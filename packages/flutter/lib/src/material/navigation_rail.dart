@@ -39,47 +39,47 @@ import 'theme_data.dart';
 /// ```dart
 /// int _currentIndex = 0;
 ///
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      body: Row(
-//        children: <Widget>[
-//          NavigationRail(
-//            currentIndex: _currentIndex,
-//            labelType: NavigationRailLabelType.selected,
-//            destinations: [
-//              NavigationRailDestination(
-//                icon: Icon(Icons.favorite_border),
-//                activeIcon: Icon(Icons.favorite),
-//                label: Text('First'),
-//              ),
-//              NavigationRailDestination(
-//                icon: Icon(Icons.bookmark_border),
-//                activeIcon: Icon(Icons.book),
-//                label: Text('Second'),
-//              ),
-//              NavigationRailDestination(
-//                icon: Icon(Icons.star_border),
-//                activeIcon: Icon(Icons.star),
-//                label: Text('Third'),
-//              ),
-//            ],
-//            onDestinationSelected: (int index) {
-//              setState(() {
-//                _currentIndex = index;
-//              });
-//            },
-//          ),
-//          VerticalDivider(thickness: 1, width: 1),
-//          Expanded(
-//            child: Center(
-//              child: Text('currentIndex: $_currentIndex'),
-//            ),
-//          )
-//        ],
-//      ),
-//    );
-//  }
+///  @override
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      body: Row(
+///        children: <Widget>[
+///          NavigationRail(
+///            currentIndex: _currentIndex,
+///            labelType: NavigationRailLabelType.selected,
+///            destinations: [
+///              NavigationRailDestination(
+///                icon: Icon(Icons.favorite_border),
+///                activeIcon: Icon(Icons.favorite),
+///                label: Text('First'),
+///              ),
+///              NavigationRailDestination(
+///                icon: Icon(Icons.bookmark_border),
+///                activeIcon: Icon(Icons.book),
+///                label: Text('Second'),
+///              ),
+///              NavigationRailDestination(
+///                icon: Icon(Icons.star_border),
+///                activeIcon: Icon(Icons.star),
+///                label: Text('Third'),
+///              ),
+///            ],
+///            onDestinationSelected: (int index) {
+///              setState(() {
+///                _currentIndex = index;
+///              });
+///            },
+///          ),
+///          VerticalDivider(thickness: 1, width: 1),
+///          Expanded(
+///            child: Center(
+///              child: Text('currentIndex: $_currentIndex'),
+///            ),
+///          )
+///        ],
+///      ),
+///    );
+///  }
 /// ```
 /// {@end-tool}
 ///
