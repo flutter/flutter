@@ -69,12 +69,20 @@ Choose one of the two benchmark types:
 * A "widget benchmark" records performance metrics using a widget. This kind of
   benchmark is good for measuring the performance of widgets, often together with
   engine work that widget-under-test incurs.
+* A "widget build benchmark" records the cost of building a widget from nothing.
+  This is different from the "widget benchmark" because typically the latter
+  only performs incremental UI updates, such as an animation. In contrast, this
+  benchmark pumps an empty frame to clear all previously built widgets and
+  rebuilds them from scratch.
 
-For a raw benchmark implement `RawRecorder` (tip: you can start by copying
+For a raw benchmark extend `RawRecorder` (tip: you can start by copying
 `bench_draw_rect.dart`).
 
-For a widget benchmark implement `WidgetRecorder` (tip: you can start by copying
+For a widget benchmark extend `WidgetRecorder` (tip: you can start by copying
 `bench_simple_lazy_text_scroll.dart`).
+
+For a widget build benchmark extend `WidgetBuildRecorder` (tip: you can start by copying
+`bench_build_material_checkbox.dart`).
 
 Pick a unique benchmark name and class name and add it to the `benchmarks` list
 in `lib/web_benchmarks.dart`.
@@ -85,7 +93,7 @@ Web benchmarks can be run using `flutter run` in debug, profile, and release
 modes, using either the HTML or the CanvasKit rendering backend. Note, however,
 that running in debug mode will result in worse numbers. Profile mode is useful
 for profiling in Chrome DevTools because the numbers are close to release mode
-and the profile contains unobfuscated numbers.
+and the profile contains unobfuscated names.
 
 Example:
 
