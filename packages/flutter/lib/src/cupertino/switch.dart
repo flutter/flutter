@@ -202,16 +202,21 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     super.didUpdateWidget(oldWidget);
     _drag..dragStartBehavior = widget.dragStartBehavior;
 
-    final bool needsAnimatedValueUpdate = needsPositionAnimation || oldWidget.value != widget.value;
-    if (needsAnimatedValueUpdate)
-      _resumePositionAnimation();
+    if (needsPositionAnimation || oldWidget.value != widget.value)
+      _resumePositionAnimation(isLinear: needsPositionAnimation);
   }
 
-  void _resumePositionAnimation() {
+  // `isLinear` must be true if the position animation is trying to move the
+  // thumb to the closest end after the most recent drag animation, so the curve
+  // does not change when the controller's value is not 0 or 1.
+  //
+  // It can be set to false when it's an implicit animation triggered by
+  // widget.value changes.
+  void _resumePositionAnimation({ bool isLinear = true }) {
     needsPositionAnimation = false;
     _position
-      ..curve = Curves.ease
-      ..reverseCurve = Curves.ease.flipped;
+      ..curve = isLinear ? null : Curves.ease
+      ..reverseCurve = isLinear ? null : Curves.ease.flipped;
     if (widget.value)
       _positionController.forward();
     else
@@ -271,9 +276,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   void _handleDragEnd(DragEndDetails details) {
     if (!isInteractive)
       return;
-    // Notify onChanged of the user intent to change value, in the meantime pause
-    // the position animation.
+    // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
+    // Call onChanged when the user's intent to change value is clear.
     if (_position.value >= 0.5 != widget.value)
       widget.onChanged(!widget.value);
     _reactionController.reverse();
