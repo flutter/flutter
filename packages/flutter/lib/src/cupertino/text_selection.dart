@@ -361,7 +361,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
-    addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
+    //addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
+    addToolbarButtonIfNeeded('Cutasdfasdfasdfasdfasdfasdfasdf', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
@@ -370,9 +371,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       barTopY: localBarTopY + globalEditableRegion.top,
       arrowTipX: arrowTipX,
       isArrowPointingDown: isArrowPointingDown,
-      child: items.isEmpty ? null : DecoratedBox(
-        decoration: const BoxDecoration(color: _kToolbarDividerColor),
-        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      child: _CupertinoTextSelectionToolbarContent(
+        children: items,
       ),
     );
   }
@@ -442,6 +442,84 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           textLineHeight + (handleSize.height - textLineHeight) / 2,
         );
     }
+  }
+}
+
+class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
+  const _CupertinoTextSelectionToolbarContent({
+    Key key,
+    @required this.children,
+  }) : assert(children != null),
+       super(key: key);
+
+  final List<Widget> children;
+
+  @override
+  _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
+}
+
+class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> {
+  int _page = 0;
+
+  void _handleNextPage() {
+    setState(() {
+      _page++;
+    });
+  }
+
+  void _handlePreviousPage() {
+    setState(() {
+      _page--;
+    });
+  }
+
+  // TODO(justinmc): I'll have to measure the children before dividing into
+  // pages. Use a RenderBox.
+  List<Widget> get _currentChildren {
+    if (widget.children.length < 3) {
+      return _page == 0 ? widget.children : <Widget>[];
+    }
+
+    return _page == 0 ? widget.children.sublist(0, 3) : widget.children.sublist(3, widget.children.length);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.children.isEmpty) {
+      return null;
+    }
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: _kToolbarDividerColor),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (_page > 0)
+            CupertinoButton(
+              child: Text('<', style: _kToolbarButtonFontStyle),
+              color: _kToolbarBackgroundColor,
+              minSize: _kToolbarHeight,
+              // TODO(justinmc): This is more complicated, see arrow padding above
+              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+              borderRadius: null,
+              pressedOpacity: 0.7,
+              onPressed: _handlePreviousPage,
+            ),
+          ..._currentChildren,
+          // TODO(justinmc): Support multiple pages after measuring.
+          if (_page < 1)
+            CupertinoButton(
+              child: Text('>', style: _kToolbarButtonFontStyle),
+              color: _kToolbarBackgroundColor,
+              minSize: _kToolbarHeight,
+              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+              borderRadius: null,
+              pressedOpacity: 0.7,
+              onPressed: _handleNextPage,
+            ),
+        ],
+      ),
+    );
   }
 }
 
