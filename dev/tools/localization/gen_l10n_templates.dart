@@ -66,6 +66,11 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
+  @(class)(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  // ignore: unused_field
+  final String _localeName;
+
   static @(class) of(BuildContext context) {
     return Localizations.of<@(class)>(context, @(class));
   }
@@ -168,6 +173,8 @@ const String pluralMethodTemplate = '''
 const String classTemplate = '''
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
+  @(class)([String locale = '@(localeName)']) : super(locale);
+
 @(methods)
 }''';
 

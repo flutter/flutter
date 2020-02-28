@@ -61,6 +61,11 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 abstract class StockStrings {
+  StockStrings(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  // ignore: unused_field
+  final String _localeName;
+
   static StockStrings of(BuildContext context) {
     return Localizations.of<StockStrings>(context, StockStrings);
   }
@@ -118,6 +123,8 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
 
 /// The translations for English (`en`).
 class StockStringsEn extends StockStrings {
+  StockStringsEn([String locale = 'en']) : super(locale);
+
   @override
   String get title => 'Stocks';
 
@@ -130,6 +137,8 @@ class StockStringsEn extends StockStrings {
 
 /// The translations for English, as used in the United States (`en_US`).
 class StockStringsEnUs extends StockStringsEn {
+  StockStringsEnUs([String locale = 'en_US']) : super(locale);
+
   @override
   String get title => 'Stocks';
 
@@ -142,6 +151,8 @@ class StockStringsEnUs extends StockStringsEn {
 
 /// The translations for Spanish Castilian (`es`).
 class StockStringsEs extends StockStrings {
+  StockStringsEs([String locale = 'es']) : super(locale);
+
   @override
   String get title => 'Acciones';
 
