@@ -14,7 +14,7 @@ class NavigationRail extends StatefulWidget {
     this.leading,
     this.trailing,
     this.destinations,
-    this.currentIndex,
+    this.currentIndex = 0,
     this.onDestinationSelected,
     this.elevation,
     this.groupAlignment = NavigationRailGroupAlignment.top,
@@ -25,7 +25,9 @@ class NavigationRail extends StatefulWidget {
     this.selectedIconTheme,
     this.preferredWidth = _railWidth,
     this.extendedWidth = _extendedRailWidth,
-  }) : assert(extendedWidth >= _railWidth);
+  }) :  assert(destinations != null && destinations.isNotEmpty),
+        assert(0 <= currentIndex && currentIndex < destinations.length),
+        assert(extendedWidth >= _railWidth);
        // TODO: assert that extended has to be labelType none
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
@@ -214,50 +216,53 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
       animation: _extendedAnimation,
       child: Material(
         elevation: elevation,
-        child: Container(
-          color: backgroundColor,
-          child: Column(
-            children: <Widget>[
-              _verticalSpacer,
-              if (leading != null)
-                ...<Widget>[
-                  if (_extendedAnimation.value > 0)
-                    Container(
-                      width: lerpDouble(widget.preferredWidth, widget.extendedWidth, _extendedAnimation.value),
-                      padding: const EdgeInsets.only(left: _horizontalDestinationPadding),
-                      child: leading,
-                    )
-                  else
-                    leading,
-                  _verticalSpacer,
+        color: backgroundColor,
+        child: Column(
+          children: <Widget>[
+            _verticalSpacer,
+            if (leading != null)
+              ...<Widget>[
+                if (_extendedAnimation.value > 0)
+                  SizedBox(
+                    width: lerpDouble(widget.preferredWidth, widget.extendedWidth, _extendedAnimation.value),
+                    child: leading,
+                  )
+                else
+                  leading,
+                _verticalSpacer,
+              ],
+            Expanded(
+              child: Column(
+                mainAxisAlignment: destinationsAlignment,
+                children: <Widget>[
+                  for (int i = 0; i < widget.destinations.length; i++)
+                    _RailDestinationBox(
+                      width: railWidth,
+                      extendedWidth: widget.extendedWidth,
+                      extendedTransitionAnimation: _extendedAnimation,
+                      selected: widget.currentIndex == i,
+                      icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
+                      label: widget.destinations[i].label,
+                      destinationAnimation: _destinationAnimations[i],
+                      labelType: labelType,
+                      iconTheme: widget.currentIndex == i ? selectedIconTheme : unselectedIconTheme,
+                      labelTextStyle: widget.currentIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
+                      onTap: () {
+                        widget.onDestinationSelected(i);
+                      },
+                    ),
                 ],
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: destinationsAlignment,
-                  children: <Widget>[
-                    for (int i = 0; i < widget.destinations.length; i++)
-                      _RailDestinationBox(
-                        width: railWidth,
-                        extendedWidth: widget.extendedWidth,
-                        extendedTransitionAnimation: _extendedAnimation,
-                        selected: widget.currentIndex == i,
-                        icon: widget.currentIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
-                        label: widget.destinations[i].label,
-                        destinationAnimation: _destinationAnimations[i],
-                        labelType: labelType,
-                        iconTheme: widget.currentIndex == i ? selectedIconTheme : unselectedIconTheme,
-                        labelTextStyle: widget.currentIndex == i ? selectedLabelTextStyle : unselectedLabelTextStyle,
-                        onTap: () {
-                          widget.onDestinationSelected(i);
-                        },
-                      ),
-                  ],
-                ),
               ),
-              // TODO: measure this and use the measurement for padding
-              if (trailing != null) trailing,
-            ],
-          ),
+            ),
+            if (trailing != null)
+              if (_extendedAnimation.value > 0)
+                SizedBox(
+                  width: lerpDouble(widget.preferredWidth, widget.extendedWidth, _extendedAnimation.value),
+                  child: trailing,
+                )
+              else
+                trailing,
+          ],
         ),
       ),
     );
@@ -426,17 +431,16 @@ class _RailDestinationBox extends StatelessWidget {
               children: <Widget>[
                 SizedBox(height: lerpedPadding),
                 themedIcon,
-                if (appearingAnimationValue > 0)
-                  Align(
-                    alignment: Alignment.topCenter,
-                    heightFactor: appearingAnimationValue,
-                    widthFactor: 1.0,
-                    child: Opacity(
-                      alwaysIncludeSemantics: true,
-                      opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
-                      child: styledLabel,
-                    ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: appearingAnimationValue,
+                  widthFactor: 1.0,
+                  child: Opacity(
+                    alwaysIncludeSemantics: true,
+                    opacity: selected ? _normalLabelFadeInValue() : _normalLabelFadeOutValue(),
+                    child: styledLabel,
                   ),
+                ),
                 SizedBox(height: lerpedPadding),
               ],
             ),
