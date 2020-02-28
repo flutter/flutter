@@ -23,9 +23,10 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   FML_FRIEND_MAKE_REF_COUNTED(Paragraph);
 
  public:
-  static fml::RefPtr<Paragraph> Create(
-      std::unique_ptr<txt::Paragraph> paragraph) {
-    return fml::MakeRefCounted<Paragraph>(std::move(paragraph));
+  static void Create(Dart_Handle paragraph_handle,
+                     std::unique_ptr<txt::Paragraph> txt_paragraph) {
+    auto paragraph = fml::MakeRefCounted<Paragraph>(std::move(txt_paragraph));
+    paragraph->AssociateWithDartWrapper(paragraph_handle);
   }
 
   ~Paragraph() override;
@@ -42,15 +43,15 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
   void layout(double width);
   void paint(Canvas* canvas, double x, double y);
 
-  std::vector<TextBox> getRectsForRange(unsigned start,
-                                        unsigned end,
-                                        unsigned boxHeightStyle,
-                                        unsigned boxWidthStyle);
-  std::vector<TextBox> getRectsForPlaceholders();
+  tonic::Float32List getRectsForRange(unsigned start,
+                                      unsigned end,
+                                      unsigned boxHeightStyle,
+                                      unsigned boxWidthStyle);
+  tonic::Float32List getRectsForPlaceholders();
   Dart_Handle getPositionForOffset(double dx, double dy);
   Dart_Handle getWordBoundary(unsigned offset);
   Dart_Handle getLineBoundary(unsigned offset);
-  std::vector<LineMetrics> computeLineMetrics();
+  tonic::Float64List computeLineMetrics();
 
   size_t GetAllocationSize() override;
 

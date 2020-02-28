@@ -1306,16 +1306,6 @@ class TextBox {
     this.direction,
   );
 
-  @pragma('vm:entry-point')
-  // ignore: unused_element
-  TextBox._(
-    this.left,
-    this.top,
-    this.right,
-    this.bottom,
-    int directionIndex,
-  ) : direction = TextDirection.values[directionIndex];
-
   /// The left edge of the text box, irrespective of direction.
   ///
   /// To get the leading edge (which may depend on the [direction]), consider [start].
@@ -1764,20 +1754,6 @@ class LineMetrics {
     this.lineNumber,
   });
 
-  @pragma('vm:entry-point')
-  // ignore: unused_element
-  LineMetrics._(
-    this.hardBreak,
-    this.ascent,
-    this.descent,
-    this.unscaledAscent,
-    this.height,
-    this.width,
-    this.left,
-    this.baseline,
-    this.lineNumber,
-  );
-
   /// True if this line ends with an explicit line break (e.g. '\n') or is the end
   /// of the paragraph. False otherwise.
   final bool hardBreak;
@@ -1843,6 +1819,39 @@ class LineMetrics {
   ///
   /// For example, the first line is line 0, second line is line 1.
   final int lineNumber;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is LineMetrics
+        && other.hardBreak == hardBreak
+        && other.ascent == ascent
+        && other.descent == descent
+        && other.unscaledAscent == unscaledAscent
+        && other.height == height
+        && other.width == width
+        && other.left == left
+        && other.baseline == baseline
+        && other.lineNumber == lineNumber;
+  }
+
+  @override
+  int get hashCode => hashValues(hardBreak, ascent, descent, unscaledAscent, height, width, left, baseline, lineNumber);
+
+  @override
+  String toString() {
+    return 'LineMetrics(hardBreak: $hardBreak, '
+                       'ascent: $ascent, '
+                       'descent: $descent, '
+                       'unscaledAscent: $unscaledAscent, '
+                       'height: $height, '
+                       'width: $width, '
+                       'left: $left, '
+                       'baseline: $baseline, '
+                       'lineNumber: $lineNumber)';
+  }
 }
 
 /// A paragraph of text.
@@ -1914,6 +1923,21 @@ class Paragraph extends NativeFieldWrapperClass2 {
   void layout(ParagraphConstraints constraints) => _layout(constraints.width);
   void _layout(double width) native 'Paragraph_layout';
 
+  List<TextBox> _decodeTextBoxes(Float32List encoded) {
+    final int count = encoded.length ~/ 5;
+    final List<TextBox> boxes = List<TextBox>(count);
+    int position = 0;
+    for (int index = 0; index < count; index += 1) {
+      boxes[index] = TextBox.fromLTRBD(
+        encoded[position++],
+        encoded[position++],
+        encoded[position++],
+        encoded[position++],
+        TextDirection.values[encoded[position++].toInt()],
+      );
+    }
+    return boxes;
+  }
   /// Returns a list of text boxes that enclose the given text range.
   ///
   /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
@@ -1930,9 +1954,10 @@ class Paragraph extends NativeFieldWrapperClass2 {
   List<TextBox> getBoxesForRange(int start, int end, {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight, BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight}) {
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
-    return _getBoxesForRange(start, end, boxHeightStyle.index, boxWidthStyle.index);
+    return _decodeTextBoxes(_getBoxesForRange(start, end, boxHeightStyle.index, boxWidthStyle.index));
   }
-  List<TextBox> _getBoxesForRange(int start, int end, int boxHeightStyle, int boxWidthStyle) native 'Paragraph_getRectsForRange';
+  // See paragraph.cc for the layout of this return value.
+  Float32List _getBoxesForRange(int start, int end, int boxHeightStyle, int boxWidthStyle) native 'Paragraph_getRectsForRange';
 
   /// Returns a list of text boxes that enclose all placeholders in the paragraph.
   ///
@@ -1940,7 +1965,10 @@ class Paragraph extends NativeFieldWrapperClass2 {
   ///
   /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
   /// where positive y values indicate down.
-  List<TextBox> getBoxesForPlaceholders() native 'Paragraph_getRectsForPlaceholders';
+  List<TextBox> getBoxesForPlaceholders() {
+    return _decodeTextBoxes(_getBoxesForPlaceholders());
+  }
+  Float32List _getBoxesForPlaceholders() native 'Paragraph_getRectsForPlaceholders';
 
   /// Returns the text position closest to the given offset.
   TextPosition getPositionForOffset(Offset offset) {
@@ -1987,7 +2015,27 @@ class Paragraph extends NativeFieldWrapperClass2 {
   ///
   /// This can potentially return a large amount of data, so it is not recommended
   /// to repeatedly call this. Instead, cache the results.
-  List<LineMetrics> computeLineMetrics() native 'Paragraph_computeLineMetrics';
+  List<LineMetrics> computeLineMetrics() {
+    final Float64List encoded = _computeLineMetrics();
+    final int count = encoded.length ~/ 9;
+    int position = 0;
+    final List<LineMetrics> metrics = List<LineMetrics>(count);
+    for (int index = 0; index < metrics.length; index += 1) {
+      metrics[index] = LineMetrics(
+        hardBreak:      encoded[position++] != 0,
+        ascent:         encoded[position++],
+        descent:        encoded[position++],
+        unscaledAscent: encoded[position++],
+        height:         encoded[position++],
+        width:          encoded[position++],
+        left:           encoded[position++],
+        baseline:       encoded[position++],
+        lineNumber:     encoded[position++].toInt(),
+      );
+    }
+    return metrics;
+  }
+  Float64List _computeLineMetrics() native 'Paragraph_computeLineMetrics';
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
@@ -2195,7 +2243,12 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.
-  Paragraph build() native 'ParagraphBuilder_build';
+  Paragraph build() {
+    final Paragraph paragraph = Paragraph._();
+    _build(paragraph);
+    return paragraph;
+  }
+  void _build(Paragraph outParagraph) native 'ParagraphBuilder_build';
 }
 
 /// Loads a font from a buffer and makes it available for rendering text.
