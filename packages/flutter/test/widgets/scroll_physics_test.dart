@@ -239,10 +239,10 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<ScrollPhysics>>());
+      expect(error.diagnostics[2], isA<DiagnosticsProperty<ScrollPhysics>>());
       expect(error.diagnostics[2].style, DiagnosticsTreeStyle.errorProperty);
       expect(error.diagnostics[2].value, physics);
-      expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ScrollMetrics>>());
+      expect(error.diagnostics[3], isA<DiagnosticsProperty<ScrollMetrics>>());
       expect(error.diagnostics[3].style, DiagnosticsTreeStyle.errorProperty);
       expect(error.diagnostics[3].value, position);
       // RegExp matcher is required here due to flutter web and flutter mobile generating
@@ -250,8 +250,8 @@ void main() {
       // in Flutter web 0.0 sometimes just appears as 0. or 0
       expect(
         error.toStringDeep(),
-        matches(RegExp(
-        r'''FlutterError
+        matches(RegExp(r'''
+FlutterError
    ClampingScrollPhysics\.applyBoundaryConditions\(\) was called
    redundantly\.
    The proposed new position\, 500(\.\d*)?, is exactly equal to the current

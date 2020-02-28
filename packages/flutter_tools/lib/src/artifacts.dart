@@ -43,9 +43,6 @@ enum Artifact {
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
   iosDeploy,
-  ideviceinfo,
-  ideviceId,
-  idevicename,
   idevicesyslog,
   idevicescreenshot,
   ideviceinstaller,
@@ -109,12 +106,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'kernel_worker.dart.snapshot';
     case Artifact.iosDeploy:
       return 'ios-deploy';
-    case Artifact.ideviceinfo:
-      return 'ideviceinfo';
-    case Artifact.ideviceId:
-      return 'idevice_id';
-    case Artifact.idevicename:
-      return 'idevicename';
     case Artifact.idevicesyslog:
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
@@ -259,11 +250,8 @@ class CachedArtifacts extends Artifacts {
         final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
         return _fileSystem.path.join(engineDir, artifactFileName);
-      case Artifact.ideviceId:
-      case Artifact.ideviceinfo:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
-      case Artifact.idevicename:
         final String artifactFileName = _artifactToFileName(artifact);
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
@@ -371,7 +359,10 @@ class CachedArtifacts extends Artifacts {
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
       case Artifact.fontSubset:
       case Artifact.constFinder:
-        return _cache.getArtifactDirectory('font-subset').childFile(_artifactToFileName(artifact, platform, mode)).path;
+        return _cache.getArtifactDirectory('engine')
+                     .childDirectory(getNameForTargetPlatform(platform))
+                     .childFile(_artifactToFileName(artifact, platform, mode))
+                     .path;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -513,9 +504,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', artifactFileName);
       case Artifact.kernelWorkerSnapshot:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
-      case Artifact.ideviceId:
-      case Artifact.ideviceinfo:
-      case Artifact.idevicename:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;

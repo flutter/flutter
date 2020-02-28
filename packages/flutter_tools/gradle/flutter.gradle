@@ -603,6 +603,18 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
+        String splitDebugInfoValue = null
+        if (project.hasProperty('split-debug-info')) {
+            splitDebugInfoValue = project.property('split-debug-info')
+        }
+        Boolean dartObfuscationValue = false
+        if (project.hasProperty('dart-obfuscation')) {
+            dartObfuscationValue = project.property('dart-obfuscation').toBoolean();
+        }
+        Boolean treeShakeIconsOptionsValue = false
+        if (project.hasProperty('tree-shake-icons')) {
+            treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -637,6 +649,18 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/")
                 extraFrontEndOptions extraFrontEndOptionsValue
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
+                splitDebugInfo splitDebugInfoValue
+                treeShakeIcons treeShakeIconsOptionsValue
+                dartObfuscation dartObfuscationValue
+                doLast {
+                    project.exec {
+                        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
+                        } else {
+                            commandLine('chmod', '-R', 'u+w', assetsDirectory)
+                        }
+                    }
+                }
             }
             File libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             Task packFlutterAppAotTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
@@ -769,6 +793,12 @@ abstract class BaseFlutterTask extends DefaultTask {
     String extraFrontEndOptions
     @Optional @Input
     String extraGenSnapshotOptions
+    @Optional @Input
+    String splitDebugInfo
+    @Optional @Input
+    Boolean treeShakeIcons
+    @Optional @Input
+    Boolean dartObfuscation
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -825,6 +855,15 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
+            if (splitDebugInfo != null) {
+                args "-dSplitDebugInfo=${splitDebugInfo}"
+            }
+            if (treeShakeIcons == true) {
+                args "-dTreeShakeIcons=true"
+            }
+            if (dartObfuscation == true) {
+                args "-dDartObfuscation=true"
+            }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
@@ -837,6 +876,10 @@ class FlutterTask extends BaseFlutterTask {
     @OutputDirectory
     File getOutputDirectory() {
         return intermediateDir
+    }
+
+    String getAssetsDirectory() {
+        return "${outputDirectory}/flutter_assets"
     }
 
     CopySpec getAssets() {
@@ -858,13 +901,13 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
-    FileCollection readDependencies(File dependenciesFile) {
+    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
       if (dependenciesFile.exists()) {
         // Dependencies file has Makefile syntax:
         //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
         String depText = dependenciesFile.text
         // So we split list of files by non-escaped(by backslash) space,
-        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        def matcher = depText.split(': ')[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
         // then we replace all escaped spaces with regular spaces
         def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
         return project.files(depList)
@@ -876,9 +919,18 @@ class FlutterTask extends BaseFlutterTask {
     FileCollection getSourceFiles() {
         FileCollection sources = project.files()
         for (File depfile in getDependenciesFiles()) {
-          sources += readDependencies(depfile)
+          sources += readDependencies(depfile, true)
         }
         return sources + project.files('pubspec.yaml')
+    }
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile, false)
+        }
+        return sources
     }
 
     @TaskAction

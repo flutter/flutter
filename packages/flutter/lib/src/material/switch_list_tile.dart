@@ -46,7 +46,7 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
@@ -85,7 +85,7 @@ enum _SwitchListTileType { material, adaptive }
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
@@ -169,7 +169,7 @@ enum _SwitchListTileType { material, adaptive }
 /// combining [Switch] with other widgets, such as [Text], [Padding] and
 /// [InkWell].
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///

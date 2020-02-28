@@ -192,7 +192,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -2072,6 +2072,7 @@ class _RenderChipElement extends RenderObjectElement {
     final _ChipSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ChipSlot slot) {

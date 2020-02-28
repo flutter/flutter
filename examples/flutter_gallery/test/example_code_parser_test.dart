@@ -24,7 +24,8 @@ void main() {
   });
 }
 
-const String testCodeFile = '''// A fake test file
+const String testCodeFile = '''
+// A fake test file
 // START test_0
 test 0 0
 test 0 1

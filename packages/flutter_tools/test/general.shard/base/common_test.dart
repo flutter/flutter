@@ -26,7 +26,7 @@ void main() {
     });
 
     testWithoutContext('Throws if accessing the Zone', () {
-      expect(() => context.get<Object>(), throwsA(isInstanceOf<UnsupportedError>()));
+      expect(() => context.get<Object>(), throwsA(isA<UnsupportedError>()));
     });
   });
 }

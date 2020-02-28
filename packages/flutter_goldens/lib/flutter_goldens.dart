@@ -136,17 +136,31 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
+  static Directory getBaseDirectory(
+    LocalFileComparator defaultComparator,
+    Platform platform, {
+    String suffix = '',
+    bool local = false,
+  }) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
-    final Directory comparisonRoot = flutterRoot.childDirectory(
-      fs.path.join(
-        'bin',
-        'cache',
-        'pkg',
-        'skia_goldens$suffix',
-      )
-    );
+    Directory comparisonRoot;
+
+    if (!local) {
+      comparisonRoot = fs.systemTempDirectory.childDirectory(
+        'skia_goldens$suffix'
+      );
+    } else {
+      comparisonRoot = flutterRoot.childDirectory(
+        fs.path.join(
+          'bin',
+          'cache',
+          'pkg',
+          'skia_goldens',
+        )
+      );
+    }
+
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(
       testDirectory.path,
@@ -550,6 +564,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      local: true,
     );
 
     if(!baseDirectory.existsSync()) {

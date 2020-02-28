@@ -22,7 +22,8 @@ Directory createResolvedTempDirectorySync(String prefix) {
 void writeFile(String path, String content) {
   globals.fs.file(path)
     ..createSync(recursive: true)
-    ..writeAsStringSync(content);
+    ..writeAsStringSync(content)
+    ..setLastModifiedSync(DateTime.now().add(const Duration(seconds: 10)));
 }
 
 void writePackages(String folder) {

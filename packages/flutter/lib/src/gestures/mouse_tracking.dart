@@ -30,7 +30,7 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// movements.
 ///
 /// This is added to a layer and managed by the [MouseRegion] widget.
-class MouseTrackerAnnotation {
+class MouseTrackerAnnotation extends Diagnosticable {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
   const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});
@@ -39,24 +39,13 @@ class MouseTrackerAnnotation {
   /// entered the annotated region.
   ///
   /// This callback is triggered when the pointer has started to be contained
-  /// by the annotationed region for any reason.
-  ///
-  /// More specifically, the callback is triggered by the following cases:
-  ///
-  ///  * A new annotated region has appeared under a pointer.
-  ///  * An existing annotated region has moved to under a pointer.
-  ///  * A new pointer has been added to somewhere within an annotated region.
-  ///  * An existing pointer has moved into an annotated region.
-  ///
-  /// This callback is not always matched by an [onExit]. If the render object
-  /// that owns the annotation is disposed while being hovered by a pointer,
-  /// the [onExit] callback of that annotation will never called, despite
-  /// the earlier call of [onEnter]. For more details, see [onExit].
+  /// by the annotationed region for any reason, which means it always matches a
+  /// later [onExit].
   ///
   /// See also:
   ///
-  ///  * [MouseRegion.onEnter], which uses this callback.
   ///  * [onExit], which is triggered when a mouse pointer exits the region.
+  ///  * [MouseRegion.onEnter], which uses this callback.
   final PointerEnterEventListener onEnter;
 
   /// Triggered when a pointer has moved within the annotated region without
@@ -69,7 +58,7 @@ class MouseTrackerAnnotation {
   ///  * A pointer has moved onto, or moved within an annotation without buttons
   ///    pressed.
   ///
-  /// This callback is not triggered when
+  /// This callback is not triggered when:
   ///
   ///  * An annotation that is containing the pointer has moved, and still
   ///    contains the pointer.
@@ -78,59 +67,30 @@ class MouseTrackerAnnotation {
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// exited the annotated region when the annotated region still exists.
   ///
-  /// This callback is triggered when the pointer has stopped to be contained
-  /// by the region, except when it's caused by the removal of the render object
-  /// that owns the annotation. More specifically, the callback is triggered by
-  /// the following cases:
-  ///
-  ///  * An annotated region that used to contain a pointer has moved away.
-  ///  * A pointer that used to be within an annotated region has been removed.
-  ///  * A pointer that used to be within an annotated region has moved away.
-  ///
-  /// And is __not__ triggered by the following case,
-  ///
-  ///  * An annotated region that used to contain a pointer has disappeared.
-  ///
-  /// The last case is the only case when [onExit] does not match an earlier
+  /// This callback is triggered when the pointer has stopped being contained
+  /// by the region for any reason, which means it always matches an earlier
   /// [onEnter].
-  /// {@template flutter.mouseTracker.onExit}
-  /// This design is because the last case is very likely to be
-  /// handled improperly and cause exceptions (such as calling `setState` of the
-  /// disposed widget). There are a few ways to mitigate this limit:
-  ///
-  ///  * If the state of hovering is contained within a widget that
-  ///    unconditionally attaches the annotation (as long as a mouse is
-  ///    connected), then this will not be a concern, since when the annotation
-  ///    is disposed the state is no longer used.
-  ///  * If you're accessible to the condition that controls whether the
-  ///    annotation is attached, then you can call the callback when that
-  ///    condition goes from true to false.
-  ///  * In the cases where the solutions above won't work, you can always
-  ///    override [State.dispose] or [RenderObject.detach].
-  /// {@endtemplate}
-  ///
-  /// Technically, whether [onExit] will be called is controlled by
-  /// [MouseTracker.attachAnnotation] and [MouseTracker.detachAnnotation].
   ///
   /// See also:
   ///
-  ///  * [MouseRegion.onExit], which uses this callback.
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
+  ///  * [RenderMouseRegion.onExit], which uses this callback.
+  ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
+  ///    certain cases and does not always match its earier [MouseRegion.onEnter].
   final PointerExitEventListener onExit;
 
   @override
-  String toString() {
-    final List<String> callbacks = <String>[];
-    if (onEnter != null)
-      callbacks.add('enter');
-    if (onHover != null)
-      callbacks.add('hover');
-    if (onExit != null)
-      callbacks.add('exit');
-    final String describeCallbacks = callbacks.isEmpty
-      ? '<none>'
-      : callbacks.join(' ');
-    return '${describeIdentity(this)}(callbacks: $describeCallbacks)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagsSummary<Function>(
+      'callbacks',
+      <String, Function> {
+        'enter': onEnter,
+        'hover': onHover,
+        'exit': onExit,
+      },
+      ifEmpty: '<none>',
+    ));
   }
 }
 
@@ -194,11 +154,9 @@ class _MouseState {
 ///
 /// ### Details
 ///
-/// The state of [MouseTracker] consists of 3 parts:
+/// The state of [MouseTracker] consists of two parts:
 ///
 ///  * The mouse devices that are connected.
-///  * The annotations that are attached, i.e. whose owner render object is
-///    painted on the screen.
 ///  * In which annotations each device is contained.
 ///
 /// The states remain stable most of the time, and are only changed at the
@@ -247,10 +205,6 @@ class MouseTracker extends ChangeNotifier {
   // mouse events from.
   final PointerRouter _router;
 
-  // The collection of annotations that are currently being tracked. It is
-  // operated on by [attachAnnotation] and [detachAnnotation].
-  final Set<MouseTrackerAnnotation> _trackedAnnotations = <MouseTrackerAnnotation>{};
-
   // Tracks the state of connected mouse devices.
   //
   // It is the source of truth for the list of connected mouse devices.
@@ -298,7 +252,6 @@ class MouseTracker extends ChangeNotifier {
           nextAnnotations: mouseState.annotations,
           previousEvent: previousEvent,
           unhandledEvent: event,
-          trackedAnnotations: _trackedAnnotations,
         );
       },
     );
@@ -306,12 +259,12 @@ class MouseTracker extends ChangeNotifier {
 
   // Find the annotations that is hovered by the device of the `state`.
   //
-  // If the device is not connected or there are no annotations attached, empty
-  // is returned without calling `annotationFinder`.
+  // If the device is not connected, an empty set is returned without calling
+  // `annotationFinder`.
   LinkedHashSet<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
-    return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
+    return (_mouseStates.containsKey(device))
       ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
       : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
   }
@@ -332,7 +285,6 @@ class MouseTracker extends ChangeNotifier {
           nextAnnotations: mouseState.annotations,
           previousEvent: mouseState.latestEvent,
           unhandledEvent: null,
-          trackedAnnotations: _trackedAnnotations,
         );
       }
     );
@@ -428,16 +380,15 @@ class MouseTracker extends ChangeNotifier {
   // null, which means the update is triggered by a new event.
   // The `unhandledEvent` can be null, which means the update is not triggered
   // by an event.
+  // However, one of `previousEvent` or `unhandledEvent` must not be null.
   static void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
     @required PointerEvent previousEvent,
     @required PointerEvent unhandledEvent,
-    @required Set<MouseTrackerAnnotation> trackedAnnotations,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
-    assert(trackedAnnotations != null);
     final PointerEvent latestEvent = unhandledEvent ?? previousEvent;
     assert(latestEvent != null);
     // Order is important for mouse event callbacks. The `findAnnotations`
@@ -446,45 +397,41 @@ class MouseTracker extends ChangeNotifier {
     // The algorithm here is explained in
     // https://github.com/flutter/flutter/issues/41420
 
-    // Send exit events in visual order.
-    final Iterable<MouseTrackerAnnotation> exitingAnnotations =
-      lastAnnotations.difference(nextAnnotations);
+    // Send exit events to annotations that are in last but not in next, in
+    // visual order.
+    final Iterable<MouseTrackerAnnotation> exitingAnnotations = lastAnnotations.where(
+      (MouseTrackerAnnotation value) => !nextAnnotations.contains(value),
+    );
     for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
-      final bool attached = trackedAnnotations.contains(annotation);
-      // Exit is not sent if annotation is no longer attached, because this
-      // trigger may cause exceptions and has safer alternatives. See
-      // [MouseRegion.onExit] for details.
-      if (annotation.onExit != null && attached) {
+      if (annotation.onExit != null) {
         annotation.onExit(PointerExitEvent.fromMouseEvent(latestEvent));
       }
     }
 
-    // Send enter events in reverse visual order.
+    // Send enter events to annotations that are not in last but in next, in
+    // reverse visual order.
     final Iterable<MouseTrackerAnnotation> enteringAnnotations =
       nextAnnotations.difference(lastAnnotations).toList().reversed;
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
-      assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
         annotation.onEnter(PointerEnterEvent.fromMouseEvent(latestEvent));
       }
     }
 
-    // Send hover events in reverse visual order.
-    // For now the order between the hover events is designed this way for no
-    // solid reasons but to keep it aligned with enter events for simplicity.
+    // Send hover events to annotations that are in next, in reverse visual
+    // order. The reverse visual order is chosen only because of the simplicity
+    // by keeping the hover events aligned with enter events.
     if (unhandledEvent is PointerHoverEvent) {
-      final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
-        nextAnnotations.toList().reversed;
       final Offset lastHoverPosition = previousEvent is PointerHoverEvent ? previousEvent.position : null;
+      final bool pointerHasMoved = lastHoverPosition == null || lastHoverPosition != unhandledEvent.position;
+      // If the hover event follows a non-hover event, or has moved since the
+      // last hover, then trigger the hover callback on all annotations.
+      // Otherwise, trigger the hover callback only on annotations that it
+      // newly enters.
+      final Iterable<MouseTrackerAnnotation> hoveringAnnotations = pointerHasMoved ? nextAnnotations.toList().reversed : enteringAnnotations;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
-        // Deduplicate: Trigger hover if it's a newly hovered annotation
-        // or the position has changed
-        assert(trackedAnnotations.contains(annotation));
-        if (!lastAnnotations.contains(annotation)
-            || lastHoverPosition != unhandledEvent.position) {
-          if (annotation.onHover != null) {
-            annotation.onHover(unhandledEvent);
-          }
+        if (annotation.onHover != null) {
+          annotation.onHover(unhandledEvent);
         }
       }
     }
@@ -519,63 +466,4 @@ class MouseTracker extends ChangeNotifier {
 
   /// Whether or not a mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.isNotEmpty;
-
-  /// Checks if the given [MouseTrackerAnnotation] is attached to this
-  /// [MouseTracker].
-  ///
-  /// This function is only public to allow for proper testing of the
-  /// MouseTracker. Do not call in other contexts.
-  @visibleForTesting
-  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    return _trackedAnnotations.contains(annotation);
-  }
-
-  /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
-  /// take effect.
-  ///
-  /// This method is typically called by the [RenderObject] that owns an
-  /// annotation, as soon as the render object is added to the render tree.
-  ///
-  /// {@template flutter.mouseTracker.attachAnnotation}
-  /// Render objects that call this method might want to schedule a frame as
-  /// well, typically by calling [RenderObject.markNeedsPaint], because this
-  /// method does not cause any immediate effect, since the state it changes is
-  /// used during a post-frame callback or when handling certain pointer events.
-  ///
-  /// ### About annotation attachment
-  ///
-  /// It is the responsibility of the render object that owns the annotation to
-  /// maintain the attachment of the annotation. Whether an annotation is
-  /// attached should be kept in sync with whether its owner object is mounted,
-  /// which is used in the following ways:
-  ///
-  ///  * If a pointer enters an annotation, it is asserted that the annotation
-  ///    is attached.
-  ///  * If a pointer stops being contained by an annotation,
-  ///    the exit event is triggered only if the annotation is still attached.
-  ///    This is to prevent exceptions caused calling setState of a disposed
-  ///    widget. See [MouseTrackerAnnotation.onExit] for more details.
-  ///  * The [MouseTracker] also uses the attachment to track the number of
-  ///    attached annotations, and will skip mouse position checks if there is no
-  ///    annotations attached.
-  /// {@endtemplate}
-  ///  * Attaching an annotation that has been attached will assert.
-  void attachAnnotation(MouseTrackerAnnotation annotation) {
-    assert(!_duringDeviceUpdate);
-    assert(!_trackedAnnotations.contains(annotation));
-    _trackedAnnotations.add(annotation);
-  }
-
-  /// Notify [MouseTracker] that a mouse tracker annotation that was previously
-  /// attached has stopped taking effect.
-  ///
-  /// This method is typically called by the [RenderObject] that owns an
-  /// annotation, as soon as the render object is removed from the render tree.
-  /// {@macro flutter.mouseTracker.attachAnnotation}
-  ///  * Detaching an annotation that has not been attached will assert.
-  void detachAnnotation(MouseTrackerAnnotation annotation) {
-    assert(!_duringDeviceUpdate);
-    assert(_trackedAnnotations.contains(annotation));
-    _trackedAnnotations.remove(annotation);
-  }
 }

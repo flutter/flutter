@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a Fuchsia target.
 class BuildFuchsiaCommand extends BuildSubCommand {
   BuildFuchsiaCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     argParser.addOption(

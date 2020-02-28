@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -180,7 +181,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
@@ -197,7 +198,7 @@ void main() {
               height: 300.0,
               child: Navigator(
                 onGenerateRoute: (RouteSettings settings) {
-                  if (settings.isInitialRoute) {
+                  if (settings.name == '/') {
                     return MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return RaisedButton(
@@ -453,7 +454,7 @@ void main() {
     expect(isPopped, isFalse);
   });
 
-  testWidgets('replaceNamed', (WidgetTester tester) async {
+  testWidgets('replaceNamed replaces', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
@@ -951,6 +952,13 @@ void main() {
     Route<void> routeB;
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
+      theme: ThemeData(
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          },
+        ),
+      ),
       home: FlatButton(
         child: const Text('A'),
         onPressed: () {
@@ -1258,7 +1266,7 @@ void main() {
     );
 
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
 
     // Only the root route should've been pushed.
@@ -1327,15 +1335,15 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   If a Navigator has no onUnknownRoute, then its onGenerateRoute\n'
-          '   must never return null.\n'
-          '   When trying to build the route "/", onGenerateRoute returned\n'
-          '   null, but there was no onUnknownRoute callback specified.\n'
+          '   Navigator.onGenerateRoute returned null when requested to build\n'
+          '   route "/".\n'
+          '   The onGenerateRoute callback must never return null, unless an\n'
+          '   onUnknownRoute callback is provided as well.\n'
           '   The Navigator was:\n'
           '     NavigatorState#4d6bf(lifecycle state: created)\n',
         ),
@@ -1354,15 +1362,14 @@ void main() {
       expect(exception, isFlutterError);
       final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
-      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(error.diagnostics.last, isA<DiagnosticsProperty<NavigatorState>>());
       expect(
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   A Navigator\'s onUnknownRoute returned null.\n'
-          '   When trying to build the route "/", both onGenerateRoute and\n'
-          '   onUnknownRoute returned null. The onUnknownRoute callback should\n'
-          '   never return null.\n'
+          '   Navigator.onUnknownRoute returned null when requested to build\n'
+          '   route "/".\n'
+          '   The onUnknownRoute callback must never return null.\n'
           '   The Navigator was:\n'
           '     NavigatorState#38036(lifecycle state: created)\n',
         ),
@@ -1465,6 +1472,274 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
+
+  testWidgets('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45797.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Key bottomRoute = UniqueKey();
+    final Key topRoute = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
+        navigatorKey: navigator,
+        routes: <String, WidgetBuilder>{
+          '/' : (BuildContext context) => StatefulTestWidget(key: bottomRoute),
+          '/a': (BuildContext context) => StatefulTestWidget(key: topRoute),
+        },
+      ),
+    );
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute)).rebuildCount, 1);
+
+    navigator.currentState.pushNamed('/a');
+    await tester.pumpAndSettle();
+
+    // Bottom route is offstage and did not rebuild.
+    expect(find.byKey(bottomRoute), findsNothing);
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute, skipOffstage: false)).rebuildCount, 1);
+
+    expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
+  });
+
+  testWidgets('initial routes below opaque route are offstage', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: g,
+          initialRoute: '/a/b',
+          onGenerateRoute: (RouteSettings s) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext c) {
+                return Text('+${s.name}+');
+              },
+              settings: s,
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('+/+'), findsNothing);
+    expect(find.text('+/+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a+'), findsNothing);
+    expect(find.text('+/a+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a/b+'), findsOneWidget);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('+/+'), findsNothing);
+    expect(find.text('+/+', skipOffstage: false), findsOneWidget);
+    expect(find.text('+/a+'), findsOneWidget);
+    expect(find.text('+/a/b+'), findsNothing);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('+/+'), findsOneWidget);
+    expect(find.text('+/a+'), findsNothing);
+    expect(find.text('+/a/b+'), findsNothing);
+  });
+
+  testWidgets('Can provide custom onGenerateInitialRoutes', (WidgetTester tester) async {
+    bool onGenerateInitialRoutesCalled = false;
+    final GlobalKey<NavigatorState> g = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: g,
+          initialRoute: 'Hello World',
+          onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
+            onGenerateInitialRoutesCalled = true;
+            final List<Route<void>> result = <Route<void>>[];
+            for (final String route in initialRoute.split(' ')) {
+              result.add(MaterialPageRoute<void>(builder: (BuildContext context) {
+                return Text(route);
+              }));
+            }
+            return result;
+          },
+        ),
+      ),
+    );
+
+    expect(onGenerateInitialRoutesCalled, true);
+    expect(find.text('Hello'), findsNothing);
+    expect(find.text('World'), findsOneWidget);
+
+    g.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hello'), findsOneWidget);
+    expect(find.text('World'), findsNothing);
+  });
+
+  testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25080.
+
+    const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: navigator,
+          initialRoute: 'root',
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) {
+                routeNameToContext[settings.name] = ModalRoute.of(context) as MaterialPageRoute<dynamic>;
+                return Text('Route: ${settings.name}');
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Route: root'), findsOneWidget);
+
+    navigator.currentState.pushNamed('1');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 1'), findsOneWidget);
+
+    navigator.currentState.pushNamed('2');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 2'), findsOneWidget);
+
+    navigator.currentState.pushNamed('3');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pushNamedAndRemoveUntil('4', (Route<dynamic> route) => route.isFirst);
+    await tester.pump();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    final Animation<double> route4Entry = routeNameToContext['4'].animation;
+    expect(route4Entry.value, 0.0); // Entry animation has not started.
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.4);
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.8);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    // When we hit 1.0 all but root and current have been removed.
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 1.0);
+    expect(find.text('Route: 2', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 1', skipOffstage: false), findsNothing);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: root'), findsOneWidget);
+    expect(find.text('Route: 4', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('Wrapping TickerMode can turn off ticking in routes', (WidgetTester tester) async {
+    int tickCount = 0;
+    Widget widgetUnderTest({bool enabled}) {
+      return TickerMode(
+        enabled: enabled,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            initialRoute: 'root',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return _TickingWidget(
+                    onTick: () {
+                      tickCount++;
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widgetUnderTest(enabled: false));
+    expect(tickCount, 0);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tickCount, 0);
+
+    await tester.pumpWidget(widgetUnderTest(enabled: true));
+    expect(tickCount, 0);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tickCount, 4);
+  });
+}
+
+class _TickingWidget extends StatefulWidget {
+  const _TickingWidget({this.onTick});
+
+  final VoidCallback onTick;
+
+  @override
+  State<_TickingWidget> createState() => _TickingWidgetState();
+}
+
+class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProviderStateMixin {
+  Ticker _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker((Duration _) {
+      widget.onTick();
+    })..start();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
@@ -1476,5 +1751,22 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
   @override
   AnimationController createAnimationController() {
     return super.createAnimationController()..value = 1.0;
+  }
+}
+
+class StatefulTestWidget extends StatefulWidget {
+  const StatefulTestWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulTestWidget> createState() => StatefulTestState();
+}
+
+class StatefulTestState extends State<StatefulTestWidget> {
+  int rebuildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    rebuildCount += 1;
+    return Container();
   }
 }

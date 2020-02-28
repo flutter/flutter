@@ -344,7 +344,7 @@ void main() {
         'https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html\n'
       ),
     );
-    expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<Element>>());
+    expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(

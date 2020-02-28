@@ -24,7 +24,6 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
-import '../version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -132,7 +131,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
-        help: 'List the special \'flutter-tester\' device in device listings. '
+        help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
   }
 
@@ -303,7 +302,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         _checkFlutterCopy();
         try {
-          await FlutterVersion.instance.ensureVersionFile();
+          await globals.flutterVersion.ensureVersionFile();
         } on FileSystemException catch (e) {
           globals.printError('Failed to write the version file to the artifact cache: "$e".');
           globals.printError('Please ensure you have permissions in the artifact cache directory.');
@@ -311,7 +310,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
         final bool machineFlag = topLevelResults['machine'] as bool;
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
-          await FlutterVersion.instance.checkFlutterVersionFreshness();
+          await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
         if (topLevelResults.wasParsed('packages')) {
@@ -325,9 +324,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
           flutterUsage.sendCommand('version');
           String status;
           if (machineFlag) {
-            status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+            status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
           } else {
-            status = FlutterVersion.instance.toString();
+            status = globals.flutterVersion.toString();
           }
           globals.printStatus(status);
           return;

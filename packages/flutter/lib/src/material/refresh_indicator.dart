@@ -56,18 +56,22 @@ enum _RefreshIndicatorMode {
 /// scrollable's contents and then complete the [Future] it returns. The refresh
 /// indicator disappears after the callback's [Future] has completed.
 ///
-/// If the [Scrollable] might not have enough content to overscroll, consider
-/// settings its `physics` property to [AlwaysScrollableScrollPhysics]:
+/// ## Troubleshooting
+///
+/// ### Refresh indicator does not show up
+///
+/// The [RefreshIndicator] will appear if its scrollable descendant can be
+/// overscrolled, i.e. if the scrollable's content is bigger than its viewport.
+/// To ensure that the [RefreshIndicator] will always appear, even if the
+/// scrollable's content fits within its viewport, set the scrollable's
+/// [Scrollable.physics] property to [AlwaysScrollableScrollPhysics]:
 ///
 /// ```dart
 /// ListView(
 ///   physics: const AlwaysScrollableScrollPhysics(),
 ///   children: ...
-//  )
+/// )
 /// ```
-///
-/// Using [AlwaysScrollableScrollPhysics] will ensure that the scroll view is
-/// always scrollable and, therefore, can trigger the [RefreshIndicator].
 ///
 /// A [RefreshIndicator] can only be used with a vertical scroll view.
 ///

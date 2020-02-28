@@ -161,7 +161,7 @@ void main() {
 
       // Should fail as no env variable has been passed.
       expect(failingFunction,
-          throwsA(isInstanceOf<FuchsiaRemoteConnectionError>()));
+          throwsA(isA<FuchsiaRemoteConnectionError>()));
     });
   });
 }

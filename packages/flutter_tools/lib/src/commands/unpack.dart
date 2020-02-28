@@ -189,7 +189,7 @@ class ArtifactUnpacker {
         final String sourcePath = globals.fs.path.join(sourceDirectory, entityName);
         final String targetPath = globals.fs.path.join(targetDirectory, entityName);
         if (entityName.endsWith('/')) {
-          fsUtils.copyDirectorySync(
+          globals.fsUtils.copyDirectorySync(
             globals.fs.directory(sourcePath),
             globals.fs.directory(targetPath),
           );

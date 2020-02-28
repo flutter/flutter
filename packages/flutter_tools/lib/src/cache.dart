@@ -13,7 +13,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
-import 'base/os.dart';
+import 'base/os.dart' show OperatingSystemUtils;
 import 'base/process.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
@@ -101,8 +101,12 @@ class Cache {
   }) : _rootOverride = rootOverride,
        _logger = logger ?? globals.logger,
        _fileSystem = fileSystem ?? globals.fs,
-       _platform = platform ?? globals.platform ,
-       _osUtils = osUtils ?? os {
+       _platform = platform ?? globals.platform,
+       _osUtils = osUtils ?? globals.os {
+    // TODO(zra): Move to initializer list once logger and platform parameters
+    // are required.
+    _net = Net(logger: _logger, platform: _platform);
+    _fsUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform);
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
 
@@ -134,6 +138,9 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+
+  Net _net;
+  FileSystemUtils _fsUtils;
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -342,9 +349,12 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = _fileSystem.file(globals.fs.path.join(
-        _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
-        '$artifactName.version'));
+    final File versionFile = _fileSystem.file(_fileSystem.path.join(
+      _rootOverride?.path ?? flutterRoot,
+      'bin',
+      'internal',
+      '$artifactName.version',
+    ));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -365,7 +375,7 @@ class Cache {
   /// [entity] doesn't exist.
   bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return fsUtils.isOlderThanReference(
+    return _fsUtils.isOlderThanReference(
       entity: entity,
       referenceFile: flutterToolsStamp,
     );
@@ -377,16 +387,22 @@ class Cache {
     final Uri url = Uri.parse(urlStr);
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
-    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(thirdPartyDir.path, serviceName));
+    final Directory serviceDir = _fileSystem.directory(_fileSystem.path.join(
+      thirdPartyDir.path,
+      serviceName,
+    ));
     if (!serviceDir.existsSync()) {
       serviceDir.createSync(recursive: true);
       _osUtils.chmod(serviceDir, '755');
     }
 
-    final File cachedFile = _fileSystem.file(_fileSystem.path.join(serviceDir.path, url.pathSegments.last));
+    final File cachedFile = _fileSystem.file(_fileSystem.path.join(
+      serviceDir.path,
+      url.pathSegments.last,
+    ));
     if (!cachedFile.existsSync()) {
       try {
-        await _downloadFile(url, cachedFile);
+        await downloadFile(url, cachedFile);
       } catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
@@ -414,7 +430,7 @@ class Cache {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
             'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
-            'If you\'re in China, please see this page: '
+            "If you're in China, please see this page: "
             'https://flutter.dev/community/china',
             emphasis: true,
           );
@@ -438,6 +454,26 @@ class Cache {
     }
     this.includeAllPlatforms = includeAllPlatformsState;
     return allAvailible;
+  }
+
+  /// Download a file from the given [url] and write it to [location].
+  Future<void> downloadFile(Uri url, File location) async {
+    _ensureExists(location.parent);
+    await _net.fetchUrl(url, destFile: location);
+  }
+
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    final Status status = _logger.startProgress(
+      message,
+      timeout: timeoutConfiguration.slowOperation,
+    );
+    bool exists;
+    try {
+      exists = await _net.doesRemoteFileExist(url);
+    } finally {
+      status.stop();
+    }
+    return exists;
   }
 }
 
@@ -559,7 +595,7 @@ abstract class CachedArtifact extends ArtifactSet {
       if (!verifier(tempFile)) {
         final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
-          await _downloadFile(url, tempFile);
+          await cache.downloadFile(url, tempFile);
           status.stop();
         } catch (exception) {
           status.cancel();
@@ -575,12 +611,12 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> _downloadZipArchive(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
+    return _downloadArchive(message, url, location, globals.os.verifyZip, globals.os.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
   Future<void> _downloadZippedTarball(String message, Uri url, Directory location) {
-    return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
+    return _downloadArchive(message, url, location, globals.os.verifyGzip, globals.os.unpack);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
@@ -723,7 +759,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
         if (frameworkZip.existsSync()) {
           final Directory framework = globals.fs.directory(globals.fs.path.join(dir.path, '$frameworkName.framework'));
           framework.createSync();
-          os.unzip(frameworkZip, framework);
+          globals.os.unzip(frameworkZip, framework);
         }
       }
     }
@@ -741,7 +777,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (final String pkgName in getPackageDirs()) {
-      exists = await _doesRemoteExist('Checking package $pkgName is available...',
+      exists = await cache.doesRemoteExist('Checking package $pkgName is available...',
           Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
@@ -751,7 +787,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
+      exists = await cache.doesRemoteExist('Checking $cacheDir tools are available...',
           Uri.parse(url + urlPath));
       if (!exists) {
         return false;
@@ -761,14 +797,14 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   }
 
   void _makeFilesExecutable(Directory dir) {
-    os.chmod(dir, 'a+r,a+x');
+    globals.os.chmod(dir, 'a+r,a+x');
     for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
       if (entity is File) {
         final FileStat stat = entity.statSync();
         final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
         if (entity.basename == 'flutter_tester' || isUserExecutable) {
           // Make the file readable and executable by all users.
-          os.chmod(entity, 'a+r,a+x');
+          globals.os.chmod(entity, 'a+r,a+x');
         }
       }
     }
@@ -946,7 +982,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
       );
     try {
       final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = fsUtils.escapePath(Cache.flutterRoot);
+      final String flutterSdk = globals.fsUtils.escapePath(Cache.flutterRoot);
       final RunResult processResult = await processUtils.run(
         <String>[
           gradleExecutable,
@@ -1193,11 +1229,15 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
       'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
-    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
-    if (binaryDirs == null) {
-      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    if (cache.includeAllPlatforms) {
+      return artifacts.values.toList();
+    } else {
+      final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+      if (binaryDirs == null) {
+        throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+      }
+      return <List<String>>[binaryDirs];
     }
-    return <List<String>>[binaryDirs];
   }
 
   @override
@@ -1221,9 +1261,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'usbmuxd',
     'libplist',
     'openssl',
-    'ideviceinstaller',
     'ios-deploy',
-    'libzip',
   ];
 
   // For unknown reasons, users are getting into bad states where libimobiledevice is
@@ -1232,8 +1270,8 @@ class IosUsbArtifacts extends CachedArtifact {
   // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>[
-      'idevice_id',
-      'ideviceinfo',
+      'idevicescreenshot',
+      'idevicesyslog',
     ],
   };
 
@@ -1303,19 +1341,6 @@ String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return globals.fs.path.joinAll(convertedPieces);
-}
-
-/// Download a file from the given [url] and write it to [location].
-Future<void> _downloadFile(Uri url, File location) async {
-  _ensureExists(location.parent);
-  await fetchUrl(url, destFile: location);
-}
-
-Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = globals.logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
-  final bool exists = await doesRemoteFileExist(url);
-  status.stop();
-  return exists;
 }
 
 /// Create the given [directory] and parents, as necessary.

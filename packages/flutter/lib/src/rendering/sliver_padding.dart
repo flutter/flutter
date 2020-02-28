@@ -139,6 +139,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
         remainingCacheExtent: constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: beforePadding),
         crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
+        precedingScrollExtent: beforePadding + constraints.precedingScrollExtent,
       ),
       parentUsesSize: true,
     );

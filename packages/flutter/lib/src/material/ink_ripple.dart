@@ -237,28 +237,16 @@ class InkRipple extends InteractiveInkFeature {
       referenceBox.size.center(Offset.zero),
       Curves.ease.transform(_radiusController.value),
     );
-    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
-    canvas.save();
-    if (originOffset == null) {
-      canvas.transform(transform.storage);
-    } else {
-      canvas.translate(originOffset.dx, originOffset.dy);
-    }
-    if (_clipCallback != null) {
-      final Rect rect = _clipCallback();
-      if (_customBorder != null) {
-        canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
-      } else if (_borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(RRect.fromRectAndCorners(
-          rect,
-          topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-          bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-        ));
-      } else {
-        canvas.clipRect(rect);
-      }
-    }
-    canvas.drawCircle(center, _radius.value, paint);
-    canvas.restore();
+    paintInkCircle(
+      canvas: canvas,
+      transform: transform,
+      paint: paint,
+      center: center,
+      textDirection: _textDirection,
+      radius: _radius.value,
+      customBorder: _customBorder,
+      borderRadius: _borderRadius,
+      clipCallback: _clipCallback,
+    );
   }
 }

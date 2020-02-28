@@ -6,9 +6,9 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mockito/mockito.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 final List<String> results = <String>[];
 
@@ -28,16 +28,15 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install() {
     log('install');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) => Container(),
       opaque: true,
     );
     _entries.add(entry);
-    navigator.overlay?.insert(entry, above: insertionPoint);
     routes.add(this);
-    super.install(insertionPoint);
+    super.install();
   }
 
   @override
@@ -47,8 +46,14 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   }
 
   @override
+  void didAdd() {
+    log('didAdd');
+    super.didAdd();
+  }
+
+  @override
   void didReplace(Route<dynamic> oldRoute) {
-    expect(oldRoute, isInstanceOf<TestRoute>());
+    expect(oldRoute, isA<TestRoute>());
     final TestRoute castRoute = oldRoute as TestRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
@@ -65,7 +70,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, isInstanceOf<TestRoute>());
+    expect(nextRoute, isA<TestRoute>());
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didPopNext ${castRoute.name}');
     super.didPopNext(castRoute);
@@ -73,7 +78,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
+    expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
     final TestRoute castRoute = nextRoute as TestRoute;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
@@ -82,8 +87,6 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   @override
   void dispose() {
     log('dispose');
-    for (final OverlayEntry entry in _entries)
-      entry.remove();
     _entries.clear();
     routes.remove(this);
     super.dispose();
@@ -110,10 +113,6 @@ void main() {
     expect(settings, hasOneLineDescription);
     final RouteSettings settings2 = settings.copyWith(name: 'B');
     expect(settings2.name, 'B');
-    expect(settings2.isInitialRoute, false);
-    final RouteSettings settings3 = settings2.copyWith(isInitialRoute: true);
-    expect(settings3.name, 'B');
-    expect(settings3.isInitialRoute, true);
   });
 
   testWidgets('Route settings arguments', (WidgetTester tester) async {
@@ -133,7 +132,7 @@ void main() {
     expect(settings4.arguments, isNot(same(arguments)));
   });
 
-  testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
+  testWidgets('Route management - push, replace, pop sequence', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
@@ -151,7 +150,7 @@ void main() {
       () { },
       <String>[
         'initial: install',
-        'initial: didPush',
+        'initial: didAdd',
         'initial: didChangeNext null',
       ],
     );
@@ -160,7 +159,7 @@ void main() {
       tester,
       host,
       () { host.push(second = TestRoute('second')); },
-      <String>[
+      <String>[ // stack is: initial, second
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
@@ -171,7 +170,7 @@ void main() {
       tester,
       host,
       () { host.push(TestRoute('third')); },
-      <String>[
+      <String>[ // stack is: initial, second, third
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
@@ -182,7 +181,7 @@ void main() {
       tester,
       host,
       () { host.replace(oldRoute: second, newRoute: TestRoute('two')); },
-      <String>[
+      <String>[ // stack is: initial, two, third
         'two: install',
         'two: didReplace second',
         'two: didChangeNext third',
@@ -194,20 +193,20 @@ void main() {
       tester,
       host,
       () { host.pop('hello'); },
-      <String>[
+      <String>[ // stack is: initial, two
         'third: didPop hello',
-        'third: dispose',
         'two: didPopNext third',
+        'third: dispose',
       ],
     );
     await runNavigatorTest(
       tester,
       host,
       () { host.pop('good bye'); },
-      <String>[
+      <String>[ // stack is: initial
         'two: didPop good bye',
-        'two: dispose',
         'initial: didPopNext two',
+        'two: dispose',
       ],
     );
     await tester.pumpWidget(Container());
@@ -234,7 +233,7 @@ void main() {
       () { },
       <String>[
         'first: install',
-        'first: didPush',
+        'first: didAdd',
         'first: didChangeNext null',
       ],
     );
@@ -275,8 +274,8 @@ void main() {
       () { host.pop('good bye'); },
       <String>[
         'third: didPop good bye',
-        'third: dispose',
         'second: didPopNext third',
+        'third: dispose',
       ],
     );
     await runNavigatorTest(
@@ -317,8 +316,8 @@ void main() {
       () { host.pop('the end'); },
       <String>[
         'four: didPop the end',
-        'four: dispose',
         'second: didPopNext four',
+        'four: dispose',
       ],
     );
     await tester.pumpWidget(Container());
@@ -345,7 +344,7 @@ void main() {
       () { },
       <String>[
         'A: install',
-        'A: didPush',
+        'A: didAdd',
         'A: didChangeNext null',
       ],
     );
@@ -392,8 +391,8 @@ void main() {
       () { host.popUntil((Route<dynamic> route) => route == routeB); },
       <String>[
         'C: didPop null',
-        'C: dispose',
         'b: didPopNext C',
+        'C: dispose',
       ],
     );
     await tester.pumpWidget(Container());
@@ -427,7 +426,7 @@ void main() {
       () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
       <String>[
         'A: install',
-        'A: didPush',
+        'A: didAdd',
         'A: didChangeNext null',
         'A: didPop null',
         'A: onRemove 1',
@@ -787,6 +786,43 @@ void main() {
       await tester.pumpAndSettle();
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
       expect(trainHopper2.currentTrain, isNull); // Has been disposed.
+    });
+
+    testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+      Animation<double> secondaryAnimationOfRouteOne;
+      Animation<double> primaryAnimationOfRouteTwo;
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: navigator,
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+                if (settings.name == '/')
+                  secondaryAnimationOfRouteOne = secondaryAnimation;
+                else
+                  primaryAnimationOfRouteTwo = animation;
+                return const Text('Page');
+              },
+            );
+          },
+          initialRoute: '/a',
+        )
+      );
+      // The secondary animation of the bottom route should be chained with the
+      // primary animation of top most route.
+      expect(secondaryAnimationOfRouteOne.value, 1.0);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      // Pops the top most route and verifies two routes are still chained.
+      navigator.currentState.pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 30));
+      expect(secondaryAnimationOfRouteOne.value, 0.9);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
+      await tester.pumpAndSettle();
+      expect(secondaryAnimationOfRouteOne.value, 0.0);
+      expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
     });
 
     testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
@@ -1159,6 +1195,104 @@ void main() {
       await tester.pumpAndSettle();
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(modalBarrierAnimation.value, Colors.black);
+    });
+
+    testWidgets('focus traverse correct when pop mutiple page simultaneously', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/48903
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Text('dummy1'),
+      ));
+      final Element textOnPageOne = tester.element(find.text('dummy1'));
+      final FocusScopeNode focusNodeOnPageOne = FocusScope.of(textOnPageOne);
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
+
+      // Pushes one page.
+      navigatorKey.currentState.push<void>(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('dummy2'),
+        )
+      );
+      await tester.pumpAndSettle();
+
+      final Element textOnPageTwo = tester.element(find.text('dummy2'));
+      final FocusScopeNode focusNodeOnPageTwo = FocusScope.of(textOnPageTwo);
+      // The focus should be on second page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isTrue);
+
+      // Pushes another page.
+      navigatorKey.currentState.push<void>(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const Text('dummy3'),
+        )
+      );
+      await tester.pumpAndSettle();
+      final Element textOnPageThree = tester.element(find.text('dummy3'));
+      final FocusScopeNode focusNodeOnPageThree = FocusScope.of(textOnPageThree);
+      // The focus should be on third page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isFalse);
+      expect(focusNodeOnPageThree.hasFocus, isTrue);
+
+      // Pops two pages simultaneously.
+      navigatorKey.currentState.popUntil((Route<void> route) => route.isFirst);
+      await tester.pumpAndSettle();
+      // It should refocus page one after pops.
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
+    });
+
+    testWidgets('focus traversal is correct when popping mutiple pages simultaneously - with focused children', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/48903
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(MaterialApp(
+        navigatorKey: navigatorKey,
+        home: const Text('dummy1'),
+      ));
+      final Element textOnPageOne = tester.element(find.text('dummy1'));
+      final FocusScopeNode focusNodeOnPageOne = FocusScope.of(textOnPageOne);
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
+
+      // Pushes one page.
+      navigatorKey.currentState.push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const Material(child: TextField()),
+          )
+      );
+      await tester.pumpAndSettle();
+
+      final Element textOnPageTwo = tester.element(find.byType(TextField));
+      final FocusScopeNode focusNodeOnPageTwo = FocusScope.of(textOnPageTwo);
+      // The focus should be on second page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isTrue);
+
+      // Move the focus to another node.
+      focusNodeOnPageTwo.nextFocus();
+      await tester.pumpAndSettle();
+      expect(focusNodeOnPageTwo.hasFocus, isTrue);
+      expect(focusNodeOnPageTwo.hasPrimaryFocus, isFalse);
+
+      // Pushes another page.
+      navigatorKey.currentState.push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) => const Text('dummy3'),
+          )
+      );
+      await tester.pumpAndSettle();
+      final Element textOnPageThree = tester.element(find.text('dummy3'));
+      final FocusScopeNode focusNodeOnPageThree = FocusScope.of(textOnPageThree);
+      // The focus should be on third page.
+      expect(focusNodeOnPageOne.hasFocus, isFalse);
+      expect(focusNodeOnPageTwo.hasFocus, isFalse);
+      expect(focusNodeOnPageThree.hasFocus, isTrue);
+
+      // Pops two pages simultaneously.
+      navigatorKey.currentState.popUntil((Route<void> route) => route.isFirst);
+      await tester.pumpAndSettle();
+      // It should refocus page one after pops.
+      expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
   });
 }

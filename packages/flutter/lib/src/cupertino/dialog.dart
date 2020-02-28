@@ -464,6 +464,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
       assert(_actionsElement == child);
       _actionsElement = null;
     }
+    super.forgetChild(child);
   }
 
   @override

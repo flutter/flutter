@@ -244,7 +244,7 @@ Future<void> buildGradleApp({
     BuildEvent('app-using-android-x').send();
   } else if (!usesAndroidX) {
     BuildEvent('app-not-using-android-x').send();
-    globals.printStatus('$warningMark Your app isn\'t using AndroidX.', emphasis: true);
+    globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
     globals.printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
       'by following the steps on https://goo.gl/CP92wY.',
@@ -271,7 +271,7 @@ Future<void> buildGradleApp({
     : getAssembleTaskFor(buildInfo);
 
   final Status status = globals.logger.startProgress(
-    'Running Gradle task \'$assembleTask\'...',
+    "Running Gradle task '$assembleTask'...",
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
@@ -337,6 +337,15 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
+  }
+  if (androidBuildInfo.buildInfo.splitDebugInfoPath != null) {
+    command.add('-Psplit-debug-info=${androidBuildInfo.buildInfo.splitDebugInfoPath}');
+  }
+  if (androidBuildInfo.buildInfo.treeShakeIcons) {
+    command.add('-Ptree-shake-icons=true');
+  }
+  if (androidBuildInfo.buildInfo.dartObfuscation) {
+    command.add('-Pdart-obfuscation=true');
   }
   command.add(assembleTask);
 
@@ -502,7 +511,7 @@ Future<void> buildGradleAar({
 
   final String aarTask = getAarTaskFor(androidBuildInfo.buildInfo);
   final Status status = globals.logger.startProgress(
-    'Running Gradle task \'$aarTask\'...',
+    "Running Gradle task '$aarTask'...",
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
@@ -546,10 +555,13 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    if (androidBuildInfo.buildInfo.treeShakeIcons) {
+      command.add('-Pfont-subset=true');
+    }
 
     // Copy the local engine repo in the output directory.
     try {
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         localEngineRepo,
         getRepoDirectory(outputDirectory),
       );
@@ -632,8 +644,8 @@ ${globals.terminal.bolden('Consuming the Module')}
     dependencies {''');
 
   for (final String buildMode in buildModes) {
-    globals.printStatus('''
-      ${buildMode}Implementation \'$androidPackage:flutter_$buildMode:$buildNumber\'''');
+    globals.printStatus("""
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
   }
 
   globals.printStatus('''
@@ -731,17 +743,18 @@ Future<void> buildPluginsAsAar(
     final String pluginName = pluginParts.first;
     final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
     if (!buildGradleFile.existsSync()) {
-      globals.printTrace('Skipping plugin $pluginName since it doesn\'t have a android/build.gradle file');
+      globals.printTrace("Skipping plugin $pluginName since it doesn't have a android/build.gradle file");
       continue;
     }
     globals.logger.printStatus('Building plugin $pluginName...');
     try {
       await buildGradleAar(
         project: FlutterProject.fromDirectory(pluginDirectory),
-        androidBuildInfo: const AndroidBuildInfo(
+        androidBuildInfo: AndroidBuildInfo(
           BuildInfo(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
+            treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
           ),
         ),
         target: '',
@@ -855,15 +868,15 @@ void _exitWithExpectedFileNotFound({
     ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
-    'It\'s likely that this file was generated under ${project.android.buildDirectory.path}, '
-    'but the tool couldn\'t find it.'
+    "It's likely that this file was generated under ${project.android.buildDirectory.path}, "
+    "but the tool couldn't find it."
   );
 }
 
 void _createSymlink(String targetPath, String linkPath) {
   final File targetFile = globals.fs.file(targetPath);
   if (!targetFile.existsSync()) {
-    throwToolExit('The file $targetPath wasn\'t found in the local engine out directory.');
+    throwToolExit("The file $targetPath wasn't found in the local engine out directory.");
   }
   final File linkFile = globals.fs.file(linkPath);
   final Link symlink = linkFile.parent.childLink(linkFile.basename);
@@ -879,7 +892,7 @@ void _createSymlink(String targetPath, String linkPath) {
 String _getLocalArtifactVersion(String pomPath) {
   final File pomFile = globals.fs.file(pomPath);
   if (!pomFile.existsSync()) {
-    throwToolExit('The file $pomPath wasn\'t found in the local engine out directory.');
+    throwToolExit("The file $pomPath wasn't found in the local engine out directory.");
   }
   xml.XmlDocument document;
   try {

@@ -9,6 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('$WidgetsBinding initializes with $AutomatedTestWidgetsFlutterBinding when FLUTTER_TEST = "true"', () {
     TestWidgetsFlutterBinding.ensureInitialized(<String, String>{'FLUTTER_TEST': 'true'});
-    expect(WidgetsBinding.instance, isInstanceOf<AutomatedTestWidgetsFlutterBinding>());
+    expect(WidgetsBinding.instance, isA<AutomatedTestWidgetsFlutterBinding>());
   });
 }

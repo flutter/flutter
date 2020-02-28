@@ -18,7 +18,7 @@ void main(List<String> args) {
       'help',
       abbr: 'h',
       negatable: false,
-      help: 'Display the tool\'s usage instructions and quit.',
+      help: "Display the tool's usage instructions and quit.",
   );
 
   parser.addOption(
@@ -36,7 +36,7 @@ void main(List<String> args) {
   parser.addOption(
       'part-of',
       abbr: 'p',
-      help: 'Library name to add a dart \'part of\' clause for.',
+      help: "Library name to add a dart 'part of' clause for.",
   );
 
   parser.addOption(

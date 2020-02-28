@@ -99,34 +99,34 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
-    debugDisableShadows = false;
-    Widget build(double elevation) {
-      return Center(
-        child: RepaintBoundary(
-          child: Container(
-            padding: const EdgeInsets.all(150.0),
-            color: Colors.yellow[200],
-            child: PhysicalShape(
-              color: Colors.green[900],
-              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0))),
-              elevation: elevation,
-              child: const SizedBox(
-                height: 100.0,
-                width: 100.0,
+  for (final int elevation in kElevationToShadow.keys) {
+    testWidgets('Shadows with PhysicalShape $elevation', (WidgetTester tester) async {
+      debugDisableShadows = false;
+      Widget build(double elevation) {
+        return Center(
+          child: RepaintBoundary(
+            child: Container(
+              padding: const EdgeInsets.all(150.0),
+              color: Colors.yellow[200],
+              child: PhysicalShape(
+                color: Colors.green[900],
+                clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0))),
+                elevation: elevation,
+                child: const SizedBox(
+                  height: 100.0,
+                  width: 100.0,
+                ),
               ),
             ),
           ),
-        ),
-      );
-    }
-    for (final int elevation in kElevationToShadow.keys) {
+        );
+      }
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
         matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
       );
-    }
-    debugDisableShadows = true;
-  });
+      debugDisableShadows = true;
+    });
+  }
 }

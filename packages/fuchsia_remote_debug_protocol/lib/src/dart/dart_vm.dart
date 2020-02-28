@@ -96,7 +96,7 @@ Future<json_rpc.Peer> _waitAndConnect(
         await Future<void>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
-        _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.warning("Connection to Fuchsia's Dart VM timed out at "
             '${uri.toString()}');
         rethrow;
       }

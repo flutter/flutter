@@ -65,7 +65,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    final FlutterVersion flutterVersion = globals.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 
@@ -151,6 +151,7 @@ class FlutterTesterDevice extends Device {
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
       platform: getTargetPlatformForName(getNameForHostPlatform(getCurrentHostPlatform())),
+      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     command.add('--flutter-assets-dir=$assetDirPath');
 

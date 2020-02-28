@@ -14,7 +14,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -118,7 +117,7 @@ void _updateGeneratedEnvironmentVariablesScript({
     : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
-  os.chmod(generatedModuleBuildPhaseScript, '755');
+  globals.os.chmod(generatedModuleBuildPhaseScript, '755');
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
@@ -168,6 +167,16 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
   }
 
+  // This is an optional path to split debug info
+  if (buildInfo.splitDebugInfoPath != null) {
+    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
+  }
+
+  // This is an optional path to obfuscate and output a mapping.
+  if (buildInfo.dartObfuscation) {
+    xcodeBuildSettings.add('DART_OBFUSCATION=true');
+  }
+
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
@@ -215,6 +224,10 @@ List<String> _xcodeBuildSettingsLines({
 
   if (buildInfo.trackWidgetCreation) {
     xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+  }
+
+  if (buildInfo.treeShakeIcons) {
+    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
   }
 
   return xcodeBuildSettings;
@@ -306,9 +319,8 @@ class XcodeProjectInterpreter {
     final Status status = Status.withSpinner(
       timeout: const TimeoutConfiguration().fastOperation,
       timeoutConfiguration: const TimeoutConfiguration(),
-      platform: _platform,
       stopwatch: Stopwatch(),
-      supportsColor: _terminal.supportsColor,
+      terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
@@ -345,8 +357,8 @@ class XcodeProjectInterpreter {
     }
   }
 
-  void cleanWorkspace(String workspacePath, String scheme) {
-    _processUtils.runSync(<String>[
+  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+    await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,

@@ -366,7 +366,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
+  /// The maximum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 
