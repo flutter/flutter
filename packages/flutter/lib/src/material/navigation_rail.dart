@@ -747,10 +747,6 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
 
   final Animation<double> animation;
 
-  static _ExtendedNavigationRailAnimation of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>();
-  }
-
   @override
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
