@@ -66,7 +66,7 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
-  StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
+  @(class)(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   // ignore: unused_field
   final String _localeName;
