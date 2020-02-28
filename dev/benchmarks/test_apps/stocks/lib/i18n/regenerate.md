@@ -7,7 +7,7 @@ stocks app uses the [Dart `intl` package](https://github.com/dart-lang/intl).
 Rebuilding everything requires two steps.
 
 1. Create or update the English and Spanish localizations,
-`stocks_en_US.arb`, `stocks_en.arb`, and `stocks_es_ES.arb`. See the
+`stocks_en_US.arb`, `stocks_en.arb`, and `stocks_es.arb`. See the
 [ARB specification](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
 for more info.
 
