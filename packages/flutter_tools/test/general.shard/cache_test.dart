@@ -231,7 +231,7 @@ void main() {
           null,
         });
         fail('Mock thrown exception expected');
-      } on Exception {
+      } catch (e) {
         verify(artifact1.update());
         // Don't continue when retrieval fails.
         verifyNever(artifact2.update());

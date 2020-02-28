@@ -344,7 +344,7 @@ class XcodeProjectInterpreter {
       );
       final String out = result.stdout.trim();
       return parseXcodeBuildSettings(out);
-    } on Exception catch (error) {
+    } catch(error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),

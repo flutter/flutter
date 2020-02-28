@@ -264,7 +264,7 @@ class CreateCommand extends FlutterCommand {
         outputFile.writeAsStringSync(samplesJson);
         globals.printStatus('Wrote samples JSON to "$outputFilePath"');
       }
-    } on Exception catch (e) {
+    } catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
     }
   }

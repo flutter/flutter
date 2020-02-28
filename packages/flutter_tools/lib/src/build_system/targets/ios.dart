@@ -376,8 +376,8 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
-  } on Exception catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+  } catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
   }
 
   final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
@@ -420,8 +420,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       tempDir.deleteSync(recursive: true);
     } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
-    } on Exception catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
+    } catch (e) {
+      throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
     }
   }
 }

@@ -136,7 +136,7 @@ ${_projectMetadataInformation()}
       } else {
         globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
-    } on Exception catch (sendError) {
+    } catch (sendError) {
       globals.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 

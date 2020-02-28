@@ -128,7 +128,7 @@ class _ManifestAssetBundle implements AssetBundle {
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(manifestPath);
-    } on Exception catch (e) {
+    } catch (e) {
       globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       globals.printError('$e');
       return 1;
