@@ -573,7 +573,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
       final Uri generatedImport = packageUriMapper.map(generatedPath);
-      final String importedEntrypoint = packageUriMapper.map(main).toString() ?? 'file://$main';
+      String importedEntrypoint = packageUriMapper.map(main)?.toString();
+      // Special handling for entrypoints that are not under lib, such as test scripts.
+      if (importedEntrypoint == null) {
+        final String parent = globals.fs.file(main).parent.path;
+        flutterDevices.first.generator.addFileSystemRoot(parent);
+        importedEntrypoint = 'org-dartlang-app:///${globals.fs.path.basename(main)}';
+      }
 
       final String entrypoint = <String>[
         'import "$importedEntrypoint" as entrypoint;',
