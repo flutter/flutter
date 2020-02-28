@@ -55,7 +55,7 @@ class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatory
 class MockPlatform extends Mock implements Platform {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 // src/mocks.dart imports `MockProcessManager` which implements some methods, this is a full mock
-class FullMockProcessManager extends Mock implements ProcessManager {}
+class FullMockProcessManager extends Mock implements ProcessManager {} //TODO delete
 class MockUsage extends Mock implements Usage {}
 class MockXcdevice extends Mock implements XCDevice {}
 class MockXcode extends Mock implements Xcode {}
@@ -180,46 +180,51 @@ void main() {
 
     group('ios-deploy wrappers', () {
       const String appId = '789';
+      const String deviceId = 'device-123';
       IOSDevice device;
       IOSDeploy iosDeploy;
-      FullMockProcessManager mockProcessManager;
+      FakeProcessManager fakeProcessManager;
 
-      setUp(() {
-        mockProcessManager = FullMockProcessManager();
+      testWithoutContext('isAppInstalled() catches ProcessException from ios-deploy', () async {
+        final MockIOSApp mockApp = MockIOSApp();
+        when(mockApp.id).thenReturn(appId);
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              null,
+              '--id',
+              deviceId,
+              '--exists',
+              '--bundle_id',
+              appId,
+            ],
+            onRun: () => throw const ProcessException('ios-deploy', <String>[]),
+          )
+        ]);
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
           cache: mockCache,
           logger: mockLogger,
           platform: macPlatform,
-          processManager: mockProcessManager,
+          processManager: fakeProcessManager,
         );
-
         device = IOSDevice(
-          'device-123',
+          deviceId,
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
         );
-      });
-
-      testUsingContext('isAppInstalled() catches ProcessException from ios-deploy', () async {
-        final MockIOSApp mockApp = MockIOSApp();
-        when(mockApp.id).thenReturn(appId);
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
 
         final bool result = await device.isAppInstalled(mockApp);
         expect(result, false);
       });
 
-      testUsingContext('installApp() catches ProcessException from ios-deploy', () async {
+      testWithoutContext('installApp() catches ProcessException from ios-deploy', () async {
         const String bundlePath = '/path/to/bundle';
         final MockIOSApp mockApp = MockIOSApp();
         when(mockApp.id).thenReturn(appId);
@@ -227,24 +232,77 @@ void main() {
         final MockDirectory mockDirectory = MockDirectory();
         when(mockFileSystem.directory(bundlePath)).thenReturn(mockDirectory);
         when(mockDirectory.existsSync()).thenReturn(true);
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
+        when(mockDirectory.path).thenReturn(bundlePath);
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              null,
+              '--id',
+              deviceId,
+              '--bundle',
+              bundlePath,
+              '--no-wifi',
+            ],
+            onRun: () => throw const ProcessException('ios-deploy', <String>[]),
+          )
+        ]);
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        );
+        device = IOSDevice(
+          deviceId,
+          artifacts: mockArtifacts,
+          fileSystem: mockFileSystem,
+          logger: mockLogger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+        );
 
         final bool result = await device.installApp(mockApp);
         expect(result, false);
       });
 
-      testUsingContext('uninstallApp() catches ProcessException from ios-deploy', () async {
+      testWithoutContext('uninstallApp() catches ProcessException from ios-deploy', () async {
         final MockIOSApp mockApp = MockIOSApp();
         when(mockApp.id).thenReturn(appId);
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenThrow(const ProcessException('ios-deploy', <String>[]));
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              null,
+              '--id',
+              deviceId,
+              '--uninstall_only',
+              '--bundle_id',
+              appId,
+            ],
+            onRun: () => throw const ProcessException('ios-deploy', <String>[]),
+          )
+        ]);
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        );
+        device = IOSDevice(
+          deviceId,
+          artifacts: mockArtifacts,
+          fileSystem: mockFileSystem,
+          logger: mockLogger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+        );
 
         final bool result = await device.uninstallApp(mockApp);
         expect(result, false);
