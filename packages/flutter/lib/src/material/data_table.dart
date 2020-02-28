@@ -516,18 +516,23 @@ class DataTable extends StatelessWidget {
     bool sorted,
     bool ascending,
   }) {
-    if (onSort != null) {
-      final Widget arrow = _SortArrow(
-        visible: sorted,
-        down: sorted ? ascending : null,
-        duration: _sortArrowAnimationDuration,
-      );
-      const Widget arrowPadding = SizedBox(width: _sortArrowPadding);
-      label = Row(
-        textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[ label, arrowPadding, arrow ],
-      );
+    List<Widget> arrowWithPadding() {
+      return onSort == null ? const <Widget>[] : <Widget>[
+        _SortArrow(
+          visible: sorted,
+          down: sorted ? ascending : null,
+          duration: _sortArrowAnimationDuration,
+        ),
+        const SizedBox(width: _sortArrowPadding),
+      ];
     }
+    label = Row(
+      textDirection: numeric ? TextDirection.rtl : null,
+      children: <Widget>[
+        label,
+        ...arrowWithPadding(),
+      ],
+    );
     label = Container(
       padding: padding,
       height: headingRowHeight,
@@ -702,7 +707,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
+        onSort: column.onSort != null ? () => column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );

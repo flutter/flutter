@@ -918,4 +918,67 @@ void main() {
     boxDecoration = tableRow.decoration as BoxDecoration;
     expect(boxDecoration.border.bottom.width, thickness);
   });
+
+  testWidgets('DataTable column heading cell - no sort', (WidgetTester tester) async {
+    Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Expanded(child: Center(child: Text('Name'))),
+            tooltip: 'Name',
+            onSort: sortEnabled ? (_, __) {} : null,
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('A long desert name')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: true,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsOneWidget);
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+  });
 }
