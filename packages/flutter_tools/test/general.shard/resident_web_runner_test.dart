@@ -427,9 +427,8 @@ void main() {
     Usage: () => MockFlutterUsage(),
   }));
 
-  test('web resident runner iss debuggable', () => testbed.run(() {
+  test('web resident runner is debuggable', () => testbed.run(() {
     expect(residentWebRunner.debuggingEnabled, true);
-  }, overrides: <Type, Generator>{
   }));
 
   test('Exits when initial compile fails', () => testbed.run(() async {
