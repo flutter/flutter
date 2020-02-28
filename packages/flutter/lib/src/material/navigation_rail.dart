@@ -318,10 +318,10 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? 0;
     final Color baseSelectedColor = theme.colorScheme.primary;
     final Color baseColor = theme.colorScheme.onSurface.withOpacity(0.64);
-    final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
-    final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
-    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14.0).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
-    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14.0).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
+    final IconThemeData unselectedIconTheme = theme.iconTheme.copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
+    final IconThemeData selectedIconTheme = theme.iconTheme.copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
+    final TextStyle unselectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseColor).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
+    final TextStyle selectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseSelectedColor).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
     final NavigationRailGroupAlignment groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? NavigationRailGroupAlignment.top;
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? NavigationRailLabelType.none;
     final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment(groupAlignment);
