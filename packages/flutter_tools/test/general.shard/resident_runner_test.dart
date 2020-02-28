@@ -689,7 +689,8 @@ void main() {
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.librariesSpec,
-      globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson, mode: BuildMode.debug));
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson, mode: BuildMode.debug))
+        .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
