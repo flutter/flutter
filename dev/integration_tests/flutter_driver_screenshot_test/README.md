@@ -1,3 +1,7 @@
+# STOP READING
+
+We are currently in the process of moving this test to use golden API. The configuration guide might need to be updated after that is done.
+
 # Summary
 
 This tests contains an app with a main page and sub pages.
