@@ -425,7 +425,7 @@ class AppResourceBundleCollection {
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
+      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
         return locale.toString();
       }).toList();
       if (!localeStrings.contains(language)) {

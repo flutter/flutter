@@ -583,6 +583,33 @@ void main() {
         'should fail'
       );
     });
+
+    test('throws when the base locale does not exist', () {
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+
+      try {
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: 'app_en_US.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Arb file for a fallback, en, does not exist'));
+        return;
+      }
+
+      fail(
+        'Since en_US.arb is specified, but en.arb is not, '
+        'the tool should throw an error.'
+      );
+    });
   });
 
   group('generateCode', () {
