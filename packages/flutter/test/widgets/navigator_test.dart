@@ -2404,21 +2404,42 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 
 class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   @override
-  Iterable<Route<void>> resolve({
-    List<Route<void>> enteringPageRoutes,
-    List<Route<void>> exitingPageRoutes,
-    List<Route<void>> precedingRoutes,
-    List<Route<void>> succeedingRoutes,
-    Map<Route<void>, List<Route<void>>> pageRouteToPagelessRoutes,
+  @override
+  Iterable<StageableRoute> resolve({
+    List<StageableRoute> newPageRouteHistory,
+    Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
+    Map<StageableRoute, List<StageableRoute>> exitingRouteToPagelessRoutes,
   }) {
-    enteringPageRoutes.forEach(add);
-    for (final Route<void> exiting in exitingPageRoutes) {
-      remove(exiting);
-      if (pageRouteToPagelessRoutes.containsKey(exiting)) {
-        pageRouteToPagelessRoutes[exiting].forEach(remove);
+    final List<StageableRoute> results = <StageableRoute>[];
+    void handleExitingRoute(StageableRoute location) {
+      if (!locationToExitingPageRoute.containsKey(location))
+        return;
+
+      final StageableRoute exitingPageRoute = locationToExitingPageRoute[location];
+      final bool hasPagelessRoute = exitingRouteToPagelessRoutes.containsKey(exitingPageRoute);
+
+      exitingPageRoute.markForRemove();
+      results.add(exitingPageRoute);
+
+      if (hasPagelessRoute) {
+        final List<StageableRoute> pagelessRoutes = exitingRouteToPagelessRoutes[exitingPageRoute];
+        for (final StageableRoute pagelessRoute in pagelessRoutes) {
+          pagelessRoute.markForRemove();
+        }
       }
+      handleExitingRoute(exitingPageRoute);
     }
-    return exitingPageRoutes + enteringPageRoutes;
+    handleExitingRoute(null);
+
+    for (final StageableRoute pageRoute in newPageRouteHistory) {
+      if (pageRoute.isEntering) {
+        pageRoute.markForAdd();
+      }
+      results.add(pageRoute);
+      handleExitingRoute(pageRoute);
+
+    }
+    return results;
   }
 }
 
