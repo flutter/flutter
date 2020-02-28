@@ -29,7 +29,7 @@ import 'theme_data.dart';
 /// navigation rail for more horizontal layouts and a bottom navigation bar
 /// for more vertical layouts.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 ///
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
@@ -420,6 +420,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _extendedController = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: this,
+      value: widget.extended ? 1.0 : 0.0,
     );
     _extendedAnimation = CurvedAnimation(
       parent: _extendedController,

@@ -1176,36 +1176,7 @@ void main() {
   testWidgets('Semantics - extended', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    bool extended = false;
-    StateSetter stateSetter;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            stateSetter = setState;
-            return Scaffold(
-              body: Row(
-                children: <Widget>[
-                  NavigationRail(
-                    destinations: _destinations(),
-                    extended: extended,
-                  ),
-                  const Expanded(
-                    child: Text('body'),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    stateSetter(() {
-      extended = true;
-    });
-    await tester.pumpAndSettle();
+    await _pumpLocalizedTestRail(tester, extended: true);
 
     expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
@@ -1325,7 +1296,7 @@ Future<void> _pumpNavigationRail(
   );
 }
 
-Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType labelType }) async {
+Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType labelType, bool extended = false }) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -1338,6 +1309,7 @@ Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelTy
           body: Row(
             children: <Widget>[
               NavigationRail(
+                extended: extended,
                 destinations: _destinations(),
                 labelType: labelType,
               ),
