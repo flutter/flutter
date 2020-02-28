@@ -458,19 +458,39 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
 }
 
-class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> {
+// TODO(justinmc): In native, the width is always the width of the first page.
+class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> with TickerProviderStateMixin {
+  AnimationController _controller;
   int _page = 0;
+  int _nextPage;
 
   void _handleNextPage() {
+    _controller.reverse();
+    _controller.addListener(_listener);
     setState(() {
-      _page++;
+      _nextPage = _page + 1;
     });
   }
 
   void _handlePreviousPage() {
+    _controller.reverse();
+    _controller.addListener(_listener);
     setState(() {
-      _page--;
+      _nextPage = _page - 1;
     });
+  }
+
+  void _listener() {
+    if (_controller.value != 0.0) {
+      return;
+    }
+
+    setState(() {
+      _page = _nextPage;
+      _nextPage = null;
+    });
+    _controller.forward();
+    _controller.removeListener(_listener);
   }
 
   // TODO(justinmc): I'll have to measure the children before dividing into
@@ -484,6 +504,22 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      value: 1.0,
+      vsync: this,
+      // This was eyeballed on a physical iOS device running iOS 13.
+      duration: Duration(milliseconds: 150),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.children.isEmpty) {
       return null;
@@ -491,33 +527,36 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
     return DecoratedBox(
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (_page > 0)
-            CupertinoButton(
-              child: Text('<', style: _kToolbarButtonFontStyle),
-              color: _kToolbarBackgroundColor,
-              minSize: _kToolbarHeight,
-              // TODO(justinmc): This is more complicated, see arrow padding above
-              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-              borderRadius: null,
-              pressedOpacity: 0.7,
-              onPressed: _handlePreviousPage,
-            ),
-          ..._currentChildren,
-          // TODO(justinmc): Support multiple pages after measuring.
-          if (_page < 1)
-            CupertinoButton(
-              child: Text('>', style: _kToolbarButtonFontStyle),
-              color: _kToolbarBackgroundColor,
-              minSize: _kToolbarHeight,
-              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-              borderRadius: null,
-              pressedOpacity: 0.7,
-              onPressed: _handleNextPage,
-            ),
-        ],
+      child: FadeTransition(
+        opacity: _controller,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (_page > 0)
+              CupertinoButton(
+                child: Text('◀', style: _kToolbarButtonFontStyle),
+                color: _kToolbarBackgroundColor,
+                minSize: _kToolbarHeight,
+                // TODO(justinmc): This is more complicated, see arrow padding above
+                padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+                borderRadius: null,
+                pressedOpacity: 0.7,
+                onPressed: _handlePreviousPage,
+              ),
+            ..._currentChildren,
+            // TODO(justinmc): Support multiple pages after measuring.
+            if (_page < 1)
+              CupertinoButton(
+                child: Text('▶', style: _kToolbarButtonFontStyle),
+                color: _kToolbarBackgroundColor,
+                minSize: _kToolbarHeight,
+                padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+                borderRadius: null,
+                pressedOpacity: 0.7,
+                onPressed: _handleNextPage,
+              ),
+          ],
+        ),
       ),
     );
   }
