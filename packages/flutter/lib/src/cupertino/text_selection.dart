@@ -529,6 +529,11 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: FadeTransition(
         opacity: _controller,
+        child: _CupertinoTextSelectionToolbarItems(
+          page: _page,
+          children: widget.children,
+        ),
+        /*
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -557,8 +562,89 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
               ),
           ],
         ),
+        */
       ),
     );
+  }
+}
+
+class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
+  _CupertinoTextSelectionToolbarItems({
+    Key key,
+    @required this.page,
+    @required List<Widget> children,
+  }) : assert(children != null),
+       assert(page != null),
+       super(key: key, children: children);
+
+  final int page;
+
+  @override
+  _CupertinoTextSelectionToolbarItemsRenderBox createRenderObject(BuildContext context) {
+    return _CupertinoTextSelectionToolbarItemsRenderBox(
+      page: page,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _CupertinoTextSelectionToolbarItemsRenderBox renderObject) {
+    renderObject
+      ..page = page;
+  }
+}
+
+class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+  _CupertinoTextSelectionToolbarItemsRenderBox({
+    @required this.page,
+  }) : assert(page != null),
+       super();
+
+  // TODO(justinmc): markNeedsLayout when this is set?
+  int page;
+
+  @override
+  void performLayout() {
+    if (firstChild == null) {
+      performResize();
+      return;
+    }
+
+    // TODO(justinmc): Put the  forward/back buttons as the first two items in
+    // children. Iterate the children first to determine the width of the first
+    // page. Then determine if the given page has forward/back buttons, and lay
+    // it out.
+
+    double width = 0.0;
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      child.layout(constraints.loosen(), parentUsesSize: true);
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+      childParentData.offset = Offset(width, 0.0);
+      width += child.size.width;
+    });
+
+    size = Size(width, _kToolbarHeight);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
+      context.paintChild(child, childParentData.offset + offset);
+    });
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! FlexParentData) {
+      child.parentData = FlexParentData();
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    defaultHitTestChildren(result, position: position);
   }
 }
 
