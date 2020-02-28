@@ -227,7 +227,7 @@ void main() {
     expect(call.positionalArguments[1], const Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
     expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], isA<Paint>());
-    expect(call.positionalArguments[3].isAntiAlias, false);
+    expect(call.positionalArguments[3].isAntiAlias, true);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
   });

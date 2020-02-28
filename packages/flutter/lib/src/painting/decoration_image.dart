@@ -412,7 +412,9 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  final Paint paint = Paint()..isAntiAlias = false;
+  // There might be a transform (e.g., rotation) so the `isAntiAlias` flag is
+  // necessary.
+  final Paint paint = Paint()..isAntiAlias = true;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {
