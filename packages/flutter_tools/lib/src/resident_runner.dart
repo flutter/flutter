@@ -94,6 +94,8 @@ class FlutterDevice {
           .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
           .absolute.uri.toString(),
         dartDefines: dartDefines,
+        librariesSpec: globals.fs.file(globals.artifacts
+          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
       );
     } else {
       generator = ResidentCompiler(
