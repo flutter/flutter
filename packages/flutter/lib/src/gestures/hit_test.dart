@@ -143,7 +143,7 @@ class HitTestResult {
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointer device. Did you forget to run the paint '
-      'matrix through PointerEvent.removePerspectiveTransform?'
+      'matrix through PointerEvent.removePerspectiveTransform? '
       'The provided matrix is:\n$transform'
     );
     _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));

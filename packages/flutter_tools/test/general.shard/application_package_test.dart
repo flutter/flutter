@@ -206,12 +206,13 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
+    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
       PlistParser: () => MockPlistUtils(),
       Platform: _kNoColorTerminalPlatform,
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
+      OperatingSystemUtils: () => os,
     };
 
     testUsingContext('Error on non-existing file', () {
@@ -395,8 +396,8 @@ void main() {
   });
 }
 
-const String _aaptDataWithExplicitEnabledAndMainLauncherActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithExplicitEnabledAndMainLauncherActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -436,8 +437,8 @@ const String _aaptDataWithExplicitEnabledAndMainLauncherActivity =
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
 
-const String _aaptDataWithDefaultEnabledAndMainLauncherActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithDefaultEnabledAndMainLauncherActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -476,8 +477,8 @@ const String _aaptDataWithDefaultEnabledAndMainLauncherActivity =
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
 
-const String _aaptDataWithNoEnabledActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithNoEnabledActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -506,8 +507,8 @@ const String _aaptDataWithNoEnabledActivity =
           E: category (line=45)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
-const String _aaptDataWithNoMainActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithNoMainActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -534,8 +535,8 @@ const String _aaptDataWithNoMainActivity =
           E: category (line=43)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
-const String _aaptDataWithNoLauncherActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithNoLauncherActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -562,8 +563,8 @@ const String _aaptDataWithNoLauncherActivity =
           E: action (line=43)
             A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")''';
 
-const String _aaptDataWithLauncherAndDefaultActivity =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithLauncherAndDefaultActivity = '''
+N: android=http://schemas.android.com/apk/res/android
   N: dist=http://schemas.android.com/apk/distribution
     E: manifest (line=7)
       A: android:versionCode(0x0101021b)=(type 0x10)0x1
@@ -600,8 +601,8 @@ const String _aaptDataWithLauncherAndDefaultActivity =
               A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
 ''';
 
-const String _aaptDataWithDistNamespace =
-'''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithDistNamespace = '''
+N: android=http://schemas.android.com/apk/res/android
   N: dist=http://schemas.android.com/apk/distribution
     E: manifest (line=7)
       A: android:versionCode(0x0101021b)=(type 0x10)0x1

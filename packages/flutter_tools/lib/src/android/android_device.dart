@@ -10,7 +10,7 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../application_package.dart';
-import '../base/common.dart' show throwToolExit;
+import '../base/common.dart' show throwToolExit, unawaited;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -37,6 +37,7 @@ const Map<String, _HardwareType> _kKnownHardware = <String, _HardwareType>{
   'samsungexynos7420': _HardwareType.physical,
   'samsungexynos7580': _HardwareType.physical,
   'samsungexynos7870': _HardwareType.physical,
+  'samsungexynos7880': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
@@ -581,6 +582,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.endlessTraceBuffer)
+        ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)
@@ -658,9 +661,10 @@ class AndroidDevice extends Device {
       'shell',
       'dumpsys',
       'meminfo',
-      _package.launchActivity,
+      _package.id,
       '-d',
     ]));
+
     if (runResult.exitCode != 0) {
       return const MemoryInfo.empty();
     }
@@ -800,8 +804,15 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
   final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
-  input
-    .split('\n')
+
+  final List<String> lines = input.split('\n');
+
+  final String timelineData = lines.firstWhere((String line) =>
+    line.startsWith('${AndroidMemoryInfo._kUpTimeKey}: '));
+  final List<String> times = timelineData.trim().split('${AndroidMemoryInfo._kRealTimeKey}:');
+  androidMemoryInfo.realTime = int.tryParse(times.last.trim()) ?? 0;
+
+  lines
     .skipWhile((String line) => !line.contains('App Summary'))
     .takeWhile((String line) => !line.contains('TOTAL'))
     .where((String line) => line.contains(':'))
@@ -862,6 +873,8 @@ List<AndroidDevice> getAdbDevices() {
 
 /// Android specific implementation of memory info.
 class AndroidMemoryInfo extends MemoryInfo {
+  static const String _kUpTimeKey = 'Uptime';
+  static const String _kRealTimeKey = 'Realtime';
   static const String _kJavaHeapKey = 'Java Heap';
   static const String _kNativeHeapKey = 'Native Heap';
   static const String _kCodeKey = 'Code';
@@ -870,6 +883,10 @@ class AndroidMemoryInfo extends MemoryInfo {
   static const String _kPrivateOtherKey = 'Private Other';
   static const String _kSystemKey = 'System';
   static const String _kTotalKey = 'Total';
+
+  // Realtime is time since the system was booted includes deep sleep. Clock
+  // is monotonic, and ticks even when the CPU is in power saving modes.
+  int realTime = 0;
 
   // Each measurement has KB as a unit.
   int javaHeap = 0;
@@ -884,6 +901,7 @@ class AndroidMemoryInfo extends MemoryInfo {
   Map<String, Object> toJson() {
     return <String, Object>{
       'platform': 'Android',
+      _kRealTimeKey: realTime,
       _kJavaHeapKey: javaHeap,
       _kNativeHeapKey: nativeHeap,
       _kCodeKey: code,
@@ -1014,29 +1032,40 @@ class _AdbLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
-  void _start() {
+  Future<void> _start() async {
     final String lastTimestamp = device.lastLogcatTimestamp;
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
     final List<String> args = <String>[
       'logcat',
       '-v',
       'time',
-      '-T',
-      lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
     ];
-    processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
-      _process = process;
-      // We expect logcat streams to occasionally contain invalid utf-8,
-      // see: https://github.com/flutter/flutter/pull/8864.
-      const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
-      _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
-      _process.exitCode.whenComplete(() {
-        if (_linesController.hasListener) {
-          _linesController.close();
-        }
-      });
-    });
+    // logcat -T is not supported on Android releases before Lollipop.
+    const int kLollipopVersionCode = 21;
+    final int apiVersion = (String v) {
+      // If the API version string isn't found, conservatively assume that the
+      // version is less recent than the one we're looking for.
+      return v == null ? kLollipopVersionCode - 1 : int.tryParse(v);
+    }(await device._apiVersion);
+    if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
+      args.addAll(<String>[
+        '-T',
+        lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
+      ]);
+    }
+
+    _process = await processUtils.start(device.adbCommandForDevice(args));
+
+    // We expect logcat streams to occasionally contain invalid utf-8,
+    // see: https://github.com/flutter/flutter/pull/8864.
+    const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
+    _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
+    _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
+    unawaited(_process.exitCode.whenComplete(() {
+      if (_linesController.hasListener) {
+        _linesController.close();
+      }
+    }));
   }
 
   // 'W/ActivityManager(pid): '

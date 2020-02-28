@@ -866,4 +866,56 @@ void main() {
       _customHorizontalMargin,
     );
   });
+
+  testWidgets('DataTable set border width test', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    // no thickness provided - border should be default: i.e "1.0" as it
+    // set in DataTable constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    Table table = tester.widget(find.byType(Table));
+    TableRow tableRow = table.children.first;
+    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, 1.0);
+
+    const double thickness =  4.2;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            dividerThickness: thickness,
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+    table = tester.widget(find.byType(Table));
+    tableRow = table.children.first;
+    boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, thickness);
+  });
 }

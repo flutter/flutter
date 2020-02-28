@@ -34,7 +34,7 @@ void main() {
     expect(iconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionsIconTheme.data, const IconThemeData(color: Colors.white));
     expect(actionIconText.text.style.color, Colors.white);
-    expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1));
+    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2));
   });
 
   testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
@@ -62,7 +62,7 @@ void main() {
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.body1);
+    expect(text.style, appBarTheme.textTheme.bodyText2);
   });
 
   testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
@@ -71,7 +71,7 @@ void main() {
     const double elevation = 3.0;
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
-    const TextTheme textTheme = TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink));
+    const TextTheme textTheme = TextTheme(headline6: TextStyle(color: Colors.orange), bodyText2: TextStyle(color: Colors.pink));
 
     final ThemeData themeData = _themeData().copyWith(appBarTheme: _appBarTheme());
 
@@ -102,7 +102,7 @@ void main() {
     expect(iconTheme.data, iconThemeData);
     expect(actionsIconTheme.data, actionsIconThemeData);
     expect(actionIconText.text.style.color, actionsIconThemeData.color);
-    expect(text.style, textTheme.body1);
+    expect(text.style, textTheme.bodyText2);
   });
 
   testWidgets('AppBar icon color takes priority over everything', (WidgetTester tester) async {
@@ -152,7 +152,7 @@ void main() {
     expect(iconTheme.data, appBarTheme.iconTheme);
     expect(actionsIconTheme.data, appBarTheme.actionsIconTheme);
     expect(actionIconText.text.style.color, appBarTheme.actionsIconTheme.color);
-    expect(text.style, appBarTheme.textTheme.body1);
+    expect(text.style, appBarTheme.textTheme.bodyText2);
   });
 
   testWidgets('ThemeData properties are used when no AppBarTheme is set', (WidgetTester tester) async {
@@ -179,7 +179,8 @@ void main() {
     expect(iconTheme.data, themeData.primaryIconTheme);
     expect(actionsIconTheme.data, themeData.primaryIconTheme);
     expect(actionIconText.text.style.color, themeData.primaryIconTheme.color);
-    expect(text.style, Typography().englishLike.body1.merge(Typography().white.body1).merge(themeData.primaryTextTheme.body1));
+    // Default value for ThemeData.typography is Typography.material2014()
+    expect(text.style, Typography.material2014().englishLike.bodyText2.merge(Typography.material2014().white.bodyText2).merge(themeData.primaryTextTheme.bodyText2));
   });
 }
 
@@ -189,7 +190,7 @@ AppBarTheme _appBarTheme() {
   const double elevation = 6.0;
   const IconThemeData iconThemeData = IconThemeData(color: Colors.black);
   const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.pink);
-  const TextTheme textTheme = TextTheme(body1: TextStyle(color: Colors.yellow));
+  const TextTheme textTheme = TextTheme(bodyText2: TextStyle(color: Colors.yellow));
   return const AppBarTheme(
     actionsIconTheme: actionsIconThemeData,
     brightness: brightness,
@@ -205,7 +206,7 @@ ThemeData _themeData() {
     primaryColor: Colors.purple,
     brightness: Brightness.dark,
     primaryIconTheme: const IconThemeData(color: Colors.green),
-    primaryTextTheme: const TextTheme(title: TextStyle(color: Colors.orange), body1: TextStyle(color: Colors.pink)),
+    primaryTextTheme: const TextTheme(headline6: TextStyle(color: Colors.orange), bodyText2: TextStyle(color: Colors.pink)),
   );
 }
 

@@ -1630,6 +1630,50 @@ void main() {
       semanticsTester.dispose();
     });
 
+    testWidgets('delete', (WidgetTester tester) async {
+      final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: RawChip(
+            label: const Text('test'),
+            onDeleted: () { },
+          ),
+        ),
+      ));
+
+      expect(semanticsTester, hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        label: 'test',
+                        textDirection: TextDirection.ltr,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Delete',
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            textDirection: TextDirection.ltr,
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.isButton,
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+      semanticsTester.dispose();
+    });
+
     testWidgets('with onPressed', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 

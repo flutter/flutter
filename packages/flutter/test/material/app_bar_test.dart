@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -83,66 +84,68 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400 - size.width / 2.0));
 
-    // Clear the widget tree to avoid animating between Android and iOS.
-    await tester.pumpWidget(Container(key: UniqueKey()));
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.macOS]) {
+      // Clear the widget tree to avoid animating between platforms.
+      await tester.pumpWidget(Container(key: UniqueKey()));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('X'),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('X'),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    center = tester.getCenter(title);
-    size = tester.getSize(title);
-    expect(center.dx, greaterThan(400 - size.width / 2.0));
-    expect(center.dx, lessThan(400 + size.width / 2.0));
+      center = tester.getCenter(title);
+      size = tester.getSize(title);
+      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${describeEnum(platform)}');
 
-    // One action is still centered.
+      // One action is still centered.
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('X'),
-            actions: const <Widget>[
-              Icon(Icons.thumb_up),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('X'),
+              actions: const <Widget>[
+                Icon(Icons.thumb_up),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    center = tester.getCenter(title);
-    size = tester.getSize(title);
-    expect(center.dx, greaterThan(400 - size.width / 2.0));
-    expect(center.dx, lessThan(400 + size.width / 2.0));
+      center = tester.getCenter(title);
+      size = tester.getSize(title);
+      expect(center.dx, greaterThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+      expect(center.dx, lessThan(400 + size.width / 2.0), reason: 'on ${describeEnum(platform)}');
 
-    // Two actions is left aligned again.
+      // Two actions is left aligned again.
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('X'),
-            actions: const <Widget>[
-              Icon(Icons.thumb_up),
-              Icon(Icons.thumb_up),
-            ],
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('X'),
+              actions: const <Widget>[
+                Icon(Icons.thumb_up),
+                Icon(Icons.thumb_up),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    center = tester.getCenter(title);
-    size = tester.getSize(title);
-    expect(center.dx, lessThan(400 - size.width / 2.0));
+      center = tester.getCenter(title);
+      size = tester.getSize(title);
+      expect(center.dx, lessThan(400 - size.width / 2.0), reason: 'on ${describeEnum(platform)}');
+    }
   });
 
   testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {

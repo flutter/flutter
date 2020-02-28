@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -44,45 +43,6 @@ class MockAndroidApk extends Mock implements AndroidApk {
   File get file => MockFile();
 }
 
-class MockProcessUtils extends Mock implements ProcessUtils {
-  @override
-  Future<RunResult> run(
-      List<String> cmd, {
-        bool throwOnError = false,
-        RunResultChecker whiteListFailures,
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        Map<String, String> environment,
-        Duration timeout,
-        int timeoutRetries = 0,
-      }) async {
-    if (cmd.contains('version')) {
-      return RunResult(ProcessResult(0, 0, 'Android Debug Bridge version 1.0.41', ''), cmd);
-    }
-    if (cmd.contains('android.intent.action.RUN')) {
-      _runCmd = cmd;
-    }
-    return RunResult(ProcessResult(0, 0, '', ''), cmd);
-  }
-
-  @override
-  Future<int> stream(
-      List<String> cmd, {
-        String workingDirectory,
-        bool allowReentrantFlutter = false,
-        String prefix = '',
-        bool trace = false,
-        RegExp filter,
-        StringConverter mapFunction,
-        Map<String, String> environment,
-      }) async {
-    return 0;
-  }
-
-  List<String> _runCmd;
-  List<String> get runCmd => _runCmd;
-}
-
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
@@ -97,13 +57,11 @@ void main() {
       MockAndroidApk mockApk;
       MockProcessManager mockProcessManager;
       MockAndroidSdk mockAndroidSdk;
-      MockProcessUtils mockProcessUtils;
 
       setUp(() {
         mockApk = MockAndroidApk();
         mockProcessManager = MockProcessManager();
         mockAndroidSdk = MockAndroidSdk();
-        mockProcessUtils = MockProcessUtils();
       });
 
       testUsingContext('succeeds with --cache-sksl', () async {
@@ -124,28 +82,38 @@ void main() {
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', '');
         });
+        when(mockProcessManager.run(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return ProcessResult(0, 0, '', '');
+        });
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return FakeProcess();
+        });
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null),
+            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
             cacheSkSL: true,
           ),
           platformArgs: <String, dynamic>{},
         );
-        expect(launchResult.started, isTrue);
 
-        final int cmdIndex = mockProcessUtils.runCmd.indexOf('cache-sksl');
-        expect(
-            mockProcessUtils.runCmd.sublist(cmdIndex - 1, cmdIndex + 2),
-            equals(<String>['--ez', 'cache-sksl', 'true']),
-        );
+        expect(launchResult.started, isTrue);
+        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
+          contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
-        ProcessUtils: () => mockProcessUtils,
       });
 
       testUsingContext('can run a release build on x64', () async {
@@ -166,12 +134,26 @@ void main() {
         )).thenAnswer((_) async {
           return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
         });
+        when(mockProcessManager.run(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return ProcessResult(0, 0, '', '');
+        });
+        when(mockProcessManager.start(
+          any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')
+        )).thenAnswer((_) async {
+          return FakeProcess();
+        });
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null),
+            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
           ),
           platformArgs: <String, dynamic>{},
         );
@@ -180,7 +162,6 @@ void main() {
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
-        ProcessUtils: () => mockProcessUtils,
       });
     });
   });
@@ -652,7 +633,7 @@ flutter:
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
-      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -719,42 +700,86 @@ flutter:
       mockProcessManager = MockProcessManager();
     });
 
-    testUsingContext('calls adb logcat with expected flags', () async {
-      const String klastLocatcatTimestamp = '11-27 15:39:04.506';
-      when(mockAndroidSdk.adbPath).thenReturn('adb');
-      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
-        .thenReturn(ProcessResult(0, 0, '$klastLocatcatTimestamp I/flutter: irrelevant', ''));
-      when(mockProcessManager.start(argThat(contains('logcat'))))
-        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+    void setupGetprop({int apiVersion}) {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final String buf = apiVersion == null
+          ? ''
+          : '[ro.build.version.sdk]: [$apiVersion]\n';
+        final ProcessResult result = ProcessResult(1, 0, buf, '');
+        return Future<ProcessResult>.value(result);
+      });
+    }
 
-      final AndroidDevice device = AndroidDevice('1234');
-      final DeviceLogReader logReader = device.getLogReader();
-      logReader.logLines.listen((_) {});
+    const int kLollipopVersionCode = 21;
+    void callsAdbLogcatCorrectly({int apiVersion}) {
+      testUsingContext('calls adb logcat with expected flags, apiVersion=$apiVersion', () async {
+        const String kLastLogcatTimestamp = '11-27 15:39:04.506';
+        setupGetprop(apiVersion: apiVersion);
+        when(mockAndroidSdk.adbPath).thenReturn('adb');
+        when(mockProcessManager.runSync(<String>[
+          'adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+        ]))
+          .thenReturn(ProcessResult(0, 0, '$kLastLogcatTimestamp I/flutter: irrelevant', ''));
 
-      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', klastLocatcatTimestamp]))
-        .called(1);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      ProcessManager: () => mockProcessManager,
-    });
+        final Completer<void> logcatCompleter = Completer<void>();
+        when(mockProcessManager.start(argThat(contains('logcat'))))
+          .thenAnswer((_) {
+            logcatCompleter.complete();
+            return Future<Process>.value(createMockProcess());
+          });
 
-    testUsingContext('calls adb logcat with expected flags when the device logs are empty', () async {
-      when(mockAndroidSdk.adbPath).thenReturn('adb');
-      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
-        .thenReturn(ProcessResult(0, 0, '', ''));
-      when(mockProcessManager.start(argThat(contains('logcat'))))
-        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+        final AndroidDevice device = AndroidDevice('1234');
+        final DeviceLogReader logReader = device.getLogReader();
+        logReader.logLines.listen((_) {});
+        await logcatCompleter.future;
 
-      final AndroidDevice device = AndroidDevice('1234');
-      final DeviceLogReader logReader = device.getLogReader();
-      logReader.logLines.listen((_) {});
+        verify(mockProcessManager.start(<String>[
+          'adb', '-s', '1234', 'logcat', '-v', 'time',
+          if (apiVersion != null && apiVersion >= kLollipopVersionCode)
+            ...<String>['-T', kLastLogcatTimestamp],
+        ])).called(1);
+      }, overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        ProcessManager: () => mockProcessManager,
+      });
 
-      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', '']))
-        .called(1);
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      ProcessManager: () => mockProcessManager,
-    });
+      testUsingContext('calls adb logcat with expected flags when the device logs are empty, apiVersion=$apiVersion', () async {
+        setupGetprop(apiVersion: apiVersion);
+        when(mockAndroidSdk.adbPath).thenReturn('adb');
+        when(mockProcessManager.runSync(<String>[
+          'adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+        ])).thenReturn(ProcessResult(0, 0, '', ''));
+
+        final Completer<void> logcatCompleter = Completer<void>();
+        when(mockProcessManager.start(argThat(contains('logcat'))))
+          .thenAnswer((_) {
+            logcatCompleter.complete();
+            return Future<Process>.value(createMockProcess());
+          });
+
+        final AndroidDevice device = AndroidDevice('1234');
+        final DeviceLogReader logReader = device.getLogReader();
+        logReader.logLines.listen((_) {});
+        await logcatCompleter.future;
+
+        verify(mockProcessManager.start(<String>[
+          'adb', '-s', '1234', 'logcat', '-v', 'time',
+          if (apiVersion != null && apiVersion >= kLollipopVersionCode)
+            ...<String>['-T', ''],
+        ])).called(1);
+      }, overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        ProcessManager: () => mockProcessManager,
+      });
+    }
+
+    callsAdbLogcatCorrectly(apiVersion: kLollipopVersionCode);
+    callsAdbLogcatCorrectly(apiVersion: kLollipopVersionCode - 1);
+    callsAdbLogcatCorrectly();
   });
 
   test('Can parse adb shell dumpsys info', () {
@@ -814,6 +839,7 @@ Uptime: 441088659 Realtime: 521464097
     final AndroidMemoryInfo result = parseMeminfoDump(exampleOutput);
 
     // Parses correctly
+    expect(result.realTime, 521464097);
     expect(result.javaHeap, 4296);
     expect(result.nativeHeap, 8620);
     expect(result.code, 11288);
@@ -825,6 +851,7 @@ Uptime: 441088659 Realtime: 521464097
     // toJson works correctly
     final Map<String, Object> json = result.toJson();
 
+    expect(json, containsPair('Realtime', 521464097));
     expect(json, containsPair('Java Heap', 4296));
     expect(json, containsPair('Native Heap', 8620));
     expect(json, containsPair('Code', 11288));

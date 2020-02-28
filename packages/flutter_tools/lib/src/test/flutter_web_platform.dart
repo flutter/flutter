@@ -9,6 +9,9 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
+import 'package:package_config/discovery.dart';
+import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -19,7 +22,6 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_api/src/util/stack_trace_mapper.dart';
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -50,14 +52,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String shellPath,
     this.updateGoldens,
   }) {
-    // Look up the location of the testing resources.
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.packages',
-    )).map;
-    testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(packagesDirHandler())
@@ -66,11 +60,18 @@ class FlutterWebPlatform extends PlatformPlugin {
           globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
           serveFilesOutsidePath: true,
         ))
-        .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
-            serveFilesOutsidePath: true))
+        .add(createStaticHandler(
+          _config.suiteDefaults.precompiledPath,
+          serveFilesOutsidePath: true,
+        ))
         .add(_handleStaticArtifact)
         .add(_goldenFileHandler)
-        .add(_wrapperHandler);
+        .add(_wrapperHandler)
+        .add(createStaticHandler(
+          p.join(p.current, 'test'),
+          serveFilesOutsidePath: true,
+        ))
+        .add(_packageFilesHandler);
     _server.mount(cascade.handler);
 
     _testGoldenComparator = TestGoldenComparator(
@@ -83,12 +84,13 @@ class FlutterWebPlatform extends PlatformPlugin {
     FlutterProject flutterProject,
     String shellPath,
     bool updateGoldens = false,
+    bool pauseAfterLoad = false,
   }) async {
     final shelf_io.IOServer server =
         shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return FlutterWebPlatform._(
       server,
-      Configuration.current,
+      Configuration.current.change(pauseAfterLoad: pauseAfterLoad),
       root,
       flutterProject: flutterProject,
       shellPath: shellPath,
@@ -96,13 +98,29 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  Uri testUri;
+  final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
+
+  final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    '.packages',
+  ));
+
+  /// Uri of the test package.
+  Uri get testUri => _flutterToolsPackageMap.map['test'];
 
   /// The test runner configuration.
   final Configuration _config;
 
+  @visibleForTesting
+  Configuration get config => _config;
+
   /// The underlying server.
   final shelf.Server _server;
+
+  @visibleForTesting
+  shelf.Server get server => _server;
 
   /// The URL for this server.
   Uri get url => _server.url;
@@ -192,6 +210,31 @@ class FlutterWebPlatform extends PlatformPlugin {
     }
   }
 
+  FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
+    if (request.requestedUri.pathSegments.first == 'packages') {
+      final Packages packages = await _packagesFuture;
+      final Uri fileUri = packages.resolve(Uri(
+        scheme: 'package',
+        pathSegments: request.requestedUri.pathSegments.skip(1),
+      ));
+      final String dirname = p.dirname(fileUri.toFilePath());
+      final String basename = p.basename(fileUri.toFilePath());
+      final shelf.Handler handler = createStaticHandler(dirname);
+      final shelf.Request modifiedRequest = shelf.Request(
+        request.method,
+        request.requestedUri.replace(path: basename),
+        protocolVersion: request.protocolVersion,
+        headers: request.headers,
+        handlerPath: request.handlerPath,
+        url: request.url.replace(path: basename),
+        encoding: request.encoding,
+        context: request.context,
+      );
+      return handler(modifiedRequest);
+    }
+    return shelf.Response.notFound('Not Found');
+  }
+
   final bool updateGoldens;
   TestGoldenComparator _testGoldenComparator;
 
@@ -257,9 +300,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Map<Runtime, Future<BrowserManager>> _browserManagers =
       <Runtime, Future<BrowserManager>>{};
 
-  // Mappers for Dartifying stack traces, indexed by test path.
-  final Map<String, StackTraceMapper> _mappers = <String, StackTraceMapper>{};
-
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = globals.fs.path.fromUri(request.url);
@@ -302,7 +342,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
     final RunnerSuite suite = await browserManager
-        .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
+        .load(path, suiteUrl, suiteConfig, message);
     if (_closed) {
       return null;
     }
@@ -339,6 +379,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       browser,
       hostUrl,
       completer.future,
+      headless: !_config.pauseAfterLoad,
     );
 
     // Store null values for browsers that error out so we know not to load them
@@ -587,6 +628,8 @@ class BrowserManager {
   /// [future]. If [debug] is true, starts the browser in debug mode, with its
   /// debugger interfaces on and detected.
   ///
+  /// The browser will start in headless mode if [headless] is true.
+  ///
   /// The [settings] indicate how to invoke this browser's executable.
   ///
   /// Returns the browser manager, or throws an [ApplicationException] if a
@@ -596,9 +639,10 @@ class BrowserManager {
     Uri url,
     Future<WebSocketChannel> future, {
     bool debug = false,
+    bool headless = true,
   }) async {
     final Chrome chrome =
-        await chromeLauncher.launch(url.toString(), headless: true);
+        await globals.chromeLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
@@ -648,9 +692,8 @@ class BrowserManager {
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
-    Object message, {
-    StackTraceMapper mapper,
-  }) async {
+    Object message,
+  ) async {
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
       'browser': _runtime.identifier,
@@ -689,7 +732,6 @@ class BrowserManager {
       try {
         controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
             suiteConfig, await _environment, suiteChannel, message);
-        controller.channel('test.browser.mapper').sink.add(mapper?.serialize());
 
         _controllers.add(controller);
         return await controller.suite;

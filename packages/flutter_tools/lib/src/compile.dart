@@ -197,7 +197,8 @@ class StdoutHandler {
 class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
-    final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
+    final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
+    final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
     for (final String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
@@ -277,7 +278,6 @@ class KernelCompiler {
     @required BuildMode buildMode,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    bool causalAsyncStacks = true,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
     String packagesPath,
@@ -313,7 +313,7 @@ class KernelCompiler {
       '--sdk-root',
       sdkRoot,
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ..._buildModeOptions(buildMode),
@@ -451,7 +451,6 @@ class _RejectRequest extends _CompilationRequest {
 abstract class ResidentCompiler {
   factory ResidentCompiler(String sdkRoot, {
     @required BuildMode buildMode,
-    bool causalAsyncStacks,
     bool trackWidgetCreation,
     String packagesPath,
     List<String> fileSystemRoots,
@@ -465,6 +464,10 @@ abstract class ResidentCompiler {
     List<String> dartDefines,
   }) = DefaultResidentCompiler;
 
+  // TODO(jonahwilliams): find a better way to configure additional file system
+  // roots from the runner.
+  // See: https://github.com/flutter/flutter/issues/50494
+  void addFileSystemRoot(String root);
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -512,7 +515,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   DefaultResidentCompiler(
     String sdkRoot, {
     @required this.buildMode,
-    this.causalAsyncStacks = true,
     this.trackWidgetCreation = true,
     this.packagesPath,
     this.fileSystemRoots,
@@ -531,7 +533,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/';
 
   final BuildMode buildMode;
-  final bool causalAsyncStacks;
   final bool trackWidgetCreation;
   final String packagesPath;
   final TargetModel targetModel;
@@ -541,6 +542,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+
+  @override
+  void addFileSystemRoot(String root) {
+    fileSystemRoots.add(root);
+  }
 
   /// The path to the root of the Dart SDK used to compile.
   ///
@@ -609,8 +615,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln('recompile $mainUri$inputKey');
     globals.printTrace('<- recompile $mainUri$inputKey');
     for (final Uri fileUri in request.invalidatedFiles) {
-      _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      globals.printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
+      final String message = _mapFileUri(fileUri.toString(), packageUriMapper);
+      _server.stdin.writeln(message);
+      globals.printTrace(message);
     }
     _server.stdin.writeln(inputKey);
     globals.printTrace('<- $inputKey');
@@ -650,7 +657,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
-      '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
+      '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[

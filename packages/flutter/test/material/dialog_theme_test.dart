@@ -175,7 +175,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(title: titleTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(headline6: titleTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -226,7 +226,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(textTheme: const TextTheme(subhead: contentTextStyle));
+    final ThemeData theme = ThemeData(textTheme: const TextTheme(subtitle1: contentTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

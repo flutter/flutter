@@ -26,10 +26,12 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  group('getUsage', () {
+  group('Usage', () {
     Directory tempDir;
+    Usage mockUsage;
 
     setUp(() {
+      mockUsage = MockUsage();
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
@@ -91,6 +93,25 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+    });
+
+    testUsingContext('logs success', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      await runBuildApkCommand(projectPath);
+
+      verify(mockUsage.sendEvent(
+        'tool-command-result',
+        'apk',
+        label: 'success',
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Usage: () => mockUsage,
     });
   });
 
@@ -209,6 +230,35 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('--split-debug-info is enabled when an output directory is provided', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      await expectLater(() async {
+        await runBuildApkCommand(projectPath, arguments: <String>['--split-debug-info=${tempDir.path}']);
+      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
+
+      verify(mockProcessManager.start(
+        <String>[
+          gradlew,
+          '-q',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pshrink=true',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Psplit-debug-info=${tempDir.path}',
+          'assembleRelease',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);
@@ -257,7 +307,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) {
         const String r8StdoutWarning =
-            'Execution failed for task \':app:transformClassesAndResourcesWithR8ForStageInternal\'.'
+            "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
             '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
         return Future<Process>.value(
           createMockProcess(
@@ -294,7 +344,7 @@ void main() {
       Usage: () => mockUsage,
     });
 
-    testUsingContext('reports when the app isn\'t using AndroidX', () async {
+    testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
 
@@ -325,7 +375,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
       expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
@@ -376,7 +426,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains('[!] Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains("[!] Your app isn't using AndroidX"), isFalse);
       expect(
         testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '

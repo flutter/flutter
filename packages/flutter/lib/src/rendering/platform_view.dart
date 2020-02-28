@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -351,7 +350,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    if (!(Offset.zero & size).contains(event.localPosition)) {
+    if (!(Offset.zero & size).contains(globalToLocal(event.position))) {
       return;
     }
     if ((event.original ?? event) != _lastPointerDownEvent) {
@@ -838,13 +837,11 @@ mixin _PlatformViewGestureMixin on RenderBox {
       if (_handlePointerEvent != null)
         _handlePointerEvent(event);
     });
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
   }
 
   @override
   void detach() {
     _gestureRecognizer.reset();
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     _hoverAnnotation = null;
     super.detach();
   }

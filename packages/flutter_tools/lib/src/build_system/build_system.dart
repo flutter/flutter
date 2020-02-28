@@ -277,12 +277,11 @@ abstract class Target {
 ///    }
 class Environment {
   /// Create a new [Environment] object.
-  ///
-  /// Only [projectDir] is required. The remaining environment locations have
-  /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
     @required Directory outputDir,
+    @required Directory cacheDir,
+    @required Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
   }) {
@@ -308,9 +307,30 @@ class Environment {
       projectDir: projectDir,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: globals.cache.getRoot(),
+      cacheDir: cacheDir,
       defines: defines,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      flutterRootDir: flutterRootDir,
+    );
+  }
+
+  /// Create a new [Environment] object for unit testing.
+  ///
+  /// Any directories not provided will fallback to a [testDirectory]
+  factory Environment.test(Directory testDirectory, {
+    Directory projectDir,
+    Directory outputDir,
+    Directory cacheDir,
+    Directory flutterRootDir,
+    Directory buildDir,
+    Map<String, String> defines = const <String, String>{},
+  }) {
+    return Environment(
+      projectDir: projectDir ?? testDirectory,
+      outputDir: outputDir ?? testDirectory,
+      cacheDir: cacheDir ?? testDirectory,
+      flutterRootDir: flutterRootDir ?? testDirectory,
+      buildDir: buildDir,
+      defines: defines,
     );
   }
 
@@ -410,8 +430,11 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment, globals.fs)
-      ..initialize();
+    final FileHashStore fileCache = FileHashStore(
+      environment: environment,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    )..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);

@@ -161,7 +161,11 @@ class FlutterManifest {
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
       if (plugin.containsKey('platforms')) {
-        return plugin['platforms']['android']['package'] as String;
+        final YamlMap platforms = plugin['platforms'] as YamlMap;
+
+        if (platforms.containsKey('android')) {
+          return platforms['android']['package'] as String;
+        }
       } else {
         return plugin['androidPackage'] as String;
       }
@@ -204,7 +208,7 @@ class FlutterManifest {
       }
       final String stringAsset = asset as String;
       try {
-        results.add(Uri.parse(Uri.encodeFull(stringAsset)));
+        results.add(Uri(pathSegments: stringAsset.split('/')));
       } on FormatException {
         globals.printError('Asset manifest contains invalid uri: $asset.');
       }
@@ -342,8 +346,9 @@ bool _validate(YamlMap manifest) {
         }
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+        } else {
+          _validateFlutter(kvp.value as YamlMap, errors);
         }
-        _validateFlutter(kvp.value as YamlMap, errors);
         break;
       default:
         // additionalProperties are allowed.

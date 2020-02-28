@@ -12,7 +12,6 @@ import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
@@ -232,7 +231,7 @@ class _DefaultPub implements Pub {
     @required bool retry,
     bool showTraceForErrors,
   }) async {
-    showTraceForErrors ??= isRunningOnBot;
+    showTraceForErrors ??= await globals.isRunningOnBot;
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -259,7 +258,7 @@ class _DefaultPub implements Pub {
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: _createPubEnvironment(context),
+        environment: await _createPubEnvironment(context),
       );
       String message;
       switch (code) {
@@ -304,17 +303,29 @@ class _DefaultPub implements Pub {
     final io.Process process = await processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
-      environment: _createPubEnvironment(PubContext.interactive),
+      environment: await _createPubEnvironment(PubContext.interactive),
     );
 
     // Pipe the Flutter tool stdin to the pub stdin.
-    unawaited(process.stdin.addStream(io.stdin));
+    unawaited(process.stdin.addStream(globals.stdio.stdin)
+      // If pub exits unexpectedly with an error, that will be reported below
+      // by the tool exit after the exit code check.
+      .catchError((dynamic err, StackTrace stack) {
+        globals.printTrace('Echoing stdin to the pub subprocess failed:');
+        globals.printTrace('$err\n$stack');
+      }
+    ));
 
-    // Pipe the put stdout and stderr to the tool stdout and stderr.
-    await Future.wait<dynamic>(<Future<dynamic>>[
-      io.stdout.addStream(process.stdout),
-      io.stderr.addStream(process.stderr),
-    ]);
+    // Pipe the pub stdout and stderr to the tool stdout and stderr.
+    try {
+      await Future.wait<dynamic>(<Future<dynamic>>[
+        globals.stdio.addStdoutStream(process.stdout),
+        globals.stdio.addStderrStream(process.stderr),
+      ]);
+    } catch (err, stack) {
+      globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
+      globals.printTrace('$err\n$stack');
+    }
 
     // Wait for pub to exit.
     final int code = await process.exitCode;
@@ -336,10 +347,10 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Map<String, String> _createPubEnvironment(PubContext context) {
+Future<Map<String, String>> _createPubEnvironment(PubContext context) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
-    _pubEnvironmentKey: _getPubEnvironmentValue(context),
+    _pubEnvironmentKey: await _getPubEnvironmentValue(context),
   };
   final String pubCache = _getRootPubCacheIfAvailable();
   if (pubCache != null) {
@@ -362,13 +373,13 @@ const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-String _getPubEnvironmentValue(PubContext pubContext) {
+Future<String> _getPubEnvironmentValue(PubContext pubContext) async {
   // DO NOT update this function without contacting kevmoo.
   // We have server-side tooling that assumes the values are consistent.
   final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
-    if (isRunningOnBot) 'flutter_bot',
+    if (await globals.isRunningOnBot) 'flutter_bot',
     'flutter_cli',
     ...pubContext._values,
   ];

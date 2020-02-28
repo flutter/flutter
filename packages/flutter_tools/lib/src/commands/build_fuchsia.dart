@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a Fuchsia target.
 class BuildFuchsiaCommand extends BuildSubCommand {
   BuildFuchsiaCommand({bool verboseHelp = false}) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     argParser.addOption(
@@ -69,6 +70,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       runnerPackageSource: stringArg('runner-source'),
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

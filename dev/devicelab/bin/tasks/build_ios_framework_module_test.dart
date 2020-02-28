@@ -42,6 +42,21 @@ Future<void> main() async {
         );
       });
 
+      // First, build the module in Debug to copy the debug version of Flutter.framework.
+      // This proves "flutter build ios-framework" re-copies the relevant Flutter.framework,
+      // otherwise building plugins with bitcode will fail linking because the debug version
+      // of Flutter.framework does not contain bitcode.
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios',
+            '--debug',
+            '--no-codesign',
+          ],
+        );
+      });
+
       // This builds all build modes' frameworks by default
       section('Build frameworks');
 
@@ -123,6 +138,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(appFrameworkPath, mode);
+        await _checkBitcode(appFrameworkPath, mode);
 
         final String aotSymbols = await dylibSymbols(appFrameworkPath);
 
@@ -168,6 +184,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(engineFrameworkPath, mode);
+        await _checkBitcode(engineFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -201,7 +218,7 @@ Future<void> main() async {
         );
       }
 
-      section("Check all modes' have plugin dylib");
+      section('Check all modes have plugins');
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String pluginFrameworkPath = path.join(
@@ -211,6 +228,7 @@ Future<void> main() async {
           'device_info',
         );
         await _checkFrameworkArchs(pluginFrameworkPath, mode);
+        await _checkBitcode(pluginFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -220,6 +238,17 @@ Future<void> main() async {
           'device_info.framework',
           'device_info',
         ));
+
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-armv7_arm64',
+          'device_info.framework',
+          'Headers',
+          'DeviceInfoPlugin.h',
+        ));
+
         final String simulatorFrameworkPath = path.join(
           outputPath,
           mode,
@@ -228,14 +257,27 @@ Future<void> main() async {
           'device_info.framework',
           'device_info',
         );
+
+        final String simulatorFrameworkHeaderPath = path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-x86_64-simulator',
+          'device_info.framework',
+          'Headers',
+          'DeviceInfoPlugin.h',
+        );
+
         if (mode == 'Debug') {
           checkFileExists(simulatorFrameworkPath);
+          checkFileExists(simulatorFrameworkHeaderPath);
         } else {
           checkFileNotExists(simulatorFrameworkPath);
+          checkFileNotExists(simulatorFrameworkHeaderPath);
         }
       }
 
-      section("Check all modes' have generated plugin registrant");
+      section('Check all modes have generated plugin registrant');
 
       for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String registrantFrameworkPath = path.join(
@@ -246,6 +288,7 @@ Future<void> main() async {
         );
 
         await _checkFrameworkArchs(registrantFrameworkPath, mode);
+        await _checkBitcode(registrantFrameworkPath, mode);
 
         checkFileExists(path.join(
           outputPath,
@@ -279,6 +322,56 @@ Future<void> main() async {
         }
       }
 
+      // This builds all build modes' frameworks by default
+      section('Build podspec');
+
+      const String cocoapodsOutputDirectoryName = 'flutter-frameworks-cocoapods';
+
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'build',
+          options: <String>[
+            'ios-framework',
+            '--cocoapods',
+            '--force', // Allow podspec creation on master.
+            '--output=$cocoapodsOutputDirectoryName'
+          ],
+        );
+      });
+
+      final String cocoapodsOutputPath = path.join(projectDir.path, cocoapodsOutputDirectoryName);
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
+        checkFileExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'Flutter.podspec',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'App.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'FlutterPluginRegistrant.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'device_info.framework',
+        ));
+
+        checkDirectoryExists(path.join(
+          cocoapodsOutputPath,
+          mode,
+          'package_info.framework',
+        ));
+      }
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
@@ -308,5 +401,14 @@ Future<void> _checkFrameworkArchs(String frameworkPath, String mode) async {
   // Release and Profile should not.
   if (containsSimulator != isDebug) {
     throw TaskResult.failure('$mode $frameworkPath x86_64 architecture ${isDebug ? 'missing' : 'present'}');
+  }
+}
+
+Future<void> _checkBitcode(String frameworkPath, String mode) async {
+  checkFileExists(frameworkPath);
+
+  // Bitcode only needed in Release mode for archiving.
+  if (mode == 'Release' && !await containsBitcode(frameworkPath)) {
+    throw TaskResult.failure('$frameworkPath does not contain bitcode');
   }
 }

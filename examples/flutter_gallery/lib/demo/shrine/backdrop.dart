@@ -131,7 +131,7 @@ class _BackdropTitle extends AnimatedWidget {
     );
 
     return DefaultTextStyle(
-      style: Theme.of(context).primaryTextTheme.title,
+      style: Theme.of(context).primaryTextTheme.headline6,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
       child: Row(children: <Widget>[

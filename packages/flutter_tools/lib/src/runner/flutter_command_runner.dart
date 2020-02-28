@@ -24,7 +24,6 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
-import '../version.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -132,7 +131,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
-        help: 'List the special \'flutter-tester\' device in device listings. '
+        help: "List the special 'flutter-tester' device in device listings. "
               'This headless device is used to\ntest Flutter tooling.');
   }
 
@@ -239,7 +238,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check for verbose.
     if (topLevelResults['verbose'] as bool) {
       // Override the logger.
-      contextOverrides[Logger] = VerboseLogger(globals.logger, stopwatch: Stopwatch());
+      contextOverrides[Logger] = VerboseLogger(globals.logger);
     }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
@@ -303,14 +302,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         _checkFlutterCopy();
         try {
-          await FlutterVersion.instance.ensureVersionFile();
+          await globals.flutterVersion.ensureVersionFile();
         } on FileSystemException catch (e) {
           globals.printError('Failed to write the version file to the artifact cache: "$e".');
           globals.printError('Please ensure you have permissions in the artifact cache directory.');
           throwToolExit('Failed to write the version file');
         }
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool) {
-          await FlutterVersion.instance.checkFlutterVersionFreshness();
+        final bool machineFlag = topLevelResults['machine'] as bool;
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool && !machineFlag) {
+          await globals.flutterVersion.checkFlutterVersionFreshness();
         }
 
         if (topLevelResults.wasParsed('packages')) {
@@ -323,16 +323,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['version'] as bool) {
           flutterUsage.sendCommand('version');
           String status;
-          if (topLevelResults['machine'] as bool) {
-            status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+          if (machineFlag) {
+            status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
           } else {
-            status = FlutterVersion.instance.toString();
+            status = globals.flutterVersion.toString();
           }
           globals.printStatus(status);
           return;
         }
 
-        if (topLevelResults['machine'] as bool) {
+        if (machineFlag) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);

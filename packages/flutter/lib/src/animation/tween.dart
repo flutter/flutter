@@ -261,7 +261,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
-  String toString() => '$runtimeType($begin \u2192 $end)';
+  String toString() => '${objectRuntimeType(this, 'Animatable')}($begin \u2192 $end)';
 }
 
 /// A [Tween] that evaluates its [parent] in reverse.
@@ -401,7 +401,7 @@ class ConstantTween<T> extends Tween<T> {
   T lerp(double t) => begin;
 
   @override
-  String toString() => '$runtimeType(value: $begin)';
+  String toString() => '${objectRuntimeType(this, 'ReverseTween')}(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.
@@ -450,5 +450,5 @@ class CurveTween extends Animatable<double> {
   }
 
   @override
-  String toString() => '$runtimeType(curve: $curve)';
+  String toString() => '${objectRuntimeType(this, 'CurveTween')}(curve: $curve)';
 }

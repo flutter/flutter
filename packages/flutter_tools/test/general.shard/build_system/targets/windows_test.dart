@@ -34,9 +34,8 @@ void main() {
     when(platform.isLinux).thenReturn(false);
     when(platform.pathSeparator).thenReturn(r'\');
     testbed = Testbed(setup: () {
-      environment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
+      environment = Environment.test(
+        globals.fs.currentDirectory,
       );
       globals.fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
       globals.fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();

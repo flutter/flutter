@@ -1047,7 +1047,7 @@ void main() {
           'FlutterError\n'
           '   Horizontal viewport was given unbounded width.\n'
           '   Viewports expand in the scrolling direction to fill their\n'
-          '   container.In this case, a horizontal viewport was given an\n'
+          '   container. In this case, a horizontal viewport was given an\n'
           '   unlimited amount of horizontal space in which to expand. This\n'
           '   situation typically happens when a scrollable widget is nested\n'
           '   inside another scrollable widget.\n'
@@ -1145,10 +1145,8 @@ void main() {
     );
   });
 
-  testWidgets('Handles infinite constraints when TargetPlatform is iOS', (WidgetTester tester) async {
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS or macOS', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/45866
-    final TargetPlatform oldTargetPlatform = debugDefaultTargetPlatformOverride;
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1177,6 +1175,5 @@ void main() {
     expect(find.text('b'), findsOneWidget);
     await tester.drag(find.text('b'), const Offset(0, 200));
     await tester.pumpAndSettle();
-    debugDefaultTargetPlatformOverride = oldTargetPlatform;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 }

@@ -30,9 +30,11 @@ class SliverFillViewport extends StatelessWidget {
     Key key,
     @required this.delegate,
     this.viewportFraction = 1.0,
+    this.padEnds = true,
   }) : assert(viewportFraction != null),
-      assert(viewportFraction > 0.0),
-      super(key: key);
+       assert(viewportFraction > 0.0),
+       assert(padEnds != null),
+       super(key: key);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -41,13 +43,26 @@ class SliverFillViewport extends StatelessWidget {
   /// the viewport in the main axis.
   final double viewportFraction;
 
+  /// Whether to add padding to both ends of the list.
+  ///
+  /// If this is set to true and [viewportFraction] < 1.0, padding will be added
+  /// such that the first and last child slivers will be in the center of
+  /// the viewport when scrolled all the way to the start or end, respectively.
+  /// You may want to set this to false if this [SliverFillViewport] is not the only
+  /// widget along this main axis, such as in a [CustomScrollView] with multiple
+  /// children.
+  ///
+  /// This option cannot be [null]. If [viewportFraction] >= 1.0, this option has no
+  /// effect. Defaults to [true].
+  final bool padEnds;
+
   /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
   final SliverChildDelegate delegate;
 
   @override
   Widget build(BuildContext context) {
     return _SliverFractionalPadding(
-      viewportFraction: (1 - viewportFraction).clamp(0, 1) / 2,
+      viewportFraction: padEnds ? (1 - viewportFraction).clamp(0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
         viewportFraction: viewportFraction,
         delegate: delegate,
@@ -107,6 +122,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
 
+  SliverConstraints _lastResolvedConstraints;
+
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double newValue) {
@@ -127,10 +144,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   void _resolve() {
-    if (_resolvedPadding != null)
+    if (_resolvedPadding != null && _lastResolvedConstraints == constraints)
       return;
+
     assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    _lastResolvedConstraints = constraints;
     switch (constraints.axis) {
       case Axis.horizontal:
         _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
@@ -181,9 +200,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// the amount of space that has been scrolled beforehand has not exceeded the
 /// main axis extent of the viewport.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_sizes_child.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] sizes its [child] to fill the
 /// remaining extent of the viewport in both axes. The icon is centered in the
@@ -219,9 +236,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// child's size exceeds the remaining space in the viewport.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_defers_to_child.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the child's extent exceeds that of the remaining extent of the
@@ -263,9 +278,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// [SliverFillRemaining] will defer to the size of its [child] if the
 /// [precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
-/// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_scrolled_beyond.mp4}
-///
-/// {@tool sample --template=stateless_widget_scaffold}
+/// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the [precedingScrollExtent] of the [SliverConstraints] has gone
@@ -320,6 +333,9 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// overscroll area when [fillOverscroll] is true. This sample also features a
 /// button that is pinned to the bottom of the sliver, regardless of size or
 /// overscroll behavior. Try switching [fillOverscroll] to see the difference.
+///
+/// This sample only shows the overscroll behavior on devices that support
+/// overscroll.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {

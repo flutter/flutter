@@ -44,8 +44,6 @@ void main() {
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.web,
-      DevelopmentArtifact.androidGenSnapshot,
-      DevelopmentArtifact.androidMaven,
     }));
   }, overrides: <Type, Generator>{
     Cache: () => cache,
@@ -59,9 +57,20 @@ void main() {
 
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
-      DevelopmentArtifact.androidGenSnapshot,
-      DevelopmentArtifact.androidMaven,
     }));
+  }, overrides: <Type, Generator>{
+    Cache: () => cache,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
+  });
+
+  testUsingContext('precache exits if requesting mismatched artifacts.', () async {
+    final PrecacheCommand command = PrecacheCommand();
+    applyMocksToCommand(command);
+
+    expect(createTestCommandRunner(command).run(const <String>['precache',
+      '--no-android',
+      '--android_gen_snapshot',
+    ]), throwsToolExit(message: '--android_gen_snapshot requires --android'));
   }, overrides: <Type, Generator>{
     Cache: () => cache,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),

@@ -103,7 +103,7 @@ void main() {
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Atrás');
   });
 
-  testWidgets('Localizations.override widget tracks parent\'s locale', (WidgetTester tester) async {
+  testWidgets("Localizations.override widget tracks parent's locale", (WidgetTester tester) async {
     Widget buildLocaleFrame(Locale locale) {
       return buildFrame(
         locale: locale,

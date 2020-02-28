@@ -16,6 +16,7 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -35,14 +36,12 @@ const List<Target> _kDefaultTargets = <Target>[
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
   DebugBundleLinuxAssets(),
-  WebReleaseBundle(),
+  WebServiceWorker(),
   DebugAndroidApplication(),
   FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
-  // These are one-off rules for bundle and aot compat
-  ReleaseCopyFlutterAotBundle(),
-  ProfileCopyFlutterAotBundle(),
+  // This is a one-off rule for bundle and aot compat.
   CopyFlutterBundle(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
@@ -51,6 +50,9 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  DebugIosApplicationBundle(),
+  ProfileIosApplicationBundle(),
+  ReleaseIosApplicationBundle(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -147,6 +149,8 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(stringsArg('define')),
+      cacheDir: globals.cache.getRoot(),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
     return result;
   }
@@ -198,9 +202,14 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      depfile.writeToFile(globals.fs.file(depfileFile));
+      final DepfileService depfileService = DepfileService(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
+      depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

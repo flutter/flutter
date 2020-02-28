@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -96,6 +97,48 @@ void main() {
     expect(action.calls, equals(1));
   });
 
+  testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
+    bool checked = false;
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump();
+
+    // Test three default buttons for the activation action.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    // Only space is used as an activation key on web.
+    if (kIsWeb) {
+      return;
+    }
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+  });
+
   group('error control test', () {
     Future<void> expectFlutterError({
       GlobalKey<NavigatorState> key,
@@ -162,5 +205,55 @@ void main() {
           '   null.\n' ,
       );
     });
+  });
+
+  testWidgets('WidgetsApp can customize initial routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        onGenerateInitialRoutes: (String initialRoute) {
+          expect(initialRoute, '/abc');
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page one');
+              }
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page two');
+              }
+            ),
+          ];
+        },
+        initialRoute: '/abc',
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<void>(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation) {
+              return const Text('regular page');
+            }
+          );
+        },
+        color: const Color(0xFF123456),
+      )
+    );
+    expect(find.text('non-regular page two'), findsOneWidget);
+    expect(find.text('non-regular page one'), findsNothing);
+    expect(find.text('regular page'), findsNothing);
+    navigatorKey.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('non-regular page two'), findsNothing);
+    expect(find.text('non-regular page one'), findsOneWidget);
+    expect(find.text('regular page'), findsNothing);
   });
 }

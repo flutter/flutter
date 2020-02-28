@@ -33,9 +33,8 @@ void main() {
     when(mockPlatform.environment).thenReturn(Map<String, String>.unmodifiable(<String, String>{}));
     testbed = Testbed(setup: () {
       Cache.flutterRoot = '';
-      environment = Environment(
-        outputDir: globals.fs.currentDirectory,
-        projectDir: globals.fs.currentDirectory,
+      environment = Environment.test(
+        globals.fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: 'debug',
         }

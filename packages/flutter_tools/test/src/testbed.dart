@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process.dart';
 
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -113,6 +114,9 @@ class Testbed {
       // Add the test-specific overrides
       ...?overrides,
     };
+    if (testOverrides.containsKey(ProcessUtils)) {
+      throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
+    }
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
@@ -618,7 +622,7 @@ class FakeHttpHeaders extends HttpHeaders {
   List<String> operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value) { }
+  void add(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
   void clear() { }
@@ -636,7 +640,7 @@ class FakeHttpHeaders extends HttpHeaders {
   void removeAll(String name) { }
 
   @override
-  void set(String name, Object value) { }
+  void set(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
   String value(String name) => null;
@@ -718,7 +722,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
     this.isAndroidEmbeddingV2Enabled = false,
-    this.isWebIncrementalCompilerEnabled = false,
 });
 
   @override
@@ -737,9 +740,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isAndroidEmbeddingV2Enabled;
 
   @override
-  final bool isWebIncrementalCompilerEnabled;
-
-  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -752,8 +752,6 @@ class TestFeatureFlags implements FeatureFlags {
         return isWindowsEnabled;
       case flutterAndroidEmbeddingV2Feature:
         return isAndroidEmbeddingV2Enabled;
-      case flutterWebIncrementalCompiler:
-        return isWebIncrementalCompilerEnabled;
     }
     return false;
   }
@@ -818,6 +816,9 @@ class DelegateLogger implements Logger {
 
   @override
   bool get supportsColor => delegate.supportsColor;
+
+  @override
+  void clear() => delegate.clear();
 }
 
 /// An implementation of the Cache which does not download or require locking.
@@ -917,5 +918,14 @@ class FakeCache implements Cache {
 
   @override
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+  }
+
+  @override
+  Future<void> downloadFile(Uri url, File location) async {
+  }
+
+  @override
+  Future<bool> doesRemoteExist(String message, Uri url) async {
+    return true;
   }
 }

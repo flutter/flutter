@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -108,6 +109,9 @@ class FuchsiaPM {
   Future<Process> serve(String repoPath, String host, int port) async {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
+    }
+    if (isIPv6Address(host.split('%').first)) {
+      host = '[${host.replaceAll('%', '%25')}]';
     }
     final List<String> command = <String>[
       fuchsiaArtifacts.pm.path,

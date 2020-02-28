@@ -22,7 +22,6 @@ import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -36,7 +35,7 @@ import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'globals.dart' as globals;
-import 'ios/devices.dart' show IOSDeploy;
+import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
@@ -62,26 +61,61 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
 }) async {
+
+  // Wrap runner with any asynchronous initialization that should run with the
+  // overrides and callbacks.
+  bool runningOnBot;
+  FutureOr<T> runnerWrapper() async {
+    runningOnBot = await globals.isRunningOnBot;
+    return runner();
+  }
+
   return await context.run<T>(
     name: 'global fallbacks',
-    body: runner,
+    body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidLicenseValidator: () => AndroidLicenseValidator(),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
-      AndroidValidator: () => AndroidValidator(),
+      AndroidValidator: () => AndroidValidator(
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        userMessages: globals.userMessages,
+      ),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
-      Artifacts: () => CachedArtifacts(),
+      Artifacts: () => CachedArtifacts(
+        fileSystem: globals.fs,
+        cache: globals.cache,
+        platform: globals.platform,
+      ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BotDetector: () => const BotDetector(),
       BuildSystem: () => const BuildSystem(),
-      Cache: () => Cache(),
-      ChromeLauncher: () => const ChromeLauncher(),
+      Cache: () => Cache(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
+      ChromeLauncher: () => ChromeLauncher(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      ),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
-      Config: () => Config(),
+      Config: () => Config(
+        Config.kFlutterSettings,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -97,7 +131,13 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
-      IOSDeploy: () => const IOSDeploy(),
+      IOSDeploy: () => IOSDeploy(
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
@@ -117,8 +157,17 @@ Future<T> runInContext<T>(
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
-      OperatingSystemUtils: () => OperatingSystemUtils(),
-      PersistentToolState: () => PersistentToolState(),
+      OperatingSystemUtils: () => OperatingSystemUtils(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
+      PersistentToolState: () => PersistentToolState(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       ProcessInfo: () => ProcessInfo(),
       ProcessUtils: () => ProcessUtils(
         processManager: globals.processManager,
@@ -131,14 +180,33 @@ Future<T> runInContext<T>(
       Stdio: () => const Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
-      Usage: () => Usage(),
+      Usage: () => Usage(
+        runningOnBot: runningOnBot,
+      ),
       UserMessages: () => UserMessages(),
       VisualStudio: () => VisualStudio(),
       VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
-      Xcode: () => Xcode(),
-      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
+      Xcode: () => Xcode(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+      ),
+      XCDevice: () => XCDevice(
+        processManager: globals.processManager,
+        logger: globals.logger,
+        xcode: globals.xcode,
+      ),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(
+        logger: globals.logger,
+        processManager: globals.processManager,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+        terminal: globals.terminal,
+      ),
       XcodeValidator: () => const XcodeValidator(),
     },
   );

@@ -67,7 +67,7 @@ Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
 [contributor guide](CONTRIBUTING.md).
 
-[Flutter logo]: https://flutter.dev/assets/flutter-lockup-4cb0ee072ab312e59784d9fbf4fb7ad42688a7fdaea1270ccf6bbf4f34b7e03f.svg
+[Flutter logo]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/flutter-lockup.png
 [flutter.dev]: https://flutter.dev
 [Build Status - Cirrus]: https://api.cirrus-ci.com/github/flutter/flutter.svg
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master

@@ -6,6 +6,9 @@ import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
+import 'constants.dart';
+import 'object.dart';
+
 /// A object representation of a frame from a stack trace.
 ///
 /// {@tool snippet}
@@ -57,6 +60,18 @@ class StackFrame {
     source: '<asynchronous suspension>',
   );
 
+  /// A stack frame representing a Dart elided stack overflow frame.
+  static const StackFrame stackOverFlowElision = StackFrame(
+    number: -1,
+    column: -1,
+    line: -1,
+    method: '...',
+    packageScheme: '',
+    package: '',
+    packagePath: '',
+    source: '...',
+  );
+
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
   ///
   /// This is normally useful with [StackTrace.current].
@@ -72,16 +87,28 @@ class StackFrame {
         .trim()
         .split('\n')
         .map(fromStackTraceLine)
+        // On the Web in non-debug builds the stack trace includes the exception
+        // message that precedes the stack trace itself. fromStackTraceLine will
+        // return null in that case. We will skip it here.
+        .skipWhile((StackFrame frame) => frame == null)
         .toList();
   }
 
   static StackFrame _parseWebFrame(String line) {
+    if (kDebugMode) {
+      return _parseWebDebugFrame(line);
+    } else {
+      return _parseWebNonDebugFrame(line);
+    }
+  }
+
+  static StackFrame _parseWebDebugFrame(String line) {
     final bool hasPackage = line.startsWith('package');
     final RegExp parser = hasPackage
         ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null, 'Expecgted $line to match $parser.');
+    assert(match != null, 'Expected $line to match $parser.');
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
@@ -106,11 +133,57 @@ class StackFrame {
     );
   }
 
+  // Non-debug builds do not point to dart code but compiled JavaScript, so
+  // line numbers are meaningless. We only attempt to parse the class and
+  // method name, which is more or less readable in profile builds, and
+  // minified in release builds.
+  static final RegExp _webNonDebugFramePattern = RegExp(r'^\s*at ([^\s]+).*$');
+
+  // Parses `line` as a stack frame in profile and release Web builds. If not
+  // recognized as a stack frame, returns null.
+  static StackFrame _parseWebNonDebugFrame(String line) {
+    final Match match = _webNonDebugFramePattern.firstMatch(line);
+    if (match == null) {
+      // On the Web in non-debug builds the stack trace includes the exception
+      // message that precedes the stack trace itself. Example:
+      //
+      // TypeError: Cannot read property 'hello$0' of null
+      //    at _GalleryAppState.build$1 (http://localhost:8080/main.dart.js:149790:13)
+      //    at StatefulElement.build$0 (http://localhost:8080/main.dart.js:129138:37)
+      //    at StatefulElement.performRebuild$0 (http://localhost:8080/main.dart.js:129032:23)
+      //
+      // Instead of crashing when a line is not recognized as a stack frame, we
+      // return null. The caller, such as fromStackString, can then just skip
+      // this frame.
+      return null;
+    }
+
+    final List<String> classAndMethod = match.group(1).split('.');
+    final String className = classAndMethod.length > 1 ? classAndMethod.first : '<unknown>';
+    final String method = classAndMethod.length > 1
+      ? classAndMethod.skip(1).join('.')
+      : classAndMethod.single;
+
+    return StackFrame(
+      number: -1,
+      packageScheme: '<unknown>',
+      package: '<unknown>',
+      packagePath: '<unknown>',
+      line: -1,
+      column: -1,
+      className: className,
+      method: method,
+      source: line,
+    );
+  }
+
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   static StackFrame fromStackTraceLine(String line) {
     assert(line != null);
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
+    } else if (line == '...') {
+      return stackOverFlowElision;
     }
 
     // Web frames.
@@ -226,5 +299,5 @@ class StackFrame {
   }
 
   @override
-  String toString() => '$runtimeType(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

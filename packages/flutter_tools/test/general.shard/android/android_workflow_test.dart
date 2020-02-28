@@ -7,12 +7,14 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -23,19 +25,30 @@ import '../../src/context.dart';
 import '../../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 void main() {
   AndroidSdk sdk;
+  Logger logger;
   MemoryFileSystem fs;
   MockProcessManager processManager;
   MockStdio stdio;
+  UserMessages userMessages;
 
   setUp(() {
     sdk = MockAndroidSdk();
     fs = MemoryFileSystem();
     fs.directory('/home/me').createSync(recursive: true);
+    logger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
     processManager = MockProcessManager();
     stdio = MockStdio();
+    userMessages = UserMessages();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
@@ -208,24 +221,26 @@ void main() {
     Stdio: () => stdio,
   }));
 
-  testUsingContext('detects license-only SDK installation', () async {
+  testWithoutContext('detects license-only SDK installation', () async {
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(false);
-    final ValidationResult validationResult = await AndroidValidator().validate();
+    final ValidationResult validationResult = await AndroidValidator(
+      androidStudio: null,
+      androidSdk: sdk,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: userMessages,
+    ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
       validationResult.messages.last.message,
       userMessages.androidSdkLicenseOnly(kAndroidHome),
     );
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => sdk,
-    FileSystem: () => fs,
-    ProcessManager: () => processManager,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-    Stdio: () => stdio,
-  }));
+  });
 
-  testUsingContext('detects minium required SDK and buildtools', () async {
+  testWithoutContext('detects minimum required SDK and buildtools', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(true);
@@ -236,13 +251,24 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
     when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
+    when(processManager.runSync(<String>['which', 'java'])).thenReturn(ProcessResult(123, 1, '', ''));
     final String errorMessage = userMessages.androidSdkBuildToolsOutdated(
       sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
     );
 
-    ValidationResult validationResult = await AndroidValidator().validate();
+    final AndroidValidator androidValidator = AndroidValidator(
+      androidStudio: null,
+      androidSdk: sdk,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: userMessages,
+    );
+
+    ValidationResult validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
     expect(
       validationResult.messages.last.message,
@@ -253,7 +279,7 @@ void main() {
     when(mockSdkVersion.sdkLevel).thenReturn(28);
     when(mockSdkVersion.buildToolsVersion).thenReturn(Version(28, 0, 2));
 
-    validationResult = await AndroidValidator().validate();
+    validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.missing);
     expect(
       validationResult.messages.last.message,
@@ -265,21 +291,15 @@ void main() {
     when(mockSdkVersion.sdkLevel).thenReturn(kAndroidSdkMinVersion);
     when(mockSdkVersion.buildToolsVersion).thenReturn(kAndroidSdkBuildToolsMinVersion);
 
-    validationResult = await AndroidValidator().validate();
+    validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.partial); // No Java binary
     expect(
       validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => sdk,
-    FileSystem: () => fs,
-    ProcessManager: () => processManager,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-    Stdio: () => stdio,
-  }));
+  });
 
-  testUsingContext('detects minimum required java version', () async {
+  testWithoutContext('detects minimum required java version', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
 
     // Mock a pass through scenario to reach _checkJavaVersion()
@@ -293,22 +313,41 @@ void main() {
 
     //Test with older version of JDK
     const String javaVersionText = 'openjdk version "1.7.0_212"';
-    when(globals.processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
+    when(processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
       Future<ProcessResult>.value(ProcessResult(0, 0, null, javaVersionText)));
     final String errorMessage = userMessages.androidJavaMinimumVersion(javaVersionText);
 
-    final ValidationResult validationResult = await AndroidValidator().validate();
+    final ValidationResult validationResult = await AndroidValidator(
+      androidSdk: sdk,
+      androidStudio: null,
+      fileSystem: fs,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      processManager: processManager,
+      userMessages: userMessages,
+    ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
       validationResult.messages.last.message,
       errorMessage,
     );
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => sdk,
-    FileSystem: () => fs,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
-    ProcessManager: () => processManager,
-    Stdio: () => stdio,
-  }));
+  });
 
+  testWithoutContext('Mentions `kAndroidSdkRoot if user has no AndroidSdk`', () async {
+    final ValidationResult validationResult = await AndroidValidator(
+      androidSdk: null,
+      androidStudio: null,
+      fileSystem: fs,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      processManager: processManager,
+      userMessages: userMessages,
+    ).validate();
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(kAndroidSdkRoot)
+      ),
+      true,
+    );
+  });
 }

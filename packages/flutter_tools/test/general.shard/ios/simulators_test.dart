@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -42,6 +43,24 @@ void main() {
   setUp(() {
     osx = FakePlatform.fromPlatform(const LocalPlatform());
     osx.operatingSystem = 'macos';
+  });
+
+  group('_IOSSimulatorDevicePortForwarder', () {
+    testUsingContext('dispose() does not throw an exception', () async {
+      final IOSSimulator simulator = IOSSimulator('123');
+      final DevicePortForwarder portForwarder = simulator.portForwarder;
+      await portForwarder.forward(123);
+      await portForwarder.forward(124);
+      expect(portForwarder.forwardedPorts.length, 2);
+      try {
+        await portForwarder.dispose();
+      } catch (e) {
+        fail('Encountered exception: $e');
+      }
+      expect(portForwarder.forwardedPorts.length, 0);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    }, testOn: 'posix');
   });
 
   group('logFilePath', () {
@@ -201,6 +220,7 @@ void main() {
       kTargetPlatform: 'ios',
       kBuildMode: 'debug',
       kTrackWidgetCreation: 'false',
+      kIconTreeShakerFlag: null,
     });
   }, overrides: <Type, Generator>{
     BuildSystem: () => MockBuildSystem(),
@@ -225,7 +245,7 @@ void main() {
     });
 
     testUsingContext(
-      'old Xcode doesn\'t support screenshot',
+      "old Xcode doesn't support screenshot",
       () {
         when(mockXcode.majorVersion).thenReturn(7);
         when(mockXcode.minorVersion).thenReturn(1);
@@ -478,12 +498,12 @@ void main() {
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-      when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
+      when(globals.plistParser.getValueFromFile(any, any)).thenReturn('correct');
 
       final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
-      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor', treeShakeIcons: false);
       final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
       await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 

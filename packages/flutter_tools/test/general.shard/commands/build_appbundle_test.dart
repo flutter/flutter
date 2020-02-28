@@ -26,11 +26,13 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  group('getUsage', () {
+  group('Usage', () {
     Directory tempDir;
+    Usage mockUsage;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      mockUsage = MockUsage();
     });
 
     tearDown(() {
@@ -74,6 +76,25 @@ void main() {
 
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
+    });
+
+    testUsingContext('logs success', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      await runBuildAppBundleCommand(projectPath);
+
+      verify(mockUsage.sendEvent(
+        'tool-command-result',
+        'appbundle',
+        label: 'success',
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Usage: () => mockUsage,
     });
   });
 
@@ -245,7 +266,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) {
         const String r8StdoutWarning =
-            'Execution failed for task \':app:transformClassesAndResourcesWithR8ForStageInternal\'.'
+            "Execution failed for task ':app:transformClassesAndResourcesWithR8ForStageInternal'.\n"
             '> com.android.tools.r8.CompilationFailedException: Compilation failed to complete';
         return Future<Process>.value(
           createMockProcess(
@@ -282,7 +303,7 @@ void main() {
       Usage: () => mockUsage,
     });
 
-    testUsingContext('reports when the app isn\'t using AndroidX', () async {
+    testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
 
@@ -313,7 +334,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
       expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
@@ -364,7 +385,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains('Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains("Your app isn't using AndroidX"), isFalse);
       expect(
         testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '

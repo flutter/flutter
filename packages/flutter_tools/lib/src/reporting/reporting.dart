@@ -13,13 +13,10 @@ import 'package:usage/usage_io.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/time.dart';
-import '../base/utils.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 

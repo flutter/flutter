@@ -79,13 +79,13 @@ Future<void> buildMacOS({
       'xcrun',
       'xcodebuild',
       '-workspace', flutterProject.macos.xcodeWorkspace.path,
-      '-configuration', '$configuration',
+      '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      ...environmentVariablesAsXcodeBuildSettings()
+      ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ], trace: true);
   } finally {
     status.cancel();

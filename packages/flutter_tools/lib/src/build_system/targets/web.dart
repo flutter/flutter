@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -9,7 +11,6 @@ import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
-import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'assets.dart';
@@ -30,6 +31,7 @@ const String kDart2jsOptimization = 'Dart2jsOptimization';
 const String kCspMode = 'cspMode';
 
 /// Generates an entry point for a web target.
+// Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 
@@ -81,7 +83,8 @@ class WebEntrypointTarget extends Target {
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
-      final Uri generatedImport = packageUriMapper.map(generatedPath);
+      final String generatedImport = packageUriMapper.map(generatedPath)?.toString()
+        ?? globals.fs.file(generatedPath).absolute.uri.toString();
       contents = '''
 import 'dart:ui' as ui;
 
@@ -152,9 +155,7 @@ class Dart2JSTarget extends Target {
     final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
-      ? PackageMap.globalGeneratedPackagesPath
-      : PackageMap.globalPackagesPath;
+    final String packageFile = PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
 
     final ProcessResult result = await globals.processManager.run(<String>[
@@ -190,15 +191,23 @@ class Dart2JSTarget extends Target {
         '${dart2jsDeps.path}');
       return;
     }
-    final Depfile depfile = Depfile.parseDart2js(
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    final Depfile depfile = depfileService.parseDart2js(
       environment.buildDir.childFile('main.dart.js.deps'),
       outputFile,
     );
-    depfile.writeToFile(environment.buildDir.childFile('dart2js.d'));
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('dart2js.d'),
+    );
   }
 }
 
-/// Unpacks the dart2js compilation to a given output directory
+/// Unpacks the dart2js compilation and resources to a given output directory
 class WebReleaseBundle extends Target {
   const WebReleaseBundle();
 
@@ -214,24 +223,29 @@ class WebReleaseBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.pattern('{PROJECT_DIR}/web/index.html'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-    Source.pattern('{OUTPUT_DIR}/index.html'),
   ];
 
   @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
+    'flutter_assets.d',
+    'web_resources.d',
   ];
 
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      if (!globals.fs.path.basename(outputFile.path).contains('main.dart.js')) {
+      final String basename = globals.fs.path.basename(outputFile.path);
+      if (!basename.contains('main.dart.js')) {
+        continue;
+      }
+      // Do not copy the deps file.
+      if (basename.endsWith('.deps')) {
         continue;
       }
       outputFile.copySync(
@@ -240,11 +254,139 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    environment.projectDir
-      .childDirectory('web')
-      .childFile('index.html')
-      .copySync(globals.fs.path.join(environment.outputDir.path, 'index.html'));
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
+
+    final Directory webResources = environment.projectDir
+      .childDirectory('web');
+    final List<File> inputResourceFiles = webResources
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
+
+    // Copy other resource files out of web/ directory.
+    final List<File> outputResourcesFiles = <File>[];
+    for (final File inputFile in inputResourceFiles) {
+      final File outputFile = globals.fs.file(globals.fs.path.join(
+        environment.outputDir.path,
+        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+      if (!outputFile.parent.existsSync()) {
+        outputFile.parent.createSync(recursive: true);
+      }
+      inputFile.copySync(outputFile.path);
+      outputResourcesFiles.add(outputFile);
+    }
+    final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
+    depfileService.writeToFile(
+      resourceFile,
+      environment.buildDir.childFile('web_resources.d'),
+    );
   }
+}
+
+/// Generate a service worker for a web target.
+class WebServiceWorker extends Target {
+  const WebServiceWorker();
+
+  @override
+  String get name => 'web_service_worker';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    Dart2JSTarget(),
+    WebReleaseBundle(),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'service_worker.d',
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final List<File> contents = environment.outputDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
+        && !globals.fs.path.basename(file.path).startsWith('.'))
+      .toList();
+    // TODO(jonahwilliams): determine whether this needs to be made more efficient.
+    final Map<String, String> uriToHash = <String, String>{
+      for (File file in contents)
+        // Do not force caching of source maps.
+        if (!file.path.endsWith('main.dart.js.map'))
+        '/${globals.fs.path.toUri(globals.fs.path.relative(file.path, from: environment.outputDir.path)).toString()}':
+          md5.convert(await file.readAsBytes()).toString(),
+    };
+    final File serviceWorkerFile = environment.outputDir
+      .childFile('flutter_service_worker.js');
+    final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final String serviceWorker = generateServiceWorker(uriToHash);
+    serviceWorkerFile
+      .writeAsStringSync(serviceWorker);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('service_worker.d'),
+    );
+  }
+}
+
+/// Generate a service worker with an app-specific cache name a map of
+/// resource files.
+///
+/// We embed file hashes directly into the worker so that the byte for byte
+/// invalidation will automatically reactivate workers whenever a new
+/// version is deployed.
+// TODO(jonahwilliams): on re-activate, only evict stale assets.
+String generateServiceWorker(Map<String, String> resources) {
+  return '''
+'use strict';
+const CACHE_NAME = 'flutter-app-cache';
+const RESOURCES = {
+  ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
+};
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheName) {
+      return caches.delete(cacheName);
+    }).then(function (_) {
+      return caches.open(CACHE_NAME);
+    }).then(function (cache) {
+      return cache.addAll(Object.keys(RESOURCES));
+    })
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function (response) {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+''';
 }

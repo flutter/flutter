@@ -181,8 +181,10 @@ void main() {
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
         FlutterDevice(mockHotDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final HotRunner hotRunner = HotRunner(devices);
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart was successful.
+      expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('hotRestart not supported'));
     }, overrides: <Type, Generator>{
@@ -216,8 +218,10 @@ void main() {
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
       ];
-      final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
+      final HotRunner hotRunner = HotRunner(devices);
+      final OperationResult result = await hotRunner.restart(fullRestart: true);
       // Expect hot restart successful.
+      expect(hotRunner.uri, mockDevFs.baseUri);
       expect(result.isOk, true);
       expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{

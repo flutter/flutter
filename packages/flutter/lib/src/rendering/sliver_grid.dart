@@ -71,12 +71,13 @@ class SliverGridGeometry {
 
   @override
   String toString() {
-    return 'SliverGridGeometry('
-      'scrollOffset: $scrollOffset, '
-      'crossAxisOffset: $crossAxisOffset, '
-      'mainAxisExtent: $mainAxisExtent, '
-      'crossAxisExtent: $crossAxisExtent'
-    ')';
+    final List<String> properties = <String>[
+      'scrollOffset: $scrollOffset',
+      'crossAxisOffset: $crossAxisOffset',
+      'mainAxisExtent: $mainAxisExtent',
+      'crossAxisExtent: $crossAxisExtent',
+    ];
+    return 'SliverGridGeometry(${properties.join(', ')})';
   }
 }
 

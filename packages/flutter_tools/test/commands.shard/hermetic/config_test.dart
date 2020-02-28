@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -102,7 +101,7 @@ void main() {
       expect(() => commandRunner.run(<String>[
         'config',
         '--build-dir=/foo',
-      ]), throwsA(isInstanceOf<ToolExit>()));
+      ]), throwsToolExit());
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
@@ -200,6 +199,18 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
+      when(mockUsage.sendEvent(
+        captureAny,
+        captureAny,
+        label: captureAnyNamed('label'),
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).thenAnswer((Invocation invocation) async {
+        expect(mockUsage.enabled, true);
+        expect(invocation.positionalArguments, <String>['analytics', 'enabled']);
+        expect(invocation.namedArguments[#label], 'false');
+      });
+
       await commandRunner.run(<String>[
         'config',
         '--no-analytics',
@@ -219,16 +230,6 @@ void main() {
         any,
         label: anyNamed('label'),
       ));
-
-      expect(verify(mockUsage.sendEvent(
-        captureAny,
-        captureAny,
-        label: captureAnyNamed('label'),
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).captured,
-        <dynamic>['analytics', 'enabled', 'false'],
-      );
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });

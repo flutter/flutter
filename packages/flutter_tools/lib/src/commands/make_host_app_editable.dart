@@ -13,12 +13,12 @@ class MakeHostAppEditableCommand extends FlutterCommand {
 
     argParser.addFlag(
       'ios',
-      help: 'Whether to make this project\'s iOS app editable.',
+      help: "Whether to make this project's iOS app editable.",
       negatable: false,
     );
     argParser.addFlag(
       'android',
-      help: 'Whether ot make this project\'s Android app editable.',
+      help: "Whether ot make this project's Android app editable.",
       negatable: false,
     );
   }
@@ -60,6 +60,6 @@ class MakeHostAppEditableCommand extends FlutterCommand {
       await _project.ios.makeHostAppEditable();
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

@@ -32,7 +32,7 @@ TaskFunction createRunWithoutLeakTest(dynamic dir) {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
-        if (line.contains('\] For a more detailed help message, press "h". To detach, press "d"; to quit, press "q"')) {
+        if (line.contains('] For a more detailed help message, press "h". To detach, press "d"; to quit, press "q"')) {
           process.stdin.writeln('q');
         }
         print('stdout: $line');

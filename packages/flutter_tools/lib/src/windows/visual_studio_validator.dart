@@ -12,10 +12,6 @@ VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValid
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator() : super('Visual Studio - develop for Windows');
 
-  int get majorVersion => visualStudio.fullVersion != null
-      ? int.tryParse(visualStudio.fullVersion.split('.')[0])
-      : null;
-
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
@@ -39,7 +35,16 @@ class VisualStudioValidator extends DoctorValidator {
       }
 
       // Messages for faulty installations.
-      if (visualStudio.isRebootRequired) {
+      if (!visualStudio.isAtLeastMinimumVersion) {
+        status = ValidationType.partial;
+        messages.add(ValidationMessage.error(
+            userMessages.visualStudioTooOld(
+                visualStudio.minimumVersionDescription,
+                visualStudio.workloadDescription,
+                visualStudio.necessaryComponentDescriptions(),
+            ),
+        ));
+      } else if (visualStudio.isRebootRequired) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.visualStudioRebootRequired));
       } else if (!visualStudio.isComplete) {
@@ -48,12 +53,12 @@ class VisualStudioValidator extends DoctorValidator {
       } else if (!visualStudio.isLaunchable) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
-      } else  if (!visualStudio.hasNecessaryComponents) {
+      } else if (!visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
-                visualStudio.necessaryComponentDescriptions(majorVersion),
+                visualStudio.necessaryComponentDescriptions(),
             ),
         ));
       }
@@ -63,7 +68,7 @@ class VisualStudioValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
-          visualStudio.necessaryComponentDescriptions(majorVersion),
+          visualStudio.necessaryComponentDescriptions(),
         ),
       ));
     }

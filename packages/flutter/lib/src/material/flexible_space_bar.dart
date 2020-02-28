@@ -50,7 +50,7 @@ enum StretchMode {
 /// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
 /// [FlexibleSpaceBar].
 ///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad --template=freeform}
 /// This sample application demonstrates the different features of the
 /// [FlexibleSpaceBar] when used in a [SliverAppBar]. This app bar is configured
 /// to stretch into the overscroll space, and uses the
@@ -367,7 +367,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
           final double opacity = settings.toolbarOpacity;
           if (opacity > 0.0) {
-            TextStyle titleStyle = theme.primaryTextTheme.title;
+            TextStyle titleStyle = theme.primaryTextTheme.headline6;
             titleStyle = titleStyle.copyWith(
               color: titleStyle.color.withOpacity(opacity)
             );

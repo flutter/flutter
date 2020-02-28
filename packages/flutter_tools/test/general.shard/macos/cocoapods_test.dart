@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -40,11 +41,21 @@ void main() {
   }
 
   void podsIsInHomeDir() {
-    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
+    fs.directory(fs.path.join(
+      globals.fsUtils.homeDirPath,
+      '.cocoapods',
+      'repos',
+      'master',
+    )).createSync(recursive: true);
   }
 
   String podsIsInCustomDir({String cocoapodsReposDir}) {
-    cocoapodsReposDir ??= fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
+    cocoapodsReposDir ??= fs.path.join(
+      globals.fsUtils.homeDirPath,
+      'cache',
+      'cocoapods',
+      'repos',
+    );
     fs.directory(fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
     return cocoapodsReposDir;
   }
@@ -345,7 +356,7 @@ void main() {
         );
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
@@ -394,7 +405,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         );
         fail('ToolExit expected');
       } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),

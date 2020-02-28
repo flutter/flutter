@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -122,7 +124,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side)';
+    return '${objectRuntimeType(this, 'StadiumBorder')}($side)';
   }
 }
 

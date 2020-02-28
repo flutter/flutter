@@ -503,19 +503,20 @@ class SliverConstraints extends Constraints {
 
   @override
   String toString() {
-    return 'SliverConstraints('
-             '$axisDirection, '
-             '$growthDirection, '
-             '$userScrollDirection, '
-             'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
-             'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
-             (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
-             'crossAxisDirection: $crossAxisDirection, '
-             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
-             'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)} '
-             'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)} '
-           ')';
+    final List<String> properties = <String>[
+      '$axisDirection',
+      '$growthDirection',
+      '$userScrollDirection',
+      'scrollOffset: ${scrollOffset.toStringAsFixed(1)}',
+      'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}',
+      if (overlap != 0.0) 'overlap: ${overlap.toStringAsFixed(1)}',
+      'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}',
+      'crossAxisDirection: $crossAxisDirection',
+      'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}',
+      'remainingCacheExtent: ${remainingCacheExtent.toStringAsFixed(1)}',
+      'cacheOrigin: ${cacheOrigin.toStringAsFixed(1)}',
+    ];
+    return 'SliverConstraints(${properties.join(', ')})';
   }
 }
 
@@ -715,7 +716,7 @@ class SliverGeometry extends Diagnosticable {
         if (check)
           return;
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('$runtimeType is not valid: $summary'),
+          ErrorSummary('${objectRuntimeType(this, 'SliverGeometry')} is not valid: $summary'),
           ...?details,
           if (informationCollector != null)
             ...informationCollector(),
@@ -744,7 +745,7 @@ class SliverGeometry extends Diagnosticable {
           'The "maxPaintExtent" is less than the "paintExtent".',
           details:
             _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent)
-              ..add(ErrorDescription('By definition, a sliver can\'t paint more than the maximum that it can paint!')),
+              ..add(ErrorDescription("By definition, a sliver can't paint more than the maximum that it can paint!")),
         );
       }
       verify(hitTestExtent != null, 'The "hitTestExtent" is null.');
@@ -758,7 +759,7 @@ class SliverGeometry extends Diagnosticable {
   }
 
   @override
-  String toStringShort() => '$runtimeType';
+  String toStringShort() => objectRuntimeType(this, 'SliverGeometry');
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1394,7 +1395,7 @@ abstract class RenderSliver extends RenderObject {
   @protected
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
-      throw FlutterError('$runtimeType does not implement childPosition.');
+      throw FlutterError('${objectRuntimeType(this, 'RenderSliver')} does not implement childPosition.');
     }());
     return 0.0;
   }
@@ -1431,7 +1432,7 @@ abstract class RenderSliver extends RenderObject {
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
-      throw FlutterError('$runtimeType does not implement applyPaintTransform.');
+      throw FlutterError('${objectRuntimeType(this, 'RenderSliver')} does not implement applyPaintTransform.');
     }());
   }
 

@@ -136,7 +136,7 @@ class RoundedRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'RoundedRectangleBorder')}($side, $borderRadius)';
   }
 }
 

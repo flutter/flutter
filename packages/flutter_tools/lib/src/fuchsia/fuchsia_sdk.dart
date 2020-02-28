@@ -20,6 +20,11 @@ FuchsiaSdk get fuchsiaSdk => context.get<FuchsiaSdk>();
 /// The [FuchsiaArtifacts] instance.
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 
+/// Returns [true] if the current platform supports Fuchsia targets.
+bool isFuchsiaSupportedPlatform() {
+  return globals.platform.isLinux || globals.platform.isMacOS;
+}
+
 /// The Fuchsia SDK shell commands.
 ///
 /// This workflow assumes development within the fuchsia source tree,
@@ -29,7 +34,7 @@ class FuchsiaSdk {
   FuchsiaPM get fuchsiaPM => _fuchsiaPM ??= FuchsiaPM();
   FuchsiaPM _fuchsiaPM;
 
-  /// Interface to the 'dev_finder' tool.
+  /// Interface to the 'device-finder' tool.
   FuchsiaDevFinder _fuchsiaDevFinder;
   FuchsiaDevFinder get fuchsiaDevFinder =>
       _fuchsiaDevFinder ??= FuchsiaDevFinder();
@@ -40,7 +45,7 @@ class FuchsiaSdk {
       _fuchsiaKernelCompiler ??= FuchsiaKernelCompiler();
 
   /// Example output:
-  ///    $ dev_finder list -full
+  ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
   Future<String> listDevices() async {
     if (fuchsiaArtifacts.devFinder == null ||
@@ -54,7 +59,8 @@ class FuchsiaSdk {
     return devices.isNotEmpty ? devices[0] : null;
   }
 
-  /// Returns the fuchsia system logs for an attached device.
+  /// Returns the fuchsia system logs for an attached device where
+  /// [id] is the IP address of the device.
   Stream<String> syslogs(String id) {
     Process process;
     try {
@@ -72,7 +78,7 @@ class FuchsiaSdk {
         'ssh',
         '-F',
         fuchsiaArtifacts.sshConfig.absolute.path,
-        id,
+        id, // The device's IP.
         remoteCommand,
       ];
       globals.processManager.start(cmd).then((Process newProcess) {
@@ -109,7 +115,7 @@ class FuchsiaArtifacts {
   /// FUCHSIA_SSH_CONFIG) to find the ssh configuration needed to talk to
   /// a device.
   factory FuchsiaArtifacts.find() {
-    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
+    if (!isFuchsiaSupportedPlatform()) {
       // Don't try to find the artifacts on platforms that are not supported.
       return FuchsiaArtifacts();
     }
@@ -126,7 +132,7 @@ class FuchsiaArtifacts {
 
     final String fuchsia = globals.cache.getArtifactDirectory('fuchsia').path;
     final String tools = globals.fs.path.join(fuchsia, 'tools');
-    final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'dev_finder'));
+    final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'device-finder'));
     final File pm = globals.fs.file(globals.fs.path.join(tools, 'pm'));
 
     return FuchsiaArtifacts(

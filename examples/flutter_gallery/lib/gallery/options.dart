@@ -177,7 +177,7 @@ class _FlatButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       onPressed: onPressed,
       child: DefaultTextStyle(
-        style: Theme.of(context).primaryTextTheme.subhead,
+        style: Theme.of(context).primaryTextTheme.subtitle1,
         child: child,
       ),
     );
@@ -194,9 +194,10 @@ class _Heading extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.headline6.copyWith(
           fontFamily: 'GoogleSans',
-          color: theme.accentColor,
+          color: theme.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
         ),
         child: Semantics(
           child: Text(text),
@@ -230,8 +231,8 @@ class _ThemeModeItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Theme'),
                 Text(
-                  '${modeLabels[options.themeMode]}',
-                  style: Theme.of(context).primaryTextTheme.body1,
+                  modeLabels[options.themeMode],
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -277,8 +278,8 @@ class _TextScaleFactorItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Text size'),
                 Text(
-                  '${options.textScaleFactor.label}',
-                  style: Theme.of(context).primaryTextTheme.body1,
+                  options.textScaleFactor.label,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -323,8 +324,8 @@ class _VisualDensityItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Visual density'),
                 Text(
-                  '${options.visualDensity.label}',
-                  style: Theme.of(context).primaryTextTheme.body1,
+                  options.visualDensity.label,
+                  style: Theme.of(context).primaryTextTheme.bodyText2,
                 ),
               ],
             ),
@@ -430,8 +431,8 @@ class _PlatformItem extends StatelessWidget {
               children: <Widget>[
                 const Text('Platform mechanics'),
                  Text(
-                   '${_platformLabel(options.platform)}',
-                   style: Theme.of(context).primaryTextTheme.body1,
+                   _platformLabel(options.platform),
+                   style: Theme.of(context).primaryTextTheme.bodyText2,
                  ),
               ],
             ),
@@ -514,7 +515,7 @@ class GalleryOptionsPage extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
-      style: theme.primaryTextTheme.subhead,
+      style: theme.primaryTextTheme.subtitle1,
       child: ListView(
         padding: const EdgeInsets.only(bottom: 124.0),
         children: <Widget>[
@@ -525,7 +526,7 @@ class GalleryOptionsPage extends StatelessWidget {
           _TextDirectionItem(options, onOptionsChanged),
           _TimeDilationItem(options, onOptionsChanged),
           const Divider(),
-          const _Heading('Platform mechanics'),
+          const ExcludeSemantics(child: _Heading('Platform mechanics')),
           _PlatformItem(options, onOptionsChanged),
           ..._enabledDiagnosticItems(),
           const Divider(),

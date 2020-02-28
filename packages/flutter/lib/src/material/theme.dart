@@ -92,7 +92,7 @@ class Theme extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return Text(
   ///     'Example',
-  ///     style: Theme.of(context).textTheme.title,
+  ///     style: Theme.of(context).textTheme.headline6,
   ///   );
   /// }
   /// ```
@@ -116,7 +116,7 @@ class Theme extends StatelessWidget {
   ///         return Center(
   ///           child: Text(
   ///             'Example',
-  ///             style: Theme.of(context).textTheme.title,
+  ///             style: Theme.of(context).textTheme.headline6,
   ///           ),
   ///         );
   ///       },

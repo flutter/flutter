@@ -360,7 +360,7 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTheme: snackBarTheme,
     );
 
-    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subhead;
+    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? inverseTheme.textTheme.subtitle1;
     final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;

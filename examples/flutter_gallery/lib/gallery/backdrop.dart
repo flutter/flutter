@@ -151,7 +151,7 @@ class _BackAppBar extends StatelessWidget {
     return IconTheme.merge(
       data: theme.primaryIconTheme,
       child: DefaultTextStyle(
-        style: theme.primaryTextTheme.title,
+        style: theme.primaryTextTheme.headline6,
         child: SizedBox(
           height: _kBackAppBarHeight,
           child: Row(

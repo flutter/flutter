@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -35,6 +35,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     });
 
     setUp(() {
@@ -56,7 +57,7 @@ void main() {
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
-        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -71,11 +72,27 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
+      testUsingContext('does not check that Flutter installation is up-to-date with --machine flag', () async {
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+        bool versionChecked = false;
+        when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
+          versionChecked = true;
+        });
+
+        await runner.run(<String>['dummy', '--machine', '--version']);
+
+        expect(versionChecked, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
       testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
-        expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));
+        expect(() async => await runner.run(<String>['dummy']), throwsToolExit());
 
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -90,7 +107,7 @@ void main() {
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
 
         // Verify that this also works if the sky_engine path is a symlink to the engine root.
-        fs.link('/symlink').createSync('$_kArbitraryEngineRoot');
+        fs.link('/symlink').createSync(_kArbitraryEngineRoot);
         fs.file(_kDotPackages).writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{

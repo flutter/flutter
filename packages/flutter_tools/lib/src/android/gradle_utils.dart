@@ -8,7 +8,6 @@ import '../android/android_sdk.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -98,7 +97,7 @@ class GradleUtils {
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
   void injectGradleWrapperIfNeeded(Directory directory) {
-    copyDirectorySync(
+    globals.fsUtils.copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       directory,
       shouldCopyFile: (File sourceFile, File destinationFile) {
@@ -129,7 +128,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 const String _defaultGradleVersion = '5.6.2';
 
-final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
+final RegExp _androidPluginRegExp = RegExp(r'com\.android\.tools\.build:gradle:\(\d+\.\d+\.\d+\)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
 /// otherwise it returns a default version.
@@ -172,7 +171,7 @@ bool _hasAnyExecutableFlagSet(File executable) {
 void _giveExecutePermissionIfNeeded(File executable) {
   if (!_hasAllExecutableFlagSet(executable)) {
     globals.printTrace('Trying to give execute permission to ${executable.path}.');
-    os.makeExecutable(executable);
+    globals.os.makeExecutable(executable);
   }
 }
 
@@ -267,10 +266,10 @@ void updateLocalProperties({
   }
 
   if (androidSdk != null) {
-    changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
+    changeIfNecessary('sdk.dir', globals.fsUtils.escapePath(androidSdk.directory));
   }
 
-  changeIfNecessary('flutter.sdk', escapePath(Cache.flutterRoot));
+  changeIfNecessary('flutter.sdk', globals.fsUtils.escapePath(Cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String buildName = validatedBuildNameForPlatform(
@@ -296,7 +295,7 @@ void updateLocalProperties({
 void writeLocalProperties(File properties) {
   final SettingsFile settings = SettingsFile();
   if (androidSdk != null) {
-    settings.values['sdk.dir'] = escapePath(androidSdk.directory);
+    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory);
   }
   settings.writeContents(properties);
 }

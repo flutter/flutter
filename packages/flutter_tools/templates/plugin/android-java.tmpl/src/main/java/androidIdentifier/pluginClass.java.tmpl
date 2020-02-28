@@ -16,10 +16,16 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** {{pluginClass}} */
 public class {{pluginClass}} implements FlutterPlugin, MethodCallHandler {
+  /// The MethodChannel that will the communication between Flutter and native Android
+  ///
+  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
+  /// when the Flutter Engine is detached from the Activity
+  private MethodChannel channel;
+
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}");
-    channel.setMethodCallHandler(new {{pluginClass}}());
+    channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}");
+    channel.setMethodCallHandler(this);
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
@@ -47,6 +53,7 @@ public class {{pluginClass}} implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    channel.setMethodCallHandler(null);
   }
 }
 {{/useAndroidEmbeddingV2}}

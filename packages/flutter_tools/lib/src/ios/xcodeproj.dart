@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -12,8 +14,8 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -115,7 +117,7 @@ void _updateGeneratedEnvironmentVariablesScript({
     : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
-  os.chmod(generatedModuleBuildPhaseScript, '755');
+  globals.os.chmod(generatedModuleBuildPhaseScript, '755');
 }
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
@@ -163,6 +165,16 @@ List<String> _xcodeBuildSettingsLines({
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null) {
     xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
+  }
+
+  // This is an optional path to split debug info
+  if (buildInfo.splitDebugInfoPath != null) {
+    xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
+  }
+
+  // This is an optional path to obfuscate and output a mapping.
+  if (buildInfo.dartObfuscation) {
+    xcodeBuildSettings.add('DART_OBFUSCATION=true');
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
@@ -214,6 +226,10 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
   }
 
+  if (buildInfo.treeShakeIcons) {
+    xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
+  }
+
   return xcodeBuildSettings;
 }
 
@@ -221,15 +237,33 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectI
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
+  XcodeProjectInterpreter({
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required FileSystem fileSystem,
+    @required AnsiTerminal terminal,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _terminal = terminal,
+       _logger = logger,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+  final Platform _platform;
+  final FileSystem _fileSystem;
+  final ProcessUtils _processUtils;
+  final AnsiTerminal _terminal;
+  final Logger _logger;
+
   static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
-    if (!globals.platform.isMacOS || !globals.fs.file(_executable).existsSync()) {
+    if (!_platform.isMacOS || !_fileSystem.file(_executable).existsSync()) {
       return;
     }
     try {
-      final RunResult result = processUtils.runSync(
+      final RunResult result = _processUtils.runSync(
         <String>[_executable, '-version'],
       );
       if (result.exitCode != 0) {
@@ -283,23 +317,25 @@ class XcodeProjectInterpreter {
     Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = Status.withSpinner(
-      timeout: timeoutConfiguration.fastOperation,
-      timeoutConfiguration: timeoutConfiguration,
+      timeout: const TimeoutConfiguration().fastOperation,
+      timeoutConfiguration: const TimeoutConfiguration(),
+      stopwatch: Stopwatch(),
+      terminal: _terminal,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
       '-project',
-      globals.fs.path.absolute(projectPath),
+      _fileSystem.path.absolute(projectPath),
       '-target',
       target,
       '-showBuildSettings',
-      ...environmentVariablesAsXcodeBuildSettings()
+      ...environmentVariablesAsXcodeBuildSettings(_platform)
     ];
     try {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
-      final RunResult result = await processUtils.run(
+      final RunResult result = await _processUtils.run(
         showBuildSettingsCommand,
         throwOnError: true,
         workingDirectory: projectPath,
@@ -314,15 +350,15 @@ class XcodeProjectInterpreter {
           command: showBuildSettingsCommand.join(' '),
         ).send();
       }
-      globals.printTrace('Unexpected failure to get the build settings: $error.');
+      _logger.printTrace('Unexpected failure to get the build settings: $error.');
       return const <String, String>{};
     } finally {
       status.stop();
     }
   }
 
-  void cleanWorkspace(String workspacePath, String scheme) {
-    processUtils.runSync(<String>[
+  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+    await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
@@ -330,8 +366,8 @@ class XcodeProjectInterpreter {
       scheme,
       '-quiet',
       'clean',
-      ...environmentVariablesAsXcodeBuildSettings()
-    ], workingDirectory: globals.fs.currentDirectory.path);
+      ...environmentVariablesAsXcodeBuildSettings(_platform)
+    ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
   Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
@@ -339,7 +375,7 @@ class XcodeProjectInterpreter {
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
-    final RunResult result = await processUtils.run(
+    final RunResult result = await _processUtils.run(
       <String>[
         _executable,
         '-list',
@@ -360,9 +396,9 @@ class XcodeProjectInterpreter {
 /// This allows developers to pass arbitrary build settings in without the tool needing to make a flag
 /// for or be aware of each one. This could be used to set code signing build settings in a CI
 /// environment without requiring settings changes in the Xcode project.
-List<String> environmentVariablesAsXcodeBuildSettings() {
+List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
   const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
-  return globals.platform.environment.entries.where((MapEntry<String, String> mapEntry) {
+  return platform.environment.entries.where((MapEntry<String, String> mapEntry) {
     return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
   }).expand<String>((MapEntry<String, String> mapEntry) {
     // Remove FLUTTER_XCODE_ prefix from the environment variable to get the build setting.

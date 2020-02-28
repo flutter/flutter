@@ -8,33 +8,42 @@ import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
-import 'package:flutter_tools/src/build_runner/web_fs.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
 
 void main() {
   Testbed testbed;
-  MockFlutterWebFs mockWebFs;
   ResidentWebRunner residentWebRunner;
   MockFlutterDevice mockFlutterDevice;
+  MockWebDevFS mockWebDevFS;
+  MockBuildSystem mockBuildSystem;
 
   setUp(() {
-    mockWebFs = MockFlutterWebFs();
+    mockWebDevFS = MockWebDevFS();
+    mockBuildSystem = MockBuildSystem();
     final MockWebDevice mockWebDevice = MockWebDevice();
     mockFlutterDevice = MockFlutterDevice();
     when(mockFlutterDevice.device).thenReturn(mockWebDevice);
+    when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
+    when(mockWebDevFS.sources).thenReturn(<Uri>[]);
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
     testbed = Testbed(
       setup: () {
         residentWebRunner = residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
@@ -47,29 +56,14 @@ void main() {
           urlTunneller: null,
         ) as ResidentWebRunner;
       },
-      overrides: <Type, Generator>{
-        WebFsFactory: () => ({
-          @required String target,
-          @required FlutterProject flutterProject,
-          @required BuildInfo buildInfo,
-          @required bool skipDwds,
-          @required bool initializePlatform,
-          @required String hostname,
-          @required String port,
-          @required UrlTunneller urlTunneller,
-          @required List<String> dartDefines,
-        }) async {
-          return mockWebFs;
-        },
-      },
     );
   });
 
   void _setupMocks() {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
-    when(mockWebFs.connect(any)).thenThrow(StateError('debugging not supported'));
   }
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
@@ -86,6 +80,7 @@ void main() {
     expect(debugConnectionInfo.wsUri, null);
     verify(mockStatus.stop()).called(1);
   }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
     Logger: () => DelegateLogger(BufferLogger(
       terminal: AnsiTerminal(
         stdio: null,
@@ -102,12 +97,11 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return true;
-    });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 0);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
   }));
 
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
@@ -117,21 +111,59 @@ void main() {
       connectionInfoCompleter: connectionInfoCompleter,
     ));
     await connectionInfoCompleter.future;
-    when(mockWebFs.recompile()).thenAnswer((Invocation _) async {
-      return false;
+    when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: false);
     });
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
+  }));
+
+  test('Correctly performs a full refresh on attached chrome device.', () => testbed.run(() async {
+    _setupMocks();
+    final MockChromeDevice chromeDevice = MockChromeDevice();
+    final MockChrome chrome = MockChrome();
+    final MockChromeConnection mockChromeConnection = MockChromeConnection();
+    final MockChromeTab mockChromeTab = MockChromeTab();
+    final MockWipConnection mockWipConnection = MockWipConnection();
+    when(mockChromeConnection.getTab(any)).thenAnswer((Invocation invocation) async {
+      return mockChromeTab;
+    });
+    when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
+      return mockWipConnection;
+    });
+    when(chrome.chromeConnection).thenReturn(mockChromeConnection);
+    launchChromeInstance(chrome);
+    when(mockFlutterDevice.device).thenReturn(chromeDevice);
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(result.code, 0);
+    verify(mockWipConnection.sendCommand('Page.reload', <String, Object>{
+      'ignoreCache': true,
+    })).called(1);
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => mockBuildSystem,
   }));
 
 }
 
+class MockWebDevFS extends Mock implements WebDevFS {}
 class MockWebDevice extends Mock implements Device {}
-class MockBuildDaemonCreator extends Mock implements BuildDaemonCreator {}
-class MockFlutterWebFs extends Mock implements WebFs {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockVmService extends Mock implements VmService {}
 class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockChromeDevice extends Mock implements ChromeDevice {}
+class MockChrome extends Mock implements Chrome {}
+class MockChromeConnection extends Mock implements ChromeConnection {}
+class MockChromeTab extends Mock implements ChromeTab {}
+class MockWipConnection extends Mock implements WipConnection {}
+class MockBuildSystem extends Mock implements BuildSystem {}

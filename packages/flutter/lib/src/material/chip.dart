@@ -192,7 +192,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -1784,23 +1784,27 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!hasDeleteButton) {
       return null;
     }
-    return _wrapWithTooltip(
-      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
-      widget.onDeleted,
-      GestureDetector(
-        key: deleteIconKey,
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.isEnabled
+    return Semantics(
+      container: true,
+      button: true,
+      child: _wrapWithTooltip(
+        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+        widget.onDeleted,
+        GestureDetector(
+          key: deleteIconKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.isEnabled
             ? () {
                 Feedback.forTap(context);
                 widget.onDeleted();
             }
             : null,
-        child: IconTheme(
-          data: theme.iconTheme.copyWith(
-            color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
+          child: IconTheme(
+            data: theme.iconTheme.copyWith(
+              color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
+            ),
+            child: widget.deleteIcon,
           ),
-          child: widget.deleteIcon,
         ),
       ),
     );
@@ -2068,6 +2072,7 @@ class _RenderChipElement extends RenderObjectElement {
     final _ChipSlot slot = childToSlot[child];
     childToSlot.remove(child);
     slotToChild.remove(slot);
+    super.forgetChild(child);
   }
 
   void _mountChild(Widget widget, _ChipSlot slot) {

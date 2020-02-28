@@ -52,6 +52,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     _cachedPath = null;
     delegate.currentDirectory = path;
   }
+
+  @override
+  String toString() => delegate.toString();
 }
 
 class ErrorHandlingFile
@@ -140,6 +143,9 @@ class ErrorHandlingFile
       failureMessage: 'Flutter failed to write to a file at "${delegate.path}"',
     );
   }
+
+  @override
+  String toString() => delegate.toString();
 
   Future<T> _run<T>(Future<T> Function() op, { String failureMessage }) async {
     try {
@@ -230,6 +236,9 @@ class ErrorHandlingDirectory
   @override
   Link childLink(String basename) =>
     wrapLink(fileSystem.directory(delegate).childLink(basename));
+
+  @override
+  String toString() => delegate.toString();
 }
 
 class ErrorHandlingLink
@@ -254,4 +263,7 @@ class ErrorHandlingLink
   @override
   Link wrapLink(io.Link delegate) =>
     ErrorHandlingLink(fileSystem, delegate);
+
+  @override
+  String toString() => delegate.toString();
 }

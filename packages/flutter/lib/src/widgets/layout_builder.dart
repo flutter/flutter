@@ -60,6 +60,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   void forgetChild(Element child) {
     assert(child == _child);
     _child = null;
+    super.forgetChild(child);
   }
 
   @override

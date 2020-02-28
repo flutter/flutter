@@ -724,7 +724,7 @@ void main() {
       expect(tabsPainted, const <int> [0, 0, 1]);
   });
 
-  testWidgets('Do not call dispose on a controller that we do not own'
+  testWidgets('Do not call dispose on a controller that we do not own '
               'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
@@ -798,7 +798,7 @@ void main() {
     expect(find.text('Tab 3'), findsNothing);
   });
 
-  testWidgets('A controller can control more than one CupertinoTabScaffold,'
+  testWidgets('A controller can control more than one CupertinoTabScaffold, '
     'removal of listeners does not break the controller',
     (WidgetTester tester) async {
       final List<int> tabsPainted0 = <int>[];

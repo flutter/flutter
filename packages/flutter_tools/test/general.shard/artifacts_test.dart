@@ -3,138 +3,148 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group('Artifacts', () {
-    MemoryFileSystem memoryFileSystem;
-    Directory tempDir;
+  group('CachedArtifacts', () {
+    CachedArtifacts artifacts;
+    Cache cache;
+    FileSystem fileSystem;
+    Platform platform;
 
     setUp(() {
-      memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_artifacts_test.');
+      fileSystem = MemoryFileSystem();
+      final Directory cacheRoot = fileSystem.directory('root')
+        ..createSync();
+      platform = FakePlatform(operatingSystem: 'linux');
+      cache = Cache(
+        rootOverride: cacheRoot,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: MockLogger(),
+        osUtils: MockOperatingSystemUtils(),
+      );
+      artifacts = CachedArtifacts(
+        fileSystem: fileSystem,
+        cache: cache,
+        platform: platform,
+      );
     });
 
-    tearDown(() {
-      tryToDelete(tempDir);
+    testWithoutContext('getArtifactPath', () {
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
+      );
     });
 
-    group('CachedArtifacts', () {
-      CachedArtifacts artifacts;
+    testWithoutContext('getEngineType', () {
+      expect(
+        artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
+        'android-arm',
+      );
+      expect(
+        artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
+        'ios-release',
+      );
+      expect(
+        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        'darwin-x64',
+      );
+    });
+  });
 
-      setUp(() {
-        artifacts = CachedArtifacts();
-      });
+  group('LocalEngineArtifacts', () {
+    LocalEngineArtifacts artifacts;
+    Cache cache;
+    FileSystem fileSystem;
+    Platform platform;
 
-      testUsingContext('getArtifactPath', () {
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
-          globals.fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework'),
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterTester),
-          globals.fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
-        );
-      }, overrides: <Type, Generator>{
-        Cache: () => Cache(rootOverride: tempDir),
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-      });
-
-      testUsingContext('getEngineType', () {
-        expect(
-          artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
-          'android-arm',
-        );
-        expect(
-          artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
-          'ios-release',
-        );
-        expect(
-          artifacts.getEngineType(TargetPlatform.darwin_x64),
-          'darwin-x64',
-        );
-      }, overrides: <Type, Generator>{
-        Cache: () => Cache(rootOverride: tempDir),
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-      });
+    setUp(() {
+      fileSystem = MemoryFileSystem();
+      final Directory cacheRoot = fileSystem.directory('root')
+        ..createSync();
+      platform = FakePlatform(operatingSystem: 'linux');
+      cache = Cache(
+        rootOverride: cacheRoot,
+        fileSystem: fileSystem,
+        platform: platform,
+        logger: MockLogger(),
+        osUtils: MockOperatingSystemUtils(),
+      );
+      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        cache: cache,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: FakeProcessManager.any(),
+      );
     });
 
-    group('LocalEngineArtifacts', () {
-      LocalEngineArtifacts artifacts;
+    testWithoutContext('getArtifactPath', () {
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'Flutter.framework'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'flutter_tester'),
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
+      );
+    });
 
-      setUp(() {
-        artifacts = LocalEngineArtifacts(tempDir.path,
-          memoryFileSystem.path.join(tempDir.path, 'out', 'android_debug_unopt'),
-          memoryFileSystem.path.join(tempDir.path, 'out', 'host_debug_unopt'),
-        );
-      });
+    testWithoutContext('getEngineType', () {
+      expect(
+        artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
+        'android_debug_unopt',
+      );
+      expect(
+        artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
+        'android_debug_unopt',
+      );
+      expect(
+        artifacts.getEngineType(TargetPlatform.darwin_x64),
+        'android_debug_unopt',
+      );
+    });
 
-      testUsingContext('getArtifactPath', () {
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
-          globals.fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework'),
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.flutterTester),
-          globals.fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester'),
-        );
-        expect(
-          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-          globals.fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk'),
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-      });
+    testWithoutContext('Looks up dart.exe on windows platforms', () async {
+      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        cache: cache,
+        fileSystem: fileSystem,
+        platform: FakePlatform(operatingSystem: 'windows'),
+        processManager: FakeProcessManager.any(),
+      );
 
-      testUsingContext('getEngineType', () {
-        expect(
-          artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
-          'android_debug_unopt',
-        );
-        expect(
-          artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
-          'android_debug_unopt',
-        );
-        expect(
-          artifacts.getEngineType(TargetPlatform.darwin_x64),
-          'android_debug_unopt',
-        );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-      });
+      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
+    });
 
-      testUsingContext('Looks up dart.exe on windows platforms', () async {
-        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'windows'),
-      });
-
-      testUsingContext('Looks up dart on linux platforms', () async {
-        expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(operatingSystem: 'linux'),
-      });
+    testWithoutContext('Looks up dart on linux platforms', () async {
+      expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
     });
   });
 }
+
+class MockLogger extends Mock implements Logger {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

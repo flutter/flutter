@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext.findRenderObject() as RenderSliver;
-  expect(target.parent, isInstanceOf<RenderViewport>());
+  expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
@@ -23,7 +23,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
+  testWidgets("Sliver appbars - floating - scroll offset doesn't change", (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
       Directionality(

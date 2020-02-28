@@ -17,6 +17,7 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand() {
+    addTreeShakeIconsFlag();
     addBuildModeFlags();
     usesTargetOption();
   }
@@ -47,6 +48,6 @@ class BuildLinuxCommand extends BuildSubCommand {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
     await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
-    return null;
+    return FlutterCommandResult.success();
   }
 }

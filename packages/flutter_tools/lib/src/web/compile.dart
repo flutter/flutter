@@ -39,9 +39,9 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
+    final BuildResult result = await buildSystem.build(const WebServiceWorker(), Environment.test(
+      globals.fs.currentDirectory,
       outputDir: globals.fs.directory(getWebBuildDirectory()),
-      projectDir: globals.fs.currentDirectory,
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
@@ -52,6 +52,8 @@ Future<void> buildWeb(
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: jsonEncode(dartDefines),
         kCspMode: csp.toString(),
+        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
+        // that. https://github.com/flutter/flutter/issues/49730
       },
     ));
     if (!result.success) {

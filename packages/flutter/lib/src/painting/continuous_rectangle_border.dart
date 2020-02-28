@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'borders.dart';
@@ -161,6 +163,6 @@ class ContinuousRectangleBorder extends ShapeBorder {
 
   @override
   String toString() {
-    return '$runtimeType($side, $borderRadius)';
+    return '${objectRuntimeType(this, 'ContinuousRectangleBorder')}($side, $borderRadius)';
   }
 }

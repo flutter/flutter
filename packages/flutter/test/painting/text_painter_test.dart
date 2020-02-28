@@ -730,6 +730,15 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser);
 
+  // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
+  test('TextPainter set TextHeightBehavior null test', () {
+    final TextPainter painter = TextPainter(textHeightBehavior: null)
+      ..textDirection = TextDirection.ltr;
+
+    painter.textHeightBehavior = const TextHeightBehavior();
+    painter.textHeightBehavior = null;
+  });
+
   test('TextPainter line metrics', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -740,6 +749,9 @@ void main() {
     );
 
     painter.layout(maxWidth: 300);
+
+    expect(painter.text, const TextSpan(text: text));
+    expect(painter.preferredLineHeight, 14);
 
     final List<ui.LineMetrics> lines = painter.computeLineMetrics();
 
@@ -798,5 +810,10 @@ void main() {
     expect(lines[1].lineNumber, 1);
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
-  }, skip: !isLinux);
+
+  // Disable this test, this is causing a large amount of flaking and
+  // does not have a clear cause. This may or may not be a dart compiler
+  // issue or similar. See https://github.com/flutter/flutter/issues/43763
+  // for more info.
+  }, skip: true);
 }

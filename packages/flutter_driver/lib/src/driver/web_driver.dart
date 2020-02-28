@@ -5,21 +5,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_client/vm_service_client.dart';
-import 'package:webdriver/sync_io.dart' as sync_io;
+import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/support/async.dart';
 
 import '../common/error.dart';
 import '../common/message.dart';
 import 'driver.dart';
 import 'timeline.dart';
-import 'web_driver_config.dart';
-
-export 'web_driver_config.dart';
 
 /// An implementation of the Flutter Driver using the WebDriver.
 ///
@@ -27,15 +23,14 @@ export 'web_driver_config.dart';
 ///   1. Have Selenium server (https://bit.ly/2TlkRyu) and WebDriver binary (https://chromedriver.chromium.org/downloads) downloaded and placed under the same folder
 ///   2. Launch WebDriver Server: java -jar selenium-server-standalone-3.141.59.jar
 ///   3. Launch Flutter Web application: flutter run -v -d chrome --target=test_driver/scroll_perf_web.dart
-///   4. Run test script: flutter drive --target=test_driver/scroll_perf.dart -v --use-existing-app=/application address/
+///   4. Run test script: flutter drive --target=test_driver/scroll_perf_web.dart -v --use-existing-app=/application address/
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_connection] and [_browserName].
-  WebFlutterDriver.connectedTo(this._connection, this._browser) :
+  /// [_connection].
+  WebFlutterDriver.connectedTo(this._connection) :
         _startTime = DateTime.now();
 
   final FlutterWebConnection _connection;
-  final Browser _browser;
   DateTime _startTime;
 
   /// Start time for tracing
@@ -50,21 +45,22 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
-  /// Driver also depends on environment variables BROWSER_NAME,
-  /// BROWSER_DIMENSION, HEADLESS and SELENIUM_PORT for configurations.
+  /// Driver also depends on environment variables DRIVER_SESSION_ID,
+  /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
+  /// and DRIVER_SESSION_CAPABILITIES for configurations.
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final Browser browser = browserNameToEnum(Platform.environment['BROWSER_NAME']);
     final Map<String, dynamic> settings = <String, dynamic>{
-      'browser': browser,
-      'browser-dimension': Platform.environment['BROWSER_DIMENSION'],
-      'headless': Platform.environment['HEADLESS']?.toLowerCase() == 'true',
-      'selenium-port': Platform.environment['SELENIUM_PORT'],
+      'support-timeline-action': Platform.environment['SUPPORT_TIMELINE_ACTION'] == 'true',
+      'session-id': Platform.environment['DRIVER_SESSION_ID'],
+      'session-uri': Platform.environment['DRIVER_SESSION_URI'],
+      'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
+      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
-    return WebFlutterDriver.connectedTo(connection, browser);
+    return WebFlutterDriver.connectedTo(connection);
   }
 
   @override
@@ -72,10 +68,10 @@ class WebFlutterDriver extends FlutterDriver {
     Map<String, dynamic> response;
     final Map<String, String> serialized = command.serialize();
     try {
-      final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')', command.timeout);
+      final dynamic data = await _connection.sendCommand("window.\$flutterDriver('${jsonEncode(serialized)}')", command.timeout);
       response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
     } catch (error, stackTrace) {
-      throw DriverError('Failed to respond to $command due to remote error\n : \$flutterDriver(\'${jsonEncode(serialized)}\')',
+      throw DriverError("Failed to respond to $command due to remote error\n : \$flutterDriver('${jsonEncode(serialized)}')",
           error,
           stackTrace
       );
@@ -87,16 +83,6 @@ class WebFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> close() => _connection.close();
-
-  @override
-  Future<void> forceGC() async {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<Map<String, Object>>> getVmFlags() async {
-    throw UnimplementedError();
-  }
 
   @override
   Future<void> waitUntilFirstFrameRasterized() async {
@@ -123,7 +109,7 @@ class WebFlutterDriver extends FlutterDriver {
     _checkBrowserSupportsTimeline();
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-    for (final sync_io.LogEntry entry in _connection.logs) {
+    for (final async_io.LogEntry entry in await _connection.logs.toList()) {
       if (_startTime.isBefore(entry.timestamp)) {
         final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
@@ -170,17 +156,32 @@ class WebFlutterDriver extends FlutterDriver {
 
   /// Checks whether browser supports Timeline related operations
   void _checkBrowserSupportsTimeline() {
-    if (_browser != Browser.chrome) {
-      throw UnimplementedError();
+    if (_connection.supportsTimelineAction) {
+      throw UnsupportedError('Timeline action is not supported by current testing browser');
     }
   }
 }
 
 /// Encapsulates connection information to an instance of a Flutter Web application.
 class FlutterWebConnection {
-  FlutterWebConnection._(this._driver);
+  /// Creates a FlutterWebConnection with WebDriver
+  /// and whether the WebDriver supports timeline action
+  FlutterWebConnection(this._driver, this._supportsTimelineAction);
 
-  final sync_io.WebDriver _driver;
+  final async_io.WebDriver _driver;
+
+
+  bool _supportsTimelineAction;
+  /// Whether the connected WebDriver supports timeline action for Flutter Web Driver
+  // ignore: unnecessary_getters_setters
+  bool get supportsTimelineAction => _supportsTimelineAction;
+
+  /// Setter for _supportsTimelineAction
+  @visibleForTesting
+  // ignore: unnecessary_getters_setters
+  set supportsTimelineAction(bool value) {
+    _supportsTimelineAction = value;
+  }
 
   /// Starts WebDriver with the given [capabilities] and
   /// establishes the connection to Flutter Web application.
@@ -190,61 +191,70 @@ class FlutterWebConnection {
       {Duration timeout}) async {
     // Use sync WebDriver because async version will create a 15 seconds
     // overhead when quitting.
-    final sync_io.WebDriver driver = createDriver(settings);
-    driver.get(url);
+    final async_io.WebDriver driver = await async_io.fromExistingSession(
+        settings['session-id'].toString(),
+        uri: Uri.parse(settings['session-uri'].toString()),
+        spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+    await driver.get(url);
 
-    // Configure WebDriver browser by setting its location and dimension.
-    final List<String> dimensions = settings['browser-dimension'].split(',') as List<String>;
-    if (dimensions.length != 2) {
-      throw DriverError('Invalid browser window size.');
-    }
-    final int x = int.parse(dimensions[0]);
-    final int y = int.parse(dimensions[1]);
-    final sync_io.Window window = driver.window;
-    window.setLocation(const math.Point<int>(0, 0));
-    window.setSize(math.Rectangle<int>(0, 0, x, y));
-
-    // Wait until extension is installed.
-    await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
-        matcher: 'function',
-        timeout: timeout ?? const Duration(days: 365));
-    return FlutterWebConnection._(driver);
+    await waitUntilExtensionInstalled(driver, timeout);
+    return FlutterWebConnection(driver, settings['support-timeline-action'] as bool);
   }
 
   /// Sends command via WebDriver to Flutter web application
   Future<dynamic> sendCommand(String script, Duration duration) async {
     dynamic result;
     try {
-      _driver.execute(script, <void>[]);
+      await _driver.execute(script, <void>[]);
     } catch (_) {
       // In case there is an exception, do nothing
     }
 
     try {
-      result = await waitFor<dynamic>(() => _driver.execute('r'
-          'eturn \$flutterDriverResult', <String>[]),
-          matcher: isNotNull,
-          timeout: duration ?? const Duration(days: 30));
+      result = await waitFor<dynamic>(
+        () => _driver.execute(r'return $flutterDriverResult', <String>[]),
+        matcher: isNotNull,
+        timeout: duration ?? const Duration(days: 30),
+      );
     } catch (_) {
       // Returns null if exception thrown.
       return null;
     } finally {
       // Resets the result.
-      _driver.execute('''
-        \$flutterDriverResult = null
+      await _driver.execute(r'''
+        $flutterDriverResult = null
       ''', <void>[]);
     }
     return result;
   }
 
   /// Gets performance log from WebDriver.
-  List<sync_io.LogEntry> get logs => _driver.logs.get(sync_io.LogType.performance);
+  Stream<async_io.LogEntry> get logs => _driver.logs.get(async_io.LogType.performance);
 
   /// Takes screenshot via WebDriver.
-  List<int> screenshot()  => _driver.captureScreenshotAsList();
+  Future<List<int>> screenshot()  => _driver.captureScreenshotAsList();
 
   /// Closes the WebDriver.
   Future<void> close() async {
-    _driver.quit();
+    await _driver.quit(closeSession: false);
+  }
+}
+
+/// Waits until extension is installed.
+Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration timeout) async {
+  await waitFor<void>(() =>
+      driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
+      matcher: 'function',
+      timeout: timeout ?? const Duration(days: 365));
+}
+
+async_io.WebDriverSpec _convertToSpec(String specString) {
+  switch (specString.toLowerCase()) {
+    case 'webdriverspec.w3c':
+      return async_io.WebDriverSpec.W3c;
+    case 'webdriverspec.jsonwire':
+      return async_io.WebDriverSpec.JsonWire;
+    default:
+      return async_io.WebDriverSpec.Auto;
   }
 }

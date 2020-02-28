@@ -76,7 +76,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead),
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subtitle1),
         ),
       );
     });

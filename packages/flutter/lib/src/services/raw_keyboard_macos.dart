@@ -349,7 +349,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
+    return '${objectRuntimeType(this, 'RawKeyEventDataMacOs')}(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
         ' unmodifiedCharacters: $charactersIgnoringModifiers, modifiers: $modifiers, '
         'modifiers down: $modifiersPressed)';
   }

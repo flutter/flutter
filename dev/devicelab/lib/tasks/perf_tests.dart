@@ -81,6 +81,15 @@ TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
+TaskFunction createAnimatedPlaceholderPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/animated_placeholder_perf.dart',
+    'animated_placeholder_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
 TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -380,6 +389,8 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.add('android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
@@ -407,6 +418,8 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -420,6 +433,8 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
+        options.add('--tree-shake-icons');
+        options.add('--split-debug-info=infos/');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -434,6 +449,8 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -456,6 +473,8 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     watch.start();
     await flutter('build', options: options);
@@ -713,6 +732,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
+        '--no-fast-start',
         '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',
         '-d', device.deviceId,
@@ -766,7 +786,7 @@ class ListStatistics {
 
 class _UnzipListEntry {
   factory _UnzipListEntry.fromLine(String line) {
-    final List<String> data = line.trim().split(RegExp('\\s+'));
+    final List<String> data = line.trim().split(RegExp(r'\s+'));
     assert(data.length == 8);
     return _UnzipListEntry._(
       uncompressedSize:  int.parse(data[0]),

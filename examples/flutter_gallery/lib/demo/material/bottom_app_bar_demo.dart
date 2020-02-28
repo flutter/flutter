@@ -90,7 +90,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   static void _showSnackbar() {
     const String text =
       "When the Scaffold's floating action button location changes, "
-      'the floating action button animates to its new position.'
+      'the floating action button animates to its new position. '
       'The BottomAppBar adapts its shape appropriately.';
     _scaffoldKey.currentState.showSnackBar(
       const SnackBar(content: Text(text)),
@@ -253,7 +253,7 @@ class _RadioItem<T> extends StatelessWidget {
                   },
                   child: Text(
                     value.title,
-                    style: theme.textTheme.subhead,
+                    style: theme.textTheme.subtitle1,
                   ),
                 ),
               ),
@@ -323,7 +323,7 @@ class _Heading extends StatelessWidget {
       alignment: AlignmentDirectional.centerStart,
       child: Text(
         text,
-        style: theme.textTheme.body1.copyWith(
+        style: theme.textTheme.bodyText2.copyWith(
           color: theme.primaryColor,
         ),
       ),
