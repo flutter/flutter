@@ -98,6 +98,8 @@ def to_gn_args(args):
     gn_args['skia_use_fontconfig'] = args.enable_fontconfig
     gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
     gn_args['flutter_enable_skshaper'] = args.enable_skshaper
+    if args.enable_skshaper:
+      gn_args['skia_use_icu'] = True
     gn_args['is_official_build'] = True    # Disable Skia test utilities.
     gn_args['dart_component_kind'] = 'static_library' # Always link Dart in statically.
     gn_args['is_debug'] = args.unoptimized
