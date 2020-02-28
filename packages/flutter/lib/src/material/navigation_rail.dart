@@ -478,7 +478,7 @@ class _RailDestinationBox extends StatelessWidget {
   final String indexLabel;
 
   final Animation<double> _positionAnimation;
-  
+
   @override
   Widget build(BuildContext context) {
     final Widget themedIcon = IconTheme(
@@ -638,11 +638,10 @@ class _RailDestinationBox extends StatelessWidget {
       return 0;
     }
   }
-  
+
   double _extendedLabelFadeValue() {
     return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4.0 : 1.0;
   }
-
 }
 
 /// Defines the behavior of the labels of a [NavigationRail].
