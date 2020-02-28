@@ -170,7 +170,7 @@ void main() {
     expect(description[4].contains('(color: Color(0x00000097))'), isTrue);
     expect(description[5].contains('selectedIconTheme: IconThemeData'), isTrue);
     expect(description[5].contains('(color: Color(0x00000098))'), isTrue);
-    
+
     expect(description[6], 'groupAlignment: NavigationRailGroupAlignment.bottom');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
 

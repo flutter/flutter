@@ -8,12 +8,107 @@ import 'package:flutter/material.dart';
 
 import '../../scheduler.dart';
 
-/// TODO
+/// A material widget that is meant to be displayed at the left or right of an
+/// app to navigate between a small number of views, typically between three and
+/// five.
+///
+/// A navigation rail is usually used inside a [Row] of a [Scaffold] body.
+///
+/// The navigation rail is meant for layouts with wide viewports, such as a
+/// desktop web or tablet landscape layout. For smaller layouts, like mobile
+/// portrait, a [BottomNavigationBar] should be used instead. Adaptive layouts
+/// can build different instances of the [Scaffold] in order to have a
+/// navigation rail for more horizontal layouts and a bottom navigation bar
+/// for more vertical layouts.
+///
+/// {@tool dartpad --template=stateless_widget_material}
+///
+/// This example shows a [NavigationRail] used within a Scaffold with 3
+/// [NavigationRailDestination]s. The main content is separated by a divider
+/// (although elevation on the navigation rail can be used instead). The
+/// `_currentIndex` updates according to the `onDestinationSelected` callback.
+///
+/// ```dart
+/// int _currentIndex = 0;
+///
+//  @override
+//  Widget build(BuildContext context) {
+//    return Scaffold(
+//      body: Row(
+//        children: <Widget>[
+//          NavigationRail(
+//            currentIndex: _currentIndex,
+//            labelType: NavigationRailLabelType.selected,
+//            destinations: [
+//              NavigationRailDestination(
+//                icon: Icon(Icons.favorite_border),
+//                activeIcon: Icon(Icons.favorite),
+//                label: Text('First'),
+//              ),
+//              NavigationRailDestination(
+//                icon: Icon(Icons.bookmark_border),
+//                activeIcon: Icon(Icons.book),
+//                label: Text('Second'),
+//              ),
+//              NavigationRailDestination(
+//                icon: Icon(Icons.star_border),
+//                activeIcon: Icon(Icons.star),
+//                label: Text('Third'),
+//              ),
+//            ],
+//            onDestinationSelected: (int index) {
+//              setState(() {
+//                _currentIndex = index;
+//              });
+//            },
+//          ),
+//          VerticalDivider(thickness: 1, width: 1),
+//          Expanded(
+//            child: Center(
+//              child: Text('currentIndex: $_currentIndex'),
+//            ),
+//          )
+//        ],
+//      ),
+//    );
+//  }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [Scaffold], which can display the navigation rail within a [Row] of the
+///    [Scaffold.body] slot.
+///  * [NavigationRailDestination], which is used a model to create tappable
+///    destinations in the navigation rail.
+///  * [BottomNavigationBar], which is used as a horizontal alternative for
+///    the same style of navigation as the navigation rail.
 class NavigationRail extends StatefulWidget {
-  /// TODO
+  /// Creates a material design navigation rail.
+  ///
+  /// The argument [destinations] must not be null. Additionally, it must be
+  /// non-empty.
+  ///
+  /// If [elevation] is specified, it must be non-negative.
+  ///
+  /// If [preferredWidth] is specified, it must be non-negative, and if
+  /// [extendedWidth is specified, it must be non-negative and greater than
+  /// [preferredWidth].
+  ///
+  /// The argument [extended] must be non-null. [extended] can only be set to
+  /// true when when the [labelType] is null or [NavigationRailLabelType.none].
+  ///
+  /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
+  /// [unselectedLabelTextStyle], [unselectedLabelTextStyle],
+  /// [unselectedIconTheme], or [selectedIconTheme] are null, then their
+  /// [NavigationRailThemeData] values will be used. If the corresponding
+  /// [NavigationRailThemeData] property is null, then the navigation rail
+  /// defaults are used.
+  ///
+  /// Typically used within a [Row] of the [Scaffold.body] property.
   NavigationRail({
     this.backgroundColor,
-    this.extended,
+    this.extended = false,
     this.leading,
     this.trailing,
     @required this.destinations,
@@ -30,8 +125,12 @@ class NavigationRail extends StatefulWidget {
     this.extendedWidth = _extendedRailWidth,
   }) :  assert(destinations != null && destinations.isNotEmpty),
         assert(0 <= currentIndex && currentIndex < destinations.length),
-        assert(extendedWidth >= _railWidth);
-       // TODO: assert that extended has to be labelType none
+        assert(elevation == null || elevation > 0),
+        assert(preferredWidth == null || preferredWidth > 0),
+        assert(extendedWidth == null || extendedWidth > 0),
+        assert((preferredWidth == null || extendedWidth == null) || extendedWidth >= preferredWidth),
+        assert(extended != null),
+        assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
   /// contents.
@@ -87,7 +186,10 @@ class NavigationRail extends StatefulWidget {
   /// [bottom], or [center] of a layout.
   final NavigationRailGroupAlignment groupAlignment;
 
-  /// Defines the layout and behavior of the labels in the [NavigationRail].
+  /// Defines the layout and behavior of the labels for the default, unextended
+  /// [NavigationRail].
+  ///
+  /// When the navigation rail is extended, the labels are always shown.
   ///
   /// See also:
   ///
