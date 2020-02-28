@@ -585,7 +585,6 @@ void main() {
     });
 
     test('throws when the base locale does not exist', () {
-
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
       l10nDirectory.childFile('app_en_US.arb')
