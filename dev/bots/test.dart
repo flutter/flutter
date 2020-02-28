@@ -122,6 +122,16 @@ Future<void> main(List<String> args) async {
       'web_tests03': _runWebUnitTests,
       'web_tests04': _runWebUnitTests,
       'web_tests05': _runWebUnitTests,
+      'web_tests06': _runWebUnitTests,
+      'web_tests07': _runWebUnitTests,
+      'web_tests08': _runWebUnitTests,
+      'web_tests09': _runWebUnitTests,
+      'web_tests10': _runWebUnitTests,
+      'web_tests11': _runWebUnitTests,
+      'web_tests12': _runWebUnitTests,
+      'web_tests13': _runWebUnitTests,
+      'web_tests14': _runWebUnitTests,
+      'web_tests15': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
     });
   } on ExitException catch (error) {
