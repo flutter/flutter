@@ -87,7 +87,7 @@ import 'theme_data.dart';
 ///
 ///  * [Scaffold], which can display the navigation rail within a [Row] of the
 ///    [Scaffold.body] slot.
-///  * [NavigationRailDestination], which is used a model to create tappable
+///  * [NavigationRailDestination], which is used as a model to create tappable
 ///    destinations in the navigation rail.
 ///  * [BottomNavigationBar], which is used as a horizontal alternative for
 ///    the same style of navigation as the navigation rail.
@@ -103,7 +103,7 @@ class NavigationRail extends StatefulWidget {
   /// [extendedWidth is specified, it must be non-negative and greater than
   /// [preferredWidth].
   ///
-  /// The argument [extended] must be non-null. [extended] can only be set to
+  /// The argument [extended] must not be null. [extended] can only be set to
   /// true when when the [labelType] is null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
@@ -247,6 +247,8 @@ class NavigationRail extends StatefulWidget {
 
   /// The final width when the animation is complete for setting [extended] to
   /// true.
+  ///
+  /// This is only used when [extended] is set to true.
   ///
   /// The default value is 256.
   final double extendedWidth;
@@ -400,8 +402,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   void _disposeControllers() {
-    for (final AnimationController controller in _destinationControllers)
+    for (final AnimationController controller in _destinationControllers) {
       controller.dispose();
+    }
     _extendedController.dispose();
   }
 
@@ -417,16 +420,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _extendedController = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: this,
-
     );
     _extendedAnimation = CurvedAnimation(
       parent: _extendedController,
       curve: Curves.easeInOut,
     );
     _extendedController.addListener(() {
-      setState(() {
-        // Rebuild.
-      });
+      _rebuild();
     });
   }
 
@@ -693,7 +693,7 @@ enum NavigationRailGroupAlignment {
 ///
 ///  * [NavigationRail]
 class NavigationRailDestination {
-  /// Creates an destination that is used with [NavigationRail.destinations].
+  /// Creates a destination that is used with [NavigationRail.destinations].
   ///
   /// [icon] should not be null and [label] should not be null when this
   /// destination is used in the [NavigationRail].
@@ -703,6 +703,7 @@ class NavigationRailDestination {
     this.label,
   }) : activeIcon = activeIcon ?? icon,
        assert(icon != null);
+
   /// The icon of the destination.
   ///
   /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
@@ -743,7 +744,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
     @required this.animation,
     @required Widget child,
   }) : assert(child != null),
-        super(key: key, child: child);
+       super(key: key, child: child);
 
   final Animation<double> animation;
 

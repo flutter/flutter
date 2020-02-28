@@ -402,6 +402,7 @@ void main() {
       colorScheme: otherTheme.colorScheme,
       dialogTheme: otherTheme.dialogTheme,
       floatingActionButtonTheme: otherTheme.floatingActionButtonTheme,
+      navigationRailTheme: otherTheme.navigationRailTheme,
       typography: otherTheme.typography,
       cupertinoOverrideTheme: otherTheme.cupertinoOverrideTheme,
       snackBarTheme: otherTheme.snackBarTheme,
@@ -468,6 +469,7 @@ void main() {
     expect(themeDataCopy.colorScheme, equals(otherTheme.colorScheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.floatingActionButtonTheme, equals(otherTheme.floatingActionButtonTheme));
+    expect(themeDataCopy.navigationRailTheme, equals(otherTheme.navigationRailTheme));
     expect(themeDataCopy.typography, equals(otherTheme.typography));
     expect(themeDataCopy.cupertinoOverrideTheme, equals(otherTheme.cupertinoOverrideTheme));
     expect(themeDataCopy.snackBarTheme, equals(otherTheme.snackBarTheme));

@@ -16,7 +16,7 @@ import 'theme_data.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [NavigationRailThemeData] object
-/// using `Theme.of(context).navigationRailTheme`. Instances of
+/// using `NavigationRailTheme.of(context)`. Instances of
 /// [NavigationRailThemeData] can be customized with
 /// [NavigationRailThemeData.copyWith].
 ///

@@ -70,7 +70,6 @@ void main() {
     expect(_opacityAboveLabel('Ghi'), findsNothing);
     expect(_opacityAboveLabel('Jkl'), findsNothing);
     expect(_opacityAboveLabel('Mno'), findsNothing);
-
   });
 
   testWidgets('Renders icons and selected label - [labelType]=selected', (WidgetTester tester) async {
@@ -1300,10 +1299,9 @@ List<NavigationRailDestination> _destinations() {
 
 Future<void> _pumpNavigationRail(
   WidgetTester tester, {
-  double textScaleFactor,
+  double textScaleFactor = 1.0,
   NavigationRail navigationRail,
 }) async {
-  textScaleFactor ??= 1.0;
   await tester.pumpWidget(
     MaterialApp(
       home: Builder(
