@@ -219,11 +219,6 @@ abstract class WidgetRecorder extends Recorder implements _RecordingWidgetsBindi
   }
 
   @override
-  void _onError(dynamic error, StackTrace stackTrace) {
-    _profileCompleter.completeError(error, stackTrace);
-  }
-
-  @override
   Future<Profile> run() {
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
@@ -292,11 +287,6 @@ abstract class WidgetBuildRecorder extends Recorder implements _RecordingWidgets
       final Profile profile = _generateProfile();
       _profileCompleter.complete(profile);
     }
-  }
-
-  @override
-  void _onError(dynamic error, StackTrace stackTrace) {
-    _profileCompleter.completeError(error, stackTrace);
   }
 
   @override
@@ -522,19 +512,9 @@ double _computeStandardDeviationForPopulation(Iterable<double> population) {
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
 abstract class _RecordingWidgetsBindingListener {
-  /// Whether the binding should continue pumping frames.
   bool _shouldContinue();
-
-  /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void _frameWillDraw();
-
-  /// Called immediately after calling [SchedulerBinding.handleDrawFrame].
   void _frameDidDraw();
-
-  /// Reports an error.
-  ///
-  /// The implementation is expected to halt benchmark execution as soon as possible.
-  void _onError(dynamic error, StackTrace stackTrace);
 }
 
 /// A variant of [WidgetsBinding] that collaborates with a [Recorder] to decide
@@ -563,20 +543,8 @@ class _RecordingWidgetsBinding extends BindingBase
   }
 
   _RecordingWidgetsBindingListener _listener;
-  bool _hasErrored = false;
 
   void _beginRecording(_RecordingWidgetsBindingListener recorder, Widget widget) {
-    final FlutterExceptionHandler originalOnError = FlutterError.onError;
-
-    // Fail hard and fast on errors. Benchmarks should not have any errors.
-    FlutterError.onError = (FlutterErrorDetails details) {
-      if (_hasErrored) {
-        return;
-      }
-      _listener._onError(details.exception, details.stack);
-      _hasErrored = true;
-      originalOnError(details);
-    };
     _listener = recorder;
     runApp(widget);
   }
@@ -587,28 +555,19 @@ class _RecordingWidgetsBinding extends BindingBase
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
-    // Don't keep on truckin' if there's an error.
-    if (_hasErrored) {
-      return;
-    }
     _benchmarkStopped = !_listener._shouldContinue();
     super.handleBeginFrame(rawTimeStamp);
   }
 
   @override
   void scheduleFrame() {
-    // Don't keep on truckin' if there's an error.
-    if (!_benchmarkStopped && !_hasErrored) {
+    if (!_benchmarkStopped) {
       super.scheduleFrame();
     }
   }
 
   @override
   void handleDrawFrame() {
-    // Don't keep on truckin' if there's an error.
-    if (_hasErrored) {
-      return;
-    }
     _listener._frameWillDraw();
     super.handleDrawFrame();
     _listener._frameDidDraw();
