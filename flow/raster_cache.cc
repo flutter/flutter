@@ -119,24 +119,15 @@ static RasterCacheResult Rasterize(
   return {surface->makeImageSnapshot(), logical_rect};
 }
 
-RasterCacheResult RasterizePicture(SkPicture* picture,
-                                   GrContext* context,
-                                   const SkMatrix& ctm,
-                                   SkColorSpace* dst_color_space,
-                                   bool checkerboard) {
-  return Rasterize(context, ctm, dst_color_space, checkerboard,
-                   picture->cullRect(),
-                   [=](SkCanvas* canvas) { canvas->drawPicture(picture); });
-}
-
-void RasterCache::Prepare(PrerollContext* context,
+bool RasterCache::Prepare(PrerollContext* context,
                           Layer* layer,
                           const SkMatrix& ctm) {
   LayerRasterCacheKey cache_key(layer->unique_id(), ctm);
+
   Entry& entry = layer_cache_[cache_key];
-  entry.access_count++;
-  entry.used_this_frame = true;
-  if (!entry.image.is_valid()) {
+
+  if (!entry.did_rasterize && !entry.image.is_valid() &&
+      entry.access_count >= access_threshold_) {
     entry.image = Rasterize(
         context->gr_context, ctm, context->dst_color_space,
         checkerboard_images_, layer->paint_bounds(),
@@ -161,7 +152,12 @@ void RasterCache::Prepare(PrerollContext* context,
             layer->Paint(paintContext);
           }
         });
+
+    entry.did_rasterize = true;
+
+    return true;
   }
+  return false;
 }
 
 bool RasterCache::Prepare(GrContext* context,
@@ -200,12 +196,19 @@ bool RasterCache::Prepare(GrContext* context,
     return false;
   }
 
-  if (!entry.image.is_valid()) {
-    entry.image = RasterizePicture(picture, context, transformation_matrix,
-                                   dst_color_space, checkerboard_images_);
+  // Don't try to rasterize pictures that were already attempted to be
+  // rasterized even if the image is invalid.
+  if (!entry.did_rasterize && !entry.image.is_valid()) {
+    entry.image =
+        Rasterize(context, transformation_matrix, dst_color_space,
+                  checkerboard_images_, picture->cullRect(),
+                  [=](SkCanvas* canvas) { canvas->drawPicture(picture); });
+
+    entry.did_rasterize = true;
     picture_cached_this_frame_++;
+    return true;
   }
-  return true;
+  return false;
 }
 
 RasterCacheResult RasterCache::Get(const SkPicture& picture,
