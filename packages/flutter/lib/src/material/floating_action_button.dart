@@ -582,6 +582,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(
