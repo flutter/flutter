@@ -491,7 +491,8 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
-    final TargetPlatform devicePlatform = await targetPlatform;
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
+    final TargetPlatform devicePlatform = buildInfo.targetPlatform ?? await targetPlatform;
     if (devicePlatform == TargetPlatform.android_x86 &&
        !debuggingOptions.buildInfo.isDebug) {
       globals.printError('Profile and release builds are only supported on ARM/x64 targets.');
@@ -524,7 +525,7 @@ class AndroidDevice extends Device {
           project: project,
           target: mainPath,
           androidBuildInfo: AndroidBuildInfo(
-            debuggingOptions.buildInfo,
+            buildInfo,
             targetArchs: <AndroidArch>[androidArch],
             fastStart: debuggingOptions.fastStart
           ),

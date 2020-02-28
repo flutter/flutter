@@ -538,6 +538,13 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        argResults['target-platform'] is String &&
+        argResults['target-platform'] != 'default') {
+      targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
+    }
+
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? stringArg('flavor')
@@ -562,6 +569,7 @@ abstract class FlutterCommand extends Command<void> {
           : kIconTreeShakerEnabledDefault,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
+      targetPlatform: targetPlatform,
     );
   }
 

@@ -23,6 +23,7 @@ class BuildInfo {
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
+    this.targetPlatform,
     @required this.treeShakeIcons,
   });
 
@@ -71,6 +72,9 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
+
+  /// Target platform for the build (e.g. android_arm versus android_arm64).
+  final TargetPlatform targetPlatform;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
