@@ -63,23 +63,38 @@ Future<void> _runBenchmark(String benchmarkName) async {
   }
 
   final Recorder recorder = recorderFactory();
-  final Profile profile = await recorder.run();
 
-  if (!isInManualMode) {
-    final html.HttpRequest request = await html.HttpRequest.request(
-      '/profile-data',
+  try {
+    final Profile profile = await recorder.run();
+    if (!isInManualMode) {
+      final html.HttpRequest request = await html.HttpRequest.request(
+        '/profile-data',
+        method: 'POST',
+        mimeType: 'application/json',
+        sendData: json.encode(profile.toJson()),
+      );
+      if (request.status != 200) {
+        throw Exception(
+          'Failed to report profile data to benchmark server. '
+          'The server responded with status code ${request.status}.'
+        );
+      }
+    } else {
+      print(profile);
+    }
+  } catch (error, stackTrace) {
+    if (isInManualMode) {
+      rethrow;
+    }
+    await html.HttpRequest.request(
+      '/on-error',
       method: 'POST',
       mimeType: 'application/json',
-      sendData: json.encode(profile.toJson()),
+      sendData: json.encode(<String, dynamic>{
+        'error': '$error',
+        'stackTrace': '$stackTrace',
+      }),
     );
-    if (request.status != 200) {
-      throw Exception(
-        'Failed to report profile data to benchmark server. '
-        'The server responded with status code ${request.status}.'
-      );
-    }
-  } else {
-    print(profile);
   }
 }
 
