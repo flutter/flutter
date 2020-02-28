@@ -291,23 +291,22 @@ void main() {
 
   testWidgets('AnimatedDefaultTextStyle merge test', (WidgetTester tester) async {
     const Key animatedKey = Key('animatedStyle');
-    final Builder animatedStyle = AnimatedDefaultTextStyle.merge(
-      key: animatedKey,
-      maxLines: 20,
-      duration: Duration(seconds: 10),
-      child: Text('woah!'),
-    );
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: DefaultTextStyle(
-          style: TextStyle(fontSize: 1234),
-          textHeightBehavior: TextHeightBehavior(
+          style: const TextStyle(fontSize: 1234),
+          textHeightBehavior: const TextHeightBehavior(
             applyHeightToFirstAscent: false,
           ),
           maxLines: 10,
           softWrap: true,
-          child: animatedStyle,
+          child: AnimatedDefaultTextStyle.merge(
+            key: animatedKey,
+            maxLines: 20,
+            duration: const Duration(seconds: 10),
+            child: const Text('woah!'),
+          ),
         ),
       )
     );
