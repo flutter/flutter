@@ -430,6 +430,7 @@ class Profile {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'name': name,
+      'scoreKeys': <String>['averageDrawFrameDuration'],
       'averageDrawFrameDuration': averageDrawFrameDuration.inMicroseconds,
       'drawFrameDurationNoise': drawFrameDurationNoise,
       'frames': frames
