@@ -965,6 +965,36 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
+  testWidgets('AppBar in body excludes bottom SafeArea padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/26163
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
+          child: Scaffold(
+            primary: true,
+            body: Column(
+              children: <Widget>[
+                AppBar(
+                  title: const Text('title'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+  });
+
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
