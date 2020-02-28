@@ -315,8 +315,9 @@ EmbedAndThinFrameworks() {
 
 # Main entry point.
 if [[ $# == 0 ]]; then
-  # Backwards-compatibility: if no args are provided, build.
+  # Backwards-compatibility: if no args are provided, build and embed.
   BuildApp
+  EmbedFlutterFrameworks
 else
   case $1 in
     "build")

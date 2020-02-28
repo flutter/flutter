@@ -22,7 +22,8 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
-import 'ios_project_migration.dart';
+import 'migrations/ios_migrator.dart';
+import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -88,12 +89,19 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
+  final List<IOSMigrator> migrators = <IOSMigrator>[
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode)
+  ];
+
+  for(final IOSMigrator migrator in migrators) {
+    if (!migrator.migrate()) {
+      return XcodeBuildResult(success: false);
+    }
+  }
+
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
   }
-
-  final IOSProjectMigration migration = IOSProjectMigration(app.project, globals.logger);
-  migration.migrate();
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
@@ -547,6 +555,7 @@ bool _checkXcodeVersion() {
   return true;
 }
 
+// TODO(jmagman): Refactor to IOSMigrator.
 bool upgradePbxProjWithFlutterAssets(IosProject project) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(xcodeProjectFile.existsSync());

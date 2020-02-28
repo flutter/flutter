@@ -2,36 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../project.dart';
+import '../../base/file_system.dart';
+import '../../base/logger.dart';
+import '../../macos/xcode.dart';
+import '../../project.dart';
+import 'ios_migrator.dart';
 
-/// iOS project is generated from a template on Flutter project creation.
-/// Sometimes (due to behavior changes in Xcode, CocoaPods, etc) these files need to be altered
-/// from the original template.
-class IOSProjectMigration {
-  IOSProjectMigration(IosProject project, Logger logger) :
-        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-        _podfile = project.podfile,
-        _logger = logger;
+/// Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
+/// This caused issues switching between a real device and simulator due to architecture mismatch.
+/// Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
+class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
+  RemoveFrameworkLinkAndEmbeddingMigration(
+      IosProject project,
+      Logger logger,
+      Xcode xcode,
+      ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+        _xcode = xcode,
+        super(logger);
 
   final File _xcodeProjectInfoFile;
-  final File _podfile;
-  final Logger _logger;
+  final Xcode _xcode;
 
   /// Inspect [project] for necessary migrations and rewrite files as needed.
-  void migrate() {
-    _migrateXcodeProjectInfoFile();
-    _migratePodfile();
+  @override
+  bool migrate() {
+    return _migrateXcodeProjectInfoFile();
   }
 
-  void _migrateXcodeProjectInfoFile() {
+  bool _migrateXcodeProjectInfoFile() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      _logger.printTrace('Xcode project not found, skipping migration');
-      return;
+      logger.printTrace('Xcode project not found, skipping migration');
+      return true;
     }
 
-    _processFileLines(_xcodeProjectInfoFile, (String line) {
+    bool migrationFailure = false;
+    processFileLines(_xcodeProjectInfoFile, (String line) {
       // App.framework Frameworks reference.
       // isa = PBXFrameworksBuildPhase;
       // files = (
@@ -86,59 +91,22 @@ class IOSProjectMigration {
         return line.replaceFirst(thinBinaryScript, 'xcode_backend.sh\\" embed_and_thin');
       }
 
-      return line;
-    });
-  }
-
-  void _migratePodfile() {
-    if (!_podfile.existsSync()) {
-      _logger.printTrace('Podfile not found, skipping migration');
-      return;
-    }
-
-    _processFileLines(_podfile, (String line) {
-      // # Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
-      // install! 'cocoapods', :disable_input_output_paths => true
-      if (line.contains('Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.')) {
-        return null;
-      }
-      if (line.contains('install! \'cocoapods\', :disable_input_output_paths => true')) {
-        return null;
+      if (line.contains('/* App.framework ') || line.contains('/* Flutter.framework ')) {
+        migrationFailure = true;
       }
 
       return line;
     });
-  }
 
-  /// [processLine] should return null if the line should be deleted.
-  void _processFileLines(File file, String Function(String) processLine) {
-    final List<String> lines = file.readAsLinesSync();
-
-    final StringBuffer newProjectContents = StringBuffer();
-    final String basename = file.basename;
-
-    bool migrationRequired = false;
-    for (final String line in lines) {
-      final String newProjectLine = processLine(line);
-      if (newProjectLine == null) {
-        _logger.printTrace('Migrating $basename, removing:');
-        _logger.printTrace('    $line');
-        migrationRequired = true;
-        continue;
+    if (migrationFailure) {
+      // Print scary message if the user is on Xcode 11.4 or greater, or if Xcode isn't installed.
+      final bool xcodeIsInstalled = _xcode.isInstalled;
+      if(!xcodeIsInstalled || (_xcode.majorVersion > 11 || (_xcode.majorVersion == 11 && _xcode.minorVersion >= 4))) {
+        logger.printError('Your Xcode project requires migration. See https://github.com/flutter/flutter/issues/50568 for details.');
+        return false;
       }
-      if (newProjectLine != line) {
-        _logger.printTrace('Migrating $basename, replacing:');
-        _logger.printTrace('    $line');
-        _logger.printTrace('with:');
-        _logger.printTrace('    $newProjectLine');
-        migrationRequired = true;
-      }
-      newProjectContents.writeln(newProjectLine);
     }
 
-    if (migrationRequired) {
-      _logger.printStatus('Upgrading $basename');
-      file.writeAsStringSync(newProjectContents.toString());
-    }
+    return true;
   }
 }

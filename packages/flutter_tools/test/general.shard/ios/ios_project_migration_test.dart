@@ -9,23 +9,24 @@ import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/ios/ios_project_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 
 void main () {
-  group('iOS project migration', () {
+  group('remove framework linking and embedding migration', () {
     MemoryFileSystem memoryFileSystem;
     BufferLogger testLogger;
     MockIosProject mockIosProject;
     File xcodeProjectInfoFile;
-    File podfile;
+    MockXcode mockXcode;
 
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
+      mockXcode = MockXcode();
       xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
-      podfile = memoryFileSystem.file('Podfile');
 
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
@@ -37,18 +38,19 @@ void main () {
 
       mockIosProject = MockIosProject();
       when(mockIosProject.xcodeProjectInfoFile).thenReturn(xcodeProjectInfoFile);
-      when(mockIosProject.podfile).thenReturn(podfile);
     });
 
     testWithoutContext('skipped if files are missing', () {
-      final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.migrate();
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
 
       expect(xcodeProjectInfoFile.existsSync(), isFalse);
-      expect(podfile.existsSync(), isFalse);
 
       expect(testLogger.traceText, contains('Xcode project not found, skipping migration'));
-      expect(testLogger.traceText, contains('Podfile not found, skipping migration'));
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -57,17 +59,16 @@ void main () {
       xcodeProjectInfoFile.writeAsStringSync(contents);
       final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
 
-      podfile.writeAsStringSync(contents);
-      final DateTime podfileLastModified = podfile.lastModifiedSync();
-
-      final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.migrate();
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
 
       expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
       expect(xcodeProjectInfoFile.readAsStringSync(), contents);
 
-      expect(podfile.lastModifiedSync(), podfileLastModified);
-      expect(podfile.readAsStringSync(), contents);
       expect(testLogger.statusText, isEmpty);
     });
 
@@ -88,8 +89,12 @@ keep this 1
 keep this 2
 ''');
 
-      final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-      iosProjectMigration.migrate();
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
 
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
 keep this 1
@@ -100,35 +105,107 @@ keep this 2
       expect(testLogger.statusText, contains('Upgrading project.pbxproj'));
     });
 
-  testWithoutContext('Podfile is migrated', () {
-    podfile.writeAsStringSync('''
-  end
-end
-
-# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
-install! 'cocoapods', :disable_input_output_paths => true
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
+    testWithoutContext('migration fails with leftover App.framework reference', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
 ''');
+      when(mockXcode.isInstalled).thenReturn(true);
+      when(mockXcode.majorVersion).thenReturn(11);
+      when(mockXcode.minorVersion).thenReturn(4);
 
-    final IOSProjectMigration iosProjectMigration = IOSProjectMigration(mockIosProject, testLogger);
-    iosProjectMigration.migrate();
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isFalse);
+      expect(testLogger.errorText, contains('Your Xcode project requires migration'));
+    });
 
-    expect(podfile.readAsStringSync(), '''
-  end
-end
-
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-
+    testWithoutContext('migration fails with leftover Flutter.framework reference', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+      9705A1C71CF904A300538480 /* Flutter.framework in Embed Frameworks */,
 ''');
-    expect(testLogger.statusText, contains('Upgrading Podfile'));
+      when(mockXcode.isInstalled).thenReturn(true);
+      when(mockXcode.majorVersion).thenReturn(11);
+      when(mockXcode.minorVersion).thenReturn(4);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isFalse);
+      expect(testLogger.errorText, contains('Your Xcode project requires migration'));
+    });
+
+    testWithoutContext('migration fails without Xcode installed', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
+''');
+      when(mockXcode.isInstalled).thenReturn(false);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isFalse);
+      expect(testLogger.errorText, contains('Your Xcode project requires migration'));
+    });
+
+    testWithoutContext('migration fails on Xcode < 11.4', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
+''');
+      when(mockXcode.isInstalled).thenReturn(true);
+      when(mockXcode.majorVersion).thenReturn(11);
+      when(mockXcode.minorVersion).thenReturn(3);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+      expect(testLogger.errorText, isEmpty);
+    });
+
+    testWithoutContext('migration fails on Xcode 11.4', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
+''');
+      when(mockXcode.isInstalled).thenReturn(true);
+      when(mockXcode.majorVersion).thenReturn(11);
+      when(mockXcode.minorVersion).thenReturn(4);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isFalse);
+      expect(testLogger.errorText, contains('Your Xcode project requires migration'));
+    });
+
+    testWithoutContext('migration fails on Xcode 12,0', () {
+      xcodeProjectInfoFile.writeAsStringSync('''
+        746232531E83B71900CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232521E83B71900CC1A5E /* App.framework */; };
+''');
+      when(mockXcode.isInstalled).thenReturn(true);
+      when(mockXcode.majorVersion).thenReturn(12);
+      when(mockXcode.minorVersion).thenReturn(0);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isFalse);
+      expect(testLogger.errorText, contains('Your Xcode project requires migration'));
+    });
   });
-});
 }
 
 class MockIosProject extends Mock implements IosProject {}
+class MockXcode extends Mock implements Xcode {}
