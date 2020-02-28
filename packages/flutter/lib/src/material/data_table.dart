@@ -562,7 +562,9 @@ class DataTable extends StatelessWidget {
         child: label,
       );
     }
-    if (onSort != null) {
+    // TODO(dkwingsmt): Change the condition to `if (onSort != null)` when
+    // https://github.com/flutter/flutter/issues/51152 is fixed
+    if (true) {
       label = InkWell(
         onTap: onSort,
         child: label,
