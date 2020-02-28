@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Renders at the correct default width', (WidgetTester tester) async {
@@ -689,13 +690,263 @@ void main() {
     expect(trailing.localToGlobal(Offset.zero), const Offset(8.0, 544.0));
   });
 
-  testWidgets('Extended rail destinations appear correctly', (WidgetTester tester) async {
+  testWidgets('Extended rail animates the width and labels appear - LTR', (WidgetTester tester) async {
+    bool extended = false;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _testDestinations(),
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+
+    expect(rail.size.width, equals(72.0));
+
+    stateSetter(() {
+      extended = true;
+    });
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(rail.size.width, equals(164.0));
+
+    await tester.pumpAndSettle();
+    expect(rail.size.width, equals(256.0));
+
+    expect(
+      _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
+      equals(const Offset(24.0, 32.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
+      equals(const Offset(72.0, 37.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
+      equals(const Offset(24.0, 104.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
+      equals(const Offset(72.0, 109.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
+      equals(const Offset(24.0, 176.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
+      equals(const Offset(72.0, 181.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
+      equals(const Offset(24.0, 248.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
+      equals(const Offset(72.0, 253.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
+      equals(const Offset(24.0, 320.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
+      equals(const Offset(72.0, 325.0)),
+    );
   });
 
-  testWidgets('Extended rail width can be changed', (WidgetTester tester) async {
+  testWidgets('Extended rail animates the width and labels appear - RTL', (WidgetTester tester) async {
+    bool extended = false;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: Scaffold(
+                body: Row(
+                  textDirection: TextDirection.rtl,
+                  children: <Widget>[
+                    NavigationRail(
+                      destinations: _testDestinations(),
+                      extended: extended,
+                    ),
+                    const Expanded(
+                      child: Text('body'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+
+    expect(rail.size.width, equals(72.0));
+    expect(rail.localToGlobal(Offset.zero), equals(const Offset(728.0, 0.0)));
+
+    stateSetter(() {
+      extended = true;
+    });
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(rail.size.width, equals(164.0));
+    expect(rail.localToGlobal(Offset.zero), equals(const Offset(636.0, 0.0)));
+
+    await tester.pumpAndSettle();
+    expect(rail.size.width, equals(256.0));
+    expect(rail.localToGlobal(Offset.zero), equals(const Offset(544.0, 0.0)));
+
+    expect(
+      _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
+      equals(const Offset(752.0, 32.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
+      equals(const Offset(686.0, 37.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
+      equals(const Offset(752.0, 104.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
+      equals(const Offset(686.0, 109.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
+      equals(const Offset(752.0, 176.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
+      equals(const Offset(686.0, 181.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
+      equals(const Offset(752.0, 248.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
+      equals(const Offset(686.0, 253.0)),
+    );
+    expect(
+      _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
+      equals(const Offset(752.0, 320.0)),
+    );
+    expect(
+      _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
+      equals(const Offset(686.0, 325.0)),
+    );
+  });
+
+  testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
+    bool extended = false;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    extendedWidth: 300,
+                    destinations: _testDestinations(),
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
+
+    expect(rail.size.width, equals(72.0));
+
+    stateSetter(() {
+      extended = true;
+    });
+
+    await tester.pumpAndSettle();
+    expect(rail.size.width, equals(300.0));
   });
 
   testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {
+    bool extended = false;
+    Animation<double> animation;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    leading: Builder(
+                      builder: (BuildContext context) {
+                        animation = NavigationRail.extendedAnimation(context);
+                        return FloatingActionButton(onPressed: () { },);
+                      },
+                    ),
+                    destinations: _testDestinations(),
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(animation.isDismissed, isTrue);
+
+    stateSetter(() {
+      extended = true;
+    });
+    await tester.pumpAndSettle();
+
+    expect(animation.isCompleted, isTrue);
   });
 
   testWidgets('Custom selected and unselected textStyles are honored', (WidgetTester tester) async {
@@ -789,30 +1040,156 @@ void main() {
   });
 
   testWidgets('onDestinationSelected is called', (WidgetTester tester) async {
-    int mutatedIndex;
+    int currentIndex;
 
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
         destinations: _testDestinations(),
         onDestinationSelected: (int index) {
-          mutatedIndex = index;
+          currentIndex = index;
         },
         labelType: NavigationRailLabelType.all,
       ),
     );
 
     await tester.tap(find.text('Def'));
-    expect(mutatedIndex, 1);
+    expect(currentIndex, 1);
 
     await tester.tap(find.text('Ghi'));
-    expect(mutatedIndex, 2);
+    expect(currentIndex, 2);
   });
 
-  testWidgets('Destinations can be changed', (WidgetTester tester) async {
+  testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
+    int currentIndex = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _testDestinations(),
+                    currentIndex: currentIndex,
+                    labelType: NavigationRailLabelType.selected,
+                    onDestinationSelected: (int index) {
+                      setState(() {
+                        currentIndex = index;
+                      });
+                    },
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tap the second destination.
+    await tester.tap(find.byIcon(Icons.bookmark_border));
+    expect(currentIndex, 1);
+
+    // The second destination animates in.
+    expect(_labelOpacity(tester, 'Def'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(_labelOpacity(tester, 'Def'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Def'), equals(1.0));
+
+    // Tap the third destination.
+    await tester.tap(find.byIcon(Icons.star_border));
+    expect(currentIndex, 2);
+
+    // The second destination animates out quickly and the third destination
+    // animates in.
+    expect(_labelOpacity(tester, 'Ghi'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(_labelOpacity(tester, 'Def'), equals(0.5));
+    expect(_labelOpacity(tester, 'Ghi'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(_labelOpacity(tester, 'Def'), equals(0.0));
+    expect(_labelOpacity(tester, 'Ghi'), equals(0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(_labelOpacity(tester, 'Ghi'), equals(0.5));
+    await tester.pumpAndSettle();
+    expect(_labelOpacity(tester, 'Ghi'), equals(1.0));
   });
 
   testWidgets('Semantics - labelType=[none]', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        destinations: _testDestinations(),
+      ),
+    );
+
+    final TestSemantics expected = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          textDirection: TextDirection.ltr,
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.isSelected,
+                  ],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+//                  label: 'Abc\nTab 1 of 5',
+//                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+//                  label: 'Def\nTab 2 of 5',
+//                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+//                  label: 'Ghi\nTab 3 of 5',
+//                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+//                  label: 'Jkl\nTab 4 of 5',
+//                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+//                  label: 'Mno\nTab 5 of 5',
+//                  textDirection: TextDirection.ltr,
+                ),
+                TestSemantics(
+//                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+//                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: 'body',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 
   testWidgets('Semantics - labelType=[selected]', (WidgetTester tester) async {
@@ -889,7 +1266,7 @@ RenderBox _iconRenderBox(WidgetTester tester, IconData iconData) {
     find.descendant(
       of: find.byIcon(iconData),
       matching: find.byType(RichText),
-    ).first,
+    ),
   );
 }
 
@@ -898,7 +1275,7 @@ RenderBox _labelRenderBox(WidgetTester tester, String text) {
     find.descendant(
       of: find.text(text),
       matching: find.byType(RichText),
-    ).first,
+    ),
   );
 }
 
