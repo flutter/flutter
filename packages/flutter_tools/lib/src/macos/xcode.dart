@@ -406,15 +406,11 @@ class XCDevice {
       final String architecture = deviceProperties['architecture'] as String;
       try {
         cpuArchitecture = getIOSArchForName(architecture);
-      } on Exception {
-        // Fallback to default iOS architecture. Future-proof against a
-        // theoretical version of Xcode that changes this string to something
-        // slightly different like "ARM64".
+      } catch (error) {
+        // Fallback to default iOS architecture. Future-proof against a theoretical version
+        // of Xcode that changes this string to something slightly different like "ARM64".
         cpuArchitecture ??= defaultIOSArchs.first;
-        _logger.printError(
-          'Unknown architecture $architecture, defaulting to '
-          '${getNameForDarwinArch(cpuArchitecture)}',
-        );
+        _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
       }
     }
     return cpuArchitecture;

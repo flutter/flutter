@@ -98,8 +98,7 @@ class PackagesGetCommand extends FlutterCommand {
       );
       pubGetTimer.stop();
       flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');
-    // Not limiting to catching Exception because the exception is rethrown.
-    } catch (_) { // ignore: avoid_catches_without_on_clauses
+    } catch (_) {
       pubGetTimer.stop();
       flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'failure');
       rethrow;

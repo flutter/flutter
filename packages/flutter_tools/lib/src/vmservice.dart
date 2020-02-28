@@ -145,7 +145,7 @@ class VMService {
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } on Exception catch (e, st) {
+        } catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Sources Reload: $e\n$st');
         }
@@ -189,7 +189,7 @@ class VMService {
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } on Exception catch (e, st) {
+        } catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Sources Reload: $e\n$st');
         }
@@ -213,7 +213,7 @@ class VMService {
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
-        } on Exception catch (e, st) {
+        } catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Hot Restart: $e\n$st');
         }
@@ -266,7 +266,7 @@ class VMService {
             'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
         } on rpc.RpcException {
           rethrow;
-        } on Exception catch (e, st) {
+        } catch (e, st) {
           throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during expression compilation: $e\n$st');
         }
@@ -625,8 +625,7 @@ abstract class ServiceObject {
           updateFromMap(response);
           completer.complete(this);
         }
-      // Catches all exceptions to propagate to the completer.
-      } catch (e, st) { // ignore: avoid_catches_without_on_clauses
+      } catch (e, st) {
         completer.completeError(e, st);
       }
       _inProgressReload = null;
