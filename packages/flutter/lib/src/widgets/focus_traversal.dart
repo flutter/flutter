@@ -232,7 +232,6 @@ abstract class FocusTraversalPolicy extends Diagnosticable {
   /// items, since the default algorithm is not stable (items deemed to be equal
   /// can appear in arbitrary order, and change positions between sorts), whereas
   /// [mergeSort] is stable.
-  @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants);
 
   _FocusTraversalGroupMarker _getMarker(BuildContext context) {

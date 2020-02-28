@@ -17,7 +17,6 @@ class ExampleAutofillForm extends StatefulWidget {
   /// The [child] argument must not be null.
   const ExampleAutofillForm({
     Key key,
-    @required this.uniqueIdentifier,
     @required this.child,
     this.onWillPop,
     this.onChanged,
@@ -44,7 +43,6 @@ class ExampleAutofillForm extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  final String uniqueIdentifier;
   /// Enables the form to veto attempts by the user to dismiss the [ModalRoute]
   /// that contains the form.
   ///
@@ -76,9 +74,6 @@ class ExampleAutofillForm extends StatefulWidget {
 class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillScopeMixin implements AutofillScope {
   int _generation = 0;
 
-  @override
-  String get uniqueIdentifier => widget.uniqueIdentifier;
-
   final Map<String, AutofillClient> _fields = <String, AutofillClient>{};
 
   void register(AutofillClient client) {
@@ -87,13 +82,23 @@ class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillS
     assert(identifier != null);
     // Remove from and then put back to the Map,
     // because the order of the fields matters to autofill.
-    _fields.remove(identifier);
     _fields.putIfAbsent(identifier, () => client);
   }
 
   void unregister(String identifier) {
     _fields.remove(identifier);
     unregisterAutofillClient(identifier);
+  }
+
+  @override
+  Iterable<AutofillClient> sortClients(Iterable<AutofillClient> clients) {
+    final Map<FocusNode, AutofillClient> lookupMap = <FocusNode, AutofillClient>{};
+    for (final AutofillClient client in clients)
+      lookupMap[client.focusNode] = client;
+    return FocusTraversalGroup.of(context)
+      ?.sortDescendants(clients.map((AutofillClient client) => client.focusNode))
+      ?.map((FocusNode node) => lookupMap[node])
+      ?? clients;
   }
 
   @override
@@ -107,7 +112,6 @@ class ExampleAutofillFormState extends State<ExampleAutofillForm> with AutofillS
       ),
     );
   }
-
 }
 
 class _FormScope extends InheritedWidget {

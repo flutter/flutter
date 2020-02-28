@@ -50,8 +50,6 @@ mixin AutofillClientMixin implements AutofillClient {
 }
 
 abstract class AutofillScope {
-  String get uniqueIdentifier;
-
   AutofillClient getAutofillClient(String tag);
 
   // Updating TextInputConfiguration is not needed as far as autofill goes,
@@ -103,8 +101,6 @@ mixin AutofillScopeMixin implements AutofillScope {
   void registerAutofillClient(AutofillClient client) {
     final String identifier = client.uniqueIdentifier;
     assert(identifier != null);
-
-    _clients.remove(identifier);
     _clients.putIfAbsent(identifier, ()=>client);
   }
 
@@ -116,12 +112,17 @@ mixin AutofillScopeMixin implements AutofillScope {
   @override
   AutofillClient getAutofillClient(String tag) => _clients[tag];
 
+  @protected
+  Iterable<AutofillClient> sortClients(Iterable<AutofillClient> clients) => throw UnimplementedError();
+
   TextInputConnection attach(AutofillClient client) {
     assert(client != null);
+
     _textInputConnection = TextInput.attach(
       client,
       _AutofillScopeTextInputConfiguration(
-        allConfigurations: _clients.values.map((AutofillClient client) => client.textInputConfiguration),
+        allConfigurations: sortClients(_clients.values)
+          .map((AutofillClient client) => client.textInputConfiguration),
         currentClientConfiguration: client.textInputConfiguration,
       ),
     );

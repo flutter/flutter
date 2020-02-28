@@ -1129,6 +1129,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController _floatingCursorResetController;
 
   @override
+  FocusNode get focusNode => widget.focusNode;
+
+  @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
@@ -1173,6 +1176,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
       });
     }
+
+    final ExampleAutofillFormState newAutofillScope = currentAutofillScope;
+    if (_currentAutofillScope != newAutofillScope) {
+      _currentAutofillScope?.unregister(uniqueIdentifier);
+      _currentAutofillScope = newAutofillScope;
+      _currentAutofillScope?.register(this);
+    }
   }
 
   @override
@@ -1201,12 +1211,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _openInputConnection();
     }
 
-    final ExampleAutofillFormState newAutofillScope = currentAutofillScope;
-    if (_currentAutofillScope != newAutofillScope) {
-      _currentAutofillScope?.unregister(uniqueIdentifier);
-      _currentAutofillScope = newAutofillScope;
-      _currentAutofillScope?.register(this);
-    }
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in

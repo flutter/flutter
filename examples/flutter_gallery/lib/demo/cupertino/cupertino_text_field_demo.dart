@@ -172,7 +172,6 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
         ),
         child: CupertinoScrollbar(
           child: ExampleAutofillForm(
-            uniqueIdentifier: 'Form',
             child: ListView(
               children: <Widget>[
                 Padding(
