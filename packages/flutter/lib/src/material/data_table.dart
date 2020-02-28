@@ -47,6 +47,10 @@ class DataColumn {
   /// [Icon] (typically using size 18), or a [Row] with an icon and
   /// some text.
   ///
+  /// By default, this widget will only occupy the minimal space. If you want
+  /// it to take the entire remaining space, e.g. when you want to use [Center],
+  /// you can wrap it with an [Expanded].
+  ///
   /// The label should not include the sort indicator.
   final Widget label;
 
