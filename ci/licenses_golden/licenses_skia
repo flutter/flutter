@@ -1,4 +1,4 @@
-Signature: 650cd9dd753df7b9457490837d45ded4
+Signature: 951248f754fd1f3ba7f6b1cbbfcb609f
 
 UNUSED LICENSES:
 
@@ -3985,6 +3985,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrDeviceSpaceEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrDeviceSpaceEffect.h
