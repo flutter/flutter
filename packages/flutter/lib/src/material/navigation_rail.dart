@@ -4,9 +4,17 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../scheduler.dart';
+
+import 'color_scheme.dart';
+import 'ink_well.dart';
+import 'material.dart';
+import 'material_localizations.dart';
+import 'navigation_rail_theme.dart';
+import 'theme.dart';
+import 'theme_data.dart';
 
 /// A material widget that is meant to be displayed at the left or right of an
 /// app to navigate between a small number of views, typically between three and
@@ -300,13 +308,14 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final NavigationRailThemeData navigationRailTheme = Theme.of(context).navigationRailTheme;
+    final ThemeData theme = Theme.of(context);
+    final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? theme.colorScheme.surface;
     final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? 0;
-    final Color baseSelectedColor = Theme.of(context).colorScheme.primary;
-    final Color baseColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.64);
+    final Color baseSelectedColor = theme.colorScheme.primary;
+    final Color baseColor = theme.colorScheme.onSurface.withOpacity(0.64);
     final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
     final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
     final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14.0).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);

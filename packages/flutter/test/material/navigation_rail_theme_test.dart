@@ -47,18 +47,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Theme(
-            data: ThemeData(
-              navigationRailTheme: const NavigationRailThemeData(
-                backgroundColor: backgroundColor,
-                elevation: elevation,
-                selectedIconTheme: IconThemeData(color: selectedIconColor),
-                unselectedIconTheme: IconThemeData(color: unselectedIconColor),
-                selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
-                unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
-                groupAlignment: groupAlignment,
-                labelType: labelType,
-              ),
+          body: NavigationRailTheme(
+            data: const NavigationRailThemeData(
+              backgroundColor: backgroundColor,
+              elevation: elevation,
+              selectedIconTheme: IconThemeData(color: selectedIconColor),
+              unselectedIconTheme: IconThemeData(color: unselectedIconColor),
+              selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
+              unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
+              groupAlignment: groupAlignment,
+              labelType: labelType,
             ),
             child: NavigationRail(
               destinations: _destinations(),
@@ -91,18 +89,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Theme(
-            data: ThemeData(
-              navigationRailTheme: const NavigationRailThemeData(
-                backgroundColor: Color(0x00000099),
-                elevation: 5,
-                selectedIconTheme: IconThemeData(color: Color(0x00000098)),
-                unselectedIconTheme: IconThemeData(color: Color(0x00000097)),
-                selectedLabelTextStyle: TextStyle(fontSize: 9.0),
-                unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
-                groupAlignment: NavigationRailGroupAlignment.bottom,
-                labelType: NavigationRailLabelType.selected,
-              ),
+          body: NavigationRailTheme(
+            data: const NavigationRailThemeData(
+              backgroundColor: Color(0x00000099),
+              elevation: 5,
+              selectedIconTheme: IconThemeData(color: Color(0x00000098)),
+              unselectedIconTheme: IconThemeData(color: Color(0x00000097)),
+              selectedLabelTextStyle: TextStyle(fontSize: 9.0),
+              unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
+              groupAlignment: NavigationRailGroupAlignment.bottom,
+              labelType: NavigationRailLabelType.selected,
             ),
             child: NavigationRail(
               destinations: _destinations(),

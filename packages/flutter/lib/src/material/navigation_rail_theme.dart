@@ -163,3 +163,50 @@ class NavigationRailThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
   }
 }
+
+/// An inherited widget that defines background color, elevation, label text
+/// style, icon theme, group alignment, and label type parameters for
+/// [NavigationRail]s in this widget's subtree.
+///
+/// Values specified here are used for [NavigationRail] properties that are not
+/// given an explicit non-null value.
+class NavigationRailTheme extends InheritedTheme {
+  /// Creates a navigation rail theme that controls the
+  /// [NavigationRailThemeData] properties for a [NavigationRail].
+  ///
+  /// The data argument must not be null.
+  const NavigationRailTheme({
+    Key key,
+    @required this.data,
+    Widget child,
+  }) : assert(data != null), super(key: key, child: child);
+
+  /// Specifies the background color, elevation, label text style, icon theme,
+  /// group alignment, and label type and border values for descendant
+  /// [NavigationRail] widgets.
+  final NavigationRailThemeData data;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If there is no enclosing [NavigationRailTheme] widget, then
+  /// [ThemeData.navigationRailTheme] is used.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// NavigationRailTheme theme = NavigationRailTheme.of(context);
+  /// ```
+  static NavigationRailThemeData of(BuildContext context) {
+    final NavigationRailTheme navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
+    return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final NavigationRailTheme ancestorTheme = context.findAncestorWidgetOfExactType<NavigationRailTheme>();
+    return identical(this, ancestorTheme) ? child : NavigationRailTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
+}
