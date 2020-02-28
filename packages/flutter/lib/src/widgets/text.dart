@@ -142,9 +142,11 @@ class DefaultTextStyle extends InheritedTheme {
   /// [Text.maxLines].
   final int maxLines;
 
+  /// {@template flutter.widgets.text.DefaultTextStyle.tetWidthBasis}
   /// The strategy to use when calculating the width of the Text.
   ///
   /// See [TextWidthBasis] for possible values and their implications.
+  /// {@endtemplate}
   final TextWidthBasis textWidthBasis;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}

@@ -1582,9 +1582,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// See [DefaultTextStyle.maxLines] for more details.
   final int maxLines;
 
-  /// The strategy to use when calculating the width of the Text.
-  ///
-  /// See [TextWidthBasis] for possible values and their implications.
+  /// {@macro lutter.widgets.text.DefaultTextStyle.tetWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
