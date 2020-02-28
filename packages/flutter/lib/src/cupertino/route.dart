@@ -976,6 +976,7 @@ Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(builder != null);
   assert(useRootNavigator != null);
@@ -990,5 +991,6 @@ Future<T> showCupertinoDialog<T>({
     },
     transitionBuilder: _buildCupertinoDialogTransitions,
     useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
   );
 }

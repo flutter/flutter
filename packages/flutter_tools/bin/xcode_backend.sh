@@ -166,6 +166,11 @@ BuildApp() {
     icon_tree_shaker_flag="true"
   fi
 
+  dart_obfuscation_flag="false"
+  if [[ -n "$DART_OBFUSCATION" ]]; then
+    dart_obfuscation_flag="true"
+  fi
+
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                \
     ${verbose_flag}                                                       \
     ${flutter_engine_flag}                                                \
@@ -179,6 +184,7 @@ BuildApp() {
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                \
     -dTreeShakeIcons="${icon_tree_shaker_flag}"                           \
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
+    -dDartObfuscation="${dart_obfuscation_flag}"                          \
     -dEnableBitcode="${bitcode_flag}"                                     \
     "${build_mode}_ios_bundle_flutter_assets"
 

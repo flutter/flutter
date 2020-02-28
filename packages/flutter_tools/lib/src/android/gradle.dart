@@ -344,6 +344,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.treeShakeIcons) {
     command.add('-Ptree-shake-icons=true');
   }
+  if (androidBuildInfo.buildInfo.dartObfuscation) {
+    command.add('-Pdart-obfuscation=true');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;

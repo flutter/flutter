@@ -83,7 +83,13 @@ void main() {
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
-      when(linuxProject.pluginSymlinkDirectory).thenReturn(flutterProject.directory.childDirectory('linux').childDirectory('symlinks'));
+      final Directory linuxManagedDirectory = flutterProject.directory.childDirectory('linux').childDirectory('flutter');
+      final Directory linuxEphemeralDirectory = linuxManagedDirectory.childDirectory('ephemeral');
+      when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
+      when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
+      when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
+      when(linuxProject.makeFile).thenReturn(linuxManagedDirectory.parent.childFile('Makefile'));
+      when(linuxProject.generatedPluginMakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
 
       when(mockClock.now()).thenAnswer(
@@ -870,6 +876,51 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
+
+      testUsingContext('Injecting creates generated Linux registrant', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = linuxProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader.existsSync(), isTrue);
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux plugin makefile', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File pluginMakefile = linuxProject.generatedPluginMakeFile;
+
+        expect(pluginMakefile.existsSync(), isTrue);
+        final String contents = pluginMakefile.readAsStringSync();
+        expect(contents, contains('libapackage_plugin.so'));
+        // Verify all the variables the app-level Makefile rely on.
+        expect(contents, contains('PLUGIN_TARGETS='));
+        expect(contents, contains('PLUGIN_LIBRARIES='));
+        expect(contents, contains('PLUGIN_LDFLAGS='));
+        expect(contents, contains('PLUGIN_CPPFLAGS='));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
 
       testUsingContext('Injecting creates generated Windows registrant', () async {
         when(windowsProject.existsSync()).thenReturn(true);

@@ -17,6 +17,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
+import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
@@ -160,3 +161,6 @@ PlistParser _defaultInstance;
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
+
+/// The global template renderer
+TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

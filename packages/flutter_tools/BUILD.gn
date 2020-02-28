@@ -32,7 +32,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/mime",
     "//third_party/dart-pkg/pub/multi_server_socket",
     "//third_party/dart-pkg/pub/multicast_dns",
-    "//third_party/dart-pkg/pub/mustache",
+    "//third_party/dart-pkg/pub/mustache_template",
     "//third_party/dart-pkg/pub/native_stack_traces",
     "//third_party/dart-pkg/pub/node_preamble",
     "//third_party/dart-pkg/pub/package_config",

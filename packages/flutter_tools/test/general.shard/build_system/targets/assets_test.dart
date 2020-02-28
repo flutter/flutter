@@ -90,18 +90,4 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => platform,
   });
-
-  testUsingContext('FlutterPlugins updates required files as needed', () async {
-    fileSystem.file('pubspec.yaml')
-      ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
-
-    await const FlutterPlugins().build(Environment.test(
-      fileSystem.currentDirectory,
-    ));
-
-    expect(fileSystem.file('.flutter-plugins'), exists);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-  });
 }
