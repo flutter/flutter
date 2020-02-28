@@ -73,17 +73,12 @@ void main() {
   test('breakpoints are hit after hot reload', () async {
     Isolate isolate;
     final Completer<void> sawTick1 = Completer<void>();
-    final Completer<void> sawTick3 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
         if (line.contains('((((TICK 1))))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
-        }
-        if (line.contains('((((TICK 3))))')) {
-          expect(sawTick3.isCompleted, isFalse);
-          sawTick3.complete();
         }
         if (line.contains('The application is paused in the debugger on a breakpoint.')) {
           expect(sawDebuggerPausedMessage.isCompleted, isFalse);
@@ -112,7 +107,6 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
-    await sawTick3.future; // this should happen before it pauses
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
     await sawDebuggerPausedMessage.future;
