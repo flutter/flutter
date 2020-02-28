@@ -58,7 +58,7 @@ class SemanticsUpdateBuilder
                           std::string hint,
                           int overrideId);
 
-  fml::RefPtr<SemanticsUpdate> build();
+  void build(Dart_Handle semantics_update_handle);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
