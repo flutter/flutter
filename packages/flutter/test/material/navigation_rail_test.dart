@@ -1,8 +1,11 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -10,7 +13,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -22,7 +25,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -31,13 +34,20 @@ void main() {
     expect(find.byIcon(Icons.star_border), findsOneWidget);
     expect(find.byIcon(Icons.hotel), findsOneWidget);
     expect(find.byIcon(Icons.remove_circle), findsOneWidget);
+
+    // When there are no labels, a 0 opacity label is still shown for semantics.
+    expect(_labelOpacity(tester, 'Abc'), 0);
+    expect(_labelOpacity(tester, 'Def'), 0);
+    expect(_labelOpacity(tester, 'Ghi'), 0);
+    expect(_labelOpacity(tester, 'Jkl'), 0);
+    expect(_labelOpacity(tester, 'Mno'), 0);
   });
 
   testWidgets('Renders icons and labels - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -53,13 +63,21 @@ void main() {
     expect(find.text('Ghi'), findsOneWidget);
     expect(find.text('Jkl'), findsOneWidget);
     expect(find.text('Mno'), findsOneWidget);
+
+    // When displaying all labels, there is no opacity.
+    expect(_opacityAboveLabel('Abc'), findsNothing);
+    expect(_opacityAboveLabel('Def'), findsNothing);
+    expect(_opacityAboveLabel('Ghi'), findsNothing);
+    expect(_opacityAboveLabel('Jkl'), findsNothing);
+    expect(_opacityAboveLabel('Mno'), findsNothing);
+
   });
 
   testWidgets('Renders icons and selected label - [labelType]=selected', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
     );
@@ -70,6 +88,7 @@ void main() {
     expect(find.byIcon(Icons.hotel), findsOneWidget);
     expect(find.byIcon(Icons.remove_circle), findsOneWidget);
 
+    // Only the selected label is visible.
     expect(_labelOpacity(tester, 'Abc'), 1);
     expect(_labelOpacity(tester, 'Def'), 0);
     expect(_labelOpacity(tester, 'Ghi'), 0);
@@ -81,7 +100,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.none,
       ),
     );
@@ -119,7 +138,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.none,
       ),
     );
@@ -157,7 +176,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.none,
       ),
     );
@@ -192,7 +211,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
     );
@@ -231,7 +250,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
     );
@@ -271,7 +290,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
     );
@@ -311,7 +330,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -366,7 +385,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -422,7 +441,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -478,7 +497,7 @@ void main() {
       tester,
       navigationRail: NavigationRail(
         preferredWidth: 56,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -513,7 +532,7 @@ void main() {
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
         preferredWidth: 56,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -550,7 +569,7 @@ void main() {
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
         preferredWidth: 56,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -586,7 +605,7 @@ void main() {
       tester,
       navigationRail: NavigationRail(
         groupAlignment: NavigationRailGroupAlignment.top,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -617,7 +636,7 @@ void main() {
       tester,
       navigationRail: NavigationRail(
         groupAlignment: NavigationRailGroupAlignment.center,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -648,7 +667,7 @@ void main() {
       tester,
       navigationRail: NavigationRail(
         groupAlignment: NavigationRailGroupAlignment.bottom,
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -680,7 +699,7 @@ void main() {
       navigationRail: NavigationRail(
         leading: FloatingActionButton(onPressed: () { }),
         trailing: FloatingActionButton(onPressed: () { }),
-        destinations: _testDestinations(),
+        destinations: _destinations(),
       ),
     );
 
@@ -703,7 +722,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
-                    destinations: _testDestinations(),
+                    destinations: _destinations(),
                     extended: extended,
                   ),
                   const Expanded(
@@ -790,7 +809,7 @@ void main() {
                   textDirection: TextDirection.rtl,
                   children: <Widget>[
                     NavigationRail(
-                      destinations: _testDestinations(),
+                      destinations: _destinations(),
                       extended: extended,
                     ),
                     const Expanded(
@@ -879,7 +898,7 @@ void main() {
                 children: <Widget>[
                   NavigationRail(
                     extendedWidth: 300,
-                    destinations: _testDestinations(),
+                    destinations: _destinations(),
                     extended: extended,
                   ),
                   const Expanded(
@@ -925,7 +944,7 @@ void main() {
                         return FloatingActionButton(onPressed: () { },);
                       },
                     ),
-                    destinations: _testDestinations(),
+                    destinations: _destinations(),
                     extended: extended,
                   ),
                   const Expanded(
@@ -956,7 +975,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         selectedLabelTextStyle: selectedTextStyle,
         unselectedLabelTextStyle: unselectedTextStyle,
@@ -978,7 +997,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         selectedIconTheme: selectedIconTheme,
         unselectedIconTheme: unselectedIconTheme,
@@ -997,7 +1016,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -1007,7 +1026,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         backgroundColor: Colors.green,
       ),
@@ -1020,7 +1039,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
     );
@@ -1030,7 +1049,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         elevation: 7,
       ),
@@ -1045,7 +1064,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        destinations: _testDestinations(),
+        destinations: _destinations(),
         onDestinationSelected: (int index) {
           currentIndex = index;
         },
@@ -1071,7 +1090,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
-                    destinations: _testDestinations(),
+                    destinations: _destinations(),
                     currentIndex: currentIndex,
                     labelType: NavigationRailLabelType.selected,
                     onDestinationSelected: (int index) {
@@ -1170,7 +1189,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
-                    destinations: _testDestinations(),
+                    destinations: _destinations(),
                     extended: extended,
                   ),
                   const Expanded(
@@ -1249,7 +1268,7 @@ TestSemantics _expectedSemantics() {
   );
 }
 
-List<NavigationRailDestination> _testDestinations() {
+List<NavigationRailDestination> _destinations() {
   return const <NavigationRailDestination>[
     NavigationRailDestination(
       icon: Icon(Icons.favorite_border),
@@ -1321,7 +1340,7 @@ Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelTy
           body: Row(
             children: <Widget>[
               NavigationRail(
-                destinations: _testDestinations(),
+                destinations: _destinations(),
                 labelType: labelType,
               ),
               const Expanded(
@@ -1362,7 +1381,14 @@ TextStyle _iconStyle(WidgetTester tester, IconData icon) {
   ).text.style;
 }
 
-// Only valid when labelType = selected.
+Finder _opacityAboveLabel(String text) {
+  return find.ancestor(
+    of: find.text(text),
+    matching: find.byType(Opacity),
+  );
+}
+
+// Only valid when labelType != all.
 double _labelOpacity(WidgetTester tester, String text) {
   final Opacity opacityWidget = tester.firstWidget<Opacity>(
     find.ancestor(

@@ -1,4 +1,7 @@
-import 'dart:math' as math;
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -13,12 +16,12 @@ class NavigationRail extends StatefulWidget {
     this.extended,
     this.leading,
     this.trailing,
-    this.destinations,
+    @required this.destinations,
     this.currentIndex = 0,
     this.onDestinationSelected,
     this.elevation,
-    this.groupAlignment = NavigationRailGroupAlignment.top,
-    this.labelType = NavigationRailLabelType.none,
+    this.groupAlignment,
+    this.labelType,
     this.unselectedLabelTextStyle,
     this.selectedLabelTextStyle,
     this.unselectedIconTheme,
@@ -204,8 +207,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final Color baseColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.64);
     final IconThemeData unselectedIconTheme = const IconThemeData.fallback().copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
     final IconThemeData selectedIconTheme = const IconThemeData.fallback().copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
-    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
-    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
+    final TextStyle unselectedLabelTextStyle = TextStyle(color: baseColor, fontSize: 14.0).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
+    final TextStyle selectedLabelTextStyle = TextStyle(color: baseSelectedColor, fontSize: 14.0).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
     final NavigationRailGroupAlignment groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? NavigationRailGroupAlignment.top;
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? NavigationRailLabelType.none;
     final MainAxisAlignment destinationsAlignment = _resolveGroupAlignment(groupAlignment);
@@ -501,7 +504,7 @@ class _RailDestinationBox extends StatelessWidget {
               onTap: onTap,
               onHover: (_) {},
               highlightShape: BoxShape.rectangle,
-              borderRadius: BorderRadius.all(Radius.circular(width / 2)),
+              borderRadius: BorderRadius.all(Radius.circular(width / 2.0)),
               containedInkWell: true,
               splashColor: colors.primary.withOpacity(0.12),
               hoverColor: colors.primary.withOpacity(0.04),
@@ -528,14 +531,14 @@ class _RailDestinationBox extends StatelessWidget {
 
   double _normalLabelFadeOutValue() {
     if (destinationAnimation.value > 0.75) {
-      return (destinationAnimation.value - 0.75) * 4;
+      return (destinationAnimation.value - 0.75) * 4.0;
     } else {
       return 0;
     }
   }
   
   double _extendedLabelFadeValue() {
-    return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4 : 1;
+    return extendedTransitionAnimation.value < 0.25 ? extendedTransitionAnimation.value * 4.0 : 1.0;
   }
 
 }
@@ -642,9 +645,9 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
-const double _railWidth = 72;
-const double _extendedRailWidth = 256;
-const double _horizontalDestinationPadding = 8;
-const double _verticalDestinationPaddingNoLabel = 24;
-const double _verticalDestinationPaddingWithLabel = 16;
-const Widget _verticalSpacer = SizedBox(height: 8);
+const double _railWidth = 72.0;
+const double _extendedRailWidth = 256.0;
+const double _horizontalDestinationPadding = 8.0;
+const double _verticalDestinationPaddingNoLabel = 24.0;
+const double _verticalDestinationPaddingWithLabel = 16.0;
+const Widget _verticalSpacer = SizedBox(height: 8.0);
