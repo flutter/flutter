@@ -151,7 +151,8 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            } catch (error) {
+            // This catch rethrows, so doesn't need to catch only Exception.
+            } catch (error) { // ignore: avoid_catches_without_on_clauses
               _printBufferedErrors(context);
               rethrow;
             }
