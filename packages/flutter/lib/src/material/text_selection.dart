@@ -50,15 +50,13 @@ class _TextSelectionToolbar extends StatefulWidget {
 }
 
 class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with TickerProviderStateMixin {
-  // Whether or not the overflow menu is open.  When it is closed, the menu
+  // Whether or not the overflow menu is open. When it is closed, the menu
   // items that don't overflow are shown. When it is open, only the overflowing
   // menu items are shown.
   bool _overflowOpen = false;
 
   FlatButton _getItem(VoidCallback onPressed, String label) {
-    if (onPressed == null) {
-      return null;
-    }
+    assert(onPressed != null);
     return FlatButton(
       child: Text(label),
       onPressed: () {
@@ -232,14 +230,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       }
     });
 
-    if (_intrinsicWidth == null) {
-      _intrinsicWidth = width;
-    }
+    _intrinsicWidth ??= width;
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
     final RenderBox navButton = firstChild;
-    if (_lastIndexThatFits != -1 && _lastIndexThatFits == childCount - 2
+    if (_lastIndexThatFits != -1
+      && _lastIndexThatFits == childCount - 2
       && width - navButton.size.width <= constraints.maxWidth) {
       _lastIndexThatFits = -1;
     }
@@ -255,13 +252,10 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
-      // The navigation button is placed after iterating all children.
-      if (renderObjectChild == firstChild) {
-        return;
-      }
-
-      // No need to place children that won't be painted.
-      if (!_shouldPaintChild(renderObjectChild, i)) {
+      // The navigation button is placed after iterating all children, and there
+      // is no need to place children that won't be painted.
+      if (renderObjectChild == firstChild
+        || !_shouldPaintChild(renderObjectChild, i)) {
         return;
       }
 
