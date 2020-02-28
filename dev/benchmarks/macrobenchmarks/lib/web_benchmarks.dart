@@ -17,6 +17,10 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
+/// List of all benchmarks that run in the devicelab.
+///
+/// When adding a new benchmark, add it to this map. Make sure that the name
+/// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect(),
