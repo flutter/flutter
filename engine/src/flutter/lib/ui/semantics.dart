@@ -805,7 +805,12 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   ///
   /// The returned object can be passed to [Window.updateSemantics] to actually
   /// update the semantics retained by the system.
-  SemanticsUpdate build() native 'SemanticsUpdateBuilder_build';
+  SemanticsUpdate build() {
+    final SemanticsUpdate semanticsUpdate = SemanticsUpdate._();
+    _build(semanticsUpdate);
+    return semanticsUpdate;
+  }
+  void _build(SemanticsUpdate outSemanticsUpdate) native 'SemanticsUpdateBuilder_build';
 }
 
 /// An opaque object representing a batch of semantics updates.
