@@ -225,6 +225,9 @@ class _BottomSheetState extends State<BottomSheet> {
         details,
         isClosing: isClosing,
       );
+    }
+
+    if (isClosing) {
       widget.onClosing();
     }
   }
