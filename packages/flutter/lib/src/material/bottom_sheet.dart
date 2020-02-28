@@ -327,7 +327,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
-  Curve animationCurve = _modalBottomSheetCurve;
+  ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
@@ -496,7 +496,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// animation at the time when the finger was released.
 ///
 /// The [startingPoint] and [curve] arguments must not be null.
-class BottomSheetSuspendedCurve extends Curve {
+class BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
   const BottomSheetSuspendedCurve(
     this.startingPoint, {
