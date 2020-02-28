@@ -348,7 +348,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   void handleDragEnd(DragEndDetails details, {bool isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = BottomSheetSuspendedCurve(
+    animationCurve = _BottomSheetSuspendedCurve(
       widget.route.animation.value,
       curve: _modalBottomSheetCurve,
     );
@@ -480,6 +480,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 }
 
+// TODO(guidezpl): Look into making this public. A copy of this class is in scaffold.dart, for now.
 /// A curve that progresses linearly until a specified [startingPoint], at which
 /// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
 /// but will use [startingPoint] as the Y position.
@@ -496,9 +497,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// animation at the time when the finger was released.
 ///
 /// The [startingPoint] and [curve] arguments must not be null.
-class BottomSheetSuspendedCurve extends ParametricCurve<double> {
+class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
-  const BottomSheetSuspendedCurve(
+  const _BottomSheetSuspendedCurve(
     this.startingPoint, {
     this.curve = Curves.easeOutCubic,
   }) : assert(startingPoint != null),
