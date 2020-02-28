@@ -54,7 +54,7 @@ void main() {
       expect(portForwarder.forwardedPorts.length, 2);
       try {
         await portForwarder.dispose();
-      } catch (e) {
+      } on Exception catch (e) {
         fail('Encountered exception: $e');
       }
       expect(portForwarder.forwardedPorts.length, 0);

@@ -62,7 +62,8 @@ Future<int> run(
       try {
         await runner.run(args);
         return await _exit(0);
-      } catch (error, stackTrace) {
+      // This catches all exceptions to send to crash logging, etc.
+      } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
         firstStackTrace = stackTrace;
         return await _handleToolError(
@@ -135,7 +136,8 @@ Future<int> _handleToolError(
       await _informUserOfCrash(args, error, stackTrace, errorString);
 
       return _exit(1);
-    } catch (error) {
+    // This catch catches all exceptions to ensure the message below is printed.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
         'please let us know at https://github.com/flutter/flutter/issues.\n',
@@ -243,7 +245,7 @@ Future<String> _doctorText() async {
     );
 
     return logger.statusText;
-  } catch (error, trace) {
+  } on Exception catch (error, trace) {
     return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
   }
 }
@@ -271,7 +273,9 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    } catch (error, stackTrace) {
+    // This catches all exceptions becauce the error is propagated on the
+    // completer.
+    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);
     }
   });

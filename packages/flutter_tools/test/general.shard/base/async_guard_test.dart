@@ -197,7 +197,7 @@ void main() {
         );
         try {
           await f;
-        } catch (e) {
+        } on String {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
@@ -235,7 +235,7 @@ void main() {
         );
         try {
           await f;
-        } catch (e) {
+        } on String {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
@@ -275,7 +275,7 @@ void main() {
         );
         try {
           await f;
-        } catch (e) {
+        } on String {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
