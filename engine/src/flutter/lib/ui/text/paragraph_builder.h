@@ -69,7 +69,7 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
                              double baseline_offset,
                              unsigned baseline);
 
-  fml::RefPtr<Paragraph> build();
+  void build(Dart_Handle paragraph_handle);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

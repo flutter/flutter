@@ -493,8 +493,8 @@ Dart_Handle ParagraphBuilder::addPlaceholder(double width,
   return Dart_Null();
 }
 
-fml::RefPtr<Paragraph> ParagraphBuilder::build() {
-  return Paragraph::Create(m_paragraphBuilder->Build());
+void ParagraphBuilder::build(Dart_Handle paragraph_handle) {
+  Paragraph::Create(paragraph_handle, m_paragraphBuilder->Build());
 }
 
 }  // namespace flutter

@@ -59,17 +59,4 @@ struct LineMetrics {
 
 }  // namespace flutter
 
-namespace tonic {
-template <>
-struct DartConverter<flutter::LineMetrics> {
-  static Dart_Handle ToDart(const flutter::LineMetrics& val);
-};
-
-template <>
-struct DartListFactory<flutter::LineMetrics> {
-  static Dart_Handle NewList(intptr_t length);
-};
-
-}  // namespace tonic
-
 #endif  // FLUTTER_LIB_UI_TEXT_LINE_METRICS_H_
