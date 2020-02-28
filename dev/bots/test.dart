@@ -117,7 +117,11 @@ Future<void> main(List<String> args) async {
       'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
       'tool_coverage': _runToolCoverage,
       'tool_tests': _runToolTests,
-      'web_tests': _runWebUnitTests,
+      'web_tests01': _runWebUnitTests,
+      'web_tests02': _runWebUnitTests,
+      'web_tests03': _runWebUnitTests,
+      'web_tests04': _runWebUnitTests,
+      'web_tests05': _runWebUnitTests,
       'web_integration_tests': _runWebIntegrationTests,
     });
   } on ExitException catch (error) {
