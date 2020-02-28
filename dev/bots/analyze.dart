@@ -1010,7 +1010,7 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   Hash256(0x40054377E1E084F4, 0x4F4410CE8F44C210, 0xABA945DFC55ED0EF, 0x23BDF9469E32F8D3),
 
   // dev/integration_tests/flutter_driver_screenshot_test/test_driver/goldens/red_square_image/iPhone7,2.png
-  Hash256(0x7F9D27C7BC418284, 0x01214E21CA886B2F, 0x40D9DA2B31AE7754, 0x71D68375F9C8A824),
+  Hash256(0xD2ACF0A46A7C5A21, 0x074184D6AE493135, 0xCEE837F2C606128F, 0x0F85519DB57F7A8F),
 
   // examples/flutter_view/assets/flutter-mark-square-64.png
   // examples/platform_view/assets/flutter-mark-square-64.png
