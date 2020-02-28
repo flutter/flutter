@@ -1454,6 +1454,9 @@ class Paint {
 
   @override
   String toString() {
+    if (const bool.fromEnvironment('dart.vm.product', defaultValue: false)) {
+      return super.toString();
+    }
     final StringBuffer result = StringBuffer();
     String semicolon = '';
     result.write('Paint(');
