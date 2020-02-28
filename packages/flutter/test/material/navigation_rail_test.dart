@@ -1128,78 +1128,125 @@ void main() {
   testWidgets('Semantics - labelType=[none]', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        destinations: _testDestinations(),
-      ),
-    );
+    await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.none);
 
-    final TestSemantics expected = TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
-          textDirection: TextDirection.ltr,
-          children: <TestSemantics>[
-            TestSemantics(
-              children: <TestSemantics>[
-                TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isFocusable,
-                    SemanticsFlag.isSelected,
-                  ],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-//                  label: 'Abc\nTab 1 of 5',
-//                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-//                  label: 'Def\nTab 2 of 5',
-//                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-//                  label: 'Ghi\nTab 3 of 5',
-//                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-//                  label: 'Jkl\nTab 4 of 5',
-//                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-//                  label: 'Mno\nTab 5 of 5',
-//                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-//                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-//                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: 'body',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-    expect(semantics, hasSemantics(expected, ignoreId: true, ignoreTransform: true, ignoreRect: true));
+    expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });
 
   testWidgets('Semantics - labelType=[selected]', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.selected);
+
+    expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 
   testWidgets('Semantics - labelType=[all]', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.all);
+
+    expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 
   testWidgets('Semantics - extended', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    bool extended = false;
+    StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            stateSetter = setState;
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    destinations: _testDestinations(),
+                    extended: extended,
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    stateSetter(() {
+      extended = true;
+    });
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(_expectedSemantics(), ignoreId: true, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
+}
+
+TestSemantics _expectedSemantics() {
+  return TestSemantics.root(
+    children: <TestSemantics>[
+      TestSemantics(
+        textDirection: TextDirection.ltr,
+        children: <TestSemantics>[
+          TestSemantics(
+            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isSelected,
+                  SemanticsFlag.isFocusable,
+                ],
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'Abc\nTab 1 of 5',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'Def\nTab 2 of 5',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'Ghi\nTab 3 of 5',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'Jkl\nTab 4 of 5',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                actions: <SemanticsAction>[SemanticsAction.tap],
+                label: 'Mno\nTab 5 of 5',
+                textDirection: TextDirection.ltr,
+              ),
+              TestSemantics(
+                label: 'body',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 List<NavigationRailDestination> _testDestinations() {
@@ -1256,6 +1303,33 @@ Future<void> _pumpNavigationRail(
             ),
           );
         },
+      ),
+    ),
+  );
+}
+
+Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelType labelType }) async {
+  await tester.pumpWidget(
+    Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: <Widget>[
+              NavigationRail(
+                destinations: _testDestinations(),
+                labelType: labelType,
+              ),
+              const Expanded(
+                child: Text('body'),
+              ),
+            ],
+          ),
+        ),
       ),
     ),
   );

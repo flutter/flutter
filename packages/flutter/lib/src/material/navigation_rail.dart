@@ -618,8 +618,9 @@ class NavigationRailDestination {
 
   /// The label for the destination.
   ///
-  /// The label should be provided when used with the [NavigationRail], unless
-  /// [NavigationRailLabelType.none] used and the rail will not be extended.
+  /// The label should be provided when used with the [NavigationRail]. When
+  /// the labelType is [NavigationRailLabelType.none] and the rail is not
+  /// extended, then it can be null, but should be used for semantics.
   final Widget label;
 }
 
