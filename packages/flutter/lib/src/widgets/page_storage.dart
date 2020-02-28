@@ -137,11 +137,8 @@ class PageStorageBucket {
 ///
 /// ```dart
 /// void main() => runApp(MyApp());
-/// 
-/// class MyApp extends StatelessWidget {
-///   final PageStorageBucket _bucket = PageStorageBucket();
-///   final PageStorageKey mykey = PageStorageKey('counter');
 ///
+/// class MyApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
@@ -149,65 +146,87 @@ class PageStorageBucket {
 ///       theme: ThemeData(
 ///         primarySwatch: Colors.blue,
 ///       ),
-///       home: PageStorage(
-///         child: MyHomePage(title: 'Flutter Demo Home Page'),
-///         bucket: _bucket,
-///         key: mykey,
-///       ),
+///       home: MyHomePage(),
 ///     );
 ///   }
 /// }
 ///
 /// class MyHomePage extends StatefulWidget {
-///   MyHomePage({Key key, this.title}) : super(key: key);
-///   final String title;
-///
 ///   @override
 ///   _MyHomePageState createState() => _MyHomePageState();
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   @override
-///   void initState() {
-///     PageStorage.of(context)
-///         .writeState(context, 0, identifier: ValueKey('counter'));
-///     super.initState();
-///   }
-///
-///   void _incrementCounter() {
-///     var counterNumber = PageStorage.of(context)
-///             .readState(context, identifier: ValueKey('counter')) +
-///         1;
-///     PageStorage.of(context)
-///         .writeState(context, counterNumber, identifier: ValueKey('counter'));
-///     setState(() {});
-///   }
+///   static final Key keyOne = PageStorageKey('pageOne');
+///   static final Key keyTwo = PageStorageKey('pageTwo');
+///   final PageStorageBucket bucket = PageStorageBucket();
+///   static final ColorBoxPage one = ColorBoxPage(
+///     key: keyOne,
+///   );
+///   static final ColorBoxPage two = ColorBoxPage(
+///     key: keyTwo,
+///   );
+///   List<Widget> pages = [one, two];
+///   Widget currentPage = one;
+///   int currentTab = 0;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Scaffold(
 ///       appBar: AppBar(
-///         title: Text(widget.title),
+///         title: Text("Persistance Example"),
 ///       ),
-///       body: Center(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             Text(
-///               'You have pushed the button this many times:',
-///             ),
-///             Text(
-///                 PageStorage.of(context)
-///                     .readState(context, identifier: ValueKey('counter'))
-///                     .toString(),
-///                 style: Theme.of(context).textTheme.headline5),
-///           ],
+///       body: PageStorage(
+///         child: currentPage,
+///         bucket: bucket,
+///       ),
+///       bottomNavigationBar: BottomNavigationBar(
+///         currentIndex: currentTab,
+///         onTap: (int index) {
+///           setState(() {
+///             currentTab = index;
+///             currentPage = pages[index];
+///           });
+///         },
+///         items: <BottomNavigationBarItem>[
+///           BottomNavigationBarItem(
+///             icon: Icon(Icons.home),
+///             title: Text('Page1'),
+///           ),
+///           BottomNavigationBarItem(
+///             icon: Icon(Icons.settings),
+///             title: Text("Page2"),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// class ColorBoxPage extends StatefulWidget {
+///   ColorBoxPage({
+///     Key key,
+///   }) : super(key: key);
+///
+///   @override
+///   ColorBoxPageState createState() => ColorBoxPageState();
+/// }
+///
+/// class ColorBoxPageState extends State<ColorBoxPage> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return ListView.builder(
+///       itemExtent: 250.0,
+///       itemBuilder: (context, index) => Container(
+///         padding: EdgeInsets.all(10.0),
+///         child: Material(
+///           elevation: 4.0,
+///           borderRadius: BorderRadius.circular(5.0),
+///           color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
+///           child: Center(
+///             child: Text(index.toString()),
+///           ),
 ///         ),
-///       ),
-///       floatingActionButton: FloatingActionButton(
-///         onPressed: _incrementCounter,
-///         tooltip: 'Increment',
-///         child: Icon(Icons.add),
 ///       ),
 ///     );
 ///   }
