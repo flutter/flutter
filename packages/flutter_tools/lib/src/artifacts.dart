@@ -40,6 +40,7 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  flutterWebLibrariesJson,
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
   iosDeploy,
@@ -134,6 +135,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterWebLibrariesJson:
+      return 'libraries.json';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -333,6 +336,8 @@ class CachedArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
+      case Artifact.flutterWebLibrariesJson:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
@@ -536,6 +541,8 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
+      case Artifact.flutterWebLibrariesJson:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
