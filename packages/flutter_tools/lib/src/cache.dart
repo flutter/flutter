@@ -403,7 +403,7 @@ class Cache {
     if (!cachedFile.existsSync()) {
       try {
         await downloadFile(url, cachedFile);
-      } on Exception catch (e) {
+      } catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
     }
@@ -597,8 +597,7 @@ abstract class CachedArtifact extends ArtifactSet {
         try {
           await cache.downloadFile(url, tempFile);
           status.stop();
-        // The exception is rethrown, so don't catch only Exceptions.
-        } catch (exception) { // ignore: avoid_catches_without_on_clauses
+        } catch (exception) {
           status.cancel();
           rethrow;
         }
