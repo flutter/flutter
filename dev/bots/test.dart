@@ -590,7 +590,8 @@ Future<void> _runWebUnitTests() async {
 Future<void> _runWebIntegrationTests() async {
   await _runWebStackTraceTest('profile');
   await _runWebStackTraceTest('release');
-  await _runWebDebugStackTraceTest();
+  await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('test/test.dart');
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -636,7 +637,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
-Future<void> _runWebDebugStackTraceTest() async {
+Future<void> _runWebDebugTest(String target) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final CapturedOutput output = CapturedOutput();
   bool success = false;
@@ -648,7 +649,8 @@ Future<void> _runWebDebugStackTraceTest() async {
       '-d',
       'chrome',
       '--web-run-headless',
-      'lib/stack_trace.dart',
+      '-t',
+      target,
     ],
     output: output,
     outputMode: OutputMode.capture,
