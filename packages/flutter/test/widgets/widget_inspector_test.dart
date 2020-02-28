@@ -2274,7 +2274,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('ext.flutter.inspector.structuredErrors', (WidgetTester tester) async {
       List<Map<Object, Object>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
@@ -2433,7 +2433,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('Screenshot composited transforms - with rotations', (WidgetTester tester) async {
       final LayerLink link = LayerLink();
@@ -2539,7 +2539,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(identical(key2.currentContext.findRenderObject(), box2), isTrue);
       expect(box1.localToGlobal(Offset.zero), equals(position1));
       expect(box2.localToGlobal(Offset.zero), equals(position2));
-    }, skip: isBrowser);
+    });
 
     testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
       await tester.pumpWidget(

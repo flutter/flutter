@@ -1451,7 +1451,7 @@ void main() {
         matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
       );
     }
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
