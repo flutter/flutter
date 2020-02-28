@@ -471,6 +471,381 @@ task:
     - name: web_tests15-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
+    ######################### 16
+    - name: web_tests16-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests16-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 17
+    - name: web_tests17-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests17-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 18
+    - name: web_tests18-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests18-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 19
+    - name: web_tests19-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests19-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 20
+    - name: web_tests20-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests20-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 21
+    - name: web_tests21-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests21-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 22
+    - name: web_tests22-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests22-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 23
+    - name: web_tests23-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests23-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 24
+    - name: web_tests24-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests24-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 25
+    - name: web_tests25-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests25-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 26
+    - name: web_tests26-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests26-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 27
+    - name: web_tests27-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests27-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 28
+    - name: web_tests28-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests28-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 29
+    - name: web_tests29-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests29-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ######################### 30
+    - name: web_tests30-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests30-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
   # stable). Note: tagging a commit and pushing to a release branch are
