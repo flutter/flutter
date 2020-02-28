@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/features.dart';
 import 'package:platform/platform.dart';
-
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/linux/linux_workflow.dart';
 
 import '../../src/common.dart';
@@ -24,7 +23,7 @@ void main() {
   );
   final FeatureFlags disabledFlags = TestFeatureFlags(isLinuxEnabled: false);
 
-  test('Applies to linux platform', () {
+  testWithoutContext('Applies to Linux platform', () {
     final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
       platform: linux,
       featureFlags: enabledFlags,
@@ -36,7 +35,7 @@ void main() {
     expect(linuxWorkflow.canListEmulators, false);
   });
 
-  test('Does not apply to non-linux platform', () {
+  testWithoutContext('Does not apply to non-Linux platform', () {
     final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
       platform: notLinux,
       featureFlags: enabledFlags,
@@ -48,7 +47,7 @@ void main() {
     expect(linuxWorkflow.canListEmulators, false);
   });
 
-  test('Does not apply when feature is disabled', () {
+  testWithoutContext('Does not apply when the Linux desktop feature is disabled', () {
     final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
       platform: linux,
       featureFlags: disabledFlags,
