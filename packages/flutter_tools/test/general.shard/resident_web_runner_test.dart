@@ -799,7 +799,7 @@ void main() {
       ))
     ));
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(MockLogger()),
+    Logger: () => DelegateLogger(BufferLogger.test()),
     ChromeLauncher: () => MockChromeLauncher(),
   }));
 
@@ -838,7 +838,7 @@ void main() {
       ))
     ));
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(MockLogger())
+    Logger: () => DelegateLogger(BufferLogger.test())
   }));
 
   test('Successfully turns WebSocketException into ToolExit', () => testbed.run(() async {
@@ -963,6 +963,5 @@ class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
-class MockLogger extends Mock implements Logger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}

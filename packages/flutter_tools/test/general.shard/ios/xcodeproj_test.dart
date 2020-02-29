@@ -39,8 +39,7 @@ void main() {
     fileSystem = MemoryFileSystem();
     fileSystem.file(xcodebuild).createSync(recursive: true);
     terminal = MockAnsiTerminal();
-    logger = BufferLogger(
-      outputPreferences: OutputPreferences.test(),
+    logger = BufferLogger.test(
       terminal: terminal
     );
     xcodeProjectInterpreter = XcodeProjectInterpreter(
@@ -755,7 +754,6 @@ FakePlatform fakePlatform(String name) {
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockLogger extends Mock implements Logger {}
 class MockAnsiTerminal extends Mock implements AnsiTerminal {
   @override
   bool get supportsColor => false;
