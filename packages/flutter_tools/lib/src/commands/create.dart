@@ -398,6 +398,7 @@ class CreateCommand extends FlutterCommand {
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
+      linux: featureFlags.isLinuxEnabled,
       macos: featureFlags.isMacOSEnabled,
     );
 
@@ -608,6 +609,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     bool renderDriverTest = false,
     bool withPluginHook = false,
     bool web = false,
+    bool linux = false,
     bool macos = false,
   }) {
     flutterRoot = globals.fs.path.normalize(flutterRoot);
@@ -634,17 +636,18 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
+      'pluginCppHeaderGuard': projectName.toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
       'web': web,
+      'linux': linux,
       'macos': macos,
       'year': DateTime.now().year,
-      // If a desktop platform is included, add a workaround for #31366.
-      // When Linux and Windows are added, we will need this workaround again.
-      'includeTargetPlatformWorkaround': false,
+      // Add a workaround for #31366 if including affected platforms.
+      'includeTargetPlatformWorkaround': linux,
     };
   }
 

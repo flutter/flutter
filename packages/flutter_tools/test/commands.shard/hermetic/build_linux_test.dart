@@ -225,6 +225,32 @@ BINARY_NAME=fizz_bar
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
+  testUsingContext('linux can extract binary name from app config', () async {
+    fileSystem.file('linux/Makefile')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+include app_configuration.mk
+''');
+    fileSystem.file('linux/app_configuration.mk')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+BINARY_NAME=fizz_bar
+''');
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
   testUsingContext('Refuses to build for Linux when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
