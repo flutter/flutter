@@ -18,7 +18,7 @@ Future<void> main() async {
 
   tearDownAll(() => driver.close());
 
-  //TODO(cyanglaz): Enable the test after https://github.com/flutter/flutter/pull/49815 lands.
+  // TODO(cyanglaz): Enable the test after https://github.com/flutter/flutter/pull/49815 lands.
   test('A page with an image screenshot', () async {
     final SerializableFinder imagePageListTile =
         find.byValueKey('image_page');
