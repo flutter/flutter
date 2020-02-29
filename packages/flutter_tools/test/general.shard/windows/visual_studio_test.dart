@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/mocks.dart';
 
 void main() {
   const String programFilesPath = r'C:\Program Files (x86)';
@@ -187,10 +188,11 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenAnswer((Invocation invocation) {
-        return FakeProcessResult()
-        ..exitCode = 1
-        ..stderr = ''
-        ..stdout = '';
+        return FakeProcessResult(
+          exitCode: 1,
+          stderr: '',
+          stdout: ''
+        );
       });
       visualStudio = VisualStudio(
         logger: logger,
@@ -414,3 +416,4 @@ void main() {
 }
 
 class MockLogger extends Mock implements Logger {}
+class MockProcessManager extends Mock implements ProcessManager {}
