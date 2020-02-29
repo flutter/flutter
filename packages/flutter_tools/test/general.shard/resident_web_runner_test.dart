@@ -832,13 +832,15 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was not already launched.
-    verify(globals.logger.sendEvent(
-      'app.webLaunchUrl',
-      argThat(allOf(
-        containsPair('url', 'http://localhost:8765/app/'),
-        containsPair('launched', false),
-      ))
-    ));
+    expect((delegateLogger.delegate as BufferLogger).eventText,
+      contains(json.encode(<String, Object>{
+        'name': 'app.webLaunchUrl',
+        'args': <String, Object>{
+          'url': 'http://localhost:8765/app/',
+          'launched': false,
+        },
+      },
+    )));
   }, overrides: <Type, Generator>{
     Logger: () => DelegateLogger(BufferLogger.test())
   }));
