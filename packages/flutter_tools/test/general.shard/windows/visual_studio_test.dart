@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 
-import '../../commands.shard/permeable/upgrade_test.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
