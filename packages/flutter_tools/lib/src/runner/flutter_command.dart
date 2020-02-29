@@ -109,6 +109,7 @@ class FlutterOptions {
   static const String kFileSystemScheme = 'filesystem-scheme';
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
+  static const String kDartDefinesOption = 'dart-define';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -336,19 +337,15 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefines() {
+  void usesDartDefinesOption() {
     argParser.addMultiOption(
-      'dart-define',
+      FlutterOptions.kDartDefinesOption,
       help: 'Passed to the Dart compiler building this application as a -D flag.\n'
             'Values supported by this option are compiler implementation specific.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
-      valueHelp: 'FOO=bar',
-      hide: true,
+      valueHelp: 'foo=bar',
     );
   }
-
-  /// The values passed via the `--dart-define` option.
-  List<String> get dartDefines => stringsArg('dart-define');
 
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
@@ -562,6 +559,9 @@ abstract class FlutterCommand extends Command<void> {
           : kIconTreeShakerEnabledDefault,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
+      dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
+          ? stringsArg(FlutterOptions.kDartDefinesOption)
+          : const <String>[],
     );
   }
 

@@ -14,7 +14,7 @@ class BuildInfo {
   const BuildInfo(
     this.mode,
     this.flavor, {
-    this.trackWidgetCreation = false,
+    this.trackWidgetCreation = true,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.fileSystemRoots,
@@ -23,6 +23,7 @@ class BuildInfo {
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
+    this.dartDefines,
     @required this.treeShakeIcons,
   });
 
@@ -71,6 +72,12 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
+
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  /// [bool], [String], [int], and [double].
+  final List<String> dartDefines;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

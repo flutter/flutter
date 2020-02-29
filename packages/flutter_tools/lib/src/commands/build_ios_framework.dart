@@ -48,7 +48,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
-    usesDartDefines();
+    usesDartDefinesOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     argParser
@@ -438,7 +438,7 @@ end
         bitcode: true,
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
-        dartDefines: dartDefines,
+        dartDefines: stringsArg('dart-define'),
         treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {

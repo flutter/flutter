@@ -178,9 +178,8 @@ class DriveCommand extends RunCommandBase {
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
           flutterProject: flutterProject,
-          trackWidgetCreation: boolArg('track-widget-creation'),
           target: targetFile,
-          buildMode: getBuildMode()
+          buildInfo: getBuildInfo()
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
@@ -189,7 +188,6 @@ class DriveCommand extends RunCommandBase {
           ipv6: ipv6,
           debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
           stayResident: false,
-          dartDefines: dartDefines,
           urlTunneller: null,
         );
         final Completer<void> appStartedCompleter = Completer<void>.sync();
