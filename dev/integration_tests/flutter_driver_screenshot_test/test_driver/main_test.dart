@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import './driver_screenshot_tester.dart';
+import 'package:flutter_test/src/buffer_matcher.dart';
 
 Future<void> main() async {
   FlutterDriver driver;
@@ -18,8 +18,8 @@ Future<void> main() async {
 
   tearDownAll(() => driver.close());
 
+  // TODO(cyanglaz): Enable the test after https://github.com/flutter/flutter/pull/49815 lands.
   test('A page with an image screenshot', () async {
-
     final SerializableFinder imagePageListTile =
         find.byValueKey('image_page');
     await driver.waitFor(imagePageListTile);
@@ -27,10 +27,13 @@ Future<void> main() async {
     await driver.waitFor(find.byValueKey('red_square_image'));
     await driver.waitUntilNoTransientCallbacks();
 
-    final DriverScreenShotTester tester = DriverScreenShotTester(testName: 'red_square_image', deviceModel: deviceModel, driver: driver);
-    final List<int> screenShot = await tester.getScreenshotAsBytes();
-    final bool compareResult = await tester.compareScreenshots(screenShot);
-    expect(compareResult, true);
+    // TODO(egarciad): This is currently a no-op on LUCI.
+    // https://github.com/flutter/flutter/issues/49837
+    await expectLater(
+      driver.screenshot(),
+      bufferMatchesGoldenFile('red_square_driver_screenshot__$deviceModel.png'),
+    );
+
     await driver.tap(find.byTooltip('Back'));
-  });
+  }, skip: true);
 }
