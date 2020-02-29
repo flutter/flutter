@@ -150,14 +150,16 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 );
 
 /// The global Stdio wrapper.
-Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+Stdio get stdio => context.get<Stdio>() ?? (_stdioInstance ??= Stdio());
+Stdio _stdioInstance;
 
-PlistParser get plistParser => context.get<PlistParser>() ?? (_defaultInstance ??= PlistParser(
-  fileSystem: fs,
-  processManager: processManager,
-  logger: logger,
+PlistParser get plistParser => context.get<PlistParser>() ?? (
+  _plistInstance ??= PlistParser(
+    fileSystem: fs,
+    processManager: processManager,
+    logger: logger,
 ));
-PlistParser _defaultInstance;
+PlistParser _plistInstance;
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
