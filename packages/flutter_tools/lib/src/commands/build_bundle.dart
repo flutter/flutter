@@ -122,11 +122,11 @@ class BuildBundleCommand extends BuildSubCommand {
         break;
     }
 
-    final BuildMode buildMode = getBuildMode();
+    final BuildInfo buildInfo = getBuildInfo();
 
     await bundleBuilder.build(
       platform: platform,
-      buildMode: buildMode,
+      buildInfo: buildInfo,
       mainPath: targetFile,
       manifestPath: stringArg('manifest'),
       depfilePath: stringArg('depfile'),
