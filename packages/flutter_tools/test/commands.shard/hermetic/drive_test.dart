@@ -718,9 +718,9 @@ void main() {
       final Map<String, dynamic> expected = <String, dynamic>{
         'browserName': 'chrome',
         'platformName': 'android',
-        'goog:chromeOptions': {
+        'goog:chromeOptions': <String, dynamic>{
           'androidPackage': 'com.google.android.apps.chrome',
-          'args': ['--disable-fullscreen']
+          'args': <String>['--disable-fullscreen']
         },
       };
 

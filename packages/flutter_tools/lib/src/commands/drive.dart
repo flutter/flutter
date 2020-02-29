@@ -601,9 +601,9 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
       return <String, dynamic>{
         'browserName': 'chrome',
         'platformName': 'android',
-        'goog:chromeOptions': {
+        'goog:chromeOptions': <String, dynamic>{
           'androidPackage': 'com.google.android.apps.chrome',
-          'args': ['--disable-fullscreen']
+          'args': <String>['--disable-fullscreen']
         },
       };
     default:
