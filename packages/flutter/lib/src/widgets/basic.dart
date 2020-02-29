@@ -7094,6 +7094,12 @@ class ColoredBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
     renderObject.color = color;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color));
+  }
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {

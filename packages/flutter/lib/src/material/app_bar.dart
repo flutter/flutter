@@ -603,6 +603,7 @@ class _AppBarState extends State<AppBar> {
     // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
       appBar = SafeArea(
+        bottom: false,
         top: true,
         child: appBar,
       );
@@ -1346,6 +1347,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child.layout(innerConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);

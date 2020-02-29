@@ -437,17 +437,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.arrowDown,
   };
 
-  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.delete,
-    LogicalKeyboardKey.backspace,
-  };
-
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    ..._deleteKeys,
+    LogicalKeyboardKey.delete,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -502,7 +497,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (_deleteKeys.contains(key)) {
+    } else if (key == LogicalKeyboardKey.delete) {
       _handleDelete();
     }
   }
@@ -1743,6 +1738,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
