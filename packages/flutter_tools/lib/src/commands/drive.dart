@@ -92,6 +92,7 @@ class DriveCommand extends RunCommandBase {
               'Following browsers are supported: \n'
               'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
         allowed: <String>[
+          'android-chrome',
           'chrome',
           'edge',
           'firefox',
@@ -490,6 +491,8 @@ Future<bool> _stopApp(DriveCommand command) async {
 /// A list of supported browsers
 @visibleForTesting
 enum Browser {
+  /// Chrome on Android: https://developer.chrome.com/multidevice/android/overview
+  androidChrome,
   /// Chrome: https://www.google.com/chrome/
   chrome,
   /// Edge: https://www.microsoft.com/en-us/windows/microsoft-edge
@@ -505,6 +508,7 @@ enum Browser {
 /// Converts [browserName] string to [Browser]
 Browser _browserNameToEnum(String browserName){
   switch (browserName) {
+    case 'android-chrome': return Browser.androidChrome;
     case 'chrome': return Browser.chrome;
     case 'edge': return Browser.edge;
     case 'firefox': return Browser.firefox;
@@ -592,6 +596,15 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
         'platformName': 'ios',
         'browserName': 'safari',
         'safari:useSimulator': true
+      };
+    case Browser.androidChrome:
+      return <String, dynamic>{
+        'browserName': 'chrome',
+        'platformName': 'android',
+        'goog:chromeOptions': {
+          'androidPackage': 'com.google.android.apps.chrome',
+          'args': ['--disable-fullscreen']
+        },
       };
     default:
       throw UnsupportedError('Browser $browser not supported.');
