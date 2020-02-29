@@ -5435,7 +5435,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -5493,7 +5493,7 @@ abstract class RenderObjectElement extends Element {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5515,7 +5515,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5806,20 +5806,20 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
-  void insertChildRenderObject(RenderObject child, Element slot) {
+  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child, after: slot?.renderObject);
+    renderObject.insert(child, after: slot?.value?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, Element slot) {
+  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
-    renderObject.move(child, after: slot?.renderObject);
+    renderObject.move(child, after: slot?.value?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
@@ -5854,7 +5854,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = List<Element>(widget.children.length);
     Element previousChild;
     for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(widget.children[i], previousChild);
+      final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element>(i, previousChild));
       _children[i] = newChild;
       previousChild = newChild;
     }
@@ -5899,4 +5899,34 @@ FlutterErrorDetails _debugReportException(
   );
   FlutterError.reportError(details);
   return details;
+}
+
+/// Object used by [MultiChildRenderObjectElement] for the [Element.slot] value.
+///
+/// A slot for a [MultiChildRenderObjectElement] consists of an [index]
+/// identifying where the child occupying this slot is located in the
+/// [MultiChildRenderObjectElement]'s child list and an arbitrary [value] that
+/// can further define where the child occupying this slot fits in its
+/// parent's child list.
+@immutable
+class IndexedSlot<T> {
+  /// Creates an [IndexedSlot] with the provided [index] and slot [value].
+  const IndexedSlot(this.index, this.value);
+
+  /// Information to define where the child occupying this slot fits in its
+  /// parent's child list.
+  final T value;
+
+  /// The index of this slot in the parent's child list.
+  final int index;
+
+  @override
+  bool operator ==(Object other) {
+    return other is IndexedSlot
+        && index == other.index
+        && value == other.value;
+  }
+
+  @override
+  int get hashCode => hashValues(index, value);
 }
