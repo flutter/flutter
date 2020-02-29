@@ -166,6 +166,15 @@ class CocoaPods {
           emphasis: true,
         );
         return false;
+      case CocoaPodsStatus.brokenInstall:
+        globals.printError(
+          'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
+          '$brokenCocoaPodsConsequence\n'
+          'To re-install:\n'
+          '$cocoaPodsUpgradeInstructions\n',
+          emphasis: true,
+        );
+        return false;
       case CocoaPodsStatus.unknownVersion:
         globals.printError(
           'Warning: Unknown CocoaPods version installed.\n'
@@ -193,7 +202,7 @@ class CocoaPods {
           emphasis: true,
         );
         break;
-      default:
+      case CocoaPodsStatus.recommended:
         break;
     }
     if (!await isCocoaPodsInitialized) {

@@ -342,7 +342,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('prints error, if CocoaPods install is broken', () async {
+    testUsingContext('prints error if CocoaPods install is broken', () async {
       pretendPodIsBroken();
       projectUnderTest.ios.podfile.createSync();
       final bool didInstall = await cocoaPodsUnderTest.processPods(
@@ -354,8 +354,8 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
-      //expect(testLogger.errorText, contains('not installed'));
-      //expect(testLogger.errorText, contains('Skipping pod install'));
+      expect(testLogger.errorText, contains('is installed but broken'));
+      expect(testLogger.errorText, contains('Skipping pod install'));
       expect(didInstall, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
