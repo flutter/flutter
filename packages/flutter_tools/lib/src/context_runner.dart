@@ -186,6 +186,8 @@ Future<T> runInContext<T>(
         visualStudio: VisualStudio(
           fileSystem: globals.fs,
           platform: globals.platform,
+          logger: globals.logger,
+          processManager: globals.processManager,
         )
       ),
       WebWorkflow: () => const WebWorkflow(),
