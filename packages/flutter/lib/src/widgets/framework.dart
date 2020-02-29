@@ -2052,21 +2052,20 @@ abstract class BuildContext {
   /// managing the rendering pipeline for this context.
   BuildOwner get owner;
 
-  /// Determines if [widget] is in the process of updating.
+  /// Whether the [widget] is currently updating the widget or render tree.
   ///
-  /// This flag will return `true` if [widget] is in a lifecycle that both:
-  /// - declaratively updates a tree ([Widget] tree, [RenderObject] tree)
-  /// - can consume an [InheritedWidget]
-  /// 
-  /// This includes:
-  /// - [StatelessWidget.build]
-  /// - [State.build]
-  /// - [RenderObjectWidget.createRenderObject]
-  /// - [RenderObjectWidget.updateRenderObject]
+  /// For [StatefullWidget]s and [StatelessWidget]s this flag is true while
+  /// their respective build methods are executing.
+  /// [RenderObjectWidget]s set this to true while creating or configuring their
+  /// associated [RenderObject]s.
+  /// Other [Widget] types may set this to true for conceptually similar phases
+  /// of their lifecycle.
   ///
-  /// Othwerwise, it will return `false`.
+  /// When this is true, it is safe for [widget] to establish a dependency to an
+  /// [InheritedWidget] by calling [dependOnInheritedElement] or
+  /// [dependOnInheritedWidgetOfExactType].
   ///
-  /// Always returns `false` in release mode.
+  /// Accessing this flag in release mode is not valid.
   bool get debugDoingBuild;
 
   /// The current [RenderObject] for the widget. If the widget is a
