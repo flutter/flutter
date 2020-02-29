@@ -507,7 +507,7 @@ abstract class FlutterCommand extends Command<void> {
 
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? stringArg(FlutterOptions.kExtraFrontEndOptions)
+            ? stringsArg(FlutterOptions.kExtraFrontEndOptions)?.join(',')
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
