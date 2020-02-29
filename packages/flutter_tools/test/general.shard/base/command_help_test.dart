@@ -16,7 +16,7 @@ CommandHelp _createCommandHelp({
   @required int wrapColumn,
 }) {
   final Platform platform = FakePlatform(
-    stdinSupportsAnsi: ansi,
+    stdoutSupportsAnsi: ansi,
   );
   return CommandHelp(
     logger: BufferLogger.test(),

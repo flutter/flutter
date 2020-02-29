@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import 'io.dart';
 import 'terminal.dart' show AnsiTerminal, Terminal, TerminalColor, OutputPreferences;
@@ -410,10 +411,12 @@ class BufferLogger extends Logger {
   final StringBuffer _error = StringBuffer();
   final StringBuffer _status = StringBuffer();
   final StringBuffer _trace = StringBuffer();
+  final StringBuffer _events = StringBuffer();
 
   String get errorText => _error.toString();
   String get statusText => _status.toString();
   String get traceText => _trace.toString();
+  String get eventText => _events.toString();
 
   @override
   bool get hasTerminal => false;
@@ -491,10 +494,16 @@ class BufferLogger extends Logger {
     _error.clear();
     _status.clear();
     _trace.clear();
+    _events.clear();
   }
 
   @override
-  void sendEvent(String name, [Map<String, dynamic> args]) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    _events.write(json.encode(<String, Object>{
+      'name': name,
+      'args': args
+    }));
+  }
 }
 
 class VerboseLogger extends Logger {
