@@ -29,6 +29,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   _writeGeneratedFlutterProperties(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.project);
 
+  final VisualStudio visualStudio = VisualStudio(
+    fileSystem: globals.fs,
+    platform: globals.platform,
+    logger: globals.logger,
+    processManager: globals.processManager,
+  );
   final String vcvarsScript = visualStudio.vcvarsPath;
   if (vcvarsScript == null) {
     throwToolExit('Unable to find suitable Visual Studio toolchain. '
