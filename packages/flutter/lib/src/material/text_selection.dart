@@ -55,6 +55,10 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // menu items are shown.
   bool _overflowOpen = false;
 
+  // Whether or not the currently enabled menu items have changed since the
+  // widget last updated.
+  bool _menuChanged = false;
+
   FlatButton _getItem(VoidCallback onPressed, String label) {
     assert(onPressed != null);
     return FlatButton(
@@ -66,6 +70,15 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         onPressed();
       },
     );
+  }
+
+  @override
+  void didUpdateWidget(_TextSelectionToolbar oldWidget) {
+    _menuChanged = ((widget.handleCut == null) != (oldWidget.handleCut == null))
+      || ((widget.handleCopy == null) != (oldWidget.handleCopy == null))
+      || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
+      || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null));
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -87,45 +100,49 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       return Container(width: 0.0, height: 0.0);
     }
 
-    final Align child = Align(
-      alignment: Alignment.topRight,
-      heightFactor: 1.0,
-      widthFactor: 1.0,
-      child: AnimatedSize(
+    Widget child = Material(
+      elevation: 1.0,
+      child: _TextSelectionToolbarItems(
+        isAbove: widget.isAbove,
+        overflowOpen: _overflowOpen,
+        children: <Widget>[
+          // The navButton that shows and hides the overflow menu is the
+          // first child.
+          Material(
+            child: IconButton(
+              // TODO(justinmc): This should be an AnimatedIcon, but
+              // AnimatedIcons doesn't yet support arrow_back to more_vert.
+              // https://github.com/flutter/flutter/issues/51209
+              icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
+              onPressed: () {
+                setState(() {
+                  _overflowOpen = !_overflowOpen;
+                });
+              },
+              tooltip: _overflowOpen ? 'Back' : 'More',
+            ),
+          ),
+          ...items,
+        ],
+      ),
+    );
+    // Size animation should only happen when overflowOpen is being toggled and
+    // not when the enabled menu items are changing.
+    if (!_menuChanged) {
+      child = AnimatedSize(
         vsync: this,
         // This duration was eyeballed on a Pixel 2 emulator running Android
         // API 28.
         duration: const Duration(milliseconds: 140),
-        child: Material(
-          elevation: 1.0,
-          child: _TextSelectionToolbarItems(
-            isAbove: widget.isAbove,
-            overflowOpen: _overflowOpen,
-            children: <Widget>[
-              // The navButton that shows and hides the overflow menu is the
-              // first child.
-              Material(
-                child: IconButton(
-                  // TODO(justinmc): This should be an AnimatedIcon, but
-                  // AnimatedIcons doesn't yet support arrow_back to more_vert.
-                  // https://github.com/flutter/flutter/issues/51209
-                  icon: Icon(_overflowOpen ? Icons.arrow_back : Icons.more_vert),
-                  onPressed: () {
-                    setState(() {
-                      _overflowOpen = !_overflowOpen;
-                    });
-                  },
-                  tooltip: _overflowOpen ? 'Back' : 'More',
-                ),
-              ),
-              ...items,
-            ],
-          ),
-        ),
-      ),
-    );
+        child: child,
+      );
+    }
 
-    return _overflowOpen ? IntrinsicWidth(child: child) : child;
+    return _TextSelectionToolbarContainer(
+      menuChanged: _menuChanged,
+      overflowOpen: _overflowOpen,
+      child: child,
+    );
   }
 }
 
@@ -174,12 +191,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
        _overflowOpen = overflowOpen,
        super();
 
-  // This is static so that it can be preserved between instances. The
-  // IntrinsicWidth widget is added and removed above this in the tree, causing
-  // it to be recreated, but _intrinsicWidth is needed immediately when the
-  // overflow menu is open.
-  static double _intrinsicWidth;
-
   // The index of the last item that doesn't overflow.
   int _lastIndexThatFits = -1;
 
@@ -208,7 +219,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void _layoutChildren() {
     int i = -1;
     double width = 0.0;
-    _intrinsicWidth = null;
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
@@ -226,11 +236,8 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
       if (width > constraints.maxWidth && _lastIndexThatFits == -1) {
         _lastIndexThatFits = i - 1;
-        _intrinsicWidth = width - child.size.width + firstChild.size.width;
       }
     });
-
-    _intrinsicWidth ??= width;
 
     // If the last child overflows, but only because of the width of the
     // overflow button, then just show it and hide the overflow button.
@@ -330,19 +337,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     _placeChildren();
   }
 
-  // The intrinsic width is always the size of the menu when the overflow menu
-  // is closed. This allows the right edge of the menu to be aligned when open
-  // or closed.
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _intrinsicWidth ?? 0.0;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _intrinsicWidth ?? 0.0;
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     int i = -1;
@@ -394,6 +388,122 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       child = childParentData.previousSibling;
     }
     return false;
+  }
+}
+
+// When the overflow menu is open, it tries to align its right edge to the right
+// edge of the closed menu. This widget handles this effect by measuring and
+// maintaining the width of the closed menu and aligning the child to the right.
+class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
+  const _TextSelectionToolbarContainer({
+    Key key,
+    @required Widget child,
+    @required this.menuChanged,
+    @required this.overflowOpen,
+  }) : assert(child != null),
+       assert(overflowOpen != null),
+       super(key: key, child: child);
+
+  final bool menuChanged;
+  final bool overflowOpen;
+
+  @override
+  _TextSelectionToolbarContainerRenderBox createRenderObject(BuildContext context) {
+    return _TextSelectionToolbarContainerRenderBox(overflowOpen: overflowOpen);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _TextSelectionToolbarContainerRenderBox renderObject) {
+    renderObject
+      ..overflowOpen = overflowOpen;
+
+    if (menuChanged) {
+      renderObject.onMenuChanged();
+    }
+  }
+}
+
+class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
+  _TextSelectionToolbarContainerRenderBox({
+    @required bool overflowOpen,
+  }) : assert(overflowOpen != null),
+       _overflowOpen = overflowOpen,
+       super();
+
+  // The width of the menu when it was closed. This is used to achieve the
+  // behavior where the open menu aligns its right edge to the closed menu's
+  // right edge.
+  double _closedWidth;
+
+  bool _overflowOpen;
+  bool get overflowOpen => _overflowOpen;
+  set overflowOpen(bool value) {
+    if (value == overflowOpen) {
+      return;
+    }
+    _overflowOpen = value;
+    markNeedsLayout();
+  }
+
+  // If the contents of the menu changed, reset the tracked width.
+  void onMenuChanged() {
+    _closedWidth = null;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    child.layout(constraints.loosen(), parentUsesSize: true);
+
+    if (!overflowOpen && _closedWidth == null) {
+      _closedWidth = child.size.width;
+    }
+
+    size = constraints.constrain(Size(
+      // If the open menu is wider than the closed menu, just use its own width
+      // and don't worry about aligning the right edges.
+      child.size.width > _closedWidth ? child.size.width : _closedWidth,
+      child.size.height,
+    ));
+
+    final FlexParentData childParentData = child.parentData as FlexParentData;
+    childParentData.offset = Offset(
+      size.width - child.size.width,
+      0.0,
+    );
+
+  }
+
+  // Paint at the offset set in the parent data.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final FlexParentData childParentData = child.parentData as FlexParentData;
+    context.paintChild(child, childParentData.offset + offset);
+  }
+
+  // Include the parent data offset in the hit test.
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    // The x, y parameters have the top left of the node's box as the origin.
+    final FlexParentData childParentData = child.parentData as FlexParentData;
+    final bool isHit = result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
+    if (isHit)
+      return true;
+    return false;
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! FlexParentData) {
+      child.parentData = FlexParentData();
+    }
   }
 }
 
