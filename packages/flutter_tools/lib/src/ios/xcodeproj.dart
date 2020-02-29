@@ -207,6 +207,11 @@ List<String> _xcodeBuildSettingsLines({
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
     xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
+    // Only write this or local engines, where it is supposed to be sticky to
+    // match the engine configuration. Avoid writing it otherwise so that it
+    // does not stick the user with the wrong build mode, particularly for
+    // existing app use cases.
+    xcodeBuildSettings.add('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
