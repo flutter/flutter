@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
+  testWidgets('Render and element tree stay in sync when keyed children move around', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48855.
 
     await tester.pumpWidget(
