@@ -20,6 +20,7 @@ void main() {
     setUp(() {
       mockVisualStudio = MockVisualStudio();
       validator = VisualStudioValidator(
+        userMessages: UserMessages(),
         visualStudio: mockVisualStudio,
       );
       // Default values regardless of whether VS is installed or not.

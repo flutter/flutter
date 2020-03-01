@@ -183,6 +183,7 @@ Future<T> runInContext<T>(
       ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
+        userMessages: globals.userMessages,
         visualStudio: VisualStudio(
           fileSystem: globals.fs,
           platform: globals.platform,

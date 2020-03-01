@@ -14,10 +14,13 @@ VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValid
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator({
     @required VisualStudio visualStudio,
+    @required UserMessages userMessages,
   }) : _visualStudio = visualStudio,
+       _userMessages = userMessages,
        super('Visual Studio - develop for Windows');
 
   final VisualStudio _visualStudio;
+  final UserMessages _userMessages;
 
   @override
   Future<ValidationResult> validate() async {
@@ -29,23 +32,23 @@ class VisualStudioValidator extends DoctorValidator {
       status = ValidationType.installed;
 
       messages.add(ValidationMessage(
-          userMessages.visualStudioLocation(_visualStudio.installLocation)
+          _userMessages.visualStudioLocation(_visualStudio.installLocation)
       ));
 
-      messages.add(ValidationMessage(userMessages.visualStudioVersion(
+      messages.add(ValidationMessage(_userMessages.visualStudioVersion(
           _visualStudio.displayName,
           _visualStudio.fullVersion,
       )));
 
       if (_visualStudio.isPrerelease) {
-        messages.add(ValidationMessage(userMessages.visualStudioIsPrerelease));
+        messages.add(ValidationMessage(_userMessages.visualStudioIsPrerelease));
       }
 
       // Messages for faulty installations.
       if (!_visualStudio.isAtLeastMinimumVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
-            userMessages.visualStudioTooOld(
+            _userMessages.visualStudioTooOld(
                 _visualStudio.minimumVersionDescription,
                 _visualStudio.workloadDescription,
                 _visualStudio.necessaryComponentDescriptions(),
@@ -53,17 +56,17 @@ class VisualStudioValidator extends DoctorValidator {
         ));
       } else if (_visualStudio.isRebootRequired) {
         status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.visualStudioRebootRequired));
+        messages.add(ValidationMessage.error(_userMessages.visualStudioRebootRequired));
       } else if (!_visualStudio.isComplete) {
         status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.visualStudioIsIncomplete));
+        messages.add(ValidationMessage.error(_userMessages.visualStudioIsIncomplete));
       } else if (!_visualStudio.isLaunchable) {
         status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.visualStudioNotLaunchable));
+        messages.add(ValidationMessage.error(_userMessages.visualStudioNotLaunchable));
       } else if (!_visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.error(
-            userMessages.visualStudioMissingComponents(
+            _userMessages.visualStudioMissingComponents(
                 _visualStudio.workloadDescription,
                 _visualStudio.necessaryComponentDescriptions(),
             ),
@@ -73,7 +76,7 @@ class VisualStudioValidator extends DoctorValidator {
     } else {
       status = ValidationType.missing;
       messages.add(ValidationMessage.error(
-        userMessages.visualStudioMissing(
+        _userMessages.visualStudioMissing(
           _visualStudio.workloadDescription,
           _visualStudio.necessaryComponentDescriptions(),
         ),
