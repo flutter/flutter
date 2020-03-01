@@ -536,7 +536,7 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      extraFrontEndOptions: extraFrontEndOptions.isNotEmpty
+      extraFrontEndOptions: extraFrontEndOptions?.isNotEmpty ?? false
         ? extraFrontEndOptions
         : null,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
