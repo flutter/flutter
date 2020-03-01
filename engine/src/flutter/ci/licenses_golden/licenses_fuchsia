@@ -1,4 +1,4 @@
-Signature: f5e9584f922dfa6a9dd743b6f0ef8ec2
+Signature: 12b6633fdde1a5a931cde62e7ebb67bd
 
 UNUSED LICENSES:
 
@@ -535,6 +535,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
@@ -1535,6 +1536,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/navigation.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/url_request_rewrite_rules.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/access_point_provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/client_provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
@@ -2256,6 +2261,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
