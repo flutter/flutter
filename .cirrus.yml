@@ -172,7 +172,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
-      only_if: "$CIRRUS_BRANCH == 'master'"
+      #only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
         # As of February 2020, the tool_coverage-linux shard needed at least 24G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
