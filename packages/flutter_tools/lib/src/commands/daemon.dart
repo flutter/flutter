@@ -35,9 +35,7 @@ const String protocolVersion = '0.5.3';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false }) {
-    usesDartDefinesOption();
-  }
+  DaemonCommand({ this.hidden = false });
 
   @override
   final String name = 'daemon';

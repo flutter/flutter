@@ -47,10 +47,10 @@ class BuildInfo {
   final bool trackWidgetCreation;
 
   /// Extra command-line options for front-end.
-  final String extraFrontEndOptions;
+  final List<String> extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
-  final String extraGenSnapshotOptions;
+  final List<String> extraGenSnapshotOptions;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.

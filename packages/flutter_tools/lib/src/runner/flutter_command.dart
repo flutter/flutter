@@ -103,6 +103,7 @@ class FlutterCommandResult {
 /// Common flutter command line options.
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
+  static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
@@ -504,19 +505,15 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-number')
         : null;
 
-    String extraFrontEndOptions =
+    final List<String> extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? stringsArg(FlutterOptions.kExtraFrontEndOptions)?.join(',')
-            : null;
+            ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
+            : <String>[];
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
       for (final String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
-        if (extraFrontEndOptions != null) {
-          extraFrontEndOptions += ',' + flag;
-        } else {
-          extraFrontEndOptions = flag;
-        }
+        extraFrontEndOptions.add(flag);
       }
     }
 
@@ -540,7 +537,9 @@ abstract class FlutterCommand extends Command<void> {
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: null,
+      extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+        : const <String>[],
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)
           : null,

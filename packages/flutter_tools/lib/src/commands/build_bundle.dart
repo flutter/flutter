@@ -54,6 +54,10 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: true,
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
+      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+        splitCommas: true,
+        hide: true,
+      )
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               "in the application's LICENSE file.",
@@ -131,7 +135,8 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: boolArg('precompiled'),
       reportLicensedPackages: boolArg('report-licensed-packages'),
       trackWidgetCreation: boolArg('track-widget-creation'),
-      extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
+      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
       fileSystemScheme: stringArg('filesystem-scheme'),
       fileSystemRoots: stringsArg('filesystem-root'),
       treeShakeIcons: boolArg('tree-shake-icons'),
