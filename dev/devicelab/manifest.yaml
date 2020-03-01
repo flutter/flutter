@@ -407,6 +407,7 @@ tasks:
   ios_defines_test:
     description: >
       Builds a Framework with a --dart-define and verifies it can be used as a constant
+    stage: devicelab
     flaky: true
     required_agent_capabilities: ["mac/ios"]
 
