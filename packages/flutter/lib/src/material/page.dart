@@ -20,8 +20,10 @@ import 'theme.dart';
 /// in environments with a right-to-left reading direction.)
 ///
 /// By default, when a modal route is replaced by another, the previous route
-/// remains in memory. To free all the resources when this is not necessary, set
-/// [maintainState] to false.
+/// remains in memory. To free resources when this is not necessary, set
+/// [maintainState] to false. When [maintainState] is false, it stills maintains
+/// the first, and only the first, route in memory. Use [Navigator.pushReplacement]
+/// to free every route from memory.
 ///
 /// The `fullscreenDialog` property specifies whether the incoming page is a
 /// fullscreen modal dialog. On iOS, those pages animate from the bottom to the
