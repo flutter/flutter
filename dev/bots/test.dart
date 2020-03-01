@@ -243,7 +243,7 @@ Future<void> _runToolCoverage() async {
     coverage: 'coverage',
   );
   await runCommand(pub,
-    <String>['run', 'coverage:format_coverage', '--lcov', '--in=coverage', '--out=lcov.info'],
+    <String>['run', 'coverage:format_coverage', '--lcov', '--in=coverage', '--out=coverage/lcov.info'],
     workingDirectory: toolRoot,
     outputMode: OutputMode.discard,
   );
@@ -703,7 +703,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
 }
 
 Future<void> _pubRunTest(String workingDirectory, {
-  List<String> testPaths,
+  List<String> testPaths = const <String>[],
   bool enableFlutterToolAsserts = true,
   String coverage,
   bq.TabledataResourceApi tableData,
