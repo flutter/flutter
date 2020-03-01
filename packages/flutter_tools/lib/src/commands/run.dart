@@ -204,7 +204,6 @@ class RunCommand extends RunCommandBase {
               'cannot be paired with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
         splitCommas: true,
         hide: true,

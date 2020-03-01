@@ -42,10 +42,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         splitCommas: true,
         hide: true,
       )
-      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
-        splitCommas: true,
-        hide: true,
-      )
       ..addFlag('bitcode',
         defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
@@ -87,7 +83,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
-      extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
       dartDefines: buildInfo.dartDefines,
       treeShakeIcons: buildInfo.treeShakeIcons,
     );

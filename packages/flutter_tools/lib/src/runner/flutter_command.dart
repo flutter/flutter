@@ -103,7 +103,6 @@ class FlutterCommandResult {
 /// Common flutter command line options.
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
-  static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
   static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
@@ -541,9 +540,7 @@ abstract class FlutterCommand extends Command<void> {
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? stringArg(FlutterOptions.kExtraGenSnapshotOptions)
-          : null,
+      extraGenSnapshotOptions: null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)
           : null,
