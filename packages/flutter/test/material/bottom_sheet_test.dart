@@ -10,6 +10,21 @@ import 'package:flutter/gestures.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  // Pumps and ensures that the BottomSheet animates non-linearly.
+  Future<void> _checkNonLinearAnimation(WidgetTester tester) async {
+    final Offset firstPosition = tester.getCenter(find.text('BottomSheet'));
+    await tester.pump(const Duration(milliseconds: 30));
+    final Offset secondPosition = tester.getCenter(find.text('BottomSheet'));
+    await tester.pump(const Duration(milliseconds: 30));
+    final Offset thirdPosition = tester.getCenter(find.text('BottomSheet'));
+
+    final double dyDelta1 = secondPosition.dy - firstPosition.dy;
+    final double dyDelta2 = thirdPosition.dy - secondPosition.dy;
+
+    // If the animation were linear, these two values would be the same.
+    expect(dyDelta1, isNot(closeTo(dyDelta2, 0.1)));
+  }
+
   testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     BuildContext savedContext;
 
@@ -112,6 +127,38 @@ void main() {
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(showBottomSheetThenCalled, isTrue);
+    expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('Verify that the BottomSheet animates non-linearly', (WidgetTester tester) async {
+    BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          savedContext = context;
+          return Container();
+        },
+      ),
+    ));
+
+    await tester.pump();
+    expect(find.text('BottomSheet'), findsNothing);
+
+    showModalBottomSheet<void>(
+      context: savedContext,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pump();
+
+    await _checkNonLinearAnimation(tester);
+    await tester.pumpAndSettle();
+
+    // Tap above the bottom sheet to dismiss it.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pump();
+    await _checkNonLinearAnimation(tester);
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(find.text('BottomSheet'), findsNothing);
   });
 

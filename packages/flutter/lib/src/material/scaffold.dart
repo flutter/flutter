@@ -9,6 +9,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -19,6 +20,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'colors.dart';
+import 'curves.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -40,6 +42,7 @@ import 'theme_data.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
+const Curve _standardBottomSheetCurve = standardEasing;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -2562,6 +2565,63 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter setState;
 }
 
+// TODO(guidezpl): Look into making this public. A copy of this class is in bottom_sheet.dart, for now.
+/// A curve that progresses linearly until a specified [startingPoint], at which
+/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
+/// but will use [startingPoint] as the Y position.
+///
+/// For example, if [startingPoint] is set to `0.5`, and [curve] is set to
+/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
+/// straight line, and the top-right quarter will contain the entire contents of
+/// [Curves.easeOut].
+///
+/// This is useful in situations where a widget must track the user's finger
+/// (which requires a linear animation), and afterwards can be flung using a
+/// curve specified with the [curve] argument, after the finger is released. In
+/// such a case, the value of [startingPoint] would be the progress of the
+/// animation at the time when the finger was released.
+///
+/// The [startingPoint] and [curve] arguments must not be null.
+class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
+  /// Creates a suspended curve.
+  const _BottomSheetSuspendedCurve(
+      this.startingPoint, {
+        this.curve = Curves.easeOutCubic,
+      }) : assert(startingPoint != null),
+        assert(curve != null);
+
+  /// The progress value at which [curve] should begin.
+  ///
+  /// This defaults to [Curves.easeOutCubic].
+  final double startingPoint;
+
+  /// The curve to use when [startingPoint] is reached.
+  final Curve curve;
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
+
+    if (t < startingPoint) {
+      return t;
+    }
+
+    if (t == 1.0) {
+      return t;
+    }
+
+    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(startingPoint, 1, transformed);
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}($startingPoint, $curve)';
+  }
+}
+
 class _StandardBottomSheet extends StatefulWidget {
   const _StandardBottomSheet({
     Key key,
@@ -2593,6 +2653,8 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+  ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
+
   @override
   void initState() {
     super.initState();
@@ -2615,6 +2677,19 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       widget.onClosing();
     }
     return null;
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    // Allow the bottom sheet to track the user's finger accurately.
+    animationCurve = Curves.linear;
+  }
+
+  void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
+    // Allow the bottom sheet to animate smoothly from its current position.
+    animationCurve = _BottomSheetSuspendedCurve(
+      widget.animationController.value,
+      curve: _standardBottomSheetCurve,
+    );
   }
 
   void _handleStatusChange(AnimationStatus status) {
@@ -2662,7 +2737,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         builder: (BuildContext context, Widget child) {
           return Align(
             alignment: AlignmentDirectional.topStart,
-            heightFactor: widget.animationController.value,
+            heightFactor: animationCurve.transform(widget.animationController.value),
             child: child,
           );
         },
@@ -2670,6 +2745,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,
