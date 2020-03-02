@@ -6,33 +6,15 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// A [ValueKey] that defines where [PageStorage] values will be saved.
-///
-/// [Scrollable]s ([ScrollPosition]s really) use [PageStorage] to save their
-/// scroll offset. Each time a scroll completes, the scrollable's page
-/// storage is updated.
-///
-/// [PageStorage] is used to save and restore values that can outlive the widget.
-/// The values are stored in a per-route [Map] whose keys are defined by the
-/// [PageStorageKey]s for the widget and its ancestors. To make it possible
-/// for a saved value to be found when a widget is recreated, the key's values
-/// must not be objects whose identity will change each time the widget is created.
-///
-/// For example, to ensure that the scroll offsets for the scrollable within
-/// each `MyScrollableTabView` below are restored when the [TabBarView]
-/// is recreated, we've specified [PageStorageKey]s whose values are the
-/// tabs' string labels.
-///
-/// ```dart
-/// TabBarView(
-///   children: myTabs.map((Tab tab) {
-///     MyScrollableTabView(
-///       key: PageStorageKey<String>(tab.text), // like 'Tab 1'
-///       tab: tab,
-///     ),
-///   }),
-/// )
-/// ```
+/// A key indicating that the widget state is persisted in a storage after
+/// destruction and will be restored when recreated.
+/// 
+/// Each key needs to have a value that is unique in its corresponding storage,
+/// i.e. the widget's closest ancestor [PageStorage]. To make it possible for a
+/// saved value to be found when a widget is recreated, the key's values must
+/// not be objects whose identity will change each time the widget is created.
+/// 
+/// For more introduction, see [PageStorage]
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
   const PageStorageKey(T value) : super(value);
@@ -129,11 +111,24 @@ class PageStorageBucket {
   }
 }
 
-/// A widget that establishes a page storage bucket for this widget subtree.
-///
+/// Establish a subtree in which widgets can opt into persisting states after
+/// being destroyed.
+/// 
+/// [PageStorage] is used to save and restore values that can outlive the widget
+/// For example, when multiple pages are grouped in tabs, when a page is
+/// switched out, its widget is destroyed and its state is lost. By adding a
+/// [PageStorage] at the root and adding a [PageStorageKey] to each page, the
+/// page's state will be stored in its closest ancestor [PageStorage], and
+/// restored when it's switched back.
+/// Usually you don't need to explicitly use a [PageStorage], since it's already
+/// included in routes.
+/// [PageStorageKey] is used by [Scrollable] if
+/// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
 /// {@tool snippet}
-///
-/// This sample uses page storage to implement to counter.
+/// This sample shows how to explicitly use a [PageStorage] to
+/// store the states of its children pages. Each page includes a scrollable
+/// list, whose position is preserved when switching between the tabs thanks to
+/// the help of [PageStorageKey].
 ///
 /// ```dart
 /// void main() => runApp(MyApp());
@@ -203,16 +198,11 @@ class PageStorageBucket {
 ///   }
 /// }
 ///
-/// class ColorBoxPage extends StatefulWidget {
+/// class ColorBoxPage extends StatelessWidget{
 ///   ColorBoxPage({
 ///     Key key,
 ///   }) : super(key: key);
-///
-///   @override
-///   ColorBoxPageState createState() => ColorBoxPageState();
-/// }
-///
-/// class ColorBoxPageState extends State<ColorBoxPage> {
+/// 
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return ListView.builder(
@@ -233,6 +223,9 @@ class PageStorageBucket {
 /// }
 /// ```
 /// {@end-tool}
+/// See also:
+/// 
+/// * [ModalRoute], which includes this class.
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
   ///
