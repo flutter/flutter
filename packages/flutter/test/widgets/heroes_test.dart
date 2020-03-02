@@ -2054,19 +2054,19 @@ Future<void> main() async {
       ),
     );
 
-    // Show both tabs to init
+    // Show both tabs to init.
     await tester.tap(find.byIcon(Icons.home));
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.favorite));
     await tester.pump();
 
-    // Inner heroes are in the tree, one is offstage
+    // Inner heroes are in the tree, one is offstage.
     expect(find.byKey(nestedRouteHeroTwo), findsOneWidget);
     expect(find.byKey(nestedRouteHeroOne), findsNothing);
     expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
 
-    // Root hero is not in the tree
+    // Root hero is not in the tree.
     expect(find.byKey(rootRouteHero), findsNothing);
 
     rootNavigator.currentState.push(
@@ -2088,7 +2088,7 @@ Future<void> main() async {
     expect(find.byKey(nestedRouteHeroOne, skipOffstage: false), findsOneWidget);
     expect(find.byKey(nestedRouteHeroTwo, skipOffstage: false), findsOneWidget);
 
-    // Root hero is in the tree
+    // Root hero is in the tree.
     expect(find.byKey(rootRouteHero), findsOneWidget);
 
     // Doesn't crash.

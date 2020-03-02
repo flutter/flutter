@@ -922,11 +922,11 @@ class HeroController extends NavigatorObserver {
   };
 }
 
-/// Enables or disables heroes in the widget subtree.
+/// Enables or disables [Hero]es in the widget subtree.
 class HeroMode extends StatelessWidget {
-  /// Creates a widget that enables or disables heroes.
+  /// Creates a widget that enables or disables [Hero]es.
   ///
-  /// The [enabled] argument must not be null.
+  /// The [child] and [enabled] arguments must not be null.
   const HeroMode({
     Key key,
     @required this.child,
@@ -938,11 +938,13 @@ class HeroMode extends StatelessWidget {
   /// The subtree to place inside the [HeroMode].
   final Widget child;
 
-  /// The current hero mode of this subtree.
+  /// Whether or not [Hero]es are enabled in this subtree.
   ///
-  /// If true, then heroes in this subtree will perform.
+  /// If true, then the [Hero]es in this subtree will animate as usual.
   ///
-  /// If false, then heroes in this subtree will not perform.
+  /// If false, then the [Hero]es in this subtree will not animate.
+  ///
+  /// Defaults to true and must not be null.
   final bool enabled;
 
   @override
