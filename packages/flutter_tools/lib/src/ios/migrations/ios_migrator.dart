@@ -16,7 +16,7 @@ class IOSMigrator {
   @protected
   final Logger logger;
 
-  /// Returns success of migration. Skipped migrations should return true.
+  /// Returns whether migration was successful or was skipped.
   bool migrate() {
     return false;
   }
