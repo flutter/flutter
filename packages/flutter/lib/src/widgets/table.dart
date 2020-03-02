@@ -90,7 +90,7 @@ class _TableElementRow {
 ///
 /// For more details about the table layout algorithm, see [RenderTable].
 /// To control the alignment of children, see [TableCell].
-/// 
+///
 /// See also:
 ///
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
