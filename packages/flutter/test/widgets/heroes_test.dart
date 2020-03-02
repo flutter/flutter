@@ -2035,7 +2035,7 @@ Future<void> main() async {
         navigatorKey: rootNavigator,
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(icon: Icon(Icons.home)),
               BottomNavigationBarItem(icon: Icon(Icons.favorite)),
             ],
