@@ -139,10 +139,10 @@ class SimControl {
     ]);
   }
 
-  Future<RunResult> install(String deviceId, String appPath) {
-    Future<RunResult> result;
+  Future<RunResult> install(String deviceId, String appPath) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await processUtils.run(
         <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
         throwOnError: true,
       );
@@ -152,10 +152,10 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> uninstall(String deviceId, String appId) {
-    Future<RunResult> result;
+  Future<RunResult> uninstall(String deviceId, String appId) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await processUtils.run(
         <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
         throwOnError: true,
       );

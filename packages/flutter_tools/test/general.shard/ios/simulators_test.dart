@@ -8,6 +8,8 @@ import 'dart:io' show ProcessResult, Process;
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
@@ -430,6 +432,8 @@ void main() {
 
     MockProcessManager mockProcessManager;
     SimControl simControl;
+    const String deviceId = 'smart-phone';
+    const String appId = 'flutterApp';
 
     setUp(() {
       mockProcessManager = MockProcessManager();
@@ -486,6 +490,20 @@ void main() {
       final IOSSimulator iosSimulatorA = IOSSimulator('x', name: 'Testo', simulatorCategory: 'NaN');
 
       expect(await iosSimulatorA.sdkMajorVersion, 11);
+    });
+
+    testUsingContext('.uninstall() handles exceptions', () async {
+      when(mockProcessManager.run(
+        <String>['/usr/bin/xcrun', 'simctl', 'uninstall', deviceId, appId],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      expect(
+        () async => await simControl.uninstall(deviceId, appId),
+        throwsToolExit(message: r'xcrun'),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
   });
 
