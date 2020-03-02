@@ -305,10 +305,8 @@ class Hero extends StatefulWidget {
             inviteHero(hero, tag);
           }
         }
-      } else if (widget is HeroMode) {
-        if (!widget.enabled) {
-          return;
-        }
+      } else if (widget is HeroMode && !widget.enabled) {
+        return;
       }
       element.visitChildren(visitor);
     }
