@@ -84,7 +84,7 @@ class RasterCache {
                bool is_complex,
                bool will_change);
 
-  bool Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
+  void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
   RasterCacheResult Get(const SkPicture& picture, const SkMatrix& ctm) const;
 
@@ -101,7 +101,6 @@ class RasterCache {
  private:
   struct Entry {
     bool used_this_frame = false;
-    bool did_rasterize = false;
     size_t access_count = 0;
     RasterCacheResult image;
   };
