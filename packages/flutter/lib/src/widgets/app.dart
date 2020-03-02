@@ -615,11 +615,11 @@ class WidgetsApp extends StatefulWidget {
   /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] only
-  ///  1. [Locale.countryCode] only when all preferred locales fail to match
-  ///  1. Returns the first element of [supportedLocales] as a fallback
+  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  5. [Locale.countryCode] only when all preferred locales fail to match
+  ///  6. Returns the first element of [supportedLocales] as a fallback
   ///
   /// When more than one supported locale matches one of these criteria, only
   /// the first matching locale is returned.
