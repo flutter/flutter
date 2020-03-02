@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
