@@ -1,4 +1,4 @@
-Signature: 7b849f60ff55281f4fdc7349bce9b19d
+Signature: fc2bd6b9ecc2cabd5149efe1981a3059
 
 UNUSED LICENSES:
 
@@ -5631,6 +5631,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Repeater.c
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/RoundCorners.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/ShapeLayer.h
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/TrimPaths.cpp
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGDashEffect.h
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGDashEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
