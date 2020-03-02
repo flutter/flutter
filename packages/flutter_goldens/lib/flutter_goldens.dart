@@ -253,7 +253,6 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-
     return skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
