@@ -260,6 +260,7 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(_additionalConstraints.enforce(constraints), parentUsesSize: true);
       size = child.size;
@@ -351,6 +352,7 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void performLayout() {
     if (child != null) {
+      final BoxConstraints constraints = this.constraints;
       child.layout(_limitConstraints(constraints), parentUsesSize: true);
       size = constraints.constrain(child.size);
     } else {
@@ -461,15 +463,13 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsValid());
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('$runtimeType has unbounded constraints.'),
-          ErrorDescription(
-            'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
-            'both unbounded width and unbounded height constraints. Because both '
-            "constraints were unbounded, this render object doesn't know how much "
-            'size to consume.'
-          )
-        ]);
+        throw FlutterError(
+          '$runtimeType has unbounded constraints.\n'
+          'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
+          'both unbounded width and unbounded height constraints. Because both '
+          'constraints were unbounded, this render object doesn\'t know how much '
+          'size to consume.'
+        );
       }
       return true;
     }());

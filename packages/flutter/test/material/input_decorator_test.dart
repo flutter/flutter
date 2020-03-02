@@ -21,6 +21,7 @@ Widget buildInputDecorator({
   bool isHovering = false,
   TextStyle baseStyle,
   TextAlignVertical textAlignVertical,
+  VisualDensity visualDensity,
   Widget child = const Text(
     'text',
     style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
@@ -33,6 +34,7 @@ Widget buildInputDecorator({
           return Theme(
             data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
+              visualDensity: visualDensity,
             ),
             child: Align(
               alignment: Alignment.topLeft,
@@ -1433,6 +1435,43 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
   });
 
+  testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.pages),
+          prefixIconConstraints: BoxConstraints(
+            minWidth: 32,
+            minHeight: 32,
+          ),
+          suffixIcon: Icon(Icons.satellite),
+          suffixIconConstraints: BoxConstraints(
+            minWidth: 25,
+            minHeight: 25,
+          ),
+          isDense: true, // has to be true to go below 48px height
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 32px because the prefix icon
+    // is now a custom value
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 32.0));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getSize(find.byIcon(Icons.pages)).height, 32.0);
+    expect(tester.getSize(find.byIcon(Icons.satellite)).height, 25.0);
+
+    // (InputDecorator height - Text widget height) / 2
+    expect(tester.getTopLeft(find.text('text')).dy, (32.0 - 16.0) / 2);
+    // prefixIcon should take up the entire height of InputDecorator
+    expect(tester.getTopLeft(find.byIcon(Icons.pages)).dy, 0.0);
+    // (InputDecorator height - suffixIcon height) / 2
+    expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, (32.0 - 25.0) / 2);
+    expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
+  });
+
   testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
     const Key prefixKey = Key('prefix');
     await tester.pumpWidget(
@@ -1456,6 +1495,196 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getSize(find.byKey(prefixKey)).height, 16.0);
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 16.0);
+  });
+
+  testWidgets('InputDecorator respects reduced theme visualDensity', (WidgetTester tester) async {
+    // Label is visible, hint is not (opacity 0.0).
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The label is not floating so it's vertically centered.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderBottom(tester), 48.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    // Label moves upwards, hint is visible (opacity 1.0).
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: true,
+        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+    }
+
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
+    expect(getBorderBottom(tester), 48.0);
+    expect(getBorderWeight(tester), 2.0);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: false,
+        isFocused: true,
+        visualDensity: const VisualDensity(horizontal: -2.0, vertical: -2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+    }
+
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderBottom(tester), 48.0);
+    expect(getBorderWeight(tester), 2.0);
+  });
+
+  testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
+    // Label is visible, hint is not (opacity 0.0).
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The label is not floating so it's vertically centered.
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 40.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderBottom(tester), 64.0);
+    expect(getBorderWeight(tester), 1.0);
+
+    // Label moves upwards, hint is visible (opacity 1.0).
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: true,
+        visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+    }
+
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
+    expect(getOpacity(tester, 'hint'), 1.0);
+    expect(getBorderBottom(tester), 64.0);
+    expect(getBorderWeight(tester), 2.0);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: false,
+        isFocused: true,
+        visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is 200ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+    }
+
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderBottom(tester), 64.0);
+    expect(getBorderWeight(tester), 2.0);
   });
 
   testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {

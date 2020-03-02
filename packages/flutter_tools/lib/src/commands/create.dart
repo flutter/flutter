@@ -642,10 +642,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'web': web,
       'macos': macos,
       'year': DateTime.now().year,
-      // For now, the new plugin schema is only used when a desktop plugin is
-      // enabled. Once the new schema is supported on stable, this should be
-      // removed, and the new schema should always be used.
-      'useNewPluginSchema': macos,
       // If a desktop platform is included, add a workaround for #31366.
       // When Linux and Windows are added, we will need this workaround again.
       'includeTargetPlatformWorkaround': false,

@@ -48,7 +48,7 @@ abstract class FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
   });
 }
 
@@ -79,7 +79,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String icudtlPath,
     Directory coverageDirectory,
     bool web = false,
-    String randomSeed = '0',
+    String randomSeed,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
@@ -102,7 +102,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--name', name],
       for (final String plainName in plainNames)
         ...<String>['--plain-name', plainName],
-      '--test-randomize-ordering-seed=$randomSeed',
+      if (randomSeed != null)
+        '--test-randomize-ordering-seed=$randomSeed',
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory

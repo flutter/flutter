@@ -20,7 +20,7 @@ void main() {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
     if (info.serverUri == null) {
-      throw TestFailure('This test _must_ be run with --enable-vmservice.');
+      fail('This test _must_ be run with --enable-vmservice.');
     }
     await timelineObtainer.connect(info.serverUri);
     await timelineObtainer.setDartFlags();
@@ -58,7 +58,8 @@ void main() {
           'name': 'ImageCache.clear',
           'args': <String, dynamic>{
             'pendingImages': 1,
-            'cachedImages': 0,
+            'keepAliveImages': 0,
+            'liveImages': 1,
             'currentSizeInBytes': 0,
             'isolateId': isolateId,
           }
@@ -73,7 +74,6 @@ void _expectTimelineEvents(
   List<Map<String, dynamic>> expected,
 ) {
   for (final Map<String, dynamic> event in events) {
-
     for (int index = 0; index < expected.length; index += 1) {
       if (expected[index]['name'] == event['name']) {
         final Map<String, dynamic> expectedArgs = expected[index]['args'] as Map<String, dynamic>;
@@ -91,9 +91,6 @@ void _expectTimelineEvents(
 }
 
 bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
-  if (expectedArgs.length != args.length) {
-    return false;
-  }
   for (final String key in expectedArgs.keys) {
     if (expectedArgs[key] != args[key]) {
       return false;
@@ -153,7 +150,7 @@ class TimelineObtainer {
 
   Future<void> close() async {
     expect(_completers, isEmpty);
-    await _observatorySocket.close();
+    await _observatorySocket?.close();
   }
 }
 

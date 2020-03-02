@@ -23,16 +23,6 @@ final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 class MockStdout extends Mock implements Stdout {}
 
-class ThrowingStdio extends Stdio {
-  ThrowingStdio(this.stdout, this.stderr);
-
-  @override
-  final Stdout stdout;
-
-  @override
-  final IOSink stderr;
-}
-
 void main() {
   group('AppContext', () {
     FakeStopwatch fakeStopWatch;
@@ -94,9 +84,11 @@ void main() {
   testWithoutContext('Logger does not throw when stdio write throws synchronously', () async {
     final MockStdout stdout = MockStdout();
     final MockStdout stderr = MockStdout();
-    final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
+    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
     bool stdoutThrew = false;
     bool stderrThrew = false;
+    final Completer<void> stdoutError = Completer<void>();
+    final Completer<void> stderrError = Completer<void>();
     when(stdout.write(any)).thenAnswer((_) {
       stdoutThrew = true;
       throw 'Error';
@@ -105,6 +97,8 @@ void main() {
       stderrThrew = true;
       throw 'Error';
     });
+    when(stdout.done).thenAnswer((_) => stdoutError.future);
+    when(stderr.done).thenAnswer((_) => stderrError.future);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(
         stdio: stdio,
@@ -123,7 +117,9 @@ void main() {
   testWithoutContext('Logger does not throw when stdio write throws asynchronously', () async {
     final MockStdout stdout = MockStdout();
     final MockStdout stderr = MockStdout();
-    final ThrowingStdio stdio = ThrowingStdio(stdout, stderr);
+    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
+    final Completer<void> stdoutError = Completer<void>();
+    final Completer<void> stderrError = Completer<void>();
     bool stdoutThrew = false;
     bool stderrThrew = false;
     final Completer<void> stdoutCompleter = Completer<void>();
@@ -142,6 +138,8 @@ void main() {
         throw 'Error';
       }, null);
     });
+    when(stdout.done).thenAnswer((_) => stdoutError.future);
+    when(stderr.done).thenAnswer((_) => stderrError.future);
     final Logger logger = StdoutLogger(
       terminal: AnsiTerminal(
         stdio: stdio,
@@ -157,6 +155,43 @@ void main() {
     await stderrCompleter.future;
     expect(stdoutThrew, true);
     expect(stderrThrew, true);
+  });
+
+  testWithoutContext('Logger does not throw when stdio completes done with an error', () async {
+    final MockStdout stdout = MockStdout();
+    final MockStdout stderr = MockStdout();
+    final Stdio stdio = Stdio.test(stdout: stdout, stderr: stderr);
+    final Completer<void> stdoutError = Completer<void>();
+    final Completer<void> stderrError = Completer<void>();
+    final Completer<void> stdoutCompleter = Completer<void>();
+    final Completer<void> stderrCompleter = Completer<void>();
+    when(stdout.write(any)).thenAnswer((_) {
+      Zone.current.runUnaryGuarded<void>((_) {
+        stdoutError.completeError(Exception('Some pipe error'));
+        stdoutCompleter.complete();
+      }, null);
+    });
+    when(stderr.write(any)).thenAnswer((_) {
+      Zone.current.runUnaryGuarded<void>((_) {
+        stderrError.completeError(Exception('Some pipe error'));
+        stderrCompleter.complete();
+      }, null);
+    });
+    when(stdout.done).thenAnswer((_) => stdoutError.future);
+    when(stderr.done).thenAnswer((_) => stderrError.future);
+    final Logger logger = StdoutLogger(
+      terminal: AnsiTerminal(
+        stdio: stdio,
+        platform: _kNoAnsiPlatform,
+      ),
+      stdio: stdio,
+      outputPreferences: OutputPreferences.test(),
+      timeoutConfiguration: const TimeoutConfiguration(),
+    );
+    logger.printStatus('message');
+    logger.printError('error message');
+    await stdoutCompleter.future;
+    await stderrCompleter.future;
   });
 
   group('Spinners', () {

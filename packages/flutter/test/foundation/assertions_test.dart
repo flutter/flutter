@@ -355,7 +355,8 @@ void main() {
 
   test('Identifies user fault', () {
     // User fault because they called `new Text(null)` from their own code.
-    final StackTrace stack = StackTrace.fromString('''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+    final StackTrace stack = StackTrace.fromString('''
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)
 #3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
@@ -389,7 +390,8 @@ void main() {
   test('Identifies our fault', () {
     // Our fault because we should either have an assertion in `text_helper.dart`
     // or we should make sure not to pass bad values into new Text.
-    final StackTrace stack = StackTrace.fromString('''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+    final StackTrace stack = StackTrace.fromString('''
+#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
 #1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
 #2      new Text (package:flutter/src/widgets/text.dart:287:10)
 #3      new SomeWidgetUsingText (package:flutter/src/widgets/text_helper.dart:287:10)

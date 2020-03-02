@@ -591,7 +591,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         showCursor: widget.showCursor,
         controller: _controller,
         focusNode: focusNode,
-        strutStyle: widget.strutStyle ?? StrutStyle.disabled,
+        strutStyle: widget.strutStyle ?? const StrutStyle(),
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
         textScaleFactor: widget.textScaleFactor,
