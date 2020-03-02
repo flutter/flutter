@@ -462,13 +462,13 @@ abstract class ResidentCompiler {
     List<String> experimentalFlags,
     String platformDill,
     List<String> dartDefines,
+    String librariesSpec,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
-
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -527,6 +527,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.experimentalFlags,
     this.platformDill,
     List<String> dartDefines,
+    this.librariesSpec,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -543,6 +544,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+  final String librariesSpec;
 
   @override
   void addFileSystemRoot(String root) {
@@ -664,6 +666,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,
+      ],
+      if (librariesSpec != null) ...<String>[
+        '--libraries-spec',
+        librariesSpec,
       ],
       if (packagesFilePath != null) ...<String>[
         '--packages',

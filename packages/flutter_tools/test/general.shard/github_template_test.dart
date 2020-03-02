@@ -107,7 +107,8 @@ device_info=/fake/pub.dartlang.org/pub.dartlang.org/device_info-0.4.1+4/
 
         final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText);
         final String actualBody = Uri.parse(actualURL).queryParameters['body'];
-        const String expectedBody = '''## Command
+        const String expectedBody = '''
+## Command
 ```
 flutter test
 ```

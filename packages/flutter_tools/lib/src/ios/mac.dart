@@ -91,7 +91,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     globals.printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
@@ -428,16 +427,6 @@ return result.exitCode != 0 &&
     result.stdout != null &&
     result.stdout.contains('database is locked') &&
     result.stdout.contains('there are two concurrent builds running');
-}
-
-String readGeneratedXcconfig(String appPath) {
-  final String generatedXcconfigPath =
-      globals.fs.path.join(globals.fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
-  final File generatedXcconfigFile = globals.fs.file(generatedXcconfigPath);
-  if (!generatedXcconfigFile.existsSync()) {
-    return null;
-  }
-  return generatedXcconfigFile.readAsStringSync();
 }
 
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {

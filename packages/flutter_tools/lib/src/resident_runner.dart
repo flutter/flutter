@@ -94,6 +94,8 @@ class FlutterDevice {
           .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
           .absolute.uri.toString(),
         dartDefines: dartDefines,
+        librariesSpec: globals.fs.file(globals.artifacts
+          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
       );
     } else {
       generator = ResidentCompiler(
@@ -110,13 +112,15 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: dartDefines,
       );
-      if (flutterProject.hasBuilders) {
-        generator = await CodeGeneratingResidentCompiler.create(
-          residentCompiler: generator,
-          flutterProject: flutterProject,
-        );
-      }
     }
+
+    if (flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        residentCompiler: generator,
+        flutterProject: flutterProject,
+      );
+    }
+
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
@@ -627,16 +631,6 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
-    // TODO(jonahwilliams): this is a temporary work around to regain some of
-    // the initialize from dill performance. Longer term, we should have a
-    // better way to determine where the appropriate dill file is, as this
-    // doesn't work for Android or macOS builds.}
-    if (dillOutputPath == null) {
-      final File existingDill = globals.fs.file(globals.fs.path.join('build', 'app.dill'));
-      if (existingDill.existsSync()) {
-        existingDill.copySync(globals.fs.path.join(artifactDirectory.path, 'app.dill'));
-      }
-    }
   }
 
   @protected
@@ -677,6 +671,13 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+
+  // Returns the Uri of the first connected device for mobile,
+  // and only connected device for web.
+  //
+  // Would be null if there is no device connected or
+  // there is no devFS associated with the first device.
+  Uri get uri => flutterDevices.first?.devFS?.baseUri;
 
   /// Returns [true] if the resident runner exited after invoking [exit()].
   bool get exited => _exited;

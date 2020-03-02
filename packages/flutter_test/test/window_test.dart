@@ -256,6 +256,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.disableAnimations = false,
     this.boldText = false,
     this.reduceMotion = false,
+    this.highContrast = false,
   });
 
   @override
@@ -272,4 +273,18 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
 
   @override
   final bool reduceMotion;
+
+  @override
+  final bool highContrast;
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [AccessibilityFeatures], and makes things easier when we do rolls to
+  /// give us time to catch up.
+  ///
+  /// If you would like to add to this class, changes must first be made in the
+  /// engine, followed by the framework.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
 }

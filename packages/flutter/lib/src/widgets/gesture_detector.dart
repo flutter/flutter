@@ -242,13 +242,11 @@ class GestureDetector extends StatelessWidget {
            }
            final String recognizer = havePan ? 'pan' : 'scale';
            if (haveVerticalDrag && haveHorizontalDrag) {
-             throw FlutterError.fromParts(<DiagnosticsNode>[
-               ErrorSummary('Incorrect GestureDetector arguments.'),
-               ErrorDescription(
-                 'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
-                 'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
-               )
-             ]);
+             throw FlutterError(
+               'Incorrect GestureDetector arguments.\n'
+               'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
+               'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
+             );
            }
          }
          return true;

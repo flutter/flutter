@@ -84,47 +84,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('Forces fast start off for devices that do not support it', () async {
-      final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
-      when(mockDevice.name).thenReturn('mockdevice');
-      when(mockDevice.supportsFastStart).thenReturn(false);
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async => false);
-      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
-      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) {
-        return Future<List<Device>>.value(<Device>[mockDevice]);
-      });
-      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.value(mockDevice);
-      });
-      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
-
-      final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
-      try {
-        await createTestCommandRunner(command).run(<String>[
-          'run',
-          '--fast-start',
-          '--no-pub',
-        ]);
-        fail('Expect exception');
-      } catch (e) {
-        expect(e, isA<ToolExit>());
-      }
-
-      final BufferLogger bufferLogger = globals.logger as BufferLogger;
-      expect(bufferLogger.statusText, isNot(contains(
-        'Using --fast-start option with device mockdevice, but this device '
-        'does not support it. Overriding the setting to false.'
-      )));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      DeviceManager: () => MockDeviceManager(),
-    });
-
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('.packages')
@@ -215,7 +174,7 @@ void main() {
 
         const List<Device> noDevices = <Device>[];
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(noDevices)
+          (Invocation invocation) => Future<List<Device>>.value(noDevices)
         );
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(noDevices)
@@ -245,7 +204,7 @@ void main() {
 
         // Called as part of requiredArtifacts()
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[])
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[])
         );
         // No devices are attached, we just want to verify update the cache
         // BEFORE checking for devices
@@ -308,7 +267,7 @@ void main() {
         )).thenReturn('/path/to/sdk');
 
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[mockDevice]),
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
@@ -366,9 +325,7 @@ void main() {
       setUpAll(() {
         final FakeDevice fakeDevice = FakeDevice();
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            fakeDevice,
-          ]);
+          return Future<List<Device>>.value(<Device>[fakeDevice]);
         });
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
@@ -454,7 +411,7 @@ void main() {
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.android_arm),
         ]);
       });
@@ -465,7 +422,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.ios),
         ]);
       });
@@ -476,7 +433,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.ios),
           MockDevice(TargetPlatform.android_arm),
         ]);
@@ -489,7 +446,7 @@ void main() {
       }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
+        return Future<List<Device>>.value(<Device>[
           MockDevice(TargetPlatform.web_javascript),
         ]);
       });
@@ -510,7 +467,7 @@ void main() {
       setUpAll(() {
         final FakeDevice fakeDevice = FakeDevice().._targetPlatform = TargetPlatform.web_javascript;
         when(mockDeviceManager.getDevices()).thenAnswer(
-          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[fakeDevice])
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
         );
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
@@ -612,7 +569,7 @@ class TestRunCommand extends RunCommand {
   @override
   // ignore: must_call_super
   Future<void> validateCommand() async {
-    devices = await deviceManager.getDevices().toList();
+    devices = await deviceManager.getDevices();
   }
 }
 

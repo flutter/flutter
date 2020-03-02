@@ -18,7 +18,7 @@ void main() {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
       final DeviceManager deviceManager = DeviceManager();
-      final List<Device> devices = await deviceManager.getDevices().toList();
+      final List<Device> devices = await deviceManager.getDevices();
       expect(devices, isList);
     });
 
@@ -30,7 +30,7 @@ void main() {
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
       Future<void> expectDevice(String id, List<Device> expected) async {
-        expect(await deviceManager.getDevicesById(id).toList(), expected);
+        expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('01abfc49119c410e', <Device>[device2]);
       await expectDevice('Nexus 5X', <Device>[device2]);
@@ -170,9 +170,7 @@ class TestDeviceManager extends DeviceManager {
   bool isAlwaysSupportedOverride;
 
   @override
-  Stream<Device> getAllConnectedDevices() {
-    return Stream<Device>.fromIterable(allDevices);
-  }
+  Future<List<Device>> getAllConnectedDevices() async => allDevices;
 
   @override
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {

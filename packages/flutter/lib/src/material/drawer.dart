@@ -232,6 +232,7 @@ class DrawerController extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
     this.edgeDragWidth,
+    this.enableOpenDragGesture = true,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -277,6 +278,11 @@ class DrawerController extends StatefulWidget {
   ///
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
+
+  /// Determines if the [Drawer] can be opened with a drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool enableOpenDragGesture;
 
   /// The width of the area within which a horizontal swipe will open the
   /// drawer.
@@ -505,18 +511,22 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
 
     if (_controller.status == AnimationStatus.dismissed) {
-      return Align(
-        alignment: _drawerOuterAlignment,
-        child: GestureDetector(
-          key: _gestureDetectorKey,
-          onHorizontalDragUpdate: _move,
-          onHorizontalDragEnd: _settle,
-          behavior: HitTestBehavior.translucent,
-          excludeFromSemantics: true,
-          dragStartBehavior: widget.dragStartBehavior,
-          child: Container(width: dragAreaWidth),
-        ),
-      );
+      if (widget.enableOpenDragGesture) {
+        return Align(
+          alignment: _drawerOuterAlignment,
+          child: GestureDetector(
+            key: _gestureDetectorKey,
+            onHorizontalDragUpdate: _move,
+            onHorizontalDragEnd: _settle,
+            behavior: HitTestBehavior.translucent,
+            excludeFromSemantics: true,
+            dragStartBehavior: widget.dragStartBehavior,
+            child: Container(width: dragAreaWidth),
+          ),
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
     } else {
       bool platformHasBackButton;
       switch (Theme.of(context).platform) {

@@ -914,6 +914,8 @@ void main() {
 
     tester.testTextInput.log.clear();
     tester.testTextInput.closeConnection();
+    // A pump is needed to allow the focus change (unfocus) to be resolved.
+    await tester.pump();
 
     // Widget does not have focus anymore.
     expect(state.wantKeepAlive, false);
@@ -2971,12 +2973,13 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<FadeTransition> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-      // On Android, an empty app contains a single FadeTransition. The following
-      // two are the left and right text selection handles, respectively.
-      final FadeTransition left = transitions[1];
-      final FadeTransition right = transitions[2];
+      final List<FadeTransition> transitions = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+        matching: find.byType(FadeTransition),
+      ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+      expect(transitions.length, 2);
+      final FadeTransition left = transitions[0];
+      final FadeTransition right = transitions[1];
 
       if (expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(1.0));
@@ -3719,51 +3722,6 @@ void main() {
     expect((await Clipboard.getData(Clipboard.kTextPlain)).text, equals(testText));
 
     // Delete
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.delete,
-      ],
-      platform: platform,
-    );
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: 72,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, isEmpty, reason: 'on $platform');
-
-    /// Paste and Select All
-    await sendKeys(
-      tester,
-      <LogicalKeyboardKey>[
-        LogicalKeyboardKey.keyV,
-        LogicalKeyboardKey.keyA,
-      ],
-      shortcutModifier: true,
-      platform: platform,
-    );
-
-    expect(
-      selection,
-      equals(
-        const TextSelection(
-          baseOffset: 0,
-          extentOffset: testText.length,
-          affinity: TextAffinity.downstream,
-        ),
-      ),
-      reason: 'on $platform',
-    );
-    expect(controller.text, equals(testText), reason: 'on $platform');
-
-    // Backspace
     await sendKeys(
       tester,
       <LogicalKeyboardKey>[

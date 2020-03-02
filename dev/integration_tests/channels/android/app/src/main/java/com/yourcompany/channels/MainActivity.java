@@ -20,7 +20,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 public class MainActivity extends FlutterActivity {
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    GeneratedPluginRegistrant.registerWith(flutterEngine);
+    super.configureFlutterEngine(flutterEngine);
 
     DartExecutor dartExecutor = flutterEngine.getDartExecutor();
     setupMessageHandshake(new BasicMessageChannel<>(dartExecutor, "binary-msg", BinaryCodec.INSTANCE));
