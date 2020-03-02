@@ -321,7 +321,12 @@ class _TestTerminal implements Terminal {
   Stream<String> get keystrokes => const Stream<String>.empty();
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger logger, String prompt, int defaultChoiceIndex, bool displayAcceptedCharacters = true}) {
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
+    @required Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
 
