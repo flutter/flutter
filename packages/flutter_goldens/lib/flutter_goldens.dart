@@ -265,11 +265,10 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && cirrusPR.isEmpty
       && cirrusBranch == 'master'
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
-    
-    print(platform.environment['GOLD_TRYJOB']);
 
+    final bool isTryjob = platform.environment['GOLD_TRYJOB'] as bool;
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && !(platform.environment['GOLD_TRYJOB'] as bool);
+      && !isTryjob;
 
     return cirrusPostSubmit || luciPostSubmit;
   }
