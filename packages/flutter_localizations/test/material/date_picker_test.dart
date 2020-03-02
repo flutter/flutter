@@ -19,7 +19,7 @@ void main() {
     initialDate = DateTime(2016, DateTime.january, 15);
   });
 
-  group(DayPicker, () {
+  group(CalendarDatePicker, () {
     final intl.NumberFormat arabicNumbers = intl.NumberFormat('0', 'ar');
     final Map<Locale, Map<String, dynamic>> testLocales = <Locale, Map<String, dynamic>>{
       // Tests the default.
@@ -59,13 +59,11 @@ void main() {
         final TextDirection textDirection = testLocales[locale]['textDirection'] as TextDirection;
         final DateTime baseDate = DateTime(2017, 9, 27);
 
-        await _pumpBoilerplate(tester, DayPicker(
-          selectedDate: baseDate,
-          currentDate: baseDate,
-          onChanged: (DateTime newValue) { },
+        await _pumpBoilerplate(tester, CalendarDatePicker(
+          initialDate: baseDate,
           firstDate: baseDate.subtract(const Duration(days: 90)),
           lastDate: baseDate.add(const Duration(days: 90)),
-          displayedMonth: baseDate,
+          onDateChanged: (DateTime newValue) {},
         ), locale: locale, textDirection: textDirection);
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
@@ -126,14 +124,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(dayPicker),
+      Localizations.localeOf(picker),
       const Locale('fr', 'CA'),
     );
 
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.ltr,
     );
 
@@ -169,9 +167,9 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.rtl,
     );
 
@@ -210,14 +208,14 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    final Element dayPicker = tester.element(find.byType(DayPicker));
+    final Element picker = tester.element(find.byType(CalendarDatePicker));
     expect(
-      Localizations.localeOf(dayPicker),
+      Localizations.localeOf(picker),
       const Locale('fr', 'CA'),
     );
 
     expect(
-      Directionality.of(dayPicker),
+      Directionality.of(picker),
       TextDirection.rtl,
     );
 
@@ -292,12 +290,16 @@ Future<void> _pumpBoilerplate(
   Locale locale = const Locale('en', 'US'),
   TextDirection textDirection = TextDirection.ltr,
 }) async {
-  await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
-    child: Localizations(
-      locale: locale,
-      delegates: GlobalMaterialLocalizations.delegates,
-      child: child,
+  await tester.pumpWidget(MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: locale,
+        delegates: GlobalMaterialLocalizations.delegates,
+        child: Material(
+          child: child,
+        ),
+      ),
     ),
   ));
 }

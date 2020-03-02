@@ -76,12 +76,14 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  1. The string that would be returned by [Intl.canonicalizedLocale] for
   ///     the locale.
   ///  2. The [intl.DateFormat] for [formatYear].
-  ///  3. The [intl.DateFormat] for [formatMediumDate].
-  ///  4. The [intl.DateFormat] for [formatFullDate].
-  ///  5. The [intl.DateFormat] for [formatMonthYear].
-  ///  6. The [NumberFormat] for [formatDecimal] (also used by [formatHour] and
+  ///  3. The [int.DateFormat] for [formatShortDate].
+  ///  4. The [intl.DateFormat] for [formatMediumDate].
+  ///  5. The [intl.DateFormat] for [formatFullDate].
+  ///  6. The [intl.DateFormat] for [formatMonthYear].
+  ///  7. The [int.DateFormat] for [formatShortMonthDay].
+  ///  8. The [NumberFormat] for [formatDecimal] (also used by [formatHour] and
   ///     [formatTimeOfDay] when [timeOfDayFormat] doesn't use [HourFormat.HH]).
-  ///  7. The [NumberFormat] for [formatHour] and the hour part of
+  ///  9. The [NumberFormat] for [formatHour] and the hour part of
   ///     [formatTimeOfDay] when [timeOfDayFormat] uses [HourFormat.HH], and for
   ///     [formatMinute] and the minute part of [formatTimeOfDay].
   ///
@@ -90,21 +92,30 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   const GlobalMaterialLocalizations({
     @required String localeName,
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : assert(localeName != null),
        _localeName = localeName,
        assert(fullYearFormat != null),
        _fullYearFormat = fullYearFormat,
+       assert(compactDateFormat != null),
+       _compactDateFormat = compactDateFormat,
+       assert(shortDateFormat != null),
+       _shortDateFormat = shortDateFormat,
        assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
        assert(longDateFormat != null),
        _longDateFormat = longDateFormat,
        assert(yearMonthFormat != null),
        _yearMonthFormat = yearMonthFormat,
+       assert(shortMonthDayFormat != null),
+       _shortMonthDayFormat = shortMonthDayFormat,
        assert(decimalFormat != null),
        _decimalFormat = decimalFormat,
        assert(twoDigitZeroPaddedFormat != null),
@@ -112,9 +123,12 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
+  final intl.DateFormat _compactDateFormat;
+  final intl.DateFormat _shortDateFormat;
   final intl.DateFormat _mediumDateFormat;
   final intl.DateFormat _longDateFormat;
   final intl.DateFormat _yearMonthFormat;
+  final intl.DateFormat _shortMonthDayFormat;
   final intl.NumberFormat _decimalFormat;
   final intl.NumberFormat _twoDigitZeroPaddedFormat;
 
@@ -143,6 +157,16 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
+  String formatCompactDate(DateTime date) {
+    return _compactDateFormat.format(date);
+  }
+
+  @override
+  String formatShortDate(DateTime date) {
+    return _shortDateFormat.format(date);
+  }
+
+  @override
   String formatMediumDate(DateTime date) {
     return _mediumDateFormat.format(date);
   }
@@ -155,6 +179,20 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   String formatMonthYear(DateTime date) {
     return _yearMonthFormat.format(date);
+  }
+
+  @override
+  String formatShortMonthDay(DateTime date) {
+    return _shortMonthDayFormat.format(date);
+  }
+
+  @override
+  DateTime parseCompactDate(String inputString) {
+    try {
+      return _compactDateFormat.parseStrict(inputString);
+    } on FormatException {
+      return null;
+    }
   }
 
   @override
@@ -576,24 +614,36 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       );
 
       intl.DateFormat fullYearFormat;
+      intl.DateFormat compactDateFormat;
+      intl.DateFormat shortDateFormat;
       intl.DateFormat mediumDateFormat;
       intl.DateFormat longDateFormat;
       intl.DateFormat yearMonthFormat;
+      intl.DateFormat shortMonthDayFormat;
       if (intl.DateFormat.localeExists(localeName)) {
         fullYearFormat = intl.DateFormat.y(localeName);
+        compactDateFormat = intl.DateFormat.yMd(localeName);
+        shortDateFormat = intl.DateFormat.yMMMd(localeName);
         mediumDateFormat = intl.DateFormat.MMMEd(localeName);
         longDateFormat = intl.DateFormat.yMMMMEEEEd(localeName);
         yearMonthFormat = intl.DateFormat.yMMMM(localeName);
+        shortMonthDayFormat = intl.DateFormat.MMMd(localeName);
       } else if (intl.DateFormat.localeExists(locale.languageCode)) {
         fullYearFormat = intl.DateFormat.y(locale.languageCode);
+        compactDateFormat = intl.DateFormat.yMd(locale.languageCode);
+        shortDateFormat = intl.DateFormat.yMMMd(locale.languageCode);
         mediumDateFormat = intl.DateFormat.MMMEd(locale.languageCode);
         longDateFormat = intl.DateFormat.yMMMMEEEEd(locale.languageCode);
         yearMonthFormat = intl.DateFormat.yMMMM(locale.languageCode);
+        shortMonthDayFormat = intl.DateFormat.MMMd(locale.languageCode);
       } else {
         fullYearFormat = intl.DateFormat.y();
+        compactDateFormat = intl.DateFormat.yMd();
+        shortDateFormat = intl.DateFormat.yMMMd();
         mediumDateFormat = intl.DateFormat.MMMEd();
         longDateFormat = intl.DateFormat.yMMMMEEEEd();
         yearMonthFormat = intl.DateFormat.yMMMM();
+        shortMonthDayFormat = intl.DateFormat.MMMd();
       }
 
       intl.NumberFormat decimalFormat;
@@ -612,9 +662,12 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
+        compactDateFormat,
+        shortDateFormat,
         mediumDateFormat,
         longDateFormat,
         yearMonthFormat,
+        shortMonthDayFormat,
         decimalFormat,
         twoDigitZeroPaddedFormat,
       ));
