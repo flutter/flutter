@@ -2024,7 +2024,7 @@ Future<void> main() async {
 
   testWidgets('Can push/pop on outer Navigator if nested Navigators contains same Heroes', (WidgetTester tester) async {
     const String heroTag = 'foo';
-    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey<NavigatorState>();
     final Key rootRouteHero = UniqueKey();
     final Key nestedRouteHeroOne = UniqueKey();
     final Key nestedRouteHeroTwo = UniqueKey();
