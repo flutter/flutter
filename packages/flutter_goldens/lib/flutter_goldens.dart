@@ -253,6 +253,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
+
     return skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
@@ -267,8 +268,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      // TODO(PIINKS): I don't think this key exists in post-submit luci checks, verify.
-      && platform.environment['upload_packages'] as bool;
+      && !(platform.environment['GOLD_TRYJOB'] as bool);
 
     return cirrusPostSubmit || luciPostSubmit;
   }
@@ -619,7 +619,6 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    // TODO(Piinks): What does driver test support look like locally?
     golden = _addPrefix(golden);
     final String testName = skiaClient.cleanTestName(golden.path);
     final List<String> testExpectations = skiaClient.expectations[testName];
