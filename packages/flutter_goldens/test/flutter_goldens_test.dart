@@ -510,7 +510,8 @@ void main() {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990'
+              'SWARMING_TASK_ID' : '12345678990',
+              'GOLD_TRYJOB' : 'false',
             },
             operatingSystem: 'macos'
           );
