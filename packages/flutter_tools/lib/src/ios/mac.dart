@@ -93,7 +93,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode)
   ];
 
-  for(final IOSMigrator migrator in migrators) {
+  for (final IOSMigrator migrator in migrators) {
     if (!migrator.migrate()) {
       return XcodeBuildResult(success: false);
     }
