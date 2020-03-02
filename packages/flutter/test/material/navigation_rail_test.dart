@@ -105,28 +105,31 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+    expect(renderBox.localToGlobal(Offset.zero), Offset.zero);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     // The destination padding is 24, but the top has additional padding of 8.
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 32.0)),
+      equals(iconAdjustment + const Offset(24.0, 32.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -143,28 +146,30 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     // The destination padding is 24, but the top has additional padding of 8.
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 32.0)),
+      equals(iconAdjustment + const Offset(24.0, 32.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -181,28 +186,30 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     // The destination padding is 24, but the top has additional padding of 8.
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 32.0)),
+      equals(iconAdjustment + const Offset(24.0, 32.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -216,11 +223,13 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 24.0)),
+      equals(iconAdjustment + const Offset(24.0, 24.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -228,19 +237,19 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -258,9 +267,11 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, 142);
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 24.0)),
+      equals(iconAdjustment + const Offset(59.0, 24.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -268,19 +279,19 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 130.0)),
+      equals(iconAdjustment + const Offset(59.0, 130.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 202.0)),
+      equals(iconAdjustment + const Offset(59.0, 202.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 274.0)),
+      equals(iconAdjustment + const Offset(59.0, 274.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 346.0)),
+      equals(iconAdjustment + const Offset(59.0, 346.0)),
     );
   });
 
@@ -296,32 +307,34 @@ void main() {
 
     // A smaller textScaleFactor will not reduce the default size of the rail.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 24.0)),
+      equals(iconAdjustment + const Offset(24.0, 24.0)),
     );
 
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 48.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Abc'), 48.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -335,11 +348,13 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 24.0)),
+      equals(iconAdjustment + const Offset(24.0, 24.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -347,7 +362,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 96.0)),
+      equals(iconAdjustment + const Offset(24.0, 96.0)),
     );
     expect(
       _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
@@ -355,7 +370,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 168.0)),
+      equals(iconAdjustment + const Offset(24.0, 168.0)),
     );
     expect(
       _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
@@ -363,7 +378,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 240.0)),
+      equals(iconAdjustment + const Offset(24.0, 240.0)),
     );
     expect(
       _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
@@ -371,7 +386,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 312.0)),
+      equals(iconAdjustment + const Offset(24.0, 312.0)),
     );
     expect(
       _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
@@ -393,9 +408,11 @@ void main() {
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
     expect(renderBox.size.width, 142);
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 24.0)),
+      equals(iconAdjustment + const Offset(59.0, 24.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -403,7 +420,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 122.0)),
+      equals(iconAdjustment + const Offset(59.0, 122.0)),
     );
     expect(
       _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
@@ -411,7 +428,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 220.0)),
+      equals(iconAdjustment + const Offset(59.0, 220.0)),
     );
     expect(
       _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
@@ -419,7 +436,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 318.0)),
+      equals(iconAdjustment + const Offset(59.0, 318.0)),
     );
     expect(
       _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
@@ -427,7 +444,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(59.0, 416.0)),
+      equals(iconAdjustment + const Offset(59.0, 416.0)),
     );
     expect(
       _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
@@ -447,47 +464,49 @@ void main() {
 
     // A smaller textScaleFactor will not reduce the default size of the rail.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 24.0)),
+      equals(iconAdjustment + const Offset(24.0, 24.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 48.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Abc'), 48.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 96.0)),
+      equals(iconAdjustment + const Offset(24.0, 96.0)),
     );
     expect(
       _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 120.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Def'), 120.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 168.0)),
+      equals(iconAdjustment + const Offset(24.0, 168.0)),
     );
     expect(
       _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 192.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Ghi'), 192.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 240.0)),
+      equals(iconAdjustment + const Offset(24.0, 240.0)),
     );
     expect(
       _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 264.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Jkl'), 264.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 312.0)),
+      equals(iconAdjustment + const Offset(24.0, 312.0)),
     );
     expect(
       _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
-      equals(const Offset(20.0, 336.0)),
+      equals(Offset(_verticalLabelXOffset(tester, 'Mno'), 336.0)),
     );
   });
 
@@ -495,33 +514,35 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        preferredWidth: 56,
+        preferredWidth: 56.0,
         destinations: _destinations(),
       ),
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56);
+    expect(renderBox.size.width, 56.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 24.0)),
+      equals(iconAdjustment + const Offset(16.0, 24.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 80.0)),
+      equals(iconAdjustment + const Offset(16.0, 80.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 136.0)),
+      equals(iconAdjustment + const Offset(16.0, 136.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 192.0)),
+      equals(iconAdjustment + const Offset(16.0, 192.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 248.0)),
+      equals(iconAdjustment + const Offset(16.0, 248.0)),
     );
   });
 
@@ -530,7 +551,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        preferredWidth: 56,
+        preferredWidth: 56.0,
         destinations: _destinations(),
       ),
     );
@@ -538,27 +559,29 @@ void main() {
     // Since the rail is icon only, its preferred width should not be affected
     // by  textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56);
+    expect(renderBox.size.width, 56.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 24.0)),
+      equals(iconAdjustment + const Offset(16.0, 24.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 80.0)),
+      equals(iconAdjustment + const Offset(16.0, 80.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 136.0)),
+      equals(iconAdjustment + const Offset(16.0, 136.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 192.0)),
+      equals(iconAdjustment + const Offset(16.0, 192.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 248.0)),
+      equals(iconAdjustment + const Offset(16.0, 248.0)),
     );
   });
 
@@ -567,7 +590,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        preferredWidth: 56,
+        preferredWidth: 56.0,
         destinations: _destinations(),
       ),
     );
@@ -575,27 +598,29 @@ void main() {
     // Since the rail is icon only, its preferred width should not be affected
     // by  textScaleFactor.
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 56);
+    expect(renderBox.size.width, 56.0);
+
+    final Offset iconAdjustment = _iconAdjustment(tester);
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 24.0)),
+      equals(iconAdjustment + const Offset(16.0, 24.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 80.0)),
+      equals(iconAdjustment + const Offset(16.0, 80.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 136.0)),
+      equals(iconAdjustment + const Offset(16.0, 136.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 192.0)),
+      equals(iconAdjustment + const Offset(16.0, 192.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(16.0, 248.0)),
+      equals(iconAdjustment + const Offset(16.0, 248.0)),
     );
   });
 
@@ -608,25 +633,27 @@ void main() {
       ),
     );
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 32.0)),
+      equals(iconAdjustment + const Offset(24.0, 32.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
   });
 
@@ -639,25 +666,27 @@ void main() {
       ),
     );
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 148.0)),
+      equals(iconAdjustment + const Offset(24.0, 148.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 220.0)),
+      equals(iconAdjustment + const Offset(24.0, 220.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 292.0)),
+      equals(iconAdjustment + const Offset(24.0, 292.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 364.0)),
+      equals(iconAdjustment + const Offset(24.0, 364.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 436.0)),
+      equals(iconAdjustment + const Offset(24.0, 436.0)),
     );
   });
 
@@ -670,25 +699,27 @@ void main() {
       ),
     );
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 264.0)),
+      equals(iconAdjustment + const Offset(24.0, 264.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 336.0)),
+      equals(iconAdjustment + const Offset(24.0, 336.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 408.0)),
+      equals(iconAdjustment + const Offset(24.0, 408.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 480.0)),
+      equals(iconAdjustment + const Offset(24.0, 480.0)),
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 552.0)),
+      equals(iconAdjustment + const Offset(24.0, 552.0)),
     );
   });
 
@@ -750,9 +781,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(rail.size.width, equals(256.0));
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 32.0)),
+      equals(iconAdjustment + const Offset(24.0, 32.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -760,7 +793,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 104.0)),
+      equals(iconAdjustment + const Offset(24.0, 104.0)),
     );
     expect(
       _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
@@ -768,7 +801,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 176.0)),
+      equals(iconAdjustment + const Offset(24.0, 176.0)),
     );
     expect(
       _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
@@ -776,7 +809,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 248.0)),
+      equals(iconAdjustment + const Offset(24.0, 248.0)),
     );
     expect(
       _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
@@ -784,7 +817,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(24.0, 320.0)),
+      equals(iconAdjustment + const Offset(24.0, 320.0)),
     );
     expect(
       _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
@@ -825,6 +858,8 @@ void main() {
 
     final RenderBox rail = tester.firstRenderObject<RenderBox>(find.byType(NavigationRail));
 
+    final Offset iconAdjustment = _iconAdjustment(tester);
+
     expect(rail.size.width, equals(72.0));
     expect(rail.localToGlobal(Offset.zero), equals(const Offset(728.0, 0.0)));
 
@@ -843,7 +878,7 @@ void main() {
 
     expect(
       _iconRenderBox(tester, Icons.favorite).localToGlobal(Offset.zero),
-      equals(const Offset(752.0, 32.0)),
+      equals(iconAdjustment + const Offset(752.0, 32.0)),
     );
     expect(
       _labelRenderBox(tester, 'Abc').localToGlobal(Offset.zero),
@@ -851,7 +886,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.bookmark_border).localToGlobal(Offset.zero),
-      equals(const Offset(752.0, 104.0)),
+      equals(iconAdjustment + const Offset(752.0, 104.0)),
     );
     expect(
       _labelRenderBox(tester, 'Def').localToGlobal(Offset.zero),
@@ -859,7 +894,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.star_border).localToGlobal(Offset.zero),
-      equals(const Offset(752.0, 176.0)),
+      equals(iconAdjustment + const Offset(752.0, 176.0)),
     );
     expect(
       _labelRenderBox(tester, 'Ghi').localToGlobal(Offset.zero),
@@ -867,7 +902,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.hotel).localToGlobal(Offset.zero),
-      equals(const Offset(752.0, 248.0)),
+      equals(iconAdjustment + const Offset(752.0, 248.0)),
     );
     expect(
       _labelRenderBox(tester, 'Jkl').localToGlobal(Offset.zero),
@@ -875,7 +910,7 @@ void main() {
     );
     expect(
       _iconRenderBox(tester, Icons.remove_circle).localToGlobal(Offset.zero),
-      equals(const Offset(752.0, 320.0)),
+      equals(iconAdjustment + const Offset(752.0, 320.0)),
     );
     expect(
       _labelRenderBox(tester, 'Mno').localToGlobal(Offset.zero),
@@ -1376,4 +1411,17 @@ Material _railMaterial(WidgetTester tester) {
       matching: find.byType(Material),
     ),
   );
+}
+
+// The icon size is expected to be 24x24, but may be different depending
+// on the platform (e.g. web).
+Offset _iconAdjustment(WidgetTester tester) {
+  final Size iconSize = _iconRenderBox(tester, Icons.favorite).size;
+  return Offset(24.0 - iconSize.width, 24 - iconSize.height) / 2.0;
+}
+
+// Used to calculate x offset for labels because smaller scale texts differ in
+// sizes in different platforms (e.g. web).
+double _verticalLabelXOffset(WidgetTester tester, String text) {
+  return (72.0 - _labelRenderBox(tester, text).size.width) / 2.0;
 }
