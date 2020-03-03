@@ -581,7 +581,9 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         reverse: widget.reverse,
         child: _buildContainerForScrollDirection(
           children: <Widget>[
-            if (widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),
+            // The finalDropArea must be at index 0 so that widget.onReorder
+            // gets called with the correct start and end index.
+            if (widget.reverse) _wrap(finalDropArea, 0, constraints),
             if (widget.header != null) widget.header,
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
             if (!widget.reverse) _wrap(finalDropArea, widget.children.length, constraints),

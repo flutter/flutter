@@ -30,7 +30,12 @@ void main() {
       );
     }
 
-    Widget build({ Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr }) {
+    Widget build({
+      Widget header,
+      Axis scrollDirection = Axis.vertical,
+      TextDirection textDirection = TextDirection.ltr,
+      bool reverse = false,
+      }) {
       return MaterialApp(
         home: Directionality(
           textDirection: textDirection,
@@ -38,6 +43,7 @@ void main() {
             height: itemHeight * 10,
             width: itemHeight * 10,
             child: ReorderableListView(
+              reverse: reverse,
               header: header,
               children: listItems.map<Widget>(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
@@ -957,7 +963,20 @@ void main() {
           handle.dispose();
         });
       });
+    });
 
+    testWidgets('allows reordering from the very bottom to the very top in reverse', (WidgetTester tester) async {
+      // Test for https://github.com/flutter/flutter/issues/51359 to avoid a regression.
+      // To replicate the bugs behaviour we need to drag an item into the finalDropArea. 
+      // The finalDropArea is _ReorderableListContentState._defaultDropAreaExtent (= 100) wide/high
+      await tester.pumpWidget(build(reverse: true));
+      expect(listItems, orderedEquals(originalListItems));
+      await longPressDrag(
+        tester,
+        tester.getCenter(find.text('Item 4')),
+        tester.getCenter(find.text('Item 1')) - const Offset(0, 100),
+      );
+      expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
     });
 
     testWidgets('ReorderableListView can be reversed', (WidgetTester tester) async {
