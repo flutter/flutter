@@ -11,7 +11,7 @@ import 'framework.dart';
 /// 
 /// Each key needs to have a value that is unique in its corresponding storage,
 /// i.e. the widget's closest ancestor [PageStorage]. To make it possible for a
-/// saved value to be found when a widget is recreated, the key's values must
+/// saved value to be found when a widget is recreated, the key's value must
 /// not be objects whose identity will change each time the widget is created.
 /// 
 /// For more introduction, see [PageStorage]
