@@ -35,7 +35,6 @@ void main() {
       Widget footer,
       Axis scrollDirection = Axis.vertical,
       TextDirection textDirection = TextDirection.ltr,
-      bool reverse = false,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -44,7 +43,6 @@ void main() {
             height: itemHeight * 10,
             width: itemHeight * 10,
             child: ReorderableListView(
-              reverse: reverse,
               header: header,
               footer: footer,
               children: listItems.map<Widget>(listItemToWidget).toList(),
@@ -92,22 +90,6 @@ void main() {
           tester,
           tester.getCenter(find.text('Item 4')),
           tester.getCenter(find.text('Item 1')),
-        );
-        expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
-      });
-
-      testWidgets('allows reordering from the very bottom to the very top in reverse', (WidgetTester tester) async {
-        await tester.pumpWidget(build(
-          reverse: true,
-        ));
-        expect(listItems, orderedEquals(originalListItems));
-        await longPressDrag(
-          tester,
-          tester.getCenter(find.text('Item 4')),
-          // the list item needs to be dragged a good amout above the first item
-          // so that it reaches the finalDropArea otherwise the bug described 
-          // in https://github.com/flutter/flutter/issues/51359 doesn't happen
-          tester.getCenter(find.text('Item 1')) - const Offset(0, itemHeight * 2),
         );
         expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
       });
