@@ -28,12 +28,39 @@ void main() {
   print(ignoreMe3);
 
   createTargetInPackage();
+
+  final StaticConstInitializer staticConstMap = StaticConstInitializer();
+  staticConstMap.useOne(1);
 }
 
 class IgnoreMe {
   const IgnoreMe([this.target]);
 
   final Target target;
+}
+
+class StaticConstInitializer {
+  static const List<Target> targets = <Target>[
+    Target('100', 100, null),
+    Target('101', 101, Target('102', 102, null)),
+  ];
+
+  static const Set<Target> targetSet = <Target>{
+    Target('103', 103, null),
+    Target('104', 104, Target('105', 105, null)),
+  };
+
+
+  static const Map<int, Target> targetMap = <int, Target>{
+    0: Target('106', 106, null),
+    1: Target('107', 107, Target('108', 108, null)),
+  };
+
+  void useOne(int index) {
+    targets[index].hit();
+    targetSet.skip(index).first.hit();
+    targetMap[index].hit();
+  }
 }
 
 void blah(Target target) {
