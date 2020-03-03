@@ -113,7 +113,7 @@ class PageStorageBucket {
 
 /// Establish a subtree in which widgets can opt into persisting states after
 /// being destroyed.
-/// 
+///
 /// [PageStorage] is used to save and restore values that can outlive the widget.
 /// For example, when multiple pages are grouped in tabs, when a page is
 /// switched out, its widget is destroyed and its state is lost. By adding a
@@ -123,25 +123,28 @@ class PageStorageBucket {
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
+/// 
 /// [PageStorageKey] is used by [Scrollable] if
 /// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
-/// {@tool snippet}
+/// {@tool dartpad --template=freeform}
 /// This sample shows how to explicitly use a [PageStorage] to
 /// store the states of its children pages. Each page includes a scrollable
 /// list, whose position is preserved when switching between the tabs thanks to
 /// the help of [PageStorageKey].
 ///
-/// ```dart
-/// void main() => runApp(MyApp());
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
 ///
+/// ```dart main
+/// void main() => runApp(MyApp());
+///```
+///
+///```dart
 /// class MyApp extends StatelessWidget {
-///   @override
+///  @override
 ///   Widget build(BuildContext context) {
 ///     return MaterialApp(
-///       title: 'Flutter Demo',
-///       theme: ThemeData(
-///         primarySwatch: Colors.blue,
-///       ),
 ///       home: MyHomePage(),
 ///     );
 ///   }
@@ -153,17 +156,14 @@ class PageStorageBucket {
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   static final Key keyOne = PageStorageKey('pageOne');
-///   static final Key keyTwo = PageStorageKey('pageTwo');
-///   final PageStorageBucket bucket = PageStorageBucket();
-///   static final ColorBoxPage one = ColorBoxPage(
-///     key: keyOne,
-///   );
-///   static final ColorBoxPage two = ColorBoxPage(
-///     key: keyTwo,
-///   );
-///   List<Widget> pages = [one, two];
-///   Widget currentPage = one;
+///   List<Widget> pages = [
+///     ColorBoxPage(
+///       key: PageStorageKey('pageOne'),
+///     ),
+///     ColorBoxPage(
+///       key: PageStorageKey('pageTwo'),
+///     )
+///   ];
 ///   int currentTab = 0;
 ///
 ///   @override
@@ -173,37 +173,32 @@ class PageStorageBucket {
 ///         title: Text("Persistance Example"),
 ///       ),
 ///       body: PageStorage(
-///         child: currentPage,
-///         bucket: bucket,
+///         child: pages[currentTab],
+///         bucket: PageStorageBucket(),
 ///       ),
 ///       bottomNavigationBar: BottomNavigationBar(
 ///         currentIndex: currentTab,
 ///         onTap: (int index) {
 ///           setState(() {
 ///             currentTab = index;
-///             currentPage = pages[index];
 ///           });
 ///         },
 ///         items: <BottomNavigationBarItem>[
 ///           BottomNavigationBarItem(
-///             icon: Icon(Icons.home),
-///             title: Text('Page1'),
-///           ),
+///               icon: Icon(Icons.home), title: Text('page 1')),
 ///           BottomNavigationBarItem(
-///             icon: Icon(Icons.settings),
-///             title: Text("Page2"),
-///           ),
+///               icon: Icon(Icons.settings), title: Text('page2')),
 ///         ],
 ///       ),
 ///     );
 ///   }
 /// }
 ///
-/// class ColorBoxPage extends StatelessWidget{
+/// class ColorBoxPage extends StatelessWidget {
 ///   ColorBoxPage({
 ///     Key key,
 ///   }) : super(key: key);
-/// 
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return ListView.builder(
@@ -211,8 +206,6 @@ class PageStorageBucket {
 ///       itemBuilder: (context, index) => Container(
 ///         padding: EdgeInsets.all(10.0),
 ///         child: Material(
-///           elevation: 4.0,
-///           borderRadius: BorderRadius.circular(5.0),
 ///           color: index % 2 == 0 ? Colors.cyan : Colors.deepOrange,
 ///           child: Center(
 ///             child: Text(index.toString()),
@@ -225,7 +218,7 @@ class PageStorageBucket {
 /// ```
 /// {@end-tool}
 /// See also:
-/// 
+///
 /// * [ModalRoute], which includes this class.
 class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
