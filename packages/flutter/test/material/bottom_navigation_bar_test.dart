@@ -1448,7 +1448,7 @@ void main() {
           find.byType(BottomNavigationBar),
           matchesGoldenFile('bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
         );
-      }, skip: isBrowser);
+      }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
     }
   });
 
