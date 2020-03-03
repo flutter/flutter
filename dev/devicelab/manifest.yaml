@@ -166,6 +166,7 @@ tasks:
       Measures the runtime performance of culling opacity widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   picture_cache_perf__timeline_summary:
     description: >
