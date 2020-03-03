@@ -398,5 +398,41 @@ void main() {
       expect(imageCache.statusForKey(testImage).live, true);
       expect(imageCache.statusForKey(testImage).keepAlive, false);
     });
+
+    test('Clearing liveImages removes callbacks', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(listener);
+
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(listener);
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      imageCache.clear();
+      imageCache.clearLiveImages();
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      imageCache.putIfAbsent(testImage, () => completer2);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      completer1.removeListener(listener);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+    });
   });
 }
