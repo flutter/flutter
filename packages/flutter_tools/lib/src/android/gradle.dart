@@ -297,6 +297,13 @@ Future<void> buildGradleApp({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo
+        .targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (target != null) {
     command.add('-Ptarget=$target');
@@ -321,12 +328,6 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
-  }
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo
-      .targetArchs
-      .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
@@ -537,11 +538,6 @@ Future<void> buildGradleAar({
     command.add('-Ptarget=$target');
   }
 
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo.targetArchs
-        .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
@@ -571,6 +567,12 @@ Future<void> buildGradleAar({
         'in ${outputDirectory.path}'
       );
     }
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
 
   command.add(aarTask);
@@ -928,7 +930,7 @@ Directory _getLocalEngineRepo({
   assert(engineOutPath != null);
   assert(androidBuildInfo != null);
 
-  final String abi = getEnumName(androidBuildInfo.targetArchs.first);
+  final String abi = _getAbiByLocalEnginePath(engineOutPath);
   final Directory localEngineRepo = globals.fs.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
 
@@ -978,4 +980,28 @@ Directory _getLocalEngineRepo({
     );
   }
   return localEngineRepo;
+}
+
+String _getAbiByLocalEnginePath(String engineOutPath) {
+  String result = 'armeabi_v7a';
+  if (engineOutPath.contains('x86')) {
+    result = 'x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'x86_64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'arm64_v8a';
+  }
+  return result;
+}
+
+String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
+  String result = 'android-arm';
+  if (engineOutPath.contains('x86')) {
+    result = 'android-x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'android-x64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'android-arm64';
+  }
+  return result;
 }
