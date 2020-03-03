@@ -15,6 +15,33 @@ DartWrappable::~DartWrappable() {
   TONIC_CHECK(!dart_wrapper_);
 }
 
+// TODO(dnfield): Delete this. https://github.com/flutter/flutter/issues/50997
+Dart_Handle DartWrappable::CreateDartWrapper(DartState* dart_state) {
+  TONIC_DCHECK(!dart_wrapper_);
+  const DartWrapperInfo& info = GetDartWrapperInfo();
+
+  Dart_PersistentHandle type = dart_state->class_library().GetClass(info);
+  TONIC_DCHECK(!LogIfError(type));
+
+  Dart_Handle wrapper =
+      Dart_New(type, dart_state->private_constructor_name(), 0, nullptr);
+
+  TONIC_DCHECK(!LogIfError(wrapper));
+
+  Dart_Handle res = Dart_SetNativeInstanceField(
+      wrapper, kPeerIndex, reinterpret_cast<intptr_t>(this));
+  TONIC_DCHECK(!LogIfError(res));
+  res = Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex,
+                                    reinterpret_cast<intptr_t>(&info));
+  TONIC_DCHECK(!LogIfError(res));
+
+  this->RetainDartWrappableReference();  // Balanced in FinalizeDartWrapper.
+  dart_wrapper_ = Dart_NewWeakPersistentHandle(
+      wrapper, this, GetAllocationSize(), &FinalizeDartWrapper);
+
+  return wrapper;
+}
+
 void DartWrappable::AssociateWithDartWrapper(Dart_Handle wrapper) {
   TONIC_DCHECK(!dart_wrapper_);
   TONIC_CHECK(!LogIfError(wrapper));
@@ -47,8 +74,7 @@ void DartWrappable::FinalizeDartWrapper(void* isolate_callback_data,
                                         void* peer) {
   DartWrappable* wrappable = reinterpret_cast<DartWrappable*>(peer);
   wrappable->dart_wrapper_ = nullptr;
-  wrappable->ReleaseDartWrappableReference();  // Balanced in
-                                               // AssociateWithDartWrapper.
+  wrappable->ReleaseDartWrappableReference();  // Balanced in CreateDartWrapper.
 }
 
 size_t DartWrappable::GetAllocationSize() {
