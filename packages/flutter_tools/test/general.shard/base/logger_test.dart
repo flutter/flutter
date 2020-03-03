@@ -32,11 +32,7 @@ void main() {
     });
 
     testWithoutContext('error', () async {
-      final BufferLogger mockLogger = BufferLogger(
-        terminal: AnsiTerminal(
-          stdio: mocks.MockStdio(),
-          platform: _kNoAnsiPlatform,
-        ),
+      final BufferLogger mockLogger = BufferLogger.test(
         outputPreferences: OutputPreferences.test(showColor: false),
       );
       final VerboseLogger verboseLogger = VerboseLogger(
