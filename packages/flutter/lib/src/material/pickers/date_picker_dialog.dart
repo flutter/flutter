@@ -256,6 +256,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   DatePickerEntryMode _entryMode;
   DateTime _selectedDate;
   bool _autoValidate;
+  final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -341,6 +342,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     switch (_entryMode) {
       case DatePickerEntryMode.calendar:
         picker = CalendarDatePicker(
+          key: _calendarPickerKey,
           initialDate: _selectedDate,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
