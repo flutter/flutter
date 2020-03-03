@@ -1655,9 +1655,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
-  final _TrailingWhitespaceDirectionFormatter _whitespaceFormatter = _TrailingWhitespaceDirectionFormatter();
+  _TrailingWhitespaceDirectionFormatter _whitespaceFormatter;
 
   void _formatAndSetValue(TextEditingValue value) {
+    if (_whitespaceFormatter == null) {
+      _whitespaceFormatter = _TrailingWhitespaceDirectionFormatter(_textDirection);
+    }
+
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
@@ -2149,63 +2153,49 @@ class _Editable extends LeafRenderObjectWidget {
 }
 
   class _TrailingWhitespaceDirectionFormatter extends TextInputFormatter {
-    _TrailingWhitespaceDirectionFormatter();
+    _TrailingWhitespaceDirectionFormatter(TextDirection underlyingDirection) : lastNonWhitespaceDirection = underlyingDirection;
 
-    // static final validCharactersRegex = RegExp(r'\d|\.');
+    TextDirection lastNonWhitespaceDirection;
+    final RegExp rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+    final RegExp ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+    final RegExp whitespaceRegExp = RegExp(r'\s');
 
     @override
     TextEditingValue formatEditUpdate(
       TextEditingValue oldValue,
       TextEditingValue newValue,
     ) {
+      if (oldValue == newValue) {
+        print('BREAKING');
+        return newValue;
+      }
       List<int> out = List<int>();
       print('FORMATTING:');
-      TextDirection lastNonWhitespaceDirection = TextDirection.ltr;
-      // for (int r in newValue.text.runes) {
-      for (int i = 0; i < newValue.text.length; ++i) {
-        int r = newValue.text.codeUnitAt(i);
-        // out.add(r);
-        // out.add(0x200E);
+      bool lastWasWhitespace = false;
+      int lastNonWhitespaceCodepoint;
+      for (int r in newValue.text.runes) {
+        out.add(r);
         if (isWhitespace(r)) {
-          out.add(r);
-          if (lastNonWhitespaceDirection == TextDirection.rtl) {
-            out.add(0x200F);
-          } else {
-            out.add(0x200E);
+          if (!lastWasWhitespace && lastNonWhitespaceCodepoint != null) {
+              lastNonWhitespaceDirection = isRtl(lastNonWhitespaceCodepoint) ? TextDirection.rtl : TextDirection.ltr;
           }
-          print('isWhitespace!');
-        } else if (isRtl(r)) {
-          print('isRtl!');
-          out.add(r);
-          lastNonWhitespaceDirection = TextDirection.rtl;
+          out.add(lastNonWhitespaceDirection == TextDirection.rtl ? 0x200F : 0x200E);
+          lastWasWhitespace = true;
         } else {
-          out.add(r);
-          lastNonWhitespaceDirection = TextDirection.ltr;
+          lastNonWhitespaceCodepoint = r;
+          lastWasWhitespace = false;
         }
       }
       String formatted = String.fromCharCodes(out);
+      return newValue;
       return TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
       );
-      // return TextEditingValue(
-      //   text: formatted,
-      //   selection: TextSelection.collapsed(offset: formatted.length),
-      // );
     }
 
     bool isWhitespace(int value) {
-      if (value >= 0x0009 && value <= 0x000D ||
-          value == 0x0020 ||
-          value == 0x0085 ||
-          value == 0x00A0 ||
-          value == 0x1680 ||
-          value >= 0x2000 && value <= 0x200A ||
-          value == 0x2028 ||
-          value == 0x2029 ||
-          value == 0x202F ||
-          value == 0x205F ||
-          value == 0x3000) {
+      if (whitespaceRegExp.hasMatch(String.fromCharCode(value))) {
         return true;
       }
       return false;
@@ -2214,12 +2204,7 @@ class _Editable extends LeafRenderObjectWidget {
     // LTR: 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF'+'\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF'
 
     bool isRtl(int value) {
-      // '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC'
-      if (value >= 0x0591 && value <= 0x07FF ||
-          value >= 0xFB1D && value <= 0xFDFD ||
-          value >= 0xFE70 && value <= 0xFEFC) {
-          // value == 0x0020 ||
-          // v'\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC') {
+      if (!ltrRegExp.hasMatch(String.fromCharCode(value))) {
         return true;
       }
       return false;
