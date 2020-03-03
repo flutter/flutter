@@ -1639,19 +1639,22 @@ typedef ImageDecoderCallback = void Function(Image result);
 ///
 /// To obtain an instance of the [FrameInfo] interface, see
 /// [Codec.getNextFrame].
-class FrameInfo {
+@pragma('vm:entry-point')
+class FrameInfo extends NativeFieldWrapperClass2 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
   /// To obtain an instance of the [FrameInfo] interface, see
   /// [Codec.getNextFrame].
-  FrameInfo._(int durationMilliseconds, this.image) : duration = Duration(milliseconds: durationMilliseconds);
+  @pragma('vm:entry-point')
+  FrameInfo._();
 
   /// The duration this frame should be shown.
-  final Duration duration;
+  Duration get duration => Duration(milliseconds: _durationMillis);
+  int get _durationMillis native 'FrameInfo_durationMillis';
 
   /// The [Image] object for this frame.
-  final Image image;
+  Image get image native 'FrameInfo_image';
 }
 
 /// A handle to an image codec.
@@ -1681,32 +1684,21 @@ class Codec extends NativeFieldWrapperClass2 {
   /// * -1 for infinity repetitions.
   int get repetitionCount native 'Codec_repetitionCount';
 
-  FrameInfo _cachedFrame;
-
   /// Fetches the next animation frame.
   ///
   /// Wraps back to the first frame after returning the last frame.
   ///
   /// The returned future can complete with an error if the decoding has failed.
-  Future<FrameInfo> getNextFrame() async {
-    if (_cachedFrame == null || frameCount != 1) {
-      final Image image = Image._();
-      final int durationMilliseconds = await _futurize((_Callback<int> callback) => _getNextFrame(image, callback));
-      _cachedFrame = FrameInfo._(durationMilliseconds, image);
-    }
-    return _cachedFrame;
+  Future<FrameInfo> getNextFrame() {
+    return _futurize(_getNextFrame);
   }
 
   /// Returns an error message on failure, null on success.
-  String _getNextFrame(Image outImage, _Callback<int> callback) native 'Codec_getNextFrame';
+  String _getNextFrame(_Callback<FrameInfo> callback) native 'Codec_getNextFrame';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  void dispose() {
-    _cachedFrame = null;
-    _dispose();
-  }
-  void _dispose() native 'Codec_dispose';
+  void dispose() native 'Codec_dispose';
 }
 
 /// Instantiates an image codec [Codec] object.
@@ -1726,12 +1718,10 @@ class Codec extends NativeFieldWrapperClass2 {
 Future<Codec> instantiateImageCodec(Uint8List list, {
   int targetWidth,
   int targetHeight,
-}) async {
-  final Codec codec = Codec._();
-  await _futurize((_Callback<bool> callback) {
-    return _instantiateImageCodec(codec, list, callback, null, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension);
-  });
-  return codec;
+}) {
+  return _futurize(
+    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+  );
 }
 
 /// Instantiates a [Codec] object for an image binary data.
@@ -1745,7 +1735,7 @@ Future<Codec> instantiateImageCodec(Uint8List list, {
 /// If both are equal to [_kDoNotResizeDimension], then the image maintains its real size.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String _instantiateImageCodec(Codec outCodec, Uint8List list, _Callback<bool> callback, _ImageInfo imageInfo, int targetWidth, int targetHeight)
+String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, int targetWidth, int targetHeight)
   native 'instantiateImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
@@ -1786,12 +1776,11 @@ void decodeImageFromPixels(
   {int rowBytes, int targetWidth, int targetHeight}
 ) {
   final _ImageInfo imageInfo = _ImageInfo(width, height, format.index, rowBytes);
-  final Codec codec = Codec._();
-  _futurize(
-    (_Callback<bool> callback) => _instantiateImageCodec(codec, pixels, callback, imageInfo, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
-  ).then((bool _) {
-    codec.getNextFrame().then((FrameInfo frameInfo) => callback(frameInfo.image));
-  });
+  final Future<Codec> codecFuture = _futurize(
+    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+  );
+  codecFuture.then((Codec codec) => codec.getNextFrame())
+      .then((FrameInfo frameInfo) => callback(frameInfo.image));
 }
 
 /// Determines the winding rule that decides how the interior of a [Path] is
@@ -4136,17 +4125,15 @@ class Picture extends NativeFieldWrapperClass2 {
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
-  Future<Image> toImage(int width, int height) async {
+  Future<Image> toImage(int width, int height) {
     if (width <= 0 || height <= 0)
       throw Exception('Invalid image dimensions.');
-    final Image image = Image._();
-    await _futurize(
-      (_Callback<bool> callback) => _toImage(image, width, height, callback)
+    return _futurize(
+      (_Callback<Image> callback) => _toImage(width, height, callback)
     );
-    return image;
   }
 
-  String _toImage(Image outImage, int width, int height, _Callback<bool> callback) native 'Picture_toImage';
+  String _toImage(int width, int height, _Callback<Image> callback) native 'Picture_toImage';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.

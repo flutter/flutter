@@ -22,10 +22,8 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
 
  public:
   ~CanvasImage() override;
-  static fml::RefPtr<CanvasImage> Create(Dart_Handle dart_handle) {
-    auto image = fml::MakeRefCounted<CanvasImage>();
-    image->AssociateWithDartWrapper(dart_handle);
-    return image;
+  static fml::RefPtr<CanvasImage> Create() {
+    return fml::MakeRefCounted<CanvasImage>();
   }
 
   int width() { return image_.get()->width(); }

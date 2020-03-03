@@ -61,8 +61,7 @@ void Scene::dispose() {
   ClearDartWrapper();
 }
 
-Dart_Handle Scene::toImage(Dart_Handle image_handle,
-                           uint32_t width,
+Dart_Handle Scene::toImage(uint32_t width,
                            uint32_t height,
                            Dart_Handle raw_image_callback) {
   TRACE_EVENT0("flutter", "Scene::toImage");
@@ -76,8 +75,7 @@ Dart_Handle Scene::toImage(Dart_Handle image_handle,
     return tonic::ToDart("Could not flatten scene into a layer tree.");
   }
 
-  return Picture::RasterizeToImage(image_handle, picture, width, height,
-                                   raw_image_callback);
+  return Picture::RasterizeToImage(picture, width, height, raw_image_callback);
 }
 
 std::unique_ptr<flutter::LayerTree> Scene::takeLayerTree() {

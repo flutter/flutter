@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_UI_PAINTING_CODEC_H_
 
 #include "flutter/lib/ui/dart_wrapper.h"
+#include "flutter/lib/ui/painting/frame_info.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -29,8 +30,7 @@ class Codec : public RefCountedDartWrappable<Codec> {
 
   virtual int repetitionCount() const = 0;
 
-  virtual Dart_Handle getNextFrame(Dart_Handle image_handle,
-                                   Dart_Handle callback_handle) = 0;
+  virtual Dart_Handle getNextFrame(Dart_Handle callback_handle) = 0;
 
   void dispose();
 
