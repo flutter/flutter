@@ -32,7 +32,8 @@ class Scene : public RefCountedDartWrappable<Scene> {
 
   std::unique_ptr<flutter::LayerTree> takeLayerTree();
 
-  Dart_Handle toImage(uint32_t width,
+  Dart_Handle toImage(Dart_Handle image_handle,
+                      uint32_t width,
                       uint32_t height,
                       Dart_Handle image_callback);
 
