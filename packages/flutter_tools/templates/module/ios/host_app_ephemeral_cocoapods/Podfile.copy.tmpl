@@ -9,6 +9,3 @@ target 'Runner' do
   install_flutter_engine_pod
   install_flutter_plugin_pods flutter_application_path
 end
-
-# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
-install! 'cocoapods', :disable_input_output_paths => true
