@@ -144,7 +144,6 @@ To run tests from a specific stage, use option `-s` (`--stage`).
 Currently there are only three stages defined, `devicelab`,
 `devicelab_ios` and `devicelab_win`.
 
-
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
@@ -237,4 +236,3 @@ Where:
 
 If your test needs to run on multiple operating systems, create a separate test
 for each operating system.
-
