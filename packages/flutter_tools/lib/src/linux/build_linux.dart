@@ -33,7 +33,7 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String 
   } else if (templateCompareResult > 0) {
     throwToolExit('The Linux runner was created with a newer version of the '
       'template, which is not yet stable.\n\n'
-      'Upgrade Flutter and try again');
+      'Upgrade Flutter and try again.');
   }
 
   final StringBuffer buffer = StringBuffer('''
