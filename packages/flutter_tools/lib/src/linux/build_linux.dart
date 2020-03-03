@@ -26,7 +26,7 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String 
   // template version, since the tempalte isn't stable yet.
   final int templateCompareResult = _compareTemplateVersions(linuxProject);
   if (templateCompareResult < 0) {
-    throwToolExit('The Linux runner was createh with an earlier version of the '
+    throwToolExit('The Linux runner was created with an earlier version of the '
       'template, which is not yet stable.\n\n'
       'Delete the linux/ directory and re-run \'flutter create .\', '
       're-applying any previous changes.');
