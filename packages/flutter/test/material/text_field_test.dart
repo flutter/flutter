@@ -1897,7 +1897,6 @@ void main() {
     final Offset slightRight = iPos + const Offset(30.0, 0.0);
     await tester.longPressAt(slightRight, pointer: 7);
     await tester.pump();
-    await tester.pump();
 
     // Should have paste and select all options when collapse.
     expect(find.text('PASTE'), findsOneWidget);

@@ -55,8 +55,8 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // menu items are shown.
   bool _overflowOpen = false;
 
-  // Whether or not the currently enabled menu items have changed since the
-  // widget last updated.
+  // True iff which menu items are shown has changed since the widget last
+  // updated.
   bool _menuChanged = false;
 
   FlatButton _getItem(VoidCallback onPressed, String label) {
@@ -78,6 +78,12 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       || ((widget.handleCopy == null) != (oldWidget.handleCopy == null))
       || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
       || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null));
+
+    // If the menu items change, make sure the overflow menu is closed. This
+    // prevents an empty overflow menu and an incorrect saved width.
+    if (_menuChanged) {
+      _overflowOpen = false;
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -126,8 +132,10 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         ],
       ),
     );
-    // Size animation should only happen when overflowOpen is being toggled and
-    // not when the enabled menu items are changing.
+    // In native Android, size changes of the menu are only animated when
+    // opening and closing the overflow menu. It doesn't animate when the menu
+    // changes size to accommodate different items, such as after pressing
+    // "SELECT ALL".
     if (!_menuChanged) {
       child = AnimatedSize(
         vsync: this,
@@ -151,9 +159,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarItems({
     Key key,
-    @required List<Widget> children,
     @required this.isAbove,
     @required this.overflowOpen,
+    @required List<Widget> children,
   }) : assert(children != null),
        assert(isAbove != null),
        assert(overflowOpen != null),
@@ -243,8 +251,8 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     // overflow button, then just show it and hide the overflow button.
     final RenderBox navButton = firstChild;
     if (_lastIndexThatFits != -1
-      && _lastIndexThatFits == childCount - 2
-      && width - navButton.size.width <= constraints.maxWidth) {
+        && _lastIndexThatFits == childCount - 2
+        && width - navButton.size.width <= constraints.maxWidth) {
       _lastIndexThatFits = -1;
     }
   }
@@ -262,7 +270,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       // The navigation button is placed after iterating all children, and there
       // is no need to place children that won't be painted.
       if (renderObjectChild == firstChild
-        || !_shouldPaintChild(renderObjectChild, i)) {
+          || !_shouldPaintChild(renderObjectChild, i)) {
         return;
       }
 
@@ -402,6 +410,7 @@ class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
     @required this.overflowOpen,
   }) : assert(child != null),
        assert(overflowOpen != null),
+       assert(menuChanged != null),
        super(key: key, child: child);
 
   final bool menuChanged;
@@ -455,6 +464,8 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   void performLayout() {
     child.layout(constraints.loosen(), parentUsesSize: true);
 
+    // Save the width when the menu is closed. If the menu changes, _closedWidth
+    // is reset to null (onMenuChanged above) and a new width will be saved.
     if (!overflowOpen && _closedWidth == null) {
       _closedWidth = child.size.width;
     }
@@ -462,7 +473,9 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
     size = constraints.constrain(Size(
       // If the open menu is wider than the closed menu, just use its own width
       // and don't worry about aligning the right edges.
-      child.size.width > _closedWidth ? child.size.width : _closedWidth,
+      // _closedWidth is used even when the menu is closed to allow it to
+      // animate its size while keeping the same right alignment.
+      _closedWidth == null || child.size.width > _closedWidth ? child.size.width : _closedWidth,
       child.size.height,
     ));
 
@@ -471,7 +484,6 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
       size.width - child.size.width,
       0.0,
     );
-
   }
 
   // Paint at the offset set in the parent data.
@@ -486,7 +498,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     final FlexParentData childParentData = child.parentData as FlexParentData;
-    final bool isHit = result.addWithPaintOffset(
+    return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
       hitTest: (BoxHitTestResult result, Offset transformed) {
@@ -494,9 +506,6 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
         return child.hitTest(result, position: transformed);
       },
     );
-    if (isHit)
-      return true;
-    return false;
   }
 
   @override
