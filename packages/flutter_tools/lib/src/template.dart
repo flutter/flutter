@@ -109,6 +109,11 @@ class Template {
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
+      // Only build a Windows project if explicitly asked.
+      final bool windows = context['windows'] as bool;
+      if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
+        return null;
+      }
       final String projectName = context['projectName'] as String;
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
