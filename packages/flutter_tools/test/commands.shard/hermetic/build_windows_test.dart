@@ -23,7 +23,11 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
+const String _kTestFlutterRoot = r'C:\flutter';
+
 void main() {
+  FileSystem fileSystem;
+
   MockProcessManager mockProcessManager;
   MockProcess mockProcess;
   MockPlatform windowsPlatform;
@@ -38,6 +42,8 @@ void main() {
   });
 
   setUp(() {
+    fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    Cache.flutterRoot = _kTestFlutterRoot;
     mockProcessManager = MockProcessManager();
     mockProcess = MockProcess();
     windowsPlatform = MockPlatform()
@@ -59,15 +65,35 @@ void main() {
 
   // Creates the mock files necessary to look like a Flutter project.
   void setUpMockCoreProjectFiles() {
-    globals.fs.file('pubspec.yaml').createSync();
-    globals.fs.file('.packages').createSync();
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild() {
-    globals.fs.file(solutionPath).createSync(recursive: true);
+  void setUpMockProjectFilesForBuild({int templateVersion}) {
+    fileSystem.file(solutionPath).createSync(recursive: true);
     setUpMockCoreProjectFiles();
+
+    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
+    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
+    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
+      fileSystem.path.absolute(Cache.flutterRoot),
+      'packages',
+      'flutter_tools',
+      'templates',
+      'app',
+      'windows.tmpl',
+      versionFileSubpath,
+    ));
+    sourceTemplateVersionfile.createSync(recursive: true);
+    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
+
+    final File projectTemplateVersionFile = fileSystem.file(
+      fileSystem.path.join('windows', versionFileSubpath));
+    templateVersion ??= expectedTemplateVersion;
+    projectTemplateVersionFile.createSync(recursive: true);
+    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
@@ -79,7 +105,7 @@ void main() {
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -95,7 +121,7 @@ void main() {
     ), throwsToolExit(message: 'No Windows desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
@@ -112,8 +138,38 @@ void main() {
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    VisualStudio: () => mockVisualStudio,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build fails with instructions when template is too old', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild(templateVersion: 1);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'windows']
+    ), throwsToolExit(message: 'flutter create .'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => windowsPlatform,
+    VisualStudio: () => mockVisualStudio,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build fails with instructions when template is too new', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild(templateVersion: 999);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'windows']
+    ), throwsToolExit(message: 'Upgrade Flutter'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -125,11 +181,11 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     when(mockProcessManager.start(<String>[
-      r'C:\packages\flutter_tools\bin\vs_build.bat',
+      fileSystem.path.join(_kTestFlutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
       vcvarsPath,
-      globals.fs.path.basename(solutionPath),
+      fileSystem.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -139,7 +195,7 @@ void main() {
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
@@ -153,11 +209,11 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     when(mockProcessManager.start(<String>[
-      r'C:\packages\flutter_tools\bin\vs_build.bat',
+      fileSystem.path.join(_kTestFlutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
       vcvarsPath,
-      globals.fs.path.basename(solutionPath),
+      fileSystem.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -166,14 +222,14 @@ void main() {
     );
 
     // Spot-check important elements from the properties file.
-    final File propsFile = globals.fs.file(r'C:\windows\flutter\ephemeral\Generated.props');
+    final File propsFile = fileSystem.file(r'C:\windows\flutter\ephemeral\Generated.props');
     expect(propsFile.existsSync(), true);
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
     expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
     expect(props.findAllElements('ItemGroup').length, 1);
-    expect(props.findAllElements('FLUTTER_ROOT').first.text, r'C:\');
+    expect(props.findAllElements('FLUTTER_ROOT').first.text, _kTestFlutterRoot);
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
@@ -187,11 +243,11 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     when(mockProcessManager.start(<String>[
-      r'C:\packages\flutter_tools\bin\vs_build.bat',
+      fileSystem.path.join(_kTestFlutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
       vcvarsPath,
-      globals.fs.path.basename(solutionPath),
+      fileSystem.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: fileSystem.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -201,7 +257,7 @@ void main() {
 
     expect(testLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    FileSystem: () => fileSystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
@@ -232,7 +288,7 @@ class MockProcess extends Mock implements Process {}
 class MockPlatform extends Mock implements Platform {
   @override
   Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': r'C:\',
+    'FLUTTER_ROOT': _kTestFlutterRoot,
   };
 }
 class MockVisualStudio extends Mock implements VisualStudio {}

@@ -400,6 +400,7 @@ class CreateCommand extends FlutterCommand {
       web: featureFlags.isWebEnabled,
       linux: featureFlags.isLinuxEnabled,
       macos: featureFlags.isMacOSEnabled,
+      windows: featureFlags.isWindowsEnabled,
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
@@ -498,6 +499,12 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus('');
         globals.printStatus('WARNING: The Linux tooling and APIs are not yet stable. '
             'You will likely need to re-create the "linux" directory after future '
+            'Flutter updates.');
+      }
+      if (featureFlags.isWindowsEnabled) {
+        globals.printStatus('');
+        globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
+            'You will likely need to re-create the "windows" directory after future '
             'Flutter updates.');
       }
     }
@@ -620,6 +627,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     bool web = false,
     bool linux = false,
     bool macos = false,
+    bool windows = false,
   }) {
     flutterRoot = globals.fs.path.normalize(flutterRoot);
 
@@ -646,6 +654,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'pluginCppHeaderGuard': projectName.toUpperCase(),
+      'pluginProjectUUID': Uuid().generateV4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
@@ -654,6 +663,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'web': web,
       'linux': linux,
       'macos': macos,
+      'windows': windows,
       'year': DateTime.now().year,
     };
   }
