@@ -790,15 +790,17 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was already launched.
-    verify(globals.logger.sendEvent(
-      'app.webLaunchUrl',
-      argThat(allOf(
-        containsPair('url', 'http://localhost:8765/app/'),
-        containsPair('launched', true),
-      ))
-    ));
+    expect((delegateLogger.delegate as BufferLogger).eventText,
+      contains(json.encode(<String, Object>{
+        'name': 'app.webLaunchUrl',
+        'args': <String, Object>{
+          'url': 'http://localhost:8765/app/',
+          'launched': true,
+        },
+      },
+    )));
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(MockLogger()),
+    Logger: () => DelegateLogger(BufferLogger.test()),
     ChromeLauncher: () => MockChromeLauncher(),
   }));
 
@@ -829,15 +831,17 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was not already launched.
-    verify(globals.logger.sendEvent(
-      'app.webLaunchUrl',
-      argThat(allOf(
-        containsPair('url', 'http://localhost:8765/app/'),
-        containsPair('launched', false),
-      ))
-    ));
+    expect((delegateLogger.delegate as BufferLogger).eventText,
+      contains(json.encode(<String, Object>{
+        'name': 'app.webLaunchUrl',
+        'args': <String, Object>{
+          'url': 'http://localhost:8765/app/',
+          'launched': false,
+        },
+      },
+    )));
   }, overrides: <Type, Generator>{
-    Logger: () => DelegateLogger(MockLogger())
+    Logger: () => DelegateLogger(BufferLogger.test())
   }));
 
   test('Successfully turns WebSocketException into ToolExit', () => testbed.run(() async {
@@ -962,6 +966,5 @@ class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
-class MockLogger extends Mock implements Logger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}

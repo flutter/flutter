@@ -68,7 +68,9 @@ void main() {
   testWidgets('BackButton icon', (WidgetTester tester) async {
     final Key androidKey = UniqueKey();
     final Key iOSKey = UniqueKey();
+    final Key linuxKey = UniqueKey();
     final Key macOSKey = UniqueKey();
+    final Key windowsKey = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -83,8 +85,16 @@ void main() {
               child: BackButtonIcon(key: iOSKey),
             ),
             Theme(
+              data: ThemeData(platform: TargetPlatform.linux),
+              child: BackButtonIcon(key: linuxKey),
+            ),
+            Theme(
               data: ThemeData(platform: TargetPlatform.macOS),
               child: BackButtonIcon(key: macOSKey),
+            ),
+            Theme(
+              data: ThemeData(platform: TargetPlatform.windows),
+              child: BackButtonIcon(key: windowsKey),
             ),
           ],
         ),
@@ -93,10 +103,14 @@ void main() {
 
     final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
     final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+    final Icon linuxIcon = tester.widget(find.descendant(of: find.byKey(linuxKey), matching: find.byType(Icon)));
     final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
+    final Icon windowsIcon = tester.widget(find.descendant(of: find.byKey(windowsKey), matching: find.byType(Icon)));
     expect(iOSIcon.icon == androidIcon.icon, isFalse);
+    expect(linuxIcon.icon == androidIcon.icon, isTrue);
     expect(macOSIcon.icon == androidIcon.icon, isFalse);
     expect(macOSIcon.icon == iOSIcon.icon, isTrue);
+    expect(windowsIcon.icon == androidIcon.icon, isTrue);
   });
 
   testWidgets('BackButton color', (WidgetTester tester) async {

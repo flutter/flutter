@@ -195,6 +195,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
 ///  * [Builder], which calls a `builder` function at build time.
 ///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
 ///  * [CustomSingleChildLayout], which positions its child during layout.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   /// Creates a widget that defers its building until layout.
   ///
