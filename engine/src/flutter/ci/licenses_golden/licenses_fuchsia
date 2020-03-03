@@ -1,4 +1,4 @@
-Signature: e3ae6aef771255012b888e196f637b26
+Signature: 67e7bc0a4129f3ac3909beb7ec8fda07
 
 UNUSED LICENSES:
 
@@ -482,6 +482,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
@@ -1409,6 +1410,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/namedplace.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
@@ -2208,6 +2210,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
@@ -2928,7 +2931,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/lifecycle/lifecycle.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/link_path.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_data.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_state.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module_resolver/module_resolver.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/create_link.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/create_module_parameter_map.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_shell.fidl
@@ -3106,6 +3108,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/event.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
