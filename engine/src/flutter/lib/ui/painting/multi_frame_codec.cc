@@ -20,8 +20,11 @@ MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec)
 MultiFrameCodec::~MultiFrameCodec() = default;
 
 static void InvokeNextFrameCallback(
-    fml::RefPtr<FrameInfo> frameInfo,
+    sk_sp<SkImage> skImage,
+    fml::RefPtr<CanvasImage> canvas_image,
     std::unique_ptr<DartPersistentValue> callback,
+    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
+    SkCodec::FrameInfo skFrameInfo,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
@@ -30,10 +33,13 @@ static void InvokeNextFrameCallback(
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  if (!frameInfo) {
-    tonic::DartInvoke(callback->value(), {Dart_Null()});
+
+  if (skImage) {
+    canvas_image->set_image({skImage, std::move(unref_queue)});
+    tonic::DartInvoke(callback->value(),
+                      {tonic::ToDart(skFrameInfo.fDuration)});
   } else {
-    tonic::DartInvoke(callback->value(), {ToDart(frameInfo)});
+    tonic::DartInvoke(callback->value(), {Dart_Null()});
   }
 }
 
@@ -129,30 +135,32 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
 }
 
 void MultiFrameCodec::GetNextFrameAndInvokeCallback(
+    fml::RefPtr<CanvasImage> canvas_image,
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     fml::WeakPtr<GrContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     size_t trace_id) {
-  fml::RefPtr<FrameInfo> frameInfo = NULL;
   sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);
+  SkCodec::FrameInfo skFrameInfo;
   if (skImage) {
-    fml::RefPtr<CanvasImage> image = CanvasImage::Create();
-    image->set_image({skImage, std::move(unref_queue)});
-    SkCodec::FrameInfo skFrameInfo;
     codec_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
-    frameInfo =
-        fml::MakeRefCounted<FrameInfo>(std::move(image), skFrameInfo.fDuration);
   }
   nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
 
   ui_task_runner->PostTask(fml::MakeCopyable(
-      [callback = std::move(callback), frameInfo, trace_id]() mutable {
-        InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
+      [skImage = std::move(skImage), callback = std::move(callback),
+       canvas_image = std::move(canvas_image),
+       unref_queue = std::move(unref_queue),
+       skFrameInfo = std::move(skFrameInfo), trace_id]() mutable {
+        InvokeNextFrameCallback(std::move(skImage), std::move(canvas_image),
+                                std::move(callback), std::move(unref_queue),
+                                std::move(skFrameInfo), trace_id);
       }));
 }
 
-Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
+Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle image_handle,
+                                          Dart_Handle callback_handle) {
   static size_t trace_counter = 1;
   const size_t trace_id = trace_counter++;
 
@@ -160,17 +168,19 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     return tonic::ToDart("Callback must be a function");
   }
 
+  auto canvas_image = CanvasImage::Create(image_handle);
   auto* dart_state = UIDartState::Current();
 
   const auto& task_runners = dart_state->GetTaskRunners();
 
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
-      [callback = std::make_unique<DartPersistentValue>(
+      [canvas_image = std::move(canvas_image),
+       callback = std::make_unique<DartPersistentValue>(
            tonic::DartState::Current(), callback_handle),
        this, trace_id, ui_task_runner = task_runners.GetUITaskRunner(),
        io_manager = dart_state->GetIOManager()]() mutable {
         GetNextFrameAndInvokeCallback(
-            std::move(callback), std::move(ui_task_runner),
+            canvas_image, std::move(callback), std::move(ui_task_runner),
             io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
             trace_id);
       }));
