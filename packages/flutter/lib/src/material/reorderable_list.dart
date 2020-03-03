@@ -566,8 +566,10 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       const Key endWidgetKey = Key('DraggableList - End Widget');
       Widget finalDropArea;
+      AlignmentDirectional footerAlignment;
       switch (widget.scrollDirection) {
         case Axis.horizontal:
+          footerAlignment = AlignmentDirectional.centerStart;
           finalDropArea = SizedBox(
             key: endWidgetKey,
             width: _defaultDropAreaExtent,
@@ -576,6 +578,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           break;
         case Axis.vertical:
         default:
+          footerAlignment = AlignmentDirectional.topCenter;
           finalDropArea = SizedBox(
             key: endWidgetKey,
             height: _defaultDropAreaExtent,
@@ -583,6 +586,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           );
           break;
       }
+
       return SingleChildScrollView(
         scrollDirection: widget.scrollDirection,
         padding: widget.padding,
@@ -605,7 +609,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
                     minWidth: widget.scrollDirection == Axis.horizontal ? _defaultDropAreaExtent : 0,
                   ),
                   child: Align(
-                    alignment: widget.scrollDirection == Axis.horizontal ? Alignment.centerLeft : Alignment.topCenter,
+                    alignment: footerAlignment,
                     child: widget.footer,
                   ),
                 ),
