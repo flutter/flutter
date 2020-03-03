@@ -967,7 +967,7 @@ void main() {
 
     testWidgets('allows reordering from the very bottom to the very top in reverse', (WidgetTester tester) async {
       // Test for https://github.com/flutter/flutter/issues/51359 to avoid a regression.
-      // To replicate the bugs behaviour we need to drag an item into the finalDropArea. 
+      // To replicate the bugs behaviour we need to drag an item into the finalDropArea.
       // The finalDropArea is _ReorderableListContentState._defaultDropAreaExtent (= 100) wide/high
       await tester.pumpWidget(build(reverse: true));
       expect(listItems, orderedEquals(originalListItems));
