@@ -595,16 +595,25 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
             for (int i = 0; i < widget.children.length; i += 1) _wrap(widget.children[i], i, constraints),
             if (widget.footer != null)
               // We need to wrap the widget.footer so we can reorder an item between
-              // the last item of the list and the footer itself
-              _wrap(SizedBox(
-                  key: Key('footer'),
-                  child: widget.footer,
+              // the last item of the list and the footer itself. If the footer
+              // is used instead of the finalDropArea it needs its own key,
+              // because _wrap() requires it.
+              _wrap(ConstrainedBox(
+                  key: endWidgetKey,
+                  constraints: BoxConstraints(
+                    minHeight: widget.scrollDirection == Axis.vertical ? _defaultDropAreaExtent : 0,
+                    minWidth: widget.scrollDirection == Axis.horizontal ? _defaultDropAreaExtent : 0,
+                  ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: widget.footer,
+                  ),
                 ),
                 widget.children.length,
                 constraints,
               ),
             // We don't need a final drop area when a footer is present
-            // as the footer should provide enough space to drag a list item
+            // as the footer provides enough space to drag a list item
             // to the last position of the list, which is above the footer.
             if (!widget.reverse && widget.footer == null) _wrap(finalDropArea, widget.children.length, constraints),
           ],
