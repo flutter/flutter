@@ -121,10 +121,7 @@ void main() {
       testWidgets('properly reorders with a footer', (WidgetTester tester) async {
         await tester.pumpWidget(
           build(
-            footer: const SizedBox(
-              child: Text('Footer Text'),
-              height: itemHeight,
-            ),
+            footer: const Text('Footer Text'),
           ),
         );
         expect(find.text('Footer Text'), findsOneWidget);
