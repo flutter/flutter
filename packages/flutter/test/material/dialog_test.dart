@@ -1100,6 +1100,7 @@ void main() {
           color: Colors.green,
           height: 1000,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_buildAppWithDialog(dialog));
       await tester.tap(find.text('X'));
@@ -1119,6 +1120,7 @@ void main() {
           color: Colors.orange,
           height: 1000,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_buildAppWithDialog(dialog));
       await tester.tap(find.text('X'));
@@ -1144,6 +1146,7 @@ void main() {
           color: Colors.orange,
           height: 400,
         ),
+        scrollable: true,
       );
       await tester.pumpWidget(_buildAppWithDialog(dialog));
       await tester.tap(find.text('X'));
