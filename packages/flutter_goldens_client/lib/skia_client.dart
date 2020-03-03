@@ -39,20 +39,20 @@ class SkiaGoldClient {
 
   /// The file system to use for storing the local clone of the repository.
   ///
-  /// This is useful in tests, where a local file system (the default) can
-  /// be replaced by a memory file system.
+  /// This is useful in tests, where a local file system (the default) can be
+  /// replaced by a memory file system.
   final FileSystem fs;
 
   /// A wrapper for the [dart:io.Platform] API.
   ///
-  /// This is useful in tests, where the system platform (the default) can
-  /// be replaced by a mock platform instance.
+  /// This is useful in tests, where the system platform (the default) can be
+  /// replaced by a mock platform instance.
   final Platform platform;
 
   /// A controller for launching sub-processes.
   ///
-  /// This is useful in tests, where the real process manager (the default)
-  /// can be replaced by a mock process manager that doesn't really create
+  /// This is useful in tests, where the real process manager (the default) can
+  /// be replaced by a mock process manager that doesn't really create
   /// sub-processes.
   final ProcessManager process;
 
@@ -73,7 +73,7 @@ class SkiaGoldClient {
   /// A map of known golden file tests and their associated positive image
   /// hashes.
   ///
-  /// This is set and used by the [FlutterLocalFileComparator] and
+  /// This is set and used by the [FlutterLocalFileComparator] and the
   /// [_UnauthorizedFlutterPreSubmitComparator] to test against golden masters
   /// maintained in the Flutter Gold dashboard.
   Map<String, List<String>> get expectations => _expectations;
@@ -99,12 +99,12 @@ class SkiaGoldClient {
   /// goldctl `auth` command.
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
-  /// Used byt the [FlutterPostSubmitFileComparator] and the
+  /// Used by the [FlutterPostSubmitFileComparator] and the
   /// [_AuthorizedFlutterPreSubmitComparator].
   ///
   /// Based on the current environment, the goldctl tool may be authorized by
-  /// with a service account for Cirrus testing, or through the context provided
-  /// by a luci environment.
+  /// a service account provided by Cirrus, or through the context provided by a
+  /// luci environment.
   Future<void> auth() async {
     if (await clientIsAuthorized())
       return;
@@ -274,15 +274,7 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 
-    if (result.exitCode != 0) {
-      // We do not want to throw for non-zero exit codes here, as an intentional
-      // change or new golden file test expect non-zero exit codes. Logging here
-      // is meant to inform when an unexpected result occurs.
-      print('goldctl imgtest add stdout: ${result.stdout}');
-      print('goldctl imgtest add stderr: ${result.stderr}');
-    }
-
-    return true;
+    return result.exitCode == 0;
   }
 
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
@@ -384,6 +376,9 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final String resultStdout = result.stdout.toString();
       if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
+        // TODO(Piinks): Remove throw for pixel comparison once
+        // https://github.com/flutter/cocoon/pull/651 is validated, and return
+        // true below.
         final List<String> failureLinks = await workDirectory.childFile('failures.json').readAsLines();
 
         final StringBuffer buf = StringBuffer()
