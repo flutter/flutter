@@ -1404,52 +1404,51 @@ void main() {
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
 
-  testWidgets('BottomNavigationBar shifting backgroundColor with transition', (WidgetTester tester) async {
+  group('BottomNavigationBar shifting backgroundColor with transition', () {
     // Regression test for: https://github.com/flutter/flutter/issues/22226
-
     int _currentIndex = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Scaffold(
-              bottomNavigationBar: RepaintBoundary(
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.shifting,
-                  currentIndex: _currentIndex,
-                  onTap: (int index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      title: Text('Red'),
-                      backgroundColor: Colors.red,
-                      icon: Icon(Icons.dashboard),
-                    ),
-                    BottomNavigationBarItem(
-                      title: Text('Green'),
-                      backgroundColor: Colors.green,
-                      icon: Icon(Icons.menu),
-                    ),
-                  ],
-                ),
+    final Widget widget = MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            bottomNavigationBar: RepaintBoundary(
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.shifting,
+                currentIndex: _currentIndex,
+                onTap: (int index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    title: Text('Red'),
+                    backgroundColor: Colors.red,
+                    icon: Icon(Icons.dashboard),
+                  ),
+                  BottomNavigationBarItem(
+                    title: Text('Green'),
+                    backgroundColor: Colors.green,
+                    icon: Icon(Icons.menu),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
+    for (int pump = 1; pump < 9; pump++) {
+      testWidgets('pump $pump', (WidgetTester tester) async {
+        await tester.pumpWidget(widget);
+        await tester.tap(find.text('Green'));
 
-    await tester.tap(find.text('Green'));
-
-    for (int pump = 0; pump < 8; pump++) {
-      await tester.pump(const Duration(milliseconds: 30));
-      await expectLater(
-        find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
-      );
+        await tester.pump(Duration(milliseconds: 30 * pump));
+        await expectLater(
+          find.byType(BottomNavigationBar),
+          matchesGoldenFile('bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
+        );
+      });
     }
   }, skip: isBrowser);
 

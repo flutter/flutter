@@ -681,7 +681,7 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_cursor_width_test.0.0.png', version: 0),
+      matchesGoldenFile('text_field_cursor_width_test.0.png'),
     );
     EditableText.debugDeterministicCursor = false;
   }, skip: !isLinux);
@@ -703,10 +703,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_cursor_width_test.1.0.png', version: 0),
+      matchesGoldenFile('text_field_cursor_width_test.1.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !isLinux);
+  });
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
