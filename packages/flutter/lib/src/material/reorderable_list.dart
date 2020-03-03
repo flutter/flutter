@@ -605,7 +605,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
                     minWidth: widget.scrollDirection == Axis.horizontal ? _defaultDropAreaExtent : 0,
                   ),
                   child: Align(
-                    alignment: Alignment.topCenter,
+                    alignment: widget.scrollDirection == Axis.horizontal ? Alignment.centerLeft : Alignment.topCenter,
                     child: widget.footer,
                   ),
                 ),
