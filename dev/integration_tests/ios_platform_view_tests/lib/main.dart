@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
@@ -6,6 +10,7 @@ void main() {
   runApp(MyApp());
 }
 
+/// The main app entrance of the test
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -19,6 +24,9 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// A page with a button in the center.
+///
+/// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
@@ -42,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => PlatformViewPage()),
+              MaterialPageRoute<PlatformViewPage>(builder: (context) => PlatformViewPage()),
             );
           },
         ),
@@ -51,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+/// A page contains the platform view to be tested.
 class PlatformViewPage extends StatefulWidget {
   @override
   _PlatformViewPageState createState() => _PlatformViewPageState();
@@ -58,14 +67,13 @@ class PlatformViewPage extends StatefulWidget {
 
 class _PlatformViewPageState extends State<PlatformViewPage> {
   int numberOfTaps = 0;
-  String text = 'xxx';
   final Key button = ValueKey('plus_button');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Platform View'),
+        title: const Text('Platform View'),
       ),
       body: Column(
         children: <Widget>[
@@ -74,10 +82,10 @@ class _PlatformViewPageState extends State<PlatformViewPage> {
             width: 300,
             height: 300,
           ),
-          Text('$numberOfTaps'),
+          const Text('$numberOfTaps'),
           RaisedButton(
             key: button,
-            child: Text('button'),
+            child: const Text('button'),
             onPressed: () {
               setState(() {
                 ++numberOfTaps;
