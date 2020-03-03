@@ -642,9 +642,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'web': web,
       'macos': macos,
       'year': DateTime.now().year,
-      // If a desktop platform is included, add a workaround for #31366.
-      // When Linux and Windows are added, we will need this workaround again.
-      'includeTargetPlatformWorkaround': false,
     };
   }
 
