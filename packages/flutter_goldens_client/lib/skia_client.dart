@@ -283,6 +283,7 @@ class SkiaGoldClient {
   /// backend, the `init` argument initializes the current tryjob. Used by the
   /// [_AuthorizedFlutterPreSubmitComparator].
   Future<void> tryjobInit() async {
+    print('*tryjobinit');
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
 
@@ -293,6 +294,7 @@ class SkiaGoldClient {
     String pullRequest;
     String jobId;
     if (ci == 'luci') {
+      print('*luci');
       jobId = platform.environment['SWARMING_TASK_ID'];
       final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
       pullRequest = refs[refs.length - 2];
@@ -318,6 +320,8 @@ class SkiaGoldClient {
       '--jobid', jobId,
       '--patchset_id', commitHash,
     ];
+
+    print('*imgtestInitArguments: $imgtestInitArguments');
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
@@ -356,6 +360,7 @@ class SkiaGoldClient {
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
   Future<bool> tryjobAdd(String testName, File goldenFile) async {
+    print('*tryjobadd');
     assert(testName != null);
     assert(goldenFile != null);
 
@@ -367,6 +372,7 @@ class SkiaGoldClient {
       '--test-name', cleanTestName(testName),
       '--png-file', goldenFile.path,
     ];
+    print('*imgtestArguments: $imgtestArguments');
 
     final io.ProcessResult result = await io.Process.run(
       _goldctl,
@@ -404,6 +410,8 @@ class SkiaGoldClient {
         throw Exception(buf.toString());
       }
     }
+
+    print('*result:\n${result.stdout}\n${result.stderr}');
 
     return result.exitCode == 0;
   }
@@ -628,6 +636,7 @@ class SkiaGoldClient {
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
+    print('*keys: $keys');
     return json.encode(keys);
   }
 
