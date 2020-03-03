@@ -511,7 +511,6 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
-              'GOLD_TRYJOB' : 'false',
             },
             operatingSystem: 'macos'
           );
@@ -610,13 +609,28 @@ void main() {
       final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
 
       group('correctly determines testing environment', () {
-        test('returns true', () {
+        test('returns true for Cirrus', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '1234',
               'GOLD_SERVICE_ACCOUNT' : 'service account...',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true for Luci', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'SWARMING_TASK_ID' : '12345678990',
+              'GOLD_TRYJOB' : 'git/ref/12345/head'
             },
             operatingSystem: 'macos'
           );

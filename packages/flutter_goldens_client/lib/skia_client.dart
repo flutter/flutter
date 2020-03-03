@@ -302,8 +302,8 @@ class SkiaGoldClient {
     String jobId;
     if (ci == 'luci') {
       jobId = platform.environment['SWARMING_TASK_ID'];
-      print(platform.environment);
-      pullRequest = platform.environment['github_link'].split('/').last;
+      final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
+      pullRequest = refs[refs.length - 2];
     } else {
       pullRequest = platform.environment['CIRRUS_PR'];
       jobId = platform.environment['CIRRUS_TASK_ID'];

@@ -267,7 +267,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && !(platform.environment['GOLD_TRYJOB'].toLowerCase() == 'true');
+      && !platform.environment.containsKey('GOLD_TRYJOB');
 
     return cirrusPostSubmit || luciPostSubmit;
   }
@@ -379,8 +379,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
-      && platform.environment['GOLD_TRYJOB'].toLowerCase() == 'true';
-
+      && platform.environment.containsKey('GOLD_TRYJOB');
     return cirrusPreSubmit || luciPreSubmit;
   }
 }
