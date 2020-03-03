@@ -28,8 +28,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   sk_sp<SkPicture> picture() const { return picture_.get(); }
 
-  Dart_Handle toImage(Dart_Handle image_handle,
-                      uint32_t width,
+  Dart_Handle toImage(uint32_t width,
                       uint32_t height,
                       Dart_Handle raw_image_callback);
 
@@ -39,8 +38,7 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  static Dart_Handle RasterizeToImage(Dart_Handle image_handle,
-                                      sk_sp<SkPicture> picture,
+  static Dart_Handle RasterizeToImage(sk_sp<SkPicture> picture,
                                       uint32_t width,
                                       uint32_t height,
                                       Dart_Handle raw_image_callback);

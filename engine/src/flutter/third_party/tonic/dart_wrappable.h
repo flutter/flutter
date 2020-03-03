@@ -43,6 +43,10 @@ class DartWrappable {
 
   virtual void ReleaseDartWrappableReference() const = 0;
 
+  // Use this method sparingly. It follows a slower path using Dart_New.
+  // Prefer constructing the object in Dart code and using
+  // AssociateWithDartWrapper.
+  Dart_Handle CreateDartWrapper(DartState* dart_state);
   void AssociateWithDartWrapper(Dart_Handle wrappable);
   void ClearDartWrapper();  // Warning: Might delete this.
   Dart_WeakPersistentHandle dart_wrapper() const { return dart_wrapper_; }
@@ -103,23 +107,18 @@ struct DartConverter<
       return Dart_Null();
     if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
       return Dart_HandleFromWeakPersistent(wrapper);
-
-    Log("Do not create non-primitive Dart objects from C++ code.");
-    TONIC_DCHECK(false);
-    return Dart_NewApiError("Invalid object conversion");
+    return val->CreateDartWrapper(DartState::Current());
   }
 
   static void SetReturnValue(Dart_NativeArguments args,
                              DartWrappable* val,
                              bool auto_scope = true) {
-    if (!val) {
+    if (!val)
       Dart_SetReturnValue(args, Dart_Null());
-    } else if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper()) {
+    else if (Dart_WeakPersistentHandle wrapper = val->dart_wrapper())
       Dart_SetWeakHandleReturnValue(args, wrapper);
-    } else {
-      Log("Do not create non-primitive Dart objects from C++ code.");
-      TONIC_DCHECK(false);
-    }
+    else
+      Dart_SetReturnValue(args, val->CreateDartWrapper(DartState::Current()));
   }
 
   static T* FromDart(Dart_Handle handle) {
