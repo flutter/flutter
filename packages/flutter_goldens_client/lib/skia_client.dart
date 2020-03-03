@@ -293,11 +293,13 @@ class SkiaGoldClient {
 
     String pullRequest;
     String jobId;
+    String cis = ci;
     if (ci == 'luci') {
       print('*luci');
-      jobId = platform.environment['SWARMING_TASK_ID'];
+      jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
       final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
       pullRequest = refs[refs.length - 2];
+      cis = 'buildbucket';
     } else {
       pullRequest = platform.environment['CIRRUS_PR'];
       jobId = platform.environment['CIRRUS_TASK_ID'];
@@ -316,7 +318,7 @@ class SkiaGoldClient {
       '--passfail',
       '--crs', 'github',
       '--changelist', pullRequest,
-      '--cis', ci,
+      '--cis', cis,
       '--jobid', jobId,
       '--patchset_id', commitHash,
     ];
