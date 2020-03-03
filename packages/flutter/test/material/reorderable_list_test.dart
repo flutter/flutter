@@ -136,7 +136,7 @@ void main() {
 
         // Replaces a call to setState({}()) because onReorder can't call it.
         // Otherwise this test fails because the Reorderable wants to switch
-        // the last two elements of the list, because we did't propagate the 
+        // the last two elements of the list, because we did't propagate the
         // changes from the listItems back to the ReorderableListView
         await tester.pumpWidget(
           build(footer: const Text('Footer Text')),
