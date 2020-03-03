@@ -114,7 +114,7 @@ class PageStorageBucket {
 /// Establish a subtree in which widgets can opt into persisting states after
 /// being destroyed.
 /// 
-/// [PageStorage] is used to save and restore values that can outlive the widget
+/// [PageStorage] is used to save and restore values that can outlive the widget.
 /// For example, when multiple pages are grouped in tabs, when a page is
 /// switched out, its widget is destroyed and its state is lost. By adding a
 /// [PageStorage] at the root and adding a [PageStorageKey] to each page, the
