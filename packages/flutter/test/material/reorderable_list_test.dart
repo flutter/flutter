@@ -120,9 +120,7 @@ void main() {
 
       testWidgets('properly reorders with a footer', (WidgetTester tester) async {
         await tester.pumpWidget(
-          build(
-            footer: const Text('Footer Text'),
-          ),
+          build(footer: const Text('Footer Text')),
         );
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(originalListItems));
@@ -135,6 +133,22 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Footer Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+
+        // Replaces a call to setState({}()) because onReorder can't call it.
+        // Otherwise this test fails because the Reorderable wants to switch
+        // the last two elements of the list, because we did't propagate the 
+        // changes from the listItems back to the ReorderableListView
+        await tester.pumpWidget(
+          build(footer: const Text('Footer Text')),
+        );
+        await longPressDrag(
+          tester,
+          tester.getCenter(find.text('Item 4')),
+          tester.getCenter(find.text('Item 3')),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Footer Text'), findsOneWidget);
+        expect(listItems, orderedEquals(<String>['Item 2', 'Item 4', 'Item 3', 'Item 1']));
       });
 
       testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
