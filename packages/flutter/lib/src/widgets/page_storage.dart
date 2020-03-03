@@ -120,6 +120,7 @@ class PageStorageBucket {
 /// [PageStorage] at the root and adding a [PageStorageKey] to each page, the
 /// page's state will be stored in its closest ancestor [PageStorage], and
 /// restored when it's switched back.
+///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
 /// [PageStorageKey] is used by [Scrollable] if
