@@ -23,7 +23,6 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
@@ -298,7 +297,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if (topLevelResults['suppress-analytics'] as bool) {
-          flutterUsage.suppressAnalytics = true;
+          globals.flutterUsage.suppressAnalytics = true;
         }
 
         _checkFlutterCopy();
@@ -322,7 +321,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
         if (topLevelResults['version'] as bool) {
-          flutterUsage.sendCommand('version');
+          globals.flutterUsage.sendCommand('version');
           String status;
           if (machineFlag) {
             status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());

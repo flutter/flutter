@@ -26,6 +26,7 @@ import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/reporting.dart';
 import 'version.dart';
 import 'web/chrome.dart';
 
@@ -35,6 +36,7 @@ Config get config => context.get<Config>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
+Usage get flutterUsage => context.get<Usage>();
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
