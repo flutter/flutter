@@ -1448,9 +1448,9 @@ void main() {
           find.byType(BottomNavigationBar),
           matchesGoldenFile('bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
         );
-      });
+      }, skip: isBrowser);
     }
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
