@@ -165,6 +165,7 @@ class PageStorageBucket {
 ///     )
 ///   ];
 ///   int currentTab = 0;
+///   final PageStorageBucket _bucket = PageStorageBucket();
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -174,7 +175,7 @@ class PageStorageBucket {
 ///       ),
 ///       body: PageStorage(
 ///         child: pages[currentTab],
-///         bucket: PageStorageBucket(),
+///         bucket: _bucket,
 ///       ),
 ///       bottomNavigationBar: BottomNavigationBar(
 ///         currentIndex: currentTab,
