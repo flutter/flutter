@@ -1,4 +1,4 @@
-# platform_view_test
+# ios_platform_view_test
 
 A simple app contains:
 
