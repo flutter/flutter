@@ -31,7 +31,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (templateCompareResult < 0) {
     throwToolExit('The Windows runner was created with an earlier version of '
       'the template, which is not yet stable.\n\n'
-      'Delete the linux/ directory and re-run \'flutter create .\', '
+      'Delete the windows/ directory and re-run \'flutter create .\', '
       're-applying any previous changes.');
   } else if (templateCompareResult > 0) {
     throwToolExit('The Windows runner was created with a newer version of the '
