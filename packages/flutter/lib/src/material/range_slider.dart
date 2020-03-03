@@ -903,10 +903,14 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      default:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         // Matches Android implementation of material slider.
         return 0.05;
     }
+    assert(false, 'Unhandled TargetPlatform $_platform');
+    return 0.05;
   }
 
   void _updateLabelPainters() {

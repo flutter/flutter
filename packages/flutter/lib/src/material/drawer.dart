@@ -182,6 +182,8 @@ class Drawer extends StatelessWidget {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
     }
     return Semantics(
@@ -536,6 +538,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           platformHasBackButton = false;
           break;
       }
