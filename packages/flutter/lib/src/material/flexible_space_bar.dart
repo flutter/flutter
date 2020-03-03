@@ -188,7 +188,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// By default the value of this property is
   /// `EdgeInsetsDirectional.only(start: 72, bottom: 16)` if the title is
-  /// not centered, `EdgeInsetsDirectional.only(start 0, bottom: 16)` otherwise.
+  /// not centered, `EdgeInsetsDirectional.only(start: 0, bottom: 16)` otherwise.
   final EdgeInsetsGeometry titlePadding;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
