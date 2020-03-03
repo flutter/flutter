@@ -2052,6 +2052,22 @@ abstract class BuildContext {
   /// managing the rendering pipeline for this context.
   BuildOwner get owner;
 
+  /// Whether the [widget] is currently updating the widget or render tree.
+  ///
+  /// For [StatefullWidget]s and [StatelessWidget]s this flag is true while
+  /// their respective build methods are executing.
+  /// [RenderObjectWidget]s set this to true while creating or configuring their
+  /// associated [RenderObject]s.
+  /// Other [Widget] types may set this to true for conceptually similar phases
+  /// of their lifecycle.
+  ///
+  /// When this is true, it is safe for [widget] to establish a dependency to an
+  /// [InheritedWidget] by calling [dependOnInheritedElement] or
+  /// [dependOnInheritedWidgetOfExactType].
+  ///
+  /// Accessing this flag in release mode is not valid.
+  bool get debugDoingBuild;
+
   /// The current [RenderObject] for the widget. If the widget is a
   /// [RenderObjectWidget], this is the render object that the widget created
   /// for itself. Otherwise, it is the render object of the first descendant
@@ -4448,6 +4464,10 @@ abstract class ComponentElement extends Element {
 
   Element _child;
 
+  bool _debugDoingBuild = false;
+  @override
+  bool get debugDoingBuild => _debugDoingBuild;
+
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
@@ -4475,9 +4495,18 @@ abstract class ComponentElement extends Element {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
+      assert(() {
+        _debugDoingBuild = true;
+        return true;
+      }());
       built = build();
+      assert(() {
+        _debugDoingBuild = false;
+        return true;
+      }());
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
+      _debugDoingBuild = false;
       built = ErrorWidget.builder(
         _debugReportException(
           ErrorDescription('building $this'),
@@ -5270,6 +5299,10 @@ abstract class RenderObjectElement extends Element {
   RenderObject get renderObject => _renderObject;
   RenderObject _renderObject;
 
+  bool _debugDoingBuild = false;
+  @override
+  bool get debugDoingBuild => _debugDoingBuild;
+
   RenderObjectElement _ancestorRenderObjectElement;
 
   RenderObjectElement _findAncestorRenderObjectElement() {
@@ -5326,7 +5359,15 @@ abstract class RenderObjectElement extends Element {
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     _renderObject = widget.createRenderObject(this);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     assert(() {
       _debugUpdateRenderObjectOwner();
       return true;
@@ -5344,7 +5385,15 @@ abstract class RenderObjectElement extends Element {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     _dirty = false;
   }
 
@@ -5357,7 +5406,15 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void performRebuild() {
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     _dirty = false;
   }
 

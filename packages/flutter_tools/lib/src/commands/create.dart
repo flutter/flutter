@@ -655,8 +655,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'linux': linux,
       'macos': macos,
       'year': DateTime.now().year,
-      // Add a workaround for #31366 if including affected platforms.
-      'includeTargetPlatformWorkaround': linux,
     };
   }
 

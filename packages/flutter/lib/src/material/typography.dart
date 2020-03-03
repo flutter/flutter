@@ -182,6 +182,15 @@ class Typography extends Diagnosticable {
       case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
+        break;
+      case TargetPlatform.windows:
+        black ??= blackRedmond;
+        white ??= whiteRedmond;
+        break;
+      case TargetPlatform.linux:
+        black ??= blackHelsinki;
+        white ??= whiteHelsinki;
+        break;
     }
     return Typography._(black, white, englishLike, dense, tall);
   }
@@ -364,6 +373,85 @@ class Typography extends Diagnosticable {
     caption   : TextStyle(debugLabel: 'whiteMountainView caption',   fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
     button    : TextStyle(debugLabel: 'whiteMountainView button',    fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     overline  : TextStyle(debugLabel: 'whiteMountainView overline',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+  );
+
+  /// A material design text theme with dark glyphs based on Segoe UI.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
+  static const TextTheme blackRedmond = TextTheme(
+    headline1 : TextStyle(debugLabel: 'blackRedmond headline1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackRedmond headline2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackRedmond headline3', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackRedmond headline4', fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackRedmond headline5', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackRedmond headline6', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackRedmond bodyText1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackRedmond bodyText2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackRedmond subtitle1', fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackRedmond subtitle2', fontFamily: 'Segoe UI', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackRedmond caption',   fontFamily: 'Segoe UI', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackRedmond button',    fontFamily: 'Segoe UI', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackRedmond overline',  fontFamily: 'Segoe UI', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+  );
+
+  /// A material design text theme with light glyphs based on Segoe UI.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
+  static const TextTheme whiteRedmond = TextTheme(
+    headline1 : TextStyle(debugLabel: 'whiteRedmond headline1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteRedmond headline2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteRedmond headline3', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteRedmond headline4', fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteRedmond headline5', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteRedmond headline6', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteRedmond bodyText1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteRedmond bodyText2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteRedmond subtitle1', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteRedmond subtitle2', fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteRedmond caption',   fontFamily: 'Segoe UI', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteRedmond button',    fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteRedmond overline',  fontFamily: 'Segoe UI', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+  );
+
+  static const List<String> _helsinkiFontFallbacks = <String>['Ubuntu', 'Cantarell', 'DejaVu Sans', 'Liberation Sans', 'Arial'];
+  /// A material design text theme with dark glyphs based on Roboto, with
+  /// fallback fonts that are likely (but not guaranteed) to be installed on
+  /// Linux.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
+  static const TextTheme blackHelsinki = TextTheme(
+    headline1 : TextStyle(debugLabel: 'blackHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'blackHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'blackHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'blackHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'blackHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'blackHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'blackHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'blackHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'blackHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'blackHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'blackHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'blackHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black87, decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'blackHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.black,   decoration: TextDecoration.none),
+  );
+
+  /// A material design text theme with light glyphs based on Roboto, with fallbacks of DejaVu Sans, Liberation Sans and Arial.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
+  static const TextTheme whiteHelsinki = TextTheme(
+    headline1 : TextStyle(debugLabel: 'whiteHelsinki headline1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline2 : TextStyle(debugLabel: 'whiteHelsinki headline2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline3 : TextStyle(debugLabel: 'whiteHelsinki headline3', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline4 : TextStyle(debugLabel: 'whiteHelsinki headline4', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    headline5 : TextStyle(debugLabel: 'whiteHelsinki headline5', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    headline6 : TextStyle(debugLabel: 'whiteHelsinki headline6', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText1 : TextStyle(debugLabel: 'whiteHelsinki bodyText1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    bodyText2 : TextStyle(debugLabel: 'whiteHelsinki bodyText2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle1 : TextStyle(debugLabel: 'whiteHelsinki subtitle1', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    subtitle2 : TextStyle(debugLabel: 'whiteHelsinki subtitle2', fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    caption   : TextStyle(debugLabel: 'whiteHelsinki caption',   fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white70, decoration: TextDecoration.none),
+    button    : TextStyle(debugLabel: 'whiteHelsinki button',    fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
+    overline  : TextStyle(debugLabel: 'whiteHelsinki overline',  fontFamily: 'Roboto', fontFamilyFallback: _helsinkiFontFallbacks, inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
 
   /// A material design text theme with dark glyphs based on San Francisco.
