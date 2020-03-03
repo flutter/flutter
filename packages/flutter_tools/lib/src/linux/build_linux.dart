@@ -91,9 +91,9 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-/// Checks the template version of [project] against the current template
-/// version. Returns < 0 if the project is older than the current template, > 0
-/// if it's newer, and 0 if they match.
+// Checks the template version of [project] against the current template
+// version. Returns < 0 if the project is older than the current template, > 0
+// if it's newer, and 0 if they match.
 int _compareTemplateVersions(LinuxProject project) {
   const String projectVersionBasename = '.template_version';
   final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
