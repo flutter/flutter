@@ -1,4 +1,4 @@
-Signature: 74fb527eceeeacc6cded0eda3baae3b9
+Signature: f4fd9cad88e690b7a690873aefccfb63
 
 UNUSED LICENSES:
 
@@ -5640,6 +5640,7 @@ FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
+FILE: ../../../third_party/skia/src/core/SkVerticesPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
