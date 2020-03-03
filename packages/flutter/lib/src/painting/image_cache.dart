@@ -393,7 +393,6 @@ class ImageCache {
 
       final _CachedImage image = _CachedImage(result, imageSize);
       if (!_liveImages.containsKey(key)) {
-        assert(syncCall);
         result.addOnLastListenerRemovedCallback(() {
           _liveImages.remove(key);
         });
