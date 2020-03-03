@@ -259,7 +259,7 @@ class AlertDialog extends StatelessWidget {
     this.insetPadding = _defaultInsetPadding,
     this.clipBehavior = Clip.none,
     this.shape,
-    this.scrollable = true,
+    this.scrollable = false,
   }) : assert(contentPadding != null),
        assert(clipBehavior != null),
        super(key: key);
