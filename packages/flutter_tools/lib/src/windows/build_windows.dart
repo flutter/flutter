@@ -29,8 +29,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   // template version, since the tempalte isn't stable yet.
   final int templateCompareResult = _compareTemplateVersions(windowsProject);
   if (templateCompareResult < 0) {
-    throwToolExit('The Windows runner was createh with an earlier version of the '
-      'template, which is not yet stable.\n\n'
+    throwToolExit('The Windows runner was created with an earlier version of '
+      'the template, which is not yet stable.\n\n'
       'Delete the linux/ directory and re-run \'flutter create .\', '
       're-applying any previous changes.');
   } else if (templateCompareResult > 0) {
@@ -116,9 +116,9 @@ void _writeGeneratedFlutterProperties(WindowsProject windowsProject, BuildInfo b
   propsFile.writeAsStringSync(PropertySheet(environmentVariables: environment).toString());
 }
 
-/// Checks the template version of [project] against the current template
-/// version. Returns < 0 if the project is older than the current template, > 0
-/// if it's newer, and 0 if they match.
+// Checks the template version of [project] against the current template
+// version. Returns < 0 if the project is older than the current template, > 0
+// if it's newer, and 0 if they match.
 int _compareTemplateVersions(WindowsProject project) {
   const String projectVersionBasename = '.template_version';
   final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
