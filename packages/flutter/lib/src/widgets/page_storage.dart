@@ -8,12 +8,12 @@ import 'framework.dart';
 
 /// A key indicating that the widget state is persisted in a storage after
 /// destruction and will be restored when recreated.
-/// 
+///
 /// Each key needs to have a value that is unique in its corresponding storage,
 /// i.e. the widget's closest ancestor [PageStorage]. To make it possible for a
 /// saved value to be found when a widget is recreated, the key's value must
 /// not be objects whose identity will change each time the widget is created.
-/// 
+///
 /// For more introduction, see [PageStorage]
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
@@ -123,7 +123,7 @@ class PageStorageBucket {
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
-/// 
+///
 /// [PageStorageKey] is used by [Scrollable] if
 /// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
 /// {@tool dartpad --template=freeform}
