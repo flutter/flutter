@@ -43,6 +43,7 @@ source_set("dart") {
   testonly = true
 
   sources = [
+    "dart_isolate_runner.h",
     "elf_loader.cc",
     "elf_loader.h",
     "test_dart_native_resolver.cc",
