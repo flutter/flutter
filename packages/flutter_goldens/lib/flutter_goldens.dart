@@ -385,7 +385,9 @@ class _AuthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparat
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    return skiaClient.tryjobAdd(golden.path, goldenFile);
+    await skiaClient.tryjobAdd(golden.path, goldenFile);
+
+    return true;
   }
 }
 
