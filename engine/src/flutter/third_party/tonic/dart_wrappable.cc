@@ -64,7 +64,7 @@ void DartWrappable::ClearDartWrapper() {
   TONIC_CHECK(!LogIfError(Dart_SetNativeInstanceField(wrapper, kPeerIndex, 0)));
   TONIC_CHECK(
       !LogIfError(Dart_SetNativeInstanceField(wrapper, kWrapperInfoIndex, 0)));
-  Dart_DeleteWeakPersistentHandle(Dart_CurrentIsolate(), dart_wrapper_);
+  Dart_DeleteWeakPersistentHandle(dart_wrapper_);
   dart_wrapper_ = nullptr;
   this->ReleaseDartWrappableReference();
 }
