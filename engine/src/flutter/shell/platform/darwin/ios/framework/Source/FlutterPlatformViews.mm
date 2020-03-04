@@ -467,7 +467,6 @@ void FlutterPlatformViewsController::EnsureOverlayInitialized(
   auto overlay_it = overlays_.find(overlay_id);
 
   if (!gr_context) {
-    FML_DLOG(ERROR) << "No GrContext";
     if (overlays_.count(overlay_id) != 0) {
       return;
     }
