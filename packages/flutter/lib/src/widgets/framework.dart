@@ -5400,7 +5400,7 @@ abstract class RenderObjectElement extends Element {
   /// continues to have e3 as a previous sibling even though its index in the list
   /// has changed and its [RenderObject] needs to move to come before e2's
   /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
-  /// be assigned to its [RenderObjectElement] whenever its index in its
+  /// be assigned to its [Element] whenever its index in its
   /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
   /// exactly that and also ensures that the underlying parent [RenderObject]
   /// knows where a child needs to move to in a linked list by providing its new
