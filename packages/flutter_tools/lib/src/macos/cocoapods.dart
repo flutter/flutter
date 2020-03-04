@@ -143,13 +143,14 @@ class CocoaPods {
       throwToolExit('Podfile missing');
     }
     bool podsProcessed = false;
-    if (await _checkPodCondition()) {
-      if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
-        await _runPodInstall(xcodeProject, engineDir);
-        podsProcessed = true;
+    if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
+      if (!await _checkPodCondition()) {
+        throwToolExit('CocoaPods not installed or not in valid state.');
       }
-      _warnIfPodfileOutOfDate(xcodeProject);
+      await _runPodInstall(xcodeProject, engineDir);
+      podsProcessed = true;
     }
+    _warnIfPodfileOutOfDate(xcodeProject);
     return podsProcessed;
   }
 
