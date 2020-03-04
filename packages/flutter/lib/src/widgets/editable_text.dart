@@ -2212,13 +2212,13 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
           if (prevWasWhitespace) {
-            selectionBase -= out.length <= selectionBase ? 1 : 0;
-            selectionExtent -= out.length <= selectionExtent ? 1 : 0;
+            selectionBase -= out.length < selectionBase ? 1 : 0;
+            selectionExtent -= out.length < selectionExtent ? 1 : 0;
             out.removeLast();
           }
           out.add(codepoint);
-          selectionBase += out.length < selectionBase ? 1 : 0;
-          selectionExtent += out.length < selectionExtent ? 1 : 0;
+          selectionBase += out.length <= selectionBase ? 1 : 0;
+          selectionExtent += out.length <= selectionExtent ? 1 : 0;
           out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
           prevWasWhitespace = true;
         } else if (isDirectionalityMarker(codepoint)) {
@@ -2246,7 +2246,6 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
           affinity: newValue.selection.affinity,
           isDirectional: newValue.selection.isDirectional
         ),
-        // selection: TextSelection.collapsed(offset: formatted.length),
       );
     }
     return newValue;
