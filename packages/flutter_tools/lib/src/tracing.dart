@@ -60,8 +60,7 @@ class Tracing {
         if (!done) {
           await whenFirstFrameRendered.future;
         }
-      // The exception is rethrown, so don't catch only Exceptions.
-      } catch (exception) { // ignore: avoid_catches_without_on_clauses
+      } catch (exception) {
         status.cancel();
         rethrow;
       }

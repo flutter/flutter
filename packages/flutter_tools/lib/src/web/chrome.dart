@@ -211,7 +211,7 @@ class ChromeLauncher {
     if (!skipCheck) {
       try {
         await chrome.chromeConnection.getTabs();
-      } on Exception catch (e) {
+      } catch (e) {
         await chrome.close();
         throwToolExit(
             'Unable to connect to Chrome debug port: ${chrome.debugPort}\n $e');
@@ -235,7 +235,7 @@ class ChromeLauncher {
       final HttpClientResponse response = await request.close();
       final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
       return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
-    } on Exception {
+    } catch (_) {
       // If we fail to talk to the remote debugger protocol, give up and return
       // the raw URL rather than crashing.
       return base;

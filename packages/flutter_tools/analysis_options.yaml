@@ -7,4 +7,3 @@ linter:
   rules:
     unawaited_futures: true
     curly_braces_in_flow_control_structures: true
-    avoid_catches_without_on_clauses: true

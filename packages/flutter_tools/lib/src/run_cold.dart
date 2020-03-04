@@ -131,7 +131,7 @@ class ColdRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol();
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
       // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.

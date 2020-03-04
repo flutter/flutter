@@ -33,7 +33,7 @@ abstract class AnalyzeBase {
         } finally {
           resultsFile.close();
         }
-      } on Exception catch (e) {
+      } catch (e) {
         globals.printError('Failed to save output to "${argResults['write']}": $e');
       }
     }
