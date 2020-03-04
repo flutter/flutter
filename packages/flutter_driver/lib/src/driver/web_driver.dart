@@ -56,7 +56,7 @@ class WebFlutterDriver extends FlutterDriver {
       'session-id': Platform.environment['DRIVER_SESSION_ID'],
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
-      'is-android-chrome': Platform.environment['IS_ANDROID_CHROME'] == 'true',
+      'android-chrome-on-emulator': Platform.environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
@@ -195,9 +195,9 @@ class FlutterWebConnection {
         settings['session-id'].toString(),
         uri: Uri.parse(settings['session-uri'].toString()),
         spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
-    if (settings['is-android-chrome'] == true) {
-      // Converts to Android Uri.
+    if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
+      // Converts to Android Emulator Uri.
       // Hardcode the host to 10.0.2.2 based on
       // https://developer.android.com/studio/run/emulator-networking
       url = Uri(scheme: localUri.scheme, host: '10.0.2.2', port:localUri.port).toString();

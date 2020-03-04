@@ -105,7 +105,11 @@ class DriveCommand extends RunCommandBase {
         help: 'The dimension of browser when running Flutter Web test. \n'
               'This will affect screenshot and all offset-related actions. \n'
               'By default. it is set to 1600,1024 (1600 by 1024).',
-      );
+      )
+      ..addFlag('android-emulator',
+        defaultsTo: true,
+        help: 'Whether to perform Flutter Driver testing on Android Emulator.'
+          'Works only if \'browser-name\' is set to \'android-chrome\'');
   }
 
   @override
@@ -246,6 +250,7 @@ class DriveCommand extends RunCommandBase {
       }
 
       final bool isAndroidChrome = browser == Browser.androidChrome;
+      final bool useEmulator = argResults['android-emulator'] as bool;
       // set window size
       // for android chrome, skip such action
       if (!isAndroidChrome) {
@@ -278,7 +283,7 @@ $ex
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
         'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
-        'IS_ANDROID_CHROME': isAndroidChrome.toString(),
+        'ANDROID_CHROME_ON_EMULATOR': (isAndroidChrome && useEmulator).toString(),
       });
     }
 
