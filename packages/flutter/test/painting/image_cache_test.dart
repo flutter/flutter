@@ -434,5 +434,43 @@ void main() {
       expect(imageCache.statusForKey(testImage).live, true);
       expect(imageCache.statusForKey(testImage).keepAlive, true);
     });
+
+    test('Live image gets size updated', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+      const int testImageSize = 8 * 8 * 4;
+
+      final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..addListener(listener);
+
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+      expect(imageCache.currentSizeBytes, 0);
+
+      completer1.testSetImage(testImage);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.currentSizeBytes, testImageSize);
+
+      imageCache.evict(testImage, includeLive: false);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+      expect(imageCache.currentSizeBytes, 0);
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.currentSizeBytes, testImageSize);
+    });
   });
 }

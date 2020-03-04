@@ -286,15 +286,15 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, _LiveImage image, { bool putOk = true }) {
+  void _trackLiveImage(Object key, _LiveImage image, { bool debugPutOk = true }) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
-      assert(putOk);
+      assert(debugPutOk);
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
       // Even if the cache size is 0, we still add this listener.
-      image.completer.addOnLastListenerRemovedCallback(image.remover);
+      image.completer.addOnLastListenerRemovedCallback(image.handleRemove);
       return image;
     }).sizeBytes ??= image.sizeBytes;
   }
@@ -403,7 +403,7 @@ class ImageCache {
         // This should result in a put if `loader()` above executed
         // synchronously, in which case syncCall is true and we arrived here
         // before we got a chance to track the image otherwise.
-        putOk: syncCall,
+        debugPutOk: syncCall,
       );
 
       final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);
@@ -591,13 +591,13 @@ class _CachedImage {
 }
 
 class _LiveImage extends _CachedImage {
-  _LiveImage(ImageStreamCompleter completer, int sizeBytes, this.remover)
+  _LiveImage(ImageStreamCompleter completer, int sizeBytes, this.handleRemove)
       : super(completer, sizeBytes);
 
-  final VoidCallback remover;
+  final VoidCallback handleRemove;
 
   void removeListener() {
-    completer.removeOnLastListenerRemovedCallback(remover);
+    completer.removeOnLastListenerRemovedCallback(handleRemove);
   }
 }
 
