@@ -333,12 +333,6 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
     command.add('-Pdart-defines=${jsonEncode(androidBuildInfo.buildInfo.dartDefines)}');
   }
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo
-      .targetArchs
-      .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
     // read from include_flutter.groovy.
