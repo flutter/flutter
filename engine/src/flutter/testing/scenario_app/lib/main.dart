@@ -14,6 +14,7 @@ import 'src/animated_color_square.dart';
 import 'src/platform_view.dart';
 import 'src/poppable_screen.dart';
 import 'src/scenario.dart';
+import 'src/touches_scenario.dart';
 
 Map<String, Scenario> _scenarios = <String, Scenario>{
   'animated_color_square': AnimatedColorSquareScenario(window),
@@ -30,6 +31,7 @@ Map<String, Scenario> _scenarios = <String, Scenario>{
   'platform_view_gesture_reject_eager': PlatformViewForTouchIOSScenario(window, 'platform view touch', id: 11, accept: false),
   'platform_view_gesture_accept': PlatformViewForTouchIOSScenario(window, 'platform view touch', id: 11, accept: true),
   'platform_view_gesture_reject_after_touches_ended': PlatformViewForTouchIOSScenario(window, 'platform view touch', id: 11, accept: false, rejectUntilTouchesEnded: true),
+  'tap_status_bar' : TouchesScenario(window),
 };
 
 Scenario _currentScenario = _scenarios['animated_color_square'];
