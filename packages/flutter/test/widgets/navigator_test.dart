@@ -2408,7 +2408,7 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   Iterable<StageableRoute> resolve({
     List<StageableRoute> newPageRouteHistory,
     Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
-    Map<StageableRoute, List<StageableRoute>> exitingRouteToPagelessRoutes,
+    Map<StageableRoute, List<StageableRoute>> pageRouteToPagelessRoutes,
   }) {
     final List<StageableRoute> results = <StageableRoute>[];
     void handleExitingRoute(StageableRoute location) {
@@ -2416,13 +2416,13 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
         return;
 
       final StageableRoute exitingPageRoute = locationToExitingPageRoute[location];
-      final bool hasPagelessRoute = exitingRouteToPagelessRoutes.containsKey(exitingPageRoute);
+      final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
 
       exitingPageRoute.markForRemove();
       results.add(exitingPageRoute);
 
       if (hasPagelessRoute) {
-        final List<StageableRoute> pagelessRoutes = exitingRouteToPagelessRoutes[exitingPageRoute];
+        final List<StageableRoute> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
         for (final StageableRoute pagelessRoute in pagelessRoutes) {
           pagelessRoute.markForRemove();
         }
