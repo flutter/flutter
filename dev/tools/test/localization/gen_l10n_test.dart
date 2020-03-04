@@ -1037,7 +1037,12 @@ void main() {
     test('handles string with both triple single and triple double quote', () {
       expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
     });
-
+    test('handles dollar', () {
+      expect(generateString(r'ab$c'), r"r'ab$c'");
+    });
+    test('handles back slash', () {
+      expect(generateString(r'ab\c'), r"r'ab\c'");
+    });
     test("doesn't support multiline strings", () {
       expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
     });
