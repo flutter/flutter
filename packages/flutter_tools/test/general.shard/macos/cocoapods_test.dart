@@ -322,7 +322,7 @@ void main() {
       podsIsInHomeDir();
     });
 
-    testUsingContext('prints error, if CocoaPods is not installed', () async {
+    testUsingContext('throwsToolExit if CocoaPods is not installed', () async {
       pretendPodIsNotInstalled();
       projectUnderTest.ios.podfile.createSync();
       final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
@@ -340,7 +340,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('prints error if CocoaPods install is broken', () async {
+    testUsingContext('throwsToolExit if CocoaPods install is broken', () async {
       pretendPodIsBroken();
       projectUnderTest.ios.podfile.createSync();
       final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
