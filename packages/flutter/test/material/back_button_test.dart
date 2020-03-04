@@ -180,4 +180,35 @@ void main() {
     ));
     expect(iconText.text.style.color, Colors.red);
   });
+
+  testWidgets('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+    bool closePressed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Material(child: Text('Home')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return Material(
+              child: Center(
+                child: CloseButton(onPressed: () => closePressed = true),
+              ),
+            );
+          },
+        },
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(CloseButton));
+
+    await tester.pumpAndSettle();
+
+    // We're still on the second page.
+    expect(find.text('Home'), findsNothing);
+    // But the custom callback is called.
+    expect(closePressed, true);
+  });
 }
