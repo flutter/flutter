@@ -15,8 +15,6 @@ fi
 
 cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd
 
-./compile_ios_jit.sh ../../../out/host_debug_unopt ../../../out/$FLUTTER_ENGINE/clang_x64
-
 pushd ios/Scenarios
 
 set -o pipefail && xcodebuild -sdk iphonesimulator \
