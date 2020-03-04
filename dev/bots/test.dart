@@ -728,7 +728,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     if (useFlutterTestFormatter)
       '-rjson'
     else
-      '-rcompact'
+      '-rcompact',
     '-j$cpus',
     if (!hasColor)
       '--no-color',
