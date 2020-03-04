@@ -5960,6 +5960,8 @@ class IndexedSlot<T> {
 
   @override
   bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
     return other is IndexedSlot
         && index == other.index
         && value == other.value;
