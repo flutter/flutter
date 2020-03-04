@@ -17,7 +17,13 @@ Future<TaskResult> runDartDefinesTask() async {
   await inDirectory<void>(testDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
-    await flutter('drive', options: <String>['--verbose', '-d', deviceId, '--dart-define=test.value=ExampleValue', 'lib/defines.dart']);
+    await flutter('drive', options: <String>[
+      '--verbose',
+      '-d',
+      deviceId,
+      '--dart-define=test.value=ExampleValue',
+      'lib/defines.dart',
+    ]);
   });
 
   return TaskResult.success(<String, dynamic>{});
