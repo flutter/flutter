@@ -1153,6 +1153,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
     _cursorVisibilityNotifier.value = widget.showCursor;
+    _whitespaceFormatter = _TrailingWhitespaceDirectionalityFormatter(_textDirection);
   }
 
   @override
@@ -1655,13 +1656,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
-  _TrailingWhitespaceDirectionFormatter _whitespaceFormatter;
+  _TrailingWhitespaceDirectionalityFormatter _whitespaceFormatter;
 
   void _formatAndSetValue(TextEditingValue value) {
-    if (_whitespaceFormatter == null) {
-      _whitespaceFormatter = _TrailingWhitespaceDirectionFormatter(_textDirection);
-    }
-
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
@@ -2152,25 +2149,35 @@ class _Editable extends LeafRenderObjectWidget {
   }
 }
 
-  class _TrailingWhitespaceDirectionFormatter extends TextInputFormatter {
-    _TrailingWhitespaceDirectionFormatter(TextDirection underlyingDirection) : lastNonWhitespaceDirection = underlyingDirection;
+class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
+  _TrailingWhitespaceDirectionalityFormatter(this.underlyingDirection) : lastNonWhitespaceDirection = underlyingDirection;
 
-    TextDirection lastNonWhitespaceDirection;
-    final RegExp rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
-    final RegExp ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
-    final RegExp whitespaceRegExp = RegExp(r'\s');
+  final RegExp ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+  final RegExp rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+  final RegExp whitespaceRegExp = RegExp(r'\s');
 
-    @override
-    TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-    ) {
-      if (oldValue == newValue) {
-        print('BREAKING');
-        return newValue;
+  final TextDirection underlyingDirection;
+  TextDirection lastNonWhitespaceDirection;
+  bool hasOpposingDirection = false;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // We skip formatting (which can be more expensive) if there are no cases of
+    // mixing directionality. Once we find a case, we will always perform the
+    // formatting.
+    if (!hasOpposingDirection) {
+      if (underlyingDirection == TextDirection.ltr) {
+        hasOpposingDirection = rtlRegExp.hasMatch(newValue.text);
+      } else {
+        hasOpposingDirection = ltrRegExp.hasMatch(newValue.text);
       }
+    }
+
+    if (hasOpposingDirection) {
       List<int> out = List<int>();
-      print('FORMATTING:');
       bool lastWasWhitespace = false;
       int lastNonWhitespaceCodepoint;
       for (int r in newValue.text.runes) {
@@ -2187,26 +2194,20 @@ class _Editable extends LeafRenderObjectWidget {
         }
       }
       String formatted = String.fromCharCodes(out);
-      return newValue;
       return TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
       );
     }
-
-    bool isWhitespace(int value) {
-      if (whitespaceRegExp.hasMatch(String.fromCharCode(value))) {
-        return true;
-      }
-      return false;
-    }
-
-    // LTR: 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF'+'\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF'
-
-    bool isRtl(int value) {
-      if (!ltrRegExp.hasMatch(String.fromCharCode(value))) {
-        return true;
-      }
-      return false;
-    }
+    return newValue;
   }
+
+  bool isWhitespace(int value) {
+    return whitespaceRegExp.hasMatch(String.fromCharCode(value));
+  }
+
+  bool isRtl(int value) {
+    // We use the LTR version as short-circuiting will be more efficient.
+    return !ltrRegExp.hasMatch(String.fromCharCode(value));
+  }
+}
