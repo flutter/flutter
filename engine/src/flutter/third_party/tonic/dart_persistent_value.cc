@@ -43,8 +43,12 @@ void DartPersistentValue::Clear() {
     return;
   }
 
-  DartIsolateScope scope(dart_state->isolate());
-  Dart_DeletePersistentHandle(value_);
+  if (Dart_CurrentIsolateGroup()) {
+    Dart_DeletePersistentHandle(value_);
+  } else {
+    DartIsolateScope scope(dart_state->isolate());
+    Dart_DeletePersistentHandle(value_);
+  }
   dart_state_.reset();
   value_ = nullptr;
 }
