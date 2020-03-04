@@ -139,6 +139,9 @@ static FlutterDesktopWindowControllerState* GetSavedWindowState(
 static UniqueGLFWwindowPtr CreateShareWindowForWindow(GLFWwindow* window) {
   glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+#if defined(__linux__)
+  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
   GLFWwindow* share_window = glfwCreateWindow(1, 1, "", NULL, window);
   glfwDefaultWindowHints();
   return UniqueGLFWwindowPtr(share_window, glfwDestroyWindow);
@@ -561,6 +564,9 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
   if (window_properties.prevent_resize) {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   }
+#if defined(__linux__)
+  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
   state->window = UniqueGLFWwindowPtr(
       glfwCreateWindow(window_properties.width, window_properties.height,
                        window_properties.title, NULL, NULL),
