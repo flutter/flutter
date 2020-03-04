@@ -4,6 +4,7 @@
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -19,6 +20,20 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String 
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
       'to learn about adding Linux support to a project.');
+  }
+
+  // Check for incompatibility between the Flutter tool version and the project
+  // template version, since the tempalte isn't stable yet.
+  final int templateCompareResult = _compareTemplateVersions(linuxProject);
+  if (templateCompareResult < 0) {
+    throwToolExit('The Linux runner was created with an earlier version of the '
+      'template, which is not yet stable.\n\n'
+      'Delete the linux/ directory and re-run \'flutter create .\', '
+      're-applying any previous changes.');
+  } else if (templateCompareResult > 0) {
+    throwToolExit('The Linux runner was created with a newer version of the '
+      'template, which is not yet stable.\n\n'
+      'Upgrade Flutter and try again.');
   }
 
   final StringBuffer buffer = StringBuffer('''
@@ -74,4 +89,26 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     throwToolExit('Build process failed');
   }
   flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+}
+
+// Checks the template version of [project] against the current template
+// version. Returns < 0 if the project is older than the current template, > 0
+// if it's newer, and 0 if they match.
+int _compareTemplateVersions(LinuxProject project) {
+  const String projectVersionBasename = '.template_version';
+  final int expectedVersion = int.parse(globals.fs.file(globals.fs.path.join(
+    globals.fs.path.absolute(Cache.flutterRoot),
+    'packages',
+    'flutter_tools',
+    'templates',
+    'app',
+    'linux.tmpl',
+    'flutter',
+    projectVersionBasename,
+  )).readAsStringSync());
+  final File projectVersionFile = project.managedDirectory.childFile(projectVersionBasename);
+  final int version = projectVersionFile.existsSync()
+      ? int.tryParse(projectVersionFile.readAsStringSync())
+      : 0;
+  return version.compareTo(expectedVersion);
 }

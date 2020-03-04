@@ -234,7 +234,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         hasSuitableHapticHardware = false;
         break;
     }

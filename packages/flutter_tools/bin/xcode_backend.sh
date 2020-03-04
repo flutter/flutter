@@ -290,7 +290,7 @@ EmbedFlutterFrameworks() {
 
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
-  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${PRODUCT_NAME}".app/Frameworks"
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
   RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
 
@@ -302,17 +302,22 @@ EmbedFlutterFrameworks() {
   RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
 
   # Sign the binaries we moved.
-  local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
-  if [[ -n "$identity" && "$identity" != "\"\"" ]]; then
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
+}
+
+EmbedAndThinFrameworks() {
+  EmbedFlutterFrameworks
+  ThinAppFrameworks
 }
 
 # Main entry point.
 if [[ $# == 0 ]]; then
-  # Backwards-compatibility: if no args are provided, build.
+  # Backwards-compatibility: if no args are provided, build and embed.
   BuildApp
+  EmbedFlutterFrameworks
 else
   case $1 in
     "build")
@@ -321,5 +326,7 @@ else
       ThinAppFrameworks ;;
     "embed")
       EmbedFlutterFrameworks ;;
+    "embed_and_thin")
+      EmbedAndThinFrameworks ;;
   esac
 fi

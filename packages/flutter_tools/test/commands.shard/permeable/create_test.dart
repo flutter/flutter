@@ -585,7 +585,7 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   });
 
-  testUsingContext('app supports macOS if requested', () async {
+  testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -595,9 +595,54 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('app does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+  testUsingContext('plugin supports Linux if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('plugin does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('app does not include macOS by default', () async {

@@ -206,6 +206,8 @@ class _DayPeriodControl extends StatelessWidget {
     switch (fragmentContext.targetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
@@ -222,6 +224,8 @@ class _DayPeriodControl extends StatelessWidget {
     switch (fragmentContext.targetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
@@ -1535,6 +1539,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         _vibrateTimer?.cancel();
         _vibrateTimer = Timer(_kVibrateCommitDelay, () {
           HapticFeedback.vibrate();
