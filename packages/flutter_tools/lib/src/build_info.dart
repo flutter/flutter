@@ -14,7 +14,7 @@ class BuildInfo {
   const BuildInfo(
     this.mode,
     this.flavor, {
-    this.trackWidgetCreation = true,
+    this.trackWidgetCreation = false,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.fileSystemRoots,

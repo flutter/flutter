@@ -19,7 +19,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
-    usesDartDefinesOption();
+    usesDartDefineOption();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -76,15 +76,13 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     await aotBuilder.build(
       platform: platform,
       outputPath: outputPath,
-      buildMode: buildInfo.mode,
+      buildInfo: buildInfo,
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
       reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
-      dartDefines: buildInfo.dartDefines,
-      treeShakeIcons: buildInfo.treeShakeIcons,
     );
     return FlutterCommandResult.success();
   }

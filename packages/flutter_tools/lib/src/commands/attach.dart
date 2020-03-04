@@ -61,7 +61,7 @@ class AttachCommand extends FlutterCommand {
     usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
-    usesDartDefinesOption();
+    usesDartDefineOption();
     argParser
       ..addOption(
         'debug-port',

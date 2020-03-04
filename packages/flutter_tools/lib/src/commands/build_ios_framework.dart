@@ -48,7 +48,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
-    usesDartDefinesOption();
+    usesDartDefineOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
     argParser
@@ -355,7 +355,7 @@ end
         status.stop();
       }
     } else {
-      await _produceAotAppFrameworkIfNeeded(buildInfo.mode, modeDirectory);
+      await _produceAotAppFrameworkIfNeeded(buildInfo, modeDirectory);
     }
 
     final File sourceInfoPlist = _project.ios.hostAppRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
@@ -417,10 +417,10 @@ end
   }
 
   Future<void> _produceAotAppFrameworkIfNeeded(
-    BuildMode mode,
+    BuildInfo buildInfo,
     Directory destinationDirectory,
   ) async {
-    if (mode == BuildMode.debug) {
+    if (buildInfo.mode == BuildMode.debug) {
       return;
     }
     final Status status = globals.logger.startProgress(
@@ -431,15 +431,13 @@ end
       await _aotBuilder.build(
         platform: TargetPlatform.ios,
         outputPath: destinationDirectory.path,
-        buildMode: mode,
+        buildInfo: buildInfo,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
         mainDartFile: globals.fs.path.absolute(targetFile),
         quiet: true,
         bitcode: true,
         reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
-        dartDefines: stringsArg('dart-define'),
-        treeShakeIcons: boolArg('tree-shake-icons'),
       );
     } finally {
       status.stop();
