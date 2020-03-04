@@ -66,6 +66,8 @@ final Set<String> kMirroredIcons = new Set<String>.from(<String>[
   'help',
   'help_outline',
   'input',
+  'keyboard_arrow_left',
+  'keyboard_arrow_right',
   'keyboard_backspace',
   'keyboard_tab',
   'label',
