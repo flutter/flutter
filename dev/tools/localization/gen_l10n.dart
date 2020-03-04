@@ -163,14 +163,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
       }
     }
-<<<<<<< HEAD
     return messageValue;
-=======
-    messageValue = messageValue.replaceAll("'", '\\\'');
-    messageValue = messageValue.replaceAll('"', '\\\"');
-
-    return "'$messageValue'";
->>>>>>> parent of 4d838e5d7... Add comment
   }
 
   if (message.isPlural) {
