@@ -5389,13 +5389,13 @@ abstract class RenderObjectElement extends Element {
   /// list after the [RenderObject] associated with the [Element] provided as
   /// [IndexedSlot.value] in the [slot] value.
   ///
-  /// Simply using the previous child as a [slot] is not enough, though, because
+  /// Simply using the previous sibling as a [slot] is not enough, though, because
   /// child [RenderObject]s are only moved around when the [slot] of their
   /// associated [RenderObjectElement]s is updated. When the order of child
   /// [Element]s is changed, some elements in the list may move to a new index
   /// but still have the same previous sibling. For example, when
   /// `[e1, e2, e3, e4]` is changed to `[e1, e3, e4, e2]` the element e4
-  /// continues to have e3 as a previous child even though its index in the list
+  /// continues to have e3 as a previous sibling even though its index in the list
   /// has changed and its [RenderObject] needs to move to come before e2's
   /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
   /// be assigned to its [RenderObjectElement] whenever its index in its
