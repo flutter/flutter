@@ -1335,7 +1335,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// bool _visible = true;
 /// List<Widget> listItems = <Widget>[
 ///   Text('Now you see me,'),
-///   Text('Now you don\'t!'),
+///   Text("Now you don't!"),
 /// ];
 ///
 /// SliverOpacity(

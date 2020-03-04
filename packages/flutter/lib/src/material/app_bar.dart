@@ -297,7 +297,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// last action.
   ///
   /// The [actions] become the trailing component of the [NavigationToolBar] built
-  /// by this widget. The the height of each action is constrained to be no bigger
+  /// by this widget. The height of each action is constrained to be no bigger
   /// than the toolbar's height, which is [kToolbarHeight].
   final List<Widget> actions;
 
@@ -426,6 +426,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return false;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -516,6 +518,8 @@ class _AppBarState extends State<AppBar> {
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           namesRoute = true;
           break;
         case TargetPlatform.iOS:
@@ -603,6 +607,7 @@ class _AppBarState extends State<AppBar> {
     // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
       appBar = SafeArea(
+        bottom: false,
         top: true,
         child: appBar,
       );
@@ -1346,6 +1351,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child.layout(innerConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);

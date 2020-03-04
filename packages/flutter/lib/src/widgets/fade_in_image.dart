@@ -448,7 +448,13 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]));
+    ]))..addStatusListener((AnimationStatus status) {
+      if (_placeholderOpacityAnimation.isCompleted) {
+        // Need to rebuild to remove placeholder now that it is invisibile.
+        setState(() {});
+      }
+    });
+
     _targetOpacityAnimation = animation.drive(TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: ConstantTween<double>(0),
@@ -472,6 +478,15 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   Widget build(BuildContext context) {
+    final Widget target = FadeTransition(
+      opacity: _targetOpacityAnimation,
+      child: widget.target,
+    );
+
+    if (_placeholderOpacityAnimation.isCompleted) {
+      return target;
+    }
+
     return Stack(
       fit: StackFit.passthrough,
       alignment: AlignmentDirectional.center,
@@ -479,10 +494,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // but it allows the Stack to avoid a call to Directionality.of()
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        FadeTransition(
-          opacity: _targetOpacityAnimation,
-          child: widget.target,
-        ),
+        target,
         FadeTransition(
           opacity: _placeholderOpacityAnimation,
           child: widget.placeholder,

@@ -136,7 +136,7 @@ class UserMessages {
   String xcodeOutdated(int versionMajor, int versionMinor) =>
       'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
       'Download the latest version or update via the Mac App Store.';
-  String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
+  String get xcodeEula => "Xcode end user license agreement not signed; open Xcode or run the command 'sudo xcodebuild -license'.";
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted or run:\n'
@@ -159,7 +159,7 @@ class UserMessages {
       '$consequence\n'
       'To initialize CocoaPods, run:\n'
       '  pod setup\n'
-      'once to finalize CocoaPods\' installation.';
+      "once to finalize CocoaPods' installation.";
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
@@ -253,37 +253,37 @@ class UserMessages {
       'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';
   String runnerNoEngineBuildDirInPath(String engineSourcePath) =>
       'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
-      'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that '
-      'you have compiled the engine in that directory, which should produce an \'out\' directory';
+      "Please ensure that $engineSourcePath is a Flutter engine 'src' directory and that "
+      "you have compiled the engine in that directory, which should produce an 'out' directory";
   String get runnerLocalEngineRequired =>
       'You must specify --local-engine if you are using a locally built engine.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
   String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
-      'Warning: the \'flutter\' tool you are currently running is not the one from the current directory:\n'
+      "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
       '  running Flutter  : $flutterRoot\n'
       '  current directory: $currentDir\n'
       'This can happen when you have multiple copies of flutter installed. Please check your system path to verify '
-      'that you\'re running the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+      "that you're running the expected version (run 'flutter --version' to see which flutter is on your path).\n";
   String runnerRemovedFlutterRepo(String flutterRoot, String flutterPath) =>
       'Warning! This package referenced a Flutter repository via the .packages file that is '
-      'no longer available. The repository from which the \'flutter\' tool is currently '
+      "no longer available. The repository from which the 'flutter' tool is currently "
       'executing will be used instead.\n'
       '  running Flutter tool: $flutterRoot\n'
       '  previous reference  : $flutterPath\n'
       'This can happen if you deleted or moved your copy of the Flutter repository, or '
       'if it was on a volume that is no longer mounted or has been mounted at a '
       'different location. Please check your system path to verify that you are running '
-      'the expected version (run \'flutter --version\' to see which flutter is on your path).\n';
+      "the expected version (run 'flutter --version' to see which flutter is on your path).\n";
   String runnerChangedFlutterRepo(String flutterRoot, String flutterPath) =>
-      'Warning! The \'flutter\' tool you are currently running is from a different Flutter '
+      "Warning! The 'flutter' tool you are currently running is from a different Flutter "
       'repository than the one last used by this package. The repository from which the '
-      '\'flutter\' tool is currently executing will be used instead.\n'
+      "'flutter' tool is currently executing will be used instead.\n"
       '  running Flutter tool: $flutterRoot\n'
       '  previous reference  : $flutterPath\n'
       'This can happen when you have multiple copies of flutter installed. Please check '
       'your system path to verify that you are running the expected version (run '
-      '\'flutter --version\' to see which flutter is on your path).\n';
+      "'flutter --version' to see which flutter is on your path).\n";
   String invalidVersionSettingHintMessage(String invalidVersion) =>
       'Invalid version $invalidVersion found, default value will be used.\n'
       'In pubspec.yaml, a valid version should look like: build-name+build-number.\n'

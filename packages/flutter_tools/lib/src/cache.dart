@@ -101,7 +101,7 @@ class Cache {
   }) : _rootOverride = rootOverride,
        _logger = logger ?? globals.logger,
        _fileSystem = fileSystem ?? globals.fs,
-       _platform = platform ?? globals.platform ,
+       _platform = platform ?? globals.platform,
        _osUtils = osUtils ?? globals.os {
     // TODO(zra): Move to initializer list once logger and platform parameters
     // are required.
@@ -430,7 +430,7 @@ class Cache {
         if (_hostsBlockedInChina.contains(e.address?.host)) {
           _logger.printError(
             'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
-            'If you\'re in China, please see this page: '
+            "If you're in China, please see this page: "
             'https://flutter.dev/community/china',
             emphasis: true,
           );
@@ -1229,11 +1229,15 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
       'linux': <String>['linux-x64', 'linux-x64/$artifactName.zip'],
       'windows': <String>['windows-x64', 'windows-x64/$artifactName.zip'],
     };
-    final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
-    if (binaryDirs == null) {
-      throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+    if (cache.includeAllPlatforms) {
+      return artifacts.values.toList();
+    } else {
+      final List<String> binaryDirs = artifacts[globals.platform.operatingSystem];
+      if (binaryDirs == null) {
+        throwToolExit('Unsupported operating system: ${globals.platform.operatingSystem}');
+      }
+      return <List<String>>[binaryDirs];
     }
-    return <List<String>>[binaryDirs];
   }
 
   @override
@@ -1257,9 +1261,7 @@ class IosUsbArtifacts extends CachedArtifact {
     'usbmuxd',
     'libplist',
     'openssl',
-    'ideviceinstaller',
     'ios-deploy',
-    'libzip',
   ];
 
   // For unknown reasons, users are getting into bad states where libimobiledevice is
@@ -1268,8 +1270,8 @@ class IosUsbArtifacts extends CachedArtifact {
   // missing.
   static const Map<String, List<String>> _kExecutables = <String, List<String>>{
     'libimobiledevice': <String>[
-      'idevice_id',
-      'ideviceinfo',
+      'idevicescreenshot',
+      'idevicesyslog',
     ],
   };
 

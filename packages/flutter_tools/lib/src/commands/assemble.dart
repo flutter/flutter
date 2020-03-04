@@ -50,6 +50,9 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  DebugIosApplicationBundle(),
+  ProfileIosApplicationBundle(),
+  ReleaseIosApplicationBundle(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -199,7 +202,12 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      depfile.writeToFile(globals.fs.file(depfileFile));
+      final DepfileService depfileService = DepfileService(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
+      depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
     return FlutterCommandResult.success();
   }

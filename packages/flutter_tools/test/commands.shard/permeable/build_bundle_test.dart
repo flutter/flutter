@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
@@ -47,6 +48,7 @@ void main() {
         extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
         fileSystemRoots: anyNamed('fileSystemRoots'),
         fileSystemScheme: anyNamed('fileSystemScheme'),
+        treeShakeIcons: anyNamed('treeShakeIcons'),
       ),
     ).thenAnswer((_) => Future<void>.value());
   });
@@ -217,6 +219,7 @@ void main() {
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
         kTrackWidgetCreation: 'true',
+        kIconTreeShakerFlag: null,
       });
 
       return BuildResult(success: true);

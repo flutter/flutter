@@ -158,11 +158,13 @@ void main() {
     }
   });
 
-  test('no unauthorized imports of build_runner', () {
+  test('no unauthorized imports of build_runner or dwds', () {
     final List<String> whitelistedPaths = <String>[
       globals.fs.path.join(flutterTools, 'test', 'src', 'build_runner'),
       globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner'),
       globals.fs.path.join(flutterTools, 'lib', 'executable.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'devfs_web.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => !entity.path.contains(path));
 
@@ -177,6 +179,7 @@ void main() {
           if (line.startsWith(RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
+              line.startsWith(RegExp(r'import.*dwds:*.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {
             final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
             fail('$relativePath imports a build_runner package');

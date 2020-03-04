@@ -47,7 +47,7 @@ void main() {
     await device.shellExec('am', <String>['start', '-n', _kActivityId]);
     final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
     print('Found observatory line: $observatoryLine');
-    final String observatoryUri = RegExp('Observatory listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)').firstMatch(observatoryLine)[1];
+    final String observatoryUri = RegExp(r'Observatory listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)').firstMatch(observatoryLine)[1];
     print('Extracted observatory port: $observatoryUri');
     final Process attachProcess =
       await _run(device: device, command: <String>['attach', '--debug-uri',

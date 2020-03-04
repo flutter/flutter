@@ -144,7 +144,7 @@ class Directionality extends InheritedWidget {
 /// ```dart
 /// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
-///   child: const Text('Now you see me, now you don\'t!'),
+///   child: const Text("Now you see me, now you don't!"),
 /// )
 /// ```
 /// {@end-tool}
@@ -479,6 +479,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
+       assert(painter != null || foregroundPainter != null || (!isComplex && !willChange)),
        super(key: key, child: child);
 
   /// The painter that paints before the children.
@@ -503,10 +504,16 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool isComplex;
 
   /// Whether the raster cache should be told that this painting is likely
   /// to change in the next frame.
+  ///
+  /// This flag can't be set to true if both [painter] and [foregroundPainter]
+  /// are null because this flag will be ignored in such case.
   final bool willChange;
 
   @override
@@ -1085,6 +1092,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///    that is relative to the child's size.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Transform extends SingleChildRenderObjectWidget {
   /// Creates a widget that transforms its child.
   ///
@@ -1207,7 +1215,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1880,6 +1888,7 @@ class Center extends Align {
 ///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -1975,6 +1984,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -3031,6 +3041,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
 ///    this layout algorithm (at the cost of being slightly less efficient).
 ///  * [ListView], which implements an efficient scrolling version of this
 ///    layout algorithm.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ListBody extends MultiChildRenderObjectWidget {
   /// Creates a layout widget that arranges its children sequentially along a
   /// given axis.
@@ -4022,7 +4033,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
-///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     const Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
 /// )
@@ -4050,7 +4061,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
-///       child: Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///       child: Text("Flutter's hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android."),
 ///     ),
 ///     const Icon(Icons.sentiment_very_satisfied),
 ///   ],
@@ -4444,7 +4455,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
@@ -4483,7 +4494,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -4826,9 +4837,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
 ///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-///
-/// {@tool sample --template=freeform}
+/// {@tool dartpad --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5542,7 +5551,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5795,7 +5804,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -5949,7 +5958,7 @@ class MouseRegion extends StatefulWidget {
   ///    override [State.dispose] and call [onExit], or create your own widget
   ///    using [RenderMouseRegion].
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a blue rectangular that turns yellow when
   /// hovered. Since the hover state is completely contained within a widget
   /// that unconditionally creates the `MouseRegion`, you can ignore the
@@ -5977,7 +5986,7 @@ class MouseRegion extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateful_widget_scaffold_center}
+  /// {@tool dartpad --template=stateful_widget_scaffold_center}
   /// The following example shows a widget that hides its content one second
   /// after behing hovered, and also exposes the enter and exit callbacks.
   /// Because the widget conditionally creates the `MouseRegion`, and leaks the
@@ -7065,4 +7074,64 @@ class StatefulBuilder extends StatefulWidget {
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context, setState);
+}
+
+/// A widget that paints its area with a specified [Color] and then draws its
+/// child on top of that color.
+class ColoredBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that paints its area with the specified [Color].
+  ///
+  /// The [color] parameter must not be null.
+  const ColoredBox({@required this.color, Widget child, Key key})
+      : assert(color != null),
+        super(key: key, child: child);
+
+  /// The color to paint the background area with.
+  final Color color;
+
+  @override
+  _RenderColoredBox createRenderObject(BuildContext context) {
+    return _RenderColoredBox(color: color);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
+    renderObject.color = color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  _RenderColoredBox({@required Color color})
+    : _color = color,
+      super(behavior: HitTestBehavior.opaque);
+
+  /// The fill color for this render object.
+  ///
+  /// This parameter must not be null.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (value == _color) {
+      return;
+    }
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (size > Size.zero) {
+      context.canvas.drawRect(offset & size, Paint()..color = color);
+    }
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
 }

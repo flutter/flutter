@@ -159,6 +159,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     size = constraints.biggest;
 
     if (child == null) {
@@ -260,26 +261,24 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-        ..color = color
-        ..strokeWidth = 2.0;
-    canvas.drawCircle(
-      const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
-      _kSelectionHandleRadius,
-      paint,
+    const double halfStrokeWidth = 1.0;
+    final Paint paint = Paint()..color = color;
+    final Rect circle = Rect.fromCircle(
+      center: const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
+      radius: _kSelectionHandleRadius,
     );
-    // Draw line so it slightly overlaps the circle.
-    canvas.drawLine(
+    final Rect line = Rect.fromPoints(
       const Offset(
-        _kSelectionHandleRadius,
+        _kSelectionHandleRadius - halfStrokeWidth,
         2 * _kSelectionHandleRadius - _kSelectionHandleOverlap,
       ),
-      Offset(
-        _kSelectionHandleRadius,
-        size.height,
-      ),
-      paint,
+      Offset(_kSelectionHandleRadius + halfStrokeWidth, size.height),
     );
+    final Path path = Path()
+      ..addOval(circle)
+    // Draw line so it slightly overlaps the circle.
+      ..addRect(line);
+    canvas.drawPath(path, paint);
   }
 
   @override

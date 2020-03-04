@@ -392,7 +392,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String bundleIdentifier = PlistParser.instance.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
@@ -428,7 +428,8 @@ class IOSSimulator extends Device {
     final BuildInfo debugBuildInfo = BuildInfo(BuildMode.debug, buildInfo.flavor,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+        treeShakeIcons: buildInfo.treeShakeIcons);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
@@ -460,6 +461,7 @@ class IOSSimulator extends Device {
       precompiledSnapshot: false,
       buildMode: buildInfo.mode,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
+      treeShakeIcons: false,
     );
   }
 
@@ -471,8 +473,15 @@ class IOSSimulator extends Device {
 
   String get logFilePath {
     return globals.platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
-        ? globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
-        : globals.fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+      ? globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
+      : globals.fs.path.join(
+          globals.fsUtils.homeDirPath,
+          'Library',
+          'Logs',
+          'CoreSimulator',
+          id,
+          'system.log',
+        );
   }
 
   @override

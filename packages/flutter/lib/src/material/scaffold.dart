@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when Scaffold.shouldSnackBarIgnoreFABRect parameter is removed.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +20,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'colors.dart';
+import 'curves.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -36,6 +42,7 @@ import 'theme_data.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
+const Curve _standardBottomSheetCurve = standardEasing;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -547,9 +554,19 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       }
-      final double snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
-        ? floatingActionButtonRect.top
-        : contentBottom;
+
+      double snackBarYOffsetBase;
+      if (Scaffold.shouldSnackBarIgnoreFABRect) {
+        if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
+          snackBarYOffsetBase = floatingActionButtonRect.top;
+        else
+          snackBarYOffsetBase = contentBottom;
+      } else {
+        snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
+          ? floatingActionButtonRect.top
+          : contentBottom;
+      }
+
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
@@ -803,7 +820,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -832,7 +849,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -862,7 +879,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -997,6 +1014,8 @@ class Scaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
     this.drawerEdgeDragWidth,
+    this.drawerEnableOpenDragGesture = true,
+    this.endDrawerEnableOpenDragGesture = true,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(extendBodyBehindAppBar != null),
@@ -1094,12 +1113,15 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   ///
-  /// To open the drawer programmatically, use the [ScaffoldState.openDrawer]
-  /// function.
+  /// To open the drawer, use the [ScaffoldState.openDrawer] function.
   ///
-  /// {@tool sample --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openDrawer] to open the drawer.
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.drawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openDrawer] to open the drawer and [Navigator.pop] to close
+  /// it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -1108,21 +1130,37 @@ class Scaffold extends StatefulWidget {
   ///   _scaffoldKey.currentState.openDrawer();
   /// }
   ///
+  /// void _closeDrawer() {
+  ///   Navigator.of(context).pop();
+  /// }
+  ///
   /// @override
   /// Widget build(BuildContext context) {
   ///   return Scaffold(
   ///     key: _scaffoldKey,
-  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     appBar: AppBar(title: const Text('Drawer Demo')),
   ///     body: Center(
   ///       child: RaisedButton(
   ///         onPressed: _openDrawer,
-  ///         child: Text('Open Drawer'),
+  ///         child: const Text('Open Drawer'),
   ///       ),
   ///     ),
   ///     drawer: Drawer(
-  ///       child: Center(child: Text('This is the Drawer')),
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the drawer with a swipe gesture.
+  ///     drawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
@@ -1135,18 +1173,25 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   ///
-  /// To open the drawer programmatically, use the [ScaffoldState.openEndDrawer]
-  /// function.
+  /// To open the drawer, use the [ScaffoldState.openEndDrawer] function.
   ///
-  /// {@tool sample --template=stateful_widget_material}
-  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer.
+  /// To close the drawer, use [Navigator.pop].
+  ///
+  /// {@tool dartpad --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the
+  /// [Scaffold.endDrawerEnableOpenDragGesture] to false. Then, use
+  /// [ScaffoldState.openEndDrawer] to open the drawer and [Navigator.pop] to
+  /// close it.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
   /// void _openEndDrawer() {
   ///   _scaffoldKey.currentState.openEndDrawer();
+  /// }
+  ///
+  /// void _closeEndDrawer() {
+  ///   Navigator.of(context).pop();
   /// }
   ///
   /// @override
@@ -1161,9 +1206,21 @@ class Scaffold extends StatefulWidget {
   ///       ),
   ///     ),
   ///     endDrawer: Drawer(
-  ///       child: Center(child: Text('This is the Drawer')),
+  ///       child: Center(
+  ///         child: Column(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             const Text('This is the Drawer'),
+  ///             RaisedButton(
+  ///               onPressed: _closeEndDrawer,
+  ///               child: const Text('Close Drawer'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
   ///     ),
-  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///     // Disable opening the end drawer with a swipe gesture.
+  ///     endDrawerEnableOpenDragGesture: false,
   ///   );
   /// }
   /// ```
@@ -1265,9 +1322,32 @@ class Scaffold extends StatefulWidget {
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
+  /// Determines if the [Scaffold.drawer] can be opened with a drag
+  /// gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool drawerEnableOpenDragGesture;
+
+  /// Determines if the [Scaffold.endDrawer] can be opened with a
+  /// drag gesture.
+  ///
+  /// By default, the drag gesture is enabled.
+  final bool endDrawerEnableOpenDragGesture;
+
+  /// This flag is deprecated and fixes and issue with incorrect clipping
+  /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
+  @Deprecated(
+    'This property controls whether to clip and position the snackbar as '
+    'if there is always a floating action button, even if one is not present. '
+    'It exists to provide backwards compatibility to ease migrations, and will '
+    'eventually be removed. '
+    'This feature was deprecated after v1.15.3.'
+  )
+  static bool shouldSnackBarIgnoreFABRect = false;
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// {@tool sample --template=freeform}
+  /// {@tool dartpad --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1320,7 +1400,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample --template=stateless_widget_material}
+  /// {@tool dartpad --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1875,9 +1955,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
-  /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
-  ///
-  /// {@tool sample --template=stateless_widget_scaffold}
+  /// {@tool dartpad --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
@@ -2173,6 +2251,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2197,6 +2276,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
           edgeDragWidth: widget.drawerEdgeDragWidth,
+          enableOpenDragGesture: widget.drawerEnableOpenDragGesture,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -2418,6 +2498,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         break;
     }
 
@@ -2485,6 +2567,63 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter setState;
 }
 
+// TODO(guidezpl): Look into making this public. A copy of this class is in bottom_sheet.dart, for now.
+/// A curve that progresses linearly until a specified [startingPoint], at which
+/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
+/// but will use [startingPoint] as the Y position.
+///
+/// For example, if [startingPoint] is set to `0.5`, and [curve] is set to
+/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
+/// straight line, and the top-right quarter will contain the entire contents of
+/// [Curves.easeOut].
+///
+/// This is useful in situations where a widget must track the user's finger
+/// (which requires a linear animation), and afterwards can be flung using a
+/// curve specified with the [curve] argument, after the finger is released. In
+/// such a case, the value of [startingPoint] would be the progress of the
+/// animation at the time when the finger was released.
+///
+/// The [startingPoint] and [curve] arguments must not be null.
+class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
+  /// Creates a suspended curve.
+  const _BottomSheetSuspendedCurve(
+      this.startingPoint, {
+        this.curve = Curves.easeOutCubic,
+      }) : assert(startingPoint != null),
+        assert(curve != null);
+
+  /// The progress value at which [curve] should begin.
+  ///
+  /// This defaults to [Curves.easeOutCubic].
+  final double startingPoint;
+
+  /// The curve to use when [startingPoint] is reached.
+  final Curve curve;
+
+  @override
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
+
+    if (t < startingPoint) {
+      return t;
+    }
+
+    if (t == 1.0) {
+      return t;
+    }
+
+    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
+    final double transformed = curve.transform(curveProgress);
+    return lerpDouble(startingPoint, 1, transformed);
+  }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}($startingPoint, $curve)';
+  }
+}
+
 class _StandardBottomSheet extends StatefulWidget {
   const _StandardBottomSheet({
     Key key,
@@ -2516,6 +2655,8 @@ class _StandardBottomSheet extends StatefulWidget {
 }
 
 class _StandardBottomSheetState extends State<_StandardBottomSheet> {
+  ParametricCurve<double> animationCurve = _standardBottomSheetCurve;
+
   @override
   void initState() {
     super.initState();
@@ -2538,6 +2679,19 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       widget.onClosing();
     }
     return null;
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    // Allow the bottom sheet to track the user's finger accurately.
+    animationCurve = Curves.linear;
+  }
+
+  void _handleDragEnd(DragEndDetails details, { bool isClosing }) {
+    // Allow the bottom sheet to animate smoothly from its current position.
+    animationCurve = _BottomSheetSuspendedCurve(
+      widget.animationController.value,
+      curve: _standardBottomSheetCurve,
+    );
   }
 
   void _handleStatusChange(AnimationStatus status) {
@@ -2585,7 +2739,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         builder: (BuildContext context, Widget child) {
           return Align(
             alignment: AlignmentDirectional.topStart,
-            heightFactor: widget.animationController.value,
+            heightFactor: animationCurve.transform(widget.animationController.value),
             child: child,
           );
         },
@@ -2593,6 +2747,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            onDragStart: _handleDragStart,
+            onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,

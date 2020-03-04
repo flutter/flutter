@@ -215,7 +215,7 @@ class TextTreeConfiguration {
     this.isBlankLineBetweenPropertiesAndChildren = true,
     this.beforeName = '',
     this.suffixLineOne = '',
-    this.manditoryFooter = '',
+    this.mandatoryFooter = '',
   }) : assert(prefixLineOne != null),
        assert(prefixOtherLines != null),
        assert(prefixLastChildLineOne != null),
@@ -363,7 +363,7 @@ class TextTreeConfiguration {
   final String footer;
 
   /// Footer to add even for root nodes.
-  final String manditoryFooter;
+  final String mandatoryFooter;
 
   /// Add a blank line between properties and children if both are present.
   final bool isBlankLineBetweenPropertiesAndChildren;
@@ -600,7 +600,7 @@ final TextTreeConfiguration errorTextConfiguration = TextTreeConfiguration(
   prefixOtherLinesRootNode: '',
   beforeName:               '══╡ ',
   suffixLineOne:            ' ╞══',
-  manditoryFooter:          '═════',
+  mandatoryFooter:          '═════',
   // No need to add a blank line as the footer makes the boundary of this
   // subtree unambiguous.
   addBlankLineIfNoChildren: false,
@@ -1341,9 +1341,9 @@ class TextTreeRenderer {
           if (childConfig.footer.isNotEmpty) {
             builder.prefixOtherLines = prefixChildrenRaw;
             builder.write('${childConfig.childLinkSpace}${childConfig.footer}');
-            if (childConfig.manditoryFooter.isNotEmpty) {
+            if (childConfig.mandatoryFooter.isNotEmpty) {
               builder.writeStretched(
-                childConfig.manditoryFooter,
+                childConfig.mandatoryFooter,
                 math.max(builder.wrapWidth, _wrapWidthProperties + childPrefixOtherLines.length),
               );
             }
@@ -1362,9 +1362,9 @@ class TextTreeRenderer {
           if (childConfig.footer.isNotEmpty) {
             builder.prefixOtherLines = prefixChildrenRaw;
             builder.write('${childConfig.linkCharacter}${childConfig.footer}');
-            if (childConfig.manditoryFooter.isNotEmpty) {
+            if (childConfig.mandatoryFooter.isNotEmpty) {
               builder.writeStretched(
-                childConfig.manditoryFooter,
+                childConfig.mandatoryFooter,
                 math.max(builder.wrapWidth, _wrapWidthProperties + childPrefixOtherLines.length),
               );
             }
@@ -1373,8 +1373,8 @@ class TextTreeRenderer {
         }
       }
     }
-    if (parentConfiguration == null && config.manditoryFooter.isNotEmpty) {
-      builder.writeStretched(config.manditoryFooter, builder.wrapWidth);
+    if (parentConfiguration == null && config.mandatoryFooter.isNotEmpty) {
+      builder.writeStretched(config.mandatoryFooter, builder.wrapWidth);
       builder.write(config.lineBreak);
     }
     return builder.build();
@@ -1819,7 +1819,7 @@ class StringProperty extends DiagnosticsProperty<String> {
       // Escape linebreaks in multiline strings to avoid confusing output when
       // the parent of this node is trying to display all properties on the same
       // line.
-      text = text.replaceAll('\n', '\\n');
+      text = text.replaceAll('\n', r'\n');
     }
 
     if (quoted && text != null) {
@@ -3087,7 +3087,7 @@ mixin DiagnosticableMixin {
   String toStringShort() => describeIdentity(this);
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     String fullString;
     assert(() {
       fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
@@ -3442,7 +3442,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
 /// This mixin is identical to class [DiagnosticableTree].
 mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
   }
 

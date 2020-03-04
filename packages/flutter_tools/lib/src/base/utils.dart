@@ -350,7 +350,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @re
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
+    final RegExp characterOrCode = RegExp('(\u001b\\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
     for (final Match match in characterOrCode.allMatches(input)) {

@@ -582,6 +582,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-skia', 'true'],
       if (debuggingOptions.traceSystrace)
         ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.endlessTraceBuffer)
+        ...<String>['--ez', 'endless-trace-buffer', 'true'],
       if (debuggingOptions.dumpSkpOnShaderCompilation)
         ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
       if (debuggingOptions.cacheSkSL)
@@ -1040,7 +1042,11 @@ class _AdbLogReader extends DeviceLogReader {
     ];
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
-    final int apiVersion = int.tryParse(await device._apiVersion);
+    final int apiVersion = (String v) {
+      // If the API version string isn't found, conservatively assume that the
+      // version is less recent than the one we're looking for.
+      return v == null ? kLollipopVersionCode - 1 : int.tryParse(v);
+    }(await device._apiVersion);
     if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
       args.addAll(<String>[
         '-T',

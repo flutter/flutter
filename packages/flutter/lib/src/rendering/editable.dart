@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextBox, lerpDouble;
+import 'dart:ui' as ui show TextBox, lerpDouble, BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -208,6 +208,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     bool paintCursorAboveText = false,
     Offset cursorOffset,
     double devicePixelRatio = 1.0,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     @required this.textSelectionDelegate,
@@ -219,7 +221,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(
@@ -237,6 +239,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        assert(readOnly != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
+       assert(selectionHeightStyle != null),
+       assert(selectionWidthStyle != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -262,6 +266,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _startHandleLayerLink = startHandleLayerLink,
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
@@ -431,17 +437,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     LogicalKeyboardKey.arrowDown,
   };
 
-  static final Set<LogicalKeyboardKey> _deleteKeys = <LogicalKeyboardKey>{
-    LogicalKeyboardKey.delete,
-    LogicalKeyboardKey.backspace,
-  };
-
   static final Set<LogicalKeyboardKey> _shortcutKeys = <LogicalKeyboardKey>{
     LogicalKeyboardKey.keyA,
     LogicalKeyboardKey.keyC,
     LogicalKeyboardKey.keyV,
     LogicalKeyboardKey.keyX,
-    ..._deleteKeys,
+    LogicalKeyboardKey.delete,
   };
 
   static final Set<LogicalKeyboardKey> _nonModifierKeys = <LogicalKeyboardKey>{
@@ -496,7 +497,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
       _handleShortcuts(key);
-    } else if (_deleteKeys.contains(key)) {
+    } else if (key == LogicalKeyboardKey.delete) {
       _handleDelete();
     }
   }
@@ -1093,6 +1094,32 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _floatingCursorOn = false;
   Offset _floatingCursorOffset;
   TextPosition _floatingCursorTextPosition;
+
+  /// Controls how tall the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxHeightStyle] for details on available styles.
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle;
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    assert(value != null);
+    if (_selectionHeightStyle == value)
+      return;
+    _selectionHeightStyle = value;
+    markNeedsPaint();
+  }
+
+  /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// See [ui.BoxWidthStyle] for details on available styles.
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle;
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    assert(value != null);
+    if (_selectionWidthStyle == value)
+      return;
+    _selectionWidthStyle = value;
+    markNeedsPaint();
+  }
 
   /// If false, [describeSemanticsConfiguration] will not set the
   /// configuration's cursor motion or set selection callbacks.
@@ -1705,12 +1732,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
     return null;
   }
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
@@ -1772,6 +1802,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           // Override the height to take the full height of the glyph at the TextPosition
           // when not on iOS. iOS has special handling that creates a taller caret.
           // TODO(garyq): See the TODO for _getCaretPrototype.
@@ -1941,7 +1973,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
 
     if (showSelection) {
-      _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
+      _selectionRects ??= _textPainter.getBoxesForSelection(_selection, boxHeightStyle: _selectionHeightStyle, boxWidthStyle: _selectionWidthStyle);
       _paintSelection(context.canvas, effectiveOffset);
     }
 

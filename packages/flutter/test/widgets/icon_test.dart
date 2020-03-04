@@ -166,7 +166,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Changing semantic label from null doesn\'t rebuild tree ', (WidgetTester tester) async {
+  testWidgets("Changing semantic label from null doesn't rebuild tree ", (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

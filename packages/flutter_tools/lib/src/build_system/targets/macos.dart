@@ -14,6 +14,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 
@@ -199,6 +200,8 @@ class CompileMacOSFramework extends Target {
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -207,6 +210,8 @@ class CompileMacOSFramework extends Target {
       platform: TargetPlatform.darwin_x64,
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
+      splitDebugInfo: splitDebugInfo,
+      dartObfuscation: dartObfuscation,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -243,6 +248,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -282,7 +288,15 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, assetDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
     // Copy Info.plist template.
     assetDirectory.parent.childFile('Info.plist')

@@ -533,14 +533,6 @@ abstract class Widget extends DiagnosticableTree {
   static int _debugConcreteSubtype(Widget widget) {
     return widget is StatefulWidget ? 1 :
            widget is StatelessWidget ? 2 :
-           widget is InheritedModel ? 3 :
-           widget is InheritedWidget ? 4 :
-           widget is ParentDataWidget ? 5 :
-           widget is ProxyWidget ? 6 :
-           widget is LeafRenderObjectWidget ? 7 :
-           widget is SingleChildRenderObjectWidget? 8 :
-           widget is MultiChildRenderObjectWidget ? 9 :
-           widget is RenderObjectWidget ? 10 :
            0;
     }
 }
@@ -1230,7 +1222,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
           ErrorSummary('setState() called in constructor: $this'),
           ErrorHint(
             'This happens when you call setState() on a State object for a widget that '
-            'hasn\'t been inserted into the widget tree yet. It is not necessary to call '
+            "hasn't been inserted into the widget tree yet. It is not necessary to call "
             'setState() in the constructor, since the state is already assumed to be dirty '
             'when it is initially created.'
           ),
@@ -1782,9 +1774,14 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   LeafRenderObjectElement createElement() => LeafRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single child slot. (This superclass only provides the storage
 /// for that child, it doesn't actually provide the updating logic.)
+///
+/// Typically, the render object assigned to this widget will make use of
+/// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
+/// exposes a [RenderObjectWithChildMixin.child] property that allows
+/// retrieving the render object belonging to the [child] widget.
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1799,10 +1796,20 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have a single list of children. (This superclass only provides the
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
+///
+/// This will return a [RenderObject] mixing in [ContainerRenderObjectMixin],
+/// which provides the necessary functionality to visit the children of the
+/// container render object (the render object belonging to the [children] widgets).
+/// Typically, this is a [RenderBox] with [RenderBoxContainerDefaultsMixin].
+///
+/// See also:
+///
+///  * [Stack], which uses [MultiChildRenderObjectWidget].
+///  * [RenderStack], for an example implementation of the associated render object.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   ///
@@ -2045,6 +2052,22 @@ abstract class BuildContext {
   /// managing the rendering pipeline for this context.
   BuildOwner get owner;
 
+  /// Whether the [widget] is currently updating the widget or render tree.
+  ///
+  /// For [StatefullWidget]s and [StatelessWidget]s this flag is true while
+  /// their respective build methods are executing.
+  /// [RenderObjectWidget]s set this to true while creating or configuring their
+  /// associated [RenderObject]s.
+  /// Other [Widget] types may set this to true for conceptually similar phases
+  /// of their lifecycle.
+  ///
+  /// When this is true, it is safe for [widget] to establish a dependency to an
+  /// [InheritedWidget] by calling [dependOnInheritedElement] or
+  /// [dependOnInheritedWidgetOfExactType].
+  ///
+  /// Accessing this flag in release mode is not valid.
+  bool get debugDoingBuild;
+
   /// The current [RenderObject] for the widget. If the widget is a
   /// [RenderObjectWidget], this is the render object that the widget created
   /// for itself. Otherwise, it is the render object of the first descendant
@@ -2183,6 +2206,8 @@ abstract class BuildContext {
 
   /// Obtains the element corresponding to the nearest widget of the given type [T],
   /// which must be the type of a concrete [InheritedWidget] subclass.
+  ///
+  /// Returns null if no such element is found.
   ///
   /// Calling this method is O(1) with a small constant factor.
   ///
@@ -2916,14 +2941,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   static int _debugConcreteSubtype(Element element) {
     return element is StatefulElement ? 1 :
            element is StatelessElement ? 2 :
-           element is InheritedModelElement ? 3 :
-           element is InheritedElement ? 4 :
-           element is ParentDataElement ? 5 :
-           element is ProxyElement ? 6 :
-           element is LeafRenderObjectElement ? 7 :
-           element is SingleChildRenderObjectElement ? 8 :
-           element is MultiChildRenderObjectElement ? 9 :
-           element is RenderObjectElement ? 10 :
            0;
   }
 
@@ -3103,7 +3120,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('visitChildElements() called during build.'),
         ErrorDescription(
-          'The BuildContext.visitChildElements() method can\'t be called during '
+          "The BuildContext.visitChildElements() method can't be called during "
           'build because the child list is still being updated at that point, '
           'so the children might not be constructed yet, or might be old children '
           'that are going to be replaced.'
@@ -3367,7 +3384,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(() {
         if (parent == this) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('A GlobalKey was used multiple times inside one widget\'s child list.'),
+            ErrorSummary("A GlobalKey was used multiple times inside one widget's child list."),
             DiagnosticsProperty<GlobalKey>('The offending GlobalKey was', key),
             parent.describeElement('The parent of the widgets with that key was'),
             element.describeElement('The first child to get instantiated with that key became'),
@@ -3762,15 +3779,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       if (_debugLifecycleState != _ElementLifecycle.active) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('Looking up a deactivated widget\'s ancestor is unsafe.'),
+          ErrorSummary("Looking up a deactivated widget's ancestor is unsafe."),
           ErrorDescription(
-            'At this point the state of the widget\'s element tree is no longer '
+            "At this point the state of the widget's element tree is no longer "
             'stable.'
           ),
           ErrorHint(
-            'To safely refer to a widget\'s ancestor in its dispose() method, '
+            "To safely refer to a widget's ancestor in its dispose() method, "
             'save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() '
-            'in the widget\'s didChangeDependencies() method.'
+            "in the widget's didChangeDependencies() method."
           ),
         ]);
       }
@@ -4447,6 +4464,10 @@ abstract class ComponentElement extends Element {
 
   Element _child;
 
+  bool _debugDoingBuild = false;
+  @override
+  bool get debugDoingBuild => _debugDoingBuild;
+
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
@@ -4474,9 +4495,18 @@ abstract class ComponentElement extends Element {
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
     try {
+      assert(() {
+        _debugDoingBuild = true;
+        return true;
+      }());
       built = build();
+      assert(() {
+        _debugDoingBuild = false;
+        return true;
+      }());
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
+      _debugDoingBuild = false;
       built = ErrorWidget.builder(
         _debugReportException(
           ErrorDescription('building $this'),
@@ -4586,13 +4616,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  Widget build() {
-    if (_didChangeDependencies) {
-      _state.didChangeDependencies();
-      _didChangeDependencies = false;
-    }
-    return state.build(this);
-  }
+  Widget build() => _state.build(this);
 
   /// The [State] instance associated with this location in the tree.
   ///
@@ -4640,6 +4664,15 @@ class StatefulElement extends ComponentElement {
       return true;
     }());
     super._firstBuild();
+  }
+
+  @override
+  void performRebuild() {
+    if (_didChangeDependencies) {
+      _state.didChangeDependencies();
+      _didChangeDependencies = false;
+    }
+    super.performRebuild();
   }
 
   @override
@@ -4729,7 +4762,7 @@ class StatefulElement extends ComponentElement {
           ErrorSummary('dependOnInheritedWidgetOfExactType<$targetType>() or dependOnInheritedElement() was called before ${_state.runtimeType}.initState() completed.'),
           ErrorDescription(
             'When an inherited widget changes, for example if the value of Theme.of() changes, '
-            'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
+            "its dependent widgets are rebuilt. If the dependent widget's reference to "
             'the inherited widget is in a constructor or an initState() method, '
             'then the rebuilt dependent widget will not reflect the changes in the '
             'inherited widget.',
@@ -5266,6 +5299,10 @@ abstract class RenderObjectElement extends Element {
   RenderObject get renderObject => _renderObject;
   RenderObject _renderObject;
 
+  bool _debugDoingBuild = false;
+  @override
+  bool get debugDoingBuild => _debugDoingBuild;
+
   RenderObjectElement _ancestorRenderObjectElement;
 
   RenderObjectElement _findAncestorRenderObjectElement() {
@@ -5322,7 +5359,15 @@ abstract class RenderObjectElement extends Element {
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     _renderObject = widget.createRenderObject(this);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     assert(() {
       _debugUpdateRenderObjectOwner();
       return true;
@@ -5340,7 +5385,15 @@ abstract class RenderObjectElement extends Element {
       _debugUpdateRenderObjectOwner();
       return true;
     }());
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     _dirty = false;
   }
 
@@ -5353,7 +5406,15 @@ abstract class RenderObjectElement extends Element {
 
   @override
   void performRebuild() {
+    assert(() {
+      _debugDoingBuild = true;
+      return true;
+    }());
     widget.updateRenderObject(this, renderObject);
+    assert(() {
+      _debugDoingBuild = false;
+      return true;
+    }());
     _dirty = false;
   }
 

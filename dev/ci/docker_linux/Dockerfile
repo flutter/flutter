@@ -90,15 +90,6 @@ ENV PATH="${ANDROID_TOOLS_ROOT}/tools/bin:${PATH}"
 RUN mkdir -p ~/.android
 RUN touch ~/.android/repositories.cfg
 
-# Setup gradle
-ENV GRADLE_ROOT="/opt/gradle"
-RUN mkdir -p "${GRADLE_ROOT}"
-ENV GRADLE_ARCHIVE="${GRADLE_ROOT}/gradle.zip"
-ENV GRADLE_URL="http://services.gradle.org/distributions/gradle-4.4-bin.zip"
-RUN wget --progress=dot:giga "$GRADLE_URL" -O "${GRADLE_ARCHIVE}"
-RUN unzip -q -d "${GRADLE_ROOT}" "${GRADLE_ARCHIVE}"
-ENV PATH="$GRADLE_ROOT/bin:$PATH"
-
 # Add npm to path.
 ENV PATH="/usr/bin:${PATH}"
 RUN dpkg-query -L nodejs
@@ -132,10 +123,11 @@ RUN gem install bundler -N
 COPY ci/docker_linux/Gemfile /Gemfile
 COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
-RUN bundle install --system
+RUN bundle config set system 'true' && \
+  bundle install --system
 
 # Install goldctl, for Golden testing
-# Last updated 1/8/19 (update to rebuild Dockerfile with latest goldctl)
+# Last updated 2020-02-04 (update to rebuild Dockerfile with latest goldctl)
 COPY bots/download_goldctl.sh /download_goldctl.sh
 ENV GOLDCTL '/depot_tools/goldctl'
 RUN /download_goldctl.sh

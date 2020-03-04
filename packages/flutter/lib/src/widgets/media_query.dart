@@ -124,7 +124,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      highContrast = false,
+      highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -187,7 +187,7 @@ class MediaQueryData {
   /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
-  /// Padding is derived from the values of viewInsets and viewPadding.
+  /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
   /// See also:
   ///
@@ -234,7 +234,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]

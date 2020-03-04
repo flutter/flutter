@@ -7,21 +7,29 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 
-class MockLogger extends Mock implements Logger {}
-
 void main() {
   Config config;
   MemoryFileSystem memoryFileSystem;
+  FakePlatform fakePlatform;
 
   setUp(() {
     memoryFileSystem = MemoryFileSystem();
-    final File file = memoryFileSystem.file('example');
-    config = Config(file: file, logger: MockLogger());
+    fakePlatform = FakePlatform(
+      operatingSystem: 'linux',
+      environment: <String, String>{
+        'HOME': '/',
+      },
+    );
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: BufferLogger.test(),
+      platform: fakePlatform,
+    );
   });
   testWithoutContext('Config get set value', () async {
     expect(config.getValue('foo'), null);
@@ -63,7 +71,12 @@ void main() {
     );
     final File file = memoryFileSystem.file('example')
       ..writeAsStringSync('{"hello":"bar');
-    config = Config(file: file, logger: bufferLogger);
+    config = Config(
+      'example',
+      fileSystem: memoryFileSystem,
+      logger: bufferLogger,
+      platform: fakePlatform,
+    );
 
     expect(file.existsSync(), false);
     expect(bufferLogger.errorText, contains('Failed to decode preferences'));

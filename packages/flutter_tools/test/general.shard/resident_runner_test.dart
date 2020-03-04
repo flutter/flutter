@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -235,10 +234,6 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
-  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
-    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
-  }));
-
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -377,6 +372,7 @@ void main() {
           commandHelp.r,
           commandHelp.R,
           commandHelp.h,
+          commandHelp.c,
           commandHelp.q,
           commandHelp.s,
           commandHelp.w,
@@ -390,7 +386,6 @@ void main() {
           commandHelp.z,
           commandHelp.P,
           commandHelp.a,
-          commandHelp.s,
           'An Observatory debugger and profiler on null is available at: null',
           ''
         ].join('\n')
@@ -423,6 +418,15 @@ void main() {
     expect(testLogger.errorText, contains('Error'));
   }));
 
+  test('ResidentTunner clears the screen when it should', () => testbed.run(() async {
+    const String message = 'This should be cleared';
+    expect(testLogger.statusText, equals(''));
+    testLogger.printStatus(message);
+    expect(testLogger.statusText, equals(message + '\n'));  // printStatus makes a newline
+    residentRunner.clearScreen();
+    expect(testLogger.statusText, equals(''));
+  }));
+
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(true)).thenThrow(Exception());
@@ -441,7 +445,7 @@ void main() {
     expect(testLogger.errorText, contains('Error'));
   }));
 
-  test('ResidentRunner can\'t take screenshot on device without support', () => testbed.run(() {
+  test("ResidentRunner can't take screenshot on device without support", () => testbed.run(() {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
@@ -684,6 +688,9 @@ void main() {
       trackWidgetCreation: true,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.librariesSpec,
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
+        .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
@@ -692,8 +699,6 @@ void main() {
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
         .absolute.uri.toString(),
     );
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
   test('connect sets up log reader', () => testbed.run(() async {

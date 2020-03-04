@@ -3,157 +3,121 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/linux/linux_doctor.dart';
-import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 void main() {
-  group(LinuxDoctorValidator, () {
-    ProcessManager processManager;
-    LinuxDoctorValidator linuxDoctorValidator;
+  testWithoutContext('Full validation when clang++ and Make are available',() async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['clang++', '--version'],
+        stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
+      ),
+      const FakeCommand(
+        command: <String>['make', '--version'],
+        stdout: 'GNU Make 4.1\njunk',
+      ),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
 
-    setUp(() {
-      processManager = MockProcessManager();
-      linuxDoctorValidator = LinuxDoctorValidator();
-    });
+    expect(result.type, ValidationType.installed);
+    expect(result.messages, <ValidationMessage>[
+      ValidationMessage('clang++ 4.0.1'),
+      ValidationMessage('GNU Make 4.1'),
+    ]);
+  });
 
-    testUsingContext('Returns full validation when clang++ and make are availibe', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(globals.processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
+  testWithoutContext('Partial validation when clang++ version is too old', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['clang++', '--version'],
+        stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
+      ),
+      const FakeCommand(
+        command: <String>['make', '--version'],
+        stdout: 'GNU Make 4.1\njunk',
+      ),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.installed);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
+    expect(result.type, ValidationType.partial);
+    expect(result.messages, <ValidationMessage>[
+      ValidationMessage.error('clang++ 2.0.1 is below minimum version of 3.4.0'),
+      ValidationMessage('GNU Make 4.1'),
+    ]);
+  });
 
-    testUsingContext('Returns partial validation when clang++ version is too old', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(globals.processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
+  testWithoutContext('Missing validation when Make is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['clang++', '--version'],
+        stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
+      ),
+      const FakeCommand(
+        command: <String>['make', '--version'],
+        exitCode: 1,
+      ),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.partial);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ 2.0.1 is below minimum version of 3.4.0'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      ValidationMessage('clang++ 4.0.1'),
+      ValidationMessage.error('make is not installed'),
+    ]);
+  });
 
-    testUsingContext('Returns mising validation when make is not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
-          exitCode: 0,
-        );
-      });
-      when(globals.processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
+  testWithoutContext('Missing validation when clang++ is not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['clang++', '--version'],
+        exitCode: 1
+      ),
+      const FakeCommand(
+        command: <String>['make', '--version'],
+        stdout: 'GNU Make 4.1\njunk'
+      ),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+    );
+    final ValidationResult result = await linuxDoctorValidator.validate();
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage.error('make is not installed'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
+    expect(result.type, ValidationType.missing);
+    expect(result.messages, <ValidationMessage>[
+      ValidationMessage.error('clang++ is not installed'),
+      ValidationMessage('GNU Make 4.1'),
+    ]);
+  });
 
-    testUsingContext('Returns mising validation when clang++ is not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-      when(globals.processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: 'GNU Make 4.1\njunk',
-          exitCode: 0,
-        );
-      });
+  testWithoutContext('Missing validation when clang++ and Make are not available', () async {
+    final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['clang++', '--version'],
+        exitCode: 1,
+      ),
+      const FakeCommand(
+        command: <String>['make', '--version'],
+        exitCode: 1,
+      ),
+    ]);
+    final DoctorValidator linuxDoctorValidator = LinuxDoctorValidator(
+      processManager: processManager,
+    );
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ is not installed'),
-        ValidationMessage('GNU Make 4.1'),
-      ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-
-    testUsingContext('Returns missing validation when clang and make are not availible', () async {
-      when(globals.processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-      when(globals.processManager.run(<String>[
-        'make',
-        '--version',
-      ])).thenAnswer((_) async {
-        return FakeProcessResult(
-          stdout: '',
-          exitCode: 1,
-        );
-      });
-
-      final ValidationResult result = await linuxDoctorValidator.validate();
-      expect(result.type, ValidationType.missing);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
+    final ValidationResult result = await linuxDoctorValidator.validate();
+    expect(result.type, ValidationType.missing);
   });
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

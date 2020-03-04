@@ -126,7 +126,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
 
   @override
   void filter(List<StackFrame> stackFrames, List<String> reasons) {
-    for (int index = 0; index < stackFrames.length; index += 1) {
+    for (int index = 0; index < stackFrames.length - numFrames; index += 1) {
       if (_matchesFrames(stackFrames.skip(index).take(numFrames).toList())) {
         reasons.setRange(index, index + numFrames, _replacements);
         index += numFrames - 1;
@@ -135,6 +135,9 @@ class RepetitiveStackFrameFilter extends StackFilter {
   }
 
   bool _matchesFrames(List<StackFrame> stackFrames) {
+    if (stackFrames.length < numFrames) {
+      return false;
+    }
     for (int index = 0; index < stackFrames.length; index++) {
       if (!frames[index].matches(stackFrames[index])) {
         return false;
@@ -583,7 +586,7 @@ class FlutterErrorDetails extends Diagnosticable {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.error).toStringDeep(minLevel: minLevel);
   }
 
@@ -886,7 +889,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   String toStringShort() => 'FlutterError';
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     // Avoid wrapping lines.
     final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 4000000000);
     return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');

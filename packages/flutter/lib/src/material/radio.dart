@@ -29,7 +29,7 @@ const double _kInnerRadius = 4.5;
 /// will respond to [onChanged] by calling [State.setState] to update the
 /// radio button's [groupValue].
 ///
-/// {@tool sample --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.

@@ -138,7 +138,7 @@ class VMService {
         final bool pause = params.asMap['pause'] as bool ?? false;
 
         if (isolateId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
+          throw rpc.RpcException.invalidParams("Invalid 'isolateId': $isolateId");
         }
         try {
           await reloadSources(isolateId, force: force, pause: pause);
@@ -173,10 +173,10 @@ class VMService {
         final String classId = params['class'].value as String;
 
         if (libraryId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
+          throw rpc.RpcException.invalidParams("Invalid 'libraryId': $libraryId");
         }
         if (classId.isEmpty) {
-          throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
+          throw rpc.RpcException.invalidParams("Invalid 'classId': $classId");
         }
 
         globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
@@ -205,7 +205,7 @@ class VMService {
         final bool pause = params.asMap['pause'] as bool ?? false;
 
         if (pause is! bool) {
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+          throw rpc.RpcException.invalidParams("Invalid 'pause': $pause");
         }
 
         try {
@@ -226,7 +226,7 @@ class VMService {
     }
 
     _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
-      final FlutterVersion version = FlutterVersion();
+      final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;
@@ -243,12 +243,12 @@ class VMService {
         final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty) {
           throw rpc.RpcException.invalidParams(
-              'Invalid \'isolateId\': $isolateId');
+              "Invalid 'isolateId': $isolateId");
         }
         final String expression = params['expression'].asString;
         if (expression is! String || expression.isEmpty) {
           throw rpc.RpcException.invalidParams(
-              'Invalid \'expression\': $expression');
+              "Invalid 'expression': $expression");
         }
         final List<String> definitions =
             List<String>.from(params['definitions'].asList);
@@ -452,6 +452,8 @@ class VMService {
   Future<void> getVM() async => await vm.reload();
 
   Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
+
+  Future<void> close() async => await _peer.close();
 }
 
 /// An error that is thrown when constructing/updating a service object.

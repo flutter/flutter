@@ -327,7 +327,73 @@ void main() {
 
     expect(imageCache.containsKey(testImageProvider), true);
     expect(imageCache.currentSize, 1);
+    expect(testImageProvider.loadCallCount, 1);
     expect(stream.completer, null);
+  });
+
+  testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache', (WidgetTester tester) async {
+    final int oldSize = imageCache.maximumSize;
+    imageCache.maximumSize = 1;
+
+    final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
+    final ScrollController scrollController = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: SingleChildScrollView(
+        physics: ControllablePhysics(),
+        controller: scrollController,
+        child: TestWidget(key),
+      ),
+    ));
+
+    final DisposableBuildContext context = DisposableBuildContext(key.currentState);
+    const TestImage testImage = TestImage(width: 10, height: 10);
+    final TestImageProvider testImageProvider = TestImageProvider(testImage);
+    final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
+      context: context,
+      imageProvider: testImageProvider,
+    );
+
+    expect(testImageProvider.configuration, null);
+    expect(imageCache.containsKey(testImageProvider), false);
+
+    final ControllablePhysics physics = _findPhysics<ControllablePhysics>(tester);
+    physics.recommendDeferredLoadingValue = true;
+
+    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+
+    expect(testImageProvider.configuration, null);
+    expect(stream.completer, null);
+    expect(imageCache.currentSize, 0);
+
+    // Occupy the only slot in the cache with another image.
+    final TestImageProvider testImageProvider2 = TestImageProvider(const TestImage());
+    testImageProvider2.complete();
+    await precacheImage(testImageProvider2, context.context);
+    expect(imageCache.containsKey(testImageProvider), false);
+    expect(imageCache.containsKey(testImageProvider2), true);
+    expect(imageCache.currentSize, 1);
+
+    // Complete the original image while we're still scrolling fast.
+    testImageProvider.complete();
+    stream.setCompleter(testImageProvider.load(testImageProvider, PaintingBinding.instance.instantiateImageCodec));
+
+    // Verify that this hasn't chagned the cache state yet
+    expect(imageCache.containsKey(testImageProvider), false);
+    expect(imageCache.containsKey(testImageProvider2), true);
+    expect(imageCache.currentSize, 1);
+    expect(testImageProvider.loadCallCount, 1);
+
+    await tester.pump();
+
+    // After pumping a frame, the original image should be in the cache because
+    // it took the LRU slot.
+    expect(imageCache.containsKey(testImageProvider), true);
+    expect(imageCache.containsKey(testImageProvider2), false);
+    expect(imageCache.currentSize, 1);
+    expect(testImageProvider.loadCallCount, 1);
+
+    imageCache.maximumSize = oldSize;
   });
 }
 
