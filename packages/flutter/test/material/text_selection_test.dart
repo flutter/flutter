@@ -158,7 +158,7 @@ void main() {
       // Long press to show the menu.
       final Offset textOffset = textOffsetToPosition(tester, 1);
       await tester.longPressAt(textOffset);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The last button is missing, and a more button is shown.
       expect(find.text('CUT'), findsOneWidget);
@@ -186,6 +186,7 @@ void main() {
       expect(selectAllOffset.dy, lessThan(cutOffset.dy));
 
       // Tapping the back button shows the selection menu again.
+      expect(find.byType(IconButton), findsOneWidget);
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
       expect(find.text('CUT'), findsOneWidget);
