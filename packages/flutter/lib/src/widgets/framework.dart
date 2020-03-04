@@ -5812,10 +5812,10 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 ///
 /// See also:
 ///
-/// * [IndexedSlot], which are used as [Element.slot]s for the children of a
+/// * [IndexedSlot], which is used as [Element.slot]s for the children of a
 ///   [MultiChildRenderObjectElement].
 /// * [RenderObjectElement.updateChildren], which discusses why [IndexedSlot]
-///   are used for the slots of the children.
+///   is used for the slots of the children.
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
@@ -5934,7 +5934,8 @@ FlutterErrorDetails _debugReportException(
   return details;
 }
 
-/// Used by [MultiChildRenderObjectElement] for the [Element.slot] value.
+/// A value for [Element.slot] used for children of
+/// [MultiChildRenderObjectElement]s.
 ///
 /// A slot for a [MultiChildRenderObjectElement] consists of an [index]
 /// identifying where the child occupying this slot is located in the
