@@ -271,8 +271,7 @@ Future<void> _runToolTests() async {
         : '';
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard', suffix),
-        useBuildRunner: canUseBuildRunner,
+        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
       );
