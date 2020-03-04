@@ -292,12 +292,12 @@ void main() {
 
   "singleQuote": "Flutter's amazing!",
   "@singleQuote": {
-    "description": "Love Flutter!"
+    "description": "A message with a single quote."
   },
 
   "doubleQuote": "Flutter is \"amazing\"!",
   "@doubleQuote": {
-    "description": "Still love Flutter!"
+    "description": "A message with double quotes."
   }
 }
 ''';
