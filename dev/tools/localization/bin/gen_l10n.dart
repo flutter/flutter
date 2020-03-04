@@ -86,7 +86,7 @@ Future<void> main(List<String> arguments) async {
   final String templateArbFileName = results['template-arb-file'] as String;
   final String classNameString = results['output-class'] as String;
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
-  final String header = results['header'] as String;
+  final String headerString = results['header'] as String;
   final String headerFile = results['header-file'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
@@ -100,7 +100,7 @@ Future<void> main(List<String> arguments) async {
         outputFileString: outputFileString,
         classNameString: classNameString,
         preferredSupportedLocaleString: preferredSupportedLocaleString,
-        header: header,
+        header: headerString,
         headerFile: headerFile,
       )
       ..loadResources()

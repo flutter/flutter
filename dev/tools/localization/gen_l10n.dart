@@ -256,7 +256,6 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
-  String _header;
 
   /// The reference to the project's l10n directory.
   ///
@@ -317,6 +316,9 @@ class LocalizationsGenerator {
   /// [l10nDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
+  /// The header to be prepended to the generated Dart localization file.
+  String header = '';
+
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
@@ -330,7 +332,7 @@ class LocalizationsGenerator {
     String outputFileString,
     String classNameString,
     String preferredSupportedLocaleString,
-    String header,
+    String headerString,
     String headerFile,
   }) {
     setL10nDirectory(l10nDirectoryPath);
@@ -344,9 +346,9 @@ class LocalizationsGenerator {
       );
     } else {
       if (header != null) {
-        _header = header;
+        header = headerString;
       } else if (headerFile != null) {
-        _header = _setHeaderWithFile(headerFile);
+        header = _setHeaderWithFile(headerFile);
       }
     }
     className = classNameString;
@@ -538,6 +540,7 @@ class LocalizationsGenerator {
     final String lookupBody = generateLookupBody(_allBundles, className);
 
     return fileTemplate
+      .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')

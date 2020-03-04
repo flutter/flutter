@@ -233,6 +233,82 @@ void main() {
     });
   });
 
+  test('correctly adds a headerString when it is set', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a String should not fail: \n$e');
+    }
+
+    expect(generator.header, '/// Sample header');
+  });
+
+  test('correctly adds a headerFile when it is set', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName)
+      .writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory.childFile('header.txt')
+      .writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a file should not fail: \n$e');
+    }
+
+    expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('setting both a headerString and a headerFile should fail', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName)
+      .writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory.childFile('header.txt')
+      .writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header for localizations file.',
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Cannot accept both header and header file arguments'));
+      return;
+    }
+
+    fail('Setting both headerFile and headerString should fail');
+  });
+
   group('loadResources', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
