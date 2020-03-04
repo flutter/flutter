@@ -397,9 +397,9 @@ tasks:
 
   # iOS on-device tests
 
-  ios_obfuscate_test:
+  ios_content_validation_test:
     description: >
-      Builds an obfuscated APK and verifies a dart identifier cannot be found
+      Builds an obfuscated app and verifies contents and structure
     stage: devicelab
     flaky: true
     required_agent_capabilities: ["mac/ios"]
