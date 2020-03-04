@@ -603,6 +603,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.snapshot')
     .where((File file) => path.extension(file.path) != '.png')
     .where((File file) => path.extension(file.path) != '.jpg')
+    .where((File file) => path.extension(file.path) != '.ico')
     .where((File file) => path.extension(file.path) != '.jar')
     .toList();
   final List<String> problems = <String>[];
