@@ -5381,7 +5381,9 @@ abstract class RenderObjectElement extends Element {
   /// [IndexedSlot.index] is set to the index that the currently processed
   /// `child` corresponds to in the `newWidgets` list and [IndexedSlot.value] is
   /// set to the [Element] of the previous widget in that list (or null if it is
-  /// the first child). When the [slot] value of an [Element] changes, its
+  /// the first child).
+  ///
+  /// When the [slot] value of an [Element] changes, its
   /// associated [renderObject] needs to move to a new position in the child
   /// list of its parents. If that [RenderObject] organizes its children in a
   /// linked list (as is done by the [ContainerRenderObjectMixin]) this can
