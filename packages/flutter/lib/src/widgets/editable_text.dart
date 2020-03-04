@@ -2193,7 +2193,13 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
     }
 
     if (_hasOpposingDirection) {
+      _prevNonWhitespaceDirection = _baseDirection;
+
       final List<int> out = <int>[];
+
+      int selectionBase = newValue.selection.baseOffset;
+      int selectionExtent = newValue.selection.extentOffset;
+
       bool prevWasWhitespace = false;
       int prevNonWhitespaceCodepoint;
       for (final int codepoint in newValue.text.runes) {
@@ -2206,15 +2212,21 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
           if (prevWasWhitespace) {
+            selectionBase -= out.length <= selectionBase ? 1 : 0;
+            selectionExtent -= out.length <= selectionExtent ? 1 : 0;
             out.removeLast();
           }
           out.add(codepoint);
+          selectionBase += out.length < selectionBase ? 1 : 0;
+          selectionExtent += out.length < selectionExtent ? 1 : 0;
           out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
           prevWasWhitespace = true;
         } else if (isDirectionalityMarker(codepoint)) {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
           if (prevWasWhitespace) {
+            selectionBase -= out.length < selectionBase ? 1 : 0;
+            selectionExtent -= out.length < selectionExtent ? 1 : 0;
             out.removeLast();
           }
           out.add(codepoint);
@@ -2228,7 +2240,13 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
       final String formatted = String.fromCharCodes(out);
       return TextEditingValue(
         text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
+        selection: TextSelection(
+          baseOffset: selectionBase,
+          extentOffset: selectionExtent,
+          affinity: newValue.selection.affinity,
+          isDirectional: newValue.selection.isDirectional
+        ),
+        // selection: TextSelection.collapsed(offset: formatted.length),
       );
     }
     return newValue;
