@@ -33,7 +33,31 @@ Future<void> main() async {
     await driver.tap(backButton);
     await driver.waitUntilNoTransientCallbacks();
 
-    Health driverHealth = await driver.checkHealth();
+    final Health driverHealth = await driver.checkHealth();
+    expect(driverHealth.status, HealthStatus.ok);
+  });
+
+    test('Merge thread to create and remove platform views should not crash', () async {
+
+    final SerializableFinder platformViewButton =
+        find.byValueKey('platform_view_button');
+    await driver.waitFor(platformViewButton);
+    await driver.tap(platformViewButton);
+
+    await driver.waitUntilNoTransientCallbacks();
+
+    final SerializableFinder backButton = find.pageBack();
+    await driver.tap(backButton);
+    await driver.waitUntilNoTransientCallbacks();
+
+    final SerializableFinder no_action_button =
+        find.byValueKey('no_action_button');
+    await driver.waitFor(no_action_button);
+    await driver.tap(no_action_button);
+    // The animation of a `RaisedButton` should pump enough frames to un-merge the thread.
+    await driver.waitUntilNoTransientCallbacks();
+
+    final Health driverHealth = await driver.checkHealth();
     expect(driverHealth.status, HealthStatus.ok);
   });
 }

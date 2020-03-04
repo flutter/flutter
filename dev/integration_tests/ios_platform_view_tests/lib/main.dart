@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 ///
 /// On press the button, a page with platform view should be pushed into the scene.
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
 
   @override
@@ -36,25 +36,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: FlatButton(
-          key: const ValueKey('platform_view_button'),
-          child: Text('platform view'),
+      body: Column(children: <Widget>[
+        FlatButton(
+          key: const ValueKey<String>('platform_view_button'),
+          child: const Text('platform view'),
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute<PlatformViewPage>(builder: (context) => PlatformViewPage()),
+              MaterialPageRoute<PlatformViewPage>(
+                  builder: (BuildContext context) => PlatformViewPage()),
             );
           },
         ),
-      ),
+        RaisedButton(
+          key: const ValueKey<String>('no_action_button'),
+          child: const Text('An no action button'),
+          onPressed: () {},
+        ),
+      ]),
     );
   }
 }
@@ -67,7 +72,7 @@ class PlatformViewPage extends StatefulWidget {
 
 class _PlatformViewPageState extends State<PlatformViewPage> {
   int numberOfTaps = 0;
-  final Key button = ValueKey('plus_button');
+  final Key button = const ValueKey<String>('plus_button');
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +83,11 @@ class _PlatformViewPageState extends State<PlatformViewPage> {
       body: Column(
         children: <Widget>[
           Container(
-            child: UiKitView(viewType: 'platform_view'),
+            child: const UiKitView(viewType: 'platform_view'),
             width: 300,
             height: 300,
           ),
-          const Text('$numberOfTaps'),
+          Text('$numberOfTaps'),
           RaisedButton(
             key: button,
             child: const Text('button'),

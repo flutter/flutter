@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        child: UiKitView(viewType: 'platform_view'),
+        child: const UiKitView(viewType: 'platform_view'),
         width: 300,
         height: 300,
       ),
@@ -31,5 +31,29 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Container(),
     ));
+  });
+
+  testWidgets('un-merging thread after removing the platform view does not crash',
+      (WidgetTester tester) async {
+    // Pump a frame with platform view, threads are merged.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Container(
+        child: const UiKitView(viewType: 'platform_view'),
+        width: 300,
+        height: 300,
+      ),
+    ));
+
+    // Remove platform view, thread should still be merged at this moment as the lease hasn't expired.
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Container(),
+    ));
+
+    // Pump enough widgets to un-merge the threads.
+    for (int i = 0; i < 100; i++) {
+      await tester.pump();
+    }
   });
 }
