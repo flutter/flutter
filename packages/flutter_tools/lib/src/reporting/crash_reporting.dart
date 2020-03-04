@@ -126,9 +126,7 @@ class CrashReportSender {
       } else {
         globals.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
-    // Catch all exceptions to print the message that makes clear that the
-    // crash logger crashed.
-    } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
+    } catch (sendError, sendStackTrace) {
       if (sendError is SocketException || sendError is HttpException) {
         globals.printError('Failed to send crash report due to a network error: $sendError');
       } else {

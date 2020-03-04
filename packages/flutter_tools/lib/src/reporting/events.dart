@@ -195,7 +195,7 @@ class CommandResultEvent extends UsageEvent {
         label: parameter,
         value: maxRss,
       );
-    } on Exception catch (error) {
+    } catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
       globals.printTrace('Querying maxRss failed with error: $error');
     }

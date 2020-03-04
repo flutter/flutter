@@ -67,7 +67,7 @@ class IntelliJPlugins {
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);
-    } on Exception {
+    } catch (_) {
       return null;
     }
   }
