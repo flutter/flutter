@@ -1658,9 +1658,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _TrailingWhitespaceDirectionalityFormatter _whitespaceFormatter;
 
   void _formatAndSetValue(TextEditingValue value) {
-    if (_whitespaceFormatter == null) {
-      _whitespaceFormatter = _TrailingWhitespaceDirectionalityFormatter(textDirection: _textDirection);
-    }
+    _whitespaceFormatter ??= _TrailingWhitespaceDirectionalityFormatter(textDirection: _textDirection);
+
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
@@ -2177,8 +2176,8 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
   bool _hasOpposingDirection = false;
 
   // See [Unicode.RLM] and [Unicode.LRM].
-  static int _RLM = 0x200F;
-  static int _LRM = 0x200E;
+  static const int _rlm = 0x200F;
+  static const int _lrm = 0x200E;
 
   @override
   TextEditingValue formatEditUpdate(
@@ -2194,11 +2193,11 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
     }
 
     if (_hasOpposingDirection) {
-      List<int> out = List<int>();
+      final List<int> out = <int>[];
       bool prevWasWhitespace = false;
       int prevNonWhitespaceCodepoint;
-      for (int r in newValue.text.runes) {
-        if (isWhitespace(r)) {
+      for (final int codepoint in newValue.text.runes) {
+        if (isWhitespace(codepoint)) {
           // Only compute the directionality of the non-whitespace
           // when the value is needed.
           if (!prevWasWhitespace && prevNonWhitespaceCodepoint != null) {
@@ -2209,24 +2208,24 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
           if (prevWasWhitespace) {
             out.removeLast();
           }
-          out.add(r);
-          out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _RLM : _LRM);
+          out.add(codepoint);
+          out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
           prevWasWhitespace = true;
-        } else if (isDirectionalityMarker(r)) {
+        } else if (isDirectionalityMarker(codepoint)) {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
           if (prevWasWhitespace) {
             out.removeLast();
           }
-          out.add(r);
+          out.add(codepoint);
         } else {
           // Normal character, track its codepoint add it to the string.
-          prevNonWhitespaceCodepoint = r;
+          prevNonWhitespaceCodepoint = codepoint;
           prevWasWhitespace = false;
-          out.add(r);
+          out.add(codepoint);
         }
       }
-      String formatted = String.fromCharCodes(out);
+      final String formatted = String.fromCharCodes(out);
       return TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
@@ -2240,7 +2239,7 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
   }
 
   bool isDirectionalityMarker(int value) {
-    return value == _RLM || value == _LRM;
+    return value == _rlm || value == _lrm;
   }
 
   bool isRtl(int value) {
