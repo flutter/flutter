@@ -292,14 +292,17 @@ EmbedFlutterFrameworks() {
   # if it doesn't already exist).
   local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
-  # Remove it first since Xcode might be trying to hold some of these files - this way we're
-  # sure to get a clean copy.
-  RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
-  RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
+
+  # Copy Xcode behavior and don't copy over headers or modules.
+  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
+  if [[ "$ACTION" != "install" ]]; then
+    # Strip bitcode from the destination unless archiving.
+    RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${flutter_ios_engine_folder}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  fi
 
   # Sign the binaries we moved.
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
