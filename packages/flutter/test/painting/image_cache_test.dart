@@ -436,6 +436,13 @@ void main() {
     });
 
     test('Live image gets size updated', () async {
+      // Add an image to the cache in pending state
+      // Complete it once it is in there as live
+      // Evict it but leave the live one.
+      // Add it again.
+      // If the live image did not track the size properly, the last line of
+      // this test will fail.
+
       const TestImage testImage = TestImage(width: 8, height: 8);
       const int testImageSize = 8 * 8 * 4;
 
