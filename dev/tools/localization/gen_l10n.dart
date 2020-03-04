@@ -155,7 +155,7 @@ String generatePluralMethod(Message message) {
 
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
-    String messageValue = bundle.translationFor(message);
+    String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
@@ -163,12 +163,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
       }
     }
-
-    // Escape single and double quotes.
-    messageValue = messageValue.replaceAll("'", '\\\'');
-    messageValue = messageValue.replaceAll('"', '\\\"');
-
-    return "'$messageValue'";
+    return messageValue;
   }
 
   if (message.isPlural) {

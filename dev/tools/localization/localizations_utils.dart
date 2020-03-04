@@ -386,15 +386,14 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// Strings with newlines are not supported.
 String generateString(String value) {
   assert(!value.contains('\n'));
-  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
   if (!value.contains("'"))
-    return "$rawPrefix'$value'";
+    return "'$value'";
   if (!value.contains('"'))
-    return '$rawPrefix"$value"';
+    return '"$value"';
   if (!value.contains("'''"))
-    return "$rawPrefix'''$value'''";
+    return "'''$value'''";
   if (!value.contains('"""'))
-    return '$rawPrefix"""$value"""';
+    return '"""$value"""';
 
   return value.split("'''")
     .map(generateString)
