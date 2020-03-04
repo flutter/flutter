@@ -7,8 +7,8 @@
 
 namespace txt {
 
-std::string GetDefaultFontFamily() {
-  return "Arial";
+std::vector<std::string> GetDefaultFontFamilies() {
+  return {"Segoe UI", "Arial"};
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager() {

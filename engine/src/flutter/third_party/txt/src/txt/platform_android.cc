@@ -6,8 +6,8 @@
 
 namespace txt {
 
-std::string GetDefaultFontFamily() {
-  return "sans-serif";
+std::vector<std::string> GetDefaultFontFamilies() {
+  return {"sans-serif"};
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager() {

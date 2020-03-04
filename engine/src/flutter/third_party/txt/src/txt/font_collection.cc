@@ -150,11 +150,14 @@ FontCollection::GetMinikinFontCollectionForFamilies(
   }
   // Search for default font family if no user font families were found.
   if (minikin_families.empty()) {
-    const auto default_font_family = GetDefaultFontFamily();
-    std::shared_ptr<minikin::FontFamily> minikin_family =
-        FindFontFamilyInManagers(default_font_family);
-    if (minikin_family != nullptr) {
-      minikin_families.push_back(minikin_family);
+    const auto default_font_families = GetDefaultFontFamilies();
+    for (auto family : default_font_families) {
+      std::shared_ptr<minikin::FontFamily> minikin_family =
+          FindFontFamilyInManagers(family);
+      if (minikin_family != nullptr) {
+        minikin_families.push_back(minikin_family);
+        break;
+      }
     }
   }
   // Default font family also not found. We fail to get a FontCollection.
@@ -319,7 +322,7 @@ FontCollection::CreateSktFontCollection() {
     skt_collection_ = sk_make_sp<skia::textlayout::FontCollection>();
 
     skt_collection_->setDefaultFontManager(default_font_manager_,
-                                           GetDefaultFontFamily().c_str());
+                                           GetDefaultFontFamilies()[0].c_str());
     skt_collection_->setAssetFontManager(asset_font_manager_);
     skt_collection_->setDynamicFontManager(dynamic_font_manager_);
     skt_collection_->setTestFontManager(test_font_manager_);
