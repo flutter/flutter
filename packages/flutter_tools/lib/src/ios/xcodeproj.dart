@@ -209,20 +209,9 @@ List<String> _xcodeBuildSettingsLines({
 
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = globals.fs.path.basename(localEngineArtifacts.engineOutPath);
-    String engineBuildMode = 'release';
-    if (engineOutPath.toLowerCase().contains('debug')) {
-      engineBuildMode = 'debug';
-    } else if (engineOutPath.toLowerCase().contains('profile')) {
-      engineBuildMode = 'profile';
-    }
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=$engineOutPath');
-    // Only write this or local engines, where it is supposed to be sticky to
-    // match the engine configuration. Avoid writing it otherwise so that it
-    // does not stick the user with the wrong build mode, particularly for
-    // existing app use cases.
-    xcodeBuildSettings.add('FLUTTER_BUILD_MODE=$engineBuildMode');
+    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
