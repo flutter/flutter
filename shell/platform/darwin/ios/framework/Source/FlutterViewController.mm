@@ -23,6 +23,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
+static constexpr CGFloat kScrollViewContentSize = 2.0;
+
 NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
 
 NSNotificationName const FlutterViewControllerWillDealloc = @"FlutterViewControllerWillDealloc";
@@ -86,7 +89,7 @@ NSNotificationName const FlutterViewControllerWillDealloc = @"FlutterViewControl
 // This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
-@interface FlutterViewController () <FlutterBinaryMessenger>
+@interface FlutterViewController () <FlutterBinaryMessenger, UIScrollViewDelegate>
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @end
 
@@ -123,6 +126,11 @@ typedef enum UIAccessibilityContrast : NSInteger {
   // Coalescer that filters out superfluous keyboard notifications when the app
   // is being foregrounded.
   fml::scoped_nsobject<FlutterCoalescer> _updateViewportMetrics;
+  // This scroll view is a workaround to accomodate iOS 13 and higher.  There isn't a way to get
+  // touches on the status bar to trigger scrolling to the top of a scroll view.  We place a
+  // UIScrollView with height zero and a content offset so we can get those events. See also:
+  // https://github.com/flutter/flutter/issues/35050
+  fml::scoped_nsobject<UIScrollView> _scrollView;
 }
 
 @synthesize displayingFlutterUI = _displayingFlutterUI;
@@ -329,6 +337,40 @@ typedef enum UIAccessibilityContrast : NSInteger {
   self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
   [self installSplashScreenViewIfNecessary];
+  UIScrollView* scrollView = [[UIScrollView alloc] init];
+  scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+  // The color shouldn't matter since it is offscreen.
+  scrollView.backgroundColor = UIColor.whiteColor;
+  scrollView.delegate = self;
+  // This is an arbitrary small size.
+  scrollView.contentSize = CGSizeMake(kScrollViewContentSize, kScrollViewContentSize);
+  // This is an arbitrary offset that is not CGPointZero.
+  scrollView.contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
+  [self.view addSubview:scrollView];
+  _scrollView.reset(scrollView);
+}
+
+static void sendFakeTouchEvent(FlutterEngine* engine,
+                               CGPoint location,
+                               flutter::PointerData::Change change) {
+  const CGFloat scale = [UIScreen mainScreen].scale;
+  flutter::PointerData pointer_data;
+  pointer_data.Clear();
+  pointer_data.physical_x = location.x * scale;
+  pointer_data.physical_y = location.y * scale;
+  pointer_data.kind = flutter::PointerData::DeviceKind::kTouch;
+  pointer_data.time_stamp = [[NSDate date] timeIntervalSince1970] * kMicrosecondsPerSecond;
+  auto packet = std::make_unique<flutter::PointerDataPacket>(/*count=*/1);
+  pointer_data.change = change;
+  packet->SetPointerData(0, pointer_data);
+  [engine dispatchPointerDataPacket:std::move(packet)];
+}
+
+- (BOOL)scrollViewShouldScrollToTop:(UIScrollView*)scrollView {
+  CGPoint statusBarPoint = CGPointZero;
+  sendFakeTouchEvent(_engine.get(), statusBarPoint, flutter::PointerData::Change::kDown);
+  sendFakeTouchEvent(_engine.get(), statusBarPoint, flutter::PointerData::Change::kUp);
+  return NO;
 }
 
 #pragma mark - Managing launch views
@@ -569,7 +611,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
       flutter::PointerData pointer_data;
       pointer_data.Clear();
 
-      constexpr int kMicrosecondsPerSecond = 1000 * 1000;
       // Use current time.
       pointer_data.time_stamp = [[NSDate date] timeIntervalSince1970] * kMicrosecondsPerSecond;
 
@@ -834,6 +875,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 - (void)viewDidLayoutSubviews {
   CGSize viewSize = self.view.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
+
+  // Purposefully place this not visible.
+  _scrollView.get().frame = CGRectMake(0.0, 0.0, viewSize.width, 0.0);
+  _scrollView.get().contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
 
   // First time since creation that the dimensions of its view is known.
   bool firstViewBoundsUpdate = !_viewportMetrics.physical_width;
@@ -1143,42 +1188,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     }
   } else {
     return @"normal";
-  }
-}
-
-#pragma mark - Status Bar touch event handling
-
-// Standard iOS status bar height in points.
-constexpr CGFloat kStandardStatusBarHeight = 20.0;
-
-- (void)handleStatusBarTouches:(UIEvent*)event {
-  CGFloat standardStatusBarHeight = kStandardStatusBarHeight;
-  if (@available(iOS 11, *)) {
-    standardStatusBarHeight = self.view.safeAreaInsets.top;
-  }
-
-  // If the status bar is double-height, don't handle status bar taps. iOS
-  // should open the app associated with the status bar.
-  CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
-  if (statusBarFrame.size.height != standardStatusBarHeight) {
-    return;
-  }
-
-  // If we detect a touch in the status bar, synthesize a fake touch begin/end.
-  for (UITouch* touch in event.allTouches) {
-    if (touch.phase == UITouchPhaseBegan && touch.tapCount > 0) {
-      CGPoint windowLoc = [touch locationInView:nil];
-      CGPoint screenLoc = [touch.window convertPoint:windowLoc toWindow:nil];
-      if (CGRectContainsPoint(statusBarFrame, screenLoc)) {
-        NSSet* statusbarTouches = [NSSet setWithObject:touch];
-
-        flutter::PointerData::Change change = flutter::PointerData::Change::kDown;
-        [self dispatchTouches:statusbarTouches pointerDataChangeOverride:&change];
-        change = flutter::PointerData::Change::kUp;
-        [self dispatchTouches:statusbarTouches pointerDataChangeOverride:&change];
-        return;
-      }
-    }
   }
 }
 
