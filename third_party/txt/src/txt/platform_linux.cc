@@ -12,8 +12,8 @@
 
 namespace txt {
 
-std::string GetDefaultFontFamily() {
-  return "Arial";
+std::vector<std::string> GetDefaultFontFamilies() {
+  return {"Ubuntu", "Cantarell", "DejaVu Sans", "Liberation Sans", "Arial"};
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager() {

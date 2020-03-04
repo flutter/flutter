@@ -6,8 +6,8 @@
 
 namespace txt {
 
-std::string GetDefaultFontFamily() {
-  return "Roboto";
+std::vector<std::string> GetDefaultFontFamilies() {
+  return {"Roboto"};
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager() {
