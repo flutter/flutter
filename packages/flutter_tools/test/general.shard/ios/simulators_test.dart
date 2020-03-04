@@ -8,7 +8,6 @@ import 'dart:io' show ProcessResult, Process;
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';

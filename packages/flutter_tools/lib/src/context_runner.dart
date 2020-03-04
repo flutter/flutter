@@ -174,7 +174,10 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(),
+      SimControl: () => SimControl(
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
