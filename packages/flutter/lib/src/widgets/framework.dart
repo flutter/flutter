@@ -5389,7 +5389,7 @@ abstract class RenderObjectElement extends Element {
   /// linked list (as is done by the [ContainerRenderObjectMixin]) this can
   /// be implemented by re-inserting the child [RenderObject] into the
   /// list after the [RenderObject] associated with the [Element] provided as
-  /// [IndexedSlot.value] in the [slot] value.
+  /// [IndexedSlot.value] in the [slot] object.
   ///
   /// Simply using the previous sibling as a [slot] is not enough, though, because
   /// child [RenderObject]s are only moved around when the [slot] of their
@@ -5403,7 +5403,7 @@ abstract class RenderObjectElement extends Element {
   /// be assigned to its [RenderObjectElement] whenever its index in its
   /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
   /// exactly that and also ensures that the underlying parent [RenderObject]
-  /// knows where a child needs to move to in a linked list by providing its
+  /// knows where a child needs to move to in a linked list by providing its new
   /// previous sibling.
   @protected
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> forgottenChildren }) {
