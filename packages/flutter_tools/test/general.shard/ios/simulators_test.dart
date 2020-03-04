@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
@@ -33,6 +34,7 @@ import '../../src/mocks.dart';
 
 class MockFile extends Mock implements File {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
+class MockLogger extends Mock implements Logger {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
@@ -230,11 +232,13 @@ void main() {
 
   group('Simulator screenshot', () {
     MockXcode mockXcode;
+    MockLogger mockLogger;
     MockProcessManager mockProcessManager;
     IOSSimulator deviceUnderTest;
 
     setUp(() {
       mockXcode = MockXcode();
+      mockLogger = MockLogger();
       mockProcessManager = MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
@@ -281,7 +285,7 @@ void main() {
       overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         // Test a real one. Screenshot doesn't require instance states.
-        SimControl: () => SimControl(),
+        SimControl: () => SimControl(processManager: mockProcessManager, logger: mockLogger),
         Xcode: () => mockXcode,
       },
     );
@@ -430,18 +434,23 @@ void main() {
 }
     ''';
 
+    MockLogger mockLogger;
     MockProcessManager mockProcessManager;
     SimControl simControl;
     const String deviceId = 'smart-phone';
     const String appId = 'flutterApp';
 
     setUp(() {
+      mockLogger = MockLogger();
       mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(any)).thenAnswer((Invocation _) async {
         return ProcessResult(mockPid, 0, validSimControlOutput, '');
       });
 
-      simControl = SimControl();
+      simControl = SimControl(
+        logger: mockLogger,
+        processManager: mockProcessManager,
+      );
     });
 
     testUsingContext('getDevices succeeds', () async {
@@ -492,7 +501,19 @@ void main() {
       expect(await iosSimulatorA.sdkMajorVersion, 11);
     });
 
-    testUsingContext('.uninstall() handles exceptions', () async {
+    testWithoutContext('.install() handles exceptions', () async {
+      when(mockProcessManager.run(
+        <String>['/usr/bin/xcrun', 'simctl', 'install', deviceId, appId],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      expect(
+        () async => await simControl.install(deviceId, appId),
+        throwsToolExit(message: r'Unable to install'),
+      );
+    });
+
+    testWithoutContext('.uninstall() handles exceptions', () async {
       when(mockProcessManager.run(
         <String>['/usr/bin/xcrun', 'simctl', 'uninstall', deviceId, appId],
         environment: anyNamed('environment'),
@@ -500,10 +521,20 @@ void main() {
       )).thenThrow(const ProcessException('xcrun', <String>[]));
       expect(
         () async => await simControl.uninstall(deviceId, appId),
-        throwsToolExit(message: r'xcrun'),
+        throwsToolExit(message: r'Unable to uninstall'),
       );
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+    });
+
+    testWithoutContext('.launch() handles exceptions', () async {
+      when(mockProcessManager.run(
+        <String>['/usr/bin/xcrun', 'simctl', 'launch', deviceId, appId],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenThrow(const ProcessException('xcrun', <String>[]));
+      expect(
+        () async => await simControl.launch(deviceId, appId),
+        throwsToolExit(message: r'Unable to launch'),
+      );
     });
   });
 

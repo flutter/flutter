@@ -6,12 +6,14 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -59,6 +61,15 @@ class IOSSimulatorUtils {
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
+  SimControl({
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _logger = logger,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+  final Logger _logger;
+  final ProcessUtils _processUtils;
+
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context.get<SimControl>();
 
@@ -83,10 +94,10 @@ class SimControl {
     //   "pairs": { ... },
 
     final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
-    globals.printTrace(command.join(' '));
-    final ProcessResult results = await globals.processManager.run(command);
+    _logger.printTrace(command.join(' '));
+    final RunResult results = await _processUtils.run(command);
     if (results.exitCode != 0) {
-      globals.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
+      _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
     }
     try {
@@ -94,13 +105,13 @@ class SimControl {
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }
-      globals.printError('simctl returned unexpected JSON response: ${results.stdout}');
+      _logger.printError('simctl returned unexpected JSON response: ${results.stdout}');
       return <String, dynamic>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
-      globals.printError('simctl returned non-JSON response: ${results.stdout}');
+      _logger.printError('simctl returned non-JSON response: ${results.stdout}');
       return <String, dynamic>{};
     }
   }
@@ -130,7 +141,7 @@ class SimControl {
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
-    return processUtils.exitsHappy(<String>[
+    return _processUtils.exitsHappy(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
@@ -142,7 +153,7 @@ class SimControl {
   Future<RunResult> install(String deviceId, String appPath) async {
     RunResult result;
     try {
-      result = await processUtils.run(
+      result = await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
         throwOnError: true,
       );
@@ -155,7 +166,7 @@ class SimControl {
   Future<RunResult> uninstall(String deviceId, String appId) async {
     RunResult result;
     try {
-      result = await processUtils.run(
+      result = await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
         throwOnError: true,
       );
@@ -165,10 +176,10 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
-    Future<RunResult> result;
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await _processUtils.run(
         <String>[
           _xcrunPath,
           'simctl',
@@ -187,7 +198,7 @@ class SimControl {
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
-      await processUtils.run(
+      await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
         throwOnError: true,
       );
@@ -555,6 +566,7 @@ class IOSSimulator extends Device {
 }
 
 /// Launches the device log reader process on the host.
+@visibleForTesting
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
