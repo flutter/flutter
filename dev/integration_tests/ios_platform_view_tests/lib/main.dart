@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(children: <Widget>[
         FlatButton(
           key: const ValueKey<String>('platform_view_button'),
-          child: const Text('platform view'),
+          child: const Text('show platform view'),
           onPressed: () {
             Navigator.push(
               context,
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         RaisedButton(
           key: const ValueKey<String>('no_action_button'),
-          child: const Text('An no action button'),
+          child: const Text('A no action button'),
           onPressed: () {},
         ),
       ]),
@@ -71,7 +71,6 @@ class PlatformViewPage extends StatefulWidget {
 }
 
 class _PlatformViewPageState extends State<PlatformViewPage> {
-  int numberOfTaps = 0;
   final Key button = const ValueKey<String>('plus_button');
 
   @override
@@ -87,13 +86,11 @@ class _PlatformViewPageState extends State<PlatformViewPage> {
             width: 300,
             height: 300,
           ),
-          Text('$numberOfTaps'),
           RaisedButton(
             key: button,
             child: const Text('button'),
             onPressed: () {
               setState(() {
-                ++numberOfTaps;
               });
             },
           )

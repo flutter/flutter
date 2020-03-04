@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:e2e/e2e.dart';
 
+// TODO(cyanglaz): e2e test is not current running on flutter/flutter.
+// Move the e2e test to engine repo once https://github.com/flutter/flutter/issues/51892 is resolved.
 void main() {
   E2EWidgetsFlutterBinding.ensureInitialized();
 
