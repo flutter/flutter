@@ -602,6 +602,10 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  bool _isUnicodeDirectionality(int value) {
+    return value == 0x200F || value == 0x200E;
+  }
+
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
   int getOffsetAfter(int offset) {
@@ -636,7 +640,7 @@ class TextPainter {
       return null;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(prevCodeUnit) || _text.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
@@ -687,7 +691,7 @@ class TextPainter {
     if (nextCodeUnit == null)
       return null;
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16;
+    final bool needsSearch = _isUtf16Surrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {

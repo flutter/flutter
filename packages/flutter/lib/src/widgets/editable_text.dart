@@ -1153,7 +1153,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    _whitespaceFormatter = _TrailingWhitespaceDirectionalityFormatter(_textDirection);
   }
 
   @override
@@ -1659,6 +1658,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _TrailingWhitespaceDirectionalityFormatter _whitespaceFormatter;
 
   void _formatAndSetValue(TextEditingValue value) {
+    if (_whitespaceFormatter == null) {
+      _whitespaceFormatter = _TrailingWhitespaceDirectionalityFormatter(textDirection: _textDirection);
+    }
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
@@ -2149,48 +2151,79 @@ class _Editable extends LeafRenderObjectWidget {
   }
 }
 
+// This formatter inserts [Unicode.RLM] and [Unicode.LRM] into the
+// string in order to preserve expected caret behavior when trailing
+// whitespace is inserted.
+//
+// When typing in a direction that opposes the underlying direction
+// of the paragraph, trailing whitespace gets the directionality
+// of the paragraph. This is often at odds with what is immeditely
+// being typed. This formatter makes use of the RLM and LRM to cause
+// the text shaper to inherently treat the whitespace as being
+// surrounded by the directionality of the previous non-whitespace
+// codepoint.
 class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
-  _TrailingWhitespaceDirectionalityFormatter(this.underlyingDirection) : lastNonWhitespaceDirection = underlyingDirection;
+  // The [textDirection] should be the base directionality of the paragraph/editable.
+  _TrailingWhitespaceDirectionalityFormatter({TextDirection textDirection})
+    : _baseDirection = textDirection,
+      _prevNonWhitespaceDirection = textDirection;
 
-  final RegExp ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
-  final RegExp rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
-  final RegExp whitespaceRegExp = RegExp(r'\s');
+  final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+  final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+  final RegExp _whitespaceRegExp = RegExp(r'\s');
 
-  final TextDirection underlyingDirection;
-  TextDirection lastNonWhitespaceDirection;
-  bool hasOpposingDirection = false;
+  final TextDirection _baseDirection;
+  TextDirection _prevNonWhitespaceDirection;
+  bool _hasOpposingDirection = false;
+
+  // See [Unicode.RLM] and [Unicode.LRM].
+  static int _RLM = 0x200F;
+  static int _LRM = 0x200E;
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // We skip formatting (which can be more expensive) if there are no cases of
-    // mixing directionality. Once we find a case, we will always perform the
-    // formatting.
-    if (!hasOpposingDirection) {
-      if (underlyingDirection == TextDirection.ltr) {
-        hasOpposingDirection = rtlRegExp.hasMatch(newValue.text);
-      } else {
-        hasOpposingDirection = ltrRegExp.hasMatch(newValue.text);
-      }
+    // Skip formatting (which can be more expensive) if there are no cases of
+    // mixing directionality. Once a case of mixed directionality is found,
+    // always perform the formatting.
+    if (!_hasOpposingDirection) {
+      _hasOpposingDirection = _baseDirection == TextDirection.ltr ?
+        _rtlRegExp.hasMatch(newValue.text) : _ltrRegExp.hasMatch(newValue.text);
     }
 
-    if (hasOpposingDirection) {
+    if (_hasOpposingDirection) {
       List<int> out = List<int>();
-      bool lastWasWhitespace = false;
-      int lastNonWhitespaceCodepoint;
+      bool prevWasWhitespace = false;
+      int prevNonWhitespaceCodepoint;
       for (int r in newValue.text.runes) {
-        out.add(r);
         if (isWhitespace(r)) {
-          if (!lastWasWhitespace && lastNonWhitespaceCodepoint != null) {
-              lastNonWhitespaceDirection = isRtl(lastNonWhitespaceCodepoint) ? TextDirection.rtl : TextDirection.ltr;
+          // Only compute the directionality of the non-whitespace
+          // when the value is needed.
+          if (!prevWasWhitespace && prevNonWhitespaceCodepoint != null) {
+            _prevNonWhitespaceDirection = isRtl(prevNonWhitespaceCodepoint) ? TextDirection.rtl : TextDirection.ltr;
           }
-          out.add(lastNonWhitespaceDirection == TextDirection.rtl ? 0x200F : 0x200E);
-          lastWasWhitespace = true;
+          // If we already added directionality for this run of whitespace,
+          // "shift" the marker added to the end of the whitespace run.
+          if (prevWasWhitespace) {
+            out.removeLast();
+          }
+          out.add(r);
+          out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _RLM : _LRM);
+          prevWasWhitespace = true;
+        } else if (isDirectionalityMarker(r)) {
+          // Handle pre-existing directionality markers. Use pre-existing marker
+          // instead of the one we add.
+          if (prevWasWhitespace) {
+            out.removeLast();
+          }
+          out.add(r);
         } else {
-          lastNonWhitespaceCodepoint = r;
-          lastWasWhitespace = false;
+          // Normal character, track its codepoint add it to the string.
+          prevNonWhitespaceCodepoint = r;
+          prevWasWhitespace = false;
+          out.add(r);
         }
       }
       String formatted = String.fromCharCodes(out);
@@ -2203,11 +2236,15 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
   }
 
   bool isWhitespace(int value) {
-    return whitespaceRegExp.hasMatch(String.fromCharCode(value));
+    return _whitespaceRegExp.hasMatch(String.fromCharCode(value));
+  }
+
+  bool isDirectionalityMarker(int value) {
+    return value == _RLM || value == _LRM;
   }
 
   bool isRtl(int value) {
-    // We use the LTR version as short-circuiting will be more efficient.
-    return !ltrRegExp.hasMatch(String.fromCharCode(value));
+    // Use the LTR version as short-circuiting will be more efficient.
+    return !_ltrRegExp.hasMatch(String.fromCharCode(value));
   }
 }
