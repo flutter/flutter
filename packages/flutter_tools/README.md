@@ -86,8 +86,7 @@ This is what we do in the continuous integration bots.
 
 ### Forcing snapshot regeneration
 
-To force the Flutter Tools snapshot to be regenerated, delete the following
-files:
+To force the Flutter Tools snapshot to be regenerated, run:
 ```shell
-$ rm ../../bin/cache/flutter_tools.stamp ../../bin/cache/flutter_tools.snapshot
+$ flutter build self
 ```

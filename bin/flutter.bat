@@ -15,6 +15,23 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
+REM Count the number of arguments
+SET arg_count=0
+FOR %%x in (%*) do SET /A arg_count+=1
+
+REM Check for build self command
+SET build_self=false
+IF "%1" == "build" (
+  IF "%2" == "self" (
+    IF "%arg_count%" == "2" (
+      SET build_self=true
+    ) else (
+      ECHO %~n0 %*: '%1 %2' does not support any additional parameters.
+      EXIT /B 1
+    )
+  )
+)
+
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
@@ -81,6 +98,7 @@ GOTO :after_subroutine
   SET /P dart_required_version=<"%engine_version_path%"
   SET /P dart_installed_version=<"%engine_stamp%"
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
+  IF "%build_self%" == "true" GOTO do_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /P stamp_value=<"%stamp_path%"
@@ -176,7 +194,8 @@ REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
 REM Windows to re-read the line from disk after the CALL command has finished
 REM regardless of the ampersand chain.
-"%dart%" --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
-
+IF "%build_self%" == "false" (
+  "%dart%" --packages="%flutter_tools_dir%\.packages" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %* & exit /B !ERRORLEVEL!
+)
 :final_exit
 EXIT /B %exit_code%

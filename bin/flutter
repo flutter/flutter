@@ -16,6 +16,17 @@ set -e
 
 unset CDPATH
 
+# Check for build self command
+BUILD_SELF=false
+if [[ $1 == build && $2 == self ]]; then
+  if [[ $# == 2 ]]; then
+    BUILD_SELF=true
+  else
+    echo "$(basename -- $0) $@: '$1 $2' does not support any additional parameters."
+    exit 1
+  fi
+fi
+
 function follow_links() {
   cd -P "${1%/*}"
   local file="$PWD/${1##*/}"
@@ -104,11 +115,12 @@ function upgrade_flutter () {
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
 
   # Invalidate cache if:
+  #  * BUILD_SELF if true, or
   #  * SNAPSHOT_PATH is not a file, or
   #  * STAMP_PATH is not a file with nonzero size, or
   #  * Contents of STAMP_PATH is not our local git HEAD revision, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  if [[ "$BUILD_SELF" == "true" || ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
@@ -189,4 +201,6 @@ fi
 
 # FLUTTER_TOOL_ARGS isn't quoted below, because it is meant to be considered as
 # separate space-separated args.
-"$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+if [[ $BUILD_SELF == false ]]; then
+  "$DART" --packages="$FLUTTER_TOOLS_DIR/.packages" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+fi
