@@ -537,7 +537,6 @@ void main() {
         await createTestCommandRunner(command).run(args);
         expect(mockWebRunnerFactory._dartDefines, <String>['FOO=bar']);
       }, overrides: <Type, Generator>{
-        DeviceManager: () => mockDeviceManager,
         FeatureFlags: () => TestFeatureFlags(
           isWebEnabled: true,
         ),

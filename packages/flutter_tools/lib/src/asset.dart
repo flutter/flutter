@@ -335,7 +335,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
   final List<_Asset> result = <_Asset>[];
 
   for (final Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (final Map<dynamic, dynamic> font in family['fonts']) {
+    for (final Map<dynamic, dynamic> font in (family['fonts'] as List<dynamic>).cast<Map<dynamic, dynamic>>()) {
       final Uri entryUri = globals.fs.path.toUri(font['asset'] as String);
       result.add(_Asset(
         baseDir: globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
