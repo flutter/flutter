@@ -398,5 +398,86 @@ void main() {
       expect(imageCache.statusForKey(testImage).live, true);
       expect(imageCache.statusForKey(testImage).keepAlive, false);
     });
+
+    test('Clearing liveImages removes callbacks', () async {
+      const TestImage testImage = TestImage(width: 8, height: 8);
+
+      final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(listener);
+
+      final TestImageStreamCompleter completer2 = TestImageStreamCompleter()
+        ..testSetImage(testImage)
+        ..addListener(listener);
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      imageCache.clear();
+      imageCache.clearLiveImages();
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, false);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+
+      imageCache.putIfAbsent(testImage, () => completer2);
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+
+      completer1.removeListener(listener);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+    });
+
+    test('Live image gets size updated', () async {
+      // Add an image to the cache in pending state
+      // Complete it once it is in there as live
+      // Evict it but leave the live one.
+      // Add it again.
+      // If the live image did not track the size properly, the last line of
+      // this test will fail.
+
+      const TestImage testImage = TestImage(width: 8, height: 8);
+      const int testImageSize = 8 * 8 * 4;
+
+      final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+
+      final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
+        ..addListener(listener);
+
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+      expect(imageCache.statusForKey(testImage).pending, true);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+      expect(imageCache.currentSizeBytes, 0);
+
+      completer1.testSetImage(testImage);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.currentSizeBytes, testImageSize);
+
+      imageCache.evict(testImage, includeLive: false);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, false);
+      expect(imageCache.currentSizeBytes, 0);
+
+      imageCache.putIfAbsent(testImage, () => completer1);
+
+      expect(imageCache.statusForKey(testImage).pending, false);
+      expect(imageCache.statusForKey(testImage).live, true);
+      expect(imageCache.statusForKey(testImage).keepAlive, true);
+      expect(imageCache.currentSizeBytes, testImageSize);
+    });
   });
 }

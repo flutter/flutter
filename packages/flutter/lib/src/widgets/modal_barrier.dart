@@ -79,6 +79,8 @@ class ModalBarrier extends StatelessWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         platformSupportsDismissingBarrier = false;
         break;
       case TargetPlatform.iOS:

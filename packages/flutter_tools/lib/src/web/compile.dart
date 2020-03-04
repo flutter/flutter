@@ -65,7 +65,7 @@ Future<void> buildWeb(
       }
       throwToolExit('Failed to compile application for the Web.');
     }
-  } catch (err) {
+  } on Exception catch (err) {
     throwToolExit(err.toString());
   } finally {
     status.stop();

@@ -11,7 +11,11 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:mockito/mockito.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -32,6 +36,8 @@ void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
   Platform linux;
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   Packages packages;
   Platform windows;
   MockHttpServer mockHttpServer;

@@ -109,6 +109,22 @@ void main() {
     )).thenAnswer((_) async => exitsWithError());
   }
 
+  void pretendPodIsBroken() {
+    // it is present
+    when(mockProcessManager.run(
+      <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsHappy());
+
+    // but is not working
+    when(mockProcessManager.run(
+      <String>['pod', '--version'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsWithError());
+  }
+
   void pretendPodIsInstalled() {
     when(mockProcessManager.run(
       <String>['which', 'pod'],
@@ -306,21 +322,37 @@ void main() {
       podsIsInHomeDir();
     });
 
-    testUsingContext('prints error, if CocoaPods is not installed', () async {
+    testUsingContext('throwsToolExit if CocoaPods is not installed', () async {
       pretendPodIsNotInstalled();
       projectUnderTest.ios.podfile.createSync();
-      final bool didInstall = await cocoaPodsUnderTest.processPods(
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',
       );
+      expect(invokeProcessPods, throwsToolExit());
       verifyNever(mockProcessManager.run(
       argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
-      expect(testLogger.errorText, contains('not installed'));
-      expect(testLogger.errorText, contains('Skipping pod install'));
-      expect(didInstall, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throwsToolExit if CocoaPods install is broken', () async {
+      pretendPodIsBroken();
+      projectUnderTest.ios.podfile.createSync();
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(invokeProcessPods, throwsToolExit());
+      verifyNever(mockProcessManager.run(
+      argThat(containsAllInOrder(<String>['pod', 'install'])),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
@@ -355,7 +387,7 @@ void main() {
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch(e) {
+      } on Exception catch (e) {
         expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
@@ -404,7 +436,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch (e) {
+      } on Exception catch (e) {
         expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,

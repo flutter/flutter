@@ -5,13 +5,11 @@ The main page contains a list of buttons; each button leads to a designated sub 
 Each sub page should displays some simple UIs to screenshot tested.
 
 The flutter driver test runs the app and opens each page to take a screenshot.
-Then it compares the screenshots with golden files stored on Flutter Gold.
+
+Use `test_driver/flutter_gold_main_test.dart` to test against golden files stored on Flutter Gold.
+Otherwise, use `main_test.dart` to test against golden files stored on `test_driver/goldens/<some_test_page_name>/<device_model>.png`.
 
 Note that new binaries can't be checked in the Flutter repo, so use [Flutter Gold](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter) instead.
-
-# Reconstruction
-
-We are currently in the process of moving this test to use golden API. The configuration guide below might need to be updated after that is done.
 
 # Add a new page to test
 
@@ -25,5 +23,5 @@ An example of a `Page` subclass can be found in `lib/image_page.dart`
 
 # Environments
 
-* Device Lab which runs the app on iPhone 6.
+* Device Lab which runs the app on iPhone 6s.
 * LUCI which runs the app on a Fuchsia NUC device.
