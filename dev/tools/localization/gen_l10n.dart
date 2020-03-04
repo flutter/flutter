@@ -163,6 +163,9 @@ String generateMethod(Message message, AppResourceBundle bundle) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
       }
     }
+    messageValue = messageValue.replaceAll("'", '\\\'');
+    messageValue = messageValue.replaceAll('"', '\\\"');
+
     return "'$messageValue'";
   }
 
