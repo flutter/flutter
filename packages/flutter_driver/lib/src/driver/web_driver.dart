@@ -183,7 +183,7 @@ class FlutterWebConnection {
     _supportsTimelineAction = value;
   }
 
-  /// Starts WebDriver with the given [capabilities] and
+  /// Starts WebDriver with the given [settings] and
   /// establishes the connection to Flutter Web application.
   static Future<FlutterWebConnection> connect(
       String url,
@@ -196,8 +196,11 @@ class FlutterWebConnection {
         uri: Uri.parse(settings['session-uri'].toString()),
         spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
     if (settings['is-android-chrome'] == true) {
+      // Converts to Android Uri.
       final Uri localUri = Uri.parse(url);
-      url = Uri(scheme: 'http', host: '10.0.2.2', port:localUri.port).toString();
+      // Hardcode the host to 10.0.2.2 based on
+      // https://developer.android.com/studio/run/emulator-networking
+      url = Uri(scheme: localUri.scheme, host: '10.0.2.2', port:localUri.port).toString();
     }
     await driver.get(url);
 
