@@ -256,7 +256,7 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
-
+  String _header;
 
   /// The reference to the project's l10n directory.
   ///
@@ -330,11 +330,25 @@ class LocalizationsGenerator {
     String outputFileString,
     String classNameString,
     String preferredSupportedLocaleString,
+    String header,
+    String headerFile,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
+    if (header != null && headerFile != null) {
+      throw L10nException(
+        'Cannot accept both header and header file arguments. \n'
+        'Please make sure to define only one or the other. '
+      );
+    } else {
+      if (header != null) {
+        _header = header;
+      } else if (headerFile != null) {
+        _header = _setHeaderWithFile(headerFile);
+      }
+    }
     className = classNameString;
   }
 
@@ -395,6 +409,10 @@ class LocalizationsGenerator {
     if (outputFileString == null)
       throw L10nException('outputFileString argument cannot be null');
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
+  }
+
+  String _setHeaderWithFile(String headerFile) {
+    return '';
   }
 
   static bool _isValidClassName(String className) {
