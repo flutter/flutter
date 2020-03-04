@@ -150,7 +150,7 @@ class ArtifactUnpacker {
       } else {
         globals.printTrace('Artifacts for version $targetHash already present.');
       }
-    } on Exception catch (error, stackTrace) {
+    } catch (error, stackTrace) {
       globals.printError(stackTrace.toString());
       globals.printError(error.toString());
       return false;
@@ -200,8 +200,8 @@ class ArtifactUnpacker {
       }
 
       globals.printTrace('Copied artifacts from $sourceDirectory.');
-    } on Exception catch (e, stackTrace) {
-      globals.printError(e.toString());
+    } catch (e, stackTrace) {
+      globals.printError(e.message as String);
       globals.printError(stackTrace.toString());
       return false;
     }

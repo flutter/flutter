@@ -198,7 +198,7 @@ class Doctor {
       ValidationResult result;
       try {
         result = await asyncGuard<ValidationResult>(() => validator.validate());
-      } on Exception catch (exception) {
+      } catch (exception) {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
@@ -280,10 +280,10 @@ class Doctor {
       ValidationResult result;
       try {
         result = await validatorTask.result;
-        status.stop();
-      } on Exception catch (exception, stackTrace) {
+      } catch (exception, stackTrace) {
         result = ValidationResult.crash(exception, stackTrace);
-        status.cancel();
+      } finally {
+        status.stop();
       }
 
       switch (result.type) {
@@ -437,7 +437,7 @@ class GroupedValidator extends DoctorValidator {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
-      } on Exception catch (exception, stackTrace) {
+      } catch (exception, stackTrace) {
         results.add(ValidationResult.crash(exception, stackTrace));
       }
     }
@@ -667,7 +667,7 @@ bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
     return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
-  } on Exception {
+  } catch (error) {
     return false;
   }
 }
@@ -795,7 +795,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
           String installPath;
           try {
             installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
-          } on Exception {
+          } catch (e) {
             // ignored
           }
           if (installPath != null && globals.fs.isDirectorySync(installPath)) {
