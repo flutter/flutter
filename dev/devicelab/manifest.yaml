@@ -185,6 +185,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  textfield_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of textfield on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
