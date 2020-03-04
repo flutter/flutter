@@ -47,7 +47,7 @@ class WebFlutterDriver extends FlutterDriver {
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
   /// Driver also depends on environment variables DRIVER_SESSION_ID,
   /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
-  /// and DRIVER_SESSION_CAPABILITIES for configurations.
+  /// and IS_ANDROID_CHROME for configurations.
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -56,7 +56,7 @@ class WebFlutterDriver extends FlutterDriver {
       'session-id': Platform.environment['DRIVER_SESSION_ID'],
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
-      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
+      'is-android-chrome': Platform.environment['IS_ANDROID_CHROME'] == 'true',
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
@@ -195,6 +195,10 @@ class FlutterWebConnection {
         settings['session-id'].toString(),
         uri: Uri.parse(settings['session-uri'].toString()),
         spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+    if (settings['is-android-chrome'] == true) {
+      final Uri localUri = Uri.parse(url);
+      url = Uri(scheme: 'http', host: '10.0.2.2', port:localUri.port).toString();
+    }
     await driver.get(url);
 
     await waitUntilExtensionInstalled(driver, timeout);

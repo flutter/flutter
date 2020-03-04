@@ -245,25 +245,30 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
+      final bool isAndroidChrome = browser == Browser.androidChrome;
       // set window size
-      final List<String> dimensions = argResults['browser-dimension'].split(',') as List<String>;
-      assert(dimensions.length == 2);
-      int x, y;
-      try {
-        x = int.parse(dimensions[0]);
-        y = int.parse(dimensions[1]);
-      } on FormatException catch (ex) {
-        throwToolExit('''
+      // for android chrome, skip such action
+      if (!isAndroidChrome) {
+        final List<String> dimensions = argResults['browser-dimension'].split(
+            ',') as List<String>;
+        assert(dimensions.length == 2);
+        int x, y;
+        try {
+          x = int.parse(dimensions[0]);
+          y = int.parse(dimensions[1]);
+        } on FormatException catch (ex) {
+          throwToolExit('''
 Dimension provided to --browser-dimension is invalid:
 $ex
         ''');
-      }
-      final async_io.Window window = await driver.window;
-      try {
-        await window.setLocation(const math.Point<int>(0, 0));
-        await window.setSize(math.Rectangle<int>(0, 0, x, y));
-      } catch (_) {
-       // Error might be thrown in some browsers.
+        }
+        final async_io.Window window = await driver.window;
+        try {
+          await window.setLocation(const math.Point<int>(0, 0));
+          await window.setSize(math.Rectangle<int>(0, 0, x, y));
+        } catch (_) {
+          // Error might be thrown in some browsers.
+        }
       }
 
       // add driver info to environment variables
@@ -271,9 +276,9 @@ $ex
         'DRIVER_SESSION_ID': driver.id,
         'DRIVER_SESSION_URI': driver.uri.toString(),
         'DRIVER_SESSION_SPEC': driver.spec.toString(),
-        'DRIVER_SESSION_CAPABILITIES': jsonEncode(driver.capabilities),
         'SUPPORT_TIMELINE_ACTION': (browser == Browser.chrome).toString(),
         'FLUTTER_WEB_TEST': 'true',
+        'IS_ANDROID_CHROME': isAndroidChrome.toString(),
       });
     }
 
