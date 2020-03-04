@@ -528,7 +528,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // have already completed.
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(error, stackTrace);
       }
     }());
@@ -732,7 +732,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   Map<String, dynamic> _parseJsonResponse(String line) {
     try {
       return castStringKeyedMap(json.decode(line));
-    } catch (e) {
+    } on Exception {
       // Not valid JSON, so likely some other output.
       return null;
     }
@@ -771,7 +771,7 @@ Map<String, dynamic> parseFlutterResponse(String line) {
     try {
       final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
-    } catch (e) {
+    } on Exception {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]
       return null;
     }
