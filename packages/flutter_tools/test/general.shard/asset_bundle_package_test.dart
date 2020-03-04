@@ -70,32 +70,26 @@ $assetsSection
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
-    String expectedAssetManifest, {
-    bool expectExists = true,
-  }) async {
+    String expectedAssetManifest,
+  ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml');
 
     for (final String packageName in packages) {
       for (final String asset in assets) {
         final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
-        expect(bundle.entries.containsKey(entryKey), expectExists,
-          reason: 'Cannot find key on bundle: $entryKey');
-        if (expectExists) {
-          expect(
-            utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
-            asset,
-          );
-        }
+        expect(bundle.entries.containsKey(entryKey), true, reason: 'Cannot find key on bundle: $entryKey');
+        expect(
+          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          asset,
+        );
       }
     }
 
-    if (expectExists) {
-      expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
-        expectedAssetManifest,
-      );
-    }
+    expect(
+      utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+      expectedAssetManifest,
+    );
   }
 
   void writeAssets(String path, List<String> assets) {
@@ -666,15 +660,24 @@ $assetsSection
         assets: assetOnManifest,
       );
 
-      await buildAndVerifyAssets(
-        assetOnManifest,
-        <String>['test_package'],
-        null,
-        expectExists: false,
-      );
+      try {
+        await buildAndVerifyAssets(
+          assetOnManifest,
+          <String>['test_package'],
+          null,
+        );
+
+        final Function watchdog = () async {
+          assert(false, 'Code failed to detect missing directory. Test failed.');
+        };
+        watchdog();
+      } catch (e) {
+        // Test successful
+      }
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
   });
 }

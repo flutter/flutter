@@ -194,7 +194,7 @@ class FlutterTesterDevice extends Device {
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printError('Failed to launch $package: $error');
       return LaunchResult.failed();
     }

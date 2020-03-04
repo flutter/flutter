@@ -122,7 +122,7 @@ class AndroidValidator extends DoctorValidator {
           final List<String> versionLines = (result.stderr as String).split('\n');
           javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
-      } on Exception catch (error) {
+      } catch (error) {
         _logger.printTrace(error.toString());
       }
       if (javaVersionText == null || javaVersionText.isEmpty) {
@@ -287,7 +287,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         final List<String> versionLines = (result.stderr as String).split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
-    } on Exception catch (error) {
+    } catch (error) {
       globals.printTrace(error.toString());
     }
     if (javaVersion == null) {
@@ -389,7 +389,7 @@ class AndroidLicenseValidator extends DoctorValidator {
           globals.stdio.addStdoutStream(process.stdout),
           globals.stdio.addStderrStream(process.stderr),
         ]);
-      } on Exception catch (err, stack) {
+      } catch (err, stack) {
         globals.printTrace('Echoing stdout or stderr from the license subprocess failed:');
         globals.printTrace('$err\n$stack');
       }

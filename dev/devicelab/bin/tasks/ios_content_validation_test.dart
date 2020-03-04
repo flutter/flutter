@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
@@ -14,8 +15,9 @@ Future<void> main() async {
   await task(() async {
     try {
       bool foundProjectName = false;
+      bool bitcode = false;
       await runProjectTest((FlutterProject flutterProject) async {
-        section('iOS Framework content with --obfuscate');
+        section('Build app with with --obfuscate');
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
             'ios',
@@ -24,30 +26,58 @@ Future<void> main() async {
             '--split-debug-info=foo/',
           ]);
         });
-        final String outputFramework = path.join(
+        final String outputAppPath = path.join(
           flutterProject.rootPath,
-          'build/ios/iphoneos/Runner.app/Frameworks/App.framework/App',
+          'build/ios/iphoneos/Runner.app',
         );
-        if (!File(outputFramework).existsSync()) {
-          fail('Failed to produce expected output at $outputFramework');
+        final String outputAppFramework = path.join(
+          flutterProject.rootPath,
+          outputAppPath,
+          'Frameworks/App.framework/App',
+        );
+        if (!File(outputAppFramework).existsSync()) {
+          fail('Failed to produce expected output at $outputAppFramework');
         }
+
+        section('Validate obfuscation');
 
         // Verify that an identifier from the Dart project code is not present
         // in the compiled binary.
         await inDirectory(flutterProject.rootPath, () async {
           final String response = await eval(
             'grep',
-            <String>[flutterProject.name, outputFramework],
+            <String>[flutterProject.name, outputAppFramework],
             canFail: true,
           );
           if (response.trim().contains('matches')) {
             foundProjectName = true;
           }
         });
+
+        section('Validate bitcode');
+
+        final String outputFlutterFramework = path.join(
+          flutterProject.rootPath,
+          outputAppPath,
+          'Frameworks/Flutter.framework/Flutter',
+        );
+
+        if (!File(outputFlutterFramework).existsSync()) {
+          fail('Failed to produce expected output at $outputFlutterFramework');
+        }
+        bitcode = await containsBitcode(outputFlutterFramework);
       });
+
       if (foundProjectName) {
         return TaskResult.failure('Found project name in obfuscated dart library');
       }
+      // Archiving should contain a bitcode blob, but not building in release.
+      // This mimics Xcode behavior and present a developer from having to install a
+      // 300+MB app to test devices.
+      if (bitcode) {
+        return TaskResult.failure('Bitcode present in Flutter.framework');
+      }
+
       return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;

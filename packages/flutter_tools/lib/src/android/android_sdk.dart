@@ -492,7 +492,7 @@ class AndroidSdk {
         .map((FileSystemEntity entity) {
           try {
             return Version.parse(entity.basename);
-          } on Exception {
+          } catch (error) {
             return null;
           }
         })
@@ -518,7 +518,7 @@ class AndroidSdk {
               .group(1);
           platformVersion = int.parse(versionString);
         }
-      } on Exception {
+      } catch (error) {
         return null;
       }
 
@@ -583,7 +583,7 @@ class AndroidSdk {
             return fileSystem.path.join(javaHome, 'bin', 'java');
           }
         }
-      } on Exception catch (_) { /* ignore */ }
+      } catch (_) { /* ignore */ }
     }
 
     // Fallback to PATH based lookup.

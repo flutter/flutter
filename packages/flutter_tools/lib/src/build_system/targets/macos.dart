@@ -331,7 +331,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       try {
         final File sourceFile = environment.buildDir.childFile('app.dill');
         sourceFile.copySync(assetDirectory.childFile('kernel_blob.bin').path);
-      } on Exception catch (err) {
+      } catch (err) {
         throw Exception('Failed to copy app.dill: $err');
       }
       // Copy precompiled runtimes.
@@ -344,7 +344,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
             assetDirectory.childFile('vm_snapshot_data').path);
         globals.fs.file(isolateSnapshotData).copySync(
             assetDirectory.childFile('isolate_snapshot_data').path);
-      } on Exception catch (err) {
+      } catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
     }

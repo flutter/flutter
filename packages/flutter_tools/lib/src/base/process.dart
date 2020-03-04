@@ -367,7 +367,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           stdioFuture = stdioFuture.timeout(const Duration(seconds: 1));
         }
         await stdioFuture;
-      } on Exception catch (_) {
+      } catch (_) {
         // Ignore errors on the process' stdout and stderr streams. Just capture
         // whatever we got, and use the exit code
       }
@@ -539,7 +539,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     _traceCommand(cli);
     try {
       return _processManager.runSync(cli, environment: environment).exitCode == 0;
-    } on Exception catch (error) {
+    } catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }
@@ -553,7 +553,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     _traceCommand(cli);
     try {
       return (await _processManager.run(cli, environment: environment)).exitCode == 0;
-    } on Exception catch (error) {
+    } catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }

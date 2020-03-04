@@ -76,7 +76,7 @@ void main() {
           '--show-test-device',
         ]);
         fail('Expect exception');
-      } on Exception catch (e) {
+      } catch (e) {
         expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
       }
     }, overrides: <Type, Generator>{
@@ -102,7 +102,7 @@ void main() {
           '--no-pub',
         ]);
         fail('Expect exception');
-      } on Exception catch (e) {
+      } catch (e) {
         expect(e, isInstanceOf<ToolExit>());
       }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
@@ -127,7 +127,7 @@ void main() {
           '--no-pub',
         ]);
         fail('Expect exception');
-      } on Exception catch (e) {
+      } catch (e) {
         expect(e, isInstanceOf<ToolExit>());
         expect(e.toString(), contains('No pubspec.yaml file found'));
       }
@@ -221,8 +221,8 @@ void main() {
         } on ToolExit catch (e) {
           // We expect a ToolExit because no devices are attached
           expect(e.message, null);
-        } on Exception catch (e) {
-          fail('ToolExit expected, got $e');
+        } catch (e) {
+          fail('ToolExit expected');
         }
 
         verifyInOrder(<void>[
@@ -293,8 +293,8 @@ void main() {
         } on ToolExit catch (e) {
           // We expect a ToolExit because app does not start
           expect(e.message, null);
-        } on Exception catch (e) {
-          fail('ToolExit expected, got $e');
+        } catch (e) {
+          fail('ToolExit expected');
         }
         final List<dynamic> captures = verify(mockUsage.sendCommand(
           captureAny,
