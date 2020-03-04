@@ -930,16 +930,14 @@ void main() {
     const Size kSmallScreenSizeLandscape = Size(521, 320);
 
     Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
-      final Size originalSize = tester.binding.window.physicalSize;
-      final double originalPixelRatio = tester.binding.window.devicePixelRatio;
       tester.binding.window.physicalSizeTestValue = size;
       tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.binding.window.clearPhysicalSizeTestValue();
+      tester.binding.window.clearDevicePixelRatioTestValue();
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('OK'));
       });
       await tester.pumpAndSettle();
-      tester.binding.window.physicalSizeTestValue = originalSize;
-      tester.binding.window.devicePixelRatioTestValue = originalPixelRatio;
     }
 
     testWidgets('common screen size - portrait', (WidgetTester tester) async {
