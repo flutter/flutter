@@ -297,7 +297,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// last action.
   ///
   /// The [actions] become the trailing component of the [NavigationToolBar] built
-  /// by this widget. The the height of each action is constrained to be no bigger
+  /// by this widget. The height of each action is constrained to be no bigger
   /// than the toolbar's height, which is [kToolbarHeight].
   final List<Widget> actions;
 

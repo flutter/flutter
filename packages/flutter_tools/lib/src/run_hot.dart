@@ -597,7 +597,7 @@ class HotRunner extends ResidentRunner {
     if (!(reloadReport['success'] as bool)) {
       if (printErrors) {
         globals.printError('Hot reload was rejected:');
-        for (final Map<String, dynamic> notice in reloadReport['details']['notices']) {
+        for (final Map<String, dynamic> notice in (reloadReport['details']['notices'] as List<dynamic>).cast<Map<String, dynamic>>()) {
           globals.printError('${notice['message']}');
         }
       }

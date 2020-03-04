@@ -184,6 +184,11 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
+  // iOS does not link on Flutter in any build phase. Add the linker flag.
+  if (!useMacOSConfig) {
+    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
+  }
+
   if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
