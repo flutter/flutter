@@ -17,7 +17,10 @@ import 'property_sheet.dart';
 import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
+  String target,
+  VisualStudio visualStudioOverride,
+}) async {
   if (!windowsProject.solutionFile.existsSync()) {
     throwToolExit(
       'No Windows desktop project configured. '
@@ -29,7 +32,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   _writeGeneratedFlutterProperties(windowsProject, buildInfo, target);
   createPluginSymlinks(windowsProject.project);
 
-  final VisualStudio visualStudio = VisualStudio(
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(
     fileSystem: globals.fs,
     platform: globals.platform,
     logger: globals.logger,

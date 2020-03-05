@@ -71,55 +71,58 @@ void main() {
   }
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
+
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => FakeProcessManager.any(),
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockCoreProjectFiles();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     ), throwsToolExit(message: 'No Windows desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => FakeProcessManager.any(),
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => FakeProcessManager.any(),
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build does not spew stdout to status logger', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
@@ -134,7 +137,7 @@ void main() {
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     );
     expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
     expect(testLogger.traceText, contains('STDOUT STUFF'));
@@ -142,12 +145,12 @@ void main() {
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
@@ -162,7 +165,7 @@ void main() {
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     );
 
     // Spot-check important elements from the properties file.
@@ -176,12 +179,12 @@ void main() {
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildCommand command = BuildCommand();
+    final BuildWindowsCommand command = BuildWindowsCommand()
+      ..visualStudioOverride = mockVisualStudio;
     applyMocksToCommand(command);
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
@@ -196,7 +199,7 @@ void main() {
     });
 
     await createTestCommandRunner(command).run(
-      const <String>['build', 'windows']
+      const <String>['windows']
     );
 
     expect(testLogger.statusText, contains('🚧'));
@@ -204,7 +207,6 @@ void main() {
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
-    VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
