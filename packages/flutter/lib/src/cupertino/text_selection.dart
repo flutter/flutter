@@ -42,7 +42,6 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
 
-
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
   fontSize: 14.0,
@@ -95,6 +94,18 @@ class CupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
       ..arrowTipX = _arrowTipX
       ..isArrowPointingDown = _isArrowPointingDown;
   }
+}
+
+// TODO(justinmc): Share with Material?
+class _ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
+  // Whether or not this child is painted.
+  //
+  // Children in the selection toolbar may be laid out for measurement purposes
+  // but not painted. This allows these children to be identified.
+  bool shouldPaint;
+
+  @override
+  String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
 }
 
 class _ToolbarParentData extends BoxParentData {
@@ -362,7 +373,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     }
 
     //addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
-    addToolbarButtonIfNeeded('Cutasdfasdfasdfasdfasdfasdfasdf', canCut, handleCut);
+    addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
@@ -531,38 +542,29 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         opacity: _controller,
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
-          children: widget.children,
-        ),
-        /*
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (_page > 0)
-              CupertinoButton(
-                child: Text('◀', style: _kToolbarButtonFontStyle),
-                color: _kToolbarBackgroundColor,
-                minSize: _kToolbarHeight,
-                // TODO(justinmc): This is more complicated, see arrow padding above
-                padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-                borderRadius: null,
-                pressedOpacity: 0.7,
-                onPressed: _handlePreviousPage,
-              ),
-            ..._currentChildren,
-            // TODO(justinmc): Support multiple pages after measuring.
-            if (_page < 1)
-              CupertinoButton(
-                child: Text('▶', style: _kToolbarButtonFontStyle),
-                color: _kToolbarBackgroundColor,
-                minSize: _kToolbarHeight,
-                padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-                borderRadius: null,
-                pressedOpacity: 0.7,
-                onPressed: _handleNextPage,
-              ),
+            CupertinoButton(
+              child: Text('◀', style: _kToolbarButtonFontStyle),
+              color: _kToolbarBackgroundColor,
+              minSize: _kToolbarHeight,
+              // TODO(justinmc): This is more complicated, see arrow padding above
+              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+              borderRadius: null,
+              pressedOpacity: 0.7,
+              onPressed: _handlePreviousPage,
+            ),
+            CupertinoButton(
+              child: Text('▶', style: _kToolbarButtonFontStyle),
+              color: _kToolbarBackgroundColor,
+              minSize: _kToolbarHeight,
+              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
+              borderRadius: null,
+              pressedOpacity: 0.7,
+              onPressed: _handleNextPage,
+            ),
+            ...widget.children,
           ],
         ),
-        */
       ),
     );
   }
@@ -593,7 +595,7 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   }
 }
 
-class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
     @required this.page,
   }) : assert(page != null),
@@ -609,36 +611,114 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       return;
     }
 
-    // TODO(justinmc): Put the  forward/back buttons as the first two items in
+    // TODO(justinmc): Put the forward/back buttons as the first two items in
     // children. Iterate the children first to determine the width of the first
     // page. Then determine if the given page has forward/back buttons, and lay
     // it out.
 
-    double width = 0.0;
+    double pageWidth = 0.0;
+    double parentWidth = 0.0;
+    RenderBox buttonBack;
+    RenderBox buttonForward;
+    int currentPage = 0;
+    int i = -1;
     visitChildren((RenderObject renderObjectChild) {
+      i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      child.layout(constraints.loosen(), parentUsesSize: true);
-      final FlexParentData childParentData = child.parentData as FlexParentData;
-      childParentData.offset = Offset(width, 0.0);
-      width += child.size.width;
+      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+
+      double buttonWidth = 0.0;
+      if (i > 2) {
+        if (currentPage == 0) {
+          buttonWidth = buttonForward.size.width;
+        } else {
+          buttonWidth = buttonBack.size.width + buttonForward.size.width;
+        }
+      }
+
+      child.layout(
+        BoxConstraints.loose(Size(
+          // TODO(justinmc): This might not work perfectly with the exception
+          // below where we remove a button.
+          constraints.maxWidth - buttonWidth,
+          constraints.maxHeight,
+        )),
+        parentUsesSize: true,
+      );
+      childParentData.shouldPaint = false;
+
+      // Skip positioning the two page navigation buttons for now.
+      if (i == 0) {
+        buttonBack = child;
+        return;
+      }
+      if (i == 1) {
+        buttonForward = child;
+        return;
+      }
+
+      // TODO(justinmc): Make sure that if a child is wider than the entire
+      // constraints, it gets ellided.
+      // If this child causes the current page to overflow, move to the next
+      // page.
+      if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
+        // If this is the last child and it only overflows because of the
+        // forward button, don't move to the next page.
+        final double buttonWidthLastPage = buttonWidth - buttonForward.size.width;
+        final double widthWithoutForward = pageWidth + buttonWidthLastPage + child.size.width;
+        if (renderObjectChild != lastChild || widthWithoutForward > constraints.maxWidth) {
+          currentPage++;
+          pageWidth = 0.0;
+        }
+      }
+      childParentData.offset = Offset(pageWidth, 0.0);
+      pageWidth += child.size.width;
+      childParentData.shouldPaint = currentPage == page;
+
+      // TODO(justinmc): Can I optimize by not laying out pages after the
+      // current page?
+
+      if (currentPage == page) {
+        parentWidth = pageWidth;
+      }
     });
 
-    size = Size(width, _kToolbarHeight);
+    // Position page nav buttons.
+    if (currentPage > 0) {
+      final _ToolbarItemsParentData buttonForwardParentData = buttonForward.parentData as _ToolbarItemsParentData;
+      final _ToolbarItemsParentData buttonBackParentData = buttonBack.parentData as _ToolbarItemsParentData;
+      if (page > 0) {
+        // TODO(justinmc): I don't think that the buttons are moving forward to
+        // make room for this back button when needed.
+        buttonBackParentData.offset = Offset.zero;
+        buttonBackParentData.shouldPaint = true;
+        parentWidth += buttonBack.size.width;
+      }
+      if (page < currentPage) {
+        buttonForwardParentData.offset = Offset(parentWidth, 0.0);
+        buttonForwardParentData.shouldPaint = true;
+        parentWidth += buttonForward.size.width;
+      }
+    }
+
+    size = Size(parentWidth, _kToolbarHeight);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final FlexParentData childParentData = child.parentData as FlexParentData;
-      context.paintChild(child, childParentData.offset + offset);
+      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      if (childParentData.shouldPaint) {
+        context.paintChild(child, childParentData.offset + offset);
+      }
     });
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData) {
-      child.parentData = FlexParentData();
+    if (child.parentData is! _ToolbarItemsParentData) {
+      child.parentData = _ToolbarItemsParentData();
     }
   }
 
