@@ -96,7 +96,7 @@ class BuildRunner extends CodeGenerator {
           }
         }
       }
-      stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      stringBuffer.writeln('  build_runner: $kMinimumBuildRunnerVersion');
       stringBuffer.writeln('  build_daemon: $kSupportedBuildDaemonVersion');
       syntheticPubspec.writeAsStringSync(stringBuffer.toString());
 
