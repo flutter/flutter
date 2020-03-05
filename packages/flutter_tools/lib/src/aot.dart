@@ -28,8 +28,6 @@ class AotBuilder {
     bool quiet = true,
     bool reportTimings = false,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
-    List<String> extraFrontEndOptions,
-    List<String> extraGenSnapshotOptions,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -61,7 +59,7 @@ class AotBuilder {
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         outputPath: outputPath,
-        extraFrontEndOptions: extraFrontEndOptions,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         dartDefines: buildInfo.dartDefines
       );
       if (kernelOut == null) {
@@ -87,7 +85,7 @@ class AotBuilder {
             mainPath: kernelOut,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            extraGenSnapshotOptions: extraGenSnapshotOptions,
+            extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
             bitcode: bitcode,
             quiet: quiet,
             splitDebugInfo: null,
@@ -126,7 +124,7 @@ class AotBuilder {
           mainPath: kernelOut,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
           bitcode: false,
           splitDebugInfo: null,
           dartObfuscation: false,
