@@ -245,18 +245,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(
-                  initiallyExpanded: true,
-                  headerColorTween: headerColorTween,
-                  iconColorTween: iconColorTween,
-                  title: TestText('Expanded', key: titleKey),
-                  trailing: TestIcon(key: iconKey),
-                ),
-              ],
-            ),
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            headerColorTween: headerColorTween,
+            iconColorTween: iconColorTween,
+            title: TestText('Expanded', key: titleKey),
+            trailing: TestIcon(key: iconKey),
           ),
         ),
       ),
@@ -298,18 +292,12 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Material(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                ExpansionTile(
-                  initiallyExpanded: true,
-                  headerColorTween: headerColorTween,
-                  iconColorTween: iconColorTween,
-                  title: TestText('Expanded', key: titleKey),
-                  trailing: TestIcon(key: iconKey),
-                ),
-              ],
-            ),
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            headerColorTween: headerColorTween,
+            iconColorTween: iconColorTween,
+            title: TestText('Expanded', key: titleKey),
+            trailing: TestIcon(key: iconKey),
           ),
         ),
       ),
