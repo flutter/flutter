@@ -1652,6 +1652,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _value = value;
       _updateRemoteEditingValueIfNeeded();
     } else if (isRepeat) {
+      // Clear out the unformatted remote value with the already-known
+      // post-format value.
       _updateRemoteEditingValueIfNeeded();
     } else {
       _value = value;
