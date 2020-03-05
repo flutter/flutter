@@ -39,8 +39,6 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
-
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
 /// WARNING: if you change this number, also change .cirrus.yml
@@ -236,18 +234,18 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
 }
 
 Future<void> _runToolCoverage() async {
-  await runCommand( // Precompile tests to speed up subsequent runs.
-    pub,
-    <String>['run', 'build_runner', 'build'],
-    workingDirectory: toolRoot,
+  await _pubRunTest(
+    toolRoot,
+    testPaths: <String>[
+      path.join('test', 'general.shard'),
+      path.join('test', 'commands.shard', 'hermetic'),
+    ],
+    coverage: 'coverage',
   );
-  await runCommand(
-    dart,
-    <String>[path.join('tool', 'tool_coverage.dart')],
+  await runCommand(pub,
+    <String>['run', 'coverage:format_coverage', '--lcov', '--in=coverage', '--out=coverage/lcov.info'],
     workingDirectory: toolRoot,
-    environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot,
-    }
+    outputMode: OutputMode.discard,
   );
 }
 
@@ -273,8 +271,7 @@ Future<void> _runToolTests() async {
         : '';
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard', suffix),
-        useBuildRunner: canUseBuildRunner,
+        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
       );
@@ -706,25 +703,12 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
 }
 
 Future<void> _pubRunTest(String workingDirectory, {
-  String testPath,
+  List<String> testPaths,
   bool enableFlutterToolAsserts = true,
   bool useBuildRunner = false,
+  String coverage,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run'];
-  if (useBuildRunner) {
-    final String posixTestPath = path.posix.joinAll(path.split(testPath));
-    args.addAll(<String>[
-      'build_runner',
-      'test',
-      '--build-filter=$posixTestPath/*.dill',
-      '--build-filter=$posixTestPath/**/*.dill',
-      '--',
-    ]);
-  } else {
-    args.add('test');
-  }
-  args.add(useFlutterTestFormatter ? '-rjson' : '-rcompact');
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
   if (cpuVariable != null) {
@@ -737,11 +721,23 @@ Future<void> _pubRunTest(String workingDirectory, {
   } else {
     cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
   }
-  args.add('-j$cpus');
-  if (!hasColor)
-    args.add('--no-color');
-  if (testPath != null)
-    args.add(testPath);
+
+  final List<String> args = <String>[
+    'run',
+    'test',
+    if (useFlutterTestFormatter)
+      '-rjson'
+    else
+      '-rcompact',
+    '-j$cpus',
+    if (!hasColor)
+      '--no-color',
+    if (coverage != null)
+      '--coverage=$coverage',
+    if (testPaths != null)
+      for (final String testPath in testPaths)
+        testPath,
+  ];
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   };
