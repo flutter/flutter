@@ -190,8 +190,14 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
       file = globals.fs.file(potential);
+    }
+
+    if (!file.existsSync()) {
+      final String webPath = globals.fs.path.join(
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+      file = globals.fs.file(webPath);
     }
 
     if (!file.existsSync()) {

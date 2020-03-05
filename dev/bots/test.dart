@@ -588,6 +588,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebStackTraceTest('profile');
   await _runWebStackTraceTest('release');
   await _runWebDebugTest('lib/stack_trace.dart');
+  await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
 }
 
