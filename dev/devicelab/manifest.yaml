@@ -131,7 +131,6 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   # Android on-device tests
 
@@ -226,7 +225,6 @@ tasks:
       Checks that `flutter run --release` does not crash.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true # https://github.com/flutter/flutter/issues/45416.
 
   platform_interaction_test:
     description: >
@@ -329,7 +327,6 @@ tasks:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   complex_layout_semantics_perf:
@@ -407,7 +404,6 @@ tasks:
     description: >
       Builds an obfuscated app and verifies contents and structure
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   tiles_scroll_perf_ios__timeline_summary:
@@ -573,7 +569,6 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -727,7 +722,6 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   analyzer_benchmark:
     description: >
