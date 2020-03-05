@@ -1655,10 +1655,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
-  _TrailingWhitespaceDirectionalityFormatter _whitespaceFormatter;
+  _WhitespaceDirectionalityFormatter _whitespaceFormatter;
 
   void _formatAndSetValue(TextEditingValue value) {
-    _whitespaceFormatter ??= _TrailingWhitespaceDirectionalityFormatter(textDirection: _textDirection);
+    _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
@@ -2154,19 +2154,23 @@ class _Editable extends LeafRenderObjectWidget {
 // string in order to preserve expected caret behavior when trailing
 // whitespace is inserted.
 //
-// When typing in a direction that opposes the underlying direction
-// of the paragraph, trailing whitespace gets the directionality
+// When typing in a direction that opposes the base direction
+// of the paragraph, un-enclosed whitespace gets the directionality
 // of the paragraph. This is often at odds with what is immeditely
-// being typed. This formatter makes use of the RLM and LRM to cause
-// the text shaper to inherently treat the whitespace as being
-// surrounded by the directionality of the previous non-whitespace
-// codepoint.
-class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
+// being typed causing the caret to jump to the wrong side of the text.
+// This formatter makes use of the RLM and LRM to cause the text
+// shaper to inherently treat the whitespace as being surrounded
+// by the directionality of the previous non-whitespace codepoint.
+class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
   // The [textDirection] should be the base directionality of the paragraph/editable.
-  _TrailingWhitespaceDirectionalityFormatter({TextDirection textDirection})
+  _WhitespaceDirectionalityFormatter({TextDirection textDirection})
     : _baseDirection = textDirection,
       _prevNonWhitespaceDirection = textDirection;
 
+  // Using regex here instead of ICU is suboptimal, but is enough
+  // to produce the correct results for any reasonable input where this
+  // is even relevant. Using full ICU would be a much heavier change,
+  // requiring exposure of the C++ ICU API.
   final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
   final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
   final RegExp _whitespaceRegExp = RegExp(r'\s');
@@ -2197,6 +2201,7 @@ class _TrailingWhitespaceDirectionalityFormatter extends TextInputFormatter {
 
       final List<int> out = <int>[];
 
+      // We add/subtract from these as we insert/remove markers.
       int selectionBase = newValue.selection.baseOffset;
       int selectionExtent = newValue.selection.extentOffset;
 
