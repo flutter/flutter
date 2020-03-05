@@ -192,7 +192,15 @@ class DriveCommand extends RunCommandBase {
           target: targetFile,
           flutterProject: flutterProject,
           ipv6: ipv6,
-          debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+          debuggingOptions: getBuildInfo().isRelease ?
+            DebuggingOptions.disabled(
+              getBuildInfo(),
+              port: stringArg('web-port')
+            )
+            : DebuggingOptions.enabled(
+              getBuildInfo(),
+              port: stringArg('web-port')
+          ),
           stayResident: false,
           dartDefines: dartDefines,
           urlTunneller: null,
