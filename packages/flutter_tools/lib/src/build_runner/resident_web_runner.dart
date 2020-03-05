@@ -48,6 +48,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   }) {
     return _ResidentWebRunner(
@@ -57,6 +58,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       debuggingOptions: debuggingOptions,
       ipv6: ipv6,
       stayResident: stayResident,
+      dartDefines: dartDefines,
       urlTunneller: urlTunneller,
     );
   }
@@ -75,6 +77,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
+    @required this.dartDefines,
   }) : super(
           <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
@@ -85,6 +88,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
+  final List<String> dartDefines;
   DateTime firstBuildTime;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
@@ -354,6 +358,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
+    @required List<String> dartDefines,
     @required this.urlTunneller,
   }) : super(
           device,
@@ -362,6 +367,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
+          dartDefines: dartDefines,
         );
 
   final UrlTunneller urlTunneller;
@@ -426,6 +432,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             target,
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
+            dartDefines,
             false,
           );
         }
@@ -491,6 +498,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           target,
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
+          dartDefines,
           false,
         );
       } on ToolExit {

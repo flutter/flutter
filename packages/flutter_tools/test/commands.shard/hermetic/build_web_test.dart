@@ -57,6 +57,7 @@ void main() {
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
+      const <String>[],
       false,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
@@ -76,6 +77,7 @@ void main() {
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     expect(await runner.run(), 1);

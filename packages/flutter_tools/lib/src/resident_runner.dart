@@ -33,7 +33,7 @@ import 'vmservice.dart';
 class FlutterDevice {
   FlutterDevice(
     this.device, {
-    @required this.buildInfo,
+    @required this.trackWidgetCreation,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
@@ -41,34 +41,38 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-  }) : assert(buildInfo.trackWidgetCreation != null),
+    @required BuildMode buildMode,
+    List<String> dartDefines,
+  }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
            Artifact.flutterPatchedSdkPath,
            platform: targetPlatform,
-           mode: buildInfo.mode,
+           mode: buildMode,
          ),
-         buildMode: buildInfo.mode,
-         trackWidgetCreation: buildInfo.trackWidgetCreation,
+         buildMode: buildMode,
+         trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
-         dartDefines: buildInfo.dartDefines,
+         dartDefines: dartDefines,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
     @required FlutterProject flutterProject,
+    @required bool trackWidgetCreation,
     @required String target,
-    @required BuildInfo buildInfo,
+    @required BuildMode buildMode,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    List<String> dartDefines,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -77,9 +81,9 @@ class FlutterDevice {
     }
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
+        buildMode: buildMode,
+        trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots ?? <String>[],
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
@@ -87,9 +91,9 @@ class FlutterDevice {
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
+          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
           .absolute.uri.toString(),
-        dartDefines: buildInfo.dartDefines,
+        dartDefines: dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
       );
@@ -98,15 +102,15 @@ class FlutterDevice {
         globals.artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
           platform: targetPlatform,
-          mode: buildInfo.mode,
+          mode: buildMode,
         ),
-        buildMode: buildInfo.mode,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        buildMode: buildMode,
+        trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
-        dartDefines: buildInfo.dartDefines,
+        dartDefines: dartDefines,
       );
     }
 
@@ -119,6 +123,7 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
+      trackWidgetCreation: trackWidgetCreation,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
@@ -126,13 +131,13 @@ class FlutterDevice {
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
-      buildInfo: buildInfo,
+      buildMode: buildMode,
+      dartDefines: dartDefines,
     );
   }
 
   final Device device;
   final ResidentCompiler generator;
-  final BuildInfo buildInfo;
   Stream<Uri> observatoryUris;
   VMService vmService;
   DevFS devFS;
@@ -142,6 +147,7 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
   final String viewFilter;
+  final bool trackWidgetCreation;
 
   /// Whether the stream [observatoryUris] is still open.
   bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
@@ -556,7 +562,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,

@@ -18,17 +18,7 @@ void main() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
     return TestRunner(
-      <FlutterDevice>[
-        FlutterDevice(
-          MockDevice(),
-          buildInfo: const BuildInfo(
-            BuildMode.debug,
-            null,
-            trackWidgetCreation: false,
-            treeShakeIcons: false,
-          ),
-        ),
-      ],
+      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false, buildMode: BuildMode.debug)],
     );
   }
 

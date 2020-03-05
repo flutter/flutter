@@ -173,7 +173,7 @@ class TestFlutterDevice extends FlutterDevice {
     @required this.exception,
     @required ResidentCompiler generator,
   })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator);
+        super(device, buildMode: BuildMode.debug, generator: generator, trackWidgetCreation: false);
 
   /// The exception to throw when the connect method is called.
   final Exception exception;

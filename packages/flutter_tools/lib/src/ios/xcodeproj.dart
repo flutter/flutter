@@ -19,7 +19,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -234,10 +233,6 @@ List<String> _xcodeBuildSettingsLines({
 
   if (buildInfo.treeShakeIcons) {
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
-  }
-
-  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
   }
 
   return xcodeBuildSettings;
