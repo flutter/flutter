@@ -72,6 +72,22 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
+    testWithoutContext('skips migrating script with embed', () {
+      const String contents = '''
+shellScript = "/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" embed\\n/bin/sh \"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\\" thin\n";
+			''';
+      xcodeProjectInfoFile.writeAsStringSync(contents);
+
+      final RemoveFrameworkLinkAndEmbeddingMigration iosProjectMigration = RemoveFrameworkLinkAndEmbeddingMigration(
+        mockIosProject,
+        testLogger,
+        mockXcode,
+      );
+      expect(iosProjectMigration.migrate(), isTrue);
+      expect(xcodeProjectInfoFile.readAsStringSync(), contents);
+      expect(testLogger.statusText, isEmpty);
+    });
+
     testWithoutContext('Xcode project is migrated', () {
       xcodeProjectInfoFile.writeAsStringSync('''
 prefix 3B80C3941E831B6300D905FE
