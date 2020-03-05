@@ -282,13 +282,15 @@ class AndroidSdk {
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
 
-  /// Whether the `platform-tools` directory exists in the Android SDK.
+  /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
   /// It is possible to have an Android SDK folder that is missing this with
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => globals.fs.directory(globals.fs.path.join(directory, 'platform-tools')).existsSync();
+  bool get platformToolsAvailable =>
+    globals.fs.directory(globals.fs.path.join(directory, 'platform-tools')).existsSync()  ||
+    globals.fs.directory(globals.fs.path.join(directory, 'cmdline-tools')).existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
   ///
@@ -547,7 +549,11 @@ class AndroidSdk {
 
   /// Returns the filesystem path of the Android SDK manager tool or null if not found.
   String get sdkManagerPath {
-    return globals.fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
+    final File oldPath = globals.fs.file(globals.fs.path.join(directory, 'tools', 'bin', 'sdkmanager'));
+    if (oldPath.existsSync()) {
+      return oldPath.path;
+    }
+    return globals.fs.path.join(directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager');
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
