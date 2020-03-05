@@ -547,7 +547,10 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
-  /// Returns the filesystem path of the Android SDK manager tool or null if not found.
+  /// Returns the filesystem path of the Android SDK manager tool.
+  ///
+  /// The sdkmanager was previously in the tools directory but this component
+  /// was marked as obsolete in 3.6.
   String get sdkManagerPath {
     final File cmdlineTool = globals.fs.file(
       globals.fs.path.join(directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager')
