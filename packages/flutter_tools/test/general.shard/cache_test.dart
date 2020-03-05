@@ -423,7 +423,7 @@ void main() {
       final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
         ..createSync();
       iosUsbArtifacts.location.childFile('idevicesyslog')
-        ..createSync();
+        .createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), true);
 

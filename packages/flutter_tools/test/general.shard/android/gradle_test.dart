@@ -1414,7 +1414,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -1580,7 +1580,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -2621,7 +2621,7 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory
     .childDirectory(directoryName)
-    ..createSync(recursive: true);
+    .createSync(recursive: true);
 
   bundleDirectory
     .childDirectory(directoryName)
