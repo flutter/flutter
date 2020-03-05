@@ -156,31 +156,9 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = PackageMap.globalPackagesPath;
-    final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
 
-    // Run the dart2js compilation in two stages, so that icon tree shaking can
-    // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(<String>[
-      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
-      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
-      '--libraries-spec=$specPath',
-      '-o',
-      outputKernel.path,
-      '--packages=$packageFile',
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else
-        '-Ddart.vm.product=true',
-      for (final String dartDefine in parseDartDefines(environment))
-        '-D$dartDefine',
-      '--cfe-only',
-      environment.buildDir.childFile('main.dart').path,
-    ]);
-    if (kernelResult.exitCode != 0) {
-      throw Exception(kernelResult.stdout + kernelResult.stderr);
-    }
-    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
+    final ProcessResult result = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
@@ -190,17 +168,24 @@ class Dart2JSTarget extends Target {
         '-O4',
       if (buildMode == BuildMode.profile)
         '--no-minify',
-      if (csp)
-        '--csp',
       '-o',
       outputFile.path,
-      environment.buildDir.childFile('app.dill').path,
+      '--packages=$packageFile',
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
+      if (csp)
+        '--csp',
+      for (final String dartDefine in parseDartDefines(environment))
+        '-D$dartDefine',
+      environment.buildDir.childFile('main.dart').path,
     ]);
-    if (javaScriptResult.exitCode != 0) {
-      throw Exception(javaScriptResult.stdout + javaScriptResult.stderr);
+    if (result.exitCode != 0) {
+      throw Exception(result.stdout + result.stderr);
     }
     final File dart2jsDeps = environment.buildDir
-      .childFile('app.dill.deps');
+      .childFile('main.dart.js.deps');
     if (!dart2jsDeps.existsSync()) {
       globals.printError('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
@@ -212,7 +197,7 @@ class Dart2JSTarget extends Target {
       platform: globals.platform,
     );
     final Depfile depfile = depfileService.parseDart2js(
-      environment.buildDir.childFile('app.dill.deps'),
+      environment.buildDir.childFile('main.dart.js.deps'),
       outputFile,
     );
     depfileService.writeToFile(
