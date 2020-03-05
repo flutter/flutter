@@ -82,14 +82,16 @@ class ExpansionTile extends StatefulWidget {
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
 
-  /// The tween to control the color of the header.
-  /// begin defaults to theme.textTheme.subtitle1.color
-  /// end defaults to theme.accentColor
+  /// The tween that controls the color of the header.
+  ///
+  /// This tween's `begin` property defaults to [ThemeData.textTheme.subtitle1.color],
+  /// whereas the tween's `end` property defaults to [ThemeData.accentColor].
   final ColorTween headerColorTween;
 
-  /// The tween to control the color of the header.
-  /// begin defaults to theme.unselectedWidgetColor
-  /// end defaults to theme.accentColor
+  /// The tween that controls the icon's color.
+  ///
+  /// This tween's begin property defaults to [ThemeData.unselectedWidgetColor],
+  /// whereas the tween's end property defaults to [ThemeData.accentColor].
   final ColorTween iconColorTween;
 
   @override
@@ -211,17 +213,17 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.didUpdateWidget(oldWidget);
   }
 
-    void _updateColorTweens() {
-      final ThemeData theme = Theme.of(context);
-      _borderColorTween.end = theme.dividerColor;
-      _headerColorTween
-        ..begin = widget.headerColorTween?.begin ?? theme.textTheme.subtitle1.color
-        ..end = widget.headerColorTween?.end ?? theme.accentColor;
-      _iconColorTween
-        ..begin = widget.iconColorTween?.begin ?? theme.unselectedWidgetColor
-        ..end = widget.iconColorTween?.end ?? theme.accentColor;
-      _backgroundColorTween.end = widget.backgroundColor;
-    }
+  void _updateColorTweens() {
+    final ThemeData theme = Theme.of(context);
+    _borderColorTween.end = theme.dividerColor;
+    _headerColorTween
+      ..begin = widget.headerColorTween?.begin ?? theme.textTheme.subtitle1.color
+      ..end = widget.headerColorTween?.end ?? theme.accentColor;
+    _iconColorTween
+      ..begin = widget.iconColorTween?.begin ?? theme.unselectedWidgetColor
+      ..end = widget.iconColorTween?.end ?? theme.accentColor;
+    _backgroundColorTween.end = widget.backgroundColor;
+  }
 
   @override
   Widget build(BuildContext context) {
