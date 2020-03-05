@@ -73,6 +73,7 @@ void main() {
   }));
 
   test('KernelSnapshot handles null result from kernel compilation', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     final String build = androidEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(command: <String>[
@@ -95,7 +96,9 @@ void main() {
       ], exitCode: 1),
     ]);
 
-    expect(const KernelSnapshot().build(androidEnvironment), throwsA(isA<Exception>()));
+    await expectLater(() => const KernelSnapshot().build(androidEnvironment),
+      throwsA(isA<Exception>()));
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('KernelSnapshot does not use track widget creation on profile builds', () => testbed.run(() async {
@@ -123,6 +126,8 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('KernelSnapshot can disable track-widget-creation on debug builds', () => testbed.run(() async {
@@ -151,6 +156,8 @@ void main() {
     await const KernelSnapshot().build(androidEnvironment
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false');
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('KernelSnapshot forces platform linking on debug for darwin target platforms', () => testbed.run(() async {
@@ -180,6 +187,8 @@ void main() {
       ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
       ..defines[kTrackWidgetCreation] = 'false'
     );
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('KernelSnapshot does use track widget creation on debug builds', () => testbed.run(() async {
@@ -214,6 +223,8 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(testEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('AotElfProfile Produces correct output directory', () => testbed.run(() async {
@@ -235,31 +246,33 @@ void main() {
     androidEnvironment.buildDir.childFile('app.dill').createSync(recursive: true);
 
     await const AotElfProfile().build(androidEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('AotElfProfile throws error if missing build mode', () => testbed.run(() async {
-    androidEnvironment..defines.remove(kBuildMode);
+    androidEnvironment.defines.remove(kBuildMode);
 
     expect(const AotElfProfile().build(androidEnvironment),
       throwsA(isInstanceOf<MissingDefineException>()));
   }));
 
   test('AotElfProfile throws error if missing target platform', () => testbed.run(() async {
-    androidEnvironment..defines.remove(kTargetPlatform);
+    androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotElfProfile().build(androidEnvironment),
       throwsA(isInstanceOf<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing build mode', () => testbed.run(() async {
-    iosEnvironment..defines.remove(kBuildMode);
+    iosEnvironment.defines.remove(kBuildMode);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
       throwsA(isInstanceOf<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing target platform', () => testbed.run(() async {
-    iosEnvironment..defines.remove(kTargetPlatform);
+    iosEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
       throwsA(isInstanceOf<MissingDefineException>()));
@@ -391,6 +404,8 @@ void main() {
     iosEnvironment.defines[kIosArchs] ='armv7 arm64';
 
     await const AotAssemblyProfile().build(iosEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('AotAssemblyProfile with bitcode sends correct argument to snapshotter (one arch)', () => testbed.run(() async {
@@ -464,6 +479,8 @@ void main() {
     ]);
 
     await const AotAssemblyProfile().build(iosEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 
   test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {
@@ -490,5 +507,7 @@ void main() {
     ]);
 
     await const AotElfRelease().build(androidEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
   }));
 }
