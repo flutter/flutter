@@ -116,7 +116,7 @@ Future<void> main() async {
 ''';
     }
     environment.buildDir.childFile('main.dart')
-      ..writeAsStringSync(contents);
+      .writeAsStringSync(contents);
   }
 }
 

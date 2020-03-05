@@ -575,7 +575,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsStringSync('Existing lock file.');
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
-        ..writeAsStringSync('Updated Podfile');
+        .writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',

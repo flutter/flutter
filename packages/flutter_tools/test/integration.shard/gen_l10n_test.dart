@@ -101,6 +101,8 @@ void main() {
      '#l10n 22 (Hello World of 101 citizens)\n'
      '#l10n 23 (Hello two worlds with 102 total citizens)\n'
      '#l10n 24 ([Hello] -World- #123#)\n'
+     '#l10n 25 (Flutter\'s amazing!)\n'
+     '#l10n 26 (Flutter is "amazing"!)\n'
      '#l10n END\n'
     );
   });

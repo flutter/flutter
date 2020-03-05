@@ -270,7 +270,7 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(RenderObject child, Element slot) {
+  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     renderObject.setupParentData(child);
   }
 
