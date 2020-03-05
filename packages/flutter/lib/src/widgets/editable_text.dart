@@ -2205,41 +2205,63 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
       int selectionBase = newValue.selection.baseOffset;
       int selectionExtent = newValue.selection.extentOffset;
 
+      void addToSelection() {
+        selectionBase += out.length <= selectionBase ? 1 : 0;
+        selectionExtent += out.length <= selectionExtent ? 1 : 0;
+      }
+      void subtractFromSelection() {
+        selectionBase -= out.length < selectionBase ? 1 : 0;
+        selectionExtent -= out.length < selectionExtent ? 1 : 0;
+      }
+
       bool prevWasWhitespace = false;
+      bool prevWasDirectionalityMarker = false;
       int prevNonWhitespaceCodepoint;
       for (final int codepoint in newValue.text.runes) {
         if (isWhitespace(codepoint)) {
           // Only compute the directionality of the non-whitespace
           // when the value is needed.
           if (!prevWasWhitespace && prevNonWhitespaceCodepoint != null) {
-            _prevNonWhitespaceDirection = isRtl(prevNonWhitespaceCodepoint) ? TextDirection.rtl : TextDirection.ltr;
+            _prevNonWhitespaceDirection = getDirection(prevNonWhitespaceCodepoint);
           }
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
           if (prevWasWhitespace) {
-            selectionBase -= out.length < selectionBase ? 1 : 0;
-            selectionExtent -= out.length < selectionExtent ? 1 : 0;
+            subtractFromSelection();
             out.removeLast();
           }
           out.add(codepoint);
-          selectionBase += out.length <= selectionBase ? 1 : 0;
-          selectionExtent += out.length <= selectionExtent ? 1 : 0;
+          addToSelection();
           out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+
           prevWasWhitespace = true;
+          prevWasDirectionalityMarker = false;
         } else if (isDirectionalityMarker(codepoint)) {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
           if (prevWasWhitespace) {
-            selectionBase -= out.length < selectionBase ? 1 : 0;
-            selectionExtent -= out.length < selectionExtent ? 1 : 0;
+            subtractFromSelection();
             out.removeLast();
           }
           out.add(codepoint);
+
+          prevWasWhitespace = false;
+          prevWasDirectionalityMarker = true;
         } else {
+          // If the whitespace was already enclosed by the same directionality,
+          // we can remove the artifically added marker.
+          if (!prevWasDirectionalityMarker &&
+              prevWasWhitespace &&
+              getDirection(codepoint) == _prevNonWhitespaceDirection) {
+            subtractFromSelection();
+            out.removeLast();
+          }
           // Normal character, track its codepoint add it to the string.
           prevNonWhitespaceCodepoint = codepoint;
-          prevWasWhitespace = false;
           out.add(codepoint);
+          
+          prevWasWhitespace = false;
+          prevWasDirectionalityMarker = false;
         }
       }
       final String formatted = String.fromCharCodes(out);
@@ -2264,8 +2286,9 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
     return value == _rlm || value == _lrm;
   }
 
-  bool isRtl(int value) {
-    // Use the LTR version as short-circuiting will be more efficient.
-    return !_ltrRegExp.hasMatch(String.fromCharCode(value));
+  TextDirection getDirection(int value) {
+    // Use the LTR version as short-circuiting will be more efficient since
+    // there are more LTR codepoints.
+    return _ltrRegExp.hasMatch(String.fromCharCode(value)) ? TextDirection.ltr : TextDirection.rtl;
   }
 }
