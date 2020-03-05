@@ -42,6 +42,15 @@ source_set("libcxx") {
     "src/variant.cpp",
     "src/vector.cpp",
   ]
+  # filesystem uses statvfs, which requires API level 19+.
+  if (!is_android) {
+    sources += [
+      "src/filesystem/directory_iterator.cpp",
+      "src/filesystem/filesystem_common.h",
+      "src/filesystem/int128_builtins.cpp",
+      "src/filesystem/operations.cpp",
+    ]
+  }
 
   deps = [
     "//third_party/libcxxabi",
