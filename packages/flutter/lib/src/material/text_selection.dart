@@ -189,26 +189,33 @@ class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarItemsElement createElement() => _TextSelectionToolbarItemsElement(this);
 }
 
+class ToolbarParentData extends ContainerBoxParentData<RenderBox> {
+  // Whether or not this child is painted.
+  //
+  // Children in the selection toolbar may be laid out for measurement purposes
+  // but not painted. This allows these children to be identified.
+  bool shouldPaint;
+
+  @override
+  String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
+}
+
 class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   _TextSelectionToolbarItemsElement(
     MultiChildRenderObjectWidget widget,
   ) : super(widget);
 
-  // TODO(justinmc): This is where you should implement a better way to check
-  // offstage besides position 1,1.
+  static bool _shouldPaint(Element child) {
+    return (child.renderObject.parentData as ToolbarParentData).shouldPaint;
+  }
+
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    // TODO(justinmc): Don't use foreach with a lambda.
-    children.forEach((Element child) {
-      final FlexParentData childParentData = child.renderObject.parentData as FlexParentData;
-      if (childParentData.offset.dx != 1 && childParentData.offset.dy != 1) {
-        visitor(child);
-      }
-    });
+    children.where(_shouldPaint).forEach(visitor);
   }
 }
 
-class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>, RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarParentData> {
   _TextSelectionToolbarItemsRenderBox({
     @required bool isAbove,
     @required bool overflowOpen,
@@ -286,19 +293,17 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     visitChildren((RenderObject renderObjectChild) {
       i++;
 
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
+
       // The navigation button is placed after iterating all children, and there
       // is no need to place children that won't be painted.
       if (renderObjectChild == firstChild
           || !_shouldPaintChild(renderObjectChild, i)) {
-        final RenderBox child = renderObjectChild as RenderBox;
-        final FlexParentData childParentData = child.parentData as FlexParentData;
-        // TODO(justinmc): Find a better way to indicate offstage.
-        childParentData.offset = const Offset(1, 1);
+        childParentData.shouldPaint = false;
         return;
       }
-
-      final RenderBox child = renderObjectChild as RenderBox;
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      childParentData.shouldPaint = true;
 
       if (!overflowOpen) {
         childParentData.offset = Offset(fitWidth, 0.0);
@@ -317,9 +322,10 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       }
     });
 
-    // Place the navigation button if there is overflow.
-    if (_lastIndexThatFits >= 0) {
-      final FlexParentData navButtonParentData = navButton.parentData as FlexParentData;
+    // Place the navigation button if needed.
+    final ToolbarParentData navButtonParentData = navButton.parentData as ToolbarParentData;
+    if (_shouldPaintChild(firstChild, 0)) {
+      navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
         navButtonParentData.offset = isAbove
           ? Offset(0.0, overflowHeight)
@@ -332,11 +338,11 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
         navButtonParentData.offset = Offset(fitWidth, 0.0);
         nextSize = Size(nextSize.width + navButton.size.width, nextSize.height);
       }
+    } else {
+      navButtonParentData.shouldPaint = false;
     }
 
     size = nextSize;
-    //size = Size(constraints.maxWidth, nextSize.height);
-    //size = Size(nextSize.width + navButton.size.width, nextSize.height);
   }
 
   // Returns true when the child should be painted, false otherwise.
@@ -381,15 +387,15 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
       // Otherwise paint the child.
       final RenderBox child = renderObjectChild as RenderBox;
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
       context.paintChild(child, childParentData.offset + offset);
     });
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData) {
-      child.parentData = FlexParentData();
+    if (child.parentData is! ToolbarParentData) {
+      child.parentData = ToolbarParentData();
     }
   }
 
@@ -397,13 +403,11 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox child = lastChild;
-    int i = childCount;
     while (child != null) {
-      i--;
-      final FlexParentData childParentData = child.parentData as FlexParentData;
+      final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
 
-      // Don't hit test children that haven't been painted.
-      if (!_shouldPaintChild(child, i)) {
+      // Don't hit test children aren't shown.
+      if (!childParentData.shouldPaint) {
         child = childParentData.previousSibling;
         continue;
       }
@@ -504,7 +508,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
       child.size.height,
     ));
 
-    final FlexParentData childParentData = child.parentData as FlexParentData;
+    final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
     childParentData.offset = Offset(
       size.width - child.size.width,
       0.0,
@@ -514,7 +518,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   // Paint at the offset set in the parent data.
   @override
   void paint(PaintingContext context, Offset offset) {
-    final FlexParentData childParentData = child.parentData as FlexParentData;
+    final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
@@ -522,7 +526,8 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
-    final FlexParentData childParentData = child.parentData as FlexParentData;
+    final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
+    //return child.hitTest(result, position: position);
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -535,15 +540,14 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! FlexParentData) {
-      child.parentData = FlexParentData();
+    if (child.parentData is! ToolbarParentData) {
+      child.parentData = ToolbarParentData();
     }
   }
 
-  // TODO(justinmc): Implement this for _TextSelectionToolbarItems as well!
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final FlexParentData childParentData = child.parentData as FlexParentData;
+    final ToolbarParentData childParentData = child.parentData as ToolbarParentData;
     transform.translate(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
   }
