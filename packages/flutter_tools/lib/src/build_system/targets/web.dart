@@ -158,6 +158,7 @@ class Dart2JSTarget extends Target {
     final String packageFile = PackageMap.globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+    final List<String> dartDefines = parseDartDefines(environment);
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
@@ -168,12 +169,6 @@ class Dart2JSTarget extends Target {
       '-o',
       outputKernel.path,
       '--packages=$packageFile',
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else
-        '-Ddart.vm.product=true',
-      for (final String dartDefine in parseDartDefines(environment))
-        '-D$dartDefine',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path,
     ]);
@@ -188,6 +183,12 @@ class Dart2JSTarget extends Target {
         '-$dart2jsOptimization'
       else
         '-O4',
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
+      for (final String dartDefine in dartDefines)
+        '-D$dartDefine',
       if (buildMode == BuildMode.profile)
         '--no-minify',
       if (csp)

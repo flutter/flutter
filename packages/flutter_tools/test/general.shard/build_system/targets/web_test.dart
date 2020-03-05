@@ -225,7 +225,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -234,6 +233,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O4',
+        '-Ddart.vm.profile=true',
         '--no-minify',
         '--csp',
         '-o',
@@ -256,7 +256,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -265,6 +264,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O4',
+        '-Ddart.vm.profile=true',
         '--no-minify',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -285,7 +285,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -294,6 +293,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O4',
+        '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -314,7 +314,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -323,6 +322,7 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O3',
+        '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -362,9 +362,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.product=true',
-        '-DFOO=bar',
-        '-DBAZ=qux',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -373,6 +370,9 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O4',
+        '-Ddart.vm.product=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -393,9 +393,6 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
          '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '-Ddart.vm.profile=true',
-        '-DFOO=bar',
-        '-DBAZ=qux',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -404,6 +401,9 @@ void main() {
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-O4',
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
         '--no-minify',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
