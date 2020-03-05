@@ -289,6 +289,36 @@ void main() {
     expect(mockOnEndFunction.called, 1);
   });
 
+  testWidgets('AnimatedDefaultTextStyle merge test', (WidgetTester tester) async {
+    const Key animatedKey = Key('animatedStyle');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: DefaultTextStyle(
+          style: const TextStyle(fontSize: 1234),
+          textHeightBehavior: const TextHeightBehavior(
+            applyHeightToFirstAscent: false,
+          ),
+          maxLines: 10,
+          softWrap: true,
+          child: AnimatedDefaultTextStyle.merge(
+            key: animatedKey,
+            maxLines: 20,
+            duration: const Duration(seconds: 10),
+            child: const Text('woah!'),
+          ),
+        ),
+      )
+    );
+    await tester.pump();
+
+    final Finder animatedDefaultTextStyleFinder = find.byKey(animatedKey);
+    AnimatedDefaultTextStyle getAnimatedDefautTextStyleWidget(Finder finder) => tester.widget<AnimatedDefaultTextStyle>(finder);
+    expect(getAnimatedDefautTextStyleWidget(animatedDefaultTextStyleFinder).textHeightBehavior, const TextHeightBehavior(applyHeightToFirstAscent: false,));
+    expect(getAnimatedDefautTextStyleWidget(animatedDefaultTextStyleFinder).softWrap, true);
+    expect(getAnimatedDefautTextStyleWidget(animatedDefaultTextStyleFinder).maxLines, 20);
+  });
+
   testWidgets('AnimatedPhysicalModel onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(wrap(
       child: TestAnimatedWidget(

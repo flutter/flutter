@@ -42,6 +42,16 @@ class GenSnapshot {
         Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
+  /// Ignored warning messages from gen_snapshot.
+  static const Set<String> kIgnoredWarnings = <String>{
+    // --strip on elf snapshot.
+    'Warning: Generating ELF library without DWARF debugging information.',
+    // --strip on ios-assembly snapshot.
+    'Warning: Generating assembly code without DWARF debugging information.',
+    // A fun two-part message with spaces for obfuscation.
+    'Warning: This VM has been configured to obfuscate symbol information which violates the Dart standard.',
+    '         See dartbug.com/30524 for more information.',
+  };
   Future<int> run({
     @required SnapshotType snapshotType,
     DarwinArch darwinArch,
@@ -59,18 +69,9 @@ class GenSnapshot {
       snapshotterPath += '_' + getNameForDarwinArch(darwinArch);
     }
 
-    StringConverter outputFilter;
-    if (additionalArgs.contains('--strip')) {
-      // Filter out gen_snapshot's warning message about stripping debug symbols
-      // from ELF library snapshots.
-      const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
-      const String kAssemblyStripWarning = 'Warning: Generating assembly code without DWARF debugging information.';
-      outputFilter = (String line) => line != kStripWarning && line != kAssemblyStripWarning ? line : null;
-    }
-
     return processUtils.stream(
       <String>[snapshotterPath, ...args],
-      mapFunction: outputFilter,
+      mapFunction: (String line) =>  kIgnoredWarnings.contains(line) ? null : line,
     );
   }
 }
@@ -94,6 +95,7 @@ class AOTSnapshotter {
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
     @required String splitDebugInfo,
+    @required bool dartObfuscation,
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
@@ -147,7 +149,8 @@ class AOTSnapshotter {
     // multiple debug files.
     final String archName = getNameForTargetPlatform(platform, darwinArch: darwinArch);
     final String debugFilename = 'app.$archName.symbols';
-    if (splitDebugInfo?.isNotEmpty ?? false) {
+    final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+    if (shouldSplitDebugInfo) {
       globals.fs.directory(splitDebugInfo)
         .createSync(recursive: true);
     }
@@ -157,10 +160,12 @@ class AOTSnapshotter {
       // Faster async/await
       '--no-causal-async-stacks',
       '--lazy-async-stacks',
-      if (splitDebugInfo?.isNotEmpty ?? false) ...<String>[
+      if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
         '--save-debugging-info=${globals.fs.path.join(splitDebugInfo, debugFilename)}'
-      ]
+      ],
+      if (dartObfuscation)
+        '--obfuscate',
     ]);
 
     genSnapshotArgs.add(mainPath);

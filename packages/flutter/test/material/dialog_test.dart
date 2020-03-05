@@ -155,6 +155,20 @@ void main() {
     expect(content.text.style, contentTextStyle);
   });
 
+  testWidgets('Custom clipBehavior', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[],
+      clipBehavior: Clip.antiAlias,
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
@@ -557,7 +571,7 @@ void main() {
     ); // right
   });
 
-  testWidgets('Dialogs can set the vertical direction of actions', (WidgetTester tester) async {
+  testWidgets('Dialogs can set the vertical direction of overflowing actions', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -589,7 +603,74 @@ void main() {
     final Rect buttonOneRect = tester.getRect(find.byKey(key1));
     final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
     // Second [RaisedButton] should appear above the first.
-    expect(buttonTwoRect.bottom, buttonOneRect.top);
+    expect(buttonTwoRect.bottom, lessThanOrEqualTo(buttonOneRect.top));
+  });
+
+  testWidgets('Dialogs have no spacing by default for overflowing actions', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        RaisedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 1'),
+        ),
+        RaisedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 2'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      _buildAppWithDialog(dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    expect(buttonOneRect.bottom, buttonTwoRect.top);
+  });
+
+  testWidgets('Dialogs can set the button spacing of overflowing actions', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        RaisedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 1'),
+        ),
+        RaisedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('Looooooooooooooong button 2'),
+        ),
+      ],
+      actionsOverflowButtonSpacing: 10.0,
+    );
+
+    await tester.pumpWidget(
+      _buildAppWithDialog(dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    expect(buttonOneRect.bottom, buttonTwoRect.top - 10.0);
   });
 
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
@@ -681,6 +762,47 @@ void main() {
       tester.getRect(find.byType(Placeholder)),
       const Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
     );
+  });
+
+  testWidgets('Dialog insetPadding added to outside of dialog', (WidgetTester tester) async {
+    // The default testing screen (800, 600)
+    const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+
+    // Test with no padding
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.all(0.0),
+        ),
+        child: Dialog(
+          child: Placeholder(),
+          insetPadding: null,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(Placeholder)), screenRect);
+
+    // Test with an insetPadding
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          viewInsets: EdgeInsets.all(0.0),
+        ),
+        child: Dialog(
+          insetPadding: EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+          child: Placeholder(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(Placeholder)),
+        Rect.fromLTRB(
+          screenRect.left + 10.0,
+          screenRect.top + 20.0,
+          screenRect.right - 30.0,
+          screenRect.bottom - 40.0,
+        ));
   });
 
   testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
@@ -1048,6 +1170,60 @@ void main() {
       expect(content.localToGlobal(Offset.zero), equals(contentOriginalOffset));
     });
   });
+
+  testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
+    RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute?.settings;
+          })
+        ],
+        home: const Material(
+          child: Center(
+            child: RaisedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    const RouteSettings exampleSetting = RouteSettings(name: 'simple');
+
+    final Future<int> result = showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            SimpleDialogOption(
+              child: const Text('X'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+      routeSettings: exampleSetting,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('Title'), findsOneWidget);
+    expect(currentRouteSetting, exampleSetting);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(await result, isNull);
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting?.name, '/');
+  });
 }
 
 class DialogObserver extends NavigatorObserver {
@@ -1060,4 +1236,22 @@ class DialogObserver extends NavigatorObserver {
     }
     super.didPush(route, previousRoute);
   }
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({@required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+
+  @override
+  void didReplace({Route<dynamic> newRoute, Route<dynamic> oldRoute}) => onDidChange(newRoute);
 }

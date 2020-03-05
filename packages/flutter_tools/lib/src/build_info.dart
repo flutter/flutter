@@ -22,6 +22,7 @@ class BuildInfo {
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
+    this.dartObfuscation = false,
     @required this.treeShakeIcons,
   });
 
@@ -67,6 +68,9 @@ class BuildInfo {
   /// traces. If null, stack trace information is not stripped from the
   /// executable.
   final String splitDebugInfoPath;
+
+  /// Whether to apply dart source code obfuscation.
+  final bool dartObfuscation;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

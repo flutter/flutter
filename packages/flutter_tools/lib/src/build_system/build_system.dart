@@ -379,7 +379,7 @@ class Environment {
 
   /// The `FLUTTER_ROOT` environment variable.
   ///
-  /// Defaults to to the value of [Cache.flutterRoot].
+  /// Defaults to the value of [Cache.flutterRoot].
   final Directory flutterRootDir;
 
   /// The `OUTPUT_DIR` environment variable.

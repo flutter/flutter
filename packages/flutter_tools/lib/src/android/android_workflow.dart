@@ -359,12 +359,6 @@ class AndroidLicenseValidator extends DoctorValidator {
       throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
     }
 
-    final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
-    if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
-      // SDK manager is found, but needs to be updated.
-      throwToolExit(userMessages.androidSdkManagerOutdated(androidSdk.sdkManagerPath));
-    }
-
     try {
       final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],

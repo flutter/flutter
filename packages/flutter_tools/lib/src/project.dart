@@ -402,7 +402,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = PlistParser.instance.getValueFromFile(
+        fromPlist = globals.plistParser.getValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -566,6 +566,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   File get generatedXcodePropertiesFile => _flutterLibRoot
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
+
+  Directory get compiledDartFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('App.framework');
 
   Directory get pluginRegistrantHost {
     return isModule
@@ -952,6 +956,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+  /// Contains configuration to add plugins to the build.
+  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
+
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
@@ -999,6 +1006,9 @@ class LinuxProject extends FlutterProjectPlatform {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  /// Makefile with rules and variables for plugin builds.
+  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
 
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');

@@ -172,11 +172,21 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
   }
 
+  // This is an optional path to obfuscate and output a mapping.
+  if (buildInfo.dartObfuscation) {
+    xcodeBuildSettings.add('DART_OBFUSCATION=true');
+  }
+
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
   if (setSymroot) {
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+  }
+
+  // iOS does not link on Flutter in any build phase. Add the linker flag.
+  if (!useMacOSConfig) {
+    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
   }
 
   if (!project.isModule) {
@@ -352,8 +362,8 @@ class XcodeProjectInterpreter {
     }
   }
 
-  void cleanWorkspace(String workspacePath, String scheme) {
-    _processUtils.runSync(<String>[
+  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+    await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,

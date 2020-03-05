@@ -67,6 +67,11 @@ void main() {
         when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
         expect(await botDetector.isRunningOnBot, isTrue);
       });
+
+      testWithoutContext('returns true when running on borg', () async {
+        fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
+        expect(await botDetector.isRunningOnBot, isTrue);
+      });
     });
   });
 

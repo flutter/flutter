@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:mustache/mustache.dart' as mustache;
-
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
@@ -101,6 +99,11 @@ class Template {
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
+      // Only build a Linux project if explicitly asked.
+      final bool linux = context['linux'] as bool;
+      if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
+        return null;
+      }
       // Only build a macOS project if explicitly asked.
       final bool macOS = context['macos'] as bool;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
@@ -182,7 +185,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = mustache.Template(templateContents).renderString(context);
+        final String renderedContents = globals.templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

@@ -563,8 +563,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
-    renderObject
-      ..textDirection = Directionality.of(context);
+    renderObject.textDirection = Directionality.of(context);
   }
 }
 
@@ -582,6 +581,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(
