@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistry;
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * Protocol for listener of events from the UIApplication, typically a FlutterPlugin.
  */
 @protocol FlutterApplicationLifeCycleDelegate
@@ -165,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * A plugin registration callback.
  *
  * Used for registering plugins with additional instances of
@@ -176,7 +176,7 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>* registry);
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * Implemented by the iOS part of a Flutter plugin.
  *
  * Defines a set of optional callback methods and a method to set up the plugin
@@ -239,7 +239,7 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
 @end
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * How the UIGestureRecognizers of a platform view are blocked.
  *
  * UIGestureRecognizers of platform views can be blocked based on decisions made by the
@@ -265,14 +265,14 @@ typedef enum {
 } FlutterPlatformViewGestureRecognizersBlockingPolicy;
 
 #pragma mark -
-/***************************************************************************************************
- *Registration context for a single `FlutterPlugin`, providing a one stop shop
- *for the plugin to access contextual information and register callbacks for
- *various application events.
+/**
+ * Registration context for a single `FlutterPlugin`, providing a one stop shop
+ * for the plugin to access contextual information and register callbacks for
+ * various application events.
  *
- *Registrars are obtained from a `FlutterPluginRegistry` which keeps track of
- *the identity of registered plugins and provides basic support for cross-plugin
- *coordination.
+ * Registrars are obtained from a `FlutterPluginRegistry` which keeps track of
+ * the identity of registered plugins and provides basic support for cross-plugin
+ * coordination.
  */
 @protocol FlutterPluginRegistrar <NSObject>
 /**
@@ -373,7 +373,7 @@ typedef enum {
 @end
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * A registry of Flutter iOS plugins.
  *
  * Plugins are identified by unique string keys, typically the name of the
@@ -419,7 +419,7 @@ typedef enum {
 @end
 
 #pragma mark -
-/***************************************************************************************************
+/**
  * Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register
  * themselves to the application life cycle events.
  *
@@ -430,6 +430,12 @@ typedef enum {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
     <UNUserNotificationCenterDelegate>
 #endif
+
+/**
+ * Called when registering a new `FlutterApplicaitonLifeCycleDelegate`.
+ *
+ * See also: `-[FlutterAppDelegate addApplicationLifeCycleDelegate:]`
+ */
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 @end
 
