@@ -200,7 +200,7 @@ class DriveCommand extends RunCommandBase {
             : DebuggingOptions.enabled(
               getBuildInfo(),
               port: stringArg('web-port')
-          ),
+            ),
           stayResident: false,
           dartDefines: dartDefines,
           urlTunneller: null,
