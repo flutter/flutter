@@ -5,20 +5,47 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
-  AnalyzeBase(this.argResults);
+  AnalyzeBase(this.argResults, {
+    @required this.repoRoots,
+    @required this.repoPackages,
+    @required this.fileSystem,
+    @required this.logger,
+    @required this.platform,
+    @required this.processManager,
+    @required this.terminal,
+  });
 
   /// The parsed argument results for execution.
   final ArgResults argResults;
+  @protected
+  final List<String> repoRoots;
+  @protected
+  final List<Directory> repoPackages;
+  @protected
+  final FileSystem fileSystem;
+  @protected
+  final Logger logger;
+  @protected
+  final ProcessManager processManager;
+  @protected
+  final Platform platform;
+  @protected
+  final AnsiTerminal terminal;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -26,7 +53,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile = globals.fs.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = fileSystem.file(argResults['write']).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -34,7 +61,7 @@ abstract class AnalyzeBase {
           resultsFile.close();
         }
       } catch (e) {
-        globals.printError('Failed to save output to "${argResults['write']}": $e');
+        logger.printError('Failed to save output to "${argResults['write']}": $e');
       }
     }
   }
@@ -46,28 +73,11 @@ abstract class AnalyzeBase {
       'issues': errorCount,
       'missingDartDocs': membersMissingDocumentation,
     };
-    globals.fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
-    globals.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
+    fileSystem.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
+    logger.printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
   bool get isBenchmarking => argResults['benchmark'] as bool;
-}
-
-/// Return true if [fileList] contains a path that resides inside the Flutter repository.
-/// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
-bool inRepo(List<String> fileList) {
-  if (fileList == null || fileList.isEmpty) {
-    fileList = <String>[globals.fs.path.current];
-  }
-  final String root = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
-  final String prefix = root + globals.fs.path.separator;
-  for (String file in fileList) {
-    file = globals.fs.path.normalize(globals.fs.path.absolute(file));
-    if (file == root || file.startsWith(prefix)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 class PackageDependency {
