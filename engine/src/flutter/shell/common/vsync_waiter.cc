@@ -9,18 +9,6 @@
 
 namespace flutter {
 
-#if defined(OS_FUCHSIA)
-// In general, traces on Fuchsia are recorded across the whole system.
-// Because of this, emitting a "VSYNC" event per flutter process is
-// undesirable, as the events will collide with each other.  We
-// instead let another area of the system emit them.
-static constexpr const char* kVsyncTraceName = "vsync callback";
-#else   // defined(OS_FUCHSIA)
-// Note: The tag name must be "VSYNC" (it is special) so that the
-// "Highlight Vsync" checkbox in the timeline can be enabled.
-static constexpr const char* kVsyncTraceName = "VSYNC";
-#endif  // defined(OS_FUCHSIA)
-
 static constexpr const char* kVsyncFlowName = "VsyncFlow";
 
 VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
@@ -114,7 +102,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     task_runners_.GetUITaskRunner()->PostTaskForTime(
         [callback, flow_identifier, frame_start_time, frame_target_time]() {
-          FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
+          FML_TRACE_EVENT("flutter", "VsyncProcessCallback", "StartTime",
                           frame_start_time, "TargetTime", frame_target_time);
           fml::tracing::TraceEventAsyncComplete(
               "flutter", "VsyncSchedulingOverhead", fml::TimePoint::Now(),
