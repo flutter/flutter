@@ -32,7 +32,12 @@ const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators() : super('iOS simulators');
+  IOSSimulators({
+    @required IOSSimulatorUtils iosSimulatorUtils,
+  }) : _iosSimulatorUtils = iosSimulatorUtils,
+       super('iOS simulators');
+
+  final IOSSimulatorUtils _iosSimulatorUtils;
 
   @override
   bool get supportsPlatform => globals.platform.isMacOS;
@@ -41,7 +46,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => IOSSimulatorUtils.instance.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices() async => _iosSimulatorUtils.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {
@@ -53,9 +58,6 @@ class IOSSimulatorUtils {
 
   final SimControl _simControl;
   final Xcode _xcode;
-
-  /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck) {
@@ -590,7 +592,6 @@ class IOSSimulator extends Device {
 }
 
 /// Launches the device log reader process on the host.
-@visibleForTesting
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {

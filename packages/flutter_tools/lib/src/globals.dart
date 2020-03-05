@@ -68,6 +68,7 @@ AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 IOSDeploy get iosDeploy => context.get<IOSDeploy>();
+IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
