@@ -6,15 +6,16 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// A key indicating that the widget state is persisted in a storage after
-/// destruction and will be restored when recreated.
+/// A key can be used to persist the widget state in storage after
+/// the destruction and will be restored when recreated.
 ///
-/// Each key needs to have a value that is unique in its corresponding storage,
+/// Each key with its value plus the ancestor chain of other PageStorageKeys need to be unique,
 /// i.e. the widget's closest ancestor [PageStorage]. To make it possible for a
 /// saved value to be found when a widget is recreated, the key's value must
 /// not be objects whose identity will change each time the widget is created.
 ///
-/// For more introduction, see [PageStorage]
+/// See also:
+/// * [PageStorage], which is the closet ancestor for [PageStorageKey].
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
   const PageStorageKey(T value) : super(value);
@@ -117,9 +118,9 @@ class PageStorageBucket {
 /// [PageStorage] is used to save and restore values that can outlive the widget.
 /// For example, when multiple pages are grouped in tabs, when a page is
 /// switched out, its widget is destroyed and its state is lost. By adding a
-/// [PageStorage] at the root and adding a [PageStorageKey] to each page, the
+/// [PageStorage] at the root and adding a [PageStorageKey] to each page, most of the
 /// page's state will be stored in its closest ancestor [PageStorage], and
-/// restored when it's switched back.
+/// restored when it's switched back. Only the state knowing how to use [PageStorage] is persisted.
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
@@ -127,6 +128,7 @@ class PageStorageBucket {
 /// [PageStorageKey] is used by [Scrollable] if
 /// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
 /// {@tool dartpad --template=freeform}
+///
 /// This sample shows how to explicitly use a [PageStorage] to
 /// store the states of its children pages. Each page includes a scrollable
 /// list, whose position is preserved when switching between the tabs thanks to
@@ -156,7 +158,7 @@ class PageStorageBucket {
 /// }
 ///
 /// class _MyHomePageState extends State<MyHomePage> {
-///   List<Widget> pages = [
+///   final List<Widget> pages = <Widget>[
 ///     ColorBoxPage(
 ///       key: PageStorageKey('pageOne'),
 ///     ),
