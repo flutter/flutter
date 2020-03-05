@@ -80,7 +80,7 @@ void main() {
           urlTunneller: null,
         ) as ResidentWebRunner;
         globals.fs.currentDirectory.childFile('.packages')
-          ..writeAsStringSync('\n');
+          .writeAsStringSync('\n');
       },
     );
   });

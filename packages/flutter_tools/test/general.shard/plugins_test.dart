@@ -236,7 +236,7 @@ flutter:
         .childDirectory('java')
         .childDirectory(pluginName)
         .childFile('UseOldEmbedding.java')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       flutterProject.directory
         .childFile('.packages')
@@ -855,7 +855,7 @@ EndGlobal''');
           .childDirectory('lib')
           .childDirectory('src')
           .childFile('web_plugin.dart')
-          ..createSync(recursive: true);
+          .createSync(recursive: true);
 
         flutterProject.directory
           .childFile('.packages')

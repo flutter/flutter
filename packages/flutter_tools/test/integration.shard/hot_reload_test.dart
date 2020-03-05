@@ -107,14 +107,19 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
+    print('waiting for pause...');
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
+    print('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
+    print('waiting for resume...');
     await _flutter.resume();
+    print('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
+    print('subscription cancel...');
     await subscription.cancel();
   });
 

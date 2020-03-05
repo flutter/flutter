@@ -193,8 +193,7 @@ class _PointDemoState extends State<_PointDemo> {
         ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
           () => ImmediateMultiDragGestureRecognizer(),
           (ImmediateMultiDragGestureRecognizer instance) {
-            instance
-              ..onStart = _handleOnStart;
+            instance.onStart = _handleOnStart;
           },
         ),
       },
@@ -366,8 +365,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
         ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
           () => ImmediateMultiDragGestureRecognizer(),
           (ImmediateMultiDragGestureRecognizer instance) {
-            instance
-              ..onStart = _handleOnStart;
+            instance.onStart = _handleOnStart;
           },
         ),
       },

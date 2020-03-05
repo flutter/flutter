@@ -87,7 +87,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
 
       // Embed and thin frameworks in a script instead of using Xcode's link / embed build phases.
       const String thinBinaryScript = 'xcode_backend.sh\\" thin';
-      if (line.contains(thinBinaryScript)) {
+      if (line.contains(thinBinaryScript) && !line.contains(' embed')) {
         return line.replaceFirst(thinBinaryScript, 'xcode_backend.sh\\" embed_and_thin');
       }
 
@@ -102,7 +102,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
       // Print scary message if the user is on Xcode 11.4 or greater, or if Xcode isn't installed.
       final bool xcodeIsInstalled = _xcode.isInstalled;
       if(!xcodeIsInstalled || (_xcode.majorVersion > 11 || (_xcode.majorVersion == 11 && _xcode.minorVersion >= 4))) {
-        logger.printError('Your Xcode project requires migration. See https://github.com/flutter/flutter/issues/50568 for details.');
+        logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
         return false;
       }
     }
