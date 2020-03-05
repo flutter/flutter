@@ -1016,7 +1016,7 @@ class RenderTable extends RenderBox {
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1)
-          positions[x] = positions[x-1] + widths[x-1];
+          positions[x] = (positions[x-1] + widths[x-1]).floorToDouble();
         _columnLefts = positions;
         tableWidth = positions.last + widths.last;
         break;
