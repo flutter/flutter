@@ -295,6 +295,7 @@ class XcodeProjectInterpreter {
 
   int _majorVersion;
   int get majorVersion {
+    print('in xcodeProjectInterpreter');
     if (_majorVersion == null) {
       _updateVersion();
     }

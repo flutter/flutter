@@ -91,7 +91,10 @@ class Xcode {
     return _xcodeProjectInterpreter.isInstalled;
   }
 
-  int get majorVersion => _xcodeProjectInterpreter.majorVersion;
+  int get majorVersion {
+    print(_xcodeProjectInterpreter.majorVersion);
+    return _xcodeProjectInterpreter.majorVersion;
+  }
 
   int get minorVersion => _xcodeProjectInterpreter.minorVersion;
 

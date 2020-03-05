@@ -24,6 +24,7 @@ import 'cache.dart';
 import 'ios/ios_deploy.dart';
 import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
+import 'ios/simulators.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'version.dart';
@@ -67,6 +68,7 @@ AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 IOSDeploy get iosDeploy => context.get<IOSDeploy>();
+SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 

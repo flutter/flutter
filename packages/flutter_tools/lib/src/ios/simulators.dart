@@ -21,6 +21,7 @@ import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
@@ -44,17 +45,32 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
+  IOSSimulatorUtils({
+    @required SimControl simControl,
+    @required Xcode xcode,
+  }) : _simControl = simControl,
+       _xcode = xcode;
+
+  final SimControl _simControl;
+  final Xcode _xcode;
+
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
   static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulator>[];
     }
 
-    final List<SimDevice> connected = await SimControl.instance.getConnectedDevices();
+    final List<SimDevice> connected = await _simControl.getConnectedDevices();
     return connected.map<IOSSimulator>((SimDevice device) {
-      return IOSSimulator(device.udid, name: device.name, simulatorCategory: device.category);
+      return IOSSimulator(
+        device.udid,
+        name: device.name,
+        simControl: _simControl,
+        simulatorCategory: device.category,
+        xcode: _xcode,
+      );
     }).toList();
   }
 }
@@ -69,9 +85,6 @@ class SimControl {
 
   final Logger _logger;
   final ProcessUtils _processUtils;
-
-  /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context.get<SimControl>();
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -259,17 +272,28 @@ class SimDevice {
 }
 
 class IOSSimulator extends Device {
-  IOSSimulator(String id, { this.name, this.simulatorCategory }) : super(
-      id,
-      category: Category.mobile,
-      platformType: PlatformType.ios,
-      ephemeral: true,
-  );
+  IOSSimulator(
+    String id, {
+      this.name,
+      this.simulatorCategory,
+      @required SimControl simControl,
+      @required Xcode xcode,
+    }) : _simControl = simControl,
+         _xcode = xcode,
+         super(
+           id,
+           category: Category.mobile,
+           platformType: PlatformType.ios,
+           ephemeral: true,
+         );
 
   @override
   final String name;
 
   final String simulatorCategory;
+
+  final SimControl _simControl;
+  final Xcode _xcode;
 
   @override
   Future<bool> get isLocalEmulator async => true;
@@ -290,7 +314,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
-    return SimControl.instance.isInstalled(id, app.id);
+    return _simControl.isInstalled(id, app.id);
   }
 
   @override
@@ -300,7 +324,7 @@ class IOSSimulator extends Device {
   Future<bool> installApp(covariant IOSApp app) async {
     try {
       final IOSApp iosApp = app;
-      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, iosApp.simulatorBundlePath);
       return true;
     } catch (e) {
       return false;
@@ -310,7 +334,7 @@ class IOSSimulator extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await SimControl.instance.uninstall(id, app.id);
+      await _simControl.uninstall(id, app.id);
       return true;
     } catch (e) {
       return false;
@@ -405,7 +429,7 @@ class IOSSimulator extends Device {
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
       final String bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-      await SimControl.instance.launch(id, bundleIdentifier, args);
+      await _simControl.launch(id, bundleIdentifier, args);
     } catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();
@@ -460,7 +484,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    await SimControl.instance.install(id, globals.fs.path.absolute(bundle.path));
+    await _simControl.install(id, globals.fs.path.absolute(bundle.path));
   }
 
   @visibleForTesting
@@ -538,7 +562,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return globals.xcode.majorVersion > 8 || (globals.xcode.majorVersion == 8 && globals.xcode.minorVersion >= 2);
+    return _xcode.majorVersion > 8 || (_xcode.majorVersion == 8 && _xcode.minorVersion >= 2);
   }
 
   @override
@@ -546,7 +570,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) {
-    return SimControl.instance.takeScreenshot(id, outputFile.path);
+    return _simControl.takeScreenshot(id, outputFile.path);
   }
 
   @override

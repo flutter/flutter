@@ -137,7 +137,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
-      IOSSimulatorUtils: () => IOSSimulatorUtils(),
+      IOSSimulatorUtils: () => IOSSimulatorUtils(
+        simControl: globals.simControl,
+        xcode: globals.xcode,
+      ),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       Logger: () => globals.platform.isWindows
