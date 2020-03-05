@@ -5,39 +5,18 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
-
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
-/// An interface to the Dart analysis server.
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {
-    @required FileSystem fileSystem,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required Platform platform,
-    @required AnsiTerminal terminal,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _logger = logger,
-       _platform = platform,
-       _terminal = terminal;
+  AnalysisServer(this.sdkPath, this.directories);
 
   final String sdkPath;
   final List<String> directories;
-  final FileSystem _fileSystem;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final Platform _platform;
-  final AnsiTerminal _terminal;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -50,9 +29,9 @@ class AnalysisServer {
 
   Future<void> start() async {
     final String snapshot =
-        _fileSystem.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
+        globals.fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
-      _fileSystem.path.join(sdkPath, 'bin', 'dart'),
+      globals.fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
@@ -60,14 +39,14 @@ class AnalysisServer {
       sdkPath,
     ];
 
-    _logger.printTrace('dart ${command.skip(1).join(' ')}');
-    _process = await _processManager.start(command);
+    globals.printTrace('dart ${command.skip(1).join(' ')}');
+    _process = await globals.processManager.start(command);
     // This callback hookup can't throw.
     unawaited(_process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream =
         _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
-    errorStream.listen(_logger.printError);
+    errorStream.listen(globals.printError);
 
     final Stream<String> inStream =
         _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
@@ -94,11 +73,11 @@ class AnalysisServer {
       'params': params,
     });
     _process.stdin.writeln(message);
-    _logger.printTrace('==> $message');
+    globals.printTrace('==> $message');
   }
 
   void _handleServerResponse(String line) {
-    _logger.printTrace('<== $line');
+    globals.printTrace('<== $line');
 
     final dynamic response = json.decode(line);
 
@@ -119,10 +98,10 @@ class AnalysisServer {
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
         final Map<String, dynamic> error = castStringKeyedMap(response['error']);
-        _logger.printError(
+        globals.printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
-          _logger.printError(error['stackTrace'] as String);
+          globals.printError(error['stackTrace'] as String);
         }
       }
     }
@@ -138,9 +117,9 @@ class AnalysisServer {
 
   void _handleServerError(Map<String, dynamic> error) {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
-    _logger.printError('Error from the analysis server: ${error['message']}');
+    globals.printError('Error from the analysis server: ${error['message']}');
     if (error['stackTrace'] != null) {
-      _logger.printError(error['stackTrace'] as String);
+      globals.printError(error['stackTrace'] as String);
     }
     _didServerErrorOccur = true;
   }
@@ -151,13 +130,7 @@ class AnalysisServer {
     final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
-        .map<AnalysisError>((Map<String, dynamic> json) {
-          return AnalysisError(json,
-            fileSystem: _fileSystem,
-            platform: _platform,
-            terminal: _terminal,
-          );
-        })
+        .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed) {
       _errorsController.add(FileAnalysisErrors(file, errors));
@@ -179,17 +152,7 @@ enum _AnalysisSeverity {
 }
 
 class AnalysisError implements Comparable<AnalysisError> {
-  AnalysisError(this.json, {
-    @required Platform platform,
-    @required AnsiTerminal terminal,
-    @required FileSystem fileSystem,
-  }) : _platform = platform,
-       _terminal = terminal,
-       _fileSystem = fileSystem;
-
-  final Platform _platform;
-  final AnsiTerminal _terminal;
-  final FileSystem _fileSystem;
+  AnalysisError(this.json);
 
   static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
     'INFO': _AnalysisSeverity.info,
@@ -197,7 +160,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     'ERROR': _AnalysisSeverity.error,
   };
 
-  String  get _separator => _platform.isWindows ? '-' : '•';
+  static final String _separator = globals.platform.isWindows ? '-' : '•';
 
   // "severity":"INFO","type":"TODO","location":{
   //   "file":"/Users/.../lib/test.dart","offset":362,"length":72,"startLine":15,"startColumn":4
@@ -208,9 +171,9 @@ class AnalysisError implements Comparable<AnalysisError> {
   String get colorSeverity {
     switch(_severityLevel) {
       case _AnalysisSeverity.error:
-        return _terminal.color(severity, TerminalColor.red);
+        return globals.terminal.color(severity, TerminalColor.red);
       case _AnalysisSeverity.warning:
-        return _terminal.color(severity, TerminalColor.yellow);
+        return globals.terminal.color(severity, TerminalColor.yellow);
       case _AnalysisSeverity.info:
       case _AnalysisSeverity.none:
         return severity;
@@ -261,7 +224,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     final String padding = ' ' * math.max(0, 7 - severity.length);
     return '$padding${colorSeverity.toLowerCase()} $_separator '
         '$messageSentenceFragment $_separator '
-        '${_fileSystem.path.relative(file)}:$startLine:$startColumn $_separator '
+        '${globals.fs.path.relative(file)}:$startLine:$startColumn $_separator '
         '$code';
   }
 
