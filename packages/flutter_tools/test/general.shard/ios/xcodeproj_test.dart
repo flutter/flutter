@@ -458,9 +458,9 @@ Information about project "Runner":
     }
 
     testUsingOsxContext('sets OTHER_LDFLAGS for iOS', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'Flutter.framework'));
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -483,9 +483,9 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('do not set OTHER_LDFLAGS for macOS', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterMacOSFramework,
+      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterMacOSFramework,
           platform: TargetPlatform.darwin_x64, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'FlutterMacOS.framework'));
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
