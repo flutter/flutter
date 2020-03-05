@@ -641,7 +641,7 @@ ${globals.terminal.bolden('Consuming the Module')}
             url '${repoDirectory.path}'
         }
         maven {
-            url 'http://download.flutter.io'
+            url 'https://storage.googleapis.com/download.flutter.io'
         }
       }
 
