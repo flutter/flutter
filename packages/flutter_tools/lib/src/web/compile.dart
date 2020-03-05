@@ -11,7 +11,6 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -53,7 +52,8 @@ Future<void> buildWeb(
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: jsonEncode(dartDefines),
         kCspMode: csp.toString(),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
+        // that. https://github.com/flutter/flutter/issues/49730
       },
     ));
     if (!result.success) {
