@@ -287,12 +287,12 @@ void main() {
     test('Live image cache avoids leaks of unlistened streams', () async {
       imageCache.maximumSize = 3;
 
-      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(1, 1).resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2).resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3).resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4).resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5).resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6).resolve(ImageConfiguration.empty);
 
       // wait an event loop to let image resolution process.
       await null;
@@ -304,12 +304,12 @@ void main() {
     test('Disabled image cache does not leak live images', () async {
       imageCache.maximumSize = 0;
 
-      const TestImageProvider(1, 1)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(2, 2)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(3, 3)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(4, 4)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(5, 5)..resolve(ImageConfiguration.empty);
-      const TestImageProvider(6, 6)..resolve(ImageConfiguration.empty);
+      const TestImageProvider(1, 1).resolve(ImageConfiguration.empty);
+      const TestImageProvider(2, 2).resolve(ImageConfiguration.empty);
+      const TestImageProvider(3, 3).resolve(ImageConfiguration.empty);
+      const TestImageProvider(4, 4).resolve(ImageConfiguration.empty);
+      const TestImageProvider(5, 5).resolve(ImageConfiguration.empty);
+      const TestImageProvider(6, 6).resolve(ImageConfiguration.empty);
 
       // wait an event loop to let image resolution process.
       await null;

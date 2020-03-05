@@ -260,7 +260,7 @@ void main() {
         ],
         onRun: () {
           globals.fs.file('.packages')
-            ..setLastModifiedSync(DateTime(2002));
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -280,7 +280,7 @@ void main() {
         ],
         onRun: () {
           globals.fs.file('pubspec.yaml')
-            ..setLastModifiedSync(DateTime(2002));
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -309,9 +309,9 @@ void main() {
       testLogger.clear();
       // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+        .setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
@@ -321,9 +321,9 @@ void main() {
       testLogger.clear();
       // bad scenario 2: pub changes pubspec.yaml instead
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+        .setLastModifiedSync(DateTime(2001));
       try {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
@@ -337,9 +337,9 @@ void main() {
       expect(globals.fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
       // bad scenario 3: pubspec.yaml was created in the future
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(9999));
+        .setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, contains('Running "flutter pub get" in /...\n'));
