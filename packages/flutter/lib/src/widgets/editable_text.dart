@@ -2259,7 +2259,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           // Normal character, track its codepoint add it to the string.
           prevNonWhitespaceCodepoint = codepoint;
           out.add(codepoint);
-          
+
           prevWasWhitespace = false;
           prevWasDirectionalityMarker = false;
         }
