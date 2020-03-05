@@ -371,6 +371,7 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+  
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // This test does not matter, it can be approved at any time if rendering
     // changes. The intention of this test is to validate integration changes
