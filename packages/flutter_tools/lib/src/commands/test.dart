@@ -208,24 +208,21 @@ class TestCommand extends FlutterCommand {
       ];
     }
 
+    final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
       final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
+        verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
-    final bool machine = boolArg('machine');
-    if (collector != null && machine) {
-      throwToolExit("The test command doesn't support --machine and coverage together");
-    }
-
     TestWatcher watcher;
-    if (collector != null) {
+    if (machine) {
+      watcher = EventPrinter(parent: collector);
+    } else if (collector != null) {
       watcher = collector;
-    } else if (machine) {
-      watcher = EventPrinter();
     }
 
     Cache.releaseLockEarly();
