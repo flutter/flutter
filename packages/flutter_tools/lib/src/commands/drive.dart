@@ -14,7 +14,6 @@ import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
