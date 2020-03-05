@@ -139,7 +139,7 @@ void main() {
     setUp(() {
       processManager = FakeProcessManager.list(<FakeCommand>[]);
       fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-      logger = MockLogger();
+      logger = BufferLogger.test();
       visualStudio = VisualStudio(
         fileSystem: fileSystem,
         platform: windowsPlatform,
@@ -416,5 +416,4 @@ void main() {
   });
 }
 
-class MockLogger extends Mock implements Logger {}
 class MockProcessManager extends Mock implements ProcessManager {}
