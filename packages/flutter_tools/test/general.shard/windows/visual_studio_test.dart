@@ -342,7 +342,7 @@ void main() {
       Platform: () => windowsPlatform,
     });
 
-    testUsingContext('isLaunchable returns false if the installation can\'t be launched', () {
+    testUsingContext("isLaunchable returns false if the installation can't be launched", () {
       setMockCompatibleVisualStudioInstallation(null);
       setMockPrereleaseVisualStudioInstallation(null);
 

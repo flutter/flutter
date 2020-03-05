@@ -102,7 +102,7 @@ void main(List<String> argList) {
     _kShowDartPad,
     defaultsTo: false,
     negatable: false,
-    help: 'Indicates whether DartPad should be included in the sample\'s '
+    help: "Indicates whether DartPad should be included in the sample's "
         'final HTML output. This flag only applies when the type parameter is '
         '"sample".',
   );

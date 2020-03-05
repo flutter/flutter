@@ -15,6 +15,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
@@ -229,7 +230,7 @@ class XCDevice {
 
   Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
     if (!isInstalled) {
-      _logger.printTrace('Xcode not found. Run \'flutter doctor\' for more information.');
+      _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
     }
     if (useCache && _cachedListResults != null) {
@@ -349,6 +350,10 @@ class XCDevice {
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         sdkVersion: _sdkVersion(deviceProperties),
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+        iosDeploy: globals.iosDeploy,
+        platform: globals.platform,
       ));
     }
     return devices;

@@ -192,6 +192,11 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   Future<void> shutdown() {
     return _residentCompiler.shutdown();
   }
+
+  @override
+  void addFileSystemRoot(String root) {
+    _residentCompiler.addFileSystemRoot(root);
+  }
 }
 
 /// The current status of a codegen build.

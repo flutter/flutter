@@ -54,7 +54,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     print('($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     print('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -86,7 +86,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     globals.printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
     globals.printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -181,7 +181,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 }) async {
   final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
-  return _getAllCoverage(vmService, libraryPredicate);
+  final Map<String, dynamic> result = await _getAllCoverage(
+      vmService, libraryPredicate);
+  await vmService.close();
+  return result;
 }
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
@@ -203,7 +206,7 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     if (scriptList['scripts'] == null) {
       continue;
     }
-    for (final Map<String, dynamic> script in scriptList['scripts']) {
+    for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
@@ -244,7 +247,7 @@ void _buildCoverageMap(
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (final String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    for (final Map<String, dynamic> range in sourceReport['ranges']) {
+    for (final Map<String, dynamic> range in (sourceReport['ranges'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {

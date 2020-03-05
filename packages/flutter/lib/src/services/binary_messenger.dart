@@ -76,13 +76,13 @@ BinaryMessenger get defaultBinaryMessenger {
       throw FlutterError(
         'ServicesBinding.defaultBinaryMessenger was accessed before the '
         'binding was initialized.\n'
-        'If you\'re running an application and need to access the binary '
+        "If you're running an application and need to access the binary "
         'messenger before `runApp()` has been called (for example, during '
         'plugin initialization), then you need to explicitly call the '
         '`WidgetsFlutterBinding.ensureInitialized()` first.\n'
-        'If you\'re running a test, you can call the '
+        "If you're running a test, you can call the "
         '`TestWidgetsFlutterBinding.ensureInitialized()` as the first line in '
-        'your test\'s `main()` method to initialize the binding.'
+        "your test's `main()` method to initialize the binding."
       );
     }
     return true;

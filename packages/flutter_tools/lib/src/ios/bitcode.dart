@@ -9,7 +9,6 @@ import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
-import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;
@@ -28,7 +27,7 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform)
 
   final RunResult clangResult = await xcode.clang(<String>['--version']);
   final String clangVersion = clangResult.stdout.split('\n').first;
-  final String engineClangVersion = PlistParser.instance.getValueFromFile(
+  final String engineClangVersion = globals.plistParser.getValueFromFile(
     globals.fs.path.join(flutterFrameworkPath, 'Info.plist'),
     'ClangVersion',
   );

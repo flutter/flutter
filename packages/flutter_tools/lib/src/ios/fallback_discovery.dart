@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
 import '../mdns_discovery.dart';
@@ -120,20 +121,25 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent(_kEventName, 'failure').send();
+      _sendFailureEvent(err, assumedDevicePort);
       return null;
     }
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     const int kDelaySeconds = 2;
+    Exception firstException;
     while (attempts < 5) {
       try {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
-          final Isolate isolate = await vmService.getIsolate(isolateRefs.id) as Isolate;
-          final LibraryRef library = isolate.rootLib;
+          final dynamic isolateResponse = await vmService.getIsolate(isolateRefs.id);
+          if (isolateResponse is Sentinel) {
+            // Might have been a Sentinel. Try again later.
+            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
+          }
+          final LibraryRef library = (isolateResponse as Isolate).rootLib;
           if (library.uri.startsWith('package:$packageName')) {
             UsageEvent(_kEventName, 'success').send();
             return Uri.parse('http://localhost:$hostPort');
@@ -141,6 +147,7 @@ class FallbackDiscovery {
         }
       } on Exception catch (err) {
         // No action, we might have failed to connect.
+        firstException ??= err;
         _logger.printTrace(err.toString());
       }
 
@@ -152,7 +159,27 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
-    UsageEvent(_kEventName, 'failure').send();
+    _sendFailureEvent(firstException, assumedDevicePort);
     return null;
+  }
+
+  void _sendFailureEvent(Exception err, int assumedDevicePort) {
+    String eventAction;
+    String eventLabel;
+    if (err == null) {
+      eventAction = 'failure-attempts-exhausted';
+      eventLabel = assumedDevicePort.toString();
+    } else if (err is HttpException) {
+      eventAction = 'failure-http';
+      eventLabel = '${err.message}, device port = $assumedDevicePort';
+    } else {
+      eventAction = 'failure-other';
+      eventLabel = '$err, device port = $assumedDevicePort';
+    }
+    UsageEvent(
+      _kEventName,
+      eventAction,
+      label: eventLabel,
+    ).send();
   }
 }

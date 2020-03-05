@@ -22,6 +22,7 @@ class BuildInfo {
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
+    this.dartObfuscation = false,
     @required this.treeShakeIcons,
   });
 
@@ -67,6 +68,9 @@ class BuildInfo {
   /// traces. If null, stack trace information is not stripped from the
   /// executable.
   final String splitDebugInfoPath;
+
+  /// Whether to apply dart source code obfuscation.
+  final bool dartObfuscation;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -390,6 +394,7 @@ DarwinArch getIOSArchForName(String arch) {
     case 'armv7':
       return DarwinArch.armv7;
     case 'arm64':
+    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
       return DarwinArch.arm64;
     case 'x86_64':
       return DarwinArch.x86_64;

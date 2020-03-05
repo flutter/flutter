@@ -24,6 +24,7 @@ void main() {
   Environment environment;
   MockPlatform mockPlatform;
   MockPlatform  mockWindowsPlatform;
+  DepfileService depfileService;
 
   setUp(() {
     mockPlatform = MockPlatform();
@@ -53,6 +54,11 @@ void main() {
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         }
       );
+      depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
@@ -84,9 +90,9 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     webResources.childFile('foo.txt')
-      ..writeAsStringSync('A');
+      .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
 
     await const WebReleaseBundle().build(environment);
@@ -309,13 +315,13 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
       environment.buildDir.childFile('main.dart.js.deps')
-        ..writeAsStringSync('file:///a.dart');
+        .writeAsStringSync('file:///a.dart');
       return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d').existsSync(), true);
-    final Depfile depfile = Depfile.parse(environment.buildDir.childFile('dart2js.d'));
+    final Depfile depfile = depfileService.parse(environment.buildDir.childFile('dart2js.d'));
 
     expect(depfile.inputs.single.path, globals.fs.path.absolute('a.dart'));
     expect(depfile.outputs.single.path,

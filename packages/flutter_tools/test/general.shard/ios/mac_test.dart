@@ -202,7 +202,7 @@ Error launching application on iPhone.''',
       await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
-        contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
+        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
 
@@ -284,6 +284,80 @@ Could not build the precompiled application for the device.''',
       expect(
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);
   });

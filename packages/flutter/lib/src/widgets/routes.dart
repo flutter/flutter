@@ -1727,6 +1727,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
+/// The `routeSettings` will be used in the construction of the dialog's route.
+/// See [RouteSettings] for more details.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -1743,6 +1746,7 @@ Future<T> showGeneralDialog<T>({
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -1754,6 +1758,7 @@ Future<T> showGeneralDialog<T>({
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
+    settings: routeSettings,
   ));
 }
 

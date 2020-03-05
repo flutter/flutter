@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -730,6 +731,15 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   }, skip: isBrowser);
 
+  // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
+  test('TextPainter set TextHeightBehavior null test', () {
+    final TextPainter painter = TextPainter(textHeightBehavior: null)
+      ..textDirection = TextDirection.ltr;
+
+    painter.textHeightBehavior = const TextHeightBehavior();
+    painter.textHeightBehavior = null;
+  });
+
   test('TextPainter line metrics', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -807,4 +817,20 @@ void main() {
   // issue or similar. See https://github.com/flutter/flutter/issues/43763
   // for more info.
   }, skip: true);
+
+  test('TextPainter caret height and line height', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..strutStyle = const StrutStyle(fontSize: 50.0);
+
+    const String text = 'A';
+    painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
+    painter.layout();
+
+    final double caretHeight = painter.getFullHeightForCaret(
+      const ui.TextPosition(offset: 0),
+      ui.Rect.zero,
+    );
+    expect(caretHeight, 50.0);
+  }, skip: kIsWeb);
 }

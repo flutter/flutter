@@ -210,7 +210,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
         assert(
           false,
           'Failed to load DatePickerDateOrder $datePickerDateOrderString for '
-          'locale $_localeName.\nNon conforming string for $_localeName\'s '
+          "locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
         return null;
@@ -244,7 +244,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
         assert(
           false,
           'Failed to load DatePickerDateTimeOrder $datePickerDateTimeOrderString '
-          'for locale $_localeName.\nNon conforming string for $_localeName\'s '
+          "for locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
         return null;

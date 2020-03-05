@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,6 +24,18 @@ Future<ui.Image> createTestImage([List<int> bytes = kTransparentImage]) async {
 }
 
 void main() {
+  int originalCacheSize;
+
+  setUp(() {
+    originalCacheSize = imageCache.maximumSize;
+    imageCache.clear();
+    imageCache.clearLiveImages();
+  });
+
+  tearDown(() {
+    imageCache.maximumSize = originalCacheSize;
+  });
+
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
@@ -64,7 +77,7 @@ void main() {
     expect(renderImage.image, isNull);
   });
 
-  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
+  testWidgets("Verify Image doesn't reset its RenderImage when changing providers if it has gaplessPlayback set", (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
     await tester.pumpWidget(
@@ -144,7 +157,7 @@ void main() {
     expect(renderImage.image, isNull);
   });
 
-  testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
+  testWidgets("Verify Image doesn't reset its RenderImage when changing providers if it has gaplessPlayback set", (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestImageProvider imageProvider1 = TestImageProvider();
     await tester.pumpWidget(
@@ -187,7 +200,9 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final TestImageProvider imageProvider = TestImageProvider();
+    final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // Of the two nested MediaQuery objects, the innermost one,
     // mediaQuery2, should define the configuration of the imageProvider.
@@ -207,7 +222,7 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider,
+            image: debouncingProvider,
           ),
         ),
       ),
@@ -234,7 +249,7 @@ void main() {
           child: Image(
             excludeFromSemantics: true,
             key: imageKey,
-            image: imageProvider,
+            image: debouncingProvider,
           ),
         ),
       ),
@@ -247,7 +262,9 @@ void main() {
     final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
     final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
     final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
-    final TestImageProvider imageProvider = TestImageProvider();
+    final ConfigurationKeyedTestImageProvider imageProvider = ConfigurationKeyedTestImageProvider();
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
 
     // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
@@ -264,7 +281,7 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider,
+              image: debouncingProvider,
             ),
           ),
           MediaQuery(
@@ -302,7 +319,7 @@ void main() {
             child: Image(
               excludeFromSemantics: true,
               key: imageKey,
-              image: imageProvider,
+              image: debouncingProvider,
             ),
           ),
         ],
@@ -310,6 +327,139 @@ void main() {
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
+  });
+
+  testWidgets('Verify ImageProvider does not inherit configuration when it does not key to it', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = TestImageProvider();
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
+
+    // Of the two nested MediaQuery objects, the innermost one,
+    // mediaQuery2, should define the configuration of the imageProvider.
+    await tester.pumpWidget(
+      MediaQuery(
+        key: mediaQueryKey1,
+        data: const MediaQueryData(
+          devicePixelRatio: 10.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: MediaQuery(
+          key: mediaQueryKey2,
+          data: const MediaQueryData(
+            devicePixelRatio: 5.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: Image(
+            excludeFromSemantics: true,
+            key: imageKey,
+            image: debouncingProvider,
+          ),
+        ),
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+
+    // This is the same widget hierarchy as before except that the
+    // two MediaQuery objects have exchanged places. The imageProvider
+    // should not be resolved again, because it does not key to configuration.
+    await tester.pumpWidget(
+      MediaQuery(
+        key: mediaQueryKey2,
+        data: const MediaQueryData(
+          devicePixelRatio: 5.0,
+          padding: EdgeInsets.zero,
+        ),
+        child: MediaQuery(
+          key: mediaQueryKey1,
+          data: const MediaQueryData(
+            devicePixelRatio: 10.0,
+            padding: EdgeInsets.zero,
+          ),
+          child: Image(
+            excludeFromSemantics: true,
+            key: imageKey,
+            image: debouncingProvider,
+          ),
+        ),
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+  });
+
+  testWidgets('Verify ImageProvider does not inherit configuration when it does not key to it again', (WidgetTester tester) async {
+    final GlobalKey mediaQueryKey1 = GlobalKey(debugLabel: 'mediaQueryKey1');
+    final GlobalKey mediaQueryKey2 = GlobalKey(debugLabel: 'mediaQueryKey2');
+    final GlobalKey imageKey = GlobalKey(debugLabel: 'image');
+    final TestImageProvider imageProvider = TestImageProvider();
+    final Set<Object> seenKeys = <Object>{};
+    final DebouncingImageProvider debouncingProvider = DebouncingImageProvider(imageProvider, seenKeys);
+
+    // This is just a variation on the previous test. In this version the location
+    // of the Image changes and the MediaQuery widgets do not.
+    await tester.pumpWidget(
+      Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget> [
+          MediaQuery(
+            key: mediaQueryKey2,
+            data: const MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Image(
+              excludeFromSemantics: true,
+              key: imageKey,
+              image: debouncingProvider,
+            ),
+          ),
+          MediaQuery(
+            key: mediaQueryKey1,
+            data: const MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Container(width: 100.0),
+          ),
+        ],
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
+
+    await tester.pumpWidget(
+      Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget> [
+          MediaQuery(
+            key: mediaQueryKey2,
+            data: const MediaQueryData(
+              devicePixelRatio: 5.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Container(width: 100.0),
+          ),
+          MediaQuery(
+            key: mediaQueryKey1,
+            data: const MediaQueryData(
+              devicePixelRatio: 10.0,
+              padding: EdgeInsets.zero,
+            ),
+            child: Image(
+              excludeFromSemantics: true,
+              key: imageKey,
+              image: debouncingProvider,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
   });
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
@@ -626,7 +776,7 @@ void main() {
     expect(isSync, isTrue);
   });
 
-  testWidgets('Precache remove listeners immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
+  testWidgets('Precache removes original listener immediately after future completes, does not crash on successive calls #25143', (WidgetTester tester) async {
     final TestImageStreamCompleter imageStreamCompleter = TestImageStreamCompleter();
     final TestImageProvider provider = TestImageProvider(streamCompleter: imageStreamCompleter);
 
@@ -1062,7 +1212,7 @@ void main() {
     expect(find.byType(RawImage), findsOneWidget);
   }, skip: isBrowser);
 
-  testWidgets('Image doesn\'t rebuild on chunk events if loadingBuilder is null', (WidgetTester tester) async {
+  testWidgets("Image doesn't rebuild on chunk events if loadingBuilder is null", (WidgetTester tester) async {
     final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
     final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
@@ -1227,9 +1377,229 @@ void main() {
     expect(imageProviders.skip(309 - 15).every(loadCalled), true);
     expect(imageProviders.take(309 - 15).every(loadNotCalled), true);
   });
+
+  testWidgets('Same image provider in multiple parts of the tree, no cache room left', (WidgetTester tester) async {
+    imageCache.maximumSize = 0;
+
+    final ui.Image image = await tester.runAsync(createTestImage);
+    final TestImageProvider provider1 = TestImageProvider();
+    final TestImageProvider provider2 = TestImageProvider();
+
+    expect(provider1.loadCallCount, 0);
+    expect(provider2.loadCallCount, 0);
+    expect(imageCache.liveImageCount, 0);
+
+    await tester.pumpWidget(Column(
+      children: <Widget>[
+        Image(image: provider1),
+        Image(image: provider2),
+        Image(image: provider1),
+        Image(image: provider1),
+        Image(image: provider2),
+      ],
+    ));
+
+    expect(imageCache.liveImageCount, 2);
+    expect(imageCache.statusForKey(provider1).live, true);
+    expect(imageCache.statusForKey(provider1).pending, false);
+    expect(imageCache.statusForKey(provider1).keepAlive, false);
+    expect(imageCache.statusForKey(provider2).live, true);
+    expect(imageCache.statusForKey(provider2).pending, false);
+    expect(imageCache.statusForKey(provider2).keepAlive, false);
+
+    expect(provider1.loadCallCount, 1);
+    expect(provider2.loadCallCount, 1);
+
+    provider1.complete(image);
+    await tester.idle();
+
+    provider2.complete(image);
+    await tester.idle();
+
+    expect(imageCache.liveImageCount, 2);
+    expect(imageCache.currentSize, 0);
+
+    await tester.pumpWidget(Image(image: provider2));
+    await tester.idle();
+    expect(imageCache.statusForKey(provider1).untracked, true);
+    expect(imageCache.statusForKey(provider2).live, true);
+    expect(imageCache.statusForKey(provider2).pending, false);
+    expect(imageCache.statusForKey(provider2).keepAlive, false);
+    expect(imageCache.liveImageCount, 1);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.idle();
+    expect(provider1.loadCallCount, 1);
+    expect(provider2.loadCallCount, 1);
+    expect(imageCache.liveImageCount, 0);
+  });
+
+  testWidgets('precacheImage does not hold weak ref for more than a frame', (WidgetTester tester) async {
+    imageCache.maximumSize = 0;
+    final TestImageProvider provider = TestImageProvider();
+    Future<void> precache;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          precache = precacheImage(provider, context);
+          return Container();
+        }
+      )
+    );
+    provider.complete();
+    await precache;
+
+    // Should have ended up with only a weak ref, not in cache because cache size is 0
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.containsKey(provider), false);
+
+    final ImageCacheStatus providerLocation = await provider.obtainCacheStatus(configuration: ImageConfiguration.empty);
+
+    expect(providerLocation, isNotNull);
+    expect(providerLocation.live, true);
+    expect(providerLocation.keepAlive, false);
+    expect(providerLocation.pending, false);
+
+    // Check that a second resolve of the same image is synchronous.
+    expect(provider._lastResolvedConfiguration, isNotNull);
+    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
+    bool isSync;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
+
+    // Still have live ref because frame has not pumped yet.
+    await tester.pump();
+    expect(imageCache.liveImageCount, 1);
+
+    SchedulerBinding.instance.scheduleFrame();
+    await tester.pump();
+    // Live ref should be gone - we didn't listen to the stream.
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 0);
+
+    stream.addListener(listener);
+    expect(isSync, true); // because the stream still has the image.
+
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 0);
+
+    expect(provider.loadCallCount, 1);
+  });
+
+  testWidgets('precacheImage allows time to take over weak refernce', (WidgetTester tester) async {
+    final TestImageProvider provider = TestImageProvider();
+    Future<void> precache;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          precache = precacheImage(provider, context);
+          return Container();
+        }
+      )
+    );
+    provider.complete();
+    await precache;
+
+    // Should have ended up in the cache and have a weak reference.
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+
+    // Check that a second resolve of the same image is synchronous.
+    expect(provider._lastResolvedConfiguration, isNotNull);
+    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
+    bool isSync;
+    final ImageStreamListener listener = ImageStreamListener((ImageInfo image, bool syncCall) { isSync = syncCall; });
+
+    // Should have ended up in the cache and still have a weak reference.
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+
+    stream.addListener(listener);
+    expect(isSync, true);
+
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+
+    SchedulerBinding.instance.scheduleFrame();
+    await tester.pump();
+
+    expect(imageCache.liveImageCount, 1);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+    stream.removeListener(listener);
+
+    expect(imageCache.liveImageCount, 0);
+    expect(imageCache.currentSize, 1);
+    expect(imageCache.containsKey(provider), true);
+    expect(provider.loadCallCount, 1);
+  });
+
+  testWidgets('evict an image during precache', (WidgetTester tester) async {
+    // This test checks that the live image tracking does not hold on to a
+    // pending image that will never complete because it has been evicted from
+    // the cache.
+    // The scenario may arise in a test harness that is trying to load real
+    // images using `tester.runAsync()`, and wants to make sure that widgets
+    // under test have not also tried to resolve the image in a FakeAsync zone.
+    // The image loaded in the FakeAsync zone will never complete, and the
+    // runAsync call wants to make sure it gets a load attempt from the correct
+    // zone.
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    await tester.runAsync(() async {
+      final List<Future<void>> futures = <Future<void>>[];
+      await tester.pumpWidget(Builder(builder: (BuildContext context) {
+        futures.add(precacheImage(provider, context));
+        imageCache.evict(provider);
+        futures.add(precacheImage(provider, context));
+        return const SizedBox.expand();
+      }));
+      await Future.wait<void>(futures);
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, true);
+
+      // Schedule a frame to get precacheImage to stop listening.
+      SchedulerBinding.instance.scheduleFrame();
+      await tester.pump();
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, false);
+    });
+  });
 }
 
-class TestImageProvider extends ImageProvider<TestImageProvider> {
+class ConfigurationAwareKey {
+  const ConfigurationAwareKey(this.provider, this.configuration)
+    : assert(provider != null),
+      assert(configuration != null);
+
+  final ImageProvider provider;
+  final ImageConfiguration configuration;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is ConfigurationAwareKey
+        && other.provider == provider
+        && other.configuration == configuration;
+  }
+
+  @override
+  int get hashCode => hashValues(provider, configuration);
+}
+
+class ConfigurationKeyedTestImageProvider extends TestImageProvider {
+  @override
+  Future<ConfigurationAwareKey> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<ConfigurationAwareKey>(ConfigurationAwareKey(this, configuration));
+  }
+}
+
+class TestImageProvider extends ImageProvider<Object> {
   TestImageProvider({ImageStreamCompleter streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
@@ -1239,28 +1609,30 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
 
-  bool get loadCalled => _loadCalled;
-  bool _loadCalled = false;
+  bool get loadCalled => _loadCallCount > 0;
+  int get loadCallCount => _loadCallCount;
+  int _loadCallCount = 0;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<Object> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
     _lastResolvedConfiguration = configuration;
     super.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
-    _loadCalled = true;
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+    _loadCallCount += 1;
     return _streamCompleter;
   }
 
-  void complete() {
-    _completer.complete(ImageInfo(image: TestImage()));
+  void complete([ui.Image image]) {
+    image ??= TestImage();
+    _completer.complete(ImageInfo(image: image));
   }
 
   void fail(dynamic exception, StackTrace stackTrace) {
@@ -1326,4 +1698,31 @@ class TestImage implements ui.Image {
 
   @override
   String toString() => '[$width\u00D7$height]';
+}
+
+class DebouncingImageProvider extends ImageProvider<Object> {
+  DebouncingImageProvider(this.imageProvider, this.seenKeys);
+
+  /// A set of keys that will only get resolved the _first_ time they are seen.
+  ///
+  /// If an ImageProvider produces the same key for two different image
+  /// configurations, it should only actually resolve once using this provider.
+  /// However, if it does care about image configuration, it should make the
+  /// property or properties it cares about part of the key material it
+  /// produces.
+  final Set<Object> seenKeys;
+  final ImageProvider<Object> imageProvider;
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
+    if (seenKeys.add(key)) {
+      imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
+    }
+  }
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+
+  @override
+  ImageStreamCompleter load(Object key, DecoderCallback decode) => imageProvider.load(key, decode);
 }

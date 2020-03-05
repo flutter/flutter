@@ -32,7 +32,7 @@ void main() {
     fileSystem = const LocalFileSystem();
     platform = const LocalPlatform();
     processManager = const LocalProcessManager();
-    terminal = AnsiTerminal(platform: platform, stdio: const Stdio());
+    terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     logger = BufferLogger(outputPreferences: OutputPreferences.test(), terminal: terminal);
     FlutterCommandRunner.initFlutterRoot();
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analysis_test.');

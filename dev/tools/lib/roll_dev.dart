@@ -52,7 +52,7 @@ void main(List<String> args) {
     kJustPrint,
     negatable: false,
     help:
-        'Don\'t actually roll the dev channel; '
+        "Don't actually roll the dev channel; "
         'just print the would-be version and quit.',
   );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');

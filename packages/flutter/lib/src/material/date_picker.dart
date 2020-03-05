@@ -908,6 +908,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         HapticFeedback.vibrate();
         break;
       case TargetPlatform.iOS:
@@ -1086,8 +1088,8 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
-/// the documentation for which discusses how it is used.
+/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
+/// [showDialog], the documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1137,6 +1139,7 @@ Future<DateTime> showDatePicker({
   TextDirection textDirection,
   TransitionBuilder builder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) async {
   assert(initialDate != null);
   assert(firstDate != null);
@@ -1182,5 +1185,6 @@ Future<DateTime> showDatePicker({
     builder: (BuildContext context) {
       return builder == null ? child : builder(context, child);
     },
+    routeSettings: routeSettings,
   );
 }

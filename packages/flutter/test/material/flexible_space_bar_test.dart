@@ -198,7 +198,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.android, true));
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
 
-    // Clear the widget tree to avoid animating between Android and iOS.
+    // Clear the widget tree to avoid animating between platforms.
     await tester.pumpWidget(Container(key: UniqueKey()));
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, null));
@@ -207,7 +207,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
     expect(getTitleBottomLeft(), Offset.zero);
 
-    // Clear the widget tree to avoid animating between iOS and macOS.
+    // Clear the widget tree to avoid animating between platforms.
     await tester.pumpWidget(Container(key: UniqueKey()));
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, null));
@@ -215,6 +215,24 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), Offset.zero);
+
+    // Clear the widget tree to avoid animating between platforms.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.windows, null));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.windows, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
+
+    // Clear the widget tree to avoid animating between platforms.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.linux, null));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.linux, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   }, skip: isBrowser);
 }
 

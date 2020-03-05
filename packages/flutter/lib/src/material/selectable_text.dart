@@ -78,6 +78,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWordsInRange(
             from: details.globalPosition - details.offsetFromOrigin,
             to: details.globalPosition,
@@ -99,6 +101,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           break;
       }
@@ -120,6 +124,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           renderEditable.selectWord(cause: SelectionChangedCause.longPress);
           Feedback.forLongPress(_state.context);
           break;
@@ -205,6 +211,7 @@ class SelectableText extends StatefulWidget {
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
+    this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -218,6 +225,11 @@ class SelectableText extends StatefulWidget {
         assert(autofocus != null),
         assert(dragStartBehavior != null),
         assert(maxLines == null || maxLines > 0),
+        assert(minLines == null || minLines > 0),
+        assert(
+          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+          'minLines can\'t be greater than maxLines',
+        ),
         assert(
           data != null,
           'A non-null String must be provided to a SelectableText widget.',
@@ -248,6 +260,7 @@ class SelectableText extends StatefulWidget {
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
+    this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -261,6 +274,11 @@ class SelectableText extends StatefulWidget {
     assert(autofocus != null),
     assert(dragStartBehavior != null),
     assert(maxLines == null || maxLines > 0),
+    assert(minLines == null || minLines > 0),
+    assert(
+      (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+      'minLines can\'t be greater than maxLines',
+    ),
     assert(
       textSpan != null,
       'A non-null TextSpan must be provided to a SelectableText.rich widget.',
@@ -328,6 +346,9 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.editableText.minLines}
+  final int minLines;
 
   /// {@macro flutter.widgets.editableText.maxLines}
   final int maxLines;
@@ -398,6 +419,7 @@ class SelectableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
@@ -478,6 +500,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
       // Do nothing.
     }
   }
@@ -551,6 +575,8 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         forcePressEnabled = false;
         textSelectionControls = materialTextSelectionControls;
         paintCursorAboveText = false;
@@ -575,13 +601,14 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         showCursor: widget.showCursor,
         controller: _controller,
         focusNode: focusNode,
-        strutStyle: widget.strutStyle ?? StrutStyle.disabled,
+        strutStyle: widget.strutStyle ?? const StrutStyle(),
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
         textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
         forceLine: false,
         toolbarOptions: widget.toolbarOptions,
+        minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,

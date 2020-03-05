@@ -49,6 +49,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesFlavorOption();
     usesPubOption();
     usesDartDefines();
+    addSplitDebugInfoOption();
+    addDartObfuscationOption();
     argParser
       ..addFlag('debug',
         negatable: true,
@@ -475,7 +477,8 @@ end
         '-destination generic/platform=iOS',
         'SYMROOT=${iPhoneBuildOutput.path}',
         'BITCODE_GENERATION_MODE=$bitcodeGenerationMode',
-        'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
+        'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+        'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
       ];
 
       RunResult buildPluginsResult = await processUtils.run(
@@ -500,8 +503,8 @@ end
           '-destination generic/platform=iOS',
           'SYMROOT=${simulatorBuildOutput.path}',
           'ARCHS=x86_64',
-          'ONLY_ACTIVE_ARCH=NO'
-          // No device targeted, so build all valid architectures.
+          'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
+          'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
         ];
 
         buildPluginsResult = await processUtils.run(

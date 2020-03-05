@@ -10,7 +10,6 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
-import '../base/bot_detector.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';

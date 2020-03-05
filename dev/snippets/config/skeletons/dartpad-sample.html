@@ -22,7 +22,11 @@
 </div>
 <div class="snippet-container">
     <div class="snippet" id="longSnippet{{serial}}">
+        {{description}}
         <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}&sample_channel={{channel}}"></iframe>
+        <div class="snippet-description">To create a local project with this code sample, run:<br/>
+            <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
+        </div>
     </div>
     <div class="snippet" id="shortSnippet{{serial}}" hidden>
         {{description}}

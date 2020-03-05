@@ -84,7 +84,7 @@ flutter_project:lib/
     Cache.disableLocking();
     Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     processManager = const LocalProcessManager();
-    terminal = AnsiTerminal(platform: platform, stdio: const Stdio());
+    terminal = AnsiTerminal(platform: platform, stdio: Stdio());
     fileSystem = const LocalFileSystem();
     platform = const LocalPlatform();
     logger = BufferLogger(
@@ -106,6 +106,7 @@ flutter_project:lib/
         ..writeAsStringSync(mainDartSrc);
   });
 
+<<<<<<< HEAD
   tearDownAll(() {
     tryToDelete(tempDir);
   });
@@ -234,6 +235,87 @@ flutter_project:lib/
       }
     }
   });
+=======
+      // Analyze in the current directory - no arguments
+      testUsingContext('working directory with errors', () async {
+        // Break the code to produce the "Avoid empty else" hint
+        // that is upgraded to a warning in package:flutter/analysis_options_user.yaml
+        // to assert that we are using the default Flutter analysis options.
+        // Also insert a statement that should not trigger a lint here
+        // but will trigger a lint later on when an analysis_options.yaml is added.
+        String source = await libMain.readAsString();
+        source = source.replaceFirst(
+          'return MaterialApp(',
+          'if (debugPrintRebuildDirtyWidgets) {} else ; return MaterialApp(',
+        );
+        source = source.replaceFirst(
+          'onPressed: _incrementCounter,',
+          '// onPressed: _incrementCounter,',
+        );
+        source = source.replaceFirst(
+            '_counter++;',
+            '_counter++; throw "an error message";',
+          );
+        libMain.writeAsStringSync(source);
+
+        // Analyze in the current directory - no arguments
+        await runCommand(
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
+          arguments: <String>['analyze', '--no-pub'],
+          statusTextContains: <String>[
+            'Analyzing',
+            'info $analyzerSeparator Avoid empty else statements',
+            'info $analyzerSeparator Avoid empty statements',
+            "info $analyzerSeparator The declaration '_incrementCounter' isn't",
+          ],
+          exitMessageContains: '3 issues found.',
+          toolExit: true,
+        );
+      });
+
+      // Analyze in the current directory - no arguments
+      testUsingContext('working directory with local options', () async {
+        // Insert an analysis_options.yaml file in the project
+        // which will trigger a lint for broken code that was inserted earlier
+        final File optionsFile = globals.fs.file(globals.fs.path.join(projectPath, 'analysis_options.yaml'));
+        try {
+          optionsFile.writeAsStringSync('''
+      include: package:flutter/analysis_options_user.yaml
+      linter:
+        rules:
+          - only_throw_errors
+      ''');
+          String source = libMain.readAsStringSync();
+          source = source.replaceFirst(
+            'onPressed: _incrementCounter,',
+            '// onPressed: _incrementCounter,',
+          );
+          source = source.replaceFirst(
+            '_counter++;',
+            '_counter++; throw "an error message";',
+          );
+          libMain.writeAsStringSync(source);
+
+          // Analyze in the current directory - no arguments
+          await runCommand(
+            command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
+            arguments: <String>['analyze', '--no-pub'],
+            statusTextContains: <String>[
+              'Analyzing',
+              "info $analyzerSeparator The declaration '_incrementCounter' isn't",
+              'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+            ],
+            exitMessageContains: '2 issues found.',
+            toolExit: true,
+          );
+        } finally {
+          if (optionsFile.existsSync()) {
+            optionsFile.deleteSync();
+          }
+        }
+      });
+    });
+>>>>>>> c2ae654ddf9a3d9701262d49590efd3b3642ff8a
 
   testUsingContext('analyze once no duplicate issues', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
@@ -407,7 +489,8 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ''';
 
-const String pubspecYamlSrc = r'''name: flutter_project
+const String pubspecYamlSrc = r'''
+name: flutter_project
 environment:
   sdk: ">=2.1.0 <3.0.0"
 

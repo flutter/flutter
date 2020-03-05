@@ -121,7 +121,7 @@ void main() {
     expect(paint2.color, const Color(0x00000000));
     expect(paint2.blendMode, BlendMode.srcOver);
   });
-  test('BorderSide - won\'t lerp into negative widths', () {
+  test("BorderSide - won't lerp into negative widths", () {
     const BorderSide side0 = BorderSide(width: 0.0);
     const BorderSide side1 = BorderSide(width: 1.0);
     const BorderSide side2 = BorderSide(width: 2.0);

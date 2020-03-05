@@ -127,7 +127,7 @@ void main() {
       memoryFileSystem = MemoryFileSystem();
     });
 
-    testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
+    testUsingContext("throws ToolExit if gradle.properties doesn't exist", () {
       final Directory sampleAppAndroid = globals.fs.directory('/sample-app/android');
       sampleAppAndroid.createSync(recursive: true);
 
@@ -236,8 +236,8 @@ void main() {
 
     testUsingContext('returns the gradlew path', () {
       final Directory androidDirectory = globals.fs.directory('/android')..createSync();
-      androidDirectory.childFile('gradlew')..createSync();
-      androidDirectory.childFile('gradlew.bat')..createSync();
+      androidDirectory.childFile('gradlew').createSync();
+      androidDirectory.childFile('gradlew.bat').createSync();
       androidDirectory.childFile('gradle.properties').createSync();
 
       when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
@@ -316,7 +316,7 @@ void main() {
       GradleUtils: () => gradleUtils,
     });
 
-    testUsingContext('doesn\'t give execute permission to gradle if not needed', () {
+    testUsingContext("doesn't give execute permission to gradle if not needed", () {
       final FlutterProject flutterProject = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
