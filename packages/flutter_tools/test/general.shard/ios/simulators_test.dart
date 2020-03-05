@@ -452,7 +452,7 @@ void main() {
       );
     });
 
-    testUsingContext('getDevices succeeds', () async {
+    testWithoutContext('getDevices succeeds', () async {
       final List<SimDevice> devices = await simControl.getDevices();
 
       final SimDevice watch = devices[0];
@@ -478,23 +478,17 @@ void main() {
       expect(tv.name, 'Apple TV');
       expect(tv.udid, 'TEST-TV-UDID');
       expect(tv.isBooted, isFalse);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      SimControl: () => simControl,
     });
 
-    testUsingContext('getDevices handles bad simctl output', () async {
+    testWithoutContext('getDevices handles bad simctl output', () async {
       when(mockProcessManager.run(any))
           .thenAnswer((Invocation _) async => ProcessResult(mockPid, 0, 'Install Started', ''));
       final List<SimDevice> devices = await simControl.getDevices();
 
       expect(devices, isEmpty);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      SimControl: () => simControl,
     });
 
-    testUsingContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
+    testWithoutContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
       final IOSSimulator iosSimulatorA = IOSSimulator('x', name: 'Testo', simulatorCategory: 'NaN');
 
       expect(await iosSimulatorA.sdkMajorVersion, 11);
