@@ -101,8 +101,7 @@ void main() {
         '-format',
         'json',
         '-utf8',
-        '-la
-        ',
+        '-latest',
         ...?additionalArguments,
         ...?requirementArguments,
       ],
