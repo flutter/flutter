@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 class ExpansionTileSample extends StatelessWidget {
@@ -68,20 +67,10 @@ final List<Entry> data = <Entry>[
 
 // Displays one Entry. If the entry has children then it's displayed
 // with an ExpansionTile.
-class EntryItem extends StatefulWidget {
+class EntryItem extends StatelessWidget {
   const EntryItem(this.entry);
 
   final Entry entry;
-
-  @override
-  _EntryItemState createState() => _EntryItemState();
-}
-
-class _EntryItemState extends State<EntryItem> {
-  Color _collapsedHeaderColor = Colors.orange;
-  Color _expandedHeaderColor = Colors.pink;
-  List<Color> colors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.brown, Colors.cyan, Colors.lime];
-  Random random = Random();
 
   Widget _buildTiles(Entry root) {
     if (root.children.isEmpty)
@@ -90,29 +79,12 @@ class _EntryItemState extends State<EntryItem> {
       key: PageStorageKey<Entry>(root),
       title: Text(root.title),
       children: root.children.map<Widget>(_buildTiles).toList(),
-      headerColorTween: ColorTween(
-        begin: _collapsedHeaderColor,
-        end: _expandedHeaderColor,
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        FlatButton(
-          child: const Text('Update headerColorTween'),
-          onPressed: () {
-            setState(() {
-              _collapsedHeaderColor = colors[random.nextInt(colors.length)];
-              _expandedHeaderColor = colors[random.nextInt(colors.length)];
-            });
-          },
-        ),
-        _buildTiles(widget.entry),
-      ],
-    );
+    return _buildTiles(entry);
   }
 }
 
