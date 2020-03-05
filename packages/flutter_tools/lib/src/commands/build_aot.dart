@@ -19,7 +19,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
-    usesDartDefines();
+    usesDartDefineOption();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -39,10 +39,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
-      )
-      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
       )
@@ -70,7 +66,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
-    final BuildMode buildMode = getBuildMode();
+    final BuildInfo buildInfo = getBuildInfo();
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
@@ -80,16 +76,13 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     await aotBuilder.build(
       platform: platform,
       outputPath: outputPath,
-      buildMode: buildMode,
+      buildInfo: buildInfo,
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
       reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
       extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
-      extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
-      dartDefines: dartDefines,
-      treeShakeIcons: boolArg('tree-shake-icons'),
     );
     return FlutterCommandResult.success();
   }

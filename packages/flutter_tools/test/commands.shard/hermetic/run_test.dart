@@ -654,10 +654,9 @@ class MockWebRunnerFactory extends Mock implements WebRunnerFactory {
     FlutterProject flutterProject,
     bool ipv6,
     DebuggingOptions debuggingOptions,
-    List<String> dartDefines,
     UrlTunneller urlTunneller,
   }) {
-    _dartDefines = dartDefines;
+    _dartDefines = debuggingOptions.buildInfo.dartDefines;
     return MockWebRunner();
   }
 }
