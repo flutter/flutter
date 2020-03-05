@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -15,7 +13,6 @@ import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -420,20 +417,13 @@ class IOSSimulator extends Device {
   }
 
   Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath) async {
-    await sideloadUpdatedAssetsForInstalledApplicationBundle(buildInfo, mainPath);
-
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
-
-    final BuildInfo debugBuildInfo = BuildInfo(BuildMode.debug, buildInfo.flavor,
-        trackWidgetCreation: buildInfo.trackWidgetCreation,
-        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        treeShakeIcons: buildInfo.treeShakeIcons);
+    assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
-      buildInfo: debugBuildInfo,
+      buildInfo: buildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
     );
@@ -450,19 +440,6 @@ class IOSSimulator extends Device {
 
     // Step 3: Install the updated bundle to the simulator.
     await SimControl.instance.install(id, globals.fs.path.absolute(bundle.path));
-  }
-
-  @visibleForTesting
-  Future<void> sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo buildInfo, String mainPath) {
-    // Run compiler to produce kernel file for the application.
-    return BundleBuilder().build(
-      platform: TargetPlatform.ios,
-      mainPath: mainPath,
-      precompiledSnapshot: false,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      treeShakeIcons: false,
-    );
   }
 
   @override

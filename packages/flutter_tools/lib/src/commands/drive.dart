@@ -144,11 +144,12 @@ class DriveCommand extends RunCommandBase {
 
     String observatoryUri;
     ResidentRunner residentRunner;
+    final BuildInfo buildInfo = getBuildInfo();
     final bool isWebPlatform = await device.targetPlatform == TargetPlatform.web_javascript;
     if (argResults['use-existing-app'] == null) {
       globals.printStatus('Starting application: $targetFile');
 
-      if (getBuildInfo().isRelease && !isWebPlatform) {
+      if (buildInfo.isRelease && !isWebPlatform) {
         // This is because we need VM service to be able to drive the app.
         // For Flutter Web, testing in release mode is allowed.
         throwToolExit(
@@ -159,7 +160,7 @@ class DriveCommand extends RunCommandBase {
         );
       }
 
-      if (isWebPlatform && getBuildInfo().isDebug) {
+      if (isWebPlatform && buildInfo.isDebug) {
         // TODO(angjieli): remove this once running against
         // target under test_driver in debug mode is supported
         throwToolExit(
@@ -178,18 +179,16 @@ class DriveCommand extends RunCommandBase {
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
           flutterProject: flutterProject,
-          trackWidgetCreation: boolArg('track-widget-creation'),
           target: targetFile,
-          buildMode: getBuildMode()
+          buildInfo: buildInfo
         );
         residentRunner = webRunnerFactory.createWebRunner(
           flutterDevice,
           target: targetFile,
           flutterProject: flutterProject,
           ipv6: ipv6,
-          debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
+          debuggingOptions: DebuggingOptions.enabled(buildInfo),
           stayResident: false,
-          dartDefines: dartDefines,
           urlTunneller: null,
         );
         final Completer<void> appStartedCompleter = Completer<void>.sync();
