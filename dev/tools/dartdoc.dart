@@ -136,6 +136,7 @@ Future<void> main(List<String> arguments) async {
     '--link-to-source-root', '../..',
     '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
     '--inject-html',
+    '--use-base-href',
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',
