@@ -1651,6 +1651,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
       _updateRemoteEditingValueIfNeeded();
+    } else if (isRepeat) {
+      _updateRemoteEditingValueIfNeeded();
     } else {
       _value = value;
     }
