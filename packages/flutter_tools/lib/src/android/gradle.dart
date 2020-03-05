@@ -19,7 +19,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -329,9 +328,6 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
-  }
-  if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
-    command.add('-Pdart-defines=${jsonEncode(androidBuildInfo.buildInfo.dartDefines)}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be

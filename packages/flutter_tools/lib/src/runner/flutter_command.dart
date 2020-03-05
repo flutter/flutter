@@ -109,7 +109,6 @@ class FlutterOptions {
   static const String kFileSystemScheme = 'filesystem-scheme';
   static const String kSplitDebugInfoOption = 'split-debug-info';
   static const String kDartObfuscationOption = 'obfuscate';
-  static const String kDartDefinesOption = 'dart-define';
 }
 
 abstract class FlutterCommand extends Command<void> {
@@ -337,16 +336,19 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesDartDefineOption() {
+  void usesDartDefines() {
     argParser.addMultiOption(
-      FlutterOptions.kDartDefinesOption,
-      help: 'Additional key-value pairs that will be available as constants '
-            'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
-            'and double.fromEnvironment constructors.\n'
+      'dart-define',
+      help: 'Passed to the Dart compiler building this application as a -D flag.\n'
+            'Values supported by this option are compiler implementation specific.\n'
             'Multiple defines can be passed by repeating --dart-define multiple times.',
-      valueHelp: 'foo=bar',
+      valueHelp: 'FOO=bar',
+      hide: true,
     );
   }
+
+  /// The values passed via the `--dart-define` option.
+  List<String> get dartDefines => stringsArg('dart-define');
 
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
@@ -506,15 +508,19 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-number')
         : null;
 
-    final List<String> extraFrontEndOptions =
+    String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
-            : <String>[];
+            ? stringArg(FlutterOptions.kExtraFrontEndOptions)
+            : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
       for (final String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
-        extraFrontEndOptions.add(flag);
+        if (extraFrontEndOptions != null) {
+          extraFrontEndOptions += ',' + flag;
+        } else {
+          extraFrontEndOptions = flag;
+        }
       }
     }
 
@@ -537,12 +543,10 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      extraFrontEndOptions: extraFrontEndOptions?.isNotEmpty ?? false
-        ? extraFrontEndOptions
-        : null,
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
-        : null,
+          ? stringArg(FlutterOptions.kExtraGenSnapshotOptions)
+          : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)
           : null,
@@ -558,9 +562,6 @@ abstract class FlutterCommand extends Command<void> {
           : kIconTreeShakerEnabledDefault,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
-      dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
-          ? stringsArg(FlutterOptions.kDartDefinesOption)
-          : const <String>[],
     );
   }
 

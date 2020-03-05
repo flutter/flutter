@@ -77,6 +77,7 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
+          dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
         globals.fs.currentDirectory.childFile('.packages')
@@ -138,6 +139,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -156,6 +158,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
+      dartDefines: <String>[],
       urlTunneller: null,
     );
 
@@ -171,6 +174,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     );
 
@@ -230,6 +234,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -266,6 +271,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
@@ -773,6 +779,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -813,6 +820,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
+      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 

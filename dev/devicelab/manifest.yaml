@@ -323,13 +323,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  android_defines_test:
-    description: >
-      Builds an APK with a --dart-define and verifies it can be used as a constant
-    stage: devicelab
-    flaky: true
-    required_agent_capabilities: ["linux/android"]
-
   android_obfuscate_test:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
@@ -406,13 +399,6 @@ tasks:
     required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
-
-  ios_defines_test:
-    description: >
-      Builds a Framework with a --dart-define and verifies it can be used as a constant
-    stage: devicelab
-    flaky: true
-    required_agent_capabilities: ["mac/ios"]
 
   ios_content_validation_test:
     description: >
