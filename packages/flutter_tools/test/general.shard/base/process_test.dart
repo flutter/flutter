@@ -19,8 +19,6 @@ import '../../src/mocks.dart' show MockProcess,
                                    MockStdio,
                                    flakyProcessFactory;
 
-class MockLogger extends Mock implements Logger {}
-
 void main() {
   group('process exceptions', () {
     ProcessManager mockProcessManager;
@@ -30,7 +28,7 @@ void main() {
       mockProcessManager = PlainMockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -50,7 +48,7 @@ void main() {
       int postProcessRecording;
       int cleanup;
 
-      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: MockLogger());
+      final ShutdownHooks shutdownHooks = ShutdownHooks(logger: BufferLogger.test());
 
       shutdownHooks.addShutdownHook(() async {
         serializeRecording1 = i++;
@@ -132,11 +130,11 @@ void main() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
       flakyProcessUtils = ProcessUtils(
         processManager: flakyProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -345,7 +343,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 
@@ -372,7 +370,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       processUtils = ProcessUtils(
         processManager: mockProcessManager,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
       );
     });
 

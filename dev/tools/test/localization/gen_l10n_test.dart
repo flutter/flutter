@@ -15,7 +15,7 @@ import '../../localization/localizations_utils.dart';
 import '../common.dart';
 
 final String defaultArbPathString = path.join('lib', 'l10n');
-const String defaultTemplateArbFileName = 'app_en_US.arb';
+const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''
@@ -251,7 +251,7 @@ void main() {
         fail('Setting language and locales should not fail: \n$e');
       }
 
-      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en_US')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
     });
 
@@ -263,7 +263,7 @@ void main() {
         .writeAsStringSync(singleZhMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
 
       LocalizationsGenerator generator;
@@ -280,7 +280,7 @@ void main() {
         fail('Setting language and locales should not fail: \n$e');
       }
 
-      expect(generator.supportedLocales.first, LocaleInfo.fromString('en_US'));
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
     });
@@ -288,7 +288,7 @@ void main() {
     test('adds preferred locales to the top of supportedLocales and supportedLanguageCodes', () {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
@@ -313,7 +313,7 @@ void main() {
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
-      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en_US'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en'));
     });
 
     test(
@@ -322,14 +322,14 @@ void main() {
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en_US.arb')
+        l10nDirectory.childFile('app_en.arb')
           .writeAsStringSync(singleMessageArbFileString);
         l10nDirectory.childFile('app_es.arb')
           .writeAsStringSync(singleEsMessageArbFileString);
         l10nDirectory.childFile('app_zh.arb')
           .writeAsStringSync(singleZhMessageArbFileString);
 
-        const String preferredSupportedLocaleString = '[44, "en_US"]';
+        const String preferredSupportedLocaleString = '[44, "en"]';
         LocalizationsGenerator generator;
         try {
           generator = LocalizationsGenerator(fs);
@@ -363,7 +363,7 @@ void main() {
       () {
         final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
           ..createSync(recursive: true);
-        l10nDirectory.childFile('app_en_US.arb')
+        l10nDirectory.childFile('app_en.arb')
           .writeAsStringSync(singleMessageArbFileString);
         l10nDirectory.childFile('app_es.arb')
           .writeAsStringSync(singleEsMessageArbFileString);
@@ -405,7 +405,7 @@ void main() {
         .writeAsStringSync(singleZhMessageArbFileString);
       l10nDirectory.childFile('app_es.arb')
         .writeAsStringSync(singleEsMessageArbFileString);
-      l10nDirectory.childFile('app_en_US.arb')
+      l10nDirectory.childFile('app_en.arb')
         .writeAsStringSync(singleMessageArbFileString);
 
       LocalizationsGenerator generator;
@@ -423,11 +423,11 @@ void main() {
       }
 
       if (Platform.isWindows) {
-        expect(generator.arbPathStrings.first, r'lib\l10n\app_en_US.arb');
+        expect(generator.arbPathStrings.first, r'lib\l10n\app_en.arb');
         expect(generator.arbPathStrings.elementAt(1), r'lib\l10n\app_es.arb');
         expect(generator.arbPathStrings.elementAt(2), r'lib\l10n\app_zh.arb');
       } else {
-        expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
+        expect(generator.arbPathStrings.first, 'lib/l10n/app_en.arb');
         expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
         expect(generator.arbPathStrings.elementAt(2), 'lib/l10n/app_zh.arb');
       }
@@ -581,6 +581,32 @@ void main() {
       fail(
         'Since en locale is specified twice, setting languages and locales '
         'should fail'
+      );
+    });
+
+    test('throws when the base locale does not exist', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+
+      try {
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: 'app_en_US.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Arb file for a fallback, en, does not exist'));
+        return;
+      }
+
+      fail(
+        'Since en_US.arb is specified, but en.arb is not, '
+        'the tool should throw an error.'
       );
     });
   });

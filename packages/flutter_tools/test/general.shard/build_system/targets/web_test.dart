@@ -90,9 +90,9 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     webResources.childFile('foo.txt')
-      ..writeAsStringSync('A');
+      .writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
 
     await const WebReleaseBundle().build(environment);
@@ -315,7 +315,7 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
       environment.buildDir.childFile('main.dart.js.deps')
-        ..writeAsStringSync('file:///a.dart');
+        .writeAsStringSync('file:///a.dart');
       return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
