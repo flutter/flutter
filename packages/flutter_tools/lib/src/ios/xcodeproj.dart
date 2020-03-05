@@ -218,7 +218,7 @@ List<String> _xcodeBuildSettingsLines({
     }
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
     xcodeBuildSettings.add('LOCAL_ENGINE=$engineOutPath');
-    // Only write this or local engines, where it is supposed to be sticky to
+    // Only write this for local engines, where it is supposed to be sticky to
     // match the engine configuration. Avoid writing it otherwise so that it
     // does not stick the user with the wrong build mode, particularly for
     // existing app use cases.
