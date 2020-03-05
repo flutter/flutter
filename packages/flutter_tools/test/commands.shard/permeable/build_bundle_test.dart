@@ -33,7 +33,7 @@ void main() {
     when(
       mockBundleBuilder.build(
         platform: anyNamed('platform'),
-        buildInfo: anyNamed('buildInfo'),
+        buildMode: anyNamed('buildMode'),
         mainPath: anyNamed('mainPath'),
         manifestPath: anyNamed('manifestPath'),
         applicationKernelFilePath: anyNamed('applicationKernelFilePath'),

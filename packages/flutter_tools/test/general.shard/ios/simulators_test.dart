@@ -9,6 +9,8 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -202,6 +204,26 @@ void main() {
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
+  });
+
+  testUsingContext('builds with targetPlatform', () async {
+    final IOSSimulator simulator = IOSSimulator('x', name: 'iPhone X');
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
+
+    final VerificationResult result = verify(buildSystem.build(any, captureAny));
+    final Environment environment = result.captured.single as Environment;
+    expect(environment.defines, <String, String>{
+      kTargetFile: 'lib/main.dart',
+      kTargetPlatform: 'ios',
+      kBuildMode: 'debug',
+      kTrackWidgetCreation: 'false',
+      kIconTreeShakerFlag: null,
+    });
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
   });
 
   group('Simulator screenshot', () {
