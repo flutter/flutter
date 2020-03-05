@@ -1311,7 +1311,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     }
 
     if (widget.textStyle != null) {
-      result = DefaultTextStyle(
+      result = DefaultTextStyle.merge(
         style: widget.textStyle,
         child: result,
       );

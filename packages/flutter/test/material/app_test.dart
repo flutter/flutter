@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
@@ -832,6 +833,59 @@ void main() {
     expect(find.text('non-regular page one'), findsOneWidget);
     expect(find.text('regular page one'), findsNothing);
     expect(find.text('regular page two'), findsNothing);
+  });
+
+  testWidgets('MaterialApp propogates DefaultTextStyle properties to children', (WidgetTester tester) async {
+    const String text = 'foo';
+    await tester.pumpWidget(
+      const DefaultTextStyle(
+        style: TextStyle(),
+        textHeightBehavior: TextHeightBehavior(applyHeightToFirstAscent: false),
+        child: MaterialApp(
+          home: Scaffold(
+            body: Text(text),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph renderParagraph = tester.renderObject<RenderParagraph>(find.text(text));
+    expect(renderParagraph.textHeightBehavior.applyHeightToFirstAscent, isFalse);
+  });
+
+  testWidgets('MaterialApp propogates DefaultTextStyle properties to routes', (WidgetTester tester) async {
+    const String pageOneText = 'foo';
+    const String pageTwoText = 'bar';
+    const String pageTwoRoute = '/bar';
+
+    await tester.pumpWidget(
+       DefaultTextStyle(
+        style: const TextStyle(),
+        textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
+        child: MaterialApp(
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) {
+              return Column(children: <Widget>[
+                const Text(pageOneText),
+                RaisedButton(onPressed: () {
+                  Navigator.of(context).pushNamed(pageTwoRoute);
+                }),
+              ]);
+            },
+            pageTwoRoute: (BuildContext context) => const Text(pageTwoText),
+          },
+        ),
+      ),
+    );
+
+    RenderParagraph renderParagraph = tester.renderObject<RenderParagraph>(find.text(pageOneText));
+    expect(renderParagraph.textHeightBehavior.applyHeightToFirstAscent, isFalse);
+
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pumpAndSettle();
+
+    renderParagraph = tester.renderObject<RenderParagraph>(find.text(pageTwoText));
+    expect(renderParagraph.textHeightBehavior.applyHeightToFirstAscent, isFalse);
   });
 }
 
