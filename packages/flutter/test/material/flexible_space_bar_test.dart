@@ -25,26 +25,28 @@ void main() {
     Size size = tester.getSize(title);
     expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
-    // Clear the widget tree to avoid animating between Android and iOS.
-    await tester.pumpWidget(Container(key: UniqueKey()));
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      // Clear the widget tree to avoid animating between platforms.
+      await tester.pumpWidget(Container(key: UniqueKey()));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
-          appBar: AppBar(
-            flexibleSpace: const FlexibleSpaceBar(
-              title: Text('X'),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            appBar: AppBar(
+              flexibleSpace: const FlexibleSpaceBar(
+                title: Text('X'),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    center = tester.getCenter(title);
-    size = tester.getSize(title);
-    expect(center.dx, greaterThan(400.0 - size.width / 2.0));
-    expect(center.dx, lessThan(400.0 + size.width / 2.0));
+      center = tester.getCenter(title);
+      size = tester.getSize(title);
+      expect(center.dx, greaterThan(400.0 - size.width / 2.0));
+      expect(center.dx, lessThan(400.0 + size.width / 2.0));
+    }
   });
 
   testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
@@ -154,6 +156,15 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
 
+    // Clear the widget tree to avoid animating between iOS and macOS.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.macOS, null));
+    expect(getTitleBottomLeft(), const Offset(390.0, 16.0));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
+    expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
+
   }, skip: isBrowser);
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
@@ -187,7 +198,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.android, true));
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
 
-    // Clear the widget tree to avoid animating between Android and iOS.
+    // Clear the widget tree to avoid animating between platforms.
     await tester.pumpWidget(Container(key: UniqueKey()));
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, null));
@@ -195,6 +206,33 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS, false));
     expect(getTitleBottomLeft(), Offset.zero);
+
+    // Clear the widget tree to avoid animating between platforms.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.macOS, null));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    // Clear the widget tree to avoid animating between platforms.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.windows, null));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.windows, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
+
+    // Clear the widget tree to avoid animating between platforms.
+    await tester.pumpWidget(Container(key: UniqueKey()));
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.linux, null));
+    expect(getTitleBottomLeft(), Offset.zero);
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.linux, true));
+    expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   }, skip: isBrowser);
 }
 

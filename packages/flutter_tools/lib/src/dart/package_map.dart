@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages_file.dart' as packages_file;
 
 import '../globals.dart' as globals;
@@ -17,9 +19,12 @@ Map<String, Uri> _parse(String packagesPath) {
 class PackageMap {
   PackageMap(this.packagesPath);
 
-  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+  /// Create a [PackageMap] for testing.
+  PackageMap.test(Map<String, Uri> input)
+    : packagesPath = '.packages',
+      _map = input;
 
-  static String get globalGeneratedPackagesPath => globals.fs.path.setExtension(globalPackagesPath, '.generated');
+  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
   static set globalPackagesPath(String value) {
     _globalPackagesPath = value;

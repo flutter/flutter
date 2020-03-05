@@ -325,6 +325,12 @@ void main() {
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+
+    await tester.pumpWidget(build(TargetPlatform.macOS));
+    await tester.pumpAndSettle(); // Run theme change animation.
+
+    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   group('PopupMenuButton with Icon', () {
@@ -345,7 +351,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(isInstanceOf<AssertionError>()));
+      }, throwsAssertionError);
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
@@ -1190,6 +1196,41 @@ void main() {
 
     expect(rootObserver.menuCount, 1);
     expect(nestedObserver.menuCount, 0);
+  });
+
+  testWidgets('PopupMenuButton calling showButtonMenu manually', (WidgetTester tester) async {
+    final GlobalKey<PopupMenuButtonState<int>> globalKey = GlobalKey();
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                PopupMenuButton<int>(
+                  key: globalKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<int>>[
+                      const PopupMenuItem<int>(
+                        value: 1,
+                        child: Text('Tap me please!'),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    expect(find.text('Tap me please!'), findsNothing);
+
+    globalKey.currentState.showButtonMenu();
+    // The PopupMenuItem will appear after an animation, hence,
+    // we have to first wait for the tester to settle.
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tap me please!'), findsOneWidget);
   });
 }
 

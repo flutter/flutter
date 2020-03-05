@@ -103,7 +103,6 @@ void main() {
       expect(route['settings'] is Map<dynamic, dynamic>);
       final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;
       expect(settings.containsKey('name'));
-      expect(settings['isInitialRoute'] is bool);
 
       run.stdin.write('q');
       final int result = await run.exitCode;

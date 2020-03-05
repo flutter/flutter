@@ -139,17 +139,17 @@ String _jsonToMap(dynamic json) {
   if (json == null || json is num || json is bool)
     return '$json';
 
-  if (json is String) {
-    if (currentLocale == 'kn')
-      return generateEncodedString(json);
-    else if (json.contains("'"))
-      return 'r"""$json"""';
-    else
-      return "r'''$json'''";
-  }
+  if (json is String)
+    return generateEncodedString(currentLocale, json);
 
-  if (json is Iterable)
-    return '<dynamic>[${json.map<String>(_jsonToMap).join(',')}]';
+  if (json is Iterable) {
+    final StringBuffer buffer = StringBuffer('<dynamic>[');
+    for (final dynamic value in json) {
+      buffer.writeln('${_jsonToMap(value)},');
+    }
+    buffer.write(']');
+    return buffer.toString();
+  }
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, dynamic>{');

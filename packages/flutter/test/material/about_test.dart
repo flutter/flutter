@@ -469,6 +469,54 @@ void main() {
       findsNothing,
     );
   });
+
+  testWidgets("AboutDialog's contents are scrollable", (WidgetTester tester) async {
+    final Key contentKey = UniqueKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showAboutDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    applicationName: 'A',
+                    children: <Widget>[
+                      Container(
+                        key: contentKey,
+                        color: Colors.orange,
+                        height: 500,
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Show About Dialog'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    await tester.tap(find.text('Show About Dialog'));
+    await tester.pumpAndSettle();
+
+    // Try dragging by the [AboutDialog]'s title.
+    RenderBox box = tester.renderObject(find.text('A'));
+    Offset originalOffset = box.localToGlobal(Offset.zero);
+    await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
+
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+
+    // Try dragging by the additional children in contents.
+    box = tester.renderObject(find.byKey(contentKey));
+    originalOffset = box.localToGlobal(Offset.zero);
+    await tester.drag(find.byKey(contentKey), const Offset(0.0, -20.0));
+
+    expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

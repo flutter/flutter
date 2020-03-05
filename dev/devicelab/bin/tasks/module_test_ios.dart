@@ -57,13 +57,6 @@ Future<void> main() async {
         );
       }
 
-      if (await _hasDebugSymbols(ephemeralReleaseHostApp)) {
-        return TaskResult.failure(
-          "Ephemeral host app ${ephemeralReleaseHostApp.path}'s App.framework's "
-          "debug symbols weren't stripped in release mode"
-        );
-      }
-
       section('Clean build');
 
       await inDirectory(projectDir, () async {
@@ -94,12 +87,6 @@ Future<void> main() async {
       if (!await _isAppAotBuild(ephemeralProfileHostApp)) {
         return TaskResult.failure(
           'Ephemeral host app ${ephemeralProfileHostApp.path} was not a profile build as expected'
-        );
-      }
-
-      if (!await _hasDebugSymbols(ephemeralProfileHostApp)) {
-        return TaskResult.failure(
-          "Ephemeral host app ${ephemeralProfileHostApp.path}'s App.framework does not contain debug symbols"
         );
       }
 
@@ -283,10 +270,10 @@ Future<void> main() async {
       final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
       if (!objectiveCAnalyticsOutput.contains('cd24: ios')
           || !objectiveCAnalyticsOutput.contains('cd25: true')
-          || !objectiveCAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 
@@ -372,10 +359,10 @@ Future<void> main() async {
       final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
       if (!swiftAnalyticsOutput.contains('cd24: ios')
           || !swiftAnalyticsOutput.contains('cd25: true')
-          || !swiftAnalyticsOutput.contains('viewName: build/bundle')) {
+          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
-          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
         );
       }
 
@@ -405,27 +392,4 @@ Future<bool> _isAppAotBuild(Directory app) async {
   );
 
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
-}
-
-Future<bool> _hasDebugSymbols(Directory app) async {
-  final String binary = path.join(
-    app.path,
-    'Frameworks',
-    'App.framework',
-    'App',
-  );
-
-  final String symbolTable = await eval(
-    'dsymutil',
-    <String> [
-      '--dump-debug-map',
-      binary,
-    ],
-    // The output is huge.
-    printStdout: false,
-  );
-
-  // Search for some random Flutter framework Dart function which should always
-  // be in App.framework.
-  return symbolTable.contains('BuildOwner_reassemble');
 }

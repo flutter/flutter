@@ -32,17 +32,15 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// Subclasses should override this getter to return the builders for the overlay.
   Iterable<OverlayEntry> createOverlayEntries();
 
-  /// The entries this route has placed in the overlay.
   @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install() {
     assert(_overlayEntries.isEmpty);
     _overlayEntries.addAll(createOverlayEntries());
-    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
-    super.install(insertionPoint);
+    super.install();
   }
 
   /// Controls whether [didPop] calls [NavigatorState.finalizeRoute].
@@ -68,8 +66,6 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    for (final OverlayEntry entry in _overlayEntries)
-      entry.remove();
     _overlayEntries.clear();
     super.dispose();
   }
@@ -111,6 +107,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the opaque route will not be built to save resources.
   bool get opaque;
 
+  // This ensures that if we got to the dismissed state while still current,
+  // we will still be disposed when we are eventually popped.
+  //
+  // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
   bool get finishedWhenPopped => _controller.status == AnimationStatus.dismissed;
 
@@ -185,13 +185,13 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install() {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
     _animation = createAnimation();
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    super.install(insertionPoint);
+    super.install();
   }
 
   @override
@@ -201,6 +201,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     _didPushOrReplace();
     super.didPush();
     return _controller.forward();
+  }
+
+  @override
+  void didAdd() {
+    assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _didPushOrReplace();
+    super.didAdd();
+    _controller.value = _controller.upperBound;
   }
 
   @override
@@ -247,30 +256,82 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didChangeNext(nextRoute);
   }
 
+  // A callback method that disposes existing train hopping animation and
+  // removes its listener.
+  //
+  // This property is non-null if there is a train hopping in progress, and the
+  // caller must reset this property to null after it is called.
+  VoidCallback _trainHoppingListenerRemover;
+
   void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
+    // There is an existing train hopping in progress. Unfortunately, we cannot
+    // dispose current train hopping animation until we replace it with a new
+    // animation.
+    final VoidCallback previousTrainHoppingListenerRemover = _trainHoppingListenerRemover;
+    _trainHoppingListenerRemover = null;
+
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double> current = _secondaryAnimation.parent;
       if (current != null) {
         final Animation<double> currentTrain = current is TrainHoppingAnimation ? current.currentTrain : current;
         final Animation<double> nextTrain = nextRoute._animation;
-        if (currentTrain.value == nextTrain.value) {
+        if (
+          currentTrain.value == nextTrain.value ||
+          nextTrain.status == AnimationStatus.completed ||
+          nextTrain.status == AnimationStatus.dismissed
+        ) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
         } else {
+          // Two trains animate at different values. We have to do train hopping.
+          // There are three possibilities of train hopping:
+          //  1. We hop on the nextTrain when two trains meet in the middle using
+          //     TrainHoppingAnimation.
+          //  2. There is no chance to hop on nextTrain because two trains never
+          //     cross each other. We have to directly set the animation to
+          //     nextTrain once the nextTrain stops animating.
+          //  3. A new _updateSecondaryAnimation is called before train hopping
+          //     finishes. We leave a listener remover for the next call to
+          //     properly clean up the existing train hopping.
           TrainHoppingAnimation newAnimation;
+          void _jumpOnAnimationEnd(AnimationStatus status) {
+            switch (status) {
+              case AnimationStatus.completed:
+              case AnimationStatus.dismissed:
+                // The nextTrain has stopped animating without train hopping.
+                // Directly sets the secondary animation and disposes the
+                // TrainHoppingAnimation.
+                _setSecondaryAnimation(nextTrain, nextRoute.completed);
+                if (_trainHoppingListenerRemover != null) {
+                  _trainHoppingListenerRemover();
+                  _trainHoppingListenerRemover = null;
+                }
+                break;
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
+            }
+          }
+          _trainHoppingListenerRemover = () {
+            nextTrain.removeStatusListener(_jumpOnAnimationEnd);
+            newAnimation?.dispose();
+          };
+          nextTrain.addStatusListener(_jumpOnAnimationEnd);
           newAnimation = TrainHoppingAnimation(
             currentTrain,
             nextTrain,
             onSwitchedTrain: () {
               assert(_secondaryAnimation.parent == newAnimation);
               assert(newAnimation.currentTrain == nextRoute._animation);
+              // We can hop on the nextTrain, so we don't need to listen to
+              // whether the nextTrain has stopped.
               _setSecondaryAnimation(newAnimation.currentTrain, nextRoute.completed);
-              newAnimation.dispose();
+              if (_trainHoppingListenerRemover != null) {
+                _trainHoppingListenerRemover();
+                _trainHoppingListenerRemover = null;
+              }
             },
           );
           _setSecondaryAnimation(newAnimation, nextRoute.completed);
-        }
-        if (current is TrainHoppingAnimation) {
-          current.dispose();
         }
       } else {
         _setSecondaryAnimation(nextRoute._animation, nextRoute.completed);
@@ -278,11 +339,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     } else {
       _setSecondaryAnimation(kAlwaysDismissedAnimation);
     }
+    // Finally, we dispose any previous train hopping animation because it
+    // has been successfully updated at this point.
+    if (previousTrainHoppingListenerRemover != null) {
+      previousTrainHoppingListenerRemover();
+    }
   }
 
   void _setSecondaryAnimation(Animation<double> animation, [Future<dynamic> disposed]) {
     _secondaryAnimation.parent = animation;
-    // Release the reference to the next route's animation when that route
+    // Releases the reference to the next route's animation when that route
     // is disposed.
     disposed?.then((dynamic _) {
       if (_secondaryAnimation.parent == animation) {
@@ -548,7 +614,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally)
       return RoutePopDisposition.pop;
-    return await super.willPop();
+    return super.willPop();
   }
 
   @override
@@ -668,10 +734,15 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     super.dispose();
   }
 
+  bool get _shouldIgnoreFocusRequest {
+    return widget.route.animation?.status == AnimationStatus.reverse ||
+      (widget.route.navigator?.userGestureInProgress ?? false);
+  }
+
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
   // and route.offstage.
   void _routeSetState(VoidCallback fn) {
-    if (widget.route.isCurrent) {
+    if (widget.route.isCurrent && !_shouldIgnoreFocusRequest) {
       widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
     }
     setState(fn);
@@ -704,8 +775,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                     AnimatedBuilder(
                       animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                       builder: (BuildContext context, Widget child) {
-                        final bool ignoreEvents = widget.route.animation?.status == AnimationStatus.reverse ||
-                            (widget.route.navigator?.userGestureInProgress ?? false);
+                        final bool ignoreEvents = _shouldIgnoreFocusRequest;
                         focusScopeNode.canRequestFocus = !ignoreEvents;
                         return IgnorePointer(
                           ignoring: ignoreEvents,
@@ -968,8 +1038,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
-    super.install(insertionPoint);
+  void install() {
+    super.install();
     _animationProxy = ProxyAnimation(super.animation);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }
@@ -980,6 +1050,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
     }
     return super.didPush();
+  }
+
+  @override
+  void didAdd() {
+    if (_scopeKey.currentState != null) {
+      navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
+    }
+    super.didAdd();
   }
 
   // The API for subclasses to override - used by this class
@@ -1649,6 +1727,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
+/// The `routeSettings` will be used in the construction of the dialog's route.
+/// See [RouteSettings] for more details.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -1665,6 +1746,7 @@ Future<T> showGeneralDialog<T>({
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -1676,6 +1758,7 @@ Future<T> showGeneralDialog<T>({
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
+    settings: routeSettings,
   ));
 }
 

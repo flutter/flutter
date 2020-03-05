@@ -129,7 +129,7 @@ class CocoaPods {
       return true;
     }
     final String cocoapodsReposDir = globals.platform.environment['CP_REPOS_DIR']
-      ?? globals.fs.path.join(homeDirPath, '.cocoapods', 'repos');
+      ?? globals.fs.path.join(globals.fsUtils.homeDirPath, '.cocoapods', 'repos');
     return globals.fs.isDirectory(globals.fs.path.join(cocoapodsReposDir, 'master'));
   }
 
@@ -143,13 +143,14 @@ class CocoaPods {
       throwToolExit('Podfile missing');
     }
     bool podsProcessed = false;
-    if (await _checkPodCondition()) {
-      if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
-        await _runPodInstall(xcodeProject, engineDir);
-        podsProcessed = true;
+    if (_shouldRunPodInstall(xcodeProject, dependenciesChanged)) {
+      if (!await _checkPodCondition()) {
+        throwToolExit('CocoaPods not installed or not in valid state.');
       }
-      _warnIfPodfileOutOfDate(xcodeProject);
+      await _runPodInstall(xcodeProject, engineDir);
+      podsProcessed = true;
     }
+    _warnIfPodfileOutOfDate(xcodeProject);
     return podsProcessed;
   }
 
@@ -163,6 +164,15 @@ class CocoaPods {
           '$noCocoaPodsConsequence\n'
           'To install:\n'
           '$cocoaPodsInstallInstructions\n',
+          emphasis: true,
+        );
+        return false;
+      case CocoaPodsStatus.brokenInstall:
+        globals.printError(
+          'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
+          '$brokenCocoaPodsConsequence\n'
+          'To re-install:\n'
+          '$cocoaPodsUpgradeInstructions\n',
           emphasis: true,
         );
         return false;
@@ -193,7 +203,7 @@ class CocoaPods {
           emphasis: true,
         );
         break;
-      default:
+      case CocoaPodsStatus.recommended:
         break;
     }
     if (!await isCocoaPodsInitialized) {
@@ -202,7 +212,7 @@ class CocoaPods {
         '$noCocoaPodsConsequence\n'
         'To initialize CocoaPods, run:\n'
         '  pod setup\n'
-        'once to finalize CocoaPods\' installation.',
+        "once to finalize CocoaPods' installation.",
         emphasis: true,
       );
       return false;
@@ -315,7 +325,7 @@ class CocoaPods {
     if (globals.logger.isVerbose || result.exitCode != 0) {
       final String stdout = result.stdout as String;
       if (stdout.isNotEmpty) {
-        globals.printStatus('CocoaPods\' output:\n↳');
+        globals.printStatus("CocoaPods' output:\n↳");
         globals.printStatus(stdout, indent: 4);
       }
       final String stderr = result.stderr as String;

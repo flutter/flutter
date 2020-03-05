@@ -15,7 +15,7 @@ import 'package:flutter/scheduler.dart';
 /// actual data of the image once it has been obtained.
 @immutable
 class ImageInfo {
-  /// Creates an [ImageInfo] object for the given image and scale.
+  /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
   /// Both the image and the scale must not be null.
   const ImageInfo({ @required this.image, this.scale = 1.0 })
@@ -35,9 +35,9 @@ class ImageInfo {
   ///
   /// For example, if this is 2.0 it means that there are four image pixels for
   /// every one logical pixel, and the image's actual width and height (as given
-  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are double the
-  /// height and width that should be used when painting the image (e.g. in the
-  /// arguments given to [Canvas.drawImage]).
+  /// by the [dart:ui.Image.width] and [dart:ui.Image.height] properties) are
+  /// double the height and width that should be used when painting the image
+  /// (e.g. in the arguments given to [Canvas.drawImage]).
   final double scale;
 
   @override
@@ -58,11 +58,11 @@ class ImageInfo {
 
 /// Interface for receiving notifications about the loading of an image.
 ///
-/// This class overrides `operator ==` and `hashCode` to compare the individual
+/// This class overrides [operator ==] and [hashCode] to compare the individual
 /// callbacks in the listener, meaning that if you add an instance of this class
 /// as a listener (e.g. via [ImageStream.addListener]), you can instantiate a
 /// _different_ instance of this class when you remove the listener, and the
-/// listener will be properly removed as long all associated callbacks are
+/// listener will be properly removed as long as all associated callbacks are
 /// equal.
 ///
 /// Used by [ImageStream] and [ImageStreamCompleter].
@@ -203,6 +203,11 @@ class ImageChunkEvent extends Diagnosticable {
 ///
 /// ImageStream objects are backed by [ImageStreamCompleter] objects.
 ///
+/// The [ImageCache] will consider an image to be live until the listener count
+/// drops to zero after adding at least one listener. The
+/// [addOnLastListenerRemovedCallback] method is used for tracking this
+/// information.
+///
 /// See also:
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
@@ -340,6 +345,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// is false after calling `super.removeListener()`, and if so, stopping that
   /// same work.
   @protected
+  @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
@@ -391,6 +397,30 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         break;
       }
     }
+    if (_listeners.isEmpty) {
+      for (final VoidCallback callback in _onLastListenerRemovedCallbacks) {
+        callback();
+      }
+      _onLastListenerRemovedCallbacks.clear();
+    }
+  }
+
+  final List<VoidCallback> _onLastListenerRemovedCallbacks = <VoidCallback>[];
+
+  /// Adds a callback to call when [removeListener] results in an empty
+  /// list of listeners.
+  ///
+  /// This callback will never fire if [removeListener] is never called.
+  void addOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _onLastListenerRemovedCallbacks.add(callback);
+  }
+
+  /// Removes a callback previously suppplied to
+  /// [addOnLastListenerRemovedCallback].
+  void removeOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _onLastListenerRemovedCallbacks.remove(callback);
   }
 
   /// Calls all the registered listeners to notify them of a new image.

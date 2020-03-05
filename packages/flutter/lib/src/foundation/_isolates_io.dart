@@ -12,9 +12,7 @@ import 'isolates.dart' as isolates;
 
 /// The dart:io implementation of [isolate.compute].
 Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
-  if (!kReleaseMode) {
-    debugLabel ??= callback.toString();
-  }
+  debugLabel ??= kReleaseMode ? 'compute' : callback.toString();
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
@@ -81,7 +79,10 @@ Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) a
   R result;
   await Timeline.timeSync(
     configuration.debugLabel,
-    () async { result = await configuration.apply(); },
+    () async {
+      final FutureOr<R> applicationResult = await configuration.apply();
+      result = await applicationResult;
+    },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(

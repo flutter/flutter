@@ -222,14 +222,12 @@ class _TestElement extends Element {
   _TestElement() : super(const Placeholder());
 
   @override
-  void forgetChild(Element child) {
+  void performRebuild() {
     // Intentionally left empty.
   }
 
   @override
-  void performRebuild() {
-    // Intentionally left empty.
-  }
+  bool get debugDoingBuild => throw UnimplementedError();
 }
 
 class TestTree extends Object with DiagnosticableTreeMixin {

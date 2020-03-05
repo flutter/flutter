@@ -402,14 +402,14 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = PlistParser.instance.getValueFromFile(
+        fromPlist = globals.plistParser.getValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
       } on FileNotFoundException {
         // iOS tooling not found; likely not running OSX; let [fromPlist] be null
       }
-      if (fromPlist != null && !fromPlist.contains('\$')) {
+      if (fromPlist != null && !fromPlist.contains(r'$')) {
         // Info.plist has no build variables in product bundle ID.
         return fromPlist;
       }
@@ -481,7 +481,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     if (!isModule) {
       return;
     }
-    final bool pubspecChanged = fsUtils.isOlderThanReference(
+    final bool pubspecChanged = globals.fsUtils.isOlderThanReference(
       entity: ephemeralDirectory,
       referenceFile: parent.pubspecFile,
     );
@@ -528,7 +528,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
           .childDirectory('Flutter')
           .childDirectory('engine');
       final File podspec = framework.parent.childFile('Flutter.podspec');
-      fsUtils.copyDirectorySync(
+      globals.fsUtils.copyDirectorySync(
         framework,
         engineDest.childDirectory('Flutter.framework'),
       );
@@ -567,6 +567,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
 
+  Directory get compiledDartFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('App.framework');
+
   Directory get pluginRegistrantHost {
     return isModule
         ? _flutterLibRoot
@@ -602,9 +606,9 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -689,7 +693,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return fsUtils.isOlderThanReference(
+    return globals.fsUtils.isOlderThanReference(
       entity: ephemeralDirectory,
       referenceFile: parent.pubspecFile,
     ) || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
@@ -952,6 +956,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+  /// Contains configuration to add plugins to the build.
+  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
+
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
@@ -962,6 +969,9 @@ class WindowsProject extends FlutterProjectPlatform {
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
   File get nameFile => ephemeralDirectory.childFile('exe_filename');
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
@@ -996,6 +1006,12 @@ class LinuxProject extends FlutterProjectPlatform {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  /// Makefile with rules and variables for plugin builds.
+  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
+
+  /// The directory to write plugin symlinks.
+  Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

@@ -128,7 +128,7 @@ void main() {
       );
 
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
-      expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
+      expect(textureParentLayer, isA<ClipRectLayer>());
       final ClipRectLayer clipRect = textureParentLayer as ClipRectLayer;
       expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
@@ -419,7 +419,7 @@ void main() {
       );
     });
 
-    testWidgets('Android view touch events are in virtual display\'s coordinate system', (WidgetTester tester) async {
+    testWidgets("Android view touch events are in virtual display's coordinate system", (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');

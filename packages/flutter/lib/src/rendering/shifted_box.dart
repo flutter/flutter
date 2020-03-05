@@ -193,6 +193,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _resolve();
     assert(_resolvedPadding != null);
     if (child == null) {
@@ -385,6 +386,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
     final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
 
@@ -649,6 +651,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       // Let the child lay itself out at it's "natural" size, but if
       // constrainedAxis is non-null, keep any constraints on that axis.
@@ -1183,6 +1186,7 @@ class RenderBaseline extends RenderShiftedBox {
   @override
   void performLayout() {
     if (child != null) {
+      final BoxConstraints constraints = this.constraints;
       child.layout(constraints.loosen(), parentUsesSize: true);
       final double childBaseline = child.getDistanceToBaseline(baselineType);
       final double actualBaseline = baseline;

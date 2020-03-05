@@ -207,6 +207,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A widget to display before the [title].
   ///
+  /// Typically the [leading] widget is an [Icon] or an [IconButton].
+  ///
+  /// Becomes the leading component of the [NavigationToolBar] built
+  /// by this widget. The [leading] widget's width and height are constrained to
+  /// be no bigger than toolbar's height, which is [kToolbarHeight].
+  ///
   /// If this is null and [automaticallyImplyLeading] is set to true, the
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
   /// in a [Scaffold] that also has a [Drawer], the [Scaffold] will fill this
@@ -255,15 +261,44 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The primary widget displayed in the app bar.
   ///
-  /// Typically a [Text] widget containing a description of the current contents
-  /// of the app.
+  /// Typically a [Text] widget that contains a description of the current
+  /// contents of the app.
+  ///
+  /// Becomes the middle component of the [NavigationToolBar] built by this widget.
+  /// The [title]'s width is constrained to fit within the remaining space
+  /// between the toolbar's [leading] and [actions] widgets. Its height is
+  /// _not_ constrained. The [title] is vertically centered and clipped to fit
+  /// within the toolbar, whose height is [kToolbarHeight]. Typically this
+  /// isn't noticeable because a simple [Text] [title] will fit within the
+  /// toolbar by default. On the other hand, it is noticeable when a
+  /// widget with an intrinsic height that is greater than [kToolbarHeight]
+  /// is used as the [title]. For example, when the height of an Image used
+  /// as the [title] exceeds [kToolbarHeight], it will be centered and
+  /// clipped (top and bottom), which may be undesirable. In cases like this
+  /// the height of the [title] widget can be constrained. For example:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   home: Scaffold(
+  ///     appBar: AppBar(
+  ///        title: SizedBox(
+  ///        height: kToolbarHeight,
+  ///          child: child: Image.asset(logoAsset),
+  ///      ),
+  ///   ),
+  /// )
+  /// ```
   final Widget title;
 
-  /// Widgets to display after the [title] widget.
+  /// Widgets to display in a row after the [title] widget.
   ///
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
+  ///
+  /// The [actions] become the trailing component of the [NavigationToolBar] built
+  /// by this widget. The height of each action is constrained to be no bigger
+  /// than the toolbar's height, which is [kToolbarHeight].
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tab bar. It's height will
@@ -391,6 +426,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return false;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -481,6 +518,8 @@ class _AppBarState extends State<AppBar> {
       switch (theme.platform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           namesRoute = true;
           break;
         case TargetPlatform.iOS:
@@ -568,6 +607,7 @@ class _AppBarState extends State<AppBar> {
     // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
       appBar = SafeArea(
+        bottom: false,
         top: true,
         child: appBar,
       );
@@ -1311,6 +1351,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child.layout(innerConstraints, parentUsesSize: true);
     size = constraints.constrain(child.size);

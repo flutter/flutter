@@ -11,4 +11,4 @@ import 'package:test/test.dart' as test_package show TypeMatcher;
 export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 /// A matcher that compares the type of the actual value to the type argument T.
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();

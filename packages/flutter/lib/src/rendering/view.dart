@@ -255,7 +255,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.
@@ -282,7 +284,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  // ignore: MUST_CALL_SUPER
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this

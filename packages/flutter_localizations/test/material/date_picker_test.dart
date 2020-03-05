@@ -224,7 +224,7 @@ void main() {
     await tester.tap(find.text('ANNULER'));
   });
 
-  group('locale fonts don\'t overflow layout', () {
+  group("locale fonts don't overflow layout", () {
     // Test screen layouts in various locales to ensure the fonts used
     // don't overflow the layout
 

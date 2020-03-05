@@ -53,8 +53,8 @@ class ChannelCommand extends FlutterCommand {
 
   Future<void> _listChannels({ bool showAll, bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
-    final String currentChannel = FlutterVersion.instance.channel;
-    final String currentBranch = FlutterVersion.instance.getBranchName();
+    final String currentChannel = globals.flutterVersion.channel;
+    final String currentBranch = globals.flutterVersion.getBranchName();
     final Set<String> seenUnofficialChannels = <String>{};
     final List<String> rawOutput = <String>[];
 
@@ -116,7 +116,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _switchChannel(String branchName) {
+  Future<void> _switchChannel(String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
@@ -124,11 +124,13 @@ class ChannelCommand extends FlutterCommand {
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
-    return _checkout(branchName);
+    await _checkout(branchName);
+    globals.printStatus("Successfully switched to flutter channel '$branchName'.");
+    globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }
 
   static Future<void> upgradeChannel() async {
-    final String channel = FlutterVersion.instance.channel;
+    final String channel = globals.flutterVersion.channel;
     if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
       final String alternative = FlutterVersion.obsoleteBranches[channel];
       globals.printStatus("Transitioning from '$channel' to '$alternative'...");

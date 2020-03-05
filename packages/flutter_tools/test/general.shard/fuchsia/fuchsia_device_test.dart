@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -30,8 +29,8 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -40,11 +39,10 @@ void main() {
   group('fuchsia device', () {
     MemoryFileSystem memoryFileSystem;
     MockFile sshConfig;
-    MockProcessUtils mockProcessUtils;
+
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
       sshConfig = MockFile();
-      mockProcessUtils = MockProcessUtils();
       when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
@@ -118,27 +116,27 @@ void main() {
     });
 
     testUsingContext('targetPlatform arm64 works', () async {
-      when(mockProcessUtils.run(any)).thenAnswer((Invocation _) {
-        return Future<RunResult>.value(RunResult(ProcessResult(1, 0, 'aarch64', ''), <String>['']));
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 0, 'aarch64', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
-      ProcessUtils: () => mockProcessUtils,
+      ProcessManager: () => MockProcessManager(),
     });
 
     testUsingContext('targetPlatform x64 works', () async {
-      when(mockProcessUtils.run(any)).thenAnswer((Invocation _) {
-        return Future<RunResult>.value(RunResult(ProcessResult(1, 0, 'x86_64', ''), <String>['']));
+      when(globals.processManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(1, 0, 'x86_64', '');
       });
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.targetPlatform, TargetPlatform.fuchsia_x64);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       FuchsiaSdk: () => MockFuchsiaSdk(),
-      ProcessUtils: () => mockProcessUtils,
+      ProcessManager: () => MockProcessManager(),
     });
   });
 
@@ -326,8 +324,8 @@ void main() {
     });
   });
 
-   group('screenshot', () {
-      MockProcessManager mockProcessManager;
+  group('screenshot', () {
+    MockProcessManager mockProcessManager;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
@@ -347,7 +345,7 @@ void main() {
       ),
     });
 
-    test('takeScreenshot throws if file isn\'t .ppm', () async {
+    test("takeScreenshot throws if file isn't .ppm", () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
@@ -437,7 +435,7 @@ void main() {
       ),
     }, testOn: 'posix');
 
-    testUsingContext('takeScreenshot prints error if can\'t delete file from device', () async {
+    testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
 
       when(mockProcessManager.run(
@@ -549,6 +547,7 @@ void main() {
       ),
     }, testOn: 'posix');
   });
+
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
     MockPortForwarder portForwarder;
@@ -721,7 +720,7 @@ void main() {
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
       return await device.startApp(
         app,
         prebuiltApplication: prebuilt,
@@ -754,7 +753,7 @@ void main() {
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions =
-          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null));
+          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true,
           debuggingOptions: debuggingOptions);
@@ -959,8 +958,6 @@ class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcessResult extends Mock implements ProcessResult {}
-
-class MockProcessUtils extends Mock implements ProcessUtils {}
 
 class MockFile extends Mock implements File {}
 

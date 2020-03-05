@@ -161,7 +161,11 @@ class FlutterManifest {
     if (isPlugin) {
       final YamlMap plugin = _flutterDescriptor['plugin'] as YamlMap;
       if (plugin.containsKey('platforms')) {
-        return plugin['platforms']['android']['package'] as String;
+        final YamlMap platforms = plugin['platforms'] as YamlMap;
+
+        if (platforms.containsKey('android')) {
+          return platforms['android']['package'] as String;
+        }
       } else {
         return plugin['androidPackage'] as String;
       }
@@ -327,7 +331,7 @@ bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
     if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a a string, but got ${kvp.key}.');
+      errors.add('Expected YAML key to be a string, but got ${kvp.key}.');
       continue;
     }
     switch (kvp.key as String) {
@@ -367,7 +371,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
   }
   for (final MapEntry<dynamic, dynamic> kvp in yaml.entries) {
     if (kvp.key is! String) {
-      errors.add('Expected YAML key to be a a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
+      errors.add('Expected YAML key to be a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
       continue;
     }
     switch (kvp.key as String) {

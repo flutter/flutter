@@ -7,18 +7,38 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:platform/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/mocks.dart' show MockStdio;
 
 void main() {
+  BufferLogger testLogger;
+
+  setUp(() {
+    testLogger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: MockStdio(),
+        platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
+  });
+
+  Net createNet(io.HttpClient client) {
+    return Net(
+      httpClientFactory: () => client,
+      logger: testLogger,
+      platform: FakePlatform.fromPlatform(const LocalPlatform()),
+    );
+  }
+
   group('successful fetch', () {
     const String responseString = 'response string';
     List<int> responseData;
@@ -27,32 +47,30 @@ void main() {
       responseData = utf8.encode(responseString);
     });
 
-    testUsingContext('fetchUrl() gets the data', () async {
-      final List<int> data = await fetchUrl(Uri.parse('http://example.invalid/'));
+    testWithoutContext('fetchUrl() gets the data', () async {
+      final Net net = createNet(FakeHttpClient(200, data: responseString));
+      final List<int> data = await net.fetchUrl(Uri.parse('http://example.invalid/'));
       expect(data, equals(responseData));
-    }, overrides: <Type, Generator>{
-      HttpClientFactory: () => () => FakeHttpClient(200, data: responseString),
     });
 
-    testUsingContext('fetchUrl(destFile) writes the data to a file', () async {
-      final File destFile = globals.fs.file('dest_file')..createSync();
-      final List<int> data = await fetchUrl(
+    testWithoutContext('fetchUrl(destFile) writes the data to a file', () async {
+      final Net net = createNet(FakeHttpClient(200, data: responseString));
+      final MemoryFileSystem fs = MemoryFileSystem();
+      final File destFile = fs.file('dest_file')..createSync();
+      final List<int> data = await net.fetchUrl(
         Uri.parse('http://example.invalid/'),
         destFile: destFile,
       );
       expect(data, equals(<int>[]));
       expect(destFile.readAsStringSync(), equals(responseString));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      HttpClientFactory: () => () => FakeHttpClient(200, data: responseString),
-      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
-  testUsingContext('retry from 500', () async {
+  testWithoutContext('retry from 500', () async {
+    final Net net = createNet(FakeHttpClient(500));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -68,14 +86,13 @@ void main() {
     });
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(500),
   });
 
-  testUsingContext('retry from network error', () async {
+  testWithoutContext('retry from network error', () async {
+    final Net net = createNet(FakeHttpClient(200));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -91,14 +108,15 @@ void main() {
     });
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(200),
   });
 
-  testUsingContext('retry from SocketException', () async {
+  testWithoutContext('retry from SocketException', () async {
+    final Net net = createNet(FakeHttpClientThrowing(
+      const io.SocketException('test exception handling'),
+    ));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -115,16 +133,15 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
     expect(testLogger.traceText, contains('Download error: SocketException'));
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClientThrowing(
-      const io.SocketException('test exception handling'),
-    ),
   });
 
-  testUsingContext('no retry from HandshakeException', () async {
+  testWithoutContext('no retry from HandshakeException', () async {
+    final Net net = createNet(FakeHttpClientThrowing(
+      const io.HandshakeException('test exception handling'),
+    ));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed: $exception';
@@ -135,16 +152,22 @@ void main() {
     });
     expect(error, startsWith('test failed'));
     expect(testLogger.traceText, contains('HandshakeException'));
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClientThrowing(
-      const io.HandshakeException('test exception handling'),
-    ),
   });
 
-  testUsingContext('check for bad override on ArgumentError', () async {
+  testWithoutContext('check for bad override on ArgumentError', () async {
+    final Net net = Net(
+      httpClientFactory: () => FakeHttpClientThrowing(
+        ArgumentError('test exception handling'),
+      ),
+      logger: testLogger,
+      platform: FakePlatform.fromPlatform(const LocalPlatform())
+        ..environment = <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
+        },
+    );
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed: $exception';
@@ -156,20 +179,15 @@ void main() {
     expect(error, startsWith('test failed'));
     expect(testLogger.errorText, contains('Invalid argument'));
     expect(error, contains('FLUTTER_STORAGE_BASE_URL'));
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClientThrowing(
-      ArgumentError('test exception handling'),
-    ),
-    Platform: () => FakePlatform.fromPlatform(const LocalPlatform())
-      ..environment = <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
-      },
   });
 
-  testUsingContext('retry from HttpException', () async {
+  testWithoutContext('retry from HttpException', () async {
+    final Net net = createNet(FakeHttpClientThrowing(
+      const io.HttpException('test exception handling'),
+    ));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -186,16 +204,15 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
     expect(testLogger.traceText, contains('Download error: HttpException'));
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClientThrowing(
-      const io.HttpException('test exception handling'),
-    ),
   });
 
-  testUsingContext('retry from HttpException when request throws', () async {
+  testWithoutContext('retry from HttpException when request throws', () async {
+    final Net net = createNet(FakeHttpClientThrowingRequest(
+      const io.HttpException('test exception handling'),
+    ));
     String error;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -212,17 +229,14 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
     expect(testLogger.traceText, contains('Download error: HttpException'));
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClientThrowingRequest(
-      const io.HttpException('test exception handling'),
-    ),
   });
 
-  testUsingContext('max attempts', () async {
+  testWithoutContext('max attempts', () async {
+    final Net net = createNet(FakeHttpClient(500));
     String error;
     List<int> actualResult;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
+      net.fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
         actualResult = value;
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -238,32 +252,27 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
     expect(actualResult, isNull);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(500),
   });
 
-  testUsingContext('remote file non-existant', () async {
+  testWithoutContext('remote file non-existant', () async {
+    final Net net = createNet(FakeHttpClient(404));
     final Uri invalid = Uri.parse('http://example.invalid/');
-    final bool result = await doesRemoteFileExist(invalid);
+    final bool result = await net.doesRemoteFileExist(invalid);
     expect(result, false);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(404),
   });
 
-  testUsingContext('remote file server error', () async {
+  testWithoutContext('remote file server error', () async {
+    final Net net = createNet(FakeHttpClient(500));
     final Uri valid = Uri.parse('http://example.valid/');
-    final bool result = await doesRemoteFileExist(valid);
+    final bool result = await net.doesRemoteFileExist(valid);
     expect(result, false);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(500),
   });
 
-  testUsingContext('remote file exists', () async {
+  testWithoutContext('remote file exists', () async {
+    final Net net = createNet(FakeHttpClient(200));
     final Uri valid = Uri.parse('http://example.valid/');
-    final bool result = await doesRemoteFileExist(valid);
+    final bool result = await net.doesRemoteFileExist(valid);
     expect(result, true);
-  }, overrides: <Type, Generator>{
-    HttpClientFactory: () => () => FakeHttpClient(200),
   });
 }
 

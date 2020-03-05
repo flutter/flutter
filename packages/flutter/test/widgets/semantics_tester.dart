@@ -356,15 +356,15 @@ class TestSemantics {
     if (actions is int && actions != 0 || actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty)
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
     if (label != null && label != '')
-      buf.writeln('$indent  label: \'$label\',');
+      buf.writeln("$indent  label: '$label',");
     if (value != null && value != '')
-      buf.writeln('$indent  value: \'$value\',');
+      buf.writeln("$indent  value: '$value',");
     if (increasedValue != null && increasedValue != '')
-      buf.writeln('$indent  increasedValue: \'$increasedValue\',');
+      buf.writeln("$indent  increasedValue: '$increasedValue',");
     if (decreasedValue != null && decreasedValue != '')
-      buf.writeln('$indent  decreasedValue: \'$decreasedValue\',');
+      buf.writeln("$indent  decreasedValue: '$decreasedValue',");
     if (hint != null && hint != '')
-      buf.writeln('$indent  hint: \'$hint\',');
+      buf.writeln("$indent  hint: '$hint',");
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
     if (textSelection?.isValid == true)
@@ -565,7 +565,7 @@ class SemanticsTester {
   }
 
   static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
-    return '<SemanticsTag>[${tags.map<String>((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
+    return '<SemanticsTag>[${tags.map<String>((SemanticsTag tag) => "const SemanticsTag('${tag.name}')").join(', ')}]';
   }
 
   static String _actionsToSemanticsActionExpression(dynamic actions) {
@@ -600,19 +600,19 @@ class SemanticsTester {
     if (node.label != null && node.label.isNotEmpty) {
       final String escapedLabel = node.label.replaceAll('\n', r'\n');
       if (escapedLabel != node.label) {
-        buf.writeln('  label: r\'$escapedLabel\',');
+        buf.writeln("  label: r'$escapedLabel',");
       } else {
-        buf.writeln('  label: \'$escapedLabel\',');
+        buf.writeln("  label: '$escapedLabel',");
       }
     }
     if (node.value != null && node.value.isNotEmpty)
-      buf.writeln('  value: \'${node.value}\',');
+      buf.writeln("  value: '${node.value}',");
     if (node.increasedValue != null && node.increasedValue.isNotEmpty)
-      buf.writeln('  increasedValue: \'${node.increasedValue}\',');
+      buf.writeln("  increasedValue: '${node.increasedValue}',");
     if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
-      buf.writeln('  decreasedValue: \'${node.decreasedValue}\',');
+      buf.writeln("  decreasedValue: '${node.decreasedValue}',");
     if (node.hint != null && node.hint.isNotEmpty)
-      buf.writeln('  hint: \'${node.hint}\',');
+      buf.writeln("  hint: '${node.hint}',");
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
     if (node.hasChildren) {

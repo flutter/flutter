@@ -118,6 +118,8 @@ class _FontWeightTween extends Tween<FontWeight> {
 ///
 /// See also:
 ///
+///  * [CupertinoSlidingSegmentedControl], a segmented control widget in the
+///    style introduced in iOS 13.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
@@ -826,6 +828,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
 

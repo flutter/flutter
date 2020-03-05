@@ -38,7 +38,7 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalization${camelCase(locale)}({
+  const MaterialLocalization${locale.camelCase()}({
     String localeName = '$localeName',
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,

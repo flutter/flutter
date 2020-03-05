@@ -13,6 +13,7 @@ import 'package:process/process.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
@@ -40,11 +41,21 @@ void main() {
   }
 
   void podsIsInHomeDir() {
-    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
+    fs.directory(fs.path.join(
+      globals.fsUtils.homeDirPath,
+      '.cocoapods',
+      'repos',
+      'master',
+    )).createSync(recursive: true);
   }
 
   String podsIsInCustomDir({String cocoapodsReposDir}) {
-    cocoapodsReposDir ??= fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
+    cocoapodsReposDir ??= fs.path.join(
+      globals.fsUtils.homeDirPath,
+      'cache',
+      'cocoapods',
+      'repos',
+    );
     fs.directory(fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
     return cocoapodsReposDir;
   }
@@ -93,6 +104,22 @@ void main() {
   void pretendPodIsNotInstalled() {
     when(mockProcessManager.run(
       <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsWithError());
+  }
+
+  void pretendPodIsBroken() {
+    // it is present
+    when(mockProcessManager.run(
+      <String>['which', 'pod'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenAnswer((_) async => exitsHappy());
+
+    // but is not working
+    when(mockProcessManager.run(
+      <String>['pod', '--version'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenAnswer((_) async => exitsWithError());
@@ -295,21 +322,37 @@ void main() {
       podsIsInHomeDir();
     });
 
-    testUsingContext('prints error, if CocoaPods is not installed', () async {
+    testUsingContext('throwsToolExit if CocoaPods is not installed', () async {
       pretendPodIsNotInstalled();
       projectUnderTest.ios.podfile.createSync();
-      final bool didInstall = await cocoaPodsUnderTest.processPods(
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',
       );
+      expect(invokeProcessPods, throwsToolExit());
       verifyNever(mockProcessManager.run(
       argThat(containsAllInOrder(<String>['pod', 'install'])),
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       ));
-      expect(testLogger.errorText, contains('not installed'));
-      expect(testLogger.errorText, contains('Skipping pod install'));
-      expect(didInstall, isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throwsToolExit if CocoaPods install is broken', () async {
+      pretendPodIsBroken();
+      projectUnderTest.ios.podfile.createSync();
+      final Function invokeProcessPods = () async => await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        engineDir: 'engine/path',
+      );
+      expect(invokeProcessPods, throwsToolExit());
+      verifyNever(mockProcessManager.run(
+      argThat(containsAllInOrder(<String>['pod', 'install'])),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
@@ -345,7 +388,7 @@ void main() {
         );
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
@@ -394,7 +437,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         );
         fail('ToolExit expected');
       } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),
@@ -532,7 +575,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsStringSync('Existing lock file.');
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
-        ..writeAsStringSync('Updated Podfile');
+        .writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',

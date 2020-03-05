@@ -598,7 +598,7 @@ void main() {
       // This checks both FocusScopes that have their own nodes, as well as those
       // that use external nodes.
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           child: Column(
             children: <Widget>[
               FocusScope(
@@ -661,7 +661,7 @@ void main() {
       final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
 
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           child: Column(
             children: <Widget>[
               FocusScope(
@@ -711,7 +711,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
 
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           child: Column(
             children: <Widget>[
               FocusScope(
@@ -746,7 +746,7 @@ void main() {
       final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
 
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           child: Column(
             children: <Widget>[
               FocusScope(
@@ -794,7 +794,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
 
       await tester.pumpWidget(
-        DefaultFocusTraversal(
+        FocusTraversalGroup(
           child: Column(
             children: <Widget>[
               FocusScope(
@@ -1428,10 +1428,10 @@ void main() {
 
     // Check FocusNode with child (focus1). Shouldn't affect children.
     await pumpTest(allowFocus1: false);
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+    expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 has focus.
     Focus.of(focus2.currentContext).requestFocus(); // Try to focus focus1
     await tester.pump();
-    expect(Focus.of(container1.currentContext).hasFocus, isFalse);
+    expect(Focus.of(container1.currentContext).hasFocus, isTrue); // focus2 still has focus.
     Focus.of(container1.currentContext).requestFocus(); // Now try to focus focus2
     await tester.pump();
     expect(Focus.of(container1.currentContext).hasFocus, isTrue);
