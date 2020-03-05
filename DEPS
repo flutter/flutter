@@ -508,16 +508,6 @@ deps = {
      'dep_type': 'cipd',
    },
 
-   'src/third_party/dart/pkg/analysis_server/language_model': {
-     'packages': [
-       {
-        'package': 'dart/language_model',
-        'version': 'lIRt14qoA1Cocb8j3yw_Fx5cfYou2ddam6ArBm4AI6QC',
-       }
-     ],
-     'dep_type': 'cipd',
-   },
-
   'src/flutter/third_party/gn': {
     'packages': [
       {
