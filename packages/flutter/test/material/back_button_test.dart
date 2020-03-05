@@ -35,7 +35,7 @@ void main() {
   });
 
   testWidgets('BackButton onPressed overrides default pop behavior', (WidgetTester tester) async {
-    bool backPressed = false;
+    bool customCallbackWasCalled = false;
     await tester.pumpWidget(
       MaterialApp(
         home: const Material(child: Text('Home')),
@@ -43,7 +43,7 @@ void main() {
           '/next': (BuildContext context) {
             return Material(
               child: Center(
-                child: BackButton(onPressed: () => backPressed = true),
+                child: BackButton(onPressed: () => customCallbackWasCalled = true),
               ),
             );
           },
@@ -55,6 +55,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    expect(find.text('Home'), findsNothing); // Start off on the second page.
+    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
     await tester.tap(find.byType(BackButton));
 
     await tester.pumpAndSettle();
@@ -62,7 +64,7 @@ void main() {
     // We're still on the second page.
     expect(find.text('Home'), findsNothing);
     // But the custom callback is called.
-    expect(backPressed, true);
+    expect(customCallbackWasCalled, true);
   });
 
   testWidgets('BackButton icon', (WidgetTester tester) async {
@@ -179,5 +181,37 @@ void main() {
         matching: find.byType(RichText)
     ));
     expect(iconText.text.style.color, Colors.red);
+  });
+
+  testWidgets('CloseButton onPressed overrides default pop behavior', (WidgetTester tester) async {
+    bool customCallbackWasCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Material(child: Text('Home')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return Material(
+              child: Center(
+                child: CloseButton(onPressed: () => customCallbackWasCalled = true),
+              ),
+            );
+          },
+        },
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+
+    await tester.pumpAndSettle();
+    expect(find.text('Home'), findsNothing); // Start off on the second page.
+    expect(customCallbackWasCalled, false); // customCallbackWasCalled should still be false.
+    await tester.tap(find.byType(CloseButton));
+
+    await tester.pumpAndSettle();
+
+    // We're still on the second page.
+    expect(find.text('Home'), findsNothing);
+    // The custom callback is called, setting customCallbackWasCalled to true.
+    expect(customCallbackWasCalled, true);
   });
 }
