@@ -160,6 +160,7 @@ void main() {
       '     AnimatedTheme\n'
       '     Builder\n'
       '     DefaultTextStyle\n'
+      '     Builder\n'
       '     CustomPaint\n'
       '     Banner\n'
       '     CheckedModeBanner\n'
