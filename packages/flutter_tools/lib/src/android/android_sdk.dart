@@ -283,13 +283,15 @@ class AndroidSdk {
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
 
-  /// Whether the `platform-tools` directory exists in the Android SDK.
+  /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
   /// It is possible to have an Android SDK folder that is missing this with
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => fs.directory(fs.path.join(directory, 'platform-tools')).existsSync();
+  bool get platformToolsAvailable =>
+    fs.directory(fs.path.join(directory, 'cmdline-tools')).existsSync() ||
+    fs.directory(fs.path.join(directory, 'platform-tools')).existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
   ///
@@ -531,8 +533,17 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
-  /// Returns the filesystem path of the Android SDK manager tool or null if not found.
+  /// Returns the filesystem path of the Android SDK manager tool.
+  ///
+  /// The sdkmanager was previously in the tools directory but this component
+  /// was marked as obsolete in 3.6.
   String get sdkManagerPath {
+    final File cmdlineTool = fs.file(
+      fs.path.join(directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager')
+    );
+    if (cmdlineTool.existsSync()) {
+      return cmdlineTool.path;
+    }
     return fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
   }
 
