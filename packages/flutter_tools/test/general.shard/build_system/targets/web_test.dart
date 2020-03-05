@@ -16,35 +16,38 @@ import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
+import '../../../src/context.dart';
 import '../../../src/mocks.dart';
 import '../../../src/testbed.dart';
+
+const List<String> kDart2jsLinuxArgs = <String>[
+  'bin/cache/dart-sdk/bin/dart',
+  'bin/cache/dart-sdk/bin/snapshots/dart2js.dart.snapshot',
+  '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
+];
 
 void main() {
   Testbed testbed;
   Environment environment;
-  MockPlatform mockPlatform;
-  MockPlatform  mockWindowsPlatform;
+  FakeProcessManager processManager;
+  final Platform linux = FakePlatform(
+    operatingSystem: 'linux',
+    environment: <String, String>{},
+  );
+  final Platform windows = FakePlatform(
+    operatingSystem: 'windows',
+    environment: <String, String>{},
+  );
   DepfileService depfileService;
 
   setUp(() {
-    mockPlatform = MockPlatform();
-    mockWindowsPlatform = MockPlatform();
-
-    when(mockPlatform.isWindows).thenReturn(false);
-    when(mockPlatform.isMacOS).thenReturn(true);
-    when(mockPlatform.isLinux).thenReturn(false);
-    when(mockPlatform.environment).thenReturn(const <String, String>{});
-
-    when(mockWindowsPlatform.isWindows).thenReturn(true);
-    when(mockWindowsPlatform.isMacOS).thenReturn(false);
-    when(mockWindowsPlatform.isLinux).thenReturn(false);
-
     testbed = Testbed(setup: () {
       final File packagesFile = globals.fs.file(globals.fs.path.join('foo', '.packages'))
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
       PackageMap.globalPackagesPath = packagesFile.path;
       globals.fs.currentDirectory.childDirectory('bar').createSync();
+      processManager = FakeProcessManager.list(<FakeCommand>[]);
 
       environment = Environment.test(
         globals.fs.currentDirectory,
@@ -61,7 +64,7 @@ void main() {
     );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform,
+      Platform: () => linux,
     });
   });
 
@@ -156,7 +159,7 @@ void main() {
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }, overrides: <Type, Generator>{
-    Platform: () => mockWindowsPlatform,
+    Platform: () => windows,
   }));
 
   test('WebEntrypointTarget generates an entrypoint without plugins and init platform', () => testbed.run(() async {
@@ -216,111 +219,131 @@ void main() {
   test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kCspMode] = 'true';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O4',
+        '--no-minify',
+        '--csp',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O4', // highest optimizations
-      '--no-minify', // but uses unminified names for debugging
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.profile=true',
-      '--csp',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
 
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O4',
+        '--no-minify',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O4', // highest optimizations
-      '--no-minify', // but uses unminified names for debugging
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.profile=true',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with expected args in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O4', // highest optimizations.
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.product=true',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with expected args in release with dart2js optimization override', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDart2jsOptimization] = 'O3';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O3',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O3', // configured optimizations.
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.product=true',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget produces expected depfile', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      environment.buildDir.childFile('main.dart.js.deps')
+      environment.buildDir.childFile('app.dill.deps')
         .writeAsStringSync('file:///a.dart');
       return FakeProcessResult(exitCode: 0);
     });
     await const Dart2JSTarget().build(environment);
 
-    expect(environment.buildDir.childFile('dart2js.d').existsSync(), true);
+    expect(environment.buildDir.childFile('dart2js.d'), exists);
     final Depfile depfile = depfileService.parse(environment.buildDir.childFile('dart2js.d'));
 
     expect(depfile.inputs.single.path, globals.fs.path.absolute('a.dart'));
@@ -333,54 +356,64 @@ void main() {
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O4',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O4',
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.product=true',
-      '-DFOO=bar',
-      '-DBAZ=qux',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
-    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
-      return FakeProcessResult(exitCode: 0);
-    });
-    await const Dart2JSTarget().build(environment);
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '-O4',
+        '--no-minify',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
 
-    final List<String> expected = <String>[
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
-      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
-      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
-      '-O4',
-      '--no-minify',
-      '-o',
-      environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=${globals.fs.path.join('foo', '.packages')}',
-      '-Ddart.vm.profile=true',
-      '-DFOO=bar',
-      '-DBAZ=qux',
-      environment.buildDir.childFile('main.dart').absolute.path,
-    ];
-    verify(globals.processManager.run(expected)).called(1);
+    await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
+    ProcessManager: () => processManager,
   }));
 
   test('Dart2JSTarget throws developer-friendly exception on misformatted DartDefines', () => testbed.run(() async {
@@ -427,4 +460,3 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockPlatform extends Mock implements Platform {}
