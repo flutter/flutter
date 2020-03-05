@@ -4452,6 +4452,10 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
     state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200F}\u{200F}'));
     expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200F}\u{200F}'));
+
+    // Doesn't eat emojis
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
   });
 
   testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
