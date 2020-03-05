@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 class MockVisualStudio extends Mock implements VisualStudio {}
 
@@ -66,7 +67,7 @@ void main() {
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(false);
     }
 
-    testWithoutContext('Emits a message when Visual Studio is a pre-release version', () async {
+    testUsingContext('Emits a message when Visual Studio is a pre-release version', () async {
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isPrerelease).thenReturn(true);
 
@@ -76,7 +77,7 @@ void main() {
       expect(result.messages.contains(expectedMessage), true);
     });
 
-    testWithoutContext('Emits a partial status when Visual Studio installation is incomplete', () async {
+    testUsingContext('Emits a partial status when Visual Studio installation is incomplete', () async {
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isComplete).thenReturn(false);
 
@@ -87,7 +88,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     });
 
-    testWithoutContext('Emits a partial status when Visual Studio installation needs rebooting', () async {
+    testUsingContext('Emits a partial status when Visual Studio installation needs rebooting', () async {
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isRebootRequired).thenReturn(true);
 
@@ -98,7 +99,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     });
 
-    testWithoutContext('Emits a partial status when Visual Studio installation is not launchable', () async {
+    testUsingContext('Emits a partial status when Visual Studio installation is not launchable', () async {
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isLaunchable).thenReturn(false);
 
@@ -109,7 +110,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     });
 
-    testWithoutContext('Emits partial status when Visual Studio is installed but too old', () async {
+    testUsingContext('Emits partial status when Visual Studio is installed but too old', () async {
       _configureMockVisualStudioAsTooOld();
 
       final ValidationResult result = await validator.validate();
@@ -125,7 +126,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     });
 
-    testWithoutContext('Emits partial status when Visual Studio is installed without necessary components', () async {
+    testUsingContext('Emits partial status when Visual Studio is installed without necessary components', () async {
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(false);
       final ValidationResult result = await validator.validate();
@@ -133,7 +134,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     });
 
-    testWithoutContext('Emits installed status when Visual Studio is installed with necessary components', () async {
+    testUsingContext('Emits installed status when Visual Studio is installed with necessary components', () async {
       _configureMockVisualStudioAsInstalled();
 
       final ValidationResult result = await validator.validate();
@@ -144,7 +145,7 @@ void main() {
       expect(result.type, ValidationType.installed);
     });
 
-    testWithoutContext('Emits missing status when Visual Studio is not installed', () async {
+    testUsingContext('Emits missing status when Visual Studio is not installed', () async {
       _configureMockVisualStudioAsNotInstalled();
 
       final ValidationResult result = await validator.validate();
