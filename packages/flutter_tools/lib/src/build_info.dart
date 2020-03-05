@@ -23,7 +23,7 @@ class BuildInfo {
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
-    this.dartDefines,
+    this.dartDefines = const <String>[],
     @required this.treeShakeIcons,
   });
 
