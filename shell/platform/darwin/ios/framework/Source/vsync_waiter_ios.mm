@@ -114,6 +114,8 @@ float VsyncWaiterIOS::GetDisplayRefreshRate() const {
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  TRACE_EVENT0("flutter", "VSYNC");
+
   CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(link.duration);
