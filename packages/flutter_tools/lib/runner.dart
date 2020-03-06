@@ -9,7 +9,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
 
-import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
@@ -35,8 +34,8 @@ Future<int> run(
   bool reportCrashes,
   String flutterVersion,
   Map<Type, Generator> overrides,
-}) {
-  reportCrashes ??= !isRunningOnBot(globals.platform);
+}) async {
+  reportCrashes ??= !await globals.isRunningOnBot;
 
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -63,7 +62,8 @@ Future<int> run(
       try {
         await runner.run(args);
         return await _exit(0);
-      } catch (error, stackTrace) {
+      // This catches all exceptions to send to crash logging, etc.
+      } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
         firstStackTrace = stackTrace;
         return await _handleToolError(
@@ -121,7 +121,7 @@ Future<int> _handleToolError(
     }
 
     // Report to both [Usage] and [CrashReportSender].
-    flutterUsage.sendException(error);
+    globals.flutterUsage.sendException(error);
     await CrashReportSender.instance.sendReport(
       error: error,
       stackTrace: stackTrace,
@@ -136,7 +136,8 @@ Future<int> _handleToolError(
       await _informUserOfCrash(args, error, stackTrace, errorString);
 
       return _exit(1);
-    } catch (error) {
+    // This catch catches all exceptions to ensure the message below is printed.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
         'please let us know at https://github.com/flutter/flutter/issues.\n',
@@ -244,20 +245,20 @@ Future<String> _doctorText() async {
     );
 
     return logger.statusText;
-  } catch (error, trace) {
+  } on Exception catch (error, trace) {
     return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
   }
 }
 
 Future<int> _exit(int code) async {
   // Prints the welcome message if needed.
-  flutterUsage.printWelcome();
+  globals.flutterUsage.printWelcome();
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
-  if (flutterUsage.enabled) {
+  if (globals.flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
-    await flutterUsage.ensureAnalyticsSent();
+    await globals.flutterUsage.ensureAnalyticsSent();
     globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
@@ -272,7 +273,9 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    } catch (error, stackTrace) {
+    // This catches all exceptions becauce the error is propagated on the
+    // completer.
+    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);
     }
   });

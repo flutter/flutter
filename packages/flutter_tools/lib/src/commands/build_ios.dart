@@ -19,12 +19,14 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     addTreeShakeIconsFlag();
+    addSplitDebugInfoOption();
     addBuildModeFlags(defaultToRelease: false);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
+    addDartObfuscationOption();
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device.',

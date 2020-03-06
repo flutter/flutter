@@ -163,7 +163,7 @@ class VsCode {
 
     if (localAppData != null) {
       searchLocations.add(_VsCodeInstallLocation(
-        globals.fs.path.join(localAppData, 'Programs\\Microsoft VS Code'),
+        globals.fs.path.join(localAppData, r'Programs\Microsoft VS Code'),
         '.vscode',
       ));
     }
@@ -179,7 +179,7 @@ class VsCode {
     ));
     if (localAppData != null) {
       searchLocations.add(_VsCodeInstallLocation(
-        globals.fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'),
+        globals.fs.path.join(localAppData, r'Programs\Microsoft VS Code Insiders'),
         '.vscode-insiders',
         isInsiders: true,
       ));

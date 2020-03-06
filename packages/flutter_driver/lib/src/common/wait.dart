@@ -251,7 +251,7 @@ class CombinedCondition extends SerializableWaitCondition {
     }
 
     final List<SerializableWaitCondition> conditions = <SerializableWaitCondition>[];
-    for (final Map<String, dynamic> condition in json.decode(jsonMap['conditions'])) {
+    for (final Map<String, dynamic> condition in (json.decode(jsonMap['conditions']) as List<dynamic>).cast<Map<String, dynamic>>()) {
       conditions.add(_deserialize(condition.cast<String, String>()));
     }
     return CombinedCondition(conditions);

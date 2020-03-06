@@ -517,6 +517,7 @@ class RenderStack extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _resolve();
     assert(_resolvedAlignment != null);
     _hasVisualOverflow = false;

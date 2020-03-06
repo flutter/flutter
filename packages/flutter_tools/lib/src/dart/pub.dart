@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -181,7 +180,8 @@ class _DefaultPub implements Pub {
           retry: true,
         );
         status.stop();
-      } catch (exception) {
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -232,7 +232,7 @@ class _DefaultPub implements Pub {
     @required bool retry,
     bool showTraceForErrors,
   }) async {
-    showTraceForErrors ??= isRunningOnBot(globals.platform);
+    showTraceForErrors ??= await globals.isRunningOnBot;
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -259,7 +259,7 @@ class _DefaultPub implements Pub {
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: _createPubEnvironment(context),
+        environment: await _createPubEnvironment(context),
       );
       String message;
       switch (code) {
@@ -304,7 +304,7 @@ class _DefaultPub implements Pub {
     final io.Process process = await processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
-      environment: _createPubEnvironment(PubContext.interactive),
+      environment: await _createPubEnvironment(PubContext.interactive),
     );
 
     // Pipe the Flutter tool stdin to the pub stdin.
@@ -323,7 +323,7 @@ class _DefaultPub implements Pub {
         globals.stdio.addStdoutStream(process.stdout),
         globals.stdio.addStderrStream(process.stderr),
       ]);
-    } catch (err, stack) {
+    } on Exception catch (err, stack) {
       globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
       globals.printTrace('$err\n$stack');
     }
@@ -348,10 +348,10 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Map<String, String> _createPubEnvironment(PubContext context) {
+Future<Map<String, String>> _createPubEnvironment(PubContext context) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
-    _pubEnvironmentKey: _getPubEnvironmentValue(context),
+    _pubEnvironmentKey: await _getPubEnvironmentValue(context),
   };
   final String pubCache = _getRootPubCacheIfAvailable();
   if (pubCache != null) {
@@ -374,13 +374,13 @@ const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-String _getPubEnvironmentValue(PubContext pubContext) {
+Future<String> _getPubEnvironmentValue(PubContext pubContext) async {
   // DO NOT update this function without contacting kevmoo.
   // We have server-side tooling that assumes the values are consistent.
   final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
-    if (isRunningOnBot(globals.platform)) 'flutter_bot',
+    if (await globals.isRunningOnBot) 'flutter_bot',
     'flutter_cli',
     ...pubContext._values,
   ];

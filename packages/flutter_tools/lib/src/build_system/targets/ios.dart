@@ -17,6 +17,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'icon_tree_shaker.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -39,6 +40,7 @@ abstract class AotAssemblyBase extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
@@ -62,6 +64,7 @@ abstract class AotAssemblyBase extends Target {
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
+        dartObfuscation: dartObfuscation,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -237,6 +240,7 @@ abstract class IosAssetBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
@@ -282,7 +286,15 @@ abstract class IosAssetBundle extends Target {
 
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
 
     // Copy the plist from either the project or module.
@@ -364,8 +376,8 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
-  } catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+  } on Exception catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
   }
 
   final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
@@ -408,8 +420,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       tempDir.deleteSync(recursive: true);
     } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
-    } catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+    } on Exception catch (e) {
+      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
 }

@@ -54,7 +54,7 @@ class ConfigCommand extends FlutterCommand {
     'Configure Flutter settings.\n\n'
     'To remove a setting, configure it to an empty string.\n\n'
     'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
-    'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
+    "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
 
   @override
   final List<String> aliases = <String>['configure'];
@@ -89,7 +89,7 @@ class ConfigCommand extends FlutterCommand {
     }
     return
       '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+      'Analytics reporting is currently ${globals.flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.
@@ -117,7 +117,7 @@ class ConfigCommand extends FlutterCommand {
       // We send the analytics event *before* toggling the flag intentionally
       // to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
-      flutterUsage.enabled = value;
+      globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 

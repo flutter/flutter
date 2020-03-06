@@ -73,10 +73,23 @@ void main() {
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
+      final Directory windowsManagedDirectory = flutterProject.directory.childDirectory('windows').childDirectory('flutter');
+      when(windowsProject.managedDirectory).thenReturn(windowsManagedDirectory);
+      when(windowsProject.vcprojFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.vcxproj'));
+      when(windowsProject.solutionFile).thenReturn(windowsManagedDirectory.parent.childFile('Runner.sln'));
+      when(windowsProject.pluginSymlinkDirectory).thenReturn(windowsManagedDirectory.childDirectory('ephemeral').childDirectory('.plugin_symlinks'));
+      when(windowsProject.generatedPluginPropertySheetFile).thenReturn(windowsManagedDirectory.childFile('GeneratedPlugins.props'));
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
+      final Directory linuxManagedDirectory = flutterProject.directory.childDirectory('linux').childDirectory('flutter');
+      final Directory linuxEphemeralDirectory = linuxManagedDirectory.childDirectory('ephemeral');
+      when(linuxProject.managedDirectory).thenReturn(linuxManagedDirectory);
+      when(linuxProject.ephemeralDirectory).thenReturn(linuxEphemeralDirectory);
+      when(linuxProject.pluginSymlinkDirectory).thenReturn(linuxEphemeralDirectory.childDirectory('.plugin_symlinks'));
+      when(linuxProject.makeFile).thenReturn(linuxManagedDirectory.parent.childFile('Makefile'));
+      when(linuxProject.generatedPluginMakeFile).thenReturn(linuxManagedDirectory.childFile('generated_plugins.mk'));
       when(linuxProject.existsSync()).thenReturn(false);
 
       when(mockClock.now()).thenAnswer(
@@ -104,9 +117,9 @@ void main() {
         macos:
           pluginClass: FLESomePlugin
         windows:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         linux:
-          pluginClass: FLESomePlugin
+          pluginClass: SomePlugin
         web:
           pluginClass: SomePlugin
           fileName: lib/SomeFile.dart
@@ -146,7 +159,7 @@ flutter:
         );
     }
 
-    void createPluginWithInvalidAndroidPackage() {
+    Directory createPluginWithInvalidAndroidPackage() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
               fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
       pluginUsingJavaAndNewEmbeddingDir
@@ -174,6 +187,7 @@ flutter:
           'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginUsingJavaAndNewEmbeddingDir;
     }
 
     void createNewKotlinPlugin2() {
@@ -223,7 +237,7 @@ flutter:
         .childDirectory('java')
         .childDirectory(pluginName)
         .childFile('UseOldEmbedding.java')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       flutterProject.directory
         .childFile('.packages')
@@ -266,7 +280,7 @@ flutter:
         );
     }
 
-    void createPluginWithDependencies({
+    Directory createPluginWithDependencies({
       @required String name,
       @required List<String> dependencies,
     }) {
@@ -295,12 +309,51 @@ dependencies:
           '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginDirectory;
     }
 
     // Creates the files that would indicate that pod install has run for the
     // given project.
     void simulatePodInstallRun(XcodeBasedProject project) {
       project.podManifestLock.createSync(recursive: true);
+    }
+
+    // Creates a Windows solution file sufficient to allow plugin injection
+    // to run without failing.
+    void createDummyWindowsSolutionFile() {
+      windowsProject.solutionFile.createSync(recursive: true);
+      // This isn't a valid solution file, but it's just enough to work with the
+      // plugin injection.
+      windowsProject.solutionFile.writeAsStringSync('''
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+EndGlobal''');
+    }
+
+    // Creates a Windows project file for dummyPackageDirectory sufficient to
+    // allow plugin injection to run without failing.
+    void createDummyPluginWindowsProjectFile() {
+      final File projectFile = dummyPackageDirectory
+        .parent
+        .childDirectory('windows')
+        .childFile('plugin.vcxproj');
+      projectFile.createSync(recursive: true);
+      // This isn't a valid project file, but it's just enough to work with the
+      // plugin injection.
+      projectFile.writeAsStringSync('''
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5919689F-A5D5-462C-AF50-D405CCEF89B8}</ProjectGuid>'}
+    <ProjectName>apackage</ProjectName>
+  </PropertyGroup>
+</Project>''');
     }
 
     group('refreshPlugins', () {
@@ -338,9 +391,9 @@ dependencies:
       });
 
       testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
-        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
-        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
-        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        final Directory pluginA = createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        final Directory pluginB = createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
@@ -359,9 +412,9 @@ dependencies:
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
           '# This is a generated file; do not edit or check into version control.\n'
-          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
-          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
-          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          'plugin-a=${pluginA.path}/\n'
+          'plugin-b=${pluginB.path}/\n'
+          'plugin-c=${pluginC.path}/\n'
           ''
         );
 
@@ -373,7 +426,7 @@ dependencies:
         final List<dynamic> expectedPlugins = <dynamic>[
           <String, dynamic> {
             'name': 'plugin-a',
-            'path': '/.tmp_rand0/plugin.rand0/',
+            'path': '${pluginA.path}/',
             'dependencies': <String>[
               'plugin-b',
               'plugin-c'
@@ -381,14 +434,14 @@ dependencies:
           },
           <String, dynamic> {
             'name': 'plugin-b',
-            'path': '/.tmp_rand0/plugin.rand1/',
+            'path': '${pluginB.path}/',
             'dependencies': <String>[
               'plugin-c'
             ]
           },
           <String, dynamic> {
             'name': 'plugin-c',
-            'path': '/.tmp_rand0/plugin.rand2/',
+            'path': '${pluginC.path}/',
             'dependencies': <String>[]
           },
         ];
@@ -591,17 +644,17 @@ dependencies:
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
-        createPluginWithInvalidAndroidPackage();
+        final Directory pluginDir = createPluginWithInvalidAndroidPackage();
 
         await expectLater(
           () async {
             await injectPlugins(flutterProject);
           },
           throwsToolExit(
-            message: 'The plugin `plugin1` doesn\'t have a main class defined in '
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
-                     'This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin\'s pubspec.yaml.\n'
+            message: "The plugin `plugin1` doesn't have a main class defined in "
+                     '${pluginDir.path}/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '${pluginDir.path}/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     "This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin's pubspec.yaml.\n"
                      'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
                      'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
           ),
@@ -785,7 +838,7 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Registrant for web doesn\'t escape slashes in imports', () async {
+      testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
         when(flutterProject.isModule).thenReturn(true);
         when(featureFlags.isWebEnabled).thenReturn(true);
         when(webProject.existsSync()).thenReturn(true);
@@ -804,7 +857,7 @@ dependencies:
           .childDirectory('lib')
           .childDirectory('src')
           .childFile('web_plugin.dart')
-          ..createSync(recursive: true);
+          .createSync(recursive: true);
 
         flutterProject.directory
           .childFile('.packages')
@@ -820,6 +873,244 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
 
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux registrant', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = linuxProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader.existsSync(), isTrue);
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux plugin makefile', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File pluginMakefile = linuxProject.generatedPluginMakeFile;
+
+        expect(pluginMakefile.existsSync(), isTrue);
+        final String contents = pluginMakefile.readAsStringSync();
+        expect(contents, contains('libapackage_plugin.so'));
+        // Verify all the variables the app-level Makefile rely on.
+        expect(contents, contains('PLUGIN_TARGETS='));
+        expect(contents, contains('PLUGIN_LIBRARIES='));
+        expect(contents, contains('PLUGIN_LDFLAGS='));
+        expect(contents, contains('PLUGIN_CPPFLAGS='));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+
+      testUsingContext('Injecting creates generated Windows registrant', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader.existsSync(), isTrue);
+        expect(registrantImpl.existsSync(), isTrue);
+        expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Windows plugin properties', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File properties = windowsProject.generatedPluginPropertySheetFile;
+        final String includePath = fs.path.join('flutter', 'ephemeral', '.plugin_symlinks', 'apackage', 'windows');
+
+        expect(properties.existsSync(), isTrue);
+        expect(properties.readAsStringSync(), contains('apackage_plugin.lib'));
+        expect(properties.readAsStringSync(), contains('>$includePath;'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting updates Windows solution file', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyPackageAsPlugin();
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        expect(windowsProject.solutionFile.readAsStringSync(), contains(r'apackage\windows\plugin.vcxproj'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+    });
+
+    group('createPluginSymlinks', () {
+      MockFeatureFlags featureFlags;
+
+      setUp(() {
+        featureFlags = MockFeatureFlags();
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+      });
+
+      testUsingContext('Symlinks are created for Linux plugins', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        // refreshPluginsList should call createPluginSymlinks.
+        refreshPluginsList(flutterProject);
+
+        expect(linuxProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Symlinks are created for Windows plugins', () {
+        when(windowsProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        // refreshPluginsList should call createPluginSymlinks.
+        refreshPluginsList(flutterProject);
+
+        expect(windowsProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Existing symlinks are removed when no longer in use with force', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        createPluginSymlinks(flutterProject, force: true);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), false);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        // refreshPluginsList should remove existing links and recreate on changes.
+        configureDummyPackageAsPlugin();
+        refreshPluginsList(flutterProject);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), false);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('createPluginSymlinks is a no-op without force when up to date', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+
+        final List<File> dummyFiles = <File>[
+          flutterProject.linux.pluginSymlinkDirectory.childFile('dummy'),
+          flutterProject.windows.pluginSymlinkDirectory.childFile('dummy'),
+        ];
+        for (final File file in dummyFiles) {
+          file.createSync(recursive: true);
+        }
+
+        // Without force, this should do nothing to existing files.
+        createPluginSymlinks(flutterProject);
+
+        for (final File file in dummyFiles) {
+          expect(file.existsSync(), true);
+        }
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('createPluginSymlinks repairs missing links', () {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(windowsProject.existsSync()).thenReturn(true);
+        configureDummyPackageAsPlugin();
+        refreshPluginsList(flutterProject);
+
+        final List<Link> links = <Link>[
+          linuxProject.pluginSymlinkDirectory.childLink('apackage'),
+          windowsProject.pluginSymlinkDirectory.childLink('apackage'),
+        ];
+        for (final Link link in links) {
+          link.deleteSync();
+        }
+        createPluginSymlinks(flutterProject);
+
+        for (final Link link in links) {
+          expect(link.existsSync(), true);
+        }
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

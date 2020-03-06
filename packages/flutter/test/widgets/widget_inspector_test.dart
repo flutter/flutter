@@ -117,7 +117,7 @@ class CyclicDiagnostic extends DiagnosticableTree {
   // We have to override toString to avoid the toString call itself triggering a
   // stack overflow.
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return toStringShort();
   }
 
@@ -1919,7 +1919,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
 
-      // Triggering a a rebuild of one widget in this app causes the whole app
+      // Triggering a rebuild of one widget in this app causes the whole app
       // to repaint.
       expect(data.length, equals(18));
 

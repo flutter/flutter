@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -38,134 +38,18 @@ void main() {
   group('IMobileDevice', () {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
-    MockProcessManager mockProcessManager;
     final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String ideviceIdPath = globals.fs.path.join(libimobiledevicePath, 'idevice_id');
-    final String ideviceInfoPath = globals.fs.path.join(libimobiledevicePath, 'ideviceinfo');
     final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceId, platform: anyNamed('platform'))).thenReturn(ideviceIdPath);
+      when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       when(mockCache.dyLdLibEntry).thenReturn(
         MapEntry<String, String>('DYLD_LIBRARY_PATH', libimobiledevicePath)
       );
-    });
-
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenThrow(ProcessException(ideviceIdPath, <String>['-l']));
-      expect(() async => await globals.iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
-      expect(() async => await globals.iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
-      when(mockProcessManager.run(
-        <String>[ideviceIdPath, '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
-      expect(await globals.iMobileDevice.getAvailableDeviceIDs(), 'foo');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotFoundError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.pairingDialogResponsePending.code}',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws ToolExit lockdownd fails for unknown reason', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -12345',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
-    });
-
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
-      when(mockProcessManager.run(
-        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
-      )).thenAnswer((_) {
-        final ProcessResult result = ProcessResult(
-          1,
-          255,
-          '',
-          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
-        );
-        return Future<ProcessResult>.value(result);
-      });
-      expect(() async => await globals.iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isA<IOSDeviceNotTrustedError>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Cache: () => mockCache,
-      Artifacts: () => mockArtifacts,
     });
 
     group('screenshot', () {
@@ -318,7 +202,7 @@ Error launching application on iPhone.''',
       await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
-        contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your \ndevice.'),
+        contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
 
@@ -400,6 +284,80 @@ Could not build the precompiled application for the device.''',
       expect(
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);
   });

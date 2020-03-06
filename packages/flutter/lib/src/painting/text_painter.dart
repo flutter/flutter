@@ -346,7 +346,6 @@ class TextPainter {
   ui.TextHeightBehavior get textHeightBehavior => _textHeightBehavior;
   ui.TextHeightBehavior _textHeightBehavior;
   set textHeightBehavior(ui.TextHeightBehavior value) {
-    assert(value != null);
     if (_textHeightBehavior == value)
       return;
     _textHeightBehavior = value;
@@ -642,7 +641,9 @@ class TextPainter {
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -691,7 +692,9 @@ class TextPainter {
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      // Use BoxHeightStyle.strut to ensure that the caret's height fits within
+      // the line's height and is consistent throughout the line.
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will

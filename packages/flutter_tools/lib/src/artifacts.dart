@@ -40,11 +40,10 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  flutterWebLibrariesJson,
   /// The summary dill for the dartdevc target.
   webPlatformKernelDill,
   iosDeploy,
-  ideviceinfo,
-  ideviceId,
   idevicesyslog,
   idevicescreenshot,
   ideviceinstaller,
@@ -108,10 +107,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'kernel_worker.dart.snapshot';
     case Artifact.iosDeploy:
       return 'ios-deploy';
-    case Artifact.ideviceinfo:
-      return 'ideviceinfo';
-    case Artifact.ideviceId:
-      return 'idevice_id';
     case Artifact.idevicesyslog:
       return 'idevicesyslog';
     case Artifact.idevicescreenshot:
@@ -140,6 +135,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'font-subset$exe';
     case Artifact.constFinder:
       return 'const_finder.dart.snapshot';
+    case Artifact.flutterWebLibrariesJson:
+      return 'libraries.json';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -256,8 +253,6 @@ class CachedArtifacts extends Artifacts {
         final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
         return _fileSystem.path.join(engineDir, artifactFileName);
-      case Artifact.ideviceId:
-      case Artifact.ideviceinfo:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         final String artifactFileName = _artifactToFileName(artifact);
@@ -341,6 +336,8 @@ class CachedArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
+      case Artifact.flutterWebLibrariesJson:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
         return _fileSystem.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
@@ -512,8 +509,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(dartSdkPath, 'bin', 'snapshots', artifactFileName);
       case Artifact.kernelWorkerSnapshot:
         return _fileSystem.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
-      case Artifact.ideviceId:
-      case Artifact.ideviceinfo:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
         return _cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
@@ -546,6 +541,8 @@ class LocalEngineArtifacts extends Artifacts {
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
+      case Artifact.flutterWebLibrariesJson:
+        return _fileSystem.path.join(_getFlutterWebSdkPath(), artifactFileName);
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

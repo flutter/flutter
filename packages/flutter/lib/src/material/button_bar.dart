@@ -65,9 +65,11 @@ class ButtonBar extends StatelessWidget {
     this.buttonAlignedDropdown,
     this.layoutBehavior,
     this.overflowDirection,
+    this.overflowButtonSpacing,
     this.children = const <Widget>[],
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0.0),
        super(key: key);
 
   /// How the children should be placed along the horizontal axis.
@@ -143,6 +145,22 @@ class ButtonBar extends StatelessWidget {
   /// default to [VerticalDirection.down].
   final VerticalDirection overflowDirection;
 
+  /// The spacing between buttons when the button bar overflows.
+  ///
+  /// If the [children] do not fit into a single row, they are
+  /// arranged into a column. This parameter provides additional
+  /// vertical space in between buttons when it does overflow.
+  ///
+  /// Note that the button spacing may appear to be more than
+  /// the value provided. This is because most buttons adhere to the
+  /// [MaterialTapTargetSize] of 48px. So, even though a button
+  /// might visually be 36px in height, it might still take up to
+  /// 48px vertically.
+  ///
+  /// If null then no spacing will be added in between buttons in
+  /// an overflow state.
+  final double overflowButtonSpacing;
+
   /// The buttons to arrange horizontally.
   ///
   /// Typically [RaisedButton] or [FlatButton] widgets.
@@ -176,6 +194,7 @@ class ButtonBar extends StatelessWidget {
             child: child,
           );
         }).toList(),
+        overflowButtonSpacing: overflowButtonSpacing,
       ),
     );
     switch (buttonTheme.layoutBehavior) {
@@ -226,6 +245,7 @@ class _ButtonBarRow extends Flex {
     TextDirection textDirection,
     VerticalDirection overflowDirection = VerticalDirection.down,
     TextBaseline textBaseline,
+    this.overflowButtonSpacing,
   }) : super(
     children: children,
     direction: direction,
@@ -237,6 +257,8 @@ class _ButtonBarRow extends Flex {
     textBaseline: textBaseline,
   );
 
+  final double overflowButtonSpacing;
+
   @override
   _RenderButtonBarRow createRenderObject(BuildContext context) {
     return _RenderButtonBarRow(
@@ -247,6 +269,7 @@ class _ButtonBarRow extends Flex {
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
+      overflowButtonSpacing: overflowButtonSpacing,
     );
   }
 
@@ -259,7 +282,8 @@ class _ButtonBarRow extends Flex {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
-      ..textBaseline = textBaseline;
+      ..textBaseline = textBaseline
+      ..overflowButtonSpacing = overflowButtonSpacing;
   }
 }
 
@@ -289,7 +313,9 @@ class _RenderButtonBarRow extends RenderFlex {
     @required TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
+    this.overflowButtonSpacing,
   }) : assert(textDirection != null),
+       assert(overflowButtonSpacing == null || overflowButtonSpacing >= 0),
        super(
          children: children,
          direction: direction,
@@ -302,6 +328,7 @@ class _RenderButtonBarRow extends RenderFlex {
        );
 
   bool _hasCheckedLayoutWidth = false;
+  double overflowButtonSpacing;
 
   @override
   BoxConstraints get constraints {
@@ -391,6 +418,9 @@ class _RenderButtonBarRow extends RenderFlex {
             child = childParentData.previousSibling;
             break;
         }
+
+        if (overflowButtonSpacing != null && child != null)
+          currentHeight += overflowButtonSpacing;
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }

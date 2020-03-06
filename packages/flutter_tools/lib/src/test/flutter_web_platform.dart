@@ -10,7 +10,11 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
@@ -22,7 +26,6 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_api/src/util/stack_trace_mapper.dart';
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -99,6 +102,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
 
   final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
@@ -213,6 +218,8 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
     if (request.requestedUri.pathSegments.first == 'packages') {
+      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+      // ignore: deprecated_member_use
       final Packages packages = await _packagesFuture;
       final Uri fileUri = packages.resolve(Uri(
         scheme: 'package',
@@ -301,9 +308,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Map<Runtime, Future<BrowserManager>> _browserManagers =
       <Runtime, Future<BrowserManager>>{};
 
-  // Mappers for Dartifying stack traces, indexed by test path.
-  final Map<String, StackTraceMapper> _mappers = <String, StackTraceMapper>{};
-
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
     final String path = globals.fs.path.fromUri(request.url);
@@ -346,7 +350,7 @@ class FlutterWebPlatform extends PlatformPlugin {
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
     final RunnerSuite suite = await browserManager
-        .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
+        .load(path, suiteUrl, suiteConfig, message);
     if (_closed) {
       return null;
     }
@@ -646,7 +650,7 @@ class BrowserManager {
     bool headless = true,
   }) async {
     final Chrome chrome =
-        await chromeLauncher.launch(url.toString(), headless: headless);
+        await globals.chromeLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
@@ -696,9 +700,8 @@ class BrowserManager {
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
-    Object message, {
-    StackTraceMapper mapper,
-  }) async {
+    Object message,
+  ) async {
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
       'browser': _runtime.identifier,
@@ -737,11 +740,11 @@ class BrowserManager {
       try {
         controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
             suiteConfig, await _environment, suiteChannel, message);
-        controller.channel('test.browser.mapper').sink.add(mapper?.serialize());
 
         _controllers.add(controller);
         return await controller.suite;
-      } catch (_) {
+      // Not limiting to catching Exception because the exception is rethrown.
+      } catch (_) { // ignore: avoid_catches_without_on_clauses
         closeIframe();
         rethrow;
       }
@@ -995,7 +998,7 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } catch (ex) {
+        } on Exception catch (ex) {
           print(jsonEncode({'success': false, 'message': '\$ex'}));
         }
       }

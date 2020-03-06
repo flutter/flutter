@@ -102,7 +102,7 @@ void main() {
           'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
           'Error details:\n'
-          'The list\'s length has changed from 1 to 2.'
+          "The list's length has changed from 1 to 2."
         ));
         expect(
           error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),

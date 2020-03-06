@@ -10,7 +10,6 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcodebuild.
@@ -85,8 +84,6 @@ Future<void> buildMacOS({
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (buildInfo.treeShakeIcons)
-        'TREE_SHAKE_ICONS=true',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ], trace: true);
   } finally {
@@ -95,5 +92,5 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

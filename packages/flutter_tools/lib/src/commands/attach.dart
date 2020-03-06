@@ -114,7 +114,7 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       return int.parse(stringArg('debug-port'));
-    } catch (error) {
+    } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
     return null;
@@ -215,14 +215,14 @@ class AttachCommand extends FlutterCommand {
       if (device is FuchsiaDevice) {
         final String module = stringArg('module');
         if (module == null) {
-          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+          throwToolExit("'--module' is required for attaching to a Fuchsia device");
         }
         usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } catch (_) {
+        } on Exception {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (final ForwardedPort port in ports) {
@@ -292,7 +292,7 @@ class AttachCommand extends FlutterCommand {
             globals.fs.currentDirectory,
             LaunchMode.attach,
           );
-        } catch (error) {
+        } on Exception catch (error) {
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();

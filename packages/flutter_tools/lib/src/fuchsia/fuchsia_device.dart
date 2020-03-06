@@ -82,7 +82,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     // the correct fuchsia module.
     final RegExp matchRegExp = _app == null
         ? _flutterLogOutput
-        : RegExp('INFO: ${_app.name}(\.cmx)?\\(flutter\\): ');
+        : RegExp('INFO: ${_app.name}(\\.cmx)?\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
       (EventSink<String> output) => _FuchsiaLogSink(output, matchRegExp, startTime),
@@ -271,7 +271,7 @@ class FuchsiaDevice extends Device {
         packageRepo.deleteSync(recursive: true);
       }
       packageRepo.createSync(recursive: true);
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printError('Failed to create Fuchisa package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
@@ -379,12 +379,12 @@ class FuchsiaDevice extends Device {
         await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
-      globals.printTrace('Shutting down the tool\'s package server.');
+      globals.printTrace("Shutting down the tool's package server.");
       fuchsiaPackageServer?.stop();
-      globals.printTrace('Removing the tool\'s package repo: at ${packageRepo.path}');
+      globals.printTrace("Removing the tool's package repo: at ${packageRepo.path}");
       try {
         packageRepo.deleteSync(recursive: true);
-      } catch (e) {
+      } on Exception catch (e) {
         globals.printError('Failed to remove Fuchsia package repo directory '
                    'at ${packageRepo.path}: $e.');
       }
@@ -467,9 +467,9 @@ class FuchsiaDevice extends Device {
             'Failed to delete screenshot.ppm from the device:\n$deleteResult'
           );
         }
-      } catch (_) {
+      } on Exception catch (e) {
         globals.printError(
-          'Failed to delete screenshot.ppm from the device'
+          'Failed to delete screenshot.ppm from the device: $e'
         );
       }
     }

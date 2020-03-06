@@ -67,6 +67,11 @@ if [[ -n "$TREE_SHAKE_ICONS" ]]; then
   icon_tree_shaker_flag="true"
 fi
 
+dart_obfuscation_flag="false"
+if [[ -n "$DART_OBFUSCATION" ]]; then
+  dart_obfuscation_flag="true"
+fi
+
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
@@ -75,7 +80,9 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
-    -dFontSubset="${icon_tree_shaker_flag}"                                 \
+    -dTreeShakeIcons="${icon_tree_shaker_flag}"                             \
+    -dDartObfuscation="${dart_obfuscation_flag}"                            \
+    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

@@ -23,6 +23,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -34,7 +35,8 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
-const String samplesIndexJson = '''[
+const String samplesIndexJson = '''
+[
   { "id": "sample1" },
   { "id": "sample2" }
 ]''';
@@ -325,6 +327,25 @@ void main() {
     Pub: () => const Pub(),
   });
 
+  testUsingContext('plugin example app depends on plugin', () async {
+    await _createProject(
+      projectDir,
+      <String>['--template=plugin', '-i', 'objc', '-a', 'java'],
+      <String>[
+        'example/pubspec.yaml',
+      ],
+    );
+    final String rawPubspec = await projectDir.childDirectory('example').childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    final String pluginName = projectDir.basename;
+    expect(pubspec.dependencies, contains(pluginName));
+    expect(pubspec.dependencies[pluginName] is PathDependency, isTrue);
+    final PathDependency pathDependency = pubspec.dependencies[pluginName] as PathDependency;
+    expect(pathDependency.path, '../');
+  }, overrides: <Type, Generator>{
+    Pub: () => const Pub(),
+  });
+
   testUsingContext('kotlin/swift plugin project', () async {
     return _createProject(
       projectDir,
@@ -564,7 +585,7 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   });
 
-  testUsingContext('app supports macOS if requested', () async {
+  testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -574,9 +595,54 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('app does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+  testUsingContext('plugin supports Linux if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('plugin does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('app does not include macOS by default', () async {
@@ -622,6 +688,21 @@ void main() {
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+  });
+
+  testUsingContext('plugin uses new platform schema', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    final String pubspecContents = await globals.fs.directory(projectDir.path).childFile('pubspec.yaml').readAsString();
+
+    expect(pubspecContents.contains('platforms:'), true);
   });
 
   testUsingContext('has correct content and formatting with module template', () async {

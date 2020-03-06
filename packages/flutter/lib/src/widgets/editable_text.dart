@@ -70,7 +70,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
-/// {@tool sample --template=stateful_widget_material}
+/// {@tool dartpad --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
 /// change listener forces the entered text to be lower case and keeps the
 /// cursor at the end of the input.
@@ -79,6 +79,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// final _controller = TextEditingController();
 ///
 /// void initState() {
+///   super.initState();
 ///   _controller.addListener(() {
 ///     final text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
@@ -87,7 +88,6 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///       composing: TextRange.empty,
 ///     );
 ///   });
-///   super.initState();
 /// }
 ///
 /// void dispose() {
@@ -189,8 +189,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
-    if (newSelection.start > text.length || newSelection.end > text.length)
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('invalid text selection: $newSelection')]);
+    if (!isSelectionWithinTextBounds(newSelection))
+      throw FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -219,6 +219,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
+  }
+
+  /// Check that the [selection] is inside of the bounds of [text].
+  bool isSelectionWithinTextBounds(TextSelection selection) {
+    return selection.start <= text.length && selection.end <= text.length;
   }
 }
 
@@ -426,7 +431,7 @@ class EditableText extends StatefulWidget {
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
-         'minLines can\'t be greater than maxLines',
+         "minLines can't be greater than maxLines",
        ),
        assert(expands != null),
        assert(
@@ -564,7 +569,7 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
-      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled;
+      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : const StrutStyle();
     }
     return _strutStyle.inheritFromTextStyle(style);
   }
@@ -872,7 +877,7 @@ class EditableText extends StatefulWidget {
   /// field.
   /// {@endtemplate}
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   /// When a non-completion action is pressed, such as "next" or "previous", it
   /// is often desirable to move the focus to the next or previous field.  To do
   /// this, handle it as in this example, by calling [FocusNode.focusNext] in
@@ -1154,8 +1159,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_didAutoFocus && widget.autofocus) {
-      FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).autofocus(widget.focusNode);
+        }
+      });
     }
   }
 
@@ -1218,7 +1227,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // TextInputClient implementation:
 
-  TextEditingValue _lastKnownRemoteTextEditingValue;
+  // _lastFormattedUnmodifiedTextEditingValue tracks the last value
+  // that the formatter ran on and is used to prevent double-formatting.
+  TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
+  // _receivedRemoteTextEditingValue is the direct value last passed in
+  // updateEditingValue. This value does not get updated with the formatted
+  // version.
+  TextEditingValue _receivedRemoteTextEditingValue;
 
   @override
   TextEditingValue get currentTextEditingValue => _value;
@@ -1230,6 +1245,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.readOnly) {
       return;
     }
+    _receivedRemoteTextEditingValue = value;
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
@@ -1238,7 +1254,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-    _lastKnownRemoteTextEditingValue = value;
+
     _formatAndSetValue(value);
 
     // To keep the cursor from blinking while typing, we want to restart the
@@ -1265,7 +1281,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         break;
       default:
         // Finalize editing, but don't give up focus because this keyboard
-        //  action does not imply the user is done inputting information.
+        // action does not imply the user is done inputting information.
         _finalizeEditing(false);
         break;
     }
@@ -1365,9 +1381,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection)
       return;
     final TextEditingValue localValue = _value;
-    if (localValue == _lastKnownRemoteTextEditingValue)
+    if (localValue == _receivedRemoteTextEditingValue)
       return;
-    _lastKnownRemoteTextEditingValue = localValue;
     _textInputConnection.setEditingState(localValue);
   }
 
@@ -1428,7 +1443,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
-      _lastKnownRemoteTextEditingValue = localValue;
+      _lastFormattedUnmodifiedTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(
         this,
         TextInputConfiguration(
@@ -1468,7 +1483,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.close();
       _textInputConnection = null;
-      _lastKnownRemoteTextEditingValue = null;
+      _lastFormattedUnmodifiedTextEditingValue = null;
+      _receivedRemoteTextEditingValue = null;
     }
   }
 
@@ -1486,7 +1502,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasInputConnection) {
       _textInputConnection.connectionClosedReceived();
       _textInputConnection = null;
-      _lastKnownRemoteTextEditingValue = null;
+      _lastFormattedUnmodifiedTextEditingValue = null;
+      _receivedRemoteTextEditingValue = null;
       _finalizeEditing(true);
     }
   }
@@ -1518,6 +1535,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+    // We return early if the selection is not valid. This can happen when the
+    // text of [EditableText] is updated at the same time as the selection is
+    // changed by a gesture event.
+    if (!widget.controller.isSelectionWithinTextBounds(selection))
+      return;
+
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the
@@ -1630,8 +1653,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _formatAndSetValue(TextEditingValue value) {
+    // Check if the new value is the same as the current local value, or is the same
+    // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
+    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
       _value = value;
@@ -1641,6 +1667,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
+    _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
   }
 
   void _onCursorColorTick() {

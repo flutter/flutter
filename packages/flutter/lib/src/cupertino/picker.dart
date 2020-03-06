@@ -54,9 +54,9 @@ class CupertinoPicker extends StatefulWidget {
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent]. Also, if it has transparency, no gradient
+  /// The [backgroundColor] defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker. Also, if it has transparency, no gradient
   /// effect will be rendered.
   ///
   /// The [scrollController] argument can be used to specify a custom
@@ -107,9 +107,9 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// The [itemExtent] argument must be non-null and positive.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent].
+  /// The [backgroundColor] defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker.
   CupertinoPicker.builder({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
@@ -145,10 +145,9 @@ class CupertinoPicker extends StatefulWidget {
 
   /// Background color behind the children.
   ///
-  /// Defaults to a gray color in the iOS color palette.
-  ///
-  /// This can be set to null to disable the background painting entirely; this
-  /// is mildly more efficient than using [Colors.transparent].
+  /// Defaults to null, which disables background painting entirely.
+  /// (i.e. the picker is going to have a completely transparent background), to match
+  /// the native UIPicker and UIDatePicker.
   ///
   /// Any alpha value less 255 (fully opaque) will cause the removal of the
   /// wheel list edge fade gradient from rendering of the widget.
@@ -235,7 +234,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         hasSuitableHapticHardware = false;
         break;
     }

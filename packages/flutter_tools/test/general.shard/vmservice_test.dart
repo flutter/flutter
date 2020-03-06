@@ -33,13 +33,11 @@ class MockPeer implements rpc.Peer {
   }
 
   @override
-  bool get isClosed {
-    throw 'unexpected call to isClosed';
-  }
+  bool get isClosed => _isClosed;
 
   @override
   Future<dynamic> close() async {
-    throw 'unexpected call to close()';
+    _isClosed = true;
   }
 
   @override
@@ -70,6 +68,7 @@ class MockPeer implements rpc.Peer {
   List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
+  bool _isClosed = false;
 
   Future<void> _getVMLatch;
   Completer<void> _currentGetVMLatchCompleter;
@@ -204,11 +203,21 @@ void main() {
       Logger: () => StdoutLogger(
         outputPreferences: OutputPreferences.test(),
         stdio: mockStdio,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
+    });
+
+    testUsingContext('closing VMService closes Peer', () async {
+      final MockPeer mockPeer = MockPeer();
+      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+      expect(mockPeer.isClosed, equals(false));
+      await vmService.close();
+      expect(mockPeer.isClosed, equals(true));
     });
 
     testUsingContext('refreshViews', () {
@@ -283,10 +292,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 
@@ -301,10 +312,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 
@@ -320,10 +333,12 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
         outputPreferences: outputPreferences,
-        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: const LocalPlatform(),
+        ),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
-        platform: FakePlatform(),
       ),
     });
 

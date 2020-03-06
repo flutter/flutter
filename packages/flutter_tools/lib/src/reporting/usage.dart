@@ -66,8 +66,6 @@ Map<String, String> _useCdKeys(Map<CustomDimensions, String> parameters) {
       MapEntry<String, String>(cdKey(k), v));
 }
 
-Usage get flutterUsage => Usage.instance;
-
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
@@ -76,18 +74,17 @@ abstract class Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) => _DefaultUsage(settingsName: settingsName,
                       versionOverride: versionOverride,
                       configDirOverride: configDirOverride,
-                      logFile: logFile);
-
-  /// Returns [Usage] active in the current app context.
-  static Usage get instance => context.get<Usage>();
+                      logFile: logFile,
+                      runningOnBot: runningOnBot);
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, String> parameters,
-  }) => flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+  }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
 
   /// Whether this is the first run of the tool.
   bool get isFirstRun;
@@ -161,6 +158,7 @@ class _DefaultUsage implements Usage {
     String versionOverride,
     String configDirOverride,
     String logFile,
+    @required bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -176,7 +174,7 @@ class _DefaultUsage implements Usage {
         // Many CI systems don't do a full git checkout.
         version.endsWith('/unknown') ||
         // Ignore bots.
-        isRunningOnBot(globals.platform) ||
+        runningOnBot ||
         // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
         suppressEnvFlag
       )) {

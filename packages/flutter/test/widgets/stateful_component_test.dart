@@ -55,7 +55,7 @@ void main() {
     checkTree(kBoxDecorationB);
   });
 
-  testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
+  testWidgets("Don't rebuild subwidgets", (WidgetTester tester) async {
     await tester.pumpWidget(
       const FlipWidget(
         key: Key('rebuild test'),

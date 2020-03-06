@@ -244,7 +244,7 @@ Future<void> buildGradleApp({
     BuildEvent('app-using-android-x').send();
   } else if (!usesAndroidX) {
     BuildEvent('app-not-using-android-x').send();
-    globals.printStatus('$warningMark Your app isn\'t using AndroidX.', emphasis: true);
+    globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
     globals.printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
       'by following the steps on https://goo.gl/CP92wY.',
@@ -271,7 +271,7 @@ Future<void> buildGradleApp({
     : getAssembleTaskFor(buildInfo);
 
   final Status status = globals.logger.startProgress(
-    'Running Gradle task \'$assembleTask\'...',
+    "Running Gradle task '$assembleTask'...",
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
@@ -297,6 +297,13 @@ Future<void> buildGradleApp({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo
+        .targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (target != null) {
     command.add('-Ptarget=$target');
@@ -322,12 +329,6 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
   }
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo
-      .targetArchs
-      .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
     // read from include_flutter.groovy.
@@ -343,6 +344,9 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.buildInfo.treeShakeIcons) {
     command.add('-Ptree-shake-icons=true');
+  }
+  if (androidBuildInfo.buildInfo.dartObfuscation) {
+    command.add('-Pdart-obfuscation=true');
   }
   command.add(assembleTask);
 
@@ -392,7 +396,7 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
@@ -508,7 +512,7 @@ Future<void> buildGradleAar({
 
   final String aarTask = getAarTaskFor(androidBuildInfo.buildInfo);
   final Status status = globals.logger.startProgress(
-    'Running Gradle task \'$aarTask\'...',
+    "Running Gradle task '$aarTask'...",
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
@@ -534,11 +538,6 @@ Future<void> buildGradleAar({
     command.add('-Ptarget=$target');
   }
 
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo.targetArchs
-        .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
@@ -568,6 +567,12 @@ Future<void> buildGradleAar({
         'in ${outputDirectory.path}'
       );
     }
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
 
   command.add(aarTask);
@@ -584,7 +589,7 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
   if (result.exitCode != 0) {
     globals.printStatus(result.stdout, wrap: false);
@@ -632,7 +637,7 @@ ${globals.terminal.bolden('Consuming the Module')}
             url '${repoDirectory.path}'
         }
         maven {
-            url 'http://download.flutter.io'
+            url 'https://storage.googleapis.com/download.flutter.io'
         }
       }
 
@@ -641,8 +646,8 @@ ${globals.terminal.bolden('Consuming the Module')}
     dependencies {''');
 
   for (final String buildMode in buildModes) {
-    globals.printStatus('''
-      ${buildMode}Implementation \'$androidPackage:flutter_$buildMode:$buildNumber\'''');
+    globals.printStatus("""
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber'""");
   }
 
   globals.printStatus('''
@@ -679,11 +684,11 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 
@@ -740,7 +745,7 @@ Future<void> buildPluginsAsAar(
     final String pluginName = pluginParts.first;
     final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
     if (!buildGradleFile.existsSync()) {
-      globals.printTrace('Skipping plugin $pluginName since it doesn\'t have a android/build.gradle file');
+      globals.printTrace("Skipping plugin $pluginName since it doesn't have a android/build.gradle file");
       continue;
     }
     globals.logger.printStatus('Building plugin $pluginName...');
@@ -865,15 +870,15 @@ void _exitWithExpectedFileNotFound({
     ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
-    'It\'s likely that this file was generated under ${project.android.buildDirectory.path}, '
-    'but the tool couldn\'t find it.'
+    "It's likely that this file was generated under ${project.android.buildDirectory.path}, "
+    "but the tool couldn't find it."
   );
 }
 
 void _createSymlink(String targetPath, String linkPath) {
   final File targetFile = globals.fs.file(targetPath);
   if (!targetFile.existsSync()) {
-    throwToolExit('The file $targetPath wasn\'t found in the local engine out directory.');
+    throwToolExit("The file $targetPath wasn't found in the local engine out directory.");
   }
   final File linkFile = globals.fs.file(linkPath);
   final Link symlink = linkFile.parent.childLink(linkFile.basename);
@@ -889,7 +894,7 @@ void _createSymlink(String targetPath, String linkPath) {
 String _getLocalArtifactVersion(String pomPath) {
   final File pomFile = globals.fs.file(pomPath);
   if (!pomFile.existsSync()) {
-    throwToolExit('The file $pomPath wasn\'t found in the local engine out directory.');
+    throwToolExit("The file $pomPath wasn't found in the local engine out directory.");
   }
   xml.XmlDocument document;
   try {
@@ -925,7 +930,7 @@ Directory _getLocalEngineRepo({
   assert(engineOutPath != null);
   assert(androidBuildInfo != null);
 
-  final String abi = getEnumName(androidBuildInfo.targetArchs.first);
+  final String abi = _getAbiByLocalEnginePath(engineOutPath);
   final Directory localEngineRepo = globals.fs.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
 
@@ -975,4 +980,28 @@ Directory _getLocalEngineRepo({
     );
   }
   return localEngineRepo;
+}
+
+String _getAbiByLocalEnginePath(String engineOutPath) {
+  String result = 'armeabi_v7a';
+  if (engineOutPath.contains('x86')) {
+    result = 'x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'x86_64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'arm64_v8a';
+  }
+  return result;
+}
+
+String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
+  String result = 'android-arm';
+  if (engineOutPath.contains('x86')) {
+    result = 'android-x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'android-x64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'android-arm64';
+  }
+  return result;
 }

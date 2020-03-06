@@ -313,13 +313,13 @@ class FlutterPlatform extends PlatformPlugin {
       final RunnerSuiteController controller = deserializeSuite(path, platform,
         suiteConfig, const PluginEnvironment(), channel, message);
       return await controller.suite;
-    } catch (err) {
+    } on Exception catch (err) {
       /// Rethrow a less confusing error if it is a test incompatibility.
-      if (err.toString().contains('type \'Declarer\' is not a subtype of type \'Declarer\'')) {
+      if (err.toString().contains("type 'Declarer' is not a subtype of type 'Declarer'")) {
         throw UnsupportedError('Package incompatibility between flutter and test packages:\n'
           '  * flutter is incompatible with test <1.4.0.\n'
           '  * flutter is incompatible with mockito <4.0.0\n'
-          'To fix this error, update test to at least \'^1.4.0\' and mockito to at least \'^4.0.0\'\n'
+          "To fix this error, update test to at least '^1.4.0' and mockito to at least '^4.0.0'\n"
         );
       }
       // Guess it was a different error.
@@ -667,7 +667,7 @@ class FlutterPlatform extends PlatformPlugin {
           }
           break;
       }
-    } catch (error, stack) {
+    } on Exception catch (error, stack) {
       globals.printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
@@ -681,7 +681,7 @@ class FlutterPlatform extends PlatformPlugin {
       for (final Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
-        } catch (error, stack) {
+        } on Exception catch (error, stack) {
           globals.printTrace('test $ourTestCount: error while cleaning up; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
@@ -863,7 +863,7 @@ class FlutterPlatform extends PlatformPlugin {
             if (startTimeoutTimer != null) {
               startTimeoutTimer();
             }
-          } else if (line.startsWith('error: Unable to read Dart source \'package:test/')) {
+          } else if (line.startsWith("error: Unable to read Dart source 'package:test/")) {
             globals.printTrace('Shell: $line');
             globals.printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
           } else if (line.startsWith(observatoryString)) {
@@ -873,7 +873,7 @@ class FlutterPlatform extends PlatformPlugin {
               if (reportObservatoryUri != null) {
                 reportObservatoryUri(uri);
               }
-            } catch (error) {
+            } on Exception catch (error) {
               globals.printError('Could not parse shell observatory port message: $error');
             }
           } else if (line != null) {

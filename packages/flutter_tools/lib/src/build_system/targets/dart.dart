@@ -66,6 +66,9 @@ const String kDartDefines = 'DartDefines';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
+/// Whether to enable Dart obfuscation and where to save the symbol map.
+const String kDartObfuscation = 'DartObfuscation';
+
 /// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
@@ -114,7 +117,15 @@ class CopyFlutterBundle extends Target {
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
     final Depfile assetDepfile = await copyAssets(environment, environment.outputDir);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 
   @override
@@ -262,7 +273,8 @@ abstract class AotElfBase extends Target {
       ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final String saveDebuggingInformation = environment.defines[kSplitDebugInfo];
+    final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
@@ -271,7 +283,8 @@ abstract class AotElfBase extends Target {
       outputPath: outputPath,
       bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
-      splitDebugInfo: saveDebuggingInformation
+      splitDebugInfo: splitDebugInfo,
+      dartObfuscation: dartObfuscation,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

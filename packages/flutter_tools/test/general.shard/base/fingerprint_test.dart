@@ -249,7 +249,7 @@ void main() {
         globals.fs.file('a.dart').createSync();
         expect(
           () => Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
-          throwsArgumentError,
+          throwsException,
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -328,7 +328,7 @@ void main() {
           'properties': <String, String>{},
           'files': <String, String>{},
         });
-        expect(() => Fingerprint.fromJson(jsonString), throwsArgumentError);
+        expect(() => Fingerprint.fromJson(jsonString), throwsException);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -338,7 +338,7 @@ void main() {
           'properties': <String, String>{},
           'files': <String, String>{},
         });
-        expect(() => Fingerprint.fromJson(jsonString), throwsArgumentError);
+        expect(() => Fingerprint.fromJson(jsonString), throwsException);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });

@@ -196,7 +196,7 @@ class FuchsiaRemoteConnection {
     sshConfigPath ??= Platform.environment['FUCHSIA_SSH_CONFIG'];
     if (address == null) {
       throw FuchsiaRemoteConnectionError(
-          'No address supplied, and \$FUCHSIA_DEVICE_URL not found.');
+          r'No address supplied, and $FUCHSIA_DEVICE_URL not found.');
     }
     const String interfaceDelimiter = '%';
     if (address.contains(interfaceDelimiter)) {
@@ -408,7 +408,7 @@ class FuchsiaRemoteConnection {
     // loopback device, so connecting to the IPv4 loopback would fail when the
     // target address is IPv6 link-local.
     final String addr = _useIpV6Loopback
-        ? 'http://\[$_ipv6Loopback\]:$port'
+        ? 'http://[$_ipv6Loopback]:$port'
         : 'http://$_ipv4Loopback:$port';
     final Uri uri = Uri.parse(addr);
     return uri;

@@ -4,6 +4,7 @@
 
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -40,14 +41,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-    Map<String, dynamic> plistValues = PlistParser.instance.parseFile(plistFile);
+    Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
     final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String;
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = globals.fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = globals.fs.path.join(studioPath, 'Info.plist');
-      plistValues = PlistParser.instance.parseFile(plistFile);
+      plistValues = globals.plistParser.parseFile(plistFile);
     }
 
     final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
@@ -92,7 +93,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       installPath = globals.fs
           .file(globals.fs.path.join(homeDotDir.path, 'system', '.home'))
           .readAsStringSync();
-    } catch (e) {
+    } on Exception {
       // ignored, installPath will be null, which is handled below
     }
     if (installPath != null && globals.fs.isDirectorySync(installPath)) {
@@ -199,7 +200,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             _checkForStudio(directory.path);
           }
         }
-      } catch (e) {
+      } on Exception catch (e) {
         globals.printTrace('Exception while looking for Android Studio: $e');
       }
     }
@@ -307,8 +308,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (!globals.processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      final RunResult result = processUtils.runSync(<String>[javaExecutable, '-version']);
-      if (result.exitCode == 0) {
+      RunResult result;
+      try {
+        result = processUtils.runSync(<String>[javaExecutable, '-version']);
+      } on ProcessException catch (e) {
+        _validationMessages.add('Failed to run Java: $e');
+      }
+      if (result != null && result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');

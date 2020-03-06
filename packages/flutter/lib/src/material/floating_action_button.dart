@@ -58,7 +58,7 @@ class _DefaultHeroTag {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
@@ -85,7 +85,7 @@ class _DefaultHeroTag {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".
@@ -436,7 +436,7 @@ class FloatingActionButton extends StatelessWidget {
           'FloatingActionButtons using ThemeData.accentIconTheme '
           'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
           'instead. See '
-          'https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency. '
+          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
           'This feature was deprecated after v1.13.2.'
         );
       }
@@ -563,8 +563,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
-    renderObject
-      ..textDirection = Directionality.of(context);
+    renderObject.textDirection = Directionality.of(context);
   }
 }
 
@@ -582,6 +581,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(

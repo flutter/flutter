@@ -1800,7 +1800,7 @@ abstract class RenderBox extends RenderObject {
           }
           if (!value._canBeUsedByParent) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('A child\'s size was used without setting parentUsesSize.'),
+              ErrorSummary("A child's size was used without setting parentUsesSize."),
               describeForError('The following render object'),
               value._owner.describeForError('...was assigned a size obtained from its child'),
               ErrorDescription(
@@ -2110,14 +2110,14 @@ abstract class RenderBox extends RenderObject {
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
             ErrorDescription(
-              'Unfortunately, this object\'s geometry is not known at this time, '
+              "Unfortunately, this object's geometry is not known at this time, "
               'probably because it has never been laid out. '
               'This means it cannot be accurately hit-tested.'
             ),
             ErrorHint(
               'If you are trying '
               'to perform a hit test during the layout phase itself, make sure '
-              'you only hit test nodes that have completed layout (e.g. the node\'s '
+              "you only hit test nodes that have completed layout (e.g. the node's "
               'children, after their layout() method has been called).'
             ),
           ]);

@@ -152,6 +152,26 @@ void main() {
         .thenAnswer((_) => Future<Process>.value(process));
       when(mockProcessManager.canRun(any)).thenReturn(false);
 
+      when(mockProcessManager.runSync(
+        argThat(contains(contains('gen_snapshot'))),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 255, '', ''));
+
+      when(mockProcessManager.runSync(
+        <String>['/usr/bin/xcode-select', '--print-path'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 0, '', ''));
+
+      when(mockProcessManager.run(
+        <String>['which', 'pod'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+      });
+
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
@@ -214,10 +234,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -242,10 +262,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Psplit-debug-info=${tempDir.path}',
           'assembleRelease',
         ],
@@ -274,9 +294,9 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -297,10 +317,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -344,7 +364,7 @@ void main() {
       Usage: () => mockUsage,
     });
 
-    testUsingContext('reports when the app isn\'t using AndroidX', () async {
+    testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
 
@@ -352,10 +372,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -375,7 +395,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
       expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
@@ -403,10 +423,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -426,7 +446,7 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains('[!] Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains("[!] Your app isn't using AndroidX"), isFalse);
       expect(
         testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '

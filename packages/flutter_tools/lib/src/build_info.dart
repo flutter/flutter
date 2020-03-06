@@ -22,6 +22,7 @@ class BuildInfo {
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
+    this.dartObfuscation = false,
     @required this.treeShakeIcons,
   });
 
@@ -67,6 +68,9 @@ class BuildInfo {
   /// traces. If null, stack trace information is not stripped from the
   /// executable.
   final String splitDebugInfoPath;
+
+  /// Whether to apply dart source code obfuscation.
+  final bool dartObfuscation;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -388,14 +392,15 @@ String getNameForDarwinArch(DarwinArch arch) {
 DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
+    case 'armv7f': // iPhone 4S.
       return DarwinArch.armv7;
     case 'arm64':
+    case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
       return DarwinArch.arm64;
     case 'x86_64':
       return DarwinArch.x86_64;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported iOS arch name "$arch"');
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
@@ -476,8 +481,7 @@ AndroidArch getAndroidArchForName(String platform) {
     case 'android-x86':
       return AndroidArch.x86;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported Android arch name "$platform"');
 }
 
 String getNameForAndroidArch(AndroidArch arch) {

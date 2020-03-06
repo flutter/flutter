@@ -33,7 +33,7 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool sample --template=stateless_widget_material}
+/// {@tool dartpad --template=stateless_widget_material}
 ///
 /// This sample shows two ways to open [AboutDialog]. The first one
 /// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
@@ -223,8 +223,8 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
-/// the documentation for which discusses how it is used.
+/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
+/// [showDialog], the documentation for which discusses how it is used.
 void showAboutDialog({
   @required BuildContext context,
   String applicationName,
@@ -233,6 +233,7 @@ void showAboutDialog({
   String applicationLegalese,
   List<Widget> children,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
@@ -248,6 +249,7 @@ void showAboutDialog({
         children: children,
       );
     },
+    routeSettings: routeSettings,
   );
 }
 

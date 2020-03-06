@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show TextHeightBehavior;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -574,11 +577,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// Here's an illustration (implemented below) of what using this widget looks
-/// like, using a [curve] of [Curves.fastOutSlowIn].
-/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
-///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool dartpad --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the [height], [width], [color], and
@@ -1378,9 +1377,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 ///
-/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
-///
-/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool dartpad --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatingActionButton]. Pressing the button animates the lists' opacity.
 ///
@@ -1508,8 +1505,9 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAn
 /// without explicit style) over a given duration whenever the given style
 /// changes.
 ///
-/// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
-/// not animated and take effect immediately when changed.
+/// The [textAlign], [softWrap], [textOverflow], [maxLines], [textWidthBasis]
+/// and [textHeightBehavior] properties are not animated and take effect
+/// immediately when changed.
 ///
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.elasticInOut].
@@ -1535,6 +1533,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
+    this.textWidthBasis = TextWidthBasis.parent,
+    this.textHeightBehavior,
     Curve curve = Curves.linear,
     @required Duration duration,
     VoidCallback onEnd,
@@ -1543,6 +1543,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
        super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The widget below this widget in the tree.
@@ -1581,6 +1582,67 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// See [DefaultTextStyle.maxLines] for more details.
   final int maxLines;
 
+  /// {@macro lutter.widgets.text.DefaultTextStyle.tetWidthBasis}
+  final TextWidthBasis textWidthBasis;
+
+  /// {@macro flutter.dart:ui.textHeightBehavior}
+  final ui.TextHeightBehavior textHeightBehavior;
+
+  /// Creates an animated default text style that overrides the text styles in
+  /// scope at this point in the widget tree.
+  ///
+  /// The given [style] is merged with the [style] from the default text style
+  /// for the [BuildContext] where the widget is inserted, and any of the other
+  /// arguments that are not null replace the corresponding properties on that
+  /// same default text style.
+  ///
+  /// This constructor cannot be used to override the [maxLines] property of the
+  /// ancestor with the value null, since null here is used to mean "defer to
+  /// ancestor". To replace a non-null [maxLines] from an ancestor with the null
+  /// value (to remove the restriction on number of lines), manually obtain the
+  /// ambient [DefaultTextStyle] using [DefaultTextStyle.of], then create a new
+  /// [DefaultTextStyle] using the [new DefaultTextStyle] constructor directly.
+  /// See the source below for an example of how to do this (since that's
+  /// essentially what this constructor does).
+  ///
+  /// Since the ancestor may not have been an AnimatedDefaultTextStyle, the
+  /// [duration] property is required.
+  static Widget merge({
+    Key key,
+    @required Widget child,
+    TextStyle style,
+    TextAlign textAlign,
+    bool softWrap,
+    TextOverflow overflow,
+    int maxLines,
+    TextWidthBasis textWidthBasis,
+    ui.TextHeightBehavior textHeightBehavior,
+    Curve curve = Curves.linear,
+    @required Duration duration,
+    VoidCallback onEnd,
+  }) {
+    assert(child != null);
+    return Builder(
+      builder: (BuildContext context) {
+        final DefaultTextStyle parent = DefaultTextStyle.of(context);
+        return AnimatedDefaultTextStyle(
+          key: key,
+          style: parent.style.merge(style),
+          textAlign: textAlign ?? parent.textAlign,
+          softWrap: softWrap ?? parent.softWrap,
+          overflow: overflow ?? parent.overflow,
+          maxLines: maxLines ?? parent.maxLines,
+          textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
+          duration: duration,
+          curve: curve,
+          onEnd: onEnd,
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   _AnimatedDefaultTextStyleState createState() => _AnimatedDefaultTextStyleState();
 
@@ -1592,6 +1654,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
+    properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
 }
 
@@ -1611,6 +1675,8 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
       softWrap: widget.softWrap,
       overflow: widget.overflow,
       maxLines: widget.maxLines,
+      textWidthBasis: widget.textWidthBasis,
+      textHeightBehavior: widget.textHeightBehavior,
       child: widget.child,
     );
   }
