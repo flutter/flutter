@@ -334,7 +334,7 @@ abstract class ScrollView extends StatelessWidget {
               && (focusScope.focusedChild != null && focusScope.focusedChild.hasFocus)) {
             focusScope.unfocus();
           }
-          return true;
+          return false;
         },
       );
     } else {
