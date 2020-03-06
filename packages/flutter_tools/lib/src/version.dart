@@ -531,7 +531,7 @@ class VersionCheckStamp {
         } else {
           globals.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
         globals.printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
