@@ -251,6 +251,14 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   // Lay out all children, regardless of whether or not they will be painted or
   // placed with an offset. Find which child overflows, if any.
   void _layoutChildren() {
+    // When overflow is not open, the toolbar is always a specific height.
+    final BoxConstraints sizedConstraints = _overflowOpen
+      ? constraints
+      : BoxConstraints.loose(Size(
+          constraints.maxWidth,
+          _kToolbarHeight,
+        ));
+
     int i = -1;
     double width = 0.0;
     visitChildren((RenderObject renderObjectChild) {
@@ -265,10 +273,10 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       }
 
       final RenderBox child = renderObjectChild as RenderBox;
-      child.layout(constraints.loosen(), parentUsesSize: true);
+      child.layout(sizedConstraints.loosen(), parentUsesSize: true);
       width += child.size.width;
 
-      if (width > constraints.maxWidth && _lastIndexThatFits == -1) {
+      if (width > sizedConstraints.maxWidth && _lastIndexThatFits == -1) {
         _lastIndexThatFits = i - 1;
       }
     });
@@ -278,7 +286,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     final RenderBox navButton = firstChild;
     if (_lastIndexThatFits != -1
         && _lastIndexThatFits == childCount - 2
-        && width - navButton.size.width <= constraints.maxWidth) {
+        && width - navButton.size.width <= sizedConstraints.maxWidth) {
       _lastIndexThatFits = -1;
     }
   }
