@@ -275,12 +275,8 @@ $ex
         ''');
         }
         final async_io.Window window = await driver.window;
-        try {
-          await window.setLocation(const math.Point<int>(0, 0));
-          await window.setSize(math.Rectangle<int>(0, 0, x, y));
-        } catch (_) {
-          // Error might be thrown in some browsers.
-        }
+        await window.setLocation(const math.Point<int>(0, 0));
+        await window.setSize(math.Rectangle<int>(0, 0, x, y));
       }
 
       // add driver info to environment variables
