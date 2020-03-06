@@ -54,204 +54,204 @@ void main() {
     await precacheLanguageAndRegionTags();
   });
 
-  group('Setters', () {
-    test('setL10nDirectory fails if the directory does not exist', () {
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setL10nDirectory('lib');
-      } on FileSystemException catch (e) {
-        expect(e.message, contains('Make sure that the correct path was provided'));
-        return;
-      }
+  // group('Setters', () {
+  //   test('setL10nDirectory fails if the directory does not exist', () {
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setL10nDirectory('lib');
+  //     } on FileSystemException catch (e) {
+  //       expect(e.message, contains('Make sure that the correct path was provided'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
-        'directory does not exist.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
+  //       'directory does not exist.'
+  //     );
+  //   });
 
-    test('setL10nDirectory fails if input string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setL10nDirectory(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setL10nDirectory fails if input string is null', () {
+  //     _standardFlutterDirectoryL10nSetup(fs);
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setL10nDirectory(null);
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
-        'the input string is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setL10nDirectory should fail if the '
+  //       'the input string is null.'
+  //     );
+  //   });
 
-    test('setTemplateArbFile fails if l10nDirectory is null', () {
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setTemplateArbFile(defaultTemplateArbFileName);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setTemplateArbFile fails if l10nDirectory is null', () {
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setTemplateArbFile(defaultTemplateArbFileName);
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+  //       'the l10nDirectory is null.'
+  //     );
+  //   });
 
-    test('setTemplateArbFile fails if templateArbFileName is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setTemplateArbFile(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setTemplateArbFile fails if templateArbFileName is null', () {
+  //     _standardFlutterDirectoryL10nSetup(fs);
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setTemplateArbFile(null);
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+  //       'the l10nDirectory is null.'
+  //     );
+  //   });
 
-    test('setTemplateArbFile fails if input string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setTemplateArbFile(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setTemplateArbFile fails if input string is null', () {
+  //     _standardFlutterDirectoryL10nSetup(fs);
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setTemplateArbFile(null);
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the input string is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
+  //       'the input string is null.'
+  //     );
+  //   });
 
-    test('setOutputFile fails if input string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.setOutputFile(null);
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setOutputFile fails if input string is null', () {
+  //     _standardFlutterDirectoryL10nSetup(fs);
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.setOutputFile(null);
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setOutputFile should fail if the '
-        'the input string is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.setOutputFile should fail if the '
+  //       'the input string is null.'
+  //     );
+  //   });
 
-    test('setting className fails if input string is null', () {
-      _standardFlutterDirectoryL10nSetup(fs);
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.className = null;
-      } on L10nException catch (e) {
-        expect(e.message, contains('cannot be null'));
-        return;
-      }
+  //   test('setting className fails if input string is null', () {
+  //     _standardFlutterDirectoryL10nSetup(fs);
+  //     final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+  //     try {
+  //       generator.className = null;
+  //     } on L10nException catch (e) {
+  //       expect(e.message, contains('cannot be null'));
+  //       return;
+  //     }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.className should fail if the '
-        'the input string is null.'
-      );
-    });
+  //     fail(
+  //       'Attempting to set LocalizationsGenerator.className should fail if the '
+  //       'the input string is null.'
+  //     );
+  //   });
 
-    group('className should only take valid Dart class names', () {
-      LocalizationsGenerator generator;
-      setUp(() {
-        _standardFlutterDirectoryL10nSetup(fs);
-        generator = LocalizationsGenerator(fs);
-        try {
-          generator.setL10nDirectory(defaultArbPathString);
-          generator.setTemplateArbFile(defaultTemplateArbFileName);
-          generator.setOutputFile(defaultOutputFileString);
-        } on L10nException catch (e) {
-          throw TestFailure('Unexpected failure during test setup: ${e.message}');
-        }
-      });
+  //   group('className should only take valid Dart class names', () {
+  //     LocalizationsGenerator generator;
+  //     setUp(() {
+  //       _standardFlutterDirectoryL10nSetup(fs);
+  //       generator = LocalizationsGenerator(fs);
+  //       try {
+  //         generator.setL10nDirectory(defaultArbPathString);
+  //         generator.setTemplateArbFile(defaultTemplateArbFileName);
+  //         generator.setOutputFile(defaultOutputFileString);
+  //       } on L10nException catch (e) {
+  //         throw TestFailure('Unexpected failure during test setup: ${e.message}');
+  //       }
+  //     });
 
-      test('fails on string with spaces', () {
-        try {
-          generator.className = 'String with spaces';
-        } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid public Dart class name'));
-          return;
-        }
-        fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid Dart class name.'
-        );
-      });
+  //     test('fails on string with spaces', () {
+  //       try {
+  //         generator.className = 'String with spaces';
+  //       } on L10nException catch (e) {
+  //         expect(e.message, contains('is not a valid public Dart class name'));
+  //         return;
+  //       }
+  //       fail(
+  //         'Attempting to set LocalizationsGenerator.className should fail if the '
+  //         'the input string is not a valid Dart class name.'
+  //       );
+  //     });
 
-      test('fails on non-alphanumeric symbols', () {
-        try {
-          generator.className = 'TestClass@123';
-        } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid public Dart class name'));
-          return;
-        }
-        fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
-        );
-      });
+  //     test('fails on non-alphanumeric symbols', () {
+  //       try {
+  //         generator.className = 'TestClass@123';
+  //       } on L10nException catch (e) {
+  //         expect(e.message, contains('is not a valid public Dart class name'));
+  //         return;
+  //       }
+  //       fail(
+  //         'Attempting to set LocalizationsGenerator.className should fail if the '
+  //         'the input string is not a valid public Dart class name.'
+  //       );
+  //     });
 
-      test('fails on camel-case', () {
-        try {
-          generator.className = 'camelCaseClassName';
-        } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid public Dart class name'));
-          return;
-        }
-        fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
-        );
-      });
+  //     test('fails on camel-case', () {
+  //       try {
+  //         generator.className = 'camelCaseClassName';
+  //       } on L10nException catch (e) {
+  //         expect(e.message, contains('is not a valid public Dart class name'));
+  //         return;
+  //       }
+  //       fail(
+  //         'Attempting to set LocalizationsGenerator.className should fail if the '
+  //         'the input string is not a valid public Dart class name.'
+  //       );
+  //     });
 
-      test('fails when starting with a number', () {
-        try {
-          generator.className = '123ClassName';
-        } on L10nException catch (e) {
-          expect(e.message, contains('is not a valid public Dart class name'));
-          return;
-        }
-        fail(
-          'Attempting to set LocalizationsGenerator.className should fail if the '
-          'the input string is not a valid public Dart class name.'
-        );
-      });
-    });
-  });
+  //     test('fails when starting with a number', () {
+  //       try {
+  //         generator.className = '123ClassName';
+  //       } on L10nException catch (e) {
+  //         expect(e.message, contains('is not a valid public Dart class name'));
+  //         return;
+  //       }
+  //       fail(
+  //         'Attempting to set LocalizationsGenerator.className should fail if the '
+  //         'the input string is not a valid public Dart class name.'
+  //       );
+  //     });
+  //   });
+  // });
 
-  test('correctly adds a headerString when it is set', () {
-    _standardFlutterDirectoryL10nSetup(fs);
+  // test('correctly adds a headerString when it is set', () {
+  //   _standardFlutterDirectoryL10nSetup(fs);
 
-    LocalizationsGenerator generator;
-    try {
-      generator = LocalizationsGenerator(fs);
-      generator.initialize(
-        l10nDirectoryPath: defaultArbPathString,
-        templateArbFileName: defaultTemplateArbFileName,
-        outputFileString: defaultOutputFileString,
-        classNameString: defaultClassNameString,
-        headerString: '/// Sample header',
-      );
-    } on L10nException catch (e) {
-      fail('Setting a header through a String should not fail: \n$e');
-    }
+  //   LocalizationsGenerator generator;
+  //   try {
+  //     generator = LocalizationsGenerator(fs);
+  //     generator.initialize(
+  //       l10nDirectoryPath: defaultArbPathString,
+  //       templateArbFileName: defaultTemplateArbFileName,
+  //       outputFileString: defaultOutputFileString,
+  //       classNameString: defaultClassNameString,
+  //       headerString: '/// Sample header',
+  //     );
+  //   } on L10nException catch (e) {
+  //     fail('Setting a header through a String should not fail: \n$e');
+  //   }
 
-    expect(generator.header, '/// Sample header');
-  });
+  //   expect(generator.header, '/// Sample header');
+  // });
 
   test('correctly adds a headerFile when it is set', () {
     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
@@ -274,7 +274,7 @@ void main() {
         headerFile: 'header.txt',
       );
     } on L10nException catch (e) {
-      fail('Setting a header through a file should not fail: \n$e');
+      fail('Setting a header through a file should not fail: \n${e.message}');
     }
 
     expect(generator.header, '/// Sample header in a text file');

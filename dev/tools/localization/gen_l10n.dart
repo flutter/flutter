@@ -344,18 +344,7 @@ class LocalizationsGenerator {
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
-    if (header != null && headerFile != null) {
-      throw L10nException(
-        'Cannot accept both header and header file arguments. \n'
-        'Please make sure to define only one or the other. '
-      );
-    } else {
-      if (header != null) {
-        header = headerString;
-      } else if (headerFile != null) {
-        header = _setHeaderWithFile(headerFile);
-      }
-    }
+    _setHeader(headerString, headerFile);
     className = classNameString;
   }
 
@@ -418,10 +407,6 @@ class LocalizationsGenerator {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
-  String _setHeaderWithFile(String headerFile) {
-    return '';
-  }
-
   static bool _isValidClassName(String className) {
     // Public Dart class name cannot begin with an underscore
     if (className[0] == '_')
@@ -465,6 +450,21 @@ class LocalizationsGenerator {
         }
         return LocaleInfo.fromString(localeString.toString());
       }).toList();
+    }
+  }
+
+  void _setHeader(String headerString, String headerFile) {
+    if (headerString != null && headerFile != null) {
+      throw L10nException(
+        'Cannot accept both header and header file arguments. \n'
+        'Please make sure to define only one or the other. '
+      );
+    }
+
+    if (headerString != null) {
+      header = headerString;
+    } else if (headerFile != null) {
+      header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
     }
   }
 
