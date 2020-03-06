@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 const String fileTemplate = '''
-@(header)import 'dart:async';
+@(header)
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';

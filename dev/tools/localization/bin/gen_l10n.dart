@@ -100,7 +100,7 @@ Future<void> main(List<String> arguments) async {
         outputFileString: outputFileString,
         classNameString: classNameString,
         preferredSupportedLocaleString: preferredSupportedLocaleString,
-        header: headerString,
+        headerString: headerString,
         headerFile: headerFile,
       )
       ..loadResources()
