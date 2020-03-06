@@ -12,12 +12,14 @@ class UsageEvent {
   UsageEvent(this.category, this.parameter, {
     this.label,
     this.value,
+    @required this.flutterUsage,
   });
 
   final String category;
   final String parameter;
   final String label;
   final int value;
+  final Usage flutterUsage;
 
   void send() {
     flutterUsage.sendEvent(category, parameter, label: label, value: value);
@@ -46,7 +48,7 @@ class HotEvent extends UsageEvent {
     this.invalidatedSourcesCount,
     this.transferTimeInMs,
     this.overallTimeInMs,
-  }) : super('hot', parameter);
+  }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
 
   final String reason;
   final String targetPlatform;
@@ -101,6 +103,7 @@ class DoctorResultEvent extends UsageEvent {
     'doctor-result',
     '${validator.runtimeType}',
     label: result.typeStr,
+    flutterUsage: globals.flutterUsage,
   );
 
   final DoctorValidator validator;
@@ -126,7 +129,7 @@ class PubResultEvent extends UsageEvent {
   PubResultEvent({
     @required String context,
     @required String result,
-  }) : super('pub-result', context, label: result);
+  }) : super('pub-result', context, label: result, flutterUsage: globals.flutterUsage);
 }
 
 /// An event that reports something about a build.
@@ -143,6 +146,7 @@ class BuildEvent extends UsageEvent {
       ? 'unspecified'
       : FlutterCommand.current.name,
     label: label,
+    flutterUsage: globals.flutterUsage,
   );
 
   final String command;
@@ -173,7 +177,7 @@ class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
       : assert(commandPath != null),
         assert(result != null),
-        super(commandPath, result.toString());
+        super(commandPath, result.toString(), flutterUsage: globals.flutterUsage);
 
   @override
   void send() {
@@ -211,5 +215,6 @@ class AnalyticsConfigEvent extends UsageEvent {
     'analytics',
     'enabled',
     label: enabled ? 'true' : 'false',
+    flutterUsage: globals.flutterUsage,
   );
 }

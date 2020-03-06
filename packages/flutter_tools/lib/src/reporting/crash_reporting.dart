@@ -53,7 +53,7 @@ class CrashReportSender {
   }
 
   final http.Client _client;
-  final Usage _usage = Usage.instance;
+  final Usage _usage = globals.flutterUsage;
 
   Uri get _baseUrl {
     final String overrideUrl = globals.platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
