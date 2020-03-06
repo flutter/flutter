@@ -326,13 +326,13 @@ abstract class ScrollView extends StatelessWidget {
         : scrollable;
 
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
-      final FocusNode dismissNode = FocusNode();
       return NotificationListener<ScrollUpdateNotification>(
         child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
-          if (notification.dragDetails != null && focusScope.focusedChild != dismissNode) {
-            focusScope.requestFocus(dismissNode);
+          if (notification.dragDetails != null
+              && (focusScope.focusedChild != null && focusScope.focusedChild.hasFocus)) {
+            focusScope.unfocus();
           }
           return true;
         },
