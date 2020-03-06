@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' hide userMessages;
 import '../doctor.dart';
 import 'visual_studio.dart';
 

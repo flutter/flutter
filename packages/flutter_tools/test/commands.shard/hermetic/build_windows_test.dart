@@ -8,7 +8,6 @@ import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -23,15 +22,28 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
+const String solutionPath = r'C:\windows\Runner.sln';
+const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
+    'FLUTTER_ROOT': r'C:\',
+  }
+);
+final Platform notWindowsPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{
+    'FLUTTER_ROOT': r'C:\',
+  }
+);
+
 void main() {
   MockProcessManager mockProcessManager;
   MockProcess mockProcess;
-  MockPlatform windowsPlatform;
-  MockPlatform notWindowsPlatform;
   MockVisualStudio mockVisualStudio;
-  const String solutionPath = r'C:\windows\Runner.sln';
-  const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-  const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
   setUpAll(() {
     Cache.disableLocking();
@@ -40,9 +52,6 @@ void main() {
   setUp(() {
     mockProcessManager = MockProcessManager();
     mockProcess = MockProcess();
-    windowsPlatform = MockPlatform()
-        ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
-    notWindowsPlatform = MockPlatform();
     mockVisualStudio = MockVisualStudio();
     when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
       return 0;
@@ -53,8 +62,6 @@ void main() {
     when(mockProcess.stdout).thenAnswer((Invocation invocation) {
       return Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('STDOUT STUFF')]);
     });
-    when(windowsPlatform.isWindows).thenReturn(true);
-    when(notWindowsPlatform.isWindows).thenReturn(false);
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -211,30 +218,20 @@ void main() {
   });
 
   testUsingContext('hidden when not enabled on Windows host', () {
-    when(globals.platform.isWindows).thenReturn(true);
-
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: false),
-    Platform: () => MockPlatform(),
+    Platform: () => windowsPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on Windows host', () {
-    when(globals.platform.isWindows).thenReturn(true);
-
     expect(BuildWindowsCommand().hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-    Platform: () => MockPlatform(),
+    Platform: () => windowsPlatform,
   });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
-class MockPlatform extends Mock implements Platform {
-  @override
-  Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': r'C:\',
-  };
-}
 class MockVisualStudio extends Mock implements VisualStudio {}

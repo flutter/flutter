@@ -15,17 +15,19 @@ import '../convert.dart';
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
   VisualStudio({
-    @required FileSystem fileSystem,
+    @required this.fileSystem,
+    @required this.processManager,
     @required Platform platform,
-    @required ProcessManager processManager,
     @required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
+  }) : _platform = platform,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
-  final FileSystem _fileSystem;
+  @visibleForTesting
+  final FileSystem fileSystem;
   final Platform _platform;
   final ProcessUtils _processUtils;
+  @visibleForTesting
+  final ProcessManager processManager;
 
   /// True if Visual Studio installation was found.
   ///
@@ -122,7 +124,7 @@ class VisualStudio {
     if (details.isEmpty) {
       return null;
     }
-    return _fileSystem.path.join(
+    return fileSystem.path.join(
       _usableVisualStudioDetails[_installationPathKey] as String,
       'VC',
       'Auxiliary',
@@ -140,7 +142,7 @@ class VisualStudio {
   /// present then there isn't a new enough installation of VS. This path is
   /// not user-controllable, unlike the install location of Visual Studio
   /// itself.
-  String get _vswherePath => _fileSystem.path.join(
+  String get _vswherePath => fileSystem.path.join(
     _platform.environment['PROGRAMFILES(X86)'],
     'Microsoft Visual Studio',
     'Installer',
