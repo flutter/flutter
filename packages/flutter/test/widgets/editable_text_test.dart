@@ -4238,6 +4238,61 @@ void main() {
 
     expect(formatter.log, referenceLog);
   });
+
+  testWidgets('formatter logic handles repeat filtering', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    state.updateEditingValue(const TextEditingValue(text: '01'));
+    state.updateEditingValue(const TextEditingValue(text: '012'));
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Text change causes reformat
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Selection change does not reformat
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+
+    const List<String> referenceLog = <String>[
+      '[1]: , 01',
+      '[1]: normal aa',
+      '[2]: aa, 012',
+      '[2]: normal aaaa',
+      '[3]: aaaa, 0123',
+      '[3]: normal aaaaaa',
+    ];
+
+    expect(formatter.log, referenceLog);
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
