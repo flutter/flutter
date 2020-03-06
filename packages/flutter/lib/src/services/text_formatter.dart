@@ -172,29 +172,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     if (maxLength != null && maxLength > 0 && newValue.text.runes.length > maxLength) {
-      final TextSelection newSelection = newValue.selection.copyWith(
-          baseOffset: math.min(newValue.selection.start, maxLength),
-          extentOffset: math.min(newValue.selection.end, maxLength),
-      );
-      // This does not count grapheme clusters (i.e. characters visible to the user),
-      // it counts Unicode runes, which leaves out a number of useful possible
-      // characters (like many emoji), so this will be inaccurate in the
-      // presence of those characters. The Dart lang bug
-      // https://github.com/dart-lang/sdk/issues/28404 has been filed to
-      // address this in Dart.
-      // TODO(gspencer): convert this to count actual characters when Dart
-      // supports that.
-      final RuneIterator iterator = RuneIterator(newValue.text);
-      if (iterator.moveNext())
-        for (int count = 0; count < maxLength; ++count)
-          if (!iterator.moveNext())
-            break;
-      final String truncated = newValue.text.substring(0, iterator.rawIndex);
-      return TextEditingValue(
-        text: truncated,
-        selection: newSelection,
-        composing: TextRange.empty,
-      );
+      return oldValue;
     }
     return newValue;
   }
