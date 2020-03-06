@@ -915,6 +915,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   // direct child of this directory's filesystem node.
   List<_RepositoryDirectory> get virtualSubdirectories => <_RepositoryDirectory>[];
 
+  // TODO(nurhan): soon add e2etests here.
   bool shouldRecurse(fs.IoNode entry) {
     return !entry.fullName.endsWith('third_party/gn') &&
             entry.name != '.cipd' &&
