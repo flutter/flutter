@@ -87,7 +87,7 @@ void main() {
         logger: BufferLogger.test(),
         osUtils: MockOperatingSystemUtils(),
       );
-      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+      artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
         cache: cache,
@@ -128,7 +128,7 @@ void main() {
     });
 
     testWithoutContext('Looks up dart.exe on windows platforms', () async {
-      artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
+      artifacts = LocalEngineArtifacts(
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
         cache: cache,
