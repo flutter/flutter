@@ -11,6 +11,10 @@
 
 FLUTTER_ASSERT_ARC
 
+@interface FlutterEngine ()
+- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI;
+@end
+
 extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 /// A simple mock class for FlutterEngine.
@@ -455,6 +459,18 @@ typedef enum UIAccessibilityContrast : NSInteger {
     realVC = nil;
   }
   [self waitForExpectations:@[ expectation ] timeout:1.0];
+}
+
+- (void)testDoesntLoadViewInInit {
+  XCTestExpectation* expectation =
+      [[XCTestExpectation alloc] initWithDescription:@"notification called"];
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine createShell:@"" libraryURI:@""];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  XCTAssertFalse([realVC isViewLoaded], @"shouldn't have loaded since it hasn't been shown");
 }
 
 @end

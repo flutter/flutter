@@ -34,6 +34,7 @@ class PlatformViewIOS final : public PlatformView {
 
   fml::WeakPtr<FlutterViewController> GetOwnerViewController() const;
   void SetOwnerViewController(fml::WeakPtr<FlutterViewController> owner_controller);
+  void attachView();
 
   void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
 
