@@ -155,6 +155,8 @@ void main() {
       });
 
       mockAndroidSdk = MockAndroidSdk();
+      when(mockAndroidSdk.licensesAvailable).thenReturn(true);
+      when(mockAndroidSdk.platformToolsAvailable).thenReturn(true);
       when(mockAndroidSdk.validateSdkWellFormed()).thenReturn(const <String>[]);
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
