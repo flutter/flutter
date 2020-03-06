@@ -188,7 +188,7 @@ class RecordingCanvas {
   }
 
   void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaint paint) {
-    final double strokeWidth = math.max(paint.strokeWidth, 1.0);
+    final double paintSpread = math.max(_getPaintSpread(paint), 1.0);
     // TODO(yjbanov): This can be optimized. Currently we create a box around
     //                the line and then apply the transform on the box to get
     //                the bounding box. If you have a 45-degree line and a
@@ -197,10 +197,11 @@ class RecordingCanvas {
     //                algorithm produces a square with each side of the length
     //                matching the length of the line.
     _paintBounds.growLTRB(
-        math.min(p1.dx, p2.dx) - strokeWidth,
-        math.min(p1.dy, p2.dy) - strokeWidth,
-        math.max(p1.dx, p2.dx) + strokeWidth,
-        math.max(p1.dy, p2.dy) + strokeWidth);
+      math.min(p1.dx, p2.dx) - paintSpread,
+      math.min(p1.dy, p2.dy) - paintSpread,
+      math.max(p1.dx, p2.dx) + paintSpread,
+      math.max(p1.dy, p2.dy) + paintSpread,
+    );
     _hasArbitraryPaint = true;
     _didDraw = true;
     _commands.add(PaintDrawLine(p1, p2, paint.paintData));
@@ -218,8 +219,9 @@ class RecordingCanvas {
       _hasArbitraryPaint = true;
     }
     _didDraw = true;
-    if (paint.strokeWidth != null && paint.strokeWidth != 0) {
-      _paintBounds.grow(rect.inflate(paint.strokeWidth / 2.0));
+    final double paintSpread = _getPaintSpread(paint);
+    if (paintSpread != 0.0) {
+      _paintBounds.grow(rect.inflate(paintSpread));
     } else {
       _paintBounds.grow(rect);
     }
@@ -231,12 +233,11 @@ class RecordingCanvas {
       _hasArbitraryPaint = true;
     }
     _didDraw = true;
-    final double strokeWidth =
-        paint.strokeWidth == null ? 0 : paint.strokeWidth;
-    final double left = math.min(rrect.left, rrect.right) - strokeWidth;
-    final double right = math.max(rrect.left, rrect.right) + strokeWidth;
-    final double top = math.min(rrect.top, rrect.bottom) - strokeWidth;
-    final double bottom = math.max(rrect.top, rrect.bottom) + strokeWidth;
+    final double paintSpread = _getPaintSpread(paint);
+    final double left = math.min(rrect.left, rrect.right) - paintSpread;
+    final double top = math.min(rrect.top, rrect.bottom) - paintSpread;
+    final double right = math.max(rrect.left, rrect.right) + paintSpread;
+    final double bottom = math.max(rrect.top, rrect.bottom) + paintSpread;
     _paintBounds.growLTRB(left, top, right, bottom);
     _commands.add(PaintDrawRRect(rrect, paint.paintData));
   }
@@ -281,18 +282,22 @@ class RecordingCanvas {
 
     _hasArbitraryPaint = true;
     _didDraw = true;
-    final double strokeWidth =
-        paint.strokeWidth == null ? 0 : paint.strokeWidth;
-    _paintBounds.growLTRB(outer.left - strokeWidth, outer.top - strokeWidth,
-        outer.right + strokeWidth, outer.bottom + strokeWidth);
+    final double paintSpread = _getPaintSpread(paint);
+    _paintBounds.growLTRB(
+      outer.left - paintSpread,
+      outer.top - paintSpread,
+      outer.right + paintSpread,
+      outer.bottom + paintSpread,
+    );
     _commands.add(PaintDrawDRRect(outer, inner, paint.paintData));
   }
 
   void drawOval(ui.Rect rect, SurfacePaint paint) {
     _hasArbitraryPaint = true;
     _didDraw = true;
-    if (paint.strokeWidth != null) {
-      _paintBounds.grow(rect.inflate(paint.strokeWidth));
+    final double paintSpread = _getPaintSpread(paint);
+    if (paintSpread != 0.0) {
+      _paintBounds.grow(rect.inflate(paintSpread));
     } else {
       _paintBounds.grow(rect);
     }
@@ -302,13 +307,13 @@ class RecordingCanvas {
   void drawCircle(ui.Offset c, double radius, SurfacePaint paint) {
     _hasArbitraryPaint = true;
     _didDraw = true;
-    final double strokeWidth =
-        paint.strokeWidth == null ? 0 : paint.strokeWidth;
+    final double paintSpread = _getPaintSpread(paint);
     _paintBounds.growLTRB(
-        c.dx - radius - strokeWidth,
-        c.dy - radius - strokeWidth,
-        c.dx + radius + strokeWidth,
-        c.dy + radius + strokeWidth);
+      c.dx - radius - paintSpread,
+      c.dy - radius - paintSpread,
+      c.dx + radius + paintSpread,
+      c.dy + radius + paintSpread,
+    );
     _commands.add(PaintDrawCircle(c, radius, paint.paintData));
   }
 
@@ -331,8 +336,9 @@ class RecordingCanvas {
     _hasArbitraryPaint = true;
     _didDraw = true;
     ui.Rect pathBounds = path.getBounds();
-    if (paint.strokeWidth != null) {
-      pathBounds = pathBounds.inflate(paint.strokeWidth);
+    final double paintSpread = _getPaintSpread(paint);
+    if (paintSpread != 0.0) {
+      pathBounds = pathBounds.inflate(paintSpread);
     }
     _paintBounds.grow(pathBounds);
     // Clone path so it can be reused for subsequent draw calls.
@@ -381,7 +387,7 @@ class RecordingCanvas {
     _hasArbitraryPaint = true;
     _didDraw = true;
     final ui.Rect shadowRect =
-        ElevationShadow.computeShadowRect(path.getBounds(), elevation);
+        computePenumbraBounds(path.getBounds(), elevation);
     _paintBounds.grow(shadowRect);
     _commands.add(PaintDrawShadow(path, color, elevation, transparentOccluder));
   }
@@ -390,23 +396,23 @@ class RecordingCanvas {
       ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaint paint) {
     _hasArbitraryPaint = true;
     _didDraw = true;
-    _growPaintBoundsByPoints(vertices.positions, 0);
+    _growPaintBoundsByPoints(vertices.positions, 0, paint);
     _commands.add(PaintVertices(vertices, blendMode, paint.paintData));
   }
 
   void drawRawPoints(
-      ui.PointMode pointMode, Float32List points, ui.Paint paint) {
+      ui.PointMode pointMode, Float32List points, SurfacePaint paint) {
     if (paint.strokeWidth == null) {
       return;
     }
     _hasArbitraryPaint = true;
     _didDraw = true;
-    _growPaintBoundsByPoints(points, paint.strokeWidth);
+    _growPaintBoundsByPoints(points, paint.strokeWidth, paint);
     _commands
         .add(PaintPoints(pointMode, points, paint.strokeWidth, paint.color));
   }
 
-  void _growPaintBoundsByPoints(Float32List points, double thickness) {
+  void _growPaintBoundsByPoints(Float32List points, double thickness, SurfacePaint paint) {
     double minValueX, maxValueX, minValueY, maxValueY;
     minValueX = maxValueX = points[0];
     minValueY = maxValueY = points[1];
@@ -424,8 +430,13 @@ class RecordingCanvas {
       maxValueY = math.max(maxValueY, y);
     }
     final double distance = thickness / 2.0;
-    _paintBounds.growLTRB(minValueX - distance, minValueY - distance,
-        maxValueX + distance, maxValueY + distance);
+    final double paintSpread = _getPaintSpread(paint);
+    _paintBounds.growLTRB(
+      minValueX - distance - paintSpread,
+      minValueY - distance - paintSpread,
+      maxValueX + distance + paintSpread,
+      maxValueY + distance + paintSpread,
+    );
   }
 
   int _saveCount = 1;
@@ -1936,4 +1947,29 @@ class _PaintBounds {
       return super.toString();
     }
   }
+}
+
+/// Computes the length of the visual effect caused by paint parameters, such
+/// as blur and stroke width.
+///
+/// This paint spread should be taken into accound when estimating bounding
+/// boxes for paint operations that apply the paint.
+double _getPaintSpread(SurfacePaint paint) {
+  double spread = 0.0;
+  final ui.MaskFilter maskFilter = paint?.maskFilter;
+  if (maskFilter != null) {
+    // Multiply by 2 because the sigma is the standard deviation rather than
+    // the length of the blur.
+    // See also: https://developer.mozilla.org/en-US/docs/Web/CSS/filter-function/blur
+    spread += maskFilter.webOnlySigma * 2.0;
+  }
+  if (paint.strokeWidth != null && paint.strokeWidth != 0) {
+    // The multiplication by sqrt(2) is to account for line joints that
+    // meet at 90-degree angle. Division by 2 is because only half of the
+    // stroke is sticking out of the original shape. The other half is
+    // inside the shape.
+    const double sqrtOfTwoDivByTwo = 0.70710678118;
+    spread += paint.strokeWidth * sqrtOfTwoDivByTwo;
+  }
+  return spread;
 }
