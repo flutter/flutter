@@ -95,14 +95,15 @@ void SessionConnection::Present(
     flutter::CompositorContext::ScopedFrame* frame) {
   TRACE_EVENT0("gfx", "SessionConnection::Present");
 
+  TRACE_FLOW_BEGIN("gfx", "SessionConnection::PresentSession",
+                   next_present_session_trace_id_);
+  next_present_session_trace_id_++;
+
   // Throttle frame submission to Scenic if we already have the maximum amount
   // of frames in flight. This allows the paint tasks for this frame to execute
   // in parallel with the presentation of previous frame but still provides
   // back-pressure to prevent us from enqueuing even more work.
   if (initialized_ && frames_in_flight_ < kMaxFramesInFlight) {
-    TRACE_FLOW_BEGIN("gfx", "SessionConnection::PresentSession",
-                     next_present_session_trace_id_);
-    next_present_session_trace_id_++;
     PresentSession();
   } else {
     // We should never exceed the max frames in flight.
