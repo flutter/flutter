@@ -1,4 +1,4 @@
-Signature: 2505ad7795c2f5553d05487567d49f33
+Signature: eb35a18408ac71d3b634ccc4e8b9cab8
 
 UNUSED LICENSES:
 
@@ -1424,6 +1424,8 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/opts/SkVM_opts.h
+FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
+FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl_blend.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
@@ -2073,8 +2075,6 @@ FILE: ../../../third_party/skia/src/core/SkReadBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkStrokeRec.cpp
 FILE: ../../../third_party/skia/src/core/SkTInternalLList.h
 FILE: ../../../third_party/skia/src/core/SkTLList.h
-FILE: ../../../third_party/skia/src/core/SkTLS.cpp
-FILE: ../../../third_party/skia/src/core/SkTLS.h
 FILE: ../../../third_party/skia/src/core/SkWriteBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.h
@@ -2821,9 +2821,6 @@ FILE: ../../../third_party/skia/src/ports/SkFontConfigTypeface.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_FontConfigInterface.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSFile_posix.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSFile_win.cpp
-FILE: ../../../third_party/skia/src/ports/SkTLS_none.cpp
-FILE: ../../../third_party/skia/src/ports/SkTLS_pthread.cpp
-FILE: ../../../third_party/skia/src/ports/SkTLS_win.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkOTTable_name.cpp
 FILE: ../../../third_party/skia/src/sfnt/SkTTCFHeader.h
 FILE: ../../../third_party/skia/src/shaders/SkColorFilterShader.cpp
