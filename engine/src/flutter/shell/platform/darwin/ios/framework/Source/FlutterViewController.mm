@@ -552,14 +552,24 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 #pragma mark - UIViewController lifecycle notifications
 
-- (void)viewWillAppear:(BOOL)animated {
-  TRACE_EVENT0("flutter", "viewWillAppear");
+- (void)viewDidLoad {
+  TRACE_EVENT0("flutter", "viewDidLoad");
 
   if (_engineNeedsLaunch) {
     [_engine.get() launchEngine:nil libraryURI:nil];
     [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }
+
+  FML_DCHECK([_engine.get() viewController] != nil)
+      << "FlutterViewController::viewWillAppear:AttachView ViewController was nil";
+  [_engine.get() attachView];
+
+  [super viewDidLoad];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewWillAppear");
 
   // Send platform settings to Flutter, e.g., platform brightness.
   [self onUserSettingsChanged:nil];

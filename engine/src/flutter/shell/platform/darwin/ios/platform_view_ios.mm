@@ -64,20 +64,25 @@ void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController>
                                                        owner_controller_.reset();
                                                      }] retain]);
 
-  if (owner_controller_) {
-    ios_surface_ =
-        [static_cast<FlutterView*>(owner_controller.get().view) createSurface:gl_context_];
-    FML_DCHECK(ios_surface_ != nullptr);
+  if (owner_controller_ && [owner_controller_.get() isViewLoaded]) {
+    this->attachView();
+  }
+  // Do not call `NotifyCreated()` here - let FlutterViewController take care
+  // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
+  // it can occasionally get invoked before the viewport is sized resulting in
+  // a framebuffer that will not be able to completely attach.
+}
 
-    if (accessibility_bridge_) {
-      accessibility_bridge_.reset(
-          new AccessibilityBridge(static_cast<FlutterView*>(owner_controller_.get().view), this,
-                                  [owner_controller.get() platformViewsController]));
-    }
-    // Do not call `NotifyCreated()` here - let FlutterViewController take care
-    // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
-    // it can occasionally get invoked before the viewport is sized resulting in
-    // a framebuffer that will not be able to completely attach.
+void PlatformViewIOS::attachView() {
+  FML_DCHECK(owner_controller_);
+  ios_surface_ =
+      [static_cast<FlutterView*>(owner_controller_.get().view) createSurface:gl_context_];
+  FML_DCHECK(ios_surface_ != nullptr);
+
+  if (accessibility_bridge_) {
+    accessibility_bridge_.reset(
+        new AccessibilityBridge(static_cast<FlutterView*>(owner_controller_.get().view), this,
+                                [owner_controller_.get() platformViewsController]));
   }
 }
 
