@@ -1,0 +1,18 @@
+name: regular_integration_tests
+publish_to: none
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  e2e: 0.2.4+4
+  http: 0.12.0+2
+  test: any
