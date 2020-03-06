@@ -45,7 +45,7 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
     await matchGoldenFile('canvas_arc_to_point.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
 }
 
