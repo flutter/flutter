@@ -54,9 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           },
         ),
+        // Push this button to perform an animation, which ensure the threads are unmerged after the animation.
         RaisedButton(
           key: const ValueKey<String>('no_action_button'),
-          child: const Text('A no action button'),
+          child: const Text('Tap to unmerge threads'),
           onPressed: () {},
         ),
       ]),
@@ -65,12 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 /// A page contains the platform view to be tested.
-class PlatformViewPage extends StatefulWidget {
-  @override
-  _PlatformViewPageState createState() => _PlatformViewPageState();
-}
-
-class _PlatformViewPageState extends State<PlatformViewPage> {
+class PlatformViewPage extends StatelessWidget {
   final Key button = const ValueKey<String>('plus_button');
 
   @override
@@ -89,10 +85,6 @@ class _PlatformViewPageState extends State<PlatformViewPage> {
           RaisedButton(
             key: button,
             child: const Text('button'),
-            onPressed: () {
-              setState(() {
-              });
-            },
           )
         ],
       ),
