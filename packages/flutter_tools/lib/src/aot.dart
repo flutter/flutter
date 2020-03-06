@@ -82,12 +82,15 @@ class AotBuilder {
       cacheDir: null,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       defines: <String, String>{
+        kTargetFile: mainDartFile ?? globals.fs.path.join('lib', 'main.dart'),
         kBuildMode: getNameForBuildMode(buildMode),
         kTargetPlatform: getNameForTargetPlatform(platform),
         kIconTreeShakerFlag: treeShakeIcons.toString(),
         kDartDefines: jsonEncode(dartDefines),
-        kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-        kExtraFrontEndOptions: extraFrontEndOptions.join(','),
+        if (extraGenSnapshotOptions.isNotEmpty)
+          kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
+        if (extraFrontEndOptions.isNotEmpty)
+          kExtraFrontEndOptions: extraFrontEndOptions.join(','),
         if (platform == TargetPlatform.ios)
           kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
       }

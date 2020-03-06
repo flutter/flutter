@@ -204,9 +204,7 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = <String>[
-      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
-    ];
+    final List<String> extraFrontEndOptions = environment.defines[kExtraFrontEndOptions]?.split(',');
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
