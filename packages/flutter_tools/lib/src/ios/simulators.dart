@@ -172,7 +172,7 @@ class SimControl {
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to install $appPath on $deviceId:\n$exception');
+      throwToolExit('Unable to install $appPath on $deviceId. This is sometimes caused by a malformed plist file:\n$exception');
     }
     return result;
   }
@@ -217,7 +217,7 @@ class SimControl {
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to take screenshot of $deviceId:\n$exception');
+      _logger.printError('Unable to take screenshot of $deviceId:\n$exception');
     }
   }
 }
