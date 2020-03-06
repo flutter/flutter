@@ -368,8 +368,8 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     markNeedsLayout();
   }
 
-  // Lay out all children, regardless of whether or not they will be painted or
-  // placed with an offset. Find which child overflows, if any.
+  // Layout the necessary children, and figure out where the children first
+  // overflow, if at all.
   void _layoutChildren() {
     // When overflow is not open, the toolbar is always a specific height.
     final BoxConstraints sizedConstraints = _overflowOpen
@@ -411,7 +411,27 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     }
   }
 
-  // Set the offset of all of the children that will be painted.
+  // Returns true when the child should be painted, false otherwise.
+  bool _shouldPaintChild(RenderObject renderObjectChild, int index) {
+    // Paint the navButton when there is overflow.
+    if (renderObjectChild == firstChild) {
+      return _lastIndexThatFits != -1;
+    }
+
+    // If there is no overflow, all children besides the navButton are painted.
+    if (_lastIndexThatFits == -1) {
+      return true;
+    }
+
+    // When there is overflow, paint if the child is in the part of the menu
+    // that is currently open. Overflowing children are painted when the
+    // overflow menu is open, and the children that fit are painted when the
+    // overflow menu is closed.
+    return (index > _lastIndexThatFits) == overflowOpen;
+  }
+
+  // Decide which children will be pained and set their shouldPaint, and set the
+  // offset that painted children will be placed at.
   void _placeChildren() {
     int i = -1;
     Size nextSize = const Size(0.0, 0.0);
@@ -473,25 +493,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     size = nextSize;
   }
 
-  // Returns true when the child should be painted, false otherwise.
-  bool _shouldPaintChild(RenderObject renderObjectChild, int index) {
-    // Paint the navButton when there is overflow.
-    if (renderObjectChild == firstChild) {
-      return _lastIndexThatFits != -1;
-    }
-
-    // If there is no overflow, all children besides the navButton are painted.
-    if (_lastIndexThatFits == -1) {
-      return true;
-    }
-
-    // When there is overflow, paint if the child is in the part of the menu
-    // that is currently open. Overflowing children are painted when the
-    // overflow menu is open, and the children that fit are painted when the
-    // overflow menu is closed.
-    return (index > _lastIndexThatFits) == overflowOpen;
-  }
-
   @override
   void performLayout() {
     _lastIndexThatFits = -1;
@@ -506,16 +507,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    int i = -1;
     visitChildren((RenderObject renderObjectChild) {
-      i++;
-      if (!_shouldPaintChild(renderObjectChild, i)) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+      if (!childParentData.shouldPaint) {
         return;
       }
 
-      // Otherwise paint the child.
-      final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
       context.paintChild(child, childParentData.offset + offset);
     });
   }

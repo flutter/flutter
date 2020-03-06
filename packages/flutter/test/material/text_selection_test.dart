@@ -364,8 +364,8 @@ void main() {
       // selection.
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle();
-      RenderEditable renderEditable = findRenderEditable(tester);
-      List<TextSelectionPoint> endpoints = globalize(
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      final List<TextSelectionPoint> endpoints = globalize(
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
