@@ -324,7 +324,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -333,7 +333,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -377,7 +377,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -386,7 +386,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -422,7 +422,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
     // ensure that analytics are sent.
-    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -455,7 +455,7 @@ void main() {
     ));
 
     expect(await residentWebRunner.run(), 1);
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -488,7 +488,7 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));

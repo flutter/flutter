@@ -538,7 +538,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
