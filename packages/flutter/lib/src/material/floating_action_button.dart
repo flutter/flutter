@@ -436,7 +436,7 @@ class FloatingActionButton extends StatelessWidget {
           'FloatingActionButtons using ThemeData.accentIconTheme '
           'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
           'instead. See '
-          'https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency. '
+          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
           'This feature was deprecated after v1.13.2.'
         );
       }
