@@ -22,7 +22,7 @@ class UsageEvent {
   final Usage flutterUsage;
 
   void send() {
-    flutterUsage?.sendEvent(category, parameter, label: label, value: value);
+    flutterUsage.sendEvent(category, parameter, label: label, value: value);
   }
 }
 
@@ -182,7 +182,7 @@ class CommandResultEvent extends UsageEvent {
   @override
   void send() {
     // An event for the command result.
-    flutterUsage?.sendEvent(
+    flutterUsage.sendEvent(
       'tool-command-result',
       category,
       label: parameter,
@@ -193,7 +193,7 @@ class CommandResultEvent extends UsageEvent {
     // throws an exception.
     try {
       final int maxRss = processInfo.maxRss;
-      flutterUsage?.sendEvent(
+      flutterUsage.sendEvent(
         'tool-command-max-rss',
         category,
         label: parameter,

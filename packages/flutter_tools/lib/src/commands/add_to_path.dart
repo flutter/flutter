@@ -73,12 +73,12 @@ class AddToPathCommand extends FlutterCommand {
       }
       if (addedOnce) {
           _logger.printStatus(
-          'Successfully added Flutter to the PATH. You may need to start a '
+          'Successfully added Flutter to PATH. You may need to start a '
           'new terminal shell to use it.',
         );
         return FlutterCommandResult.success();
       }
-      return FlutterCommandResult.fail();
+      throwToolExit('Unable to add Flutter to PATH');
     }
     throwToolExit('${_platform.operatingSystem} is not supported by "flutter add-to-path"');
     return null;
