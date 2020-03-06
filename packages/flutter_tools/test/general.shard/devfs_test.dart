@@ -28,7 +28,7 @@ void main() {
   String basePath;
 
   setUpAll(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     filePath = fs.path.join('lib', 'foo.txt');
   });
 
@@ -69,7 +69,7 @@ void main() {
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
 
-      final DateTime fiveSecondsAgo = DateTime.now().subtract(const Duration(seconds:5));
+      final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds: 5));
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
