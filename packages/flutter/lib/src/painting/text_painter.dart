@@ -602,6 +602,10 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  // Checks if the glyph is either [Unicode.RLM] or [Unicode.LRM]. These values take
+  // up zero space and do not have valid bounding boxes around them.
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
   bool _isUnicodeDirectionality(int value) {
     return value == 0x200F || value == 0x200E;
   }

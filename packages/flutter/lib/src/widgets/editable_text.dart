@@ -544,9 +544,9 @@ class EditableText extends StatefulWidget {
   final TextStyle style;
 
   /// {@template flutter.widgets.editableText.strutStyle}
-  /// The strut style used for the vertical layout.
+  /// The strut style used for the vertical layoutputCodepoints.
   ///
-  /// [StrutStyle] is used to establish a predictable vertical layout.
+  /// [StrutStyle] is used to establish a predictable vertical layoutputCodepoints.
   /// Since fonts may vary depending on user input and due to font
   /// fallback, [StrutStyle.forceStrutHeight] is enabled by default
   /// to lock all lines to the height of the base [TextStyle], provided by
@@ -1112,7 +1112,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   FocusAttachment _focusAttachment;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
-  // to ease in and out.
+  // to ease in and outputCodepoints.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
   // The time it takes for the floating cursor to snap to the text aligned
@@ -1670,6 +1670,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
       }
+      // Always pass the text through the whitespace directionality formatter to
+      // maintain expected behavior with carets on trailing whitespace.
+      value = _whitespaceFormatter.formatEditUpdate(_value, value);
       _lastFormattedValue = value;
     }
     // If the text has changed or the selection has changed, we should update the
@@ -2162,24 +2165,41 @@ class _Editable extends LeafRenderObjectWidget {
 // shaper to inherently treat the whitespace as being surrounded
 // by the directionality of the previous non-whitespace codepoint.
 class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
-  // The [textDirection] should be the base directionality of the paragraph/editable.
+  // The [textDirection] should be the base directionality of the
+  // paragraph/editable.
   _WhitespaceDirectionalityFormatter({TextDirection textDirection})
     : _baseDirection = textDirection,
-      _prevNonWhitespaceDirection = textDirection;
+      _previousNonWhitespaceDirection = textDirection;
 
   // Using regex here instead of ICU is suboptimal, but is enough
   // to produce the correct results for any reasonable input where this
   // is even relevant. Using full ICU would be a much heavier change,
   // requiring exposure of the C++ ICU API.
+  //
+  // LTR covers most scripts and symbols, including but not limited to Latin,
+  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
+  // SE Asian scripts.
   final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+  // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
+  // Aramic, Farsi, Dhivehi.
   final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+  // Although whitespaces are not the only codepoints that have weak directionality,
+  // these are the primary cause of the caret being misplaced.
   final RegExp _whitespaceRegExp = RegExp(r'\s');
 
   final TextDirection _baseDirection;
-  TextDirection _prevNonWhitespaceDirection;
+  // Tracks the directionality of the most recently encountered
+  // codepoint that was not whitespace. This becomes the direction of
+  // marker inserted to fully surround ambiguous whitespace.
+  TextDirection _previousNonWhitespaceDirection;
+
+  // Prevents the formatter from attempting more expensive formatting
+  // operations mixed directionality is found.
   bool _hasOpposingDirection = false;
 
   // See [Unicode.RLM] and [Unicode.LRM].
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
   static const int _rlm = 0x200F;
   static const int _lrm = 0x200E;
 
@@ -2197,74 +2217,74 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
     }
 
     if (_hasOpposingDirection) {
-      _prevNonWhitespaceDirection = _baseDirection;
+      _previousNonWhitespaceDirection = _baseDirection;
 
-      final List<int> out = <int>[];
+      final List<int> outputCodepoints = <int>[];
 
       // We add/subtract from these as we insert/remove markers.
       int selectionBase = newValue.selection.baseOffset;
       int selectionExtent = newValue.selection.extentOffset;
 
       void addToSelection() {
-        selectionBase += out.length <= selectionBase ? 1 : 0;
-        selectionExtent += out.length <= selectionExtent ? 1 : 0;
+        selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
+        selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
       }
       void subtractFromSelection() {
-        selectionBase -= out.length < selectionBase ? 1 : 0;
-        selectionExtent -= out.length < selectionExtent ? 1 : 0;
+        selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
+        selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
       }
 
-      bool prevWasWhitespace = false;
-      bool prevWasDirectionalityMarker = false;
-      int prevNonWhitespaceCodepoint;
+      bool previousWasWhitespace = false;
+      bool previousWasDirectionalityMarker = false;
+      int previousNonWhitespaceCodepoint;
       for (final int codepoint in newValue.text.runes) {
         if (isWhitespace(codepoint)) {
           // Only compute the directionality of the non-whitespace
           // when the value is needed.
-          if (!prevWasWhitespace && prevNonWhitespaceCodepoint != null) {
-            _prevNonWhitespaceDirection = getDirection(prevNonWhitespaceCodepoint);
+          if (!previousWasWhitespace && previousNonWhitespaceCodepoint != null) {
+            _previousNonWhitespaceDirection = getDirection(previousNonWhitespaceCodepoint);
           }
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
-          if (prevWasWhitespace) {
+          if (previousWasWhitespace) {
             subtractFromSelection();
-            out.removeLast();
+            outputCodepoints.removeLast();
           }
-          out.add(codepoint);
+          outputCodepoints.add(codepoint);
           addToSelection();
-          out.add(_prevNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+          outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
 
-          prevWasWhitespace = true;
-          prevWasDirectionalityMarker = false;
+          previousWasWhitespace = true;
+          previousWasDirectionalityMarker = false;
         } else if (isDirectionalityMarker(codepoint)) {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
-          if (prevWasWhitespace) {
+          if (previousWasWhitespace) {
             subtractFromSelection();
-            out.removeLast();
+            outputCodepoints.removeLast();
           }
-          out.add(codepoint);
+          outputCodepoints.add(codepoint);
 
-          prevWasWhitespace = false;
-          prevWasDirectionalityMarker = true;
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = true;
         } else {
           // If the whitespace was already enclosed by the same directionality,
           // we can remove the artifically added marker.
-          if (!prevWasDirectionalityMarker &&
-              prevWasWhitespace &&
-              getDirection(codepoint) == _prevNonWhitespaceDirection) {
+          if (!previousWasDirectionalityMarker &&
+              previousWasWhitespace &&
+              getDirection(codepoint) == _previousNonWhitespaceDirection) {
             subtractFromSelection();
-            out.removeLast();
+            outputCodepoints.removeLast();
           }
           // Normal character, track its codepoint add it to the string.
-          prevNonWhitespaceCodepoint = codepoint;
-          out.add(codepoint);
+          previousNonWhitespaceCodepoint = codepoint;
+          outputCodepoints.add(codepoint);
 
-          prevWasWhitespace = false;
-          prevWasDirectionalityMarker = false;
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = false;
         }
       }
-      final String formatted = String.fromCharCodes(out);
+      final String formatted = String.fromCharCodes(outputCodepoints);
       return TextEditingValue(
         text: formatted,
         selection: TextSelection(
