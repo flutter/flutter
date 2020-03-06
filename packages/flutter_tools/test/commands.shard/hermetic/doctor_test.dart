@@ -728,7 +728,7 @@ void main() {
     ProcessManager: () => MockProcessManager(),
   });
 
-  testUsingContext('Fetches tags when --version is used', () async {
+  testUsingContext('Fetches tags to get the right version', () async {
     Cache.disableLocking();
 
     final DoctorCommand doctorCommand = DoctorCommand();
@@ -743,7 +743,34 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
     FileSystem: () => MemoryFileSystem.test(),
     FlutterVersion: () => mockFlutterVersion,
+    Doctor: () => NoOpDoctor(),
   }, initializeFlutterRoot: false);
+}
+
+class NoOpDoctor implements Doctor {
+  @override
+  bool get canLaunchAnything => true;
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
+
+  @override
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async => true;
+
+  @override
+  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
+
+  @override
+  Future<void> summary() => null;
+
+  @override
+  List<DoctorValidator> get validators => <DoctorValidator>[];
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
 }
 
 class MockUsage extends Mock implements Usage {}
