@@ -108,6 +108,8 @@ class Home extends StatelessWidget {
                 '${localizations.helloWorldPopulation(1, 101)}',
                 '${localizations.helloWorldPopulation(2, 102)}',
                 '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+                '${localizations.singleQuote}',
+                '${localizations.doubleQuote}',
               ]);
               for (final String result in results) {
                 print('#l10n $n ($result)\n');
@@ -286,6 +288,16 @@ void main() {
       "hello": {},
       "world": {}
     }
+  },
+
+  "singleQuote": "Flutter's amazing!",
+  "@singleQuote": {
+    "description": "A message with a single quote."
+  },
+
+  "doubleQuote": "Flutter is \"amazing\"!",
+  "@doubleQuote": {
+    "description": "A message with double quotes."
   }
 }
 ''';

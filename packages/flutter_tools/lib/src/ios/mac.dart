@@ -458,7 +458,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       && result.stdout?.contains('but the linked and embedded framework') == true
       && result.stdout?.contains('was built for iOS') == true) {
     globals.printError('');
-    globals.printError('Your Xcode project requires migration. See https://github.com/flutter/flutter/issues/50568 for details.');
+    globals.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     globals.printError('');
     globals.printError('You can temporarily work around this issue by running:');
     globals.printError('  rm -rf ios/Flutter/App.framework');
