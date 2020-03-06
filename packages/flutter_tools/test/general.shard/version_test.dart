@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -411,6 +412,33 @@ void main() {
       'Could not interpret results of "git describe": v1.2.3-4-gxabcdef\n',
     );
   });
+
+  testUsingContext('determine calls fetch --tags', () {
+    final MockProcessUtils processUtils = MockProcessUtils();
+    when(processUtils.runSync(
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+
+    GitTagVersion.determine(processUtils, '.');
+
+    verify(processUtils.runSync(
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).called(1);
+    verify(processUtils.runSync(
+      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).called(1);
+  });
 }
 
 void _expectVersionMessage(String message) {
@@ -532,5 +560,5 @@ void fakeData(
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-
+class MockProcessUtils extends Mock implements ProcessUtils {}
 class MockCache extends Mock implements Cache {}
