@@ -39,10 +39,12 @@ class MockPlistUtils extends Mock implements PlistParser {}
 
 void main() {
   FakePlatform osx;
+  FileSystemUtils fsUtils;
 
   setUp(() {
     osx = FakePlatform.fromPlatform(const LocalPlatform());
     osx.operatingSystem = 'macos';
+    fsUtils = FileSystemUtils(fileSystem: MemoryFileSystem(), platform: osx);
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
@@ -69,6 +71,7 @@ void main() {
       expect(IOSSimulator('123').logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystemUtils: () => fsUtils,
     }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
@@ -77,6 +80,7 @@ void main() {
       expect(IOSSimulator('456').logFilePath, '/baz/qux/456/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystemUtils: () => fsUtils,
     });
   });
 
