@@ -95,16 +95,10 @@ class AzureDetector {
     }
     final HttpClient client = _httpClientFactory()
       ..connectionTimeout = const Duration(seconds: 1);
-    assert(client != null);
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
       );
-      if (request == null) {
-        // The HttpClient we have is not conforming to the interface - we may be
-        // in a test, and we can't trust any HttpClient requests in this case.
-        return _isRunningOnAzure = false;
-      }
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
