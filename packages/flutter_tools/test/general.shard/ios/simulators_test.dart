@@ -11,8 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
-import 'package:flutter_tools/src/build_system/targets/icon_tree_shaker.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -344,45 +342,6 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-  });
-
-  group('buildSystem', () {
-    MockSimControl mockSimControl;
-    MockXcode mockXcode;
-    MockBuildSystem mockBuildSystem;
-
-    setUp(() {
-      mockBuildSystem = MockBuildSystem();
-      mockSimControl = MockSimControl();
-      mockXcode = MockXcode();
-    });
-
-    testUsingContext('builds with targetPlatform', () async {
-      final IOSSimulator simulator = IOSSimulator(
-        'x',
-        name: 'iPhone X',
-        simControl: mockSimControl,
-        xcode: mockXcode,
-      );
-      when(mockBuildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-        return BuildResult(success: true);
-      });
-      await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
-
-      final VerificationResult result = verify(mockBuildSystem.build(any, captureAny));
-      final Environment environment = result.captured.single as Environment;
-      expect(environment.defines, <String, String>{
-        kTargetFile: 'lib/main.dart',
-        kTargetPlatform: 'ios',
-        kBuildMode: 'debug',
-        kTrackWidgetCreation: 'false',
-        kIconTreeShakerFlag: null,
-      });
-    }, overrides: <Type, Generator>{
-      BuildSystem: () => mockBuildSystem,
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });

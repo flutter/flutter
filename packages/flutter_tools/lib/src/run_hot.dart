@@ -353,7 +353,7 @@ class HotRunner extends ResidentRunner {
             mainPath,
             <Uri>[],
             outputPath: dillOutputPath ??
-              getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
+              getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packagesFilePath : packagesFilePath,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
