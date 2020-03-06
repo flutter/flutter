@@ -58,10 +58,10 @@ Future<void> main() async {
     await driver.waitUntilNoTransientCallbacks();
 
     // The animation of tapping a `RaisedButton` should pump enough frames to un-merge the thread.
-    final SerializableFinder no_action_button =
-        find.byValueKey('no_action_button');
-    await driver.waitFor(no_action_button);
-    await driver.tap(no_action_button);
+    final SerializableFinder unmergeButton =
+        find.byValueKey('unmerge_button');
+    await driver.waitFor(unmergeButton);
+    await driver.tap(unmergeButton);
     await driver.waitUntilNoTransientCallbacks();
 
     final Health driverHealth = await driver.checkHealth();

@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         // Push this button to perform an animation, which ensure the threads are unmerged after the animation.
         RaisedButton(
-          key: const ValueKey<String>('no_action_button'),
+          key: const ValueKey<String>('unmerge_button'),
           child: const Text('Tap to unmerge threads'),
           onPressed: () {},
         ),
@@ -85,6 +85,7 @@ class PlatformViewPage extends StatelessWidget {
           RaisedButton(
             key: button,
             child: const Text('button'),
+            onPressed: (){},
           )
         ],
       ),
