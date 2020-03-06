@@ -173,6 +173,14 @@ TaskFunction createTextfieldPerfTest() {
   ).run;
 }
 
+TaskFunction createColorFilterAndFadePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/color_filter_and_fade_perf.dart',
+    'color_filter_and_fade_perf',
+  ).run;
+}
+
 
 /// Measure application startup performance.
 class StartupTest {
