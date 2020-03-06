@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -13,6 +11,7 @@ import '../build_info.dart';
 import '../macos/xcode.dart';
 
 import 'file_system.dart';
+import 'logger.dart';
 import 'process.dart';
 
 /// A snapshot build configuration.
