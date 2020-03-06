@@ -3378,6 +3378,30 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/35848
+  testWidgets('Clearing text field with suffixIcon does not cause text selection exception', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Prefilled text.',
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: controller.clear,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IconButton));
+    expect(controller.text, '');
+  });
+
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
