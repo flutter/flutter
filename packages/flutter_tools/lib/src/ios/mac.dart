@@ -90,13 +90,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<IOSMigrator> migrators = <IOSMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode)
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage)
   ];
 
-  for (final IOSMigrator migrator in migrators) {
-    if (!migrator.migrate()) {
-      return XcodeBuildResult(success: false);
-    }
+  final IOSMigration migration = IOSMigration(migrators);
+  if (!migration.run()) {
+    return XcodeBuildResult(success: false);
   }
 
   if (!_checkXcodeVersion()) {
@@ -302,7 +301,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to ocassionally timeout. Here, we give
