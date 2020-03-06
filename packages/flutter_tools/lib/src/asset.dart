@@ -418,7 +418,7 @@ class LicenseCollector {
           licenseText = rawLicense;
         }
         packageLicenses.putIfAbsent(licenseText, () => <String>{})
-          ..addAll(packageNames);
+          .addAll(packageNames);
         allPackages.addAll(packageNames);
       }
     }

@@ -23,6 +23,9 @@ enum Channel {
   stable,
 }
 
+/// The flutter GitHub repository.
+const String _flutterGit = 'https://github.com/flutter/flutter.git';
+
 /// Retrieve a human-readable name for a given [channel].
 ///
 /// Requires [FlutterVersion.officialChannels] to be correctly ordered.
@@ -233,7 +236,7 @@ class FlutterVersion {
         'remote',
         'add',
         _versionCheckRemote,
-        'https://github.com/flutter/flutter.git',
+        _flutterGit,
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
@@ -702,6 +705,7 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine(ProcessUtils processUtils, [String workingDirectory]) {
+    _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
     return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 

@@ -42,7 +42,7 @@ void main() {
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
       fs.directory('test_driver').createSync();
-      fs.file('pubspec.yaml')..createSync();
+      fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
       appStarter = (DriveCommand command, Uri webUri) {

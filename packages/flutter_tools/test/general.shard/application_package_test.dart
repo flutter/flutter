@@ -206,7 +206,7 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
-    final MockOperatingSystemUtils os = MockOperatingSystemUtils();
+    MockOperatingSystemUtils os;
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -214,6 +214,10 @@ void main() {
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => os,
     };
+
+    setUp(() {
+      os = MockOperatingSystemUtils();
+    });
 
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =

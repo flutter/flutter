@@ -17,7 +17,7 @@ for more info.
 
 ```dart
 dart ${FLUTTER_PATH}/dev/tools/localization/bin/gen_l10n.dart --arb-dir=lib/i18n \
-    --template-arb-file=stocks_en_US.arb --output-localization-file=stock_strings.dart \
+    --template-arb-file=stocks_en.arb --output-localization-file=stock_strings.dart \
     --output-class=StockStrings
 ```
 

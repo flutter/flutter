@@ -202,6 +202,11 @@ abstract class FakeProcessManager implements ProcessManager {
   /// This is a no-op on [FakeProcessManager.any].
   void addCommand(FakeCommand command);
 
+  /// Whether this fake has more [FakeCommand]s that are expected to run.
+  ///
+  /// This is always `true` for [FakeProcessManager.any].
+  bool get hasRemainingExpectations;
+
   @protected
   FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment);
 
@@ -299,6 +304,9 @@ class _FakeAnyProcessManager extends FakeProcessManager {
 
   @override
   void addCommand(FakeCommand command) { }
+
+  @override
+  bool get hasRemainingExpectations => true;
 }
 
 class _SequenceProcessManager extends FakeProcessManager {
@@ -325,4 +333,7 @@ class _SequenceProcessManager extends FakeProcessManager {
   void addCommand(FakeCommand command) {
     _commands.add(command);
   }
+
+  @override
+  bool get hasRemainingExpectations => _commands.isNotEmpty;
 }

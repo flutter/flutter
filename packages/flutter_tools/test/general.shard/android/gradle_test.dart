@@ -1414,7 +1414,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -1580,7 +1580,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -2446,7 +2446,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2498,7 +2498,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2537,7 +2537,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2577,7 +2577,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2621,7 +2621,7 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory
     .childDirectory(directoryName)
-    ..createSync(recursive: true);
+    .createSync(recursive: true);
 
   bundleDirectory
     .childDirectory(directoryName)
