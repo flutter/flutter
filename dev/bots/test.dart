@@ -250,6 +250,7 @@ Future<void> _runToolCoverage() async {
       '--in=coverage',
       '--out=coverage/lcov.info',
       '--packages=.packages',
+      '--report-on=lib/'
     ],
     workingDirectory: toolRoot,
     outputMode: OutputMode.discard,
