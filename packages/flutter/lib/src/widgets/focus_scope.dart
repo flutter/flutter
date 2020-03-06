@@ -372,7 +372,7 @@ class Focus extends StatefulWidget {
   /// If true, this [Focus] widget will include a [Semantics] node that
   /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
   ///
-  /// Is is not typical to set this to false, as that can affect the semantics
+  /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
   /// Must not be null, defaults to true.

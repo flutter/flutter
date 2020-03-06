@@ -578,7 +578,7 @@ class SliderThemeData extends Diagnosticable {
 
   /// The shape that will be used to draw the [RangeSlider]'s track.
   ///
-  /// The [SliderTrackShape.getPreferredRect] method is used to to map
+  /// The [SliderTrackShape.getPreferredRect] method is used to map
   /// slider-relative gesture coordinates to the correct thumb position on the
   /// track. It is also used to horizontally position the tick marks, when the
   /// slider is discrete.

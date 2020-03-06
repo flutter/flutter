@@ -222,12 +222,14 @@ EndGlobal''');
 
     // Configures and returns a mock plugin with the given name and GUID in the
     // project's plugin symlink directory.
-    Plugin getMockPlugin(String name, String guid) {
+    Plugin getMockPlugin(String name, String guid, {bool createProject = true}) {
       final MockPlugin plugin = MockPlugin();
       when(plugin.platforms).thenReturn(<String, PluginPlatform>{project.pluginConfigKey: null});
       when(plugin.name).thenReturn(name);
       when(plugin.path).thenReturn(project.pluginSymlinkDirectory.childDirectory(name).path);
-      writeDummyPluginProject(name, guid);
+      if (createProject) {
+        writeDummyPluginProject(name, guid);
+      }
       return plugin;
     }
 
@@ -421,6 +423,16 @@ EndGlobal''');
       expect(RegExp(r'^([ \t]+\t|\t[ \t]+)EndProjectSection\s*$', multiLine: true).hasMatch(newSolutionContents), false);
       expect(RegExp(r'^([ \t]+\t|\t[ \t]+)GlobalSection\(\s*$', multiLine: true).hasMatch(newSolutionContents), false);
       expect(RegExp(r'^([ \t]+\t|\t[ \t]+)EndGlobalSection\s*$', multiLine: true).hasMatch(newSolutionContents), false);
+    });
+
+    test('A plugin without a project exits without crashing', () async {
+      writeSolutionWithoutPlugins();
+
+      final List<Plugin> plugins = <Plugin>[
+        getMockPlugin('plugin_a', pluginAGuid, createProject: false),
+      ];
+      expect(() => VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins),
+        throwsToolExit());
     });
   });
 }

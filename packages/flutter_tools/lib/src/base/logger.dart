@@ -7,9 +7,10 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import 'io.dart';
-import 'terminal.dart' show AnsiTerminal, TerminalColor, OutputPreferences;
+import 'terminal.dart' show AnsiTerminal, Terminal, TerminalColor, OutputPreferences;
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
@@ -57,7 +58,7 @@ abstract class Logger {
 
   bool get hasTerminal;
 
-  AnsiTerminal get _terminal;
+  Terminal get _terminal;
 
   OutputPreferences get _outputPreferences;
 
@@ -380,11 +381,21 @@ class BufferLogger extends Logger {
        _timeoutConfiguration = timeoutConfiguration,
        _stopwatchFactory = stopwatchFactory;
 
+  @visibleForTesting
+  BufferLogger.test({
+    Terminal terminal,
+    OutputPreferences outputPreferences,
+  }) : _terminal = terminal ?? Terminal.test(),
+       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
+       _timeoutConfiguration = const TimeoutConfiguration(),
+       _stopwatchFactory = const StopwatchFactory();
+
+
   @override
   final OutputPreferences _outputPreferences;
 
   @override
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
 
   @override
   final TimeoutConfiguration _timeoutConfiguration;
@@ -400,10 +411,12 @@ class BufferLogger extends Logger {
   final StringBuffer _error = StringBuffer();
   final StringBuffer _status = StringBuffer();
   final StringBuffer _trace = StringBuffer();
+  final StringBuffer _events = StringBuffer();
 
   String get errorText => _error.toString();
   String get statusText => _status.toString();
   String get traceText => _trace.toString();
+  String get eventText => _events.toString();
 
   @override
   bool get hasTerminal => false;
@@ -481,10 +494,16 @@ class BufferLogger extends Logger {
     _error.clear();
     _status.clear();
     _trace.clear();
+    _events.clear();
   }
 
   @override
-  void sendEvent(String name, [Map<String, dynamic> args]) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    _events.write(json.encode(<String, Object>{
+      'name': name,
+      'args': args
+    }));
+  }
 }
 
 class VerboseLogger extends Logger {
@@ -500,7 +519,7 @@ class VerboseLogger extends Logger {
   final Stopwatch _stopwatch;
 
   @override
-  AnsiTerminal get _terminal => parent._terminal;
+  Terminal get _terminal => parent._terminal;
 
   @override
   OutputPreferences get _outputPreferences => parent._outputPreferences;
