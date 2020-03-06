@@ -460,8 +460,7 @@ class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _TextSelectionToolbarContainerRenderBox renderObject) {
-    renderObject
-      ..overflowOpen = overflowOpen;
+    renderObject.overflowOpen = overflowOpen;
 
     if (menuChanged) {
       renderObject.onMenuChanged();
