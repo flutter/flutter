@@ -16,7 +16,7 @@ import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/recorder.dart';
 
-typedef RecorderFactory = Recorder<Profile<dynamic>> Function();
+typedef RecorderFactory = Recorder Function();
 
 /// List of all benchmarks that run in the devicelab.
 ///
@@ -69,10 +69,10 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
-  final Recorder<Profile<dynamic>> recorder = recorderFactory();
+  final Recorder recorder = recorderFactory();
 
   try {
-    final Profile<dynamic> profile = await recorder.run();
+    final Profile profile = await recorder.run();
     if (!isInManualMode) {
       final html.HttpRequest request = await html.HttpRequest.request(
         '/profile-data',

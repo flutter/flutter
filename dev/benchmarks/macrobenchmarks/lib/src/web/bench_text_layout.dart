@@ -26,21 +26,12 @@ class BenchTextDomLayout extends RawRecorder {
 
   static const String benchmarkName = 'text_dom_layout';
 
-  Paragraph paragraph;
-
   @override
-  void setUp() {
-    paragraph = _generateParagraph();
-  }
-
-  @override
-  void tearDown() {
-    paragraph = null;
-  }
-
-  @override
-  void body() {
-    paragraph.layout(ParagraphConstraints(width: double.infinity));
+  void body(Profile profile) {
+    final Paragraph paragraph = _generateParagraph();
+    profile.record('layout', () {
+      paragraph.layout(ParagraphConstraints(width: double.infinity));
+    });
   }
 }
 
@@ -58,23 +49,11 @@ class BenchTextDomCachedLayout extends RawRecorder {
           'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         );
 
-  Paragraph paragraph;
-
   @override
-  void setUp() {
-    // Create a new paragraph for each run, but use the same builder so the
-    // generated paragraphs are all the same (and so they get cached by the
-    // measurement service).
-    paragraph = builder.build();
-  }
-
-  @override
-  void tearDown() {
-    paragraph = null;
-  }
-
-  @override
-  void body() {
-    paragraph.layout(ParagraphConstraints(width: double.infinity));
+  void body(Profile profile) {
+    final Paragraph paragraph = builder.build();
+    profile.record('layout', () {
+      paragraph.layout(ParagraphConstraints(width: double.infinity));
+    });
   }
 }
