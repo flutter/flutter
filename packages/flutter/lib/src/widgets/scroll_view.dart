@@ -21,8 +21,14 @@ import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
+/// A representation of how a [ScrollView] should dismiss the on-screen
+/// keyboard.
 enum ScrollViewKeyboardDismissBehavior {
+  /// `manual` means there is no automatic dimissal of the on-screen keyboard.
+  /// It is up to the client to dismiss the keyboard.
   manual,
+  /// `onDrag` means that the [ScrollView] will dismiss an on-screen keyboard
+  /// when a drag begins.
   onDrag,
 }
 
@@ -242,6 +248,8 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [ScrollView] will
+  /// dismiss the keyboard automatically.
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// Returns the [AxisDirection] in which the scroll view scrolls.
