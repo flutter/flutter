@@ -503,7 +503,7 @@ class _CanvasPool extends _SaveStackTracking {
             break;
           case PathCommandTypes.ellipse:
             final Ellipse ellipse = command;
-            ctx.ellipse(
+            DomRenderer.ellipse(ctx,
                 ellipse.x,
                 ellipse.y,
                 ellipse.radiusX,
@@ -563,14 +563,14 @@ class _CanvasPool extends _SaveStackTracking {
 
   void drawOval(ui.Rect rect, ui.PaintingStyle style) {
     context.beginPath();
-    context.ellipse(rect.center.dx, rect.center.dy, rect.width / 2,
+    DomRenderer.ellipse(context, rect.center.dx, rect.center.dy, rect.width / 2,
         rect.height / 2, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
 
   void drawCircle(ui.Offset c, double radius, ui.PaintingStyle style) {
     context.beginPath();
-    context.ellipse(c.dx, c.dy, radius, radius, 0, 0, 2.0 * math.pi, false);
+    DomRenderer.ellipse(context, c.dx, c.dy, radius, radius, 0, 0, 2.0 * math.pi, false);
     contextHandle.paint(style);
   }
 

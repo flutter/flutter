@@ -245,7 +245,9 @@ class _PolyfillFontManager extends FontManager {
     paragraph.style.position = 'absolute';
     paragraph.style.visibility = 'hidden';
     paragraph.style.fontSize = '72px';
-    paragraph.style.fontFamily = 'sans-serif';
+    final String fallbackFontName = browserEngine == BrowserEngine.ie11 ?
+      'Times New Roman' : 'sans-serif';
+    paragraph.style.fontFamily = fallbackFontName;
     if (descriptors['style'] != null) {
       paragraph.style.fontStyle = descriptors['style'];
     }
@@ -257,7 +259,7 @@ class _PolyfillFontManager extends FontManager {
     html.document.body.append(paragraph);
     final int sansSerifWidth = paragraph.offsetWidth;
 
-    paragraph.style.fontFamily = "'$family', sans-serif";
+    paragraph.style.fontFamily = "'$family', $fallbackFontName";
 
     final Completer<void> completer = Completer<void>();
 
@@ -269,8 +271,10 @@ class _PolyfillFontManager extends FontManager {
         completer.complete();
       } else {
         if (DateTime.now().difference(_fontLoadStart) > _fontLoadTimeout) {
-          completer.completeError(
-              Exception('Timed out trying to load font: $family'));
+          // Let application waiting for fonts continue with fallback.
+          completer.complete();
+          // Throw unhandled exception for logging.
+          throw Exception('Timed out trying to load font: $family');
         } else {
           Timer(_fontLoadRetryDuration, _watchWidth);
         }

@@ -489,6 +489,26 @@ flt-glass-pane * {
     }
   }
 
+  static bool _ellipseFeatureDetected;
+
+  /// Draws CanvasElement ellipse with fallback.
+  static void ellipse(html.CanvasRenderingContext2D context,
+      double centerX, double centerY, double radiusX, double radiusY,
+      double rotation, double startAngle, double endAngle, bool antiClockwise) {
+    _ellipseFeatureDetected ??= js_util.getProperty(context, 'ellipse') != null;
+    if (_ellipseFeatureDetected) {
+      context.ellipse(centerX, centerY, radiusX, radiusY,
+          rotation, startAngle, endAngle, antiClockwise);
+    } else {
+      context.save();
+      context.translate(centerX, centerY);
+      context.rotate(rotation);
+      context.scale(radiusX, radiusY);
+      context.arc(0, 0, 1, startAngle, endAngle, antiClockwise);
+      context.restore();
+    }
+  }
+
   /// The element corresponding to the only child of the root surface.
   html.Element get _rootApplicationElement {
     final html.Element lastElement = rootElement.children.last;
