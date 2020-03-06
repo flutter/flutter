@@ -103,7 +103,7 @@ class AotBuilder {
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
           final Iterable<String> dylibs = iosBuilds.values.map<String>(
               (String outputDir) => globals.fs.path.join(outputDir, 'App.framework', 'App'));
-          globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework'))..createSync();
+          globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework')).createSync();
           await processUtils.run(
             <String>[
               'lipo',

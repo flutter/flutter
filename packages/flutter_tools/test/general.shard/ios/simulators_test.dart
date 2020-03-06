@@ -42,10 +42,14 @@ class MockPlistUtils extends Mock implements PlistParser {}
 
 void main() {
   FakePlatform osx;
+  FileSystemUtils fsUtils;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
     osx = FakePlatform.fromPlatform(const LocalPlatform());
     osx.operatingSystem = 'macos';
+    fileSystem = MemoryFileSystem();
+    fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
 
   group('_IOSSimulatorDevicePortForwarder', () {
@@ -69,12 +73,14 @@ void main() {
       expect(portForwarder.forwardedPorts.length, 2);
       try {
         await portForwarder.dispose();
-      } catch (e) {
+      } on Exception catch (e) {
         fail('Encountered exception: $e');
       }
       expect(portForwarder.forwardedPorts.length, 0);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     }, testOn: 'posix');
   });
 
@@ -97,6 +103,9 @@ void main() {
       expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystemUtils: () => fsUtils,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
@@ -110,6 +119,9 @@ void main() {
       expect(simulator.logFilePath, '/baz/qux/456/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystemUtils: () => fsUtils,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -228,6 +240,8 @@ void main() {
       expect(simulator.isSupported(), false);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Apple Watch is unsupported', () {
@@ -239,6 +253,8 @@ void main() {
       ).isSupported(), false);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPad 2 is supported', () {
@@ -250,6 +266,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPad Retina is supported', () {
@@ -261,6 +279,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPhone 5 is supported', () {
@@ -272,6 +292,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPhone 5s is supported', () {
@@ -283,6 +305,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPhone SE is supported', () {
@@ -294,6 +318,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPhone 7 Plus is supported', () {
@@ -305,6 +331,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('iPhone X is supported', () {
@@ -316,6 +344,8 @@ void main() {
       ).isSupported(), true);
     }, overrides: <Type, Generator>{
       Platform: () => osx,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -353,6 +383,8 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       BuildSystem: () => mockBuildSystem,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -448,6 +480,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
@@ -466,6 +499,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
     });
   });
 
@@ -499,6 +533,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
@@ -514,6 +549,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
     });
   });
 
@@ -568,6 +604,7 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
     });
   });
 
@@ -739,6 +776,8 @@ void main() {
       verify(simControl.launch(any, 'correct', any));
     }, overrides: <Type, Generator>{
       PlistParser: () => MockPlistUtils(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -755,11 +794,11 @@ void main() {
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
-  name: example
+name: example
 
-  flutter:
-    module: {}
-  ''');
+flutter:
+  module: {}
+''');
       globals.fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
@@ -773,6 +812,7 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
+
 
     testUsingContext('is true with editable host app', () async {
       globals.fs.file('pubspec.yaml').createSync();

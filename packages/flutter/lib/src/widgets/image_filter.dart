@@ -30,7 +30,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _ImageFilterRenderObject renderObject) {
-    renderObject..imageFilter = imageFilter;
+    renderObject.imageFilter = imageFilter;
   }
 
   @override
@@ -63,8 +63,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
       layer = ImageFilterLayer(imageFilter: imageFilter);
     } else {
       final ImageFilterLayer filterLayer = layer as ImageFilterLayer;
-      filterLayer
-        ..imageFilter = imageFilter;
+      filterLayer.imageFilter = imageFilter;
     }
     context.pushLayer(layer, super.paint, offset);
     assert(layer != null);

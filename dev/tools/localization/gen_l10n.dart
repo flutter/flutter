@@ -163,6 +163,11 @@ String generateMethod(Message message, AppResourceBundle bundle) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
       }
     }
+
+    // Escape single and double quotes.
+    messageValue = messageValue.replaceAll("'", '\\\'');
+    messageValue = messageValue.replaceAll('"', '\\\"');
+
     return "'$messageValue'";
   }
 
