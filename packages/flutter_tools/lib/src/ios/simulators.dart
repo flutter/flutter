@@ -6,12 +6,13 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -19,6 +20,7 @@ import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
@@ -29,7 +31,12 @@ const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators() : super('iOS simulators');
+  IOSSimulators({
+    @required IOSSimulatorUtils iosSimulatorUtils,
+  }) : _iosSimulatorUtils = iosSimulatorUtils,
+       super('iOS simulators');
+
+  final IOSSimulatorUtils _iosSimulatorUtils;
 
   @override
   bool get supportsPlatform => globals.platform.isMacOS;
@@ -38,29 +45,47 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => IOSSimulatorUtils.instance.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices() async => _iosSimulatorUtils.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {
-  /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
+  IOSSimulatorUtils({
+    @required SimControl simControl,
+    @required Xcode xcode,
+  }) : _simControl = simControl,
+       _xcode = xcode;
+
+  final SimControl _simControl;
+  final Xcode _xcode;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
-    if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
+    if (!_xcode.isInstalledAndMeetsVersionCheck) {
       return <IOSSimulator>[];
     }
 
-    final List<SimDevice> connected = await SimControl.instance.getConnectedDevices();
+    final List<SimDevice> connected = await _simControl.getConnectedDevices();
     return connected.map<IOSSimulator>((SimDevice device) {
-      return IOSSimulator(device.udid, name: device.name, simulatorCategory: device.category);
+      return IOSSimulator(
+        device.udid,
+        name: device.name,
+        simControl: _simControl,
+        simulatorCategory: device.category,
+        xcode: _xcode,
+      );
     }).toList();
   }
 }
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context.get<SimControl>();
+  SimControl({
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _logger = logger,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+  final Logger _logger;
+  final ProcessUtils _processUtils;
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -83,10 +108,10 @@ class SimControl {
     //   "pairs": { ... },
 
     final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
-    globals.printTrace(command.join(' '));
-    final ProcessResult results = await globals.processManager.run(command);
+    _logger.printTrace(command.join(' '));
+    final RunResult results = await _processUtils.run(command);
     if (results.exitCode != 0) {
-      globals.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
+      _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
     }
     try {
@@ -94,13 +119,13 @@ class SimControl {
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }
-      globals.printError('simctl returned unexpected JSON response: ${results.stdout}');
+      _logger.printError('simctl returned unexpected JSON response: ${results.stdout}');
       return <String, dynamic>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
-      globals.printError('simctl returned non-JSON response: ${results.stdout}');
+      _logger.printError('simctl returned non-JSON response: ${results.stdout}');
       return <String, dynamic>{};
     }
   }
@@ -130,7 +155,7 @@ class SimControl {
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
-    return processUtils.exitsHappy(<String>[
+    return _processUtils.exitsHappy(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
@@ -139,23 +164,23 @@ class SimControl {
     ]);
   }
 
-  Future<RunResult> install(String deviceId, String appPath) {
-    Future<RunResult> result;
+  Future<RunResult> install(String deviceId, String appPath) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to install $appPath on $deviceId:\n$exception');
+      throwToolExit('Unable to install $appPath on $deviceId. This is sometimes caused by a malformed plist file:\n$exception');
     }
     return result;
   }
 
-  Future<RunResult> uninstall(String deviceId, String appId) {
-    Future<RunResult> result;
+  Future<RunResult> uninstall(String deviceId, String appId) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
         throwOnError: true,
       );
@@ -165,10 +190,10 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
-    Future<RunResult> result;
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) async {
+    RunResult result;
     try {
-      result = processUtils.run(
+      result = await _processUtils.run(
         <String>[
           _xcrunPath,
           'simctl',
@@ -187,12 +212,12 @@ class SimControl {
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
-      await processUtils.run(
+      await _processUtils.run(
         <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
         throwOnError: true,
       );
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to take screenshot of $deviceId:\n$exception');
+      _logger.printError('Unable to take screenshot of $deviceId:\n$exception');
     }
   }
 }
@@ -248,17 +273,28 @@ class SimDevice {
 }
 
 class IOSSimulator extends Device {
-  IOSSimulator(String id, { this.name, this.simulatorCategory }) : super(
-      id,
-      category: Category.mobile,
-      platformType: PlatformType.ios,
-      ephemeral: true,
-  );
+  IOSSimulator(
+    String id, {
+      this.name,
+      this.simulatorCategory,
+      @required SimControl simControl,
+      @required Xcode xcode,
+    }) : _simControl = simControl,
+         _xcode = xcode,
+         super(
+           id,
+           category: Category.mobile,
+           platformType: PlatformType.ios,
+           ephemeral: true,
+         );
 
   @override
   final String name;
 
   final String simulatorCategory;
+
+  final SimControl _simControl;
+  final Xcode _xcode;
 
   @override
   Future<bool> get isLocalEmulator async => true;
@@ -279,7 +315,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
-    return SimControl.instance.isInstalled(id, app.id);
+    return _simControl.isInstalled(id, app.id);
   }
 
   @override
@@ -289,7 +325,7 @@ class IOSSimulator extends Device {
   Future<bool> installApp(covariant IOSApp app) async {
     try {
       final IOSApp iosApp = app;
-      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, iosApp.simulatorBundlePath);
       return true;
     } on Exception {
       return false;
@@ -299,7 +335,7 @@ class IOSSimulator extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await SimControl.instance.uninstall(id, app.id);
+      await _simControl.uninstall(id, app.id);
       return true;
     } on Exception {
       return false;
@@ -394,7 +430,7 @@ class IOSSimulator extends Device {
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
       final String bundleIdentifier = globals.plistParser.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-      await SimControl.instance.launch(id, bundleIdentifier, args);
+      await _simControl.launch(id, bundleIdentifier, args);
     } on Exception catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();
@@ -449,7 +485,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    await SimControl.instance.install(id, globals.fs.path.absolute(bundle.path));
+    await _simControl.install(id, globals.fs.path.absolute(bundle.path));
   }
 
   @visibleForTesting
@@ -527,7 +563,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return globals.xcode.majorVersion > 8 || (globals.xcode.majorVersion == 8 && globals.xcode.minorVersion >= 2);
+    return _xcode.majorVersion > 8 || (_xcode.majorVersion == 8 && _xcode.minorVersion >= 2);
   }
 
   @override
@@ -535,7 +571,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) {
-    return SimControl.instance.takeScreenshot(id, outputFile.path);
+    return _simControl.takeScreenshot(id, outputFile.path);
   }
 
   @override
