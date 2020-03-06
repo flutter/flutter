@@ -1016,7 +1016,7 @@ class RenderTable extends RenderBox {
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1)
-          positions[x] = (positions[x-1] + widths[x-1]).floorToDouble();
+          positions[x] = positions[x-1] + widths[x-1];
         _columnLefts = positions;
         tableWidth = positions.last + widths.last;
         break;
@@ -1044,7 +1044,7 @@ class RenderTable extends RenderBox {
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               assert(textBaseline != null);
-              child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
+              child.layout(BoxConstraints.tightFor(width: widths[x].ceilToDouble()), parentUsesSize: true);
               final double childBaseline = child.getDistanceToBaseline(textBaseline, onlyReal: true);
               if (childBaseline != null) {
                 beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
@@ -1059,7 +1059,7 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
             case TableCellVerticalAlignment.bottom:
-              child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
+              child.layout(BoxConstraints.tightFor(width: widths[x].ceilToDouble()), parentUsesSize: true);
               rowHeight = math.max(rowHeight, child.size.height);
               break;
             case TableCellVerticalAlignment.fill:
