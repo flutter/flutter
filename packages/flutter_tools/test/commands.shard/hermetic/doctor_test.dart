@@ -4,12 +4,17 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -722,6 +727,23 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => MockProcessManager(),
   });
+
+  testUsingContext('Fetches tags when --version is used', () async {
+    Cache.disableLocking();
+
+    final DoctorCommand doctorCommand = DoctorCommand();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
+
+    await commandRunner.run(<String>['doctor']);
+
+    verify(mockFlutterVersion.fetchTagsAndUpdate()).called(1);
+
+    Cache.enableLocking();
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.any(),
+    FileSystem: () => MemoryFileSystem.test(),
+    FlutterVersion: () => mockFlutterVersion,
+  }, initializeFlutterRoot: false);
 }
 
 class MockUsage extends Mock implements Usage {}
@@ -1062,4 +1084,3 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockFlutterVersion extends Mock implements FlutterVersion {}
