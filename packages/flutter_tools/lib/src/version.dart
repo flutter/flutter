@@ -702,6 +702,7 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine(ProcessUtils processUtils, [String workingDirectory]) {
+    _runGit('git fetch https://github.com/flutter/flutter --tags', processUtils, workingDirectory);
     return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 

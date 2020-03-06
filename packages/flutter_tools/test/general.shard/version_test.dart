@@ -520,10 +520,15 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(104, 0, '1 second ago', ''));
   when(pm.runSync(
+    <String>['git', 'fetch', 'https://github.com/flutter/flutter', '--tags'],
+    workingDirectory: anyNamed('workingDirectory'),
+    environment: anyNamed('environment'),
+  )).thenReturn(ProcessResult(105, 0, '', ''));
+  when(pm.runSync(
     <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
-  )).thenReturn(ProcessResult(105, 0, 'v0.1.2-3-1234abcd', ''));
+  )).thenReturn(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
