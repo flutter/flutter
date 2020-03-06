@@ -7,7 +7,3 @@ A simple app contains:
     * Press the button will update the text.
 
 We use this app to test platform views in general such as platform view creation, destruction and thread merging(iOS only).
-
-# e2e tests
-
-We can possibly move the e2e tests to the flutter/engine repo when e2e is running on engine ci.
