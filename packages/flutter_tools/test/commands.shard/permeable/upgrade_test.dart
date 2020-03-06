@@ -231,6 +231,12 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
+              'git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags',
+            ],
+            stdout: 'From https://github.com/flutter/flutter\n * branch                HEAD       -> FETCH_HEAD',
+          ),
+          const FakeCommand(
+            command: <String>[
               'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
             ],
             stdout: 'v1.12.16-19-gb45b676af',

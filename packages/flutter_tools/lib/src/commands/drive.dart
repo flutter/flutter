@@ -292,7 +292,7 @@ $ex
 
     try {
       await testRunner(<String>[testFile], environment);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
       }

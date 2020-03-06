@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
 // ignore_for_file: unnecessary_brace_in_string_interps
@@ -67,6 +68,7 @@ import 'package:intl/intl.dart' as intl;
 abstract class @(class) {
   @(class)(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
+  // ignore: unused_field
   final String _localeName;
 
   static @(class) of(BuildContext context) {

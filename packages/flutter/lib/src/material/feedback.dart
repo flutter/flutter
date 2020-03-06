@@ -99,9 +99,15 @@ class Feedback {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
-      default:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return Future<void>.value();
+        break;
     }
+    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
+    return Future<void>.value();
   }
 
   /// Wraps a [GestureTapCallback] to provide platform specific feedback for a
@@ -138,9 +144,15 @@ class Feedback {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
-      default:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return Future<void>.value();
+        break;
     }
+    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
+    return Future<void>.value();
   }
 
   /// Wraps a [GestureLongPressCallback] to provide platform specific feedback

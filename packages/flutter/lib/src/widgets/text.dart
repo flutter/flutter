@@ -95,6 +95,7 @@ class DefaultTextStyle extends InheritedTheme {
     TextOverflow overflow,
     int maxLines,
     TextWidthBasis textWidthBasis,
+    ui.TextHeightBehavior textHeightBehavior,
     @required Widget child,
   }) {
     assert(child != null);
@@ -109,6 +110,7 @@ class DefaultTextStyle extends InheritedTheme {
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
           child: child,
         );
       },
@@ -140,9 +142,11 @@ class DefaultTextStyle extends InheritedTheme {
   /// [Text.maxLines].
   final int maxLines;
 
+  /// {@template flutter.widgets.text.DefaultTextStyle.tetWidthBasis}
   /// The strategy to use when calculating the width of the Text.
   ///
   /// See [TextWidthBasis] for possible values and their implications.
+  /// {@endtemplate}
   final TextWidthBasis textWidthBasis;
 
   /// {@macro flutter.dart:ui.textHeightBehavior}

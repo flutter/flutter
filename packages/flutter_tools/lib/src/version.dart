@@ -23,6 +23,9 @@ enum Channel {
   stable,
 }
 
+/// The flutter GitHub repository.
+const String _flutterGit = 'https://github.com/flutter/flutter.git';
+
 /// Retrieve a human-readable name for a given [channel].
 ///
 /// Requires [FlutterVersion.officialChannels] to be correctly ordered.
@@ -233,7 +236,7 @@ class FlutterVersion {
         'remote',
         'add',
         _versionCheckRemote,
-        'https://github.com/flutter/flutter.git',
+        _flutterGit,
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
@@ -528,7 +531,7 @@ class VersionCheckStamp {
         } else {
           globals.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
         globals.printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
@@ -702,6 +705,7 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine(ProcessUtils processUtils, [String workingDirectory]) {
+    _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
     return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 

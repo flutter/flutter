@@ -456,7 +456,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
   }

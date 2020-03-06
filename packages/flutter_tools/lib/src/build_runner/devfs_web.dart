@@ -10,7 +10,11 @@ import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
@@ -62,6 +66,8 @@ class WebAssetServer implements AssetReader {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+      // ignore: deprecated_member_use
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
@@ -110,6 +116,8 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -182,8 +190,14 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
       file = globals.fs.file(potential);
+    }
+
+    if (!file.existsSync()) {
+      final String webPath = globals.fs.path.join(
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+      file = globals.fs.file(webPath);
     }
 
     if (!file.existsSync()) {
