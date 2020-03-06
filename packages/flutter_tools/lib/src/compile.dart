@@ -358,12 +358,7 @@ class KernelCompiler {
     ];
 
     globals.printTrace(command.join(' '));
-    Process server;
-    try {
-      server = await globals.processManager.start(command);
-    } on ProcessException catch (err, stackTrace) {
-      throwToolExit('Failed to start frontend server $err, $stackTrace');
-    }
+    final Process server = await globals.processManager.start(command);
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
     server.stderr
