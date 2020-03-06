@@ -341,7 +341,9 @@ void main() async {
     path.addRect(const Rect.fromLTRB(20, 30, 100, 110));
     rc.drawShadow(path, const Color(0xFFFF0000), 2.0, true);
     expect(
-        rc.computePaintBounds(), const Rect.fromLTRB(15.0, 27.0, 106.0, 117.0));
+      rc.computePaintBounds(),
+      within(distance: 0.05, from: const Rect.fromLTRB(17.9, 28.5, 103.5, 114.1)),
+    );
     await _checkScreenshot(rc, 'path_with_shadow');
   });
 
@@ -440,6 +442,177 @@ void main() async {
     rc.restore();
     await _checkScreenshot(rc, 'path_with_line_and_roundrect');
   });
+
+  test('should include paint spread in bounds estimates', () async {
+    final SurfaceSceneBuilder sb = SurfaceSceneBuilder();
+
+    final List<PaintSpreadPainter> painters = <PaintSpreadPainter>[
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawLine(
+          const Offset(0.0, 0.0),
+          const Offset(20.0, 20.0),
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawRect(
+          const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawRRect(
+          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, Radius.circular(7.0)),
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawDRRect(
+          RRect.fromLTRBR(0.0, 0.0, 20.0, 20.0, Radius.circular(5.0)),
+          RRect.fromLTRBR(4.0, 4.0, 16.0, 16.0, Radius.circular(5.0)),
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawOval(
+          const Rect.fromLTRB(0.0, 5.0, 20.0, 15.0),
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawCircle(
+          const Offset(10.0, 10.0),
+          10.0,
+          paint,
+        );
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        final SurfacePath path = SurfacePath()
+          ..moveTo(10, 0)
+          ..lineTo(20, 10)
+          ..lineTo(10, 20)
+          ..lineTo(0, 10)
+          ..close();
+        canvas.drawPath(path, paint);
+      },
+
+      // Images are not affected by mask filter or stroke width. They use image
+      // filter instead.
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawImage(_createRealTestImage(), Offset.zero, paint);
+      },
+      (RecordingCanvas canvas, SurfacePaint paint) {
+        canvas.drawImageRect(
+          _createRealTestImage(),
+          const Rect.fromLTRB(0, 0, 20, 20),
+          const Rect.fromLTRB(5, 5, 15, 15),
+          paint,
+        );
+      },
+    ];
+
+    Picture drawBounds(Rect bounds) {
+      final EnginePictureRecorder recorder = EnginePictureRecorder();
+      final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
+      canvas.drawRect(
+        bounds,
+        SurfacePaint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color.fromARGB(255, 0, 255, 0),
+      );
+      return recorder.endRecording();
+    }
+
+    for (int i = 0; i < painters.length; i++) {
+      sb.pushOffset(0.0, 20.0 + 60.0 * i);
+      final PaintSpreadPainter painter = painters[i];
+
+      // Paint with zero paint spread.
+      {
+        sb.pushOffset(20.0, 0.0);
+        final EnginePictureRecorder recorder = EnginePictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
+        final SurfacePaint zeroSpreadPaint = SurfacePaint();
+        painter(canvas, zeroSpreadPaint);
+        sb.addPicture(Offset.zero, recorder.endRecording());
+        sb.addPicture(Offset.zero, drawBounds(canvas.computePaintBounds()));
+        sb.pop();
+      }
+
+      // Paint with a thick stroke paint.
+      {
+        sb.pushOffset(80.0, 0.0);
+        final EnginePictureRecorder recorder = EnginePictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
+        final SurfacePaint thickStrokePaint = SurfacePaint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5.0;
+        painter(canvas, thickStrokePaint);
+        sb.addPicture(Offset.zero, recorder.endRecording());
+        sb.addPicture(Offset.zero, drawBounds(canvas.computePaintBounds()));
+        sb.pop();
+      }
+
+      // Paint with a mask filter blur.
+      {
+        sb.pushOffset(140.0, 0.0);
+        final EnginePictureRecorder recorder = EnginePictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
+        final SurfacePaint maskFilterBlurPaint = SurfacePaint()
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+        painter(canvas, maskFilterBlurPaint);
+        sb.addPicture(Offset.zero, recorder.endRecording());
+        sb.addPicture(Offset.zero, drawBounds(canvas.computePaintBounds()));
+        sb.pop();
+      }
+
+      // Paint with a thick stroke paint and a mask filter blur.
+      {
+        sb.pushOffset(200.0, 0.0);
+        final EnginePictureRecorder recorder = EnginePictureRecorder();
+        final RecordingCanvas canvas = recorder.beginRecording(Rect.largest);
+        final SurfacePaint thickStrokeAndBlurPaint = SurfacePaint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 5.0
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+        painter(canvas, thickStrokeAndBlurPaint);
+        sb.addPicture(Offset.zero, recorder.endRecording());
+        sb.addPicture(Offset.zero, drawBounds(canvas.computePaintBounds()));
+        sb.pop();
+      }
+
+      sb.pop();
+    }
+
+    final html.Element sceneElement = sb.build().webOnlyRootElement;
+    html.document.body.append(sceneElement);
+    try {
+      await matchGoldenFile(
+        'paint_spread_bounds.png',
+        region: const Rect.fromLTRB(0, 0, 250, 600),
+        maxDiffRatePercent: 0.0,
+        pixelComparison: PixelComparison.precise,
+      );
+    } finally {
+      sceneElement.remove();
+    }
+  });
+}
+
+typedef PaintSpreadPainter = void Function(RecordingCanvas canvas, SurfacePaint paint);
+
+const String _base64Encoded20x20TestImage = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAACXBIWXMAAC4jAAAuIwF4pT92AAAA'
+  'B3RJTUUH5AMFFBksg4i3gQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAj'
+  'SURBVDjLY2TAC/7jlWVioACMah4ZmhnxpyHG0QAb1UyZZgBjWAIm/clP0AAAAABJRU5ErkJggg==';
+
+HtmlImage _createRealTestImage() {
+  return HtmlImage(
+    html.ImageElement()
+      ..src = 'data:text/plain;base64,$_base64Encoded20x20TestImage',
+    20,
+    20,
+  );
 }
 
 class TestImage implements Image {
