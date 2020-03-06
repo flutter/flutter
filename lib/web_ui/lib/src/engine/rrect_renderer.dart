@@ -196,7 +196,7 @@ class _RRectToCanvasRenderer extends _RRectRenderer {
 
   void ellipse(double centerX, double centerY, double radiusX, double radiusY,
       double rotation, double startAngle, double endAngle, bool antiClockwise) {
-    context.ellipse(centerX, centerY, radiusX, radiusY, rotation, startAngle,
+    DomRenderer.ellipse(context, centerX, centerY, radiusX, radiusY, rotation, startAngle,
         endAngle, antiClockwise);
   }
 }
