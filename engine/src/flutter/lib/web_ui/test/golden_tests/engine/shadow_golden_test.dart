@@ -156,7 +156,6 @@ void main() async {
         pixelComparison: PixelComparison.precise,
       );
     },
-    timeout: const Timeout(Duration(seconds: 10)),
     testOn: 'chrome',
   );
 }

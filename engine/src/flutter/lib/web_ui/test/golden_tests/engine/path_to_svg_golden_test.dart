@@ -58,21 +58,21 @@ void main() async {
           ..color = const Color(0xFFFF0000)
           ..strokeWidth = 2.0
           ..style = PaintingStyle.stroke);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render quad bezier curve', () async {
     final Path path = Path();
     path.moveTo(50, 60);
     path.quadraticBezierTo(200, 60, 50, 200);
     await testPath(path, 'svg_quad_bezier');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render cubic curve', () async {
     final Path path = Path();
     path.moveTo(50, 60);
     path.cubicTo(200, 60, -100, -50, 150, 200);
     await testPath(path, 'svg_cubic_bezier');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render arcs', () async {
     final List<ArcSample> arcs = <ArcSample>[
@@ -99,14 +99,14 @@ void main() async {
       final Path path = sample.createPath();
       await testPath(path, 'svg_arc_$sampleIndex');
     }
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render rect', () async {
     final Path path = Path();
     path.addRect(const Rect.fromLTRB(15, 15, 60, 20));
     path.addRect(const Rect.fromLTRB(35, 160, 15, 100));
     await testPath(path, 'svg_rect');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render notch', () async {
     final Path path = Path();
@@ -123,7 +123,7 @@ void main() async {
     path.lineTo(0, 80);
     path.lineTo(0, 10);
     await testPath(path, 'svg_notch');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 }
 
 html.Element pathToSvgElement(Path path, Paint paint) {

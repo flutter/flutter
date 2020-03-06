@@ -54,7 +54,7 @@ void main() async {
     path.close();
 
     await testPath(path, 'render_conic_1_w10');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render conic with control point left of start point', () async {
     const double yStart = 20;
@@ -72,7 +72,7 @@ void main() async {
     path.close();
 
     await testPath(path, 'render_conic_2_w10');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('render conic with control point above start point', () async {
     const double yStart = 20;
@@ -90,5 +90,5 @@ void main() async {
     path.close();
 
     await testPath(path, 'render_conic_2');
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 }
