@@ -41,7 +41,7 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    private static final String MAVEN_REPO      = "http://download.flutter.io";
+    private static final String MAVEN_REPO      = "https://storage.googleapis.com/download.flutter.io";
 
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";

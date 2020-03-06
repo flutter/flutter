@@ -52,8 +52,8 @@ class GenerateCommand extends FlutterCommand {
         globals.printError(stackData[0] as String);
         globals.printError(stackData[1] as String);
         globals.printError(StackTrace.fromString(stackData[2] as String).toString());
-      } catch (err) {
-        globals.printError('Error reading error in ${errorFile.path}');
+      } on Exception catch (err) {
+        globals.printError('Error reading error in ${errorFile.path}: $err');
       }
     }
     return FlutterCommandResult.fail();

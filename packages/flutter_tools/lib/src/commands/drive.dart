@@ -260,7 +260,7 @@ $ex
       try {
         await window.setLocation(const math.Point<int>(0, 0));
         await window.setSize(math.Rectangle<int>(0, 0, x, y));
-      } catch (_) {
+      } on Exception {
        // Error might be thrown in some browsers.
       }
 
@@ -277,7 +277,7 @@ $ex
 
     try {
       await testRunner(<String>[testFile], environment);
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
       }

@@ -159,7 +159,7 @@ flutter:
         );
     }
 
-    void createPluginWithInvalidAndroidPackage() {
+    Directory createPluginWithInvalidAndroidPackage() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
               fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
       pluginUsingJavaAndNewEmbeddingDir
@@ -187,6 +187,7 @@ flutter:
           'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginUsingJavaAndNewEmbeddingDir;
     }
 
     void createNewKotlinPlugin2() {
@@ -279,7 +280,7 @@ flutter:
         );
     }
 
-    void createPluginWithDependencies({
+    Directory createPluginWithDependencies({
       @required String name,
       @required List<String> dependencies,
     }) {
@@ -308,6 +309,7 @@ dependencies:
           '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginDirectory;
     }
 
     // Creates the files that would indicate that pod install has run for the
@@ -389,9 +391,9 @@ EndGlobal''');
       });
 
       testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
-        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
-        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
-        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        final Directory pluginA = createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        final Directory pluginB = createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
@@ -410,9 +412,9 @@ EndGlobal''');
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
           '# This is a generated file; do not edit or check into version control.\n'
-          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
-          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
-          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          'plugin-a=${pluginA.path}/\n'
+          'plugin-b=${pluginB.path}/\n'
+          'plugin-c=${pluginC.path}/\n'
           ''
         );
 
@@ -424,7 +426,7 @@ EndGlobal''');
         final List<dynamic> expectedPlugins = <dynamic>[
           <String, dynamic> {
             'name': 'plugin-a',
-            'path': '/.tmp_rand0/plugin.rand0/',
+            'path': '${pluginA.path}/',
             'dependencies': <String>[
               'plugin-b',
               'plugin-c'
@@ -432,14 +434,14 @@ EndGlobal''');
           },
           <String, dynamic> {
             'name': 'plugin-b',
-            'path': '/.tmp_rand0/plugin.rand1/',
+            'path': '${pluginB.path}/',
             'dependencies': <String>[
               'plugin-c'
             ]
           },
           <String, dynamic> {
             'name': 'plugin-c',
-            'path': '/.tmp_rand0/plugin.rand2/',
+            'path': '${pluginC.path}/',
             'dependencies': <String>[]
           },
         ];
@@ -642,7 +644,7 @@ EndGlobal''');
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
-        createPluginWithInvalidAndroidPackage();
+        final Directory pluginDir = createPluginWithInvalidAndroidPackage();
 
         await expectLater(
           () async {
@@ -650,8 +652,8 @@ EndGlobal''');
           },
           throwsToolExit(
             message: "The plugin `plugin1` doesn't have a main class defined in "
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     '${pluginDir.path}/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '${pluginDir.path}/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
                      "This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin's pubspec.yaml.\n"
                      'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
                      'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',

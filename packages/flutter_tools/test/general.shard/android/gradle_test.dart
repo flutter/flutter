@@ -2446,7 +2446,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2498,7 +2498,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2537,7 +2537,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2577,7 +2577,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
