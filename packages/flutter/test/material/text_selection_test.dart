@@ -328,6 +328,109 @@ void main() {
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     });
+
+    testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
+      // Set the screen size to more narrow, so that SELECT ALL can't fit.
+      tester.binding.window.physicalSizeTestValue = const Size(1000, 800);
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+
+      final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(800.0, 600.0)),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                child: TextField(
+                  controller: controller,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      // Initially, the menu isn't shown at all.
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Tap to place the cursor and tap again to show the menu without a
+      // selection.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      expect(endpoints.length, 1);
+      final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+      await tester.tapAt(handlePos, pointer: 7);
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Tap SELECT ALL and measure the usual position of CUT, without
+      // _closedWidth having been used yet.
+      await tester.tap(find.text('SELECT ALL'));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+      final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
+
+      // Tap to clear the selection.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+
+      // Long press to show the menu.
+      await tester.longPressAt(textOffsetToPosition(tester, 1));
+      await tester.pump();
+
+      // The last button is missing, and a more button is shown.
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping the button shows the overflow menu.
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsNothing);
+      expect(find.text('COPY'), findsNothing);
+      expect(find.text('PASTE'), findsNothing);
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+
+      // Tapping SELECT ALL changes the menu items so that there is no no longer
+      // any overflow.
+      await tester.tap(find.text('SELECT ALL'));
+      await tester.pumpAndSettle();
+      expect(find.text('CUT'), findsOneWidget);
+      expect(find.text('COPY'), findsOneWidget);
+      expect(find.text('PASTE'), findsOneWidget);
+      expect(find.text('SELECT ALL'), findsNothing);
+      expect(find.byType(IconButton), findsNothing);
+      final Offset newCutOffset = tester.getTopLeft(find.text('CUT'));
+      expect(newCutOffset, equals(cutOffset));
+    });
   });
 
   group('menu position', () {

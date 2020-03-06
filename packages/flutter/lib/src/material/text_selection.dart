@@ -59,6 +59,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // updated.
   bool _menuChanged = false;
 
+  // The key for _TextSelectionToolbarContainer.
+  UniqueKey _containerKey = UniqueKey();
+
   FlatButton _getItem(VoidCallback onPressed, String label) {
     assert(onPressed != null);
     return FlatButton(
@@ -79,9 +82,13 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
       || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null));
 
-    // If the menu items change, make sure the overflow menu is closed. This
-    // prevents an empty overflow menu and an incorrect saved width.
     if (_menuChanged) {
+      // Change _TextSelectionToolbarContainer's key when the menu changes in
+      // order to cause it to rebuild. This lets it recalculate its
+      // saved width for the new set of children.
+      _containerKey = UniqueKey();
+      // If the menu items change, make sure the overflow menu is closed. This
+      // prevents an empty overflow menu and an incorrect saved width.
       _overflowOpen = false;
     }
     super.didUpdateWidget(oldWidget);
@@ -99,6 +106,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         _getItem(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
         _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        //_getItem(widget.handleSelectAll, 'select absolutely everything'),
     ];
 
     // If there is no option available, build an empty widget.
@@ -147,10 +155,122 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     }
 
     return _TextSelectionToolbarContainer(
-      menuChanged: _menuChanged,
+      key: _containerKey,
       overflowOpen: _overflowOpen,
       child: child,
     );
+  }
+}
+
+// When the overflow menu is open, it tries to align its right edge to the right
+// edge of the closed menu. This widget handles this effect by measuring and
+// maintaining the width of the closed menu and aligning the child to the right.
+class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
+  const _TextSelectionToolbarContainer({
+    Key key,
+    @required Widget child,
+    @required this.overflowOpen,
+  }) : assert(child != null),
+       assert(overflowOpen != null),
+       super(key: key, child: child);
+
+  final bool overflowOpen;
+
+  @override
+  _TextSelectionToolbarContainerRenderBox createRenderObject(BuildContext context) {
+    return _TextSelectionToolbarContainerRenderBox(overflowOpen: overflowOpen);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _TextSelectionToolbarContainerRenderBox renderObject) {
+    renderObject.overflowOpen = overflowOpen;
+  }
+}
+
+class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
+  _TextSelectionToolbarContainerRenderBox({
+    @required bool overflowOpen,
+  }) : assert(overflowOpen != null),
+       _overflowOpen = overflowOpen,
+       super();
+
+  // The width of the menu when it was closed. This is used to achieve the
+  // behavior where the open menu aligns its right edge to the closed menu's
+  // right edge.
+  double _closedWidth;
+
+  bool _overflowOpen;
+  bool get overflowOpen => _overflowOpen;
+  set overflowOpen(bool value) {
+    if (value == overflowOpen) {
+      return;
+    }
+    _overflowOpen = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    child.layout(constraints.loosen(), parentUsesSize: true);
+
+    // Save the width when the menu is closed. If the menu changes, this width
+    // is invalid, so it's important that this RenderBox be recreated in that
+    // case.
+    if (!overflowOpen && _closedWidth == null) {
+      _closedWidth = child.size.width;
+    }
+
+    size = constraints.constrain(Size(
+      // If the open menu is wider than the closed menu, just use its own width
+      // and don't worry about aligning the right edges.
+      // _closedWidth is used even when the menu is closed to allow it to
+      // animate its size while keeping the same right alignment.
+      _closedWidth == null || child.size.width > _closedWidth ? child.size.width : _closedWidth,
+      child.size.height,
+    ));
+
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    childParentData.offset = Offset(
+      size.width - child.size.width,
+      0.0,
+    );
+  }
+
+  // Paint at the offset set in the parent data.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    context.paintChild(child, childParentData.offset + offset);
+  }
+
+  // Include the parent data offset in the hit test.
+  @override
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    // The x, y parameters have the top left of the node's box as the origin.
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    //return child.hitTest(result, position: position);
+    return result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _ToolbarParentData) {
+      child.parentData = _ToolbarParentData();
+    }
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    transform.translate(childParentData.offset.dx, childParentData.offset.dy);
+    super.applyPaintTransform(child, transform);
   }
 }
 
@@ -433,130 +553,6 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       child = childParentData.previousSibling;
     }
     return false;
-  }
-}
-
-// When the overflow menu is open, it tries to align its right edge to the right
-// edge of the closed menu. This widget handles this effect by measuring and
-// maintaining the width of the closed menu and aligning the child to the right.
-class _TextSelectionToolbarContainer extends SingleChildRenderObjectWidget {
-  const _TextSelectionToolbarContainer({
-    Key key,
-    @required Widget child,
-    @required this.menuChanged,
-    @required this.overflowOpen,
-  }) : assert(child != null),
-       assert(overflowOpen != null),
-       assert(menuChanged != null),
-       super(key: key, child: child);
-
-  final bool menuChanged;
-  final bool overflowOpen;
-
-  @override
-  _TextSelectionToolbarContainerRenderBox createRenderObject(BuildContext context) {
-    return _TextSelectionToolbarContainerRenderBox(overflowOpen: overflowOpen);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _TextSelectionToolbarContainerRenderBox renderObject) {
-    renderObject.overflowOpen = overflowOpen;
-
-    if (menuChanged) {
-      renderObject.onMenuChanged();
-    }
-  }
-}
-
-class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
-  _TextSelectionToolbarContainerRenderBox({
-    @required bool overflowOpen,
-  }) : assert(overflowOpen != null),
-       _overflowOpen = overflowOpen,
-       super();
-
-  // The width of the menu when it was closed. This is used to achieve the
-  // behavior where the open menu aligns its right edge to the closed menu's
-  // right edge.
-  double _closedWidth;
-
-  bool _overflowOpen;
-  bool get overflowOpen => _overflowOpen;
-  set overflowOpen(bool value) {
-    if (value == overflowOpen) {
-      return;
-    }
-    _overflowOpen = value;
-    markNeedsLayout();
-  }
-
-  // If the contents of the menu changed, reset the tracked width.
-  void onMenuChanged() {
-    _closedWidth = null;
-    markNeedsLayout();
-  }
-
-  @override
-  void performLayout() {
-    child.layout(constraints.loosen(), parentUsesSize: true);
-
-    // Save the width when the menu is closed. If the menu changes, _closedWidth
-    // is reset to null (onMenuChanged above) and a new width will be saved.
-    if (!overflowOpen && _closedWidth == null) {
-      _closedWidth = child.size.width;
-    }
-
-    size = constraints.constrain(Size(
-      // If the open menu is wider than the closed menu, just use its own width
-      // and don't worry about aligning the right edges.
-      // _closedWidth is used even when the menu is closed to allow it to
-      // animate its size while keeping the same right alignment.
-      _closedWidth == null || child.size.width > _closedWidth ? child.size.width : _closedWidth,
-      child.size.height,
-    ));
-
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
-    childParentData.offset = Offset(
-      size.width - child.size.width,
-      0.0,
-    );
-  }
-
-  // Paint at the offset set in the parent data.
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
-    context.paintChild(child, childParentData.offset + offset);
-  }
-
-  // Include the parent data offset in the hit test.
-  @override
-  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    // The x, y parameters have the top left of the node's box as the origin.
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
-    //return child.hitTest(result, position: position);
-    return result.addWithPaintOffset(
-      offset: childParentData.offset,
-      position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
-        assert(transformed == position - childParentData.offset);
-        return child.hitTest(result, position: transformed);
-      },
-    );
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _ToolbarParentData) {
-      child.parentData = _ToolbarParentData();
-    }
-  }
-
-  @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
-    transform.translate(childParentData.offset.dx, childParentData.offset.dy);
-    super.applyPaintTransform(child, transform);
   }
 }
 
