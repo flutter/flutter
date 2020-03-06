@@ -81,6 +81,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
     }());
     String effectiveTransform;
     final bool isStroke = paint.style == ui.PaintingStyle.stroke;
+    final double strokeWidth = paint.strokeWidth ?? 0.0;
     final double left = math.min(rect.left, rect.right);
     final double right = math.max(rect.left, rect.right);
     final double top = math.min(rect.top, rect.bottom);
@@ -88,7 +89,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
     if (currentTransform.isIdentity()) {
       if (isStroke) {
         effectiveTransform =
-            'translate(${left - (paint.strokeWidth / 2.0)}px, ${top - (paint.strokeWidth / 2.0)}px)';
+            'translate(${left - (strokeWidth / 2.0)}px, ${top - (strokeWidth / 2.0)}px)';
       } else {
         effectiveTransform = 'translate(${left}px, ${top}px)';
       }
@@ -97,7 +98,7 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
       final Matrix4 translated = currentTransform.clone();
       if (isStroke) {
         translated.translate(
-            left - (paint.strokeWidth / 2.0), top - (paint.strokeWidth / 2.0));
+            left - (strokeWidth / 2.0), top - (strokeWidth / 2.0));
       } else {
         translated.translate(left, top);
       }
@@ -109,8 +110,8 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
       ..transformOrigin = '0 0 0'
       ..transform = effectiveTransform;
 
-    final String cssColor = paint.color == null ? '#000000'
-        : colorToCssString(paint.color);
+    final String cssColor =
+        paint.color == null ? '#000000' : colorToCssString(paint.color);
 
     if (paint.maskFilter != null) {
       style.filter = 'blur(${paint.maskFilter.webOnlySigma}px)';
@@ -118,9 +119,9 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
     if (isStroke) {
       style
-        ..width = '${right - left - paint.strokeWidth}px'
-        ..height = '${bottom - top - paint.strokeWidth}px'
-        ..border = '${paint.strokeWidth}px solid $cssColor';
+        ..width = '${right - left - strokeWidth}px'
+        ..height = '${bottom - top - strokeWidth}px'
+        ..border = '${strokeWidth}px solid $cssColor';
     } else {
       style
         ..width = '${right - left}px'

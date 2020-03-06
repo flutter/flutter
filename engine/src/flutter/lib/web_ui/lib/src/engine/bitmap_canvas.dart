@@ -353,17 +353,16 @@ class BitmapCanvas extends EngineCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
-    //_applyPaint(paint);
-    final HtmlImage htmlImage = image;
-    final html.ImageElement imgElement = htmlImage.cloneImageElement();
-    String blendMode = _stringForBlendMode(paint.blendMode);
-    imgElement.style.mixBlendMode = blendMode;
-    _drawImage(imgElement, p);
+    _drawImage(image, p, paint);
     _childOverdraw = true;
     _canvasPool.allocateExtraCanvas();
   }
 
-  void _drawImage(html.ImageElement imgElement, ui.Offset p) {
+  html.ImageElement _drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
+    final HtmlImage htmlImage = image;
+    final html.Element imgElement = htmlImage.cloneImageElement();
+    final ui.BlendMode blendMode = paint.blendMode;
+    imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
     if (_canvasPool.isClipped) {
       final List<html.Element> clipElements = _clipContent(
           _canvasPool._clipStack, imgElement, p, _canvasPool.currentTransform);
@@ -380,12 +379,12 @@ class BitmapCanvas extends EngineCanvas {
       rootElement.append(imgElement);
       _children.add(imgElement);
     }
+    return imgElement;
   }
 
   @override
   void drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaintData paint) {
-    final HtmlImage htmlImage = image;
     final bool requiresClipping = src.left != 0 ||
         src.top != 0 ||
         src.width != image.width ||
@@ -395,9 +394,6 @@ class BitmapCanvas extends EngineCanvas {
         !requiresClipping) {
       drawImage(image, dst.topLeft, paint);
     } else {
-      final html.Element imgElement = htmlImage.cloneImageElement();
-      final ui.BlendMode blendMode = paint.blendMode;
-      imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
       if (requiresClipping) {
         save();
         clipRect(dst);
@@ -414,7 +410,8 @@ class BitmapCanvas extends EngineCanvas {
           targetTop += topMargin;
         }
       }
-      _drawImage(imgElement, ui.Offset(targetLeft, targetTop));
+
+      final html.ImageElement imgElement = _drawImage(image, ui.Offset(targetLeft, targetTop), paint);
       // To scale set width / height on destination image.
       // For clipping we need to scale according to
       // clipped-width/full image width and shift it according to left/top of
