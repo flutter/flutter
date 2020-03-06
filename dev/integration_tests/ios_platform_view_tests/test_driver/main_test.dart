@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
@@ -41,7 +42,7 @@ Future<void> main() async {
 
     final Health driverHealth = await driver.checkHealth();
     expect(driverHealth.status, HealthStatus.ok);
-  });
+  }, skip: !Platform.isIOS);
 
     test('Merge thread to create and remove platform views should not crash', () async {
 
@@ -66,5 +67,5 @@ Future<void> main() async {
 
     final Health driverHealth = await driver.checkHealth();
     expect(driverHealth.status, HealthStatus.ok);
-  });
+  }, skip: !Platform.isIOS);
 }
