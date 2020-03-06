@@ -416,7 +416,7 @@ void main() {
   testUsingContext('determine calls fetch --tags', () {
     final MockProcessUtils processUtils = MockProcessUtils();
     when(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter', '--tags'],
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
@@ -429,7 +429,7 @@ void main() {
     GitTagVersion.determine(processUtils, '.');
 
     verify(processUtils.runSync(
-      <String>['git', 'fetch', 'https://github.com/flutter/flutter', '--tags'],
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
