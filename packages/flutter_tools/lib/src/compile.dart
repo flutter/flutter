@@ -241,7 +241,8 @@ class PackageUriMapper {
   }
 }
 
-List<String> _buildModeOptions(BuildMode mode) {
+/// List the preconfigured build options for a given build mode.
+List<String> buildModeOptions(BuildMode mode) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
@@ -316,7 +317,7 @@ class KernelCompiler {
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -357,14 +358,9 @@ class KernelCompiler {
     ];
 
     globals.printTrace(command.join(' '));
-    final Process server = await globals.processManager
-      .start(command)
-      .catchError((dynamic error, StackTrace stack) {
-        globals.printError('Failed to start frontend server $error, $stack');
-      });
+    final Process server = await globals.processManager.start(command);
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
-
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(globals.printError);
@@ -678,7 +674,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--packages',
         packagesPath,
       ],
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[
