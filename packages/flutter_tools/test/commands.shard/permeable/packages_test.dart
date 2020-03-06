@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess, AlwaysTrueBotDetector, AlwaysFalseBotDetector
+import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
 import '../../src/testbed.dart';
 
 void main() {
