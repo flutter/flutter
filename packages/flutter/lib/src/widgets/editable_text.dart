@@ -1645,19 +1645,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in widget.inputFormatters)
-        value = formatter.formatEditUpdate(_value, value);
-      _value = value;
-      _updateRemoteEditingValueIfNeeded();
-    } else if (isRepeat) {
-      // Clear out the unformatted remote value with the already-known
-      // post-format value.
-      _updateRemoteEditingValueIfNeeded();
-    } else {
+    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+    if (!isRepeat) {
+      if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+        for (final TextInputFormatter formatter in widget.inputFormatters) {
+          value = formatter.formatEditUpdate(_value, value);
+        }
+      }
       _value = value;
     }
+    _updateRemoteEditingValueIfNeeded();
+
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
