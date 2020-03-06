@@ -247,7 +247,7 @@ void main() {
         headerString: '/// Sample header',
       );
     } on L10nException catch (e) {
-      fail('Setting a header through a String should not fail: \n$e');
+      fail('Setting a header through a String should not fail: \n${e.message}');
     }
 
     expect(generator.header, '/// Sample header');
@@ -324,7 +324,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -353,7 +353,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
@@ -384,7 +384,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
@@ -495,7 +495,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       if (Platform.isWindows) {
@@ -546,7 +546,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -590,7 +590,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       // @@locale property should hold higher priority
