@@ -28,7 +28,7 @@ void main() {
   String basePath;
 
   setUpAll(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     filePath = fs.path.join('lib', 'foo.txt');
   });
 
@@ -69,22 +69,17 @@ void main() {
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
 
-      final DateTime fiveDaysAgo = DateTime.now().subtract(const Duration(days: 5));
-      expect(content.isModifiedAfter(fiveDaysAgo), isTrue);
-      expect(content.isModifiedAfter(fiveDaysAgo), isTrue);
+      final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds:5));
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
+      expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
 
-      // Make sure some real time passes so the time stamp will be up to date.
-      // On a fast enough system with just the right timing, the two calls to
-      // file.writeasBytesSync will execute close-enough-together such that the
-      // timestamp will not actually get updated.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
       file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
       expect(content.fileDependencies, <String>[filePath]);
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
       expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
-      updateFileModificationTime(file.path, fiveDaysAgo, 0);
+      updateFileModificationTime(file.path, fiveSecondsAgo, 0);
       expect(content.isModified, isFalse);
       expect(content.isModified, isFalse);
 
