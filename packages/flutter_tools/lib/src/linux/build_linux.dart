@@ -12,7 +12,6 @@ import '../cache.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
@@ -88,7 +87,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 // Checks the template version of [project] against the current template

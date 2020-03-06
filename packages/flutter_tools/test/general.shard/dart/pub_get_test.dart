@@ -192,7 +192,7 @@ void main() {
   testUsingContext('analytics sent on success', () async {
     MockDirectory.findCache = true;
     await pub.get(context: PubContext.flutterTests, checkLastModified: false);
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(0),
@@ -212,7 +212,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(1),
@@ -232,7 +232,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(

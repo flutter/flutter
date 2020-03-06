@@ -10,20 +10,20 @@ import '../../base/logger.dart';
 /// iOS project is generated from a template on Flutter project creation.
 /// Sometimes (due to behavior changes in Xcode, CocoaPods, etc) these files need to be altered
 /// from the original template.
-class IOSMigrator {
+abstract class IOSMigrator {
   IOSMigrator(this.logger);
 
   @protected
   final Logger logger;
 
   /// Returns whether migration was successful or was skipped.
-  bool migrate() {
-    return false;
-  }
+  bool migrate();
 
-  /// [processLine] should return null if the line should be deleted.
+  /// Return null if the line should be deleted.
+  String migrateLine(String line);
+
   @protected
-  void processFileLines(File file, String Function(String) processLine) {
+  void processFileLines(File file) {
     final List<String> lines = file.readAsLinesSync();
 
     final StringBuffer newProjectContents = StringBuffer();
@@ -31,7 +31,7 @@ class IOSMigrator {
 
     bool migrationRequired = false;
     for (final String line in lines) {
-      final String newProjectLine = processLine(line);
+      final String newProjectLine = migrateLine(line);
       if (newProjectLine == null) {
         logger.printTrace('Migrating $basename, removing:');
         logger.printTrace('    $line');
@@ -52,5 +52,23 @@ class IOSMigrator {
       logger.printStatus('Upgrading $basename');
       file.writeAsStringSync(newProjectContents.toString());
     }
+  }
+}
+
+class IOSMigration {
+  IOSMigration(this.migrators);
+
+  final List<IOSMigrator> migrators;
+
+  bool run() {
+    for (final IOSMigrator migrator in migrators) {
+      if (!migrator.migrate()) {
+        // Migration failures should be more robust, with transactions and fallbacks.
+        // See https://github.com/flutter/flutter/issues/12573 and
+        // https://github.com/flutter/flutter/issues/40460
+        return false;
+      }
+    }
+    return true;
   }
 }

@@ -121,7 +121,7 @@ Future<int> _handleToolError(
     }
 
     // Report to both [Usage] and [CrashReportSender].
-    flutterUsage.sendException(error);
+    globals.flutterUsage.sendException(error);
     await CrashReportSender.instance.sendReport(
       error: error,
       stackTrace: stackTrace,
@@ -252,13 +252,13 @@ Future<String> _doctorText() async {
 
 Future<int> _exit(int code) async {
   // Prints the welcome message if needed.
-  flutterUsage.printWelcome();
+  globals.flutterUsage.printWelcome();
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
-  if (flutterUsage.enabled) {
+  if (globals.flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
-    await flutterUsage.ensureAnalyticsSent();
+    await globals.flutterUsage.ensureAnalyticsSent();
     globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
