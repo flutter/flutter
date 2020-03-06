@@ -664,7 +664,7 @@ abstract class StageableRoute{
 /// transition in or out of the screen.
 ///
 /// This abstract class implements the API to be called by [Navigator] when it
-/// requires explicit decisions on how the routes transits on or off the screen.
+/// requires explicit decisions on how the routes transition on or off the screen.
 ///
 /// To make route transition decisions, subclass must implement [resolve].
 ///
@@ -2454,7 +2454,7 @@ class _RouteEntry extends StageableRoute {
 
   bool get willBePresent => currentState.index <= _RouteLifecycle.idle.index;
   bool get isPresent => currentState.index <= _RouteLifecycle.remove.index;
-  bool get canTransit {
+  bool get canTransitition {
     return currentState.index <= _RouteLifecycle.removing.index &&
            currentState.index >= _RouteLifecycle.push.index;
   }
@@ -3044,7 +3044,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     int index = _history.length - 1;
     while (index >= 0) {
       final _RouteEntry entry = _history[index];
-      if (!entry.canTransit) {
+      if (!entry.canTransitition) {
         index -= 1;
         continue;
       }
