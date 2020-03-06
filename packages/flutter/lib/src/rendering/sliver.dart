@@ -859,7 +859,7 @@ class SliverHitTestResult extends HitTestResult {
     assert(crossAxisPosition != null);
     assert(hitTest != null);
     if (paintOffset != null) {
-      pushTransform(Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0));
+      pushTransform(Matrix4.translationValues(-paintOffset.dx, -paintOffset.dy, 0));
     }
     final bool isHit = hitTest(
       this,
@@ -1813,6 +1813,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       geometry = SliverGeometry.zero;
       return;
     }
+    final SliverConstraints constraints = this.constraints;
     child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     double childExtent;
     switch (constraints.axis) {

@@ -15,7 +15,7 @@ import '../runner/flutter_command.dart';
 // A comment used to identify the export line added for Linux and macOS.
 const String kExportHeader = '# Added for Flutter & Dart Support';
 
-/// A command to automatically add Flutter & Dart to the PATH of users.
+/// A command to automatically add Flutter to the PATH of users.
 class AddToPathCommand extends FlutterCommand {
   AddToPathCommand({
     @required Platform platform,
@@ -42,31 +42,38 @@ class AddToPathCommand extends FlutterCommand {
     _fileSystem ??= globals.fs;
 
     final String flutterBinPath = _fileSystem.path.join(Cache.flutterRoot, 'bin');
-    final String dartBinPath = _fileSystem.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin');
 
     if (_platform.isLinux || _platform.isMacOS) {
       final String homePath = _platform.environment['HOME'];
       final List<File> searchPriority = <File>[
+        _fileSystem.file(_fileSystem.path.join(homePath, '.zshrc')),
         _fileSystem.file(_fileSystem.path.join(homePath, '.bashrc')),
         _fileSystem.file(_fileSystem.path.join(homePath, '.bash_profile')),
-        _fileSystem.file(_fileSystem.path.join(homePath, '.profile'))
+        _fileSystem.file(_fileSystem.path.join(homePath, '.profile')),
       ];
+      bool addedOnce = false;
       for (final File searchFile in searchPriority) {
         if (!searchFile.existsSync()) {
           continue;
         }
         if (searchFile.readAsStringSync().contains(kExportHeader)) {
           _logger.printStatus('Flutter already present in ${searchFile.path}');
-          return FlutterCommandResult.fail();
+          continue;
         }
-        searchFile.writeAsStringSync(
-          '\n$kExportHeader\n'
-          'export PATH=\$PATH:$flutterBinPath\n'
-          'export PATH=\$PATH:$dartBinPath',
-          mode: FileMode.append,
-        );
-        _logger.printStatus(
-          'Successfully added Flutter & Dart to path. You may need to start a '
+        try {
+          searchFile.writeAsStringSync(
+            '\n$kExportHeader\n'
+            'export PATH=\$PATH:$flutterBinPath\n',
+            mode: FileMode.append,
+          );
+          addedOnce = true;
+        } on FileSystemException catch (err) {
+          _logger.printTrace('Failed to append to ${searchFile.path}: $err');
+        }
+      }
+      if (addedOnce) {
+          _logger.printStatus(
+          'Successfully added Flutter to the PATH. You may need to start a '
           'new terminal shell to use it.',
         );
         return FlutterCommandResult.success();

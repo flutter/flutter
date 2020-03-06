@@ -35,12 +35,11 @@ import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'globals.dart' as globals;
-import 'ios/devices.dart' show IOSDeploy;
+import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
-import 'linux/linux_workflow.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -101,7 +100,13 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
-      ChromeLauncher: () => const ChromeLauncher(),
+      ChromeLauncher: () => ChromeLauncher(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      ),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(
@@ -125,11 +130,19 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
-      IOSDeploy: () => const IOSDeploy(),
-      IOSSimulatorUtils: () => IOSSimulatorUtils(),
+      IOSDeploy: () => IOSDeploy(
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ),
+      IOSSimulatorUtils: () => IOSSimulatorUtils(
+        simControl: globals.simControl,
+        xcode: globals.xcode,
+      ),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
-      LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
@@ -164,8 +177,11 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(),
-      Stdio: () => const Stdio(),
+      SimControl: () => SimControl(
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
+      Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(

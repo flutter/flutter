@@ -1170,6 +1170,60 @@ void main() {
       expect(content.localToGlobal(Offset.zero), equals(contentOriginalOffset));
     });
   });
+
+  testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
+    RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute?.settings;
+          })
+        ],
+        home: const Material(
+          child: Center(
+            child: RaisedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    const RouteSettings exampleSetting = RouteSettings(name: 'simple');
+
+    final Future<int> result = showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            SimpleDialogOption(
+              child: const Text('X'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+      routeSettings: exampleSetting,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('Title'), findsOneWidget);
+    expect(currentRouteSetting, exampleSetting);
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(await result, isNull);
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting?.name, '/');
+  });
 }
 
 class DialogObserver extends NavigatorObserver {
@@ -1182,4 +1236,22 @@ class DialogObserver extends NavigatorObserver {
     }
     super.didPush(route, previousRoute);
   }
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({@required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) => onDidChange(previousRoute);
+
+  @override
+  void didReplace({Route<dynamic> newRoute, Route<dynamic> oldRoute}) => onDidChange(newRoute);
 }

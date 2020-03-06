@@ -71,7 +71,7 @@ const String kExitMessage =  'Failed to establish connection with the applicatio
 /// A hot-runner which handles browser specific delegation.
 abstract class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    this.device, {
+    FlutterDevice device, {
     String target,
     @required this.flutterProject,
     @required bool ipv6,
@@ -79,14 +79,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
     bool stayResident = true,
     @required this.dartDefines,
   }) : super(
-          <FlutterDevice>[],
+          <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
         );
 
-  final FlutterDevice device;
+  FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
   final List<String> dartDefines;
   DateTime firstBuildTime;
@@ -247,6 +247,12 @@ abstract class ResidentWebRunner extends ResidentRunner {
     } on vmservice.RPCError {
       return;
     }
+  }
+
+  @override
+  Future<void> stopEchoingDeviceLog() async {
+    // Do nothing for ResidentWebRunner
+    await device.stopEchoingDeviceLog();
   }
 
   @override
@@ -532,7 +538,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
@@ -567,7 +573,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
       final Uri generatedImport = packageUriMapper.map(generatedPath);
-      final String importedEntrypoint = packageUriMapper.map(main).toString() ?? 'file://$main';
+      String importedEntrypoint = packageUriMapper.map(main)?.toString();
+      // Special handling for entrypoints that are not under lib, such as test scripts.
+      if (importedEntrypoint == null) {
+        final String parent = globals.fs.file(main).parent.path;
+        flutterDevices.first.generator.addFileSystemRoot(parent);
+        importedEntrypoint = 'org-dartlang-app:///${globals.fs.path.basename(main)}';
+      }
 
       final String entrypoint = <String>[
         'import "$importedEntrypoint" as entrypoint;',
@@ -704,5 +716,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
+  }
+
+  @override
+  Future<void> exitApp() async {
+    await device.exitApps();
+    appFinished();
   }
 }

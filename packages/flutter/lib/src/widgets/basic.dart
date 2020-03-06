@@ -1092,6 +1092,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///    that is relative to the child's size.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Transform extends SingleChildRenderObjectWidget {
   /// Creates a widget that transforms its child.
   ///
@@ -1214,7 +1215,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1305,8 +1306,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
-    renderObject
-      ..link = link;
+    renderObject.link = link;
   }
 }
 
@@ -1887,6 +1887,7 @@ class Center extends Align {
 ///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   /// Creates a custom single child layout.
   ///
@@ -1982,6 +1983,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
   /// Creates a custom multi-child layout.
   ///
@@ -3038,6 +3040,7 @@ AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
 ///    this layout algorithm (at the cost of being slightly less efficient).
 ///  * [ListView], which implements an efficient scrolling version of this
 ///    layout algorithm.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ListBody extends MultiChildRenderObjectWidget {
   /// Creates a layout widget that arranges its children sequentially along a
   /// given axis.
@@ -4989,8 +4992,7 @@ class Flow extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderFlow renderObject) {
-    renderObject
-      ..delegate = delegate;
+    renderObject.delegate = delegate;
   }
 }
 
@@ -7070,4 +7072,64 @@ class StatefulBuilder extends StatefulWidget {
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context, setState);
+}
+
+/// A widget that paints its area with a specified [Color] and then draws its
+/// child on top of that color.
+class ColoredBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that paints its area with the specified [Color].
+  ///
+  /// The [color] parameter must not be null.
+  const ColoredBox({@required this.color, Widget child, Key key})
+      : assert(color != null),
+        super(key: key, child: child);
+
+  /// The color to paint the background area with.
+  final Color color;
+
+  @override
+  _RenderColoredBox createRenderObject(BuildContext context) {
+    return _RenderColoredBox(color: color);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderColoredBox renderObject) {
+    renderObject.color = color;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
+  _RenderColoredBox({@required Color color})
+    : _color = color,
+      super(behavior: HitTestBehavior.opaque);
+
+  /// The fill color for this render object.
+  ///
+  /// This parameter must not be null.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (value == _color) {
+      return;
+    }
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (size > Size.zero) {
+      context.canvas.drawRect(offset & size, Paint()..color = color);
+    }
+    if (child != null) {
+      context.paintChild(child, offset);
+    }
+  }
 }

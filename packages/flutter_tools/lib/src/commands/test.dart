@@ -23,7 +23,7 @@ import '../test/runner.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FastFlutterCommand {
+class TestCommand extends FlutterCommand {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
@@ -106,11 +106,10 @@ class TestCommand extends FastFlutterCommand {
         help: 'The platform to run the unit tests on. Defaults to "tester".',
       )
       ..addOption('test-randomize-ordering-seed',
-        defaultsTo: '0',
-        help: 'If positive, use this as a seed to randomize the execution of '
-              'test cases (must be a 32bit unsigned integer).\n'
+        help: 'The seed to randomize the execution order of test cases.\n'
+              'Must be a 32bit unsigned integer or "random".\n'
               'If "random", pick a random seed to use.\n'
-              'If 0 or not set, do not randomize test case execution order.',
+              'If not passed, do not randomize test case execution order.',
       )
       ..addFlag('enable-vmservice',
         defaultsTo: false,
@@ -209,24 +208,21 @@ class TestCommand extends FastFlutterCommand {
       ];
     }
 
+    final bool machine = boolArg('machine');
     CoverageCollector collector;
     if (boolArg('coverage') || boolArg('merge-coverage')) {
       final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
+        verbose: !machine,
         libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
-    final bool machine = boolArg('machine');
-    if (collector != null && machine) {
-      throwToolExit("The test command doesn't support --machine and coverage together");
-    }
-
     TestWatcher watcher;
-    if (collector != null) {
+    if (machine) {
+      watcher = EventPrinter(parent: collector);
+    } else if (collector != null) {
       watcher = collector;
-    } else if (machine) {
-      watcher = EventPrinter();
     }
 
     Cache.releaseLockEarly();

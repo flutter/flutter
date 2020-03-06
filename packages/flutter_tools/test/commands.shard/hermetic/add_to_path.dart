@@ -9,24 +9,20 @@ import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
+
+final Platform platform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{
+  'HOME': 'HOME/'
+});
 
 void main() {
-  FileSystem fileSystem;
-  Logger logger;
-  final Platform platform = FakePlatform(operatingSystem: 'linux', environment: <String, String>{
-    'HOME': 'HOME/'
-  });
-
   setUpAll(() {
     Cache.disableLocking();
   });
 
-  setUp(() {
-    fileSystem = MemoryFileSystem.test();
-    logger = MockLogger();
-  });
-
-  test('Adds flutter to .bashrc on linux if it exists', () async {
+  testUsingContext('Adds flutter to .bashrc on linux if it exists', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
     final AddToPathCommand command = AddToPathCommand(
       platform: platform,
       logger: logger,
@@ -43,7 +39,9 @@ void main() {
     expect(bashRc.readAsStringSync(), contains(kExportHeader));
   });
 
-  test('Exits on an unsupported platform', () async {
+  testUsingContext('Exits on an unsupported platform', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
     final AddToPathCommand command = AddToPathCommand(
       platform: FakePlatform(operatingSystem: 'fuchsia'),
       logger: logger,

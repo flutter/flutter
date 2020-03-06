@@ -223,7 +223,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
+    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
       cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
@@ -232,10 +232,6 @@ void main() {
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
-  }));
-
-  test('ResidentRunner copies dill file from build output into temp directory', () => testbed.run(() async {
-    expect(residentRunner.artifactDirectory.childFile('app.dill').readAsStringSync(), 'ABC');
   }));
 
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
@@ -258,7 +254,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'reload',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -288,7 +284,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'restart',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -332,7 +328,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
+    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
       cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
@@ -692,6 +688,9 @@ void main() {
       trackWidgetCreation: true,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.librariesSpec,
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
+        .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');

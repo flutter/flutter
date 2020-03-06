@@ -10,7 +10,11 @@ import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
@@ -62,6 +66,8 @@ class WebAssetServer implements AssetReader {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+      // ignore: deprecated_member_use
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
@@ -110,6 +116,8 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -137,6 +145,10 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
+    // Track etag headers for better caching of resources.
+    final String ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
+    headers[HttpHeaders.cacheControlHeader] = 'max-age=0, must-revalidate';
+
     // NOTE: shelf removes leading `/` for some reason.
     final String requestPath = request.url.path.startsWith('/')
       ?  request.url.path
@@ -146,16 +158,29 @@ class WebAssetServer implements AssetReader {
     // Attempt to look up the file by URI.
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = getFile(requestPath);
+      // Use the underlying buffer hashCode as a revision string. This buffer is
+      // replaced whenever the frontend_server produces new output files, which
+      // will also change the hashCode.
+      final String etag = bytes.hashCode.toString();
+      if (ifNoneMatch == etag) {
+        return shelf.Response.notModified();
+      }
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/javascript';
+      headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_sourcemaps.containsKey(requestPath)) {
       final List<int> bytes = getSourceMap(requestPath);
+      final String etag = bytes.hashCode.toString();
+      if (ifNoneMatch == etag) {
+        return shelf.Response.notModified();
+      }
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
+      headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
     }
 
@@ -165,13 +190,26 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
       file = globals.fs.file(potential);
+    }
+
+    if (!file.existsSync()) {
+      final String webPath = globals.fs.path.join(
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+      file = globals.fs.file(webPath);
     }
 
     if (!file.existsSync()) {
       return shelf.Response.notFound('');
     }
+
+    // For real files, use a serialized file stat as a revision
+    final String etag = file.lastModifiedSync().toIso8601String();
+    if (ifNoneMatch == etag) {
+      return shelf.Response.notModified();
+    }
+
     final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video et cetera. If the tool
@@ -186,6 +224,7 @@ class WebAssetServer implements AssetReader {
     mimeType ??= _kDefaultMimeType;
     headers[HttpHeaders.contentLengthHeader] = length.toString();
     headers[HttpHeaders.contentTypeHeader] = mimeType;
+    headers[HttpHeaders.etagHeader] = etag;
     return shelf.Response.ok(file.openRead(), headers: headers);
   }
 
@@ -413,7 +452,8 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri get baseUri => null;
+  Uri get baseUri => _baseUri;
+  Uri _baseUri;
 
   @override
   Future<Uri> create() async {
@@ -426,7 +466,8 @@ class WebDevFS implements DevFS {
       entrypoint,
       testMode: testMode,
     );
-    return Uri.parse('http://$hostname:$port');
+    _baseUri = Uri.parse('http://$hostname:$port');
+    return _baseUri;
   }
 
   @override
@@ -585,7 +626,9 @@ class ReleaseAssetServer {
   final List<Uri> _searchPaths = <Uri>[
     globals.fs.directory(getWebBuildDirectory()).uri,
     globals.fs.directory(Cache.flutterRoot).uri,
+    globals.fs.directory(Cache.flutterRoot).parent.uri,
     globals.fs.currentDirectory.uri,
+    globals.fs.directory(globals.fsUtils.homeDirPath).uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {

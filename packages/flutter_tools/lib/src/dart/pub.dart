@@ -180,7 +180,8 @@ class _DefaultPub implements Pub {
           retry: true,
         );
         status.stop();
-      } catch (exception) {
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -322,7 +323,7 @@ class _DefaultPub implements Pub {
         globals.stdio.addStdoutStream(process.stdout),
         globals.stdio.addStderrStream(process.stderr),
       ]);
-    } catch (err, stack) {
+    } on Exception catch (err, stack) {
       globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
       globals.printTrace('$err\n$stack');
     }

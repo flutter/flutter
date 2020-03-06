@@ -41,7 +41,7 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    private static final String MAVEN_REPO      = "http://download.flutter.io";
+    private static final String MAVEN_REPO      = "https://storage.googleapis.com/download.flutter.io";
 
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
@@ -607,6 +607,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
         }
+        Boolean dartObfuscationValue = false
+        if (project.hasProperty('dart-obfuscation')) {
+            dartObfuscationValue = project.property('dart-obfuscation').toBoolean();
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
@@ -647,10 +651,11 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                dartObfuscation dartObfuscationValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
+                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
                         } else {
                             commandLine('chmod', '-R', 'u+w', assetsDirectory)
                         }
@@ -792,6 +797,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String splitDebugInfo
     @Optional @Input
     Boolean treeShakeIcons
+    @Optional @Input
+    Boolean dartObfuscation
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -853,6 +860,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
+            }
+            if (dartObfuscation == true) {
+                args "-dDartObfuscation=true"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"

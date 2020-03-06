@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -20,10 +19,11 @@ import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 import 'windows/property_sheet.dart';
+import 'windows/visual_studio_solution_utils.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
-  final String renderedTemplate =
-     mustache.Template(template, htmlEscapeValues: false).renderString(context);
+  final String renderedTemplate = globals.templateRenderer
+    .renderString(template, context, htmlEscapeValues: false);
   final File file = globals.fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
@@ -176,6 +176,9 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap yaml) {
+    if (yaml == null) {
+      return <String>['Invalid "plugin" specification.'];
+    }
 
     final bool usesOldPluginFormat = const <String>{
       'androidPackage',
@@ -798,6 +801,40 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
 }
 ''';
 
+const String _linuxPluginMakefileTemplate = '''
+# Plugins to include in the build.
+GENERATED_PLUGINS=\\
+{{#plugins}}
+\t{{name}} \\
+{{/plugins}}
+
+GENERATED_PLUGINS_DIR={{pluginsDir}}
+# A plugin library name plugin name with _plugin appended.
+GENERATED_PLUGIN_LIB_NAMES=\$(foreach plugin,\$(GENERATED_PLUGINS),\$(plugin)_plugin)
+
+# Variables for use in the enclosing Makefile. Changes to these names are
+# breaking changes.
+PLUGIN_TARGETS=\$(GENERATED_PLUGINS)
+PLUGIN_LIBRARIES=\$(foreach plugin,\$(GENERATED_PLUGIN_LIB_NAMES),\\
+\t\$(OUT_DIR)/lib\$(plugin).so)
+PLUGIN_LDFLAGS=\$(patsubst %,-l%,\$(GENERATED_PLUGIN_LIB_NAMES))
+PLUGIN_CPPFLAGS=\$(foreach plugin,\$(GENERATED_PLUGINS),\\
+\t-I\$(GENERATED_PLUGINS_DIR)/\$(plugin)/linux)
+
+# Targets
+
+# Implicit rules don't match phony targets, so list plugin builds explicitly.
+{{#plugins}}
+\$(OUT_DIR)/lib{{name}}_plugin.so: | {{name}}
+{{/plugins}}
+
+.PHONY: \$(GENERATED_PLUGINS)
+\$(GENERATED_PLUGINS):
+	make -C \$(GENERATED_PLUGINS_DIR)/\$@/linux \\
+		OUT_DIR=\$(OUT_DIR) \\
+		FLUTTER_EPHEMERAL_DIR="\$(abspath {{ephemeralDir}})"
+''';
+
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = _extractPlatformMaps(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
@@ -838,12 +875,34 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
-Future<void> _writeLinuxPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(plugins, LinuxPlugin.kConfigKey);
+  // The generated makefile is checked in, so can't use absolute paths. It is
+  // included by the main makefile, so relative paths must be relative to that
+  // file's directory.
+  final String makefileDirPath = project.linux.makeFile.parent.absolute.path;
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': linuxPlugins,
+    'ephemeralDir': globals.fs.path.relative(
+      project.linux.ephemeralDirectory.absolute.path,
+      from: makefileDirPath,
+    ),
+    'pluginsDir': globals.fs.path.relative(
+      project.linux.pluginSymlinkDirectory.absolute.path,
+      from: makefileDirPath,
+    ),
   };
   await _writeCppPluginRegistrant(project.linux.managedDirectory, context);
+  await _writeLinuxPluginMakefile(project.linux.managedDirectory, context);
+}
+
+Future<void> _writeLinuxPluginMakefile(Directory destination, Map<String, dynamic> templateContext) async {
+  final String registryDirectory = destination.path;
+  _renderTemplateToFile(
+    _linuxPluginMakefileTemplate,
+    templateContext,
+    globals.fs.path.join(registryDirectory, 'generated_plugins.mk'),
+  );
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1031,13 +1090,14 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
   if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
-    await _writeLinuxPluginRegistrant(project, plugins);
+    await _writeLinuxPluginFiles(project, plugins);
   }
   if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
+    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {

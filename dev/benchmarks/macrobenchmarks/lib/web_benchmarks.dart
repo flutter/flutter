@@ -8,6 +8,7 @@ import 'dart:html' as html;
 
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
+import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
@@ -16,11 +17,16 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
+/// List of all benchmarks that run in the devicelab.
+///
+/// When adding a new benchmark, add it to this map. Make sure that the name
+/// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll(),
   BenchDrawRect.benchmarkName: () => BenchDrawRect(),
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
+  BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
 };
 
 /// Whether we fell back to manual mode.
@@ -61,23 +67,38 @@ Future<void> _runBenchmark(String benchmarkName) async {
   }
 
   final Recorder recorder = recorderFactory();
-  final Profile profile = await recorder.run();
 
-  if (!isInManualMode) {
-    final html.HttpRequest request = await html.HttpRequest.request(
-      '/profile-data',
+  try {
+    final Profile profile = await recorder.run();
+    if (!isInManualMode) {
+      final html.HttpRequest request = await html.HttpRequest.request(
+        '/profile-data',
+        method: 'POST',
+        mimeType: 'application/json',
+        sendData: json.encode(profile.toJson()),
+      );
+      if (request.status != 200) {
+        throw Exception(
+          'Failed to report profile data to benchmark server. '
+          'The server responded with status code ${request.status}.'
+        );
+      }
+    } else {
+      print(profile);
+    }
+  } catch (error, stackTrace) {
+    if (isInManualMode) {
+      rethrow;
+    }
+    await html.HttpRequest.request(
+      '/on-error',
       method: 'POST',
       mimeType: 'application/json',
-      sendData: json.encode(profile.toJson()),
+      sendData: json.encode(<String, dynamic>{
+        'error': '$error',
+        'stackTrace': '$stackTrace',
+      }),
     );
-    if (request.status != 200) {
-      throw Exception(
-        'Failed to report profile data to benchmark server. '
-        'The server responded with status code ${request.status}.'
-      );
-    }
-  } else {
-    print(profile);
   }
 }
 
