@@ -517,6 +517,8 @@ void fakeData(
     // Careful here!  argsAre accepts 9 arguments and FlutterVersion.gitLog adds 4.
     } else if (remoteCommitDate != null && listArgsAre(FlutterVersion.gitLog(<String>['__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso']))) {
       return success(remoteCommitDate.toString());
+    } else if (argsAre('git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags')) {
+      return success('');
     }
 
     throw StateError('Unexpected call to ProcessManager.run(${invocation.positionalArguments}, ${invocation.namedArguments})');
