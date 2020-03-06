@@ -39,7 +39,7 @@ void main() async {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_shifted_clip_rect.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('pushClipRect with offset and transform', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -60,7 +60,7 @@ void main() async {
 
     await matchGoldenFile('compositing_clip_rect_with_offset_and_transform.png',
         region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('pushClipRRect', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -73,7 +73,7 @@ void main() async {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_shifted_clip_rrect.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('pushPhysicalShape', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -102,7 +102,7 @@ void main() async {
 
     await matchGoldenFile('compositing_shifted_physical_shape_clip.png',
         region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('pushImageFilter', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -115,7 +115,7 @@ void main() async {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_image_filter.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   group('Cull rect computation', () {
     _testCullRectComputation();
@@ -246,7 +246,7 @@ void _testCullRectComputation() {
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(40, 40, 70, 70));
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   // Draw a picture inside a layer clip but position the picture such that its
   // paint bounds overflow the layer clip. Verify that the cull rect is the
@@ -276,7 +276,7 @@ void _testCullRectComputation() {
 
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect, const Rect.fromLTRB(50, 40, 70, 70));
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   // Draw a picture inside a layer clip that's positioned inside the clip using
   // an offset layer. Verify that the cull rect is the intersection between the
@@ -308,7 +308,7 @@ void _testCullRectComputation() {
     final PersistedStandardPicture picture = enumeratePictures().single;
     expect(picture.optimalLocalCullRect,
         const Rect.fromLTRB(-15.0, -20.0, 15.0, 0.0));
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   // Draw a picture inside a layer clip that's positioned an offset layer such
   // that the picture is push completely outside the clip area. Verify that the
@@ -384,7 +384,7 @@ void _testCullRectComputation() {
       within(
           distance: 0.05, from: const Rect.fromLTRB(-14.1, -14.1, 14.1, 14.1)),
     );
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   test('pushClipPath', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
@@ -399,7 +399,7 @@ void _testCullRectComputation() {
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_clip_path.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   // Draw a picture inside a rotated clip. Verify that the cull rect is big
   // enough to fit the rotated clip.
@@ -514,7 +514,7 @@ void _testCullRectComputation() {
     //       from: Rect.fromLTRB(
     //           -140, -140, screenWidth - 360.0, screenHeight + 40.0)),
     // );
-  }, timeout: const Timeout(Duration(seconds: 10)));
+  });
 
   // This test reproduces text blurriness when two pieces of text appear inside
   // two nested clips:
@@ -597,7 +597,6 @@ void _testCullRectComputation() {
         pixelComparison: PixelComparison.precise,
       );
     },
-    timeout: const Timeout(Duration(seconds: 10)),
     testOn: 'chrome',
   );
 }

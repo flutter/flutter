@@ -30,8 +30,7 @@ void main() async {
 
     html.document.body.append(canvas.rootElement);
     await matchGoldenFile('canvas_rect_flipped.png', region: region);
-  }, timeout: const Timeout(Duration(seconds: 10)));
-
+  });
 }
 
 void paintRects(BitmapCanvas canvas) {
