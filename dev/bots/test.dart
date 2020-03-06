@@ -243,7 +243,15 @@ Future<void> _runToolCoverage() async {
     coverage: 'coverage',
   );
   await runCommand(pub,
-    <String>['run', 'coverage:format_coverage', '--lcov', '--in=coverage', '--out=coverage/lcov.info'],
+    <String>[
+      'run',
+      'coverage:format_coverage',
+      '--lcov',
+      '--in=coverage',
+      '--out=coverage/lcov.info',
+      '--packages=.packages',
+      '--report-on=lib/'
+    ],
     workingDirectory: toolRoot,
     outputMode: OutputMode.discard,
   );

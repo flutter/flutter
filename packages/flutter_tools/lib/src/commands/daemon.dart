@@ -175,7 +175,7 @@ class Daemon {
           completer.complete(request['result']);
         }
       }
-    } catch (error, trace) {
+    } on Exception catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
         'error': _toJsonable(error),
@@ -414,7 +414,7 @@ class DaemonDomain extends Domain {
       return <String, Object>{
         'platforms': result,
       };
-    } catch (err, stackTrace) {
+    } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, dynamic>{
         'log': 'Failed to parse project metadata',
         'stackTrace': stackTrace.toString(),
@@ -596,7 +596,7 @@ class AppDomain extends Domain {
           appStartedCompleter: appStartedCompleter,
         );
         _sendAppEvent(app, 'stop');
-      } catch (error, trace) {
+      } on Exception catch (error, trace) {
         _sendAppEvent(app, 'stop', <String, dynamic>{
           'error': _toJsonable(error),
           'trace': '$trace',
@@ -780,7 +780,7 @@ class DeviceDomain extends Domain {
         try {
           final Map<String, Object> response = await _deviceToMap(device);
           sendEvent(eventName, response);
-        } catch (err) {
+        } on Exception catch (err) {
           globals.printError('$err');
         }
       });

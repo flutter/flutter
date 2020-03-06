@@ -116,8 +116,8 @@ class VersionCommand extends FlutterCommand {
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
-    } catch (e) {
-      throwToolExit('Unable to checkout version branch for version $version.');
+    } on Exception catch (e) {
+      throwToolExit('Unable to checkout version branch for version $version: $e');
     }
 
     final FlutterVersion flutterVersion = FlutterVersion();

@@ -396,7 +396,7 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
@@ -589,7 +589,7 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
   if (result.exitCode != 0) {
     globals.printStatus(result.stdout, wrap: false);
@@ -684,11 +684,11 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 
