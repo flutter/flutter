@@ -26,13 +26,13 @@ void main() {
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('assets/foo/bar.png')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('.packages')
-      ..createSync();
+      .createSync();
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''

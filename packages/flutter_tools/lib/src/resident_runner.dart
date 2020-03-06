@@ -875,7 +875,7 @@ abstract class ResidentRunner {
           for (final FlutterView view in device.views) {
             await view.uiIsolate.flutterDebugAllowBanner(false);
           }
-        } catch (error) {
+        } on Exception catch (error) {
           status.cancel();
           globals.printError('Error communicating with Flutter on the device: $error');
           return;
@@ -889,7 +889,7 @@ abstract class ResidentRunner {
             for (final FlutterView view in device.views) {
               await view.uiIsolate.flutterDebugAllowBanner(true);
             }
-          } catch (error) {
+          } on Exception catch (error) {
             status.cancel();
             globals.printError('Error communicating with Flutter on the device: $error');
             return;
@@ -901,7 +901,7 @@ abstract class ResidentRunner {
       globals.printStatus(
         'Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).',
       );
-    } catch (error) {
+    } on Exception catch (error) {
       status.cancel();
       globals.printError('Error taking screenshot: $error');
     }
@@ -1303,7 +1303,8 @@ class TerminalHandler {
     try {
       lastReceivedCommand = command;
       await _commonTerminalInputHandler(command);
-    } catch (error, st) {
+    // Catch all exception since this is doing cleanup and rethrowing.
+    } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
         globals.printError('$error\n$st');
