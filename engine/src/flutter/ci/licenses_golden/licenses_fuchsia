@@ -1,4 +1,4 @@
-Signature: 39e9691280dd7d69354fa72c708687fd
+Signature: 92faa1ad1a02d8aa95fb090a747f73b1
 
 UNUSED LICENSES:
 
@@ -12,12 +12,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/COPYRIGHT.musl
 TYPE: LicenseType.mit
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -220,12 +220,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
@@ -722,12 +722,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -978,12 +978,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/vmar.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/vmo.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/zx.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
@@ -1741,12 +1741,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/LICENSE.vulkan
 TYPE: LicenseType.apache
 FILE: ../../../fuchsia/sdk/linux/.versions/core.cipd_version
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
@@ -1949,12 +1949,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_object_lifetimes.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_stateless_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_thread_safety.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
