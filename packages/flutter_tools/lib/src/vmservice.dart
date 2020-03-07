@@ -360,7 +360,7 @@ class VMService implements vm_service.VmService {
 
     final vm_service.VmService delegateService = vm_service.VmService(
       controller.stream,
-      (String message) => channel.sink.add(message),
+      (String message) => delegateChannel.sink.add(message),
       log: null,
       disposeHandler: () async {
         // No dispose handler, to avoid closing everyhing twice.
@@ -1580,7 +1580,3 @@ class FlutterView extends ServiceObject {
   @override
   String toString() => id;
 }
-
-
-
-class ProxyVMService {}
