@@ -214,7 +214,7 @@ void main() {
 
     testUsingContext('closing VMService closes Peer', () async {
       final MockPeer mockPeer = MockPeer();
-      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null, null);
       expect(mockPeer.isClosed, equals(false));
       await vmService.close();
       expect(mockPeer.isClosed, equals(true));
@@ -225,14 +225,14 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null, null, null);
         expect(mockPeer.sentNotifications, contains('registerService'));
         final List<String> registeredServices =
           mockPeer.sentNotifications['registerService']
             .map((dynamic service) => (service as Map<String, String>)['service'])
             .toList();
         expect(registeredServices, contains('flutterVersion'));
-        vmService.getVM().then((void value) { done = true; });
+        vmService.getVMOld().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);
         time.elapse(Duration.zero);
@@ -305,7 +305,7 @@ void main() {
       FakeAsync().run((FakeAsync time) {
         final MockPeer mockPeer = MockPeer();
         Future<void> reloadMethod({ String classId, String libraryId }) async {}
-        VMService(mockPeer, null, null, null, null, null, null, reloadMethod);
+        VMService(mockPeer, null, null, null, null, null, null, reloadMethod, null);
 
         expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
@@ -326,7 +326,7 @@ void main() {
         final MockDevice mockDevice = MockDevice();
         final MockPeer mockPeer = MockPeer();
         Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
-        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice, null);
+        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice, null, null);
 
         expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
       });
@@ -345,7 +345,7 @@ void main() {
     testUsingContext('returns correct FlutterVersion', () {
       FakeAsync().run((FakeAsync time) async {
         final MockPeer mockPeer = MockPeer();
-        VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+        VMService(mockPeer, null, null, null, null, null, MockDevice(), null, null);
 
         expect(mockPeer.registeredMethods, contains('flutterVersion'));
         expect(await mockPeer.sendRequest('flutterVersion'), equals(mockVersion.toJson()));

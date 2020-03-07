@@ -7,10 +7,10 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -483,7 +483,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   StreamController<String> _linesController;
-  List<StreamSubscription<ServiceEvent>> _loggingSubscriptions;
+  List<StreamSubscription<void>> _loggingSubscriptions;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -507,13 +507,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    // The VM service will not publish logging events unless the debug stream is being listened to.
-    // onDebugEvent listens to this stream as a side effect.
-    unawaited(connectedVmService.onDebugEvent);
-    _loggingSubscriptions.add((await connectedVmService.onStdoutEvent).listen((ServiceEvent event) {
-      final String logMessage = event.message;
-      if (logMessage.isNotEmpty) {
-        _linesController.add(logMessage);
+    _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
+      final String message = utf8.decode(base64.decode(event.bytes)).trim();
+      if (message.isNotEmpty) {
+        _linesController.add(message);
       }
     }));
   }
@@ -573,7 +570,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   void dispose() {
-    for (final StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
+    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 
+import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -455,8 +456,7 @@ class RunCommand extends RunCommandBase {
             );
           }
         }
-
-        if (!isEmulatorBuildMode(getBuildMode())) {
+        if (!isEmulatorBuildMode(getBuildMode()) && device is! AndroidDevice) {
           throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
         }
       }

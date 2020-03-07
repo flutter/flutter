@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:platform/platform.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -558,14 +558,8 @@ class HotRunner extends ResidentRunner {
       for (final FlutterDevice device in flutterDevices) {
         for (final FlutterView view in device.views) {
           isolateNotifications.add(
-            view.owner.vm.vmService.onIsolateEvent
-              .then((Stream<ServiceEvent> serviceEvents) async {
-              await for (final ServiceEvent serviceEvent in serviceEvents) {
-                if (serviceEvent.owner.name.contains('_spawn')
-                  && serviceEvent.kind == ServiceEvent.kIsolateExit) {
-                  return;
-                }
-              }
+            view.owner.vm.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
+              return event.kind == vm_service.EventKind.kIsolateExit;
             }),
           );
         }

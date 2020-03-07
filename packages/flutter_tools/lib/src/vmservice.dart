@@ -11,6 +11,7 @@ import 'package:meta/meta.dart' show required;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -112,8 +113,9 @@ typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
 });
 
 /// A connection to the Dart VM Service.
-// TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
-class VMService {
+///
+/// This also implements the package:vm_service API to enable a gradual migration.
+class VMService implements vm_service.VmService {
   VMService(
     this._peer,
     this.httpAddress,
@@ -123,6 +125,7 @@ class VMService {
     CompileExpression compileExpression,
     Device device,
     ReloadMethod reloadMethod,
+    this._delegateService,
   ) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -333,7 +336,38 @@ class VMService {
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
-    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
+    final StreamController<String> vmserviceController = StreamController<String>();
+    final StreamController<String> delegateController = StreamController<String>();
+    final StreamChannel<String> vmserviceChannel = StreamChannel<String>(vmserviceController.stream, channel.sink);
+    final StreamChannel<String> delegateChannel = StreamChannel<String>(delegateController.stream, channel.sink);
+    channel.stream.listen((String data) {
+      vmserviceController.add(data);
+      delegateController.add(data);
+    });
+
+
+    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(vmserviceChannel), onUnhandledError: _unhandledError);
+
+    // Create an instance of the package:vm_service API in addition to the flutter
+    // tool's to allow gradual migration.
+    final StreamController<dynamic> controller = StreamController<dynamic>();
+    final Completer<void> streamClosedCompleter = Completer<void>();
+
+    delegateChannel.stream.listen(
+      controller.add,
+      onDone: streamClosedCompleter.complete,
+    );
+
+    final vm_service.VmService delegateService = vm_service.VmService(
+      controller.stream,
+      (String message) => channel.sink.add(message),
+      log: null,
+      disposeHandler: () async {
+        // No dispose handler, to avoid closing everyhing twice.
+      },
+      streamClosed: streamClosedCompleter.future,
+    );
+
     final VMService service = VMService(
       peer,
       httpUri,
@@ -343,13 +377,16 @@ class VMService {
       compileExpression,
       device,
       reloadMethod,
+      delegateService,
     );
+
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
     return service;
   }
 
+  final vm_service.VmService _delegateService;
   final Uri httpAddress;
   final Uri wsAddress;
   final rpc.Peer _peer;
@@ -362,8 +399,6 @@ class VMService {
   final Map<String, StreamController<ServiceEvent>> _eventControllers =
       <String, StreamController<ServiceEvent>>{};
 
-  final Set<String> _listeningFor = <String>{};
-
   /// Whether our connection to the VM service has been closed;
   bool get isClosed => _peer.isClosed;
 
@@ -371,27 +406,24 @@ class VMService {
     await _peer.done;
   }
 
-  // Events
-  Future<Stream<ServiceEvent>> get onDebugEvent => onEvent('Debug');
-  Future<Stream<ServiceEvent>> get onExtensionEvent => onEvent('Extension');
-  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-  Future<Stream<ServiceEvent>> get onIsolateEvent => onEvent('Isolate');
-  Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
-  Future<Stream<ServiceEvent>> get onStdoutEvent => onEvent('Stdout'); // WriteEvent
+  @override
+  Stream<vm_service.Event> get onDebugEvent => onEvent('Debug');
 
-  // TODO(johnmccutchan): Add FlutterView events.
+  @override
+  Stream<vm_service.Event> get onExtensionEvent => onEvent('Extension');
 
-  /// Returns a stream of VM service events.
-  ///
-  /// This purposely returns a `Future<Stream<T>>` rather than a `Stream<T>`
-  /// because it first registers with the VM to receive events on the stream,
-  /// and only once the VM has acknowledged that the stream has started will
-  /// we return the associated stream. Any attempt to streamline this API into
-  /// returning `Stream<T>` should take that into account to avoid race
-  /// conditions.
-  Future<Stream<ServiceEvent>> onEvent(String streamId) async {
-    await _streamListen(streamId);
-    return _getEventController(streamId).stream;
+  @override
+  Stream<vm_service.Event> get onIsolateEvent => onEvent('Isolate');
+
+  @override
+  Stream<vm_service.Event> get onTimelineEvent => onEvent('Timeline');
+
+  @override
+  Stream<vm_service.Event> get onStdoutEvent => onEvent('Stdout'); // WriteEvent
+
+  @override
+  Stream<vm_service.Event> onEvent(String streamId) {
+    return _delegateService.onEvent(streamId);
   }
 
   Future<Map<String, dynamic>> _sendRequest(
@@ -441,19 +473,21 @@ class VMService {
     _getEventController(streamId).add(event);
   }
 
-  Future<void> _streamListen(String streamId) async {
-    if (!_listeningFor.contains(streamId)) {
-      _listeningFor.add(streamId);
-      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
-    }
-  }
-
   /// Reloads the VM.
-  Future<void> getVM() async => await vm.reload();
+  Future<void> getVMOld() async => await vm.reload();
 
   Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
 
-  Future<void> close() async => await _peer.close();
+  Future<void> close() async {
+    _delegateService?.dispose();
+    await _peer.close();
+  }
+
+  // To enable a gradual migration to package:vm_service
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnsupportedError('${invocation.memberName} is not currently supported');
+  }
 }
 
 /// An error that is thrown when constructing/updating a service object.
@@ -1498,10 +1532,8 @@ class FlutterView extends ServiceObject {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<void> completer = Completer<void>();
-    final StreamSubscription<ServiceEvent> subscription =
-      (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
-        // TODO(johnmccutchan): Listen to the debug stream and catch initial
-        // launch errors.
+    final StreamSubscription<vm_service.Event> subscription =
+      owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
         if (event.kind == ServiceEvent.kIsolateRunnable) {
           globals.printTrace('Isolate is runnable.');
           if (!completer.isCompleted) {
@@ -1548,3 +1580,7 @@ class FlutterView extends ServiceObject {
   @override
   String toString() => id;
 }
+
+
+
+class ProxyVMService {}
