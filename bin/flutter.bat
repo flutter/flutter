@@ -170,7 +170,7 @@ GOTO :after_subroutine
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This
-REM avoids nasty errors that may otherwise occure when the dart command (e.g. as
+REM avoids nasty errors that may otherwise occur when the dart command (e.g. as
 REM part of 'flutter upgrade') modifies this batch script while it is executing.
 REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
