@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- A message encoding/decoding mechanism.
+ * A message encoding/decoding mechanism.
  */
 FLUTTER_EXPORT
 @protocol FlutterMessageCodec
@@ -89,13 +89,34 @@ FLUTTER_EXPORT
  */
 FLUTTER_EXPORT
 @interface FlutterStandardWriter : NSObject
+/**
+ * Create a `FlutterStandardWriter` who will write to \p data.
+ */
 - (instancetype)initWithData:(NSMutableData*)data;
+/** Write a 8-bit byte. */
 - (void)writeByte:(UInt8)value;
+/** Write an array of \p bytes of size \p length. */
 - (void)writeBytes:(const void*)bytes length:(NSUInteger)length;
+/** Write an array of bytes contained in \p data. */
 - (void)writeData:(NSData*)data;
+/** Write 32-bit unsigned integer that represents a \p size of a collection. */
 - (void)writeSize:(UInt32)size;
+/** Write zero padding until data is aligned with \p alignment. */
 - (void)writeAlignment:(UInt8)alignment;
+/** Write a string with UTF-8 encoding. */
 - (void)writeUTF8:(NSString*)value;
+/** Introspects into an object and writes its representation.
+ *
+ * Supported Data Types:
+ *  - NSNull
+ *  - NSNumber
+ *  - NSString (as UTF-8)
+ *  - FlutterStandardTypedData
+ *  - NSArray of supported types
+ *  - NSDictionary of supporte types
+ *
+ * NSAsserts on failure.
+ */
 - (void)writeValue:(id)value;
 @end
 
@@ -108,15 +129,37 @@ FLUTTER_EXPORT
  */
 FLUTTER_EXPORT
 @interface FlutterStandardReader : NSObject
+/**
+ * Create a new `FlutterStandardReader` who reads from \p data.
+ */
 - (instancetype)initWithData:(NSData*)data;
+/** Returns YES when the reader hasn't reached the end of its data. */
 - (BOOL)hasMore;
+/** Reads a byte value and increments the position. */
 - (UInt8)readByte;
+/** Reads a sequence of byte values of \p length and increments the position. */
 - (void)readBytes:(void*)destination length:(NSUInteger)length;
+/** Reads a sequence of byte values of \p length and increments the position. */
 - (NSData*)readData:(NSUInteger)length;
+/** Reads a 32-bit unsigned integer representing a collection size and increments the position.*/
 - (UInt32)readSize;
+/** Advances the read position until it is aligned with \p alignment. */
 - (void)readAlignment:(UInt8)alignment;
+/** Read a null terminated string encoded with UTF-8/ */
 - (NSString*)readUTF8;
+/**
+ * Reads a byte for `FlutterStandardField` the decodes a value matching that type.
+ *
+ * See also: -[FlutterStandardWriter writeValue]
+ */
 - (nullable id)readValue;
+/**
+ * Decodes a value matching the \p type specified.
+ *
+ * See also:
+ *   - `FlutterStandardField`
+ *   - `-[FlutterStandardWriter writeValue]`
+ */
 - (nullable id)readValueOfType:(UInt8)type;
 @end
 
@@ -126,7 +169,13 @@ FLUTTER_EXPORT
  */
 FLUTTER_EXPORT
 @interface FlutterStandardReaderWriter : NSObject
+/**
+ * Create a new `FlutterStandardWriter` for writing to \p data.
+ */
 - (FlutterStandardWriter*)writerWithData:(NSMutableData*)data;
+/**
+ * Create a new `FlutterStandardReader` for reading from \p data.
+ */
 - (FlutterStandardReader*)readerWithData:(NSData*)data;
 @end
 
@@ -157,11 +206,14 @@ FLUTTER_EXPORT
  */
 FLUTTER_EXPORT
 @interface FlutterStandardMessageCodec : NSObject <FlutterMessageCodec>
+/**
+ * Create a `FlutterStandardMessageCodec` who will read and write to \p readerWriter.
+ */
 + (instancetype)codecWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter;
 @end
 
 /**
- Command object representing a method call on a `FlutterMethodChannel`.
+ * Command object representing a method call on a `FlutterMethodChannel`.
  */
 FLUTTER_EXPORT
 @interface FlutterMethodCall : NSObject
@@ -403,6 +455,9 @@ FLUTTER_EXPORT
  */
 FLUTTER_EXPORT
 @interface FlutterStandardMethodCodec : NSObject <FlutterMethodCodec>
+/**
+ * Create a `FlutterStandardMethodCodec` who will read and write to \p readerWriter.
+ */
 + (instancetype)codecWithReaderWriter:(FlutterStandardReaderWriter*)readerWriter;
 @end
 
