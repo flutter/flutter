@@ -54,8 +54,7 @@ class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscov
 class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockPlatform extends Mock implements Platform {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
-// src/mocks.dart imports `MockProcessManager` which implements some methods, this is a full mock
-class FullMockProcessManager extends Mock implements ProcessManager {} //TODO delete
+class MockStatus extends Mock implements Status {}
 class MockUsage extends Mock implements Usage {}
 class MockXcdevice extends Mock implements XCDevice {}
 class MockXcode extends Mock implements Xcode {}
@@ -97,6 +96,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -110,6 +110,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -120,6 +121,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -130,6 +132,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -140,6 +143,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -150,6 +154,7 @@ void main() {
         'device-123',
         artifacts: mockArtifacts,
         fileSystem: mockFileSystem,
+        logger: mockLogger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
         name: 'iPhone 1',
@@ -166,6 +171,7 @@ void main() {
               'device-123',
               artifacts: mockArtifacts,
               fileSystem: mockFileSystem,
+              logger: mockLogger,
               platform: platform,
               iosDeploy: iosDeploy,
               name: 'iPhone 1',
@@ -369,6 +375,7 @@ void main() {
           '123',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
           name: 'iPhone 1',
@@ -495,13 +502,14 @@ void main() {
         Cache.enableLocking();
       });
 
-      testUsingContext('disposing device disposes the portForwarder', () async {
+      testWithoutContext('disposing device disposes the portForwarder', () async {
         final IOSDevice device = IOSDevice(
           '123',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
           platform: macPlatform,
           iosDeploy: iosDeploy,
+          logger: mockLogger,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
@@ -519,10 +527,13 @@ void main() {
           sdkVersion: '13.3',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
           cpuArchitecture: DarwinArch.arm64,
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(mockIosDeploy.installApp(
           deviceId: device.id,
           bundlePath: anyNamed('bundlePath'),
@@ -554,12 +565,7 @@ void main() {
         expect(launchResult.hasObservatory, isTrue);
         expect(await device.stopApp(mockApp), isFalse);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,
       });
 
@@ -573,6 +579,7 @@ void main() {
           deviceId,
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
           name: 'iPhone 1',
@@ -604,9 +611,7 @@ void main() {
         verifyNever(successProcess.kill());
         verify(failProcess.kill());
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
         Cache: () => mockCache,
-        Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,
       });
@@ -616,12 +621,15 @@ void main() {
           '123',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(
           mockIosDeploy.installApp(deviceId: device.id, bundlePath: anyNamed('bundlePath'), launchArguments: <String>[])
         ).thenAnswer((Invocation invocation) => Future<int>.value(0));
@@ -651,11 +659,8 @@ void main() {
         verify(mockUsage.sendEvent('ios-handshake', 'fallback-success')).called(1);
         expect(await device.stopApp(mockApp), isFalse);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
         FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,
       });
@@ -665,12 +670,15 @@ void main() {
           '123',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(mockIosDeploy.installApp(
           deviceId: device.id,
           bundlePath: anyNamed('bundlePath'),
@@ -708,11 +716,8 @@ void main() {
         verify(mockUsage.sendEvent('ios-handshake', 'mdns-failure')).called(1);
         verify(mockUsage.sendEvent('ios-handshake', 'fallback-failure')).called(1);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
         FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,
       });
@@ -724,10 +729,13 @@ void main() {
           fileSystem: mockFileSystem,
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
+          logger: mockLogger,
           platform: mockPlatform,
           artifacts: mockArtifacts,
           iosDeploy: mockIosDeploy,
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(mockIosDeploy.installApp(
           deviceId: device.id,
           bundlePath: anyNamed('bundlePath'),
@@ -765,6 +773,7 @@ void main() {
           sdkVersion: '13.3',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
           cpuArchitecture: DarwinArch.arm64,
@@ -776,6 +785,8 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
             .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
@@ -823,6 +834,7 @@ void main() {
           sdkVersion: '13.3',
           artifacts: mockArtifacts,
           fileSystem: mockFileSystem,
+          logger: mockLogger,
           platform: macPlatform,
           iosDeploy: mockIosDeploy,
           cpuArchitecture: DarwinArch.arm64,
@@ -834,6 +846,8 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
+        when(mockLogger.startProgress(any, timeout: anyNamed('timeout')))
+            .thenReturn(MockStatus());
         when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
             .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
@@ -864,14 +878,10 @@ void main() {
         expect(args, contains('--observatory-port=8181'));
         expect(await device.stopApp(mockApp), isFalse);
       }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
         Cache: () => mockCache,
-        FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,
-        IOSDeploy: () => mockIosDeploy,
       });
 
       void testNonPrebuilt(
@@ -951,6 +961,7 @@ void main() {
             sdkVersion: '13.3',
             artifacts: mockArtifacts,
             fileSystem: globals.fs,
+            logger: testLogger,
             platform: macPlatform,
             iosDeploy: mockIosDeploy,
             cpuArchitecture: DarwinArch.arm64,
@@ -1039,9 +1050,9 @@ void main() {
       MockFileSystem mockFileSystem;
       MockLogger mockLogger;
       MockPlatform mockPlatform;
-      FullMockProcessManager mockProcessManager;
       const String iosDeployPath = '/path/to/ios-deploy';
       const String appId = '789';
+      const String deviceId = '123';
       const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
         'DYLD_LIBRARY_PATH',
         '/path/to/libraries',
@@ -1065,20 +1076,12 @@ void main() {
         mockPlatform = MockPlatform();
         when(mockPlatform.environment).thenReturn(<String, String>{});
         when(mockPlatform.isMacOS).thenReturn(true);
-        mockProcessManager = FullMockProcessManager();
         when(
             mockArtifacts.getArtifactPath(
                 Artifact.iosDeploy,
                 platform: anyNamed('platform'),
             ),
         ).thenReturn(iosDeployPath);
-        iosDeploy = IOSDeploy(
-          artifacts: mockArtifacts,
-          cache: mockCache,
-          logger: mockLogger,
-          platform: mockPlatform,
-          processManager: mockProcessManager,
-        );
         when(mockCache.dyLdLibEntry).thenReturn(libraryEntry);
         mockFileSystem = MockFileSystem();
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
@@ -1087,70 +1090,72 @@ void main() {
       });
 
       testWithoutContext('installApp() calls ios-deploy', () async {
-        when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
-        final IOSDevice device = IOSDevice(
-          '123',
-          name: 'iPhone 1',
-          fileSystem: mockFileSystem,
-          sdkVersion: '13.3',
-          cpuArchitecture: DarwinArch.arm64,
-          platform: mockPlatform,
-          artifacts: mockArtifacts,
-          iosDeploy: iosDeploy,
-        );
         final List<String> args = <String>[
           iosDeployPath,
           '--id',
-          device.id,
+          deviceId,
           '--bundle',
           bundlePath,
           '--no-wifi',
         ];
-        when(mockProcessManager.start(any, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment'))).
-            thenAnswer((Invocation invocation) {
-              return Future<Process>.value(createMockProcess());
-            });
-
-        await device.installApp(mockApp);
-
-        final List<String> invocationArguments = verify(mockProcessManager.start(
-          captureAny,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).captured.first as List<String>;
-        expect(invocationArguments, args);
-      });
-
-      testWithoutContext('uninstallApp() calls ios-deploy', () async {
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: args),
+        ]);
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: mockPlatform,
+          processManager: fakeProcessManager,
+        );
+        when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
         final IOSDevice device = IOSDevice(
-          '123',
+          deviceId,
           name: 'iPhone 1',
-          fileSystem: fs,
+          fileSystem: mockFileSystem,
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
+          logger: mockLogger,
           platform: mockPlatform,
           artifacts: mockArtifacts,
           iosDeploy: iosDeploy,
         );
+
+        await device.installApp(mockApp);
+      });
+
+      testWithoutContext('uninstallApp() calls ios-deploy', () async {
         final List<String> args = <String>[
           iosDeployPath,
           '--id',
-          device.id,
+          deviceId,
           '--uninstall_only',
           '--bundle_id',
           appId,
         ];
-        when(mockProcessManager.start(args, workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment'))).
-            thenAnswer((Invocation invocation) {
-              return Future<Process>.value(createMockProcess());
-            });
+        final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(command: args),
+        ]);
+        iosDeploy = IOSDeploy(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          logger: mockLogger,
+          platform: mockPlatform,
+          processManager: fakeProcessManager,
+        );
+        final IOSDevice device = IOSDevice(
+          deviceId,
+          name: 'iPhone 1',
+          fileSystem: fs,
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          logger: mockLogger,
+          platform: mockPlatform,
+          artifacts: mockArtifacts,
+          iosDeploy: iosDeploy,
+        );
+
         await device.uninstallApp(mockApp);
-        final List<String> invocationArguments = verify(mockProcessManager.start(
-          captureAny,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).captured.first as List<String>;
-        expect(invocationArguments, args);
       });
     });
   });
@@ -1161,7 +1166,7 @@ void main() {
     MockCache mockCache;
     MockFileSystem mockFileSystem;
     MockLogger mockLogger;
-    FullMockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     IOSDeploy iosDeploy;
 
     setUp(() {
@@ -1170,13 +1175,13 @@ void main() {
       mockCache = MockCache();
       mockLogger = MockLogger();
       mockFileSystem = MockFileSystem();
-      mockProcessManager = FullMockProcessManager();
+      fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
         logger: mockLogger,
         platform: macPlatform,
-        processManager: mockProcessManager,
+        processManager: fakeProcessManager,
       );
     });
 
@@ -1201,6 +1206,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         artifacts: mockArtifacts,
         iosDeploy: iosDeploy,
+        logger: mockLogger,
         platform: macPlatform,
         fileSystem: mockFileSystem,
       );
@@ -1260,7 +1266,7 @@ void main() {
     MockCache mockCache;
     MockFileSystem mockFileSystem;
     MockLogger mockLogger;
-    FullMockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     IOSDeploy iosDeploy;
 
     setUp(() {
@@ -1270,13 +1276,13 @@ void main() {
       mockCache = MockCache();
       mockLogger = MockLogger();
       mockFileSystem = MockFileSystem();
-      mockProcessManager = FullMockProcessManager();
+      fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
         logger: mockLogger,
         platform: macPlatform,
-        processManager: mockProcessManager,
+        processManager: fakeProcessManager,
       );
     });
 
@@ -1301,6 +1307,7 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
         cpuArchitecture: DarwinArch.arm64,
         artifacts: mockArtifacts,
         iosDeploy: iosDeploy,
+        logger: mockLogger,
         platform: macPlatform,
         fileSystem: mockFileSystem,
       );
@@ -1336,6 +1343,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         cpuArchitecture: DarwinArch.arm64,
         artifacts: mockArtifacts,
         iosDeploy: iosDeploy,
+        logger: mockLogger,
         platform: macPlatform,
         fileSystem: mockFileSystem,
       );
@@ -1353,7 +1361,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(device.category, Category.mobile);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
-      Platform: () => macPlatform,
     });
   });
 
@@ -1362,21 +1369,25 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     MockCache mockCache;
     MockLogger mockLogger;
     IOSDeploy iosDeploy;
+    MemoryFileSystem fileSystem;
+    FakeProcessManager fakeProcessManager;
 
     setUp(() {
+      fileSystem = MemoryFileSystem();
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
+      fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
         logger: mockLogger,
         platform: macPlatform,
-        processManager: FakeProcessManager.any(),
+        processManager: fakeProcessManager,
       );
     });
 
     testUsingContext('is true on module project', () async {
-      globals.fs.file('pubspec.yaml')
+      fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
   name: example
@@ -1384,36 +1395,37 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   flutter:
     module: {}
   ''');
-      globals.fs.file('.packages').createSync();
+      fileSystem.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       final IOSDevice device = IOSDevice(
         'test',
         artifacts: mockArtifacts,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         iosDeploy: iosDeploy,
-        platform: globals.platform,
+        logger: mockLogger,
+        platform: macPlatform,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64
       );
       expect(device.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
     });
 
     testUsingContext('is true with editable host app', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
-      globals.fs.directory('ios').createSync();
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+      fileSystem.directory('ios').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
       final IOSDevice device = IOSDevice(
         'test',
         artifacts: mockArtifacts,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         iosDeploy: iosDeploy,
+        logger: mockLogger,
         platform: globals.platform,
         name: 'iPhone 1',
         sdkVersion: '13.3',
@@ -1421,22 +1433,22 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
       expect(device.isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => macPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
     });
 
     testUsingContext('is false with no host app and no module', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();
 
       final IOSDevice device = IOSDevice(
         'test',
         artifacts: mockArtifacts,
-        fileSystem: globals.fs,
+        fileSystem: fileSystem,
         iosDeploy: iosDeploy,
-        platform: globals.platform,
+        logger: mockLogger,
+        platform: macPlatform,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
@@ -1444,8 +1456,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(device.isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => macPlatform,
+      ProcessManager: () => fakeProcessManager,
     });
   });
 }

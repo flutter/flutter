@@ -115,6 +115,7 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
+  //TODO delete this
   static Future<List<IOSDevice>> getAttachedDevices(Platform platform, XCDevice xcdevice) async {
     if (!platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
@@ -123,6 +124,7 @@ class IOSDevice extends Device {
     return await xcdevice.getAvailableTetheredIOSDevices();
   }
 
+  //TODO delete this
   static Future<List<String>> getDiagnostics(Platform platform, XCDevice xcdevice) async {
     if (!platform.isMacOS) {
       return const <String>['Control of iOS devices or simulators only supported on macOS.'];
@@ -153,7 +155,7 @@ class IOSDevice extends Device {
   Future<bool> installApp(IOSApp app) async {
     final Directory bundle = _fileSystem.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
-      globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
+      _logger.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
 
@@ -269,7 +271,7 @@ class IOSDevice extends Device {
       // "system_debug_ios" integration test in the CI, which simulates a
       // home-screen launch.
       if (debuggingOptions.debuggingEnabled &&
-          globals.platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+          _platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],
