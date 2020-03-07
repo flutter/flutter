@@ -20,10 +20,6 @@ const double _headerPaddingLandscape = 16.0;
 ///
 /// * Single Date picker with calendar mode.
 /// * Single Date picker with manual input mode.
-/// * Date Range picker with manual input mode.
-///
-/// Depending on the [orientation], this widget will adjust the spacing and the
-/// placement of its [Divider].
 ///
 /// [helpText], [orientation], [icon], [onIconPressed] are required and must be
 /// non-null.
@@ -121,10 +117,9 @@ class DatePickerHeader extends StatelessWidget {
       onPressed: onIconPressed,
     );
 
-    Widget header;
     switch (orientation) {
       case Orientation.portrait:
-        header = Column(
+         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
@@ -153,7 +148,7 @@ class DatePickerHeader extends StatelessWidget {
         );
         break;
       case Orientation.landscape:
-        header = Row(
+        return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
@@ -190,7 +185,6 @@ class DatePickerHeader extends StatelessWidget {
         );
         break;
     }
-
-    return header;
+    return null;
   }
 }

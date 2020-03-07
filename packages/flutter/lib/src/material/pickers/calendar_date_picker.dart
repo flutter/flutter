@@ -295,7 +295,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       onNextPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
       onPreviousPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
       onTitlePressed: () {
-        // Toggle the day/year mode
+        // Toggle the day/year mode.
         _handleModeChanged(_mode == DatePickerMode.day ? DatePickerMode.year : DatePickerMode.day);
       },
     );
@@ -356,20 +356,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
               ],
             );
           case Orientation.landscape:
-            return Row(
+            return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      subheader,
-                      picker,
-                    ],
-                  ),
-                ),
+                subheader,
+                picker,
               ],
             );
         }

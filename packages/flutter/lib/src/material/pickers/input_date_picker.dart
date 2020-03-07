@@ -39,9 +39,9 @@ class InputDatePickerFormField extends StatefulWidget {
   /// Creates a [TextFormField] configured to input and validate a date.
   ///
   /// If the optional [initialDate] is provided it will be used to populate
-  /// the text field. If the [fieldHintText] will be shown.
+  /// the text field. If the [fieldHintText] is provided, it will be shown.
   ///
-  /// If [initialDate] is provided, it must not before [firstDate] or after
+  /// If [initialDate] is provided, it must not be before [firstDate] or after
   /// [lastDate]. If [selectableDayPredicate] is provided, it must return `true`
   /// for [initialDate].
   ///
@@ -112,7 +112,7 @@ class InputDatePickerFormField extends StatefulWidget {
   /// The error text displayed if the entered date is not in the correct format.
   final String errorFormatText;
 
-  /// The error text displayed if the date is not in valid.
+  /// The error text displayed if the date is not valid.
   ///
   /// A date is not valid if it is earlier than [firstDate], later than
   /// [lastDate], or doesn't pass the [selectableDayPredicate].
@@ -162,7 +162,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate);
       TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
-      // Select the new text if we are auto focused and haven't selected the text before
+      // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
           baseOffset: 0,
@@ -265,7 +265,7 @@ class _DateTextInputFormatter extends TextInputFormatter {
   final String separator;
 
   final WhitelistingTextInputFormatter _filterFormatter =
-    // Only allow digits and separators (slash, dot, comma, hyphen, space)
+    // Only allow digits and separators (slash, dot, comma, hyphen, space).
     WhitelistingTextInputFormatter(RegExp(r'[\d\/\.,-\s]+'));
 
   @override

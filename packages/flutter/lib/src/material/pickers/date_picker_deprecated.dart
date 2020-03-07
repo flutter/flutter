@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// NOTE: this is the original implementation for the Material Date Picker.
-// The user interface has been redesigned and a new implementation of the Date
-// Picker interface and classes will replace this (see [CalendarDatePicker].
-// Everything here is deprecated and will go away after the transition to the
-// new API.
-
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -26,7 +20,7 @@ import '../theme.dart';
 import 'date_picker_common.dart';
 
 // NOTE: this is the original implementation for the Material Date Picker.
-// These classes are deprecated and the whole file can be removed once after
+// These classes are deprecated and the whole file can be removed after
 // this has been on stable for long enough for people to migrate to the new
 // CalendarDatePicker (if needed, as showDatePicker has already been migrated
 // and it is what most apps would have used).

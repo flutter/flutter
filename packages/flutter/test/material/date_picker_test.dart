@@ -117,19 +117,6 @@ void main() {
       });
     });
 
-    testWidgets('Can select initial date picker mode', (WidgetTester tester) async {
-      initialDate = DateTime(2014, DateTime.january, 15);
-      initialCalendarMode = DatePickerMode.year;
-      await prepareDatePicker(tester, (Future<DateTime> date) async {
-        await tester.pump();
-        // 2018 wouldn't be available if the year picker wasn't showing.
-        // The initial current year is 2014.
-        await tester.tap(find.text('2018'));
-        await tester.pump();
-        expect(find.text('January 2018'), findsOneWidget);
-      });
-    });
-
     testWidgets('Can toggle to input entry mode', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         expect(find.byType(TextField), findsNothing);
@@ -185,7 +172,7 @@ void main() {
       await tester.pumpAndSettle();
       final double ltrOkRight = tester.getBottomRight(find.text('OK')).dx;
 
-      await tester.tap(find.text('OK')); // dismiss the dialog
+      await tester.tap(find.text('OK')); // Dismiss the dialog.
       await tester.pumpAndSettle();
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
