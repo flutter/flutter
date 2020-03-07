@@ -9,6 +9,9 @@ exitStatus=0
 
 dart --version
 
+# These files trip up the script on Mac OS X.
+find . -name ".DS_Store" -exec rm {} \;
+
 (cd flutter/tools/licenses; pub get; dart --enable-asserts lib/main.dart --src ../../.. --out ../../../out/license_script_output --golden ../../ci/licenses_golden)
 
 for f in out/license_script_output/licenses_*; do
