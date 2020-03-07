@@ -648,6 +648,9 @@ class FakeHttpHeaders extends HttpHeaders {
 
 class FakeFlutterVersion implements FlutterVersion {
   @override
+  void fetchTagsAndUpdate() {  }
+
+  @override
   String get channel => 'master';
 
   @override
