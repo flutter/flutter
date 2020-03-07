@@ -93,7 +93,7 @@ GOTO :after_subroutine
   IF "%pubspec_yaml_timestamp%" == "%pubspec_lock_timestamp%" SET newer_file=""
   IF "%newer_file%" EQU "pubspec.yaml" GOTO do_snapshot
 
-  REM Everything is uptodate - exit subroutine
+  REM Everything is up-to-date - exit subroutine
   EXIT /B
 
   :do_sdk_update_and_snapshot
