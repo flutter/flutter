@@ -1101,6 +1101,9 @@ class _AdbLogReader extends DeviceLogReader {
   // adb logcat. We are currently passing 'time', which has the format:
   // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
+    if (_linesController.isClosed) {
+      return;
+    }
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
     if (timeMatch == null || line.length == timeMatch.end) {
       return;
