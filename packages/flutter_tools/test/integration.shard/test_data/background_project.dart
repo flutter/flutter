@@ -56,3 +56,53 @@ class BackgroundProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }
 }
+
+// Spawns a background isolate that repeats a message.
+class RepeatingBackgroundProject extends Project {
+
+  @override
+  final String pubspec = '''
+  name: test
+  environment:
+    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+  dependencies:
+    flutter:
+      sdk: flutter
+  ''';
+
+  @override
+  final String main = r'''
+  import 'dart:async';
+  import 'dart:isolate';
+
+  import 'package:flutter/widgets.dart';
+  import 'package:flutter/material.dart';
+
+  void main() {
+    Isolate.spawn<void>(background, null, debugName: 'background');
+    TestMain();
+  }
+
+  void background(void message) {
+    Timer.periodic(const Duration(milliseconds: 500), (Timer timer) => TestIsolate());
+  }
+
+  class TestMain {
+    TestMain() {
+      debugPrint('Main thread');
+    }
+  }
+
+  class TestIsolate {
+    TestIsolate() {
+      debugPrint('Isolate thread');
+    }
+  }
+  ''';
+
+  void updateTestIsolatePhrase(String message) {
+    final String newMainContents = main.replaceFirst('Isolate thread', message);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+  }
+}
