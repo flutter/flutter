@@ -41,6 +41,7 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
+    globals.flutterVersion.fetchTagsAndUpdate();
     RunResult runResult;
     try {
       runResult = await processUtils.run(

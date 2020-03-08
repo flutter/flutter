@@ -23,6 +23,7 @@ import '../../src/mocks.dart' show MockProcess;
 void main() {
   group('version', () {
     MockStdio mockStdio;
+    MockVersion mockVersion;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -30,6 +31,7 @@ void main() {
 
     setUp(() {
       mockStdio = MockStdio();
+      mockVersion = MockVersion();
       when(mockStdio.stdinHasTerminal).thenReturn(false);
       when(mockStdio.hasTerminal).thenReturn(false);
     });
@@ -44,6 +46,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('version switch prompt is accepted', () async {
@@ -65,6 +68,7 @@ void main() {
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('version switch prompt is declined', () async {
@@ -86,6 +90,7 @@ void main() {
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
       AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('version switch, latest commit query fails', () async {
@@ -100,6 +105,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(latestCommitFails: true),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('latest commit is parsable when query fails', () {
@@ -111,6 +117,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(latestCommitFails: true),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('switch to not supported version without force', () async {
@@ -125,6 +132,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('switch to not supported version with force', () async {
@@ -140,6 +148,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('tool exit on confusing version', () async {
@@ -156,6 +165,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext("exit tool if can't get the tags", () async {
@@ -169,6 +179,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(failGitTag: true),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
 
     testUsingContext('Does not run pub when outside a project', () async {
@@ -180,10 +191,24 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
+    });
+
+    testUsingContext('Fetches upstream tags', () async {
+      final VersionCommand command = VersionCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+      ]);
+      verify(mockVersion.fetchTagsAndUpdate()).called(1);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+      FlutterVersion: () => mockVersion,
     });
   });
 }
 
+class MockVersion extends Mock implements FlutterVersion {}
 class MockTerminal extends Mock implements AnsiTerminal {}
 class MockStdio extends Mock implements Stdio {}
 class MockProcessManager extends Mock implements ProcessManager {
