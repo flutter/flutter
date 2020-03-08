@@ -26,13 +26,13 @@ void main() {
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('assets/foo/bar.png')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     fileSystem.file('.packages')
-      ..createSync();
+      .createSync();
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -89,19 +89,5 @@ flutter:
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => platform,
-  });
-
-  testUsingContext('FlutterPlugins updates required files as needed', () async {
-    fileSystem.file('pubspec.yaml')
-      ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
-
-    await const FlutterPlugins().build(Environment.test(
-      fileSystem.currentDirectory,
-    ));
-
-    expect(fileSystem.file('.flutter-plugins'), exists);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 }

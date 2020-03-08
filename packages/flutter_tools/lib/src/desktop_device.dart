@@ -116,7 +116,7 @@ abstract class DesktopDevice extends Device {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       onAttached(package, buildMode, process);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {

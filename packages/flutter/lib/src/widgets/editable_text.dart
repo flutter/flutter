@@ -79,6 +79,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// final _controller = TextEditingController();
 ///
 /// void initState() {
+///   super.initState();
 ///   _controller.addListener(() {
 ///     final text = _controller.text.toLowerCase();
 ///     _controller.value = _controller.value.copyWith(
@@ -87,7 +88,6 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///       composing: TextRange.empty,
 ///     );
 ///   });
-///   super.initState();
 /// }
 ///
 /// void dispose() {
@@ -189,8 +189,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].
   set selection(TextSelection newSelection) {
-    if (newSelection.start > text.length || newSelection.end > text.length)
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('invalid text selection: $newSelection')]);
+    if (!isSelectionWithinTextBounds(newSelection))
+      throw FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -219,6 +219,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
+  }
+
+  /// Check that the [selection] is inside of the bounds of [text].
+  bool isSelectionWithinTextBounds(TextSelection selection) {
+    return selection.start <= text.length && selection.end <= text.length;
   }
 }
 
@@ -564,7 +569,7 @@ class EditableText extends StatefulWidget {
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
   StrutStyle get strutStyle {
     if (_strutStyle == null) {
-      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : StrutStyle.disabled;
+      return style != null ? StrutStyle.fromTextStyle(style, forceStrutHeight: true) : const StrutStyle();
     }
     return _strutStyle.inheritFromTextStyle(style);
   }
@@ -1530,6 +1535,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+    // We return early if the selection is not valid. This can happen when the
+    // text of [EditableText] is updated at the same time as the selection is
+    // changed by a gesture event.
+    if (!widget.controller.isSelectionWithinTextBounds(selection))
+      return;
+
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the

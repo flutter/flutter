@@ -1420,6 +1420,156 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This sample shows three rows of buttons, each grouped by a
+/// [FocusTraversalGroup], each with different traversal order policies. Use tab
+/// traversal to see the order they are traversed in.  The first row follows a
+/// numerical order, the second follows a lexical order (ordered to traverse
+/// right to left), and the third ignores the numerical order assigned to it and
+/// traverses in widget order.
+///
+/// ```dart preamble
+/// /// A button wrapper that adds either a numerical or lexical order, depending on
+/// /// the type of T.
+/// class OrderedButton<T> extends StatefulWidget {
+///   const OrderedButton({
+///     this.name,
+///     this.canRequestFocus = true,
+///     this.autofocus = false,
+///     this.order,
+///   });
+///
+///   final String name;
+///   final bool canRequestFocus;
+///   final bool autofocus;
+///   final T order;
+///
+///   @override
+///   _OrderedButtonState createState() => _OrderedButtonState();
+/// }
+///
+/// class _OrderedButtonState<T> extends State<OrderedButton<T>> {
+///   FocusNode focusNode;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     focusNode = FocusNode(
+///       debugLabel: widget.name,
+///       canRequestFocus: widget.canRequestFocus,
+///     );
+///   }
+///
+///   @override
+///   void dispose() {
+///     focusNode?.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   void didUpdateWidget(OrderedButton oldWidget) {
+///     super.didUpdateWidget(oldWidget);
+///     focusNode.canRequestFocus = widget.canRequestFocus;
+///   }
+///
+///   void _handleOnPressed() {
+///     focusNode.requestFocus();
+///     print('Button ${widget.name} pressed.');
+///     debugDumpFocusTree();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     FocusOrder order;
+///     if (widget.order is num) {
+///       order = NumericFocusOrder((widget.order as num).toDouble());
+///     } else {
+///       order = LexicalFocusOrder(widget.order.toString());
+///     }
+///
+///     return FocusTraversalOrder(
+///       order: order,
+///       child: Padding(
+///         padding: const EdgeInsets.all(8.0),
+///         child: OutlineButton(
+///           focusNode: focusNode,
+///           autofocus: widget.autofocus,
+///           focusColor: Colors.red,
+///           hoverColor: Colors.blue,
+///           onPressed: () => _handleOnPressed(),
+///           child: Text(widget.name),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: FocusTraversalGroup(
+///       policy: OrderedTraversalPolicy(),
+///       child: Column(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           // A group that is ordered with a numerical order, from left to right.
+///           FocusTraversalGroup(
+///             policy: OrderedTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 return OrderedButton<num>(
+///                   name: 'num: $index',
+///                   // TRY THIS: change this to "3 - index" and see how the order changes.
+///                   order: index,
+///                 );
+///               }),
+///             ),
+///           ),
+///           // A group that is ordered with a lexical order, from right to left.
+///           FocusTraversalGroup(
+///             policy: OrderedTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 // Order as "C" "B", "A".
+///                 String order =
+///                     String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
+///                 return OrderedButton<String>(
+///                   name: 'String: $order',
+///                   order: order,
+///                 );
+///               }),
+///             ),
+///           ),
+///           // A group that orders in widget order, regardless of what the order is set to.
+///           FocusTraversalGroup(
+///             // Note that because this is NOT an OrderedTraversalPolicy, the
+///             // assigned order of these OrderedButtons is ignored, and they
+///             // are traversed in widget order. TRY THIS: change this to
+///             // "OrderedTraversalPolicy()" and see that it now follows the
+///             // numeric order set on them instead of the widget order.
+///             policy: WidgetOrderTraversalPolicy(),
+///             child: Row(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: List<Widget>.generate(3, (int index) {
+///                 return OrderedButton<num>(
+///                   name: 'ignored num: ${3 - index}',
+///                   order: 3 - index,
+///                 );
+///               }),
+///             ),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FocusNode], for a description of the focus system.
@@ -1561,87 +1711,6 @@ class _FocusTraversalGroupMarker extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => false;
-}
-
-/// A deprecated widget that describes the inherited focus policy for focus
-/// traversal for its descendants.
-///
-/// _This widget has been deprecated: use [FocusTraversalGroup] instead._
-@Deprecated(
-  'Use FocusTraversalGroup as a replacement for DefaultFocusTraversal. Be aware that FocusTraversalGroup does add an (unfocusable) Focus widget to the hierarchy that DefaultFocusTraversal does not. Use FocusTraversalGroup.of(context) as a replacement for DefaultFocusTraversal.of(context). '
-  'This feature was deprecated after v1.14.3.'
-)
-class DefaultFocusTraversal extends InheritedWidget {
-  /// Creates a [DefaultFocusTraversal] object.
-  ///
-  /// The [child] argument must not be null.
-  const DefaultFocusTraversal({
-    Key key,
-    this.policy,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-  /// The policy used to move the focus from one focus node to another when
-  /// traversing them using a keyboard.
-  ///
-  /// _This widget has been deprecated: use [FocusTraversalGroup] instead._
-  ///
-  /// If not specified, traverses in reading order using
-  /// [ReadingOrderTraversalPolicy].
-  ///
-  /// See also:
-  ///
-  ///  * [FocusTraversalPolicy] for the API used to impose traversal order
-  ///    policy.
-  ///  * [WidgetOrderTraversalPolicy] for a traversal policy that traverses
-  ///    nodes in the order they are added to the widget tree.
-  ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses
-  ///    nodes in the reading order defined in the widget tree, and then top to
-  ///    bottom.
-  final FocusTraversalPolicy policy;
-
-  /// Returns the [FocusTraversalPolicy] that most tightly encloses the given
-  /// [BuildContext].
-  ///
-  /// _This method has been deprecated: use `FocusTraversalGroup.of(context)` instead._
-  ///
-  /// It does not create a rebuild dependency because changing the traversal
-  /// order doesn't change the widget tree, so nothing needs to be rebuilt as a
-  /// result of an order change.
-  ///
-  /// The [context] argument must not be null.
-  static FocusTraversalPolicy of(BuildContext context, {bool nullOk = false}) {
-    final DefaultFocusTraversal inherited = context.getElementForInheritedWidgetOfExactType<DefaultFocusTraversal>()?.widget as DefaultFocusTraversal;
-    assert(() {
-      if (nullOk) {
-        return true;
-      }
-      if (context == null) {
-        throw FlutterError(
-          'The context given to DefaultFocusTraversal.of was null, so '
-          'consequently no FocusTraversalGroup ancestor can be found.',
-        );
-      }
-      if (inherited == null) {
-        throw FlutterError(
-          'Unable to find a DefaultFocusTraversal widget in the context.\n'
-          'DefaultFocusTraversal.of() was called with a context that does not contain a '
-          'DefaultFocusTraversal.\n'
-          'No DefaultFocusTraversal ancestor could be found starting from the context that was '
-          'passed to DefaultFocusTraversal.of(). This can happen because there is not a '
-          'WidgetsApp or MaterialApp widget (those widgets introduce a DefaultFocusTraversal), '
-          'or it can happen if the context comes from a widget above those widgets.\n'
-          'The context used was:\n'
-          '  $context',
-        );
-      }
-      return true;
-    }());
-    return inherited?.policy ?? ReadingOrderTraversalPolicy();
-  }
-
-  @override
-  bool updateShouldNotify(DefaultFocusTraversal oldWidget) => false;
 }
 
 // A base class for all of the default actions that request focus for a node.

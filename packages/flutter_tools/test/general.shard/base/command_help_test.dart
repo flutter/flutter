@@ -6,27 +6,25 @@ import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
 import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart' show MockStdio;
 
-class MockLogger extends Mock implements Logger {}
-
 CommandHelp _createCommandHelp({
   @required bool ansi,
   @required int wrapColumn,
 }) {
-  final MockPlatform mockPlatform = MockPlatform();
-  when(mockPlatform.stdoutSupportsAnsi).thenReturn(ansi);
+  final Platform platform = FakePlatform(
+    stdoutSupportsAnsi: ansi,
+  );
   return CommandHelp(
-    logger: MockLogger(),
+    logger: BufferLogger.test(),
     terminal: AnsiTerminal(
       stdio:  MockStdio(),
-      platform: mockPlatform,
+      platform: platform,
     ),
-    platform: mockPlatform,
+    platform: platform,
     outputPreferences: OutputPreferences.test(
       showColor: ansi,
       wrapColumn: wrapColumn,
@@ -201,11 +199,4 @@ void main() {
       });
     });
   });
-}
-
-class MockPlatform extends Mock implements Platform {
-  @override
-  Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': '/',
-  };
 }

@@ -416,6 +416,13 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     _onLastListenerRemovedCallbacks.add(callback);
   }
 
+  /// Removes a callback previously suppplied to
+  /// [addOnLastListenerRemovedCallback].
+  void removeOnLastListenerRemovedCallback(VoidCallback callback) {
+    assert(callback != null);
+    _onLastListenerRemovedCallbacks.remove(callback);
+  }
+
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {

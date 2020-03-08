@@ -952,6 +952,13 @@ void main() {
     Route<void> routeB;
     await tester.pumpWidget(MaterialApp(
       navigatorKey: key,
+      theme: ThemeData(
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          },
+        ),
+      ),
       home: FlatButton(
         child: const Text('A'),
         onPressed: () {
@@ -1474,6 +1481,13 @@ void main() {
     final Key topRoute = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         navigatorKey: navigator,
         routes: <String, WidgetBuilder>{
           '/' : (BuildContext context) => StatefulTestWidget(key: bottomRoute),

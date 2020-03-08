@@ -372,7 +372,7 @@ class Focus extends StatefulWidget {
   /// If true, this [Focus] widget will include a [Semantics] node that
   /// indicates the [Semantics.focusable] and [Semantics.focused] properties.
   ///
-  /// Is is not typical to set this to false, as that can affect the semantics
+  /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
   /// Must not be null, defaults to true.
@@ -422,12 +422,12 @@ class Focus extends StatefulWidget {
     if (node == null) {
       if (!nullOk) {
         throw FlutterError(
-            'Focus.of() was called with a context that does not contain a Focus widget.\n'
-                'No Focus widget ancestor could be found starting from the context that was passed to '
-                'Focus.of(). This can happen because you are using a widget that looks for a Focus '
-                'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
-                'The context used was:\n'
-                '  $context'
+          'Focus.of() was called with a context that does not contain a Focus widget.\n'
+          'No Focus widget ancestor could be found starting from the context that was passed to '
+          'Focus.of(). This can happen because you are using a widget that looks for a Focus '
+          'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
+          'The context used was:\n'
+          '  $context'
         );
       }
       return null;
@@ -435,14 +435,14 @@ class Focus extends StatefulWidget {
     if (!scopeOk && node is FocusScopeNode) {
       if (!nullOk) {
         throw FlutterError(
-            'Focus.of() was called with a context that does not contain a Focus between the given '
-            'context and the nearest FocusScope widget.\n'
-            'No Focus ancestor could be found starting from the context that was passed to '
-            'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
-            'because you are using a widget that looks for a Focus ancestor, and do not have a '
-            'Focus widget ancestor in the current FocusScope.\n'
-            'The context used was:\n'
-            '  $context'
+          'Focus.of() was called with a context that does not contain a Focus between the given '
+          'context and the nearest FocusScope widget.\n'
+          'No Focus ancestor could be found starting from the context that was passed to '
+          'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
+          'because you are using a widget that looks for a Focus ancestor, and do not have a '
+          'Focus widget ancestor in the current FocusScope.\n'
+          'The context used was:\n'
+          '  $context'
         );
       }
       return null;

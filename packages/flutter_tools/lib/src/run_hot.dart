@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -185,7 +186,7 @@ class HotRunner extends ResidentRunner {
         final Map<String, dynamic> firstReport = reports.first;
         await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
       }
-    } catch (error) {
+    } on Exception catch (error) {
       return OperationResult(1, error.toString());
     }
 
@@ -196,7 +197,7 @@ class HotRunner extends ResidentRunner {
     }
 
     globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
     return OperationResult.ok;
   }
 
@@ -214,14 +215,25 @@ class HotRunner extends ResidentRunner {
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
       );
-    } catch (error) {
+    // Catches all exceptions, non-Exception objects are rethrown.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
+      if (error is! Exception && error is! String) {
+        rethrow;
+      }
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      // TODO(blasten): Remove this check once
+      // https://issuetracker.google.com/issues/132325318 has been fixed.
       if (await hasDeviceRunningAndroidQ(flutterDevices) &&
           error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318.');
+        globals.printStatus(
+          '🔨 If you are using an emulator running Android Q Beta, '
+          'consider using an emulator running API level 29 or lower.',
+        );
+        globals.printStatus(
+          'Learn more about the status of this issue on '
+          'https://issuetracker.google.com/issues/132325318.',
+        );
       }
       return 2;
     }
@@ -241,7 +253,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
@@ -329,14 +341,36 @@ class HotRunner extends ResidentRunner {
 
     firstBuildTime = DateTime.now();
 
+    final List<Future<bool>> startupTasks = <Future<bool>>[];
     for (final FlutterDevice device in flutterDevices) {
-      final int result = await device.runHot(
+      // Here we initialize the frontend_server concurrently with the platform
+      // build, reducing overall initialization time. This is safe because the first
+      // invocation of the frontend server produces a full dill file that the
+      // subsequent invocation in devfs will not overwrite.
+      if (device.generator != null) {
+        startupTasks.add(
+          device.generator.recompile(
+            mainPath,
+            <Uri>[],
+            outputPath: dillOutputPath ??
+              getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
+            packagesFilePath : packagesFilePath,
+          ).then((CompilerOutput output) => output?.errorCount == 0)
+        );
+      }
+      startupTasks.add(device.runHot(
         hotRunner: this,
         route: route,
-      );
-      if (result != 0) {
-        return result;
+      ).then((int result) => result == 0));
+    }
+    try {
+      final List<bool> results = await Future.wait(startupTasks);
+      if (!results.every((bool passed) => passed)) {
+        return 1;
       }
+    } on Exception catch (err) {
+      globals.printError(err.toString());
+      return 1;
     }
 
     return attach(
@@ -516,7 +550,7 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
-    flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
     // In benchmark mode, make sure all stream notifications have finished.
     if (benchmarkMode) {
@@ -574,7 +608,7 @@ class HotRunner extends ResidentRunner {
     if (!(reloadReport['success'] as bool)) {
       if (printErrors) {
         globals.printError('Hot reload was rejected:');
-        for (final Map<String, dynamic> notice in reloadReport['details']['notices']) {
+        for (final Map<String, dynamic> notice in (reloadReport['details']['notices'] as List<dynamic>).cast<Map<String, dynamic>>()) {
           globals.printError('${notice['message']}');
         }
       }
@@ -849,7 +883,7 @@ class HotRunner extends ResidentRunner {
         return OperationResult(errorCode, errorMessage);
       }
       return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       globals.printTrace('Hot reload failed: $error\n$stackTrace');
       return OperationResult(1, '$error');
     }
@@ -913,7 +947,7 @@ class HotRunner extends ResidentRunner {
         () async {
           try {
             await view.uiIsolate.flutterReassemble();
-          } catch (error) {
+          } on Exception catch (error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
             return;
@@ -990,7 +1024,7 @@ class HotRunner extends ResidentRunner {
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime) {
-      flutterUsage.sendTiming('hot', 'reload', reloadDuration);
+      globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
     }
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,

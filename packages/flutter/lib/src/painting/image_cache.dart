@@ -82,7 +82,7 @@ class ImageCache {
   /// not fit into the _pendingImages or _cache objects.
   ///
   /// Unlike _cache, the [_CachedImage] for this may have a null byte size.
-  final Map<Object, _CachedImage> _liveImages = <Object, _CachedImage>{};
+  final Map<Object, _LiveImage> _liveImages = <Object, _LiveImage>{};
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -162,13 +162,19 @@ class ImageCache {
   int get currentSizeBytes => _currentSizeBytes;
   int _currentSizeBytes = 0;
 
-  /// Evicts all entries from the cache.
+  /// Evicts all pending and keepAlive entries from the cache.
   ///
   /// This is useful if, for instance, the root asset bundle has been updated
   /// and therefore new images must be obtained.
   ///
   /// Images which have not finished loading yet will not be removed from the
   /// cache, and when they complete they will be inserted as normal.
+  ///
+  /// This method does not clear live references to images, since clearing those
+  /// would not reduce memory pressure. Such images still have listeners in the
+  /// application code, and will still remain resident in memory.
+  ///
+  /// To clear live references, use [clearLiveImages].
   void clear() {
     if (!kReleaseMode) {
       Timeline.instantSync(
@@ -187,11 +193,23 @@ class ImageCache {
   }
 
   /// Evicts a single entry from the cache, returning true if successful.
-  /// Pending images waiting for completion are removed as well, returning true
-  /// if successful.
   ///
-  /// When a pending image is removed the listener on it is removed as well to
-  /// prevent it from adding itself to the cache if it eventually completes.
+  /// Pending images waiting for completion are removed as well, returning true
+  /// if successful. When a pending image is removed the listener on it is
+  /// removed as well to prevent it from adding itself to the cache if it
+  /// eventually completes.
+  ///
+  /// If this method removes a pending image, it will also remove
+  /// the corresponding live tracking of the image, since it is no longer clear
+  /// if the image will ever complete or have any listeners, and failing to
+  /// remove the live reference could leave the cache in a state where all
+  /// subsequent calls to [putIfAbsent] will return an [ImageStreamCompleter]
+  /// that will never complete.
+  ///
+  /// If this method removes a completed image, it will _not_ remove the live
+  /// reference to the image, which will only be cleared when the listener
+  /// count on the completer drops to zero. To clear live image references,
+  /// whether completed or not, use [clearLiveImages].
   ///
   /// The `key` must be equal to an object used to cache an image in
   /// [ImageCache.putIfAbsent].
@@ -199,10 +217,29 @@ class ImageCache {
   /// If the key is not immediately available, as is common, consider using
   /// [ImageProvider.evict] to call this method indirectly instead.
   ///
+  /// The `includeLive` argument determines whether images that still have
+  /// listeners in the tree should be evicted as well. This parameter should be
+  /// set to true in cases where the image may be corrupted and needs to be
+  /// completely discarded by the cache. It should be set to false when calls
+  /// to evict are trying to relieve memory pressure, since an image with a
+  /// listener will not actually be evicted from memory, and subsequent attempts
+  /// to load it will end up allocating more memory for the image again. The
+  /// argument must not be null.
+  ///
   /// See also:
   ///
   ///  * [ImageProvider], for providing images to the [Image] widget.
-  bool evict(Object key) {
+  bool evict(Object key, { bool includeLive = true }) {
+    assert(includeLive != null);
+    if (includeLive) {
+      // Remove from live images - the cache will not be able to mark
+      // it as complete, and it might be getting evicted because it
+      // will never complete, e.g. it was loaded in a FakeAsync zone.
+      // In such a case, we need to make sure subsequent calls to
+      // putIfAbsent don't return this image that may never complete.
+      final _LiveImage image = _liveImages.remove(key);
+      image?.removeListener();
+    }
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
       if (!kReleaseMode) {
@@ -238,7 +275,10 @@ class ImageCache {
   /// Resizes the cache as appropriate to maintain the constraints of
   /// [maximumSize] and [maximumSizeBytes].
   void _touch(Object key, _CachedImage image, TimelineTask timelineTask) {
-    assert(timelineTask != null);
+    // TODO(dnfield): Some customers test in release mode with asserts enabled.
+    // This is bound to cause problems, b/150295238 is tracking that. For now,
+    // avoid this being a point of failure.
+    assert(kReleaseMode || timelineTask != null);
     if (image.sizeBytes != null && image.sizeBytes <= maximumSizeBytes) {
       _currentSizeBytes += image.sizeBytes;
       _cache[key] = image;
@@ -246,20 +286,17 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, _CachedImage image) {
+  void _trackLiveImage(Object key, _LiveImage image, { bool debugPutOk = true }) {
     // Avoid adding unnecessary callbacks to the completer.
-    if (_liveImages.containsKey(key)) {
-      assert(identical(_liveImages[key].completer, image.completer));
-      return;
-    }
-    _liveImages[key] = image;
-    // Even if no callers to ImageProvider.resolve have listened to the stream,
-    // the cache is listening to the stream and will remove itself once the
-    // image completes to move it from pending to keepAlive.
-    // Even if the cache size is 0, we still add this listener.
-    image.completer.addOnLastListenerRemovedCallback(() {
-      _liveImages.remove(key);
-    });
+    _liveImages.putIfAbsent(key, () {
+      assert(debugPutOk);
+      // Even if no callers to ImageProvider.resolve have listened to the stream,
+      // the cache is listening to the stream and will remove itself once the
+      // image completes to move it from pending to keepAlive.
+      // Even if the cache size is 0, we still add this listener.
+      image.completer.addOnLastListenerRemovedCallback(image.handleRemove);
+      return image;
+    }).sizeBytes ??= image.sizeBytes;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -295,14 +332,16 @@ class ImageCache {
     }
     // Remove the provider from the list so that we can move it to the
     // recently used position below.
+    // Don't use _touch here, which would trigger a check on cache size that is
+    // not needed since this is just moving an existing cache entry to the head.
     final _CachedImage image = _cache.remove(key);
     if (image != null) {
       if (!kReleaseMode) {
         timelineTask.finish(arguments: <String, dynamic>{'result': 'keepAlive'});
       }
-      // The image might have been keptAlive but had no listeners. We should
-      // track it as live again until it has no listeners again.
-      _trackLiveImage(key, image);
+      // The image might have been keptAlive but had no listeners (so not live).
+      // Make sure the cache starts tracking it as live again.
+      _trackLiveImage(key, _LiveImage(image.completer, image.sizeBytes, () => _liveImages.remove(key)));
       _cache[key] = image;
       return image.completer;
     }
@@ -318,7 +357,7 @@ class ImageCache {
 
     try {
       result = loader();
-      _trackLiveImage(key, _CachedImage(result, null));
+      _trackLiveImage(key, _LiveImage(result, null, () => _liveImages.remove(key)));
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
         timelineTask.finish(arguments: <String, dynamic>{
@@ -353,13 +392,20 @@ class ImageCache {
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
 
       final _CachedImage image = _CachedImage(result, imageSize);
-      if (!_liveImages.containsKey(key)) {
-        assert(syncCall);
-        result.addOnLastListenerRemovedCallback(() {
-          _liveImages.remove(key);
-        });
-      }
-      _liveImages[key] = image;
+
+      _trackLiveImage(
+        key,
+        _LiveImage(
+          result,
+          imageSize,
+          () => _liveImages.remove(key),
+        ),
+        // This should result in a put if `loader()` above executed
+        // synchronously, in which case syncCall is true and we arrived here
+        // before we got a chance to track the image otherwise.
+        debugPutOk: syncCall,
+      );
+
       final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
@@ -430,6 +476,9 @@ class ImageCache {
   /// memory pressure, since the live image caching only tracks image instances
   /// that are also being held by at least one other object.
   void clearLiveImages() {
+    for (final _LiveImage image in _liveImages.values) {
+      image.removeListener();
+    }
     _liveImages.clear();
   }
 
@@ -529,13 +578,27 @@ class ImageCacheStatus {
 
   @override
   int get hashCode => hashValues(pending, keepAlive, live);
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'ImageCacheStatus')}(pending: $pending, live: $live, keepAlive: $keepAlive)';
 }
 
 class _CachedImage {
   _CachedImage(this.completer, this.sizeBytes);
 
   final ImageStreamCompleter completer;
-  final int sizeBytes;
+  int sizeBytes;
+}
+
+class _LiveImage extends _CachedImage {
+  _LiveImage(ImageStreamCompleter completer, int sizeBytes, this.handleRemove)
+      : super(completer, sizeBytes);
+
+  final VoidCallback handleRemove;
+
+  void removeListener() {
+    completer.removeOnLastListenerRemovedCallback(handleRemove);
+  }
 }
 
 class _PendingImage {

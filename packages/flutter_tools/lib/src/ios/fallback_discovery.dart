@@ -6,8 +6,10 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
@@ -81,18 +83,18 @@ class FallbackDiscovery {
         hostVmservicePort: hostVmservicePort,
       );
       if (result != null) {
-        UsageEvent(_kEventName, 'mdns-success').send();
+        UsageEvent(_kEventName, 'mdns-success', flutterUsage: globals.flutterUsage).send();
         return result;
       }
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
-    UsageEvent(_kEventName, 'mdns-failure').send();
+    UsageEvent(_kEventName, 'mdns-failure', flutterUsage: globals.flutterUsage).send();
 
     try {
       final Uri result = await _protocolDiscovery.uri;
-      UsageEvent(_kEventName, 'fallback-success').send();
+      UsageEvent(_kEventName, 'fallback-success', flutterUsage: globals.flutterUsage).send();
       return result;
     } on ArgumentError {
     // In the event of an invalid InternetAddress, this code attempts to catch
@@ -101,7 +103,7 @@ class FallbackDiscovery {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with log scanning');
-    UsageEvent(_kEventName, 'fallback-failure').send();
+    UsageEvent(_kEventName, 'fallback-failure', flutterUsage: globals.flutterUsage).send();
     return null;
   }
 
@@ -120,19 +122,14 @@ class FallbackDiscovery {
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
-      UsageEvent(
-        _kEventName,
-        'failure',
-        label: err.toString(),
-        value: hostPort,
-      ).send();
+      _sendFailureEvent(err, assumedDevicePort);
       return null;
     }
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
     const int kDelaySeconds = 2;
-    Object firstException;
+    Exception firstException;
     while (attempts < 5) {
       try {
         final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
@@ -145,7 +142,7 @@ class FallbackDiscovery {
           }
           final LibraryRef library = (isolateResponse as Isolate).rootLib;
           if (library.uri.startsWith('package:$packageName')) {
-            UsageEvent(_kEventName, 'success').send();
+            UsageEvent(_kEventName, 'success', flutterUsage: globals.flutterUsage).send();
             return Uri.parse('http://localhost:$hostPort');
           }
         }
@@ -163,12 +160,28 @@ class FallbackDiscovery {
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
+    _sendFailureEvent(firstException, assumedDevicePort);
+    return null;
+  }
+
+  void _sendFailureEvent(Exception err, int assumedDevicePort) {
+    String eventAction;
+    String eventLabel;
+    if (err == null) {
+      eventAction = 'failure-attempts-exhausted';
+      eventLabel = assumedDevicePort.toString();
+    } else if (err is HttpException) {
+      eventAction = 'failure-http';
+      eventLabel = '${err.message}, device port = $assumedDevicePort';
+    } else {
+      eventAction = 'failure-other';
+      eventLabel = '$err, device port = $assumedDevicePort';
+    }
     UsageEvent(
       _kEventName,
-      'failure',
-      label: firstException?.toString() ?? 'Connection attempts exhausted',
-      value: hostPort,
+      eventAction,
+      label: eventLabel,
+      flutterUsage: globals.flutterUsage,
     ).send();
-    return null;
   }
 }

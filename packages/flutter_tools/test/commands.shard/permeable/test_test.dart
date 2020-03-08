@@ -248,6 +248,7 @@ Future<ProcessResult> _runFlutterTest(
     globals.fs.path.absolute(globals.fs.path.join('bin', 'flutter_tools.dart')),
     'test',
     '--no-color',
+    '--no-version-check',
     ...extraArguments,
     testPath,
   ];
