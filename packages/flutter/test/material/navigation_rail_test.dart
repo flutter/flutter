@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Renders at the correct default width', (WidgetTester tester) async {
+  testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -18,10 +18,60 @@ void main() {
     );
 
     final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-    expect(renderBox.size.width, 72);
+    expect(renderBox.size.width, 72.0);
   });
 
-  testWidgets('Renders only icons - [labelType]=none ', (WidgetTester tester) async {
+  testWidgets('Renders at the correct default width - [labelType]=selected', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.selected,
+        destinations: _destinations(),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+    expect(renderBox.size.width, 72.0);
+  });
+
+  testWidgets('Renders at the correct default width - [labelType]=all', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.all,
+        destinations: _destinations(),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+    expect(renderBox.size.width, 72.0);
+  });
+
+  testWidgets('Renders wider for a destination with a long label - [labelType]=all', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        labelType: NavigationRailLabelType.all,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            activeIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            activeIcon: Icon(Icons.bookmark),
+            label: Text('Longer Label'),
+          ),
+        ],
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+    expect(renderBox.size.width, 184.0);
+  });
+
+  testWidgets('Renders only icons - [labelType]=none (default)', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -514,7 +564,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        preferredWidth: 56.0,
+        minWidth: 56.0,
         destinations: _destinations(),
       ),
     );
@@ -551,7 +601,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        preferredWidth: 56.0,
+        minWidth: 56.0,
         destinations: _destinations(),
       ),
     );
@@ -590,7 +640,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
-        preferredWidth: 56.0,
+        minWidth: 56.0,
         destinations: _destinations(),
       ),
     );
@@ -624,11 +674,11 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=top', (WidgetTester tester) async {
+  testWidgets('Group alignment works - [groupAlignment]=-1.0', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        groupAlignment: NavigationRailGroupAlignment.top,
+        groupAlignment: -1.0,
         destinations: _destinations(),
       ),
     );
@@ -657,11 +707,11 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=center', (WidgetTester tester) async {
+  testWidgets('Group alignment works - [groupAlignment]=0.0', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        groupAlignment: NavigationRailGroupAlignment.center,
+        groupAlignment: 0.0,
         destinations: _destinations(),
       ),
     );
@@ -690,11 +740,11 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=bottom', (WidgetTester tester) async {
+  testWidgets('Group alignment works - [groupAlignment]=1.0', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
-        groupAlignment: NavigationRailGroupAlignment.bottom,
+        groupAlignment: 1.0,
         destinations: _destinations(),
       ),
     );
@@ -736,7 +786,7 @@ void main() {
     final RenderBox leading = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(0));
     final RenderBox trailing = tester.renderObject<RenderBox>(find.byType(FloatingActionButton).at(1));
     expect(leading.localToGlobal(Offset.zero), const Offset(8.0, 8.0));
-    expect(trailing.localToGlobal(Offset.zero), const Offset(8.0, 544.0));
+    expect(trailing.localToGlobal(Offset.zero), const Offset(8.0, 432.0));
   });
 
   testWidgets('Extended rail animates the width and labels appear - LTR', (WidgetTester tester) async {
@@ -931,7 +981,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
-                    extendedWidth: 300,
+                    minExtendedWidth: 300,
                     destinations: _destinations(),
                     extended: extended,
                   ),
@@ -1093,28 +1143,28 @@ void main() {
   });
 
   testWidgets('onDestinationSelected is called', (WidgetTester tester) async {
-    int currentIndex;
+    int selectedIndex;
 
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
         destinations: _destinations(),
         onDestinationSelected: (int index) {
-          currentIndex = index;
+          selectedIndex = index;
         },
         labelType: NavigationRailLabelType.all,
       ),
     );
 
     await tester.tap(find.text('Def'));
-    expect(currentIndex, 1);
+    expect(selectedIndex, 1);
 
     await tester.tap(find.text('Ghi'));
-    expect(currentIndex, 2);
+    expect(selectedIndex, 2);
   });
 
   testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
-    int currentIndex = 0;
+    int selectedIndex = 0;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1125,11 +1175,11 @@ void main() {
                 children: <Widget>[
                   NavigationRail(
                     destinations: _destinations(),
-                    currentIndex: currentIndex,
+                    selectedIndex: selectedIndex,
                     labelType: NavigationRailLabelType.selected,
                     onDestinationSelected: (int index) {
                       setState(() {
-                        currentIndex = index;
+                        selectedIndex = index;
                       });
                     },
                   ),
@@ -1146,7 +1196,7 @@ void main() {
 
     // Tap the second destination.
     await tester.tap(find.byIcon(Icons.bookmark_border));
-    expect(currentIndex, 1);
+    expect(selectedIndex, 1);
 
     // The second destination animates in.
     expect(_labelOpacity(tester, 'Def'), equals(0.0));
@@ -1158,7 +1208,7 @@ void main() {
 
     // Tap the third destination.
     await tester.tap(find.byIcon(Icons.star_border));
-    expect(currentIndex, 2);
+    expect(selectedIndex, 2);
 
     // The second destination animates out quickly and the third destination
     // animates in.

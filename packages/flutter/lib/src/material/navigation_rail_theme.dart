@@ -25,7 +25,9 @@ import 'theme_data.dart';
 ///
 /// All [NavigationRailThemeData] properties are `null` by default.
 /// When null, the [NavigationRail] will use the values from [ThemeData]
-/// if they exist, otherwise it will provide its own defaults.
+/// if they exist, otherwise it will provide its own defaults based on the
+/// overall [Theme]'s textTheme and colorScheme. See the individual
+/// [NavigationRail] properties for details.
 ///
 /// See also:
 ///
@@ -44,33 +46,31 @@ class NavigationRailThemeData extends Diagnosticable {
     this.labelType,
   });
 
-  /// Color to be used for the unselected, enabled [NavigationRail]'s
-  /// background.
+  /// Color to be used for the [NavigationRail]'s background.
   final Color backgroundColor;
 
-  /// The z-coordinate to be used for the unselected, enabled
-  /// [NavigationRail]'s elevation foreground.
+  /// The z-coordinate to be used for the [NavigationRail]'s elevation.
   final double elevation;
 
-  /// The style on which to base the destination label, when the destination
-  /// is not selected.
+  /// The style to merge with the default text style for
+  /// [NavigationRailDestination] labels, when the destination is not selected.
   final TextStyle unselectedLabelTextStyle;
 
-  /// The style on which to base the destination label, when the destination
-  /// is selected.
+  /// The style to merge with the default text style for
+  /// [NavigationRailDestination] labels, when the destination is selected.
   final TextStyle selectedLabelTextStyle;
 
-  /// The theme on which to base the destination icon, when the destination
-  /// is not selected.
+  /// The theme to merge with the default icon theme for
+  /// [NavigationRailDestination] icons, when the destination is not selected.
   final IconThemeData unselectedIconTheme;
 
-  /// The theme on which to base the destination icon, when the destination
-  /// is selected.
+  /// The theme to merge with the default icon theme for
+  /// [NavigationRailDestination] icons, when the destination is selected.
   final IconThemeData selectedIconTheme;
 
   /// The alignment for the [NavigationRailDestination]s as they are positioned
   /// within the [NavigationRail].
-  final NavigationRailGroupAlignment groupAlignment;
+  final double groupAlignment;
 
   /// The type that defines the layout and behavior of the labels in the
   /// [NavigationRail].
@@ -85,7 +85,7 @@ class NavigationRailThemeData extends Diagnosticable {
     TextStyle selectedLabelTextStyle,
     IconThemeData unselectedIconTheme,
     IconThemeData selectedIconTheme,
-    NavigationRailGroupAlignment groupAlignment,
+    double groupAlignment,
     NavigationRailLabelType labelType,
   }) {
     return NavigationRailThemeData(
@@ -116,8 +116,8 @@ class NavigationRailThemeData extends Diagnosticable {
       selectedLabelTextStyle: TextStyle.lerp(a?.selectedLabelTextStyle, b?.selectedLabelTextStyle, t),
       unselectedIconTheme: IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
       selectedIconTheme: IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
-      groupAlignment:  t < 0.5 ? a.groupAlignment : b.groupAlignment,
-      labelType:  t < 0.5 ? a.labelType : b.labelType,
+      groupAlignment: lerpDouble(a?.groupAlignment, b?.groupAlignment, t),
+      labelType: t < 0.5 ? a?.labelType : b?.labelType,
     );
   }
 
@@ -163,14 +163,13 @@ class NavigationRailThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('selectedLabelTextStyle', selectedLabelTextStyle, defaultValue: defaultData.selectedLabelTextStyle));
     properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme, defaultValue: defaultData.unselectedIconTheme));
     properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: defaultData.selectedIconTheme));
-    properties.add(DiagnosticsProperty<NavigationRailGroupAlignment>('groupAlignment', groupAlignment, defaultValue: defaultData.groupAlignment));
+    properties.add(DoubleProperty('groupAlignment', groupAlignment, defaultValue: defaultData.groupAlignment));
     properties.add(DiagnosticsProperty<NavigationRailLabelType>('labelType', labelType, defaultValue: defaultData.labelType));
   }
 }
 
-/// An inherited widget that defines background color, elevation, label text
-/// style, icon theme, group alignment, and label type parameters for
-/// [NavigationRail]s in this widget's subtree.
+/// An inherited widget that defines visual properties for [NavigationRail]s and
+/// [NavigationRailDestination]s in this widget's subtree.
 ///
 /// Values specified here are used for [NavigationRail] properties that are not
 /// given an explicit non-null value.
