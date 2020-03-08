@@ -309,7 +309,6 @@ void main() {
         try {
           await Cache.lock();
         } on AssertionError catch (error) {
-          print(error.toString());
           expect(error.toString(), contains("'_lock == null': is not true."));
         }
         signalController.add(mockSignal);
