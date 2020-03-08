@@ -507,6 +507,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
+    await connectedVmService.streamListen('Stdout');
     _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
       final String message = utf8.decode(base64.decode(event.bytes)).trim();
       if (message.isNotEmpty) {
