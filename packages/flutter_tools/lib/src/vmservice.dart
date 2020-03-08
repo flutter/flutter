@@ -339,28 +339,20 @@ class VMService implements vm_service.VmService {
     final StreamController<String> vmserviceController = StreamController<String>();
     final StreamController<String> delegateController = StreamController<String>();
     final StreamChannel<String> vmserviceChannel = StreamChannel<String>(vmserviceController.stream, channel.sink);
-    final StreamChannel<String> delegateChannel = StreamChannel<String>(delegateController.stream, channel.sink);
     channel.stream.listen((String data) {
       vmserviceController.add(data);
       delegateController.add(data);
     });
 
-
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(vmserviceChannel), onUnhandledError: _unhandledError);
 
     // Create an instance of the package:vm_service API in addition to the flutter
     // tool's to allow gradual migration.
-    final StreamController<dynamic> controller = StreamController<dynamic>();
     final Completer<void> streamClosedCompleter = Completer<void>();
 
-    delegateChannel.stream.listen(
-      controller.add,
-      onDone: streamClosedCompleter.complete,
-    );
-
     final vm_service.VmService delegateService = vm_service.VmService(
-      controller.stream,
-      (String message) => delegateChannel.sink.add(message),
+      delegateController.stream,
+      channel.sink.add,
       log: null,
       disposeHandler: () async {
         // No dispose handler, to avoid closing everyhing twice.
@@ -419,7 +411,12 @@ class VMService implements vm_service.VmService {
   Stream<vm_service.Event> get onTimelineEvent => onEvent('Timeline');
 
   @override
-  Stream<vm_service.Event> get onStdoutEvent => onEvent('Stdout'); // WriteEvent
+  Stream<vm_service.Event> get onStdoutEvent => onEvent('Stdout');
+
+  @override
+  Future<vm_service.Success> streamListen(String streamId) {
+    return _delegateService.streamListen(streamId);
+  }
 
   @override
   Stream<vm_service.Event> onEvent(String streamId) {
@@ -1532,6 +1529,7 @@ class FlutterView extends ServiceObject {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<void> completer = Completer<void>();
+    await owner.vm.vmService.streamListen('Isolate');
     final StreamSubscription<vm_service.Event> subscription =
       owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
         if (event.kind == ServiceEvent.kIsolateRunnable) {
@@ -1541,6 +1539,7 @@ class FlutterView extends ServiceObject {
           }
         }
       });
+    await Future<void>.delayed(const Duration(seconds: 1));
     await owner.vm.runInView(viewId,
                              entryUri,
                              packagesUri,
