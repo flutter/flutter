@@ -54,7 +54,7 @@ void main() {
     table.setFlatChildren(6, children);
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
-    const double expectedWidth = 100.0 / 6;
+    final double expectedWidth = (100.0 / 6).ceilToDouble();
     for (final RenderBox child in children) {
       expect(child.size.width, moreOrLessEquals(expectedWidth));
     }
