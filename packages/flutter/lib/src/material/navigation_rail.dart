@@ -253,7 +253,7 @@ class NavigationRail extends StatefulWidget {
   ///   types.
   final NavigationRailLabelType labelType;
 
-  /// The [TextStyle] of the unselected [NavigationRailDestination] labels.
+  /// The [TextStyle] of destination's label when it is unselected.
   ///
   /// When a [NavigationRailDestination] is selected, the
   /// [selectedLabelTextStyle] will be used instead.
@@ -265,8 +265,7 @@ class NavigationRail extends StatefulWidget {
   /// merged into the defaults.
   final TextStyle unselectedLabelTextStyle;
 
-  /// The [TextStyle] of the [NavigationRailDestination] labels when they are
-  /// selected.
+  /// The [TextStyle] of the destination's label when it is selected.
   ///
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
@@ -277,8 +276,7 @@ class NavigationRail extends StatefulWidget {
   /// merged into the defaults.
   final TextStyle selectedLabelTextStyle;
 
-  /// The default size, opacity, and color of the icon in the
-  /// [NavigationRailDestination].
+  /// The visual properties of the icon in the unselected destination.
   ///
   /// If this field is not provided, or provided with any null properties, then
   /// a copy of the [IconThemeData.fallback] with a custom [NavigationRail]
@@ -291,8 +289,7 @@ class NavigationRail extends StatefulWidget {
   /// merged into the defaults.
   final IconThemeData unselectedIconTheme;
 
-  /// The size, opacity, and color of the icon in the selected
-  /// [NavigationRailDestination].
+  /// The visual properties of the icon in the selected destination.
   ///
   /// When the [NavigationRailDestination] is not selected,
   /// [unselectedIconTheme] will be used.
