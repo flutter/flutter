@@ -30,7 +30,7 @@ class BenchTextDomLayout extends RawRecorder {
   void body(Profile profile) {
     final Paragraph paragraph = _generateParagraph();
     profile.record('layout', () {
-      paragraph.layout(ParagraphConstraints(width: double.infinity));
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
     });
   }
 }
@@ -53,7 +53,7 @@ class BenchTextDomCachedLayout extends RawRecorder {
   void body(Profile profile) {
     final Paragraph paragraph = builder.build();
     profile.record('layout', () {
-      paragraph.layout(ParagraphConstraints(width: double.infinity));
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
     });
   }
 }
