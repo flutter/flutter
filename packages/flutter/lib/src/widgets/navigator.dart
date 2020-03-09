@@ -2454,8 +2454,12 @@ class _RouteEntry extends StageableRoute {
 
   bool get willBePresent => currentState.index <= _RouteLifecycle.idle.index;
   bool get isPresent => currentState.index <= _RouteLifecycle.remove.index;
-  bool get canTransitition {
+  bool get suitableForAnnouncement {
     return currentState.index <= _RouteLifecycle.removing.index &&
+      currentState.index >= _RouteLifecycle.push.index;
+  }
+  bool get canTransitition {
+    return currentState.index <= _RouteLifecycle.remove.index &&
            currentState.index >= _RouteLifecycle.push.index;
   }
 
@@ -3045,7 +3049,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     int index = _history.length - 1;
     while (index >= 0) {
       final _RouteEntry entry = _history[index];
-      if (!entry.canTransitition) {
+      if (!entry.suitableForAnnouncement) {
         index -= 1;
         continue;
       }
