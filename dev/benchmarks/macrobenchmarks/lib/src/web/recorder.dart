@@ -473,6 +473,11 @@ class Profile {
   /// method will return true (asking the benchmark to continue collecting
   /// data).
   bool shouldContinue() {
+    // If we haven't recorded anything yet, we don't wanna stop now.
+    if (scoreData.isEmpty) {
+      return true;
+    }
+
     final List<bool> shouldContinueList = <bool>[];
     for (final String key in scoreData.keys) {
       final Timeseries timeseries = scoreData[key];
