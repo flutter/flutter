@@ -99,6 +99,11 @@ class Template {
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
+      // Only build a Linux project if explicitly asked.
+      final bool linux = context['linux'] as bool;
+      if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
+        return null;
+      }
       // Only build a macOS project if explicitly asked.
       final bool macOS = context['macos'] as bool;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {

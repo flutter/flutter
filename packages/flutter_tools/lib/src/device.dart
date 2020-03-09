@@ -75,7 +75,7 @@ class DeviceManager {
       xcdevice: globals.xcdevice,
       iosWorkflow: globals.iosWorkflow,
     ),
-    IOSSimulators(),
+    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),
     MacOSDevices(),

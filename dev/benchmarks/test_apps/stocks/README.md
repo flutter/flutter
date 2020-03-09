@@ -23,16 +23,10 @@ The `flutter run --release` command both builds and installs the Flutter app.
 ## Internationalization
 
 This app has been internationalized (just enough to show how it's
-done). It's an example of how one can do so with the
-[Dart intl package](https://pub.dev/packages/intl).
+done). It's an example of how one can do so with the gen_l10n tool.
 
-The [Flutter Internationalization Tutorial](https://flutter.dev/tutorials/internationalization/)
-covers Flutter app internationalization in general.
-
-See [regenerate.md](lib/i18n/regenerate.md) for an explanation
-of how the Dart internationalization tools, like
-`intl_translation:generate_from_arb`, were used to generate
-localizations for this app.
+See [regenerate.md](lib/i18n/regenerate.md) for an explanation for how
+the tool is used to generate localizations for this app.
 
 ## Icon
 

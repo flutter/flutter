@@ -107,20 +107,24 @@ void main() {
     );
     bool reloaded = false;
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
+    print('waiting for pause...');
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
+    print('waiting for debugger message...');
     await sawDebuggerPausedMessage.future;
     expect(reloaded, isFalse);
+    print('waiting for resume...');
     await _flutter.resume();
+    print('waiting for reload future...');
     await reloadFuture;
     expect(reloaded, isTrue);
     reloaded = false;
+    print('subscription cancel...');
     await subscription.cancel();
   });
 
   test("hot reload doesn't reassemble if paused", () async {
     final Completer<void> sawTick1 = Completer<void>();
-    final Completer<void> sawTick3 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
@@ -141,12 +145,14 @@ void main() {
       },
     );
     await _flutter.run(withDebugger: true);
+    await Future<void>.delayed(const Duration(seconds: 1));
     await sawTick1.future;
     await _flutter.addBreakpoint(
       _project.buildBreakpointUri,
       _project.buildBreakpointLine,
     );
     bool reloaded = false;
+    await Future<void>.delayed(const Duration(seconds: 1));
     final Future<void> reloadFuture = _flutter.hotReload().then((void value) { reloaded = true; });
     final Isolate isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
@@ -155,7 +161,6 @@ void main() {
     await reloadFuture; // this is the one where it times out because you're in the debugger
     expect(reloaded, isTrue);
     await _flutter.hotReload(); // now we're already paused
-    expect(sawTick3.isCompleted, isFalse);
     await sawDebuggerPausedMessage2.future; // so we just get told that nothing is going to happen
     await _flutter.resume();
     await subscription.cancel();

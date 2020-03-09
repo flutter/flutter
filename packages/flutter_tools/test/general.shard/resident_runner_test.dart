@@ -223,7 +223,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
+    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
       cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
@@ -254,7 +254,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'reload',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'reload',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -284,7 +284,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, false);
     expect(result.code, 0);
-    expect(verify(flutterUsage.sendEvent('hot', 'restart',
+    expect(verify(globals.flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm)),
@@ -328,7 +328,7 @@ void main() {
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
     expect(result.code, 1);
-    verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
+    verify(globals.flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
       cdKey(CustomDimensions.hotEventTargetPlatform):
         getNameForTargetPlatform(TargetPlatform.android_arm),
       cdKey(CustomDimensions.hotEventSdkName): 'Example',
@@ -682,10 +682,9 @@ void main() {
 
     final DefaultResidentCompiler residentCompiler = (await FlutterDevice.create(
       mockDevice,
-      buildMode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       flutterProject: FlutterProject.current(),
       target: null,
-      trackWidgetCreation: true,
     )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.librariesSpec,
@@ -747,7 +746,7 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views, { Stream<Uri> observatoryUris })
-    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false) {
+    : super(device, buildInfo: BuildInfo.debug) {
     _observatoryUris = observatoryUris;
   }
 
