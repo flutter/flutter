@@ -119,6 +119,7 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
   testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
+    const double titleFontSize = 20.0;
     const double height = 300.0;
     double width;
     await tester.pumpWidget(
@@ -139,6 +140,7 @@ void main() {
                         'X' * 2000,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: titleFontSize),
                       ),
                       centerTitle: false,
                     ),
@@ -153,10 +155,16 @@ void main() {
 
     // The title is scaled and transformed to be 1.5 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
-    // 1.5 times smaller than the full width.
+    // 1.5 times smaller than the full width. The height of the text is the same
+    // as the font size, with 10 dps bottom margin.
     expect(
       tester.getRect(find.byType(Text)),
-      Rect.fromLTRB(0, height - 30, (width / 1.5).floorToDouble(), height - 10),
+      Rect.fromLTRB(
+        0,
+        height - titleFontSize - 10,
+        (width / 1.5).floorToDouble(),
+        height - 10,
+      ),
     );
   });
 
