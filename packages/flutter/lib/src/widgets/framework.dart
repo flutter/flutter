@@ -5433,8 +5433,35 @@ abstract class RenderObjectElement extends Element {
   /// acts as if the child was not in `oldChildren`.
   ///
   /// This function is a convenience wrapper around [updateChild], which updates
-  /// each individual child. When calling [updateChild], this function uses the
-  /// previous element as the `newSlot` argument.
+  /// each individual child. When calling [updateChild], this function uses an
+  /// [IndexedSlot<Element>] as the value for the `newSlot` argument.
+  /// [IndexedSlot.index] is set to the index that the currently processed
+  /// `child` corresponds to in the `newWidgets` list and [IndexedSlot.value] is
+  /// set to the [Element] of the previous widget in that list (or null if it is
+  /// the first child).
+  ///
+  /// When the [slot] value of an [Element] changes, its
+  /// associated [renderObject] needs to move to a new position in the child
+  /// list of its parents. If that [RenderObject] organizes its children in a
+  /// linked list (as is done by the [ContainerRenderObjectMixin]) this can
+  /// be implemented by re-inserting the child [RenderObject] into the
+  /// list after the [RenderObject] associated with the [Element] provided as
+  /// [IndexedSlot.value] in the [slot] object.
+  ///
+  /// Simply using the previous sibling as a [slot] is not enough, though, because
+  /// child [RenderObject]s are only moved around when the [slot] of their
+  /// associated [RenderObjectElement]s is updated. When the order of child
+  /// [Element]s is changed, some elements in the list may move to a new index
+  /// but still have the same previous sibling. For example, when
+  /// `[e1, e2, e3, e4]` is changed to `[e1, e3, e4, e2]` the element e4
+  /// continues to have e3 as a previous sibling even though its index in the list
+  /// has changed and its [RenderObject] needs to move to come before e2's
+  /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
+  /// be assigned to its [Element] whenever its index in its
+  /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
+  /// exactly that and also ensures that the underlying parent [RenderObject]
+  /// knows where a child needs to move to in a linked list by providing its new
+  /// previous sibling.
   @protected
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> forgottenChildren }) {
     assert(oldChildren != null);
@@ -5492,7 +5519,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
       if (oldChild == null || !Widget.canUpdate(oldChild.widget, newWidget))
         break;
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
       previousChild = newChild;
@@ -5550,7 +5577,7 @@ abstract class RenderObjectElement extends Element {
         }
       }
       assert(oldChild == null || Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5572,7 +5599,7 @@ abstract class RenderObjectElement extends Element {
       assert(oldChild._debugLifecycleState == _ElementLifecycle.active);
       final Widget newWidget = newWidgets[newChildrenTop];
       assert(Widget.canUpdate(oldChild.widget, newWidget));
-      final Element newChild = updateChild(oldChild, newWidget, previousChild);
+      final Element newChild = updateChild(oldChild, newWidget, IndexedSlot<Element>(newChildrenTop, previousChild));
       assert(newChild._debugLifecycleState == _ElementLifecycle.active);
       assert(oldChild == newChild || oldChild == null || oldChild._debugLifecycleState != _ElementLifecycle.active);
       newChildren[newChildrenTop] = newChild;
@@ -5666,10 +5693,12 @@ abstract class RenderObjectElement extends Element {
 
   /// Insert the given child into [renderObject] at the given slot.
   ///
+  /// {@template flutter.widgets.slots}
   /// The semantics of `slot` are determined by this element. For example, if
   /// this element has a single child, the slot should always be null. If this
-  /// element has a list of children, the previous sibling is a convenient value
-  /// for the slot.
+  /// element has a list of children, the previous sibling element wrapped in an
+  /// [IndexedSlot] is a convenient value for the slot.
+  /// {@endtemplate}
   @protected
   void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot);
 
@@ -5677,10 +5706,7 @@ abstract class RenderObjectElement extends Element {
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   ///
-  /// The semantics of `slot` are determined by this element. For example, if
-  /// this element has a single child, the slot should always be null. If this
-  /// element has a list of children, the previous sibling is a convenient value
-  /// for the slot.
+  /// {@macro flutter.widgets.slots}
   ///
   /// This method is only ever called if [updateChild] can end up being called
   /// with an existing [Element] child and a `slot` that differs from the slot
@@ -5840,6 +5866,13 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// RenderObjects use the [ContainerRenderObjectMixin] mixin with a parent data
 /// type that implements [ContainerParentDataMixin<RenderObject>]. Such widgets
 /// are expected to inherit from [MultiChildRenderObjectWidget].
+///
+/// See also:
+///
+/// * [IndexedSlot], which is used as [Element.slot]s for the children of a
+///   [MultiChildRenderObjectElement].
+/// * [RenderObjectElement.updateChildren], which discusses why [IndexedSlot]
+///   is used for the slots of the children.
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
@@ -5863,20 +5896,20 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
-  void insertChildRenderObject(RenderObject child, Element slot) {
+  void insertChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child, after: slot?.renderObject);
+    renderObject.insert(child, after: slot?.value?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, Element slot) {
+  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
     final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
       this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
-    renderObject.move(child, after: slot?.renderObject);
+    renderObject.move(child, after: slot?.value?.renderObject);
     assert(renderObject == this.renderObject);
   }
 
@@ -5911,7 +5944,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
     _children = List<Element>(widget.children.length);
     Element previousChild;
     for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(widget.children[i], previousChild);
+      final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element>(i, previousChild));
       _children[i] = newChild;
       previousChild = newChild;
     }
@@ -5956,4 +5989,42 @@ FlutterErrorDetails _debugReportException(
   );
   FlutterError.reportError(details);
   return details;
+}
+
+/// A value for [Element.slot] used for children of
+/// [MultiChildRenderObjectElement]s.
+///
+/// A slot for a [MultiChildRenderObjectElement] consists of an [index]
+/// identifying where the child occupying this slot is located in the
+/// [MultiChildRenderObjectElement]'s child list and an arbitrary [value] that
+/// can further define where the child occupying this slot fits in its
+/// parent's child list.
+///
+/// See also:
+///
+///  * [RenderObjectElement.updateChildren], which discusses why this class is
+///    used as slot values for the children of a [MultiChildRenderObjectElement].
+@immutable
+class IndexedSlot<T> {
+  /// Creates an [IndexedSlot] with the provided [index] and slot [value].
+  const IndexedSlot(this.index, this.value);
+
+  /// Information to define where the child occupying this slot fits in its
+  /// parent's child list.
+  final T value;
+
+  /// The index of this slot in the parent's child list.
+  final int index;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is IndexedSlot
+        && index == other.index
+        && value == other.value;
+  }
+
+  @override
+  int get hashCode => hashValues(index, value);
 }

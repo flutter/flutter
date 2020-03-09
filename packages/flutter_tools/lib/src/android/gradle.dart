@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -329,6 +330,9 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
   }
+  if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
+    command.add('-Pdart-defines=${jsonEncode(androidBuildInfo.buildInfo.dartDefines)}');
+  }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
     // read from include_flutter.groovy.
@@ -396,7 +400,7 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
@@ -589,7 +593,7 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
   if (result.exitCode != 0) {
     globals.printStatus(result.stdout, wrap: false);
@@ -637,7 +641,7 @@ ${globals.terminal.bolden('Consuming the Module')}
             url '${repoDirectory.path}'
         }
         maven {
-            url 'http://download.flutter.io'
+            url 'https://storage.googleapis.com/download.flutter.io'
         }
       }
 
@@ -684,11 +688,11 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 

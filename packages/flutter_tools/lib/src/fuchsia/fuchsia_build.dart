@@ -20,7 +20,6 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
@@ -29,7 +28,7 @@ Future<void> _timedBuildStep(String name, Future<void> Function() action) async 
   final Stopwatch sw = Stopwatch()..start();
   await action();
   globals.printTrace('$name: ${sw.elapsedMilliseconds} ms.');
-  flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {

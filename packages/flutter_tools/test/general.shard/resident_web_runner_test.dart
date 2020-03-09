@@ -77,11 +77,10 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
-          dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
         globals.fs.currentDirectory.childFile('.packages')
-          ..writeAsStringSync('\n');
+          .writeAsStringSync('\n');
       },
     );
   });
@@ -139,7 +138,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -158,7 +156,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: <String>[],
       urlTunneller: null,
     );
 
@@ -174,7 +171,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     );
 
@@ -234,7 +230,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -271,7 +266,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
@@ -324,7 +318,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -333,7 +327,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -377,7 +371,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -386,7 +380,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -422,7 +416,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
     // ensure that analytics are sent.
-    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -455,7 +449,7 @@ void main() {
     ));
 
     expect(await residentWebRunner.run(), 1);
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -488,7 +482,7 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -779,7 +773,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -820,7 +813,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
