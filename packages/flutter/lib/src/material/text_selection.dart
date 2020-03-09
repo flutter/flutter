@@ -55,10 +55,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // menu items are shown.
   bool _overflowOpen = false;
 
-  // True iff which menu items are shown has changed since the widget last
-  // updated.
-  bool _menuChanged = false;
-
   // The key for _TextSelectionToolbarContainer.
   UniqueKey _containerKey = UniqueKey();
 
@@ -77,12 +73,10 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 
   @override
   void didUpdateWidget(_TextSelectionToolbar oldWidget) {
-    _menuChanged = ((widget.handleCut == null) != (oldWidget.handleCut == null))
+    if (((widget.handleCut == null) != (oldWidget.handleCut == null))
       || ((widget.handleCopy == null) != (oldWidget.handleCopy == null))
       || ((widget.handlePaste == null) != (oldWidget.handlePaste == null))
-      || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null));
-
-    if (_menuChanged) {
+      || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null))) {
       // Change _TextSelectionToolbarContainer's key when the menu changes in
       // order to cause it to rebuild. This lets it recalculate its
       // saved width for the new set of children.
@@ -106,7 +100,6 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         _getItem(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
         _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
-        //_getItem(widget.handleSelectAll, 'select absolutely everything'),
     ];
 
     // If there is no option available, build an empty widget.
@@ -140,24 +133,17 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
         ],
       ),
     );
-    // In native Android, size changes of the menu are only animated when
-    // opening and closing the overflow menu. It doesn't animate when the menu
-    // changes size to accommodate different items, such as after pressing
-    // "SELECT ALL".
-    if (!_menuChanged) {
-      child = AnimatedSize(
+
+    return _TextSelectionToolbarContainer(
+      key: _containerKey,
+      overflowOpen: _overflowOpen,
+      child: AnimatedSize(
         vsync: this,
         // This duration was eyeballed on a Pixel 2 emulator running Android
         // API 28.
         duration: const Duration(milliseconds: 140),
         child: child,
-      );
-    }
-
-    return _TextSelectionToolbarContainer(
-      key: _containerKey,
-      overflowOpen: _overflowOpen,
-      child: child,
+      ),
     );
   }
 }
