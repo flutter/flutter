@@ -50,6 +50,14 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+const TextStyle _kToolbarButtonDisabledFontStyle = TextStyle(
+  inherit: false,
+  fontSize: 14.0,
+  letterSpacing: -0.15,
+  fontWeight: FontWeight.w400,
+  color: CupertinoColors.inactiveGray,
+);
+
 // Eyeballed value.
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 
@@ -372,8 +380,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
-    //addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
-    addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
+    addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
@@ -383,6 +390,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       arrowTipX: arrowTipX,
       isArrowPointingDown: isArrowPointingDown,
       child: _CupertinoTextSelectionToolbarContent(
+        isArrowPointingDown: isArrowPointingDown,
         children: items,
       ),
     );
@@ -460,10 +468,12 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
     Key key,
     @required this.children,
+    @required this.isArrowPointingDown,
   }) : assert(children != null),
        super(key: key);
 
   final List<Widget> children;
+  final bool isArrowPointingDown;
 
   @override
   _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
@@ -526,6 +536,10 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       return null;
     }
 
+    final EdgeInsets arrowPadding = widget.isArrowPointingDown
+      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
+      : EdgeInsets.only(top: _kToolbarArrowSize.height);
+
     return DecoratedBox(
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: FadeTransition(
@@ -534,23 +548,31 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           page: _page,
           children: <Widget>[
             CupertinoButton(
-              child: Text('◀', style: _kToolbarButtonFontStyle),
+              borderRadius: null,
               color: _kToolbarBackgroundColor,
               minSize: _kToolbarHeight,
-              // TODO(justinmc): This is more complicated, see arrow padding above
-              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-              borderRadius: null,
-              pressedOpacity: 0.7,
               onPressed: _handlePreviousPage,
+              padding: arrowPadding,
+              pressedOpacity: 0.7,
+              child: Text('◀', style: _kToolbarButtonFontStyle),
             ),
             CupertinoButton(
-              child: Text('▶', style: _kToolbarButtonFontStyle),
+              borderRadius: null,
               color: _kToolbarBackgroundColor,
               minSize: _kToolbarHeight,
-              padding: EdgeInsets.only(bottom: _kToolbarArrowSize.height),
-              borderRadius: null,
-              pressedOpacity: 0.7,
               onPressed: _handleNextPage,
+              padding: arrowPadding,
+              pressedOpacity: 0.7,
+              child: Text('▶', style: _kToolbarButtonFontStyle),
+            ),
+            CupertinoButton(
+              borderRadius: null,
+              color: _kToolbarBackgroundColor,
+              minSize: _kToolbarHeight,
+              onPressed: () {},
+              padding: arrowPadding,
+              pressedOpacity: 1.0,
+              child: Text('▶', style: _kToolbarButtonDisabledFontStyle),
             ),
             ...widget.children,
           ],
@@ -619,6 +641,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     double parentWidth = 0.0;
     RenderBox buttonBack;
     RenderBox buttonForward;
+    RenderBox buttonForwardDisabled;
     int currentPage = 0;
     int i = -1;
     visitChildren((RenderObject renderObjectChild) {
@@ -627,7 +650,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
-      if (i > 2) {
+      if (i > 3) {
         if (currentPage == 0) {
           buttonWidth = buttonForward.size.width;
         } else {
@@ -655,16 +678,20 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         buttonForward = child;
         return;
       }
+      if (i == 2) {
+        buttonForwardDisabled = child;
+        return;
+      }
 
       // TODO(justinmc): Make sure that if a child is wider than the entire
       // constraints, it gets ellided.
       // If this child causes the current page to overflow, move to the next
       // page.
       if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
-        // If this is the last child and it only overflows because of the
-        // forward button, don't move to the next page.
-        final double buttonWidthLastPage = buttonWidth - buttonForward.size.width;
-        final double widthWithoutForward = pageWidth + buttonWidthLastPage + child.size.width;
+        // If this is the last child and we're still on the first page, and it
+        // only overflows because of the forward button, don't move to the next
+        // page.
+        final double widthWithoutForward = pageWidth + child.size.width;
         if (renderObjectChild != lastChild || widthWithoutForward > constraints.maxWidth) {
           currentPage++;
           pageWidth = buttonBack.size.width;
@@ -682,21 +709,33 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       }
     });
 
+    // It shoudln't be possible to navigate beyond the last page.
+    assert(page <= currentPage);
+
     // Position page nav buttons.
     if (currentPage > 0) {
       final _ToolbarItemsParentData buttonForwardParentData = buttonForward.parentData as _ToolbarItemsParentData;
+      final _ToolbarItemsParentData buttonForwardDisabledParentData = buttonForwardDisabled.parentData as _ToolbarItemsParentData;
       final _ToolbarItemsParentData buttonBackParentData = buttonBack.parentData as _ToolbarItemsParentData;
-      if (page > 0) {
-        // TODO(justinmc): I don't think that the buttons are moving forward to
-        // make room for this back button when needed.
-        buttonBackParentData.offset = Offset.zero;
-        buttonBackParentData.shouldPaint = true;
-        parentWidth += buttonBack.size.width;
-      }
-      if (page < currentPage) {
+      // The forward button always shows if there is more than one page, even on
+      // the last page (it's just disabled).
+      if (page == currentPage) {
+        buttonForwardParentData.shouldPaint = false;
+        buttonForwardDisabledParentData.offset = Offset(parentWidth, 0.0);
+        buttonForwardDisabledParentData.shouldPaint = true;
+        parentWidth += buttonForwardDisabled.size.width;
+      } else {
+        buttonForwardDisabledParentData.shouldPaint = false;
         buttonForwardParentData.offset = Offset(parentWidth, 0.0);
         buttonForwardParentData.shouldPaint = true;
         parentWidth += buttonForward.size.width;
+      }
+      if (page > 0) {
+        buttonBackParentData.offset = Offset.zero;
+        buttonBackParentData.shouldPaint = true;
+        // No need to add the width of the back button to parentWidth here. It's
+        // already been taken care of when laying out the children to
+        // accommodate the back button.
       }
     }
 
