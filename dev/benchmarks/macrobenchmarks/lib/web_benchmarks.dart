@@ -18,6 +18,8 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
+const bool isCanvasKit = bool.fromEnvironment('name', defaultValue: false);
+
 /// List of all benchmarks that run in the devicelab.
 ///
 /// When adding a new benchmark, add it to this map. Make sure that the name
@@ -28,8 +30,12 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
-  BenchTextDomLayout.benchmarkName: () => BenchTextDomLayout(),
-  BenchTextDomCachedLayout.benchmarkName: () => BenchTextDomCachedLayout(),
+
+  // Benchmarks that we don't want to run using CanvasKit.
+  if (!isCanvasKit) ...<String, RecorderFactory>{
+    BenchTextDomLayout.benchmarkName: () => BenchTextDomLayout(),
+    BenchTextDomCachedLayout.benchmarkName: () => BenchTextDomCachedLayout(),
+  }
 };
 
 /// Whether we fell back to manual mode.
