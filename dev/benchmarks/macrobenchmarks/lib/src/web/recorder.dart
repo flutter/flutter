@@ -525,7 +525,7 @@ class Profile {
     final List<String> scoreKeys = <String>[];
     final Map<String, dynamic> json = <String, dynamic>{
       'name': name,
-      'benchmarkScoreKeys': scoreKeys,
+      'scoreKeys': scoreKeys,
     };
 
     for (final String key in scoreData.keys) {
