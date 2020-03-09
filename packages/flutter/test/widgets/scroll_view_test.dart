@@ -110,7 +110,7 @@ void main() {
           color: Colors.green,
           child: TextField(
               focusNode: focusNode,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               )),
@@ -141,7 +141,7 @@ void main() {
           color: Colors.green,
           child: TextField(
               focusNode: focusNode,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               )),
