@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -121,51 +119,33 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
   testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
-    const double width = 300;
-    const double height = 100;
-    const double minExtent = 100;
-    const double maxExtent = 200;
-
-    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
-      currentExtent: maxExtent,
-      minExtent: minExtent,
-      maxExtent: maxExtent,
-      child: AppBar(
-        flexibleSpace: FlexibleSpaceBar(
-          titlePadding: EdgeInsets.zero,
-          title: Container(
-            height: height,
-            child: Text(
-              'X' * 2000,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    ) as FlexibleSpaceBarSettings;
-
+    const double height = 300.0;
+    double width;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Container(
-            width: width,
-            child: CustomScrollView(
-              primary: true,
-              slivers: <Widget>[
-                SliverPersistentHeader(
-                  floating: true,
-                  pinned: true,
-                  delegate: TestDelegate(settings: customSettings),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200.0,
-                    color: Colors.orange[400],
+          body: Builder(
+            builder: (BuildContext context) {
+              width = MediaQuery.of(context).size.width;
+              return CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    expandedHeight: height,
+                    pinned: true,
+                    stretch: true,
+                    flexibleSpace: FlexibleSpaceBar(
+                      titlePadding: EdgeInsets.zero,
+                      title: Text(
+                        'X' * 2000,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      centerTitle: false,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }
           ),
         ),
       ),
@@ -175,10 +155,10 @@ void main() {
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 1.5 times smaller than the full width.
     expect(
-      find.byType(Text),
-      paints..clipRect(rect: const Rect.fromLTWH(0, 0, width / 1.5, height)),
+      tester.getRect(find.byType(Text)),
+      Rect.fromLTRB(0, height - 30, (width / 1.5).floorToDouble(), height - 10),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool centerTitle) {
