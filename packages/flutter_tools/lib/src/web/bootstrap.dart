@@ -36,35 +36,6 @@ requireEl.src = "$requireUrl";
 // This attribute tells require JS what to load as main (defined below).
 requireEl.setAttribute("data-main", "main_module.bootstrap");
 document.head.appendChild(requireEl);
-
-
-// Invoked by connected chrome debugger for hot reload/restart support.
-window.\$hotReloadHook = function(modules) {
-  return new Promise(function(resolve, reject) {
-    if (modules == null) {
-      reject();
-    }
-    // If no modules change, return immediately.
-    if (modules.length == 0) {
-      resolve();
-    }
-    var reloadCount = 0;
-    for (var i = 0; i < modules.length; i++) {
-      require.undef(modules[i]);
-      require([modules[i]], function(module) {
-        reloadCount += 1;
-        // once we've reloaded every module, trigger the hot reload.
-        if (reloadCount == modules.length) {
-          require(["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
-            // See the doc comment under in generateMainModule.
-            window.\$dartRunMain = app[Object.keys(app)[0]].main;
-            window.\$hotReload(resolve);
-          });
-        }
-      });
-    }
-  });
-}
 ''';
 }
 
@@ -95,16 +66,6 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
 
   /* MAIN_EXTENSION_MARKER */
   child.main();
-
-  if (window.\$hotReload == null) {
-    window.\$hotReload = function(cb) {
-      dart_sdk.developer.invokeExtension("ext.flutter.disassemble", "{}").then((_) => {
-        dart_sdk.dart.hotRestart();
-        window.\$dartRunMain();
-        window.requestAnimationFrame(cb);
-      });
-    }
-  }
 
 window.\$dartLoader = {};
 window.\$dartLoader.rootDirectories = [];

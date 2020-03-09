@@ -471,7 +471,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       progressId: 'hot.restart',
     );
 
-    String reloadModules;
     if (debuggingOptions.buildInfo.isDebug) {
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
@@ -482,9 +481,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await device.generator.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
-      reloadModules = report.invalidatedModules
-        .map((String module) => '"$module"')
-        .join(',');
     } else {
       try {
         await buildWeb(
@@ -503,13 +499,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        await _wipConnection?.debugger?.sendCommand(
-          'Runtime.evaluate', params: <String, Object>{
-            'expression': 'window.\$hotReloadHook([$reloadModules])',
-            'awaitPromise': true,
-            'returnByValue': true,
-          },
-        );
+        await _vmService.callMethod('hotRestart');
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.

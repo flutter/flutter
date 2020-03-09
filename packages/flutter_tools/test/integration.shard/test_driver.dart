@@ -304,7 +304,7 @@ abstract class FlutterTestDriver {
 
   Future<Frame> getTopStackFrame() async {
     final String flutterIsolateId = await _getFlutterIsolateId();
-    final Stack stack = await _vmService.getStack(flutterIsolateId);
+    final Stack stack = await _vmService.getStack(flutterIsolateId) as Stack;
     if (stack.frames.isEmpty) {
       throw Exception('Stack is empty');
     }

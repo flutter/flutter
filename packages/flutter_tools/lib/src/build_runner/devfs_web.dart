@@ -45,11 +45,27 @@ class WebAssetServer implements AssetReader {
     this._httpServer,
     this._packages,
     this.internetAddress,
+    this._modules,
+    this._digests,
   );
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
   static const String _kDefaultMimeType = 'application/octet-stream';
+
+  final Map<String, String> _modules;
+
+  final Map<String, String> _digests;
+
+  void performRestart(List<String> modules) {
+    for (final String key in modules) {
+      // We skip computing the digest by using the hashCode of the underlying buffer.
+      // Whenever a file is updated, the corresponding Uint8List.view it corresponds
+      // to will change.
+      _digests[key] = _files[key].hashCode.toString();
+      _modules[key] = key;
+    }
+  }
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -80,6 +96,8 @@ class WebAssetServer implements AssetReader {
         httpServer,
         packages,
         address,
+        modules,
+        digests,
       );
       if (testMode) {
         return server;
@@ -104,7 +122,7 @@ class WebAssetServer implements AssetReader {
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
-          '',
+          'lib',
           (String path) async => modules,
           (String path) async => digests,
         ),
@@ -302,7 +320,7 @@ class WebAssetServer implements AssetReader {
         .replaceFirst('/', '') + '.map';
       _sourcemaps[sourcemapName] = sourcemapView;
 
-      modules.add(fileName.replaceFirst('.js', ''));
+      modules.add(fileName);
     }
     return modules;
   }
@@ -595,6 +613,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
+    webAssetServer.performRestart(modules);
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
