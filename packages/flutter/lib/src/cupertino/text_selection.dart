@@ -370,7 +370,11 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       }
 
       items.add(CupertinoButton(
-        child: Text(text, style: _kToolbarButtonFontStyle),
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+          style: _kToolbarButtonFontStyle,
+        ),
         color: _kToolbarBackgroundColor,
         minSize: _kToolbarHeight,
         padding: _kToolbarButtonPadding.add(arrowPadding),
@@ -380,6 +384,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
+    // TODO(justinmc): Test that a single long child is ellided.
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
@@ -479,7 +484,6 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   _CupertinoTextSelectionToolbarContentState createState() => _CupertinoTextSelectionToolbarContentState();
 }
 
-// TODO(justinmc): In native, the width is always the width of the first page.
 class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> with TickerProviderStateMixin {
   AnimationController _controller;
   int _page = 0;
@@ -624,18 +628,12 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     markNeedsLayout();
   }
 
-
   @override
   void performLayout() {
     if (firstChild == null) {
       performResize();
       return;
     }
-
-    // TODO(justinmc): Put the forward/back buttons as the first two items in
-    // children. Iterate the children first to determine the width of the first
-    // page. Then determine if the given page has forward/back buttons, and lay
-    // it out.
 
     double pageWidth = 0.0;
     double parentWidth = 0.0;
@@ -650,9 +648,10 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
-      if (i > 3) {
+      if (i > 2) {
         if (currentPage == 0) {
-          buttonWidth = buttonForward.size.width;
+          // If this is the last child, it's ok to fit without a forward button.
+          buttonWidth = i == childCount - 1 ? 0.0 : buttonForward.size.width;
         } else {
           buttonWidth = buttonBack.size.width + buttonForward.size.width;
         }
@@ -660,8 +659,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
       child.layout(
         BoxConstraints.loose(Size(
-          // TODO(justinmc): This might not work perfectly with the exception
-          // below where we remove a button.
           constraints.maxWidth - buttonWidth,
           constraints.maxHeight,
         )),
@@ -683,19 +680,11 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         return;
       }
 
-      // TODO(justinmc): Make sure that if a child is wider than the entire
-      // constraints, it gets ellided.
       // If this child causes the current page to overflow, move to the next
       // page.
       if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
-        // If this is the last child and we're still on the first page, and it
-        // only overflows because of the forward button, don't move to the next
-        // page.
-        final double widthWithoutForward = pageWidth + child.size.width;
-        if (renderObjectChild != lastChild || widthWithoutForward > constraints.maxWidth) {
-          currentPage++;
-          pageWidth = buttonBack.size.width;
-        }
+        currentPage++;
+        pageWidth = buttonBack.size.width;
       }
       childParentData.offset = Offset(pageWidth, 0.0);
       pageWidth += child.size.width;
