@@ -413,9 +413,9 @@ Future<LaunchResult> _startApp(DriveCommand command, Uri webUri) async {
   globals.printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
-  command._deviceLogSubscription = command
+  command._deviceLogSubscription = (await command
       .device
-      .getLogReader(app: package)
+      .getLogReader(app: package))
       .logLines
       .listen(globals.printStatus);
 
