@@ -17,7 +17,7 @@ import 'package:gen_keycodes/utils.dart';
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
 Future<String> getChromiumConversions() async {
-  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/dom_code_data.inc?cl=c3b5578091537d177f21b63732c89db3dd7b70e3');
+  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/dom_code_data.inc');
   return await http.read(keyCodeMapUri);
 }
 
