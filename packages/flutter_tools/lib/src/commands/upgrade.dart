@@ -39,7 +39,7 @@ class UpgradeCommand extends FlutterCommand {
       ..addOption(
         'working-directory',
         hide: true,
-        help: 'Override the upgrade working directoy for integration testing.'
+        help: 'Override the upgrade working directory for integration testing.'
       );
   }
 
@@ -61,7 +61,6 @@ class UpgradeCommand extends FlutterCommand {
       force: boolArg('force'),
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
@@ -78,13 +77,12 @@ class UpgradeCommandRunner {
     @required bool force,
     @required bool continueFlow,
     @required bool testFlow,
-    @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
   }) async {
+    flutterVersion.fetchTagsAndUpdate();
     if (!continueFlow) {
       await runCommandFirstHalf(
         force: force,
-        gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
         testFlow: testFlow,
       );
@@ -96,11 +94,11 @@ class UpgradeCommandRunner {
 
   Future<void> runCommandFirstHalf({
     @required bool force,
-    @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
     @required bool testFlow,
   }) async {
     await verifyUpstreamConfigured();
+    final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.

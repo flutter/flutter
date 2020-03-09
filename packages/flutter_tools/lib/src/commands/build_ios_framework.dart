@@ -232,6 +232,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
     final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
     try {
+      _flutterVersion.fetchTagsAndUpdate();
       final GitTagVersion gitTagVersion = _flutterVersion.gitTagVersion;
       if (!force && (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0)) {
         throwToolExit(

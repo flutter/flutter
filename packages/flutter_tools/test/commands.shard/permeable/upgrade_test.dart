@@ -28,14 +28,17 @@ void main() {
     UpgradeCommandRunner realCommandRunner;
     MockProcessManager processManager;
     FakePlatform fakePlatform;
-    final MockFlutterVersion flutterVersion = MockFlutterVersion();
-    const GitTagVersion gitTagVersion = GitTagVersion(1, 2, 3, 4, 5, 'asd');
-    when(flutterVersion.channel).thenReturn('dev');
+    MockFlutterVersion flutterVersion;
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
       realCommandRunner = UpgradeCommandRunner();
       processManager = MockProcessManager();
+
+      flutterVersion = MockFlutterVersion();
+      when(flutterVersion.channel).thenReturn('dev');
+      when(flutterVersion.gitTagVersion).thenReturn(const GitTagVersion(1, 2, 3, 4, 5, 'asd'));
+
       when(processManager.start(
         <String>[
           globals.fs.path.join('bin', 'flutter'),
@@ -55,12 +58,26 @@ void main() {
       });
     });
 
+    testUsingContext('fetches git tags', () async {
+      await fakeCommandRunner.runCommand(
+        force: false,
+        continueFlow: false,
+        testFlow: false,
+        flutterVersion: flutterVersion,
+      );
+      verify(flutterVersion.fetchTagsAndUpdate()).called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+
     testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+      when(flutterVersion.gitTagVersion).thenReturn(const GitTagVersion.unknown());
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         force: false,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: const GitTagVersion.unknown(),
         flutterVersion: flutterVersion,
       );
       expect(result, throwsToolExit());
@@ -69,11 +86,11 @@ void main() {
     });
 
     testUsingContext('does not throw on unknown tag, official branch, force', () async {
+      when(flutterVersion.gitTagVersion).thenReturn(const GitTagVersion.unknown());
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         force: true,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: const GitTagVersion.unknown(),
         flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
@@ -88,7 +105,6 @@ void main() {
         force: false,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
       );
       expect(result, throwsToolExit());
@@ -103,7 +119,6 @@ void main() {
         force: true,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
@@ -117,7 +132,6 @@ void main() {
         force: false,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());
@@ -132,7 +146,6 @@ void main() {
         force: false,
         continueFlow: false,
         testFlow: false,
-        gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
       );
       expect(await result, FlutterCommandResult.success());

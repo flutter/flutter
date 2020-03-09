@@ -46,6 +46,27 @@ void main() {
         ..createSync();
     });
 
+    testUsingContext('Fetches upstream tags', () async {
+      final File licenseFile = memoryFileSystem.file('license')..createSync(recursive: true);
+      when(mockCache.getLicenseFile()).thenReturn(licenseFile);
+
+      when(mockFlutterVersion.gitTagVersion).thenReturn(const GitTagVersion(1, 2, 3, 4, 0, 'deadbeef'));
+
+      final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+        aotBuilder: MockAotBuilder(),
+        bundleBuilder: MockBundleBuilder(),
+        platform: fakePlatform,
+        flutterVersion: mockFlutterVersion,
+        cache: mockCache
+      );
+
+      command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+      verify(mockFlutterVersion.fetchTagsAndUpdate()).called(1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     group('podspec', () {
       const String storageBaseUrl = 'https://fake.googleapis.com';
       const String engineRevision = '0123456789abcdef';
