@@ -504,16 +504,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     _controller.removeListener(_listener);
   }
 
-  // TODO(justinmc): I'll have to measure the children before dividing into
-  // pages. Use a RenderBox.
-  List<Widget> get _currentChildren {
-    if (widget.children.length < 3) {
-      return _page == 0 ? widget.children : <Widget>[];
-    }
-
-    return _page == 0 ? widget.children.sublist(0, 3) : widget.children.sublist(3, widget.children.length);
-  }
-
   @override
   void dispose() {
     _controller.dispose();
@@ -597,12 +587,21 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
 
 class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
-    @required this.page,
+    @required int page,
   }) : assert(page != null),
+       _page = page,
        super();
 
-  // TODO(justinmc): markNeedsLayout when this is set?
-  int page;
+  int _page;
+  int get page => _page;
+  set page(int value) {
+    if (value == _page) {
+      return;
+    }
+    _page = value;
+    markNeedsLayout();
+  }
+
 
   @override
   void performLayout() {
@@ -668,7 +667,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         final double widthWithoutForward = pageWidth + buttonWidthLastPage + child.size.width;
         if (renderObjectChild != lastChild || widthWithoutForward > constraints.maxWidth) {
           currentPage++;
-          pageWidth = 0.0;
+          pageWidth = buttonBack.size.width;
         }
       }
       childParentData.offset = Offset(pageWidth, 0.0);
@@ -724,7 +723,30 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    defaultHitTestChildren(result, position: position);
+    // The x, y parameters have the top left of the node's box as the origin.
+    RenderBox child = lastChild;
+    while (child != null) {
+      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+
+      // Don't hit test children that aren't shown.
+      if (!childParentData.shouldPaint) {
+        child = childParentData.previousSibling;
+        continue;
+      }
+
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
+        return true;
+      child = childParentData.previousSibling;
+    }
+    return false;
   }
 }
 
