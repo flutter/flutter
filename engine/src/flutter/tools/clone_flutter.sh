@@ -30,7 +30,7 @@ fi
 
 # Get latest commit's time for the engine repo.
 # Use date based on local time otherwise timezones might get mixed.
-LATEST_COMMIT_TIME_ENGINE=`git log -1 --date=local --format="%ad"`
+LATEST_COMMIT_TIME_ENGINE=`git log -1 --date=local --format="%cd"`
 echo "Latest commit time on engine found as $LATEST_COMMIT_TIME_ENGINE"
 
 # Do rest of the task in the root directory
