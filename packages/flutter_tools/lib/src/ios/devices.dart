@@ -30,19 +30,46 @@ import 'ios_workflow.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
-  IOSDevices() : super('iOS devices');
+  IOSDevices({
+    @required Platform platform,
+    @required XCDevice xcdevice,
+    @required IOSWorkflow iosWorkflow,
+  }) : _platform = platform,
+       _xcdevice = xcdevice,
+       _iosWorkflow = iosWorkflow,
+       super('iOS devices');
+
+  final Platform _platform;
+  final XCDevice _xcdevice;
+  final IOSWorkflow _iosWorkflow;
 
   @override
-  bool get supportsPlatform => globals.platform.isMacOS;
+  bool get supportsPlatform => _platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListDevices;
+  bool get canListAnything => _iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices(globals.platform, globals.xcdevice);
+  Future<List<Device>> pollingGetDevices() async {
+    if (!_platform.isMacOS) {
+      throw UnsupportedError(
+        'Control of iOS devices or simulators only supported on macOS.'
+      );
+    }
+
+    return await _xcdevice.getAvailableTetheredIOSDevices();
+  }
 
   @override
-  Future<List<String>> getDiagnostics() => IOSDevice.getDiagnostics(globals.platform, globals.xcdevice);
+  Future<List<String>> getDiagnostics() async {
+    if (!_platform.isMacOS) {
+      return const <String>[
+        'Control of iOS devices or simulators only supported on macOS.'
+      ];
+    }
+
+    return await _xcdevice.getDiagnostics();
+  }
 }
 
 class IOSDevice extends Device {
@@ -114,24 +141,6 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsStartPaused => false;
-
-  //TODO delete this
-  static Future<List<IOSDevice>> getAttachedDevices(Platform platform, XCDevice xcdevice) async {
-    if (!platform.isMacOS) {
-      throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
-    }
-
-    return await xcdevice.getAvailableTetheredIOSDevices();
-  }
-
-  //TODO delete this
-  static Future<List<String>> getDiagnostics(Platform platform, XCDevice xcdevice) async {
-    if (!platform.isMacOS) {
-      return const <String>['Control of iOS devices or simulators only supported on macOS.'];
-    }
-
-    return await xcdevice.getDiagnostics();
-  }
 
   @override
   Future<bool> isAppInstalled(IOSApp app) async {
@@ -384,7 +393,7 @@ class IOSDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await globals.iMobileDevice.takeScreenshot(outputFile); //TODO
+    await globals.iMobileDevice.takeScreenshot(outputFile);
   }
 
   @override

@@ -22,6 +22,7 @@ import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
 import 'ios/ios_deploy.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'macos/xcode.dart';
@@ -67,6 +68,7 @@ AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 IOSDeploy get iosDeploy => context.get<IOSDeploy>();
+IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 

@@ -70,7 +70,11 @@ class DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
     AndroidDevices(),
-    IOSDevices(),
+    IOSDevices(
+      platform: globals.platform,
+      xcdevice: globals.xcdevice,
+      iosWorkflow: globals.iosWorkflow,
+    ),
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),

@@ -49,6 +49,7 @@ class MockFileSystem extends Mock implements FileSystem {}
 class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 class MockLogger extends Mock implements Logger {}
 class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
 class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
@@ -1160,7 +1161,7 @@ void main() {
     });
   });
 
-  group('getAttachedDevices', () {
+  group('pollingGetDevices', () {
     MockXcdevice mockXcdevice;
     MockArtifacts mockArtifacts;
     MockCache mockCache;
@@ -1168,6 +1169,7 @@ void main() {
     MockLogger mockLogger;
     FakeProcessManager fakeProcessManager;
     IOSDeploy iosDeploy;
+    IOSWorkflow mockIosWorkflow;
 
     setUp(() {
       mockXcdevice = MockXcdevice();
@@ -1175,6 +1177,7 @@ void main() {
       mockCache = MockCache();
       mockLogger = MockLogger();
       mockFileSystem = MockFileSystem();
+      mockIosWorkflow = MockIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
@@ -1188,15 +1191,25 @@ void main() {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform unsupportedPlatform in unsupportedPlatforms) {
       testWithoutContext('throws Unsupported Operation exception on ${unsupportedPlatform.operatingSystem}', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: unsupportedPlatform,
+          xcdevice: mockXcdevice,
+          iosWorkflow: mockIosWorkflow,
+        );
         when(mockXcdevice.isInstalled).thenReturn(false);
         expect(
-            () async { await IOSDevice.getAttachedDevices(unsupportedPlatform, mockXcdevice); },
+            () async { await iosDevices.pollingGetDevices(); },
             throwsA(isA<UnsupportedError>()),
         );
       });
     }
 
     testWithoutContext('returns attached devices', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+      );
       when(mockXcdevice.isInstalled).thenReturn(true);
 
       final IOSDevice device = IOSDevice(
@@ -1213,7 +1226,7 @@ void main() {
       when(mockXcdevice.getAvailableTetheredIOSDevices())
           .thenAnswer((Invocation invocation) => Future<List<IOSDevice>>.value(<IOSDevice>[device]));
 
-      final List<IOSDevice> devices = await IOSDevice.getAttachedDevices(macPlatform, mockXcdevice);
+      final List<Device> devices = await iosDevices.pollingGetDevices();
       expect(devices, hasLength(1));
       expect(identical(devices.first, device), isTrue);
     });
@@ -1221,39 +1234,49 @@ void main() {
 
   group('getDiagnostics', () {
     MockXcdevice mockXcdevice;
+    IOSWorkflow mockIosWorkflow;
 
     setUp(() {
       mockXcdevice = MockXcdevice();
+      mockIosWorkflow = MockIOSWorkflow();
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (final Platform unsupportedPlatform in unsupportedPlatforms) {
       testWithoutContext('throws returns platform diagnostic exception on ${unsupportedPlatform.operatingSystem}', () async {
+        final IOSDevices iosDevices = IOSDevices(
+          platform: unsupportedPlatform,
+          xcdevice: mockXcdevice,
+          iosWorkflow: mockIosWorkflow,
+        );
         when(mockXcdevice.isInstalled).thenReturn(false);
-        expect((await IOSDevice.getDiagnostics(unsupportedPlatform, mockXcdevice)).first, 'Control of iOS devices or simulators only supported on macOS.');
+        expect((await iosDevices.getDiagnostics()).first, 'Control of iOS devices or simulators only supported on macOS.');
       });
     }
 
-    testUsingContext('returns diagnostics', () async {
+    testWithoutContext('returns diagnostics', () async {
+      final IOSDevices iosDevices = IOSDevices(
+        platform: macPlatform,
+        xcdevice: mockXcdevice,
+        iosWorkflow: mockIosWorkflow,
+      );
       when(mockXcdevice.isInstalled).thenReturn(true);
       when(mockXcdevice.getDiagnostics())
           .thenAnswer((Invocation invocation) => Future<List<String>>.value(<String>['Generic pairing error']));
 
-      final List<String> diagnostics = await IOSDevice.getDiagnostics(macPlatform, mockXcdevice);
+      final List<String> diagnostics = await iosDevices.getDiagnostics();
       expect(diagnostics, hasLength(1));
       expect(diagnostics.first, 'Generic pairing error');
-    }, overrides: <Type, Generator>{
-      Platform: () => macPlatform,
     });
   });
 
   group('decodeSyslog', () {
-    test('decodes a syslog-encoded line', () {
+    testWithoutContext('decodes a syslog-encoded line', () {
       final String decoded = decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });
 
-    test('passes through un-decodeable lines as-is', () {
+    testWithoutContext('passes through un-decodeable lines as-is', () {
       final String decoded = decodeSyslog(r'I \M-b\M^O syslog!');
       expect(decoded, r'I \M-b\M^O syslog!');
     });
@@ -1319,7 +1342,6 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
       expect(lines, <String>['A is for ari', 'I is for ichigo']);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
-      Platform: () => macPlatform,
     });
 
     testUsingContext('includes multi-line Flutter logs in the output', () async {
@@ -1426,7 +1448,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         fileSystem: fileSystem,
         iosDeploy: iosDeploy,
         logger: mockLogger,
-        platform: globals.platform,
+        platform: macPlatform,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64,
@@ -1486,8 +1508,8 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows {
     if (_workflows == null) {
       _workflows = <Workflow>[];
-      if (iosWorkflow.appliesToHostPlatform) {
-        _workflows.add(iosWorkflow);
+      if (globals.iosWorkflow.appliesToHostPlatform) {
+        _workflows.add(globals.iosWorkflow);
       }
     }
     return _workflows;
