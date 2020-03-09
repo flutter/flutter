@@ -248,7 +248,6 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
-    //return child.hitTest(result, position: position);
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
