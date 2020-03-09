@@ -1656,23 +1656,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    final bool isRepeatSelection = value?.selection == _lastFormattedUnmodifiedTextEditingValue?.selection;
-    // Only format when the text has changed and there are available formatters.
-    if (!isRepeatText && textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in widget.inputFormatters) {
+    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
+    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      for (final TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
-      }
-    }
-    // If the text has changed or the selection has changed, we should update the
-    // locally stored TextEditingValue to the new one.
-    if (!isRepeatText || !isRepeatSelection) {
+      _value = value;
+      _updateRemoteEditingValueIfNeeded();
+    } else {
       _value = value;
     }
-    // Always attempt to send the value. If the value has changed, then it will send,
-    // otherwise, it will short-circuit.
-    _updateRemoteEditingValueIfNeeded();
-
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
