@@ -56,7 +56,8 @@ dart_library("flutter_tools") {
 }
 
 dart_tool("fuchsia_builder") {
-  main_dart = "bin/fuchsia_builder.dart"
+  main_dart = "bin/fuchsia/fuchsia_builder.dart"
+  source_dir = "bin/fuchsia"
 
   disable_analysis = true
 
@@ -66,7 +67,8 @@ dart_tool("fuchsia_builder") {
 }
 
 dart_tool("fuchsia_asset_builder") {
-  main_dart = "bin/fuchsia_asset_builder.dart"
+  main_dart = "bin/fuchsia/fuchsia_asset_builder.dart"
+  source_dir = "bin/fuchsia"
 
   disable_analysis = true
 
@@ -152,7 +154,8 @@ dart_tool("fuchsia_asset_builder") {
 }
 
 dart_tool("fuchsia_tester") {
-  main_dart = "bin/fuchsia_tester.dart"
+  main_dart = "bin/fuchsia/fuchsia_tester.dart"
+  source_dir = "bin/fuchsia"
 
   disable_analysis = true
 
@@ -247,7 +250,8 @@ dart_tool("fuchsia_tester") {
 
 dart_tool("fuchsia_attach") {
   package_name = "fuchsia_attach"
-  main_dart = "bin/fuchsia_attach.dart"
+  main_dart = "bin/fuchsia/fuchsia_attach.dart"
+  source_dir = "bin/fuchsia"
 
   # Can be left empty as analysis is disabled.
   sources = []
