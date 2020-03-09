@@ -544,9 +544,9 @@ class EditableText extends StatefulWidget {
   final TextStyle style;
 
   /// {@template flutter.widgets.editableText.strutStyle}
-  /// The strut style used for the vertical layoutputCodepoints.
+  /// The strut style used for the vertical layout.
   ///
-  /// [StrutStyle] is used to establish a predictable vertical layoutputCodepoints.
+  /// [StrutStyle] is used to establish a predictable vertical layout.
   /// Since fonts may vary depending on user input and due to font
   /// fallback, [StrutStyle.forceStrutHeight] is enabled by default
   /// to lock all lines to the height of the base [TextStyle], provided by
@@ -1112,7 +1112,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   FocusAttachment _focusAttachment;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
-  // to ease in and outputCodepoints.
+  // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
   // The time it takes for the floating cursor to snap to the text aligned
