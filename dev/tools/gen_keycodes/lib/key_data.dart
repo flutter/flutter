@@ -99,24 +99,14 @@ class KeyData {
 
       // Windows key names
       entry.windowsKeyNames = _nameToWindowsName[entry.constantName]?.cast<String>();
-      if (entry.windowsKeyNames == null) {
-              print('*************************');
-      print('Entry constant name ${entry.constantName}');
-
-      }
-
       if (entry.windowsKeyNames != null && entry.windowsKeyNames.isNotEmpty) {
         for (final String windowsKeyName in entry.windowsKeyNames) {
           if (_nameToWindowsKeyCode[windowsKeyName] != null) {
             entry.windowsKeyCodes ??= <int>[];
             entry.windowsKeyCodes.add(_nameToWindowsKeyCode[windowsKeyName]);
-          } else {
-
           }
         }
       }
-
-
     }
 
     final Map<String, dynamic> outputMap = <String, dynamic>{};
@@ -237,7 +227,7 @@ class KeyData {
   ///  #define GLFW_KEY_SPACE              32,
   Map<String, int> _readGlfwKeyCodes(String headerFile) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-    final RegExp definedCodes = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
+    final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
     final Map<String, dynamic> replaced = <String, dynamic>{};
     for (final Match match in definedCodes.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
@@ -255,7 +245,7 @@ class KeyData {
   }
 
   Map<String, int> _readWindowsKeyCodes(String headerFile) {
-    final RegExp definedCodes = RegExp(r'''define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?''');
+    final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
     final Map<String, int> replaced = <String, int>{};
     for (final Match match in definedCodes.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2));
@@ -279,8 +269,8 @@ class KeyData {
   List<Key> _readHidEntries(String input) {
     final List<Key> entries = <Key>[];
     final RegExp usbMapRegExp = RegExp(
-        r'''DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'''
-        r'''\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)''',
+        r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
+        r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
     input = input.replaceAll(commentRegExp, '');
