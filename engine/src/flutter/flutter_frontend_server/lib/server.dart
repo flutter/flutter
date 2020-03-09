@@ -27,9 +27,11 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
 
   _FlutterFrontendCompiler(StringSink output,
       {bool unsafePackageSerialization,
+      bool useDebuggerModuleNames,
       frontend.ProgramTransformer transformer})
       : _compiler = frontend.FrontendCompiler(output,
             transformer: transformer,
+            useDebuggerModuleNames: useDebuggerModuleNames,
             unsafePackageSerialization: unsafePackageSerialization);
 
   @override
@@ -155,6 +157,7 @@ Future<int> starter(
 
   compiler ??= _FlutterFrontendCompiler(output,
       transformer: transformer,
+      useDebuggerModuleNames: options['debugger-module-names'] as bool,
       unsafePackageSerialization:
           options['unsafe-package-serialization'] as bool);
 
