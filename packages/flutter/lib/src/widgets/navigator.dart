@@ -2471,6 +2471,7 @@ class _RouteEntry extends StageableRoute {
   }
 
   static final _RouteEntryPredicate isPresentPredicate = (_RouteEntry entry) => entry.isPresent;
+  static final _RouteEntryPredicate canTransititionPredicate = (_RouteEntry entry) => entry.canTransitition;
   static final _RouteEntryPredicate willBePresentPredicate = (_RouteEntry entry) => entry.willBePresent;
 
   static _RouteEntryPredicate isRoutePredicate(Route<dynamic> route) {
@@ -3048,7 +3049,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         index -= 1;
         continue;
       }
-      final _RouteEntry next = _getRouteAfter(index + 1, _RouteEntry.isPresentPredicate);
+      final _RouteEntry next = _getRouteAfter(index + 1, _RouteEntry.canTransititionPredicate);
 
       if (next?.route != entry.lastAnnouncedNextRoute) {
         if (entry.shouldAnnounceChangeToNext(next?.route)) {
@@ -3056,7 +3057,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         entry.lastAnnouncedNextRoute = next?.route;
       }
-      final _RouteEntry previous = _getRouteBefore(index - 1, _RouteEntry.isPresentPredicate);
+      final _RouteEntry previous = _getRouteBefore(index - 1, _RouteEntry.canTransititionPredicate);
       if (previous?.route != entry.lastAnnouncedPreviousRoute) {
         entry.route.didChangePrevious(previous?.route);
         entry.lastAnnouncedPreviousRoute = previous?.route;
