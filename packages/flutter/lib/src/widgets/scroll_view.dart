@@ -338,9 +338,7 @@ abstract class ScrollView extends StatelessWidget {
         child: scrollableResult,
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
-          if (notification.dragDetails != null &&
-              (focusScope.focusedChild != null &&
-                  focusScope.focusedChild.hasFocus)) {
+          if (notification.dragDetails != null && focusScope.hasFocus) {
             focusScope.unfocus();
           }
           return false;
