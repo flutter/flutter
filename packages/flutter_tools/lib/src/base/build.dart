@@ -13,7 +13,6 @@ import '../compile.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 import 'context.dart';
 import 'file_system.dart';
@@ -341,7 +340,7 @@ class AOTSnapshotter {
     if (reportTimings) {
       globals.printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
-    flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
+    globals.flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
     return value;
   }
 }

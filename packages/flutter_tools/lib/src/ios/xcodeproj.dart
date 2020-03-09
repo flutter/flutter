@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -209,20 +210,9 @@ List<String> _xcodeBuildSettingsLines({
 
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = globals.fs.path.basename(localEngineArtifacts.engineOutPath);
-    String engineBuildMode = 'release';
-    if (engineOutPath.toLowerCase().contains('debug')) {
-      engineBuildMode = 'debug';
-    } else if (engineOutPath.toLowerCase().contains('profile')) {
-      engineBuildMode = 'profile';
-    }
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=$engineOutPath');
-    // Only write this for local engines, where it is supposed to be sticky to
-    // match the engine configuration. Avoid writing it otherwise so that it
-    // does not stick the user with the wrong build mode, particularly for
-    // existing app use cases.
-    xcodeBuildSettings.add('FLUTTER_BUILD_MODE=$engineBuildMode');
+    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -244,6 +234,10 @@ List<String> _xcodeBuildSettingsLines({
 
   if (buildInfo.treeShakeIcons) {
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
+  }
+
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
   }
 
   return xcodeBuildSettings;

@@ -189,7 +189,7 @@ class MDnsObservatoryDiscovery {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     switch (targetPlatform) {
       case TargetPlatform.ios:
-        UsageEvent('ios-mdns', 'no-ipv4-link-local').send();
+        UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: globals.flutterUsage).send();
         globals.printError(
           'The mDNS query for an attached iOS device failed. It may '
           'be necessary to disable the "Personal Hotspot" on the device, and '
