@@ -50,6 +50,15 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     return surface;
   }
 
+  /// Adds [surface] to the surface tree.
+  ///
+  /// This is used by tests.
+  void debugAddSurface(PersistedSurface surface) {
+    if (assertionsEnabled) {
+      _addSurface(surface);
+    }
+  }
+
   void _addSurface(PersistedSurface surface) {
     _adoptSurface(surface);
   }

@@ -142,19 +142,28 @@ void main() {
     //   A         A
     //   |         |
     //   B     ┌──>C
-    //   |     │
-    //   C ────┘
+    //   |     │   |
+    //   C ────┘   L
+    //   |
+    //   L
+    //
+    // Layer "L" is a logging layer used to track what would happen to the
+    // child of "C" as it's being dragged around the tree. For example, we
+    // check that the child doesn't get discarded by mistake.
     test('reparents DOM element when updated', () {
-      final SceneBuilder builder1 = SceneBuilder();
+      final _LoggingTestSurface logger = _LoggingTestSurface();
+      final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
       final PersistedTransform a1 =
           builder1.pushTransform(Matrix4.identity().storage);
       final PersistedOpacity b1 = builder1.pushOpacity(100);
       final PersistedTransform c1 =
           builder1.pushTransform(Matrix4.identity().storage);
+      builder1.debugAddSurface(logger);
       builder1.pop();
       builder1.pop();
       builder1.pop();
       builder1.build();
+      expect(logger.log, <String>['build', 'createElement', 'apply']);
 
       final html.Element elementA = a1.rootElement;
       final html.Element elementB = b1.rootElement;
@@ -163,14 +172,21 @@ void main() {
       expect(elementC.parent, elementB);
       expect(elementB.parent, elementA);
 
-      final SceneBuilder builder2 = SceneBuilder();
+      final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       final PersistedTransform a2 =
           builder2.pushTransform(Matrix4.identity().storage, oldLayer: a1);
       final PersistedTransform c2 =
           builder2.pushTransform(Matrix4.identity().storage, oldLayer: c1);
+      builder2.addRetained(logger);
       builder2.pop();
       builder2.pop();
+
+      expect(c1.isPendingUpdate, true);
+      expect(c2.isCreated, true);
       builder2.build();
+      expect(logger.log, <String>['build', 'createElement', 'apply', 'retain']);
+      expect(c1.isReleased, true);
+      expect(c2.isActive, true);
 
       expect(a2.rootElement, elementA);
       expect(b1.rootElement, isNull);
@@ -189,6 +205,8 @@ void main() {
       final html.Element element = opacityLayer.rootElement;
 
       final SceneBuilder builder2 = SceneBuilder();
+
+      expect(opacityLayer.isActive, true);
       builder2.addRetained(opacityLayer);
       expect(opacityLayer.isPendingRetention, true);
 
@@ -198,20 +216,25 @@ void main() {
     });
 
     test('revives released surface when retained', () {
-      final SceneBuilder builder1 = SceneBuilder();
+      final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
       final PersistedOpacity opacityLayer = builder1.pushOpacity(100);
+      final _LoggingTestSurface logger = _LoggingTestSurface();
+      builder1.debugAddSurface(logger);
       builder1.pop();
       builder1.build();
       expect(opacityLayer.isActive, true);
+      expect(logger.log, <String>['build', 'createElement', 'apply']);
       final html.Element element = opacityLayer.rootElement;
 
       SceneBuilder().build();
       expect(opacityLayer.isReleased, true);
       expect(opacityLayer.rootElement, isNull);
+      expect(logger.log, <String>['build', 'createElement', 'apply', 'discard']);
 
       final SceneBuilder builder2 = SceneBuilder();
       builder2.addRetained(opacityLayer);
       expect(opacityLayer.isCreated, true); // revived
+      expect(logger.log, <String>['build', 'createElement', 'apply', 'discard', 'revive']);
 
       builder2.build();
       expect(opacityLayer.isActive, true);
@@ -328,4 +351,58 @@ void main() {
           opacityLayer2.rootElement, element); // adopts old surface's element
     });
   });
+}
+
+class _LoggingTestSurface extends PersistedContainerSurface {
+  final List<String> log = <String>[];
+
+  _LoggingTestSurface() : super(null);
+
+  void build() {
+    log.add('build');
+    super.build();
+  }
+
+  @override
+  void apply() {
+    log.add('apply');
+  }
+
+  @override
+  html.Element createElement() {
+    log.add('createElement');
+    return html.Element.tag('flt-test-layer');
+  }
+
+  @override
+  void update(_LoggingTestSurface oldSurface) {
+    log.add('update');
+    super.update(oldSurface);
+  }
+
+  void adoptElements(covariant PersistedSurface oldSurface) {
+    log.add('adoptElements');
+    super.adoptElements(oldSurface);
+  }
+
+  void retain() {
+    log.add('retain');
+    super.retain();
+  }
+
+  @override
+  void discard() {
+    log.add('discard');
+    super.discard();
+  }
+
+  void revive() {
+    log.add('revive');
+    super.revive();
+  }
+
+  @override
+  double matchForUpdate(PersistedSurface existingSurface) {
+    return 1.0;
+  }
 }
