@@ -1113,6 +1113,8 @@ class AdbLogReader extends DeviceLogReader {
   // adb logcat. We are currently passing 'time', which has the format:
   // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
+    // This line might be processed after the subscription is closed but before
+    // adb stops streaming logs.
     if (_linesController.isClosed) {
       return;
     }
