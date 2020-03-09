@@ -135,6 +135,10 @@ class VMService implements vm_service.VmService {
     });
 
     if (reloadSources != null) {
+      _delegateService.registerService('reloadSources', 'Flutter Tools');
+      _delegateService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) {
+        return null;
+      });
       _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].value as String;
         final bool force = params.asMap['force'] as bool ?? false;
@@ -162,6 +166,10 @@ class VMService implements vm_service.VmService {
     }
 
     if (reloadMethod != null) {
+      _delegateService.registerService('reloadMethod', 'Flutter Tools');
+      _delegateService.registerServiceCallback('reloadMethod', (Map<String, dynamic> params) {
+        return null;
+      });
       // Register a special method for hot UI. while this is implemented
       // currently in the same way as hot reload, it leaves the tool free
       // to change to a more efficient implementation in the future.
@@ -204,6 +212,10 @@ class VMService implements vm_service.VmService {
     }
 
     if (restart != null) {
+      _delegateService.registerService('hotRestart', 'Flutter Tools');
+      _delegateService.registerServiceCallback('hotRestart', (Map<String, dynamic> params) {
+        return null;
+      });
       _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
         final bool pause = params.asMap['pause'] as bool ?? false;
 
@@ -228,6 +240,11 @@ class VMService implements vm_service.VmService {
       });
     }
 
+    _delegateService.registerService('flutterVersion', 'Flutter Tools');
+    _delegateService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) {
+      return null;
+    });
+
     _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
       final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
@@ -242,6 +259,10 @@ class VMService implements vm_service.VmService {
     });
 
     if (compileExpression != null) {
+      _delegateService.registerService('compileExpression', 'Flutter Tools');
+      _delegateService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) {
+        return null;
+      });
       _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty) {
@@ -281,6 +302,10 @@ class VMService implements vm_service.VmService {
       });
     }
     if (device != null) {
+      _delegateService.registerService('flutterMemoryInfo', 'Flutter Tools');
+      _delegateService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) {
+        return null;
+      });
       _peer.registerMethod('flutterMemoryInfo', (rpc.Parameters params) async {
         final MemoryInfo result = await device.queryMemoryInfo();
         return result.toJson();
