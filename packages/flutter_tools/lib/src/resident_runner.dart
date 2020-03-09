@@ -426,7 +426,7 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    unawaited(startEchoingDeviceLog());
+    await startEchoingDeviceLog();
 
     // Start the application.
     final Future<LaunchResult> futureResult = device.startApp(
@@ -499,7 +499,7 @@ class FlutterDevice {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
 
-    unawaited(startEchoingDeviceLog());
+    await startEchoingDeviceLog();
 
     final LaunchResult result = await device.startApp(
       package,

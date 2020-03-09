@@ -224,6 +224,7 @@ class AndroidDevice extends Device {
 
   Future<String> get _sdkVersion => _getProperty('ro.build.version.release');
 
+  @visibleForTesting
   Future<String> get apiVersion => _getProperty('ro.build.version.sdk');
 
   AdbLogReader _logReader;
@@ -491,8 +492,6 @@ class AndroidDevice extends Device {
         !await _checkForSupportedAndroidVersion()) {
       return LaunchResult.failed();
     }
-    // Initialize the log reader eagerly during startApp.
-    _logReader = await AdbLogReader.createLogReader(this, globals.processManager);
 
     final TargetPlatform devicePlatform = await targetPlatform;
     if (devicePlatform == TargetPlatform.android_x86 &&
@@ -1016,13 +1015,15 @@ void parseADBDeviceOutput(
 
 /// A log reader that logs from `adb logcat`.
 class AdbLogReader extends DeviceLogReader {
-  @visibleForTesting
-  AdbLogReader.test(this.adbProcess, this.name)  {
+  AdbLogReader._(this._adbProcess, this.name)  {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
       onCancel: _stop,
     );
   }
+
+  @visibleForTesting
+  factory AdbLogReader.test(Process adbProcess, String name) = AdbLogReader._;
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
@@ -1049,10 +1050,10 @@ class AdbLogReader extends DeviceLogReader {
       ],
     ];
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader.test(process, device.name);
+    return AdbLogReader._(process, device.name);
   }
 
-  final Process adbProcess;
+  final Process _adbProcess;
 
   @override
   final String name;
@@ -1066,13 +1067,13 @@ class AdbLogReader extends DeviceLogReader {
     // We expect logcat streams to occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
     const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
-    adbProcess.stdout.transform<String>(decoder)
+    _adbProcess.stdout.transform<String>(decoder)
       .transform<String>(const LineSplitter())
       .listen(_onLine);
-    adbProcess.stderr.transform<String>(decoder)
+    _adbProcess.stderr.transform<String>(decoder)
       .transform<String>(const LineSplitter())
       .listen(_onLine);
-    unawaited(adbProcess.exitCode.whenComplete(() {
+    unawaited(_adbProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener) {
         _linesController.close();
       }
@@ -1175,7 +1176,7 @@ class AdbLogReader extends DeviceLogReader {
 
   void _stop() {
     _linesController.close();
-    adbProcess?.kill();
+    _adbProcess?.kill();
   }
 
   @override
