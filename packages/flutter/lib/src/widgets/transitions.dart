@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -970,11 +969,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-    this.textWidthBasis = TextWidthBasis.parent,
-    this.textHeightBehavior,
   }) : assert(style != null),
        assert(child != null),
-       assert(textWidthBasis != null),
        super(key: key, listenable: style);
 
   /// The animation that controls the descendants' text style.
@@ -997,14 +993,6 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// See [DefaultTextStyle.maxLines] for more details.
   final int maxLines;
 
-  /// The strategy to use when calculating the width of the Text.
-  ///
-  /// See [TextWidthBasis] for possible values and their implications.
-  final TextWidthBasis textWidthBasis;
-
-  /// {@macro flutter.dart:ui.textHeightBehavior}
-  final ui.TextHeightBehavior textHeightBehavior;
-
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
@@ -1018,8 +1006,6 @@ class DefaultTextStyleTransition extends AnimatedWidget {
       softWrap: softWrap,
       overflow: overflow,
       maxLines: maxLines,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
       child: child,
     );
   }

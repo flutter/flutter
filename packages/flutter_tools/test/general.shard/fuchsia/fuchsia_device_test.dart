@@ -476,7 +476,7 @@ void main() {
 
       try {
         await device.takeScreenshot(globals.fs.file('file.ppm'));
-      } catch (_) {
+      } on Exception {
         assert(false);
       }
       expect(
@@ -534,8 +534,8 @@ void main() {
 
       try {
         await device.takeScreenshot(globals.fs.file('file.ppm'));
-      } catch (_) {
-        assert(false);
+      } on Exception catch (e) {
+        fail('Unexpected exception: $e');
       }
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

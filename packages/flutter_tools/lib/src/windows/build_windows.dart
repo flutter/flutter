@@ -12,7 +12,6 @@ import '../cache.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'property_sheet.dart';
 import 'visual_studio.dart';
 
@@ -76,7 +75,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (result != 0) {
     throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
-  flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// Writes the generatedPropertySheetFile with the configuration for the given build.

@@ -921,8 +921,8 @@ void main() {
         outputPreferences: OutputPreferences.test(showColor: false),
         timeoutConfiguration: const TimeoutConfiguration(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
       final List<String> output = outputStdout();
 
       expect(output.length, equals(3));
@@ -947,8 +947,8 @@ void main() {
         ),
         stopwatchFactory: FakeStopwatchFactory(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
 
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA$'),
@@ -967,8 +967,8 @@ void main() {
         ),
         outputPreferences: OutputPreferences.test(),
       );
-      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
-      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation).stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation).stop();
 
       expect(logger.statusText, 'AAA\nBBB\n');
     });

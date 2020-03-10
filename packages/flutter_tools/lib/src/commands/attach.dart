@@ -61,7 +61,7 @@ class AttachCommand extends FlutterCommand {
     usesIpv6Flag();
     usesFilesystemOptions(hide: !verboseHelp);
     usesFuchsiaOptions(hide: !verboseHelp);
-    usesDartDefines();
+    usesDartDefineOption();
     argParser
       ..addOption(
         'debug-port',
@@ -114,7 +114,7 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       return int.parse(stringArg('debug-port'));
-    } catch (error) {
+    } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
     return null;
@@ -201,7 +201,6 @@ class AttachCommand extends FlutterCommand {
           stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(),
           logToStdout: true,
-          dartDefines: dartDefines,
         )
       : null;
 
@@ -222,7 +221,7 @@ class AttachCommand extends FlutterCommand {
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } catch (_) {
+        } on Exception {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (final ForwardedPort port in ports) {
@@ -246,7 +245,7 @@ class AttachCommand extends FlutterCommand {
       if (observatoryUri == null) {
         final ProtocolDiscovery observatoryDiscovery =
           ProtocolDiscovery.observatory(
-            device.getLogReader(),
+            await device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,
@@ -292,7 +291,7 @@ class AttachCommand extends FlutterCommand {
             globals.fs.currentDirectory,
             LaunchMode.attach,
           );
-        } catch (error) {
+        } on Exception catch (error) {
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();
@@ -348,14 +347,12 @@ class AttachCommand extends FlutterCommand {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      trackWidgetCreation: boolArg('track-widget-creation'),
       fileSystemRoots: stringsArg('filesystem-root'),
       fileSystemScheme: stringArg('filesystem-scheme'),
       viewFilter: stringArg('isolate-filter'),
       target: stringArg('target'),
       targetModel: TargetModel(stringArg('target-model')),
-      buildMode: getBuildMode(),
-      dartDefines: dartDefines,
+      buildInfo: getBuildInfo(),
     );
     flutterDevice.observatoryUris = observatoryUris;
     final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

@@ -136,7 +136,7 @@ abstract class OperatingSystemUtils {
         return findFreePort(ipv6: true);
       }
       _logger.printTrace('findFreePort failed: $e');
-    } catch (e) {
+    } on Exception catch (e) {
       // Failures are signaled by a return value of 0 from this function.
       _logger.printTrace('findFreePort failed: $e');
     } finally {
@@ -223,7 +223,7 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyZip(File zipFile) =>
-    _processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
