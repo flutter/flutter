@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
@@ -28,6 +31,10 @@ void main() {
       botDetector = BotDetector(
         platform: fakePlatform,
         httpClientFactory: () => mockHttpClient,
+        persistentToolState: PersistentToolState.test(
+          directory: MemoryFileSystem.test().currentDirectory,
+          logger: BufferLogger.test(),
+        ),
       );
     });
 
@@ -77,6 +84,7 @@ void main() {
 
   group('AzureDetector', () {
     AzureDetector azureDetector;
+    PersistentToolState persistentToolState;
     MockHttpClient mockHttpClient;
     MockHttpClientRequest mockHttpClientRequest;
     MockHttpHeaders mockHttpHeaders;
@@ -85,16 +93,30 @@ void main() {
       mockHttpClient = MockHttpClient();
       mockHttpClientRequest = MockHttpClientRequest();
       mockHttpHeaders = MockHttpHeaders();
+      persistentToolState = PersistentToolState.test(
+        directory: MemoryFileSystem.test().currentDirectory,
+        logger: BufferLogger.test(),
+      );
       azureDetector = AzureDetector(
         httpClientFactory: () => mockHttpClient,
+        persistentToolState: persistentToolState,
       );
+    });
+
+    testWithoutContext('isRunningOnAzure uses cached value in config', () async {
+      persistentToolState.isBot = false;
+
+      expect(await azureDetector.isRunningOnAzure, isFalse);
+      verifyNever(mockHttpClient.getUrl(any));
     });
 
     testWithoutContext('isRunningOnAzure returns false when connection times out', () async {
       when(mockHttpClient.getUrl(any)).thenAnswer((_) {
         throw const SocketException('HTTP connection timed out');
       });
+
       expect(await azureDetector.isRunningOnAzure, isFalse);
+      expect(persistentToolState.isBot, isFalse);
     });
 
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {
@@ -102,7 +124,9 @@ void main() {
         return Future<HttpClientRequest>.value(mockHttpClientRequest);
       });
       when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
+
       expect(await azureDetector.isRunningOnAzure, isTrue);
+      expect(persistentToolState.isBot, isTrue);
     });
   });
 }

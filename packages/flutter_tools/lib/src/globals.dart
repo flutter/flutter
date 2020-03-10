@@ -80,6 +80,7 @@ XCDevice get xcdevice => context.get<XCDevice>();
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
+  persistentToolState: persistentToolState,
 );
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;

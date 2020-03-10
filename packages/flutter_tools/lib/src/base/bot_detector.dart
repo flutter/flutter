@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
+import '../persistent_tool_state.dart';
 import 'io.dart';
 import 'net.dart';
 
@@ -12,10 +13,12 @@ class BotDetector {
   BotDetector({
     @required HttpClientFactory httpClientFactory,
     @required Platform platform,
+    @required PersistentToolState persistentToolState,
   }) :
     _platform = platform,
     _azureDetector = AzureDetector(
       httpClientFactory: httpClientFactory,
+      persistentToolState: persistentToolState,
     );
 
   final Platform _platform;
@@ -81,20 +84,24 @@ class BotDetector {
 class AzureDetector {
   AzureDetector({
     @required HttpClientFactory httpClientFactory,
-  }) : _httpClientFactory = httpClientFactory;
+    @required PersistentToolState persistentToolState,
+  }) : _httpClientFactory = httpClientFactory,
+       _persistentToolState = persistentToolState;
 
   static const String _serviceUrl = 'http://169.254.169.254/metadata/instance';
 
   final HttpClientFactory _httpClientFactory;
+  final PersistentToolState _persistentToolState;
 
   bool _isRunningOnAzure;
 
   Future<bool> get isRunningOnAzure async {
+    _isRunningOnAzure = _persistentToolState.isBot;
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure;
     }
     final HttpClient client = _httpClientFactory()
-      ..connectionTimeout = const Duration(seconds: 1);
+      ..connectionTimeout = const Duration(milliseconds: 250);
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
@@ -104,13 +111,16 @@ class AzureDetector {
     } on SocketException {
       // If there is an error on the socket, it probalby means that we are not
       // running on Azure.
+      _persistentToolState.isBot = false;
       return _isRunningOnAzure = false;
     } on HttpException {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
+      _persistentToolState.isBot = true;
       return _isRunningOnAzure = true;
     }
     // We got a response. We're running on Azure.
+    _persistentToolState.isBot = true;
     return _isRunningOnAzure = true;
   }
 }
