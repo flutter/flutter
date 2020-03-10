@@ -10,6 +10,10 @@ import 'semantics_tester.dart';
 void main() {
   group('Available semantic scroll actions', () {
     // Regression tests for https://github.com/flutter/flutter/issues/52032.
+
+    const int itemCount = 10;
+    const double itemHeight = 150.0;
+
     testWidgets('forward vertical', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
@@ -19,10 +23,10 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListView.builder(
             controller: controller,
-            itemCount: 10,
+            itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
               return SizedBox(
-                height: 150,
+                height: itemHeight,
                 child: Text('Tile $index'),
               );
             },
@@ -33,7 +37,7 @@ void main() {
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
 
       // Jump to the end.
-      controller.jumpTo(10 * 150.0);
+      controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown]));
 
@@ -50,10 +54,10 @@ void main() {
           child: ListView.builder(
             reverse: true,
             controller: controller,
-            itemCount: 10,
+            itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
               return SizedBox(
-                height: 150,
+                height: itemHeight,
                 child: Text('Tile $index'),
               );
             },
@@ -64,7 +68,7 @@ void main() {
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollDown]));
 
       // Jump to the end.
-      controller.jumpTo(10 * 150.0);
+      controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp]));
 
@@ -81,10 +85,10 @@ void main() {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             controller: controller,
-            itemCount: 10,
+            itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
               return SizedBox(
-                height: 150,
+                height: itemHeight,
                 child: Text('Tile $index'),
               );
             },
@@ -95,7 +99,7 @@ void main() {
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
 
       // Jump to the end.
-      controller.jumpTo(10 * 150.0);
+      controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
 
@@ -113,10 +117,10 @@ void main() {
             scrollDirection: Axis.horizontal,
             reverse: true,
             controller: controller,
-            itemCount: 10,
+            itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) {
               return SizedBox(
-                height: 150,
+                height: itemHeight,
                 child: Text('Tile $index'),
               );
             },
@@ -127,7 +131,7 @@ void main() {
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
 
       // Jump to the end.
-      controller.jumpTo(10 * 150.0);
+      controller.jumpTo(itemCount * itemHeight);
       await tester.pumpAndSettle();
       expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
 
