@@ -306,6 +306,8 @@ FILE: ../../../flutter/lib/ui/painting/image.cc
 FILE: ../../../flutter/lib/ui/painting/image.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder.cc
 FILE: ../../../flutter/lib/ui/painting/image_decoder.h
+FILE: ../../../flutter/lib/ui/painting/image_decoder_test.cc
+FILE: ../../../flutter/lib/ui/painting/image_decoder_test.h
 FILE: ../../../flutter/lib/ui/painting/image_decoder_unittests.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h

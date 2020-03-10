@@ -12,12 +12,15 @@
 namespace flutter {
 
 MultiFrameCodec::MultiFrameCodec(std::unique_ptr<SkCodec> codec)
+    : state_(new State(std::move(codec))) {}
+
+MultiFrameCodec::~MultiFrameCodec() = default;
+
+MultiFrameCodec::State::State(std::unique_ptr<SkCodec> codec)
     : codec_(std::move(codec)),
       frameCount_(codec_->getFrameCount()),
       repetitionCount_(codec_->getRepetitionCount()),
       nextFrameIndex_(0) {}
-
-MultiFrameCodec::~MultiFrameCodec() = default;
 
 static void InvokeNextFrameCallback(
     fml::RefPtr<FrameInfo> frameInfo,
@@ -70,7 +73,7 @@ static bool CopyToBitmap(SkBitmap* dst,
   return true;
 }
 
-sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
+sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrContext> resourceContext) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
@@ -128,7 +131,7 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
   }
 }
 
-void MultiFrameCodec::GetNextFrameAndInvokeCallback(
+void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     fml::WeakPtr<GrContext> resourceContext,
@@ -167,9 +170,16 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [callback = std::make_unique<DartPersistentValue>(
            tonic::DartState::Current(), callback_handle),
-       this, trace_id, ui_task_runner = task_runners.GetUITaskRunner(),
+       weak_state = std::weak_ptr<MultiFrameCodec::State>(state_), trace_id,
+       ui_task_runner = task_runners.GetUITaskRunner(),
        io_manager = dart_state->GetIOManager()]() mutable {
-        GetNextFrameAndInvokeCallback(
+        auto state = weak_state.lock();
+        if (!state) {
+          ui_task_runner->PostTask(fml::MakeCopyable(
+              [callback = std::move(callback)]() { callback->Clear(); }));
+          return;
+        }
+        state->GetNextFrameAndInvokeCallback(
             std::move(callback), std::move(ui_task_runner),
             io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
             trace_id);
@@ -179,11 +189,11 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 }
 
 int MultiFrameCodec::frameCount() const {
-  return frameCount_;
+  return state_->frameCount_;
 }
 
 int MultiFrameCodec::repetitionCount() const {
-  return repetitionCount_;
+  return state_->repetitionCount_;
 }
 
 }  // namespace flutter
