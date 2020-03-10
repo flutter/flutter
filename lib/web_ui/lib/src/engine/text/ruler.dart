@@ -244,7 +244,8 @@ class TextDimensions {
 
   /// Applies geometric style properties to the [element].
   void applyStyle(ParagraphGeometricStyle style) {
-    _element.style
+    final html.CssStyleDeclaration elementStyle = _element.style;
+    elementStyle
       ..fontSize = style.fontSize != null ? '${style.fontSize.floor()}px' : null
       ..fontFamily = canonicalizeFontFamily(style.effectiveFontFamily)
       ..fontWeight =
@@ -255,10 +256,16 @@ class TextDimensions {
       ..letterSpacing =
           style.letterSpacing != null ? '${style.letterSpacing}px' : null
       ..wordSpacing =
-          style.wordSpacing != null ? '${style.wordSpacing}px' : null
-      ..textDecoration = style.decoration;
+          style.wordSpacing != null ? '${style.wordSpacing}px' : null;
+    final String decoration = style.decoration;
+    if (browserEngine == BrowserEngine.webkit) {
+      domRenderer.setElementStyle(
+          _element, '-webkit-text-decoration', decoration);
+    } else {
+      elementStyle.textDecoration = decoration;
+    }
     if (style.lineHeight != null) {
-      _element.style.lineHeight = style.lineHeight.toString();
+      elementStyle.lineHeight = style.lineHeight.toString();
     }
     _invalidateBoundsCache();
   }
@@ -277,7 +284,20 @@ class TextDimensions {
   double get width => _readAndCacheMetrics().width;
 
   /// The height of the paragraph being measured.
-  double get height => _readAndCacheMetrics().height;
+  double get height {
+    double cachedHeight = _readAndCacheMetrics().height;
+    if (browserEngine == BrowserEngine.firefox &&
+      // In the flutter tester environment, we use a predictable-size for font
+      // measurement tests.
+      !ui.debugEmulateFlutterTesterEnvironment) {
+      // See subpixel rounding bug :
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=442139
+      // This causes bottom of letters such as 'y' to be cutoff and
+      // incorrect rendering of double underlines.
+      cachedHeight += 1.0;
+    }
+    return cachedHeight;
+  }
 }
 
 /// Performs 4 types of measurements:
