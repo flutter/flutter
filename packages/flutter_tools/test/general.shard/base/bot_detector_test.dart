@@ -82,7 +82,7 @@ void main() {
         when(mockHttpClientRequest.headers).thenReturn(mockHttpHeaders);
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isTrue);
       });
 
       testWithoutContext('caches azure bot detection results across instances', () async {
@@ -104,7 +104,7 @@ void main() {
         fakePlatform.environment['BORG_ALLOC_DIR'] = 'true';
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isFalse);
+        expect(persistentToolState.isRunningOnBot, isTrue);
       });
     });
   });
