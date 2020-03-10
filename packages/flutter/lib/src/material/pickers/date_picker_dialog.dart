@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -21,6 +23,12 @@ import 'date_picker_common.dart';
 import 'date_picker_header.dart';
 import 'date_utils.dart' as utils;
 import 'input_date_picker.dart';
+
+const Size _calendarPortraitDialogSize = Size(330.0, 518.0);
+const Size _calendarLandscapeDialogSize = Size(496.0, 346.0);
+const Size _inputPortraitDialogSize = Size(330.0, 270.0);
+const Size _inputLandscapeDialogSize = Size(496, 160.0);
+const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 250);
 
 /// Shows a dialog containing a Material Design date picker.
 ///
@@ -302,6 +310,29 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     setState(() => _selectedDate = date);
   }
 
+  Size _dialogSize(BuildContext context) {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    switch (_entryMode) {
+      case DatePickerEntryMode.calendar:
+        switch (orientation) {
+          case Orientation.portrait:
+            return _calendarPortraitDialogSize;
+          case Orientation.landscape:
+            return _calendarLandscapeDialogSize;
+        }
+        break;
+      case DatePickerEntryMode.input:
+        switch (orientation) {
+          case Orientation.portrait:
+            return _inputPortraitDialogSize;
+          case Orientation.landscape:
+            return _inputLandscapeDialogSize;
+        }
+        break;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -309,6 +340,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
+    final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
     final String dateText = _selectedDate != null
       ? localizations.formatMediumDate(_selectedDate)
@@ -379,51 +411,64 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         break;
     }
 
+    final Widget header = DatePickerHeader(
+      // TODO(darrenaustin): localize 'SELECT DATE'
+      helpText: widget.helpText ?? 'SELECT DATE',
+      titleText: dateText,
+      titleStyle: dateStyle,
+      orientation: orientation,
+      isShort: orientation == Orientation.landscape,
+      icon: entryModeIcon,
+      iconTooltip: entryModeTooltip,
+      onIconPressed: _handelEntryModeToggle,
+    );
+
+    final Size dialogSize = _dialogSize(context) * textScaleFactor;
     return Dialog(
-      child: Builder(builder: (BuildContext context) {
-        final Orientation orientation = MediaQuery.of(context).orientation;
-        final Widget header = DatePickerHeader(
-          // TODO(darrenaustin): localize 'SELECT DATE'
-          helpText: widget.helpText ?? 'SELECT DATE',
-          titleText: dateText,
-          titleStyle: dateStyle,
-          orientation: orientation,
-          icon: entryModeIcon,
-          iconTooltip: entryModeTooltip,
-          onIconPressed: _handelEntryModeToggle,
-        );
-        switch (orientation) {
-          case Orientation.portrait:
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                header,
-                Flexible(child: picker),
-                actions,
-              ],
-            );
-          case Orientation.landscape:
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                header,
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Flexible(child: picker),
-                      actions,
-                    ],
-                  ),
-                ),
-              ],
-            );
-        }
-        return null;
-      }),
+      child: AnimatedContainer(
+        width: dialogSize.width,
+        height: dialogSize.height,
+        duration: _dialogSizeAnimationDuration,
+        curve: Curves.easeIn,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaleFactor: textScaleFactor,
+          ),
+          child: Builder(builder: (BuildContext context) {
+            switch (orientation) {
+              case Orientation.portrait:
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    Expanded(child: picker),
+                    actions,
+                  ],
+                );
+              case Orientation.landscape:
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    header,
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Expanded(child: picker),
+                          actions,
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+            }
+            return null;
+          }),
+        ),
+      ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4.0))

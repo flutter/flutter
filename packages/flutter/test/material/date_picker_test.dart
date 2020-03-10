@@ -753,10 +753,6 @@ void main() {
           label: '30, Saturday, January 30, 2016',
           hasTapAction: true,
         ));
-        expect(tester.getSemantics(find.text('31')), matchesSemantics(
-          label: '31, Sunday, January 31, 2016',
-          hasTapAction: true,
-        ));
 
         // Ok/Cancel buttons
         expect(tester.getSemantics(find.text('OK')), matchesSemantics(
@@ -807,8 +803,8 @@ void main() {
           isButton: true,
         ));
 
-        // Year grid only shows 2010 - 2027
-        for (int year = 2010; year <= 2027; year++) {
+        // Year grid only shows 2010 - 2024
+        for (int year = 2010; year <= 2024; year++) {
           expect(tester.getSemantics(find.text('$year')), matchesSemantics(
             label: '$year',
             hasTapAction: true,
