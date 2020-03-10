@@ -25,8 +25,8 @@ void main() {
           '-v',
           'time',
           '-T',
-          kLastLogcatTimestamp
-        ]
+          kLastLogcatTimestamp,
+        ],
       )
     ]);
     await AdbLogReader.createLogReader(
@@ -47,7 +47,7 @@ void main() {
           'logcat',
           '-v',
           'time',
-        ]
+        ],
       )
     ]);
     await AdbLogReader.createLogReader(
@@ -68,7 +68,7 @@ void main() {
           'logcat',
           '-v',
           'time',
-        ]
+        ],
       )
     ]);
     await AdbLogReader.createLogReader(
@@ -91,7 +91,7 @@ void main() {
           'time',
         ],
         completer: Completer<void>.sync(),
-        stdout: 'Hello There\n'
+        stdout: 'Hello There\n',
       )
     ]);
     final AdbLogReader logReader = await AdbLogReader.createLogReader(
@@ -99,7 +99,7 @@ void main() {
       processManager,
     );
     final Completer<void> onDone = Completer<void>.sync();
-    logReader.logLines.listen((String line) { }, onDone: onDone.complete);
+    logReader.logLines.listen((String _) { }, onDone: onDone.complete);
 
     logReader.dispose();
     await onDone.future;
