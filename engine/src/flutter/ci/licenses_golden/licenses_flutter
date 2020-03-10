@@ -92,6 +92,9 @@ FILE: ../../../flutter/flow/raster_cache.h
 FILE: ../../../flutter/flow/raster_cache_key.cc
 FILE: ../../../flutter/flow/raster_cache_key.h
 FILE: ../../../flutter/flow/raster_cache_unittests.cc
+FILE: ../../../flutter/flow/rtree.cc
+FILE: ../../../flutter/flow/rtree.h
+FILE: ../../../flutter/flow/rtree_unittests.cc
 FILE: ../../../flutter/flow/scene_update_context.cc
 FILE: ../../../flutter/flow/scene_update_context.h
 FILE: ../../../flutter/flow/skia_gpu_object.cc
