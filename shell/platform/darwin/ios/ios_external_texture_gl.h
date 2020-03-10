@@ -12,34 +12,41 @@
 
 namespace flutter {
 
-class IOSExternalTextureGL : public flutter::Texture {
+class IOSExternalTextureGL final : public Texture {
  public:
   IOSExternalTextureGL(int64_t textureId, NSObject<FlutterTexture>* externalTexture);
 
+  // |Texture|
   ~IOSExternalTextureGL() override;
 
-  // Called from GPU thread.
-  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze, GrContext* context) override;
-
-  void OnGrContextCreated() override;
-
-  void OnGrContextDestroyed() override;
-
-  void MarkNewFrameAvailable() override;
-
-  void OnTextureUnregistered() override;
-
  private:
-  void CreateTextureFromPixelBuffer();
-
-  void EnsureTextureCacheExists();
-  bool NeedUpdateTexture(bool freeze);
-
   bool new_frame_ready_ = false;
   fml::scoped_nsobject<NSObject<FlutterTexture>> external_texture_;
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
   fml::CFRef<CVOpenGLESTextureRef> texture_ref_;
   fml::CFRef<CVPixelBufferRef> buffer_ref_;
+
+  // |Texture|
+  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze, GrContext* context) override;
+
+  // |Texture|
+  void OnGrContextCreated() override;
+
+  // |Texture|
+  void OnGrContextDestroyed() override;
+
+  // |Texture|
+  void MarkNewFrameAvailable() override;
+
+  // |Texture|
+  void OnTextureUnregistered() override;
+
+  void CreateTextureFromPixelBuffer();
+
+  void EnsureTextureCacheExists();
+
+  bool NeedUpdateTexture(bool freeze);
+
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
 };
 

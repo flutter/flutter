@@ -295,6 +295,7 @@ RasterStatus Rasterizer::DoDraw(
 }
 
 RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
+  TRACE_EVENT0("flutter", "Rasterizer::DrawToSurface");
   FML_DCHECK(surface_);
 
   auto frame = surface_->AcquireFrame(layer_tree.frame_size());
@@ -350,6 +351,7 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
     FireNextFrameCallbackIfPresent();
 
     if (surface_->GetContext()) {
+      TRACE_EVENT0("flutter", "PerformDeferredSkiaCleanup");
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
     }
 
