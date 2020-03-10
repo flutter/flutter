@@ -11,21 +11,9 @@ ImageFilterLayer::ImageFilterLayer(sk_sp<SkImageFilter> filter)
 
 void ImageFilterLayer::Preroll(PrerollContext* context,
                                const SkMatrix& matrix) {
-  TRACE_EVENT0("flutter", "ImageFilterLayer::Preroll");
-
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-
-  SkRect child_paint_bounds = SkRect::MakeEmpty();
-  PrerollChildren(context, matrix, &child_paint_bounds);
-  if (filter_) {
-    const SkIRect filter_input_bounds = child_paint_bounds.roundOut();
-    SkIRect filter_output_bounds =
-        filter_->filterBounds(filter_input_bounds, SkMatrix::I(),
-                              SkImageFilter::kForward_MapDirection);
-    child_paint_bounds = SkRect::Make(filter_output_bounds);
-  }
-  set_paint_bounds(child_paint_bounds);
+  ContainerLayer::Preroll(context, matrix);
 
   if (!context->has_platform_view && context->raster_cache &&
       SkRect::Intersects(context->cull_rect, paint_bounds())) {
