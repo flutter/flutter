@@ -17,10 +17,6 @@
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
-#if FLUTTER_SHELL_ENABLE_METAL
-#include "flutter/shell/platform/darwin/ios/ios_surface_metal.h"
-#endif  //  FLUTTER_SHELL_ENABLE_METAL
-
 @implementation FlutterView
 
 id<FlutterViewEngineDelegate> _delegate;
@@ -56,110 +52,28 @@ id<FlutterViewEngineDelegate> _delegate;
 }
 
 - (void)layoutSubviews {
-  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
-    CAEAGLLayer* layer = reinterpret_cast<CAEAGLLayer*>(self.layer);
-    layer.allowsGroupOpacity = YES;
+  if ([self.layer isKindOfClass:NSClassFromString(@"CAEAGLLayer")] ||
+      [self.layer isKindOfClass:NSClassFromString(@"CAMetalLayer")]) {
     CGFloat screenScale = [UIScreen mainScreen].scale;
-    layer.contentsScale = screenScale;
-    layer.rasterizationScale = screenScale;
+    self.layer.allowsGroupOpacity = YES;
+    self.layer.contentsScale = screenScale;
+    self.layer.rasterizationScale = screenScale;
   }
 
-#if FLUTTER_SHELL_ENABLE_METAL
-  if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
-    const CGFloat screenScale = [UIScreen mainScreen].scale;
-
-    auto metal_layer = reinterpret_cast<CAMetalLayer*>(self.layer);
-    metal_layer.contentsScale = screenScale;
-    metal_layer.rasterizationScale = screenScale;
-
-    const auto layer_size = self.bounds.size;
-    metal_layer.drawableSize =
-        CGSizeMake(layer_size.width * screenScale, layer_size.height * screenScale);
-  }
-
-#endif  //  FLUTTER_SHELL_ENABLE_METAL
   [super layoutSubviews];
 }
 
-#if FLUTTER_SHELL_ENABLE_METAL
-static bool UseMetalRenderer() {
-  // If there is a command line argument that says Metal should not be used, that takes precedence
-  // over everything else. This allows disabling Metal on a per run basis to check for regressions
-  // on an application that has otherwise opted into Metal on an iOS version that supports it.
-  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--disable-metal"]) {
-    return false;
-  }
-
-  // If the application wants to use metal on a per run basis with disregard for version checks or
-  // plist based opt ins, respect that opinion. This allows selectively testing features on older
-  // version of iOS than those explicitly stated as being supported.
-  if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--force-metal"]) {
-    return true;
-  }
-
-  // This is just a version we picked that is easy to support and has all necessary Metal features.
-  bool ios_version_supports_metal = false;
-  if (@available(iOS 11.0, *)) {
-    ios_version_supports_metal = true;
-  }
-
-  // The application must opt-in by default to use Metal without command line flags.
-  bool application_opts_into_metal =
-      [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"io.flutter.metal_preview"] boolValue];
-
-  return ios_version_supports_metal && application_opts_into_metal;
-}
-#endif  // FLUTTER_SHELL_ENABLE_METAL
-
 + (Class)layerClass {
-#if TARGET_IPHONE_SIMULATOR
-  return [CALayer class];
-#else  // TARGET_IPHONE_SIMULATOR
-#if FLUTTER_SHELL_ENABLE_METAL
-  if (UseMetalRenderer()) {
-    return [CAMetalLayer class];
-  } else {
-    return [CAEAGLLayer class];
-  }
-#else   // FLUTTER_SHELL_ENABLE_METAL
-  return [CAEAGLLayer class];
-#endif  //  FLUTTER_SHELL_ENABLE_METAL
-#endif  // TARGET_IPHONE_SIMULATOR
+  return flutter::GetCoreAnimationLayerClassForRenderingAPI();
 }
 
 - (std::unique_ptr<flutter::IOSSurface>)createSurface:
-    (std::shared_ptr<flutter::IOSGLContext>)context {
-  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
-    fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
-        reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
-    if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
-      if (@available(iOS 9.0, *)) {
-        // TODO(amirh): only do this if there's an embedded view.
-        // https://github.com/flutter/flutter/issues/24133
-        eagl_layer.get().presentsWithTransaction = YES;
-      }
-    }
-    return std::make_unique<flutter::IOSSurfaceGL>(context, std::move(eagl_layer),
-                                                   [_delegate platformViewsController]);
-#if FLUTTER_SHELL_ENABLE_METAL
-  } else if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
-    fml::scoped_nsobject<CAMetalLayer> metalLayer(
-        reinterpret_cast<CAMetalLayer*>([self.layer retain]));
-    if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
-      if (@available(iOS 8.0, *)) {
-        // TODO(amirh): only do this if there's an embedded view.
-        // https://github.com/flutter/flutter/issues/24133
-        metalLayer.get().presentsWithTransaction = YES;
-      }
-    }
-    return std::make_unique<flutter::IOSSurfaceMetal>(std::move(metalLayer),
-                                                      [_delegate platformViewsController]);
-#endif  //  FLUTTER_SHELL_ENABLE_METAL
-  } else {
-    fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-    return std::make_unique<flutter::IOSSurfaceSoftware>(std::move(layer),
-                                                         [_delegate platformViewsController]);
-  }
+    (std::shared_ptr<flutter::IOSContext>)ios_context {
+  return flutter::IOSSurface::Create(
+      std::move(ios_context),                              // context
+      fml::scoped_nsobject<CALayer>{[self.layer retain]},  // layer
+      [_delegate platformViewsController]                  // platform views controller
+  );
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {

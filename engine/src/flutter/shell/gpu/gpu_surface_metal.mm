@@ -6,6 +6,7 @@
 
 #include <QuartzCore/CAMetalLayer.h>
 
+#include "flutter/fml/trace_event.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
@@ -15,62 +16,17 @@ static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 namespace flutter {
 
 GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
-                                 fml::scoped_nsobject<CAMetalLayer> layer)
-    : delegate_(delegate), layer_(std::move(layer)) {
-  if (!layer_) {
-    FML_LOG(ERROR) << "Could not create metal surface because of invalid layer.";
-    return;
-  }
-
-  layer.get().pixelFormat = MTLPixelFormatBGRA8Unorm;
+                                 fml::scoped_nsobject<CAMetalLayer> layer,
+                                 sk_sp<GrContext> context,
+                                 fml::scoped_nsprotocol<id<MTLCommandQueue>> command_queue)
+    : delegate_(delegate),
+      layer_(std::move(layer)),
+      context_(std::move(context)),
+      command_queue_(std::move(command_queue)) {
+  layer_.get().pixelFormat = MTLPixelFormatBGRA8Unorm;
   // Flutter needs to read from the color attachment in cases where there are effects such as
   // backdrop filters.
-  layer.get().framebufferOnly = NO;
-
-  auto metal_device = fml::scoped_nsprotocol<id<MTLDevice>>([layer_.get().device retain]);
-  auto metal_queue = fml::scoped_nsprotocol<id<MTLCommandQueue>>([metal_device newCommandQueue]);
-
-  if (!metal_device || !metal_queue) {
-    FML_LOG(ERROR) << "Could not create metal device or queue.";
-    return;
-  }
-
-  command_queue_ = metal_queue;
-
-  // The context creation routine accepts arguments using transfer semantics.
-  auto context = GrContext::MakeMetal(metal_device.release(), metal_queue.release());
-  if (!context) {
-    FML_LOG(ERROR) << "Could not create Skia metal context.";
-    return;
-  }
-
-  context_ = context;
-}
-
-GPUSurfaceMetal::GPUSurfaceMetal(GPUSurfaceDelegate* delegate,
-                                 sk_sp<GrContext> gr_context,
-                                 fml::scoped_nsobject<CAMetalLayer> layer)
-    : delegate_(delegate), layer_(std::move(layer)), context_(gr_context) {
-  if (!layer_) {
-    FML_LOG(ERROR) << "Could not create metal surface because of invalid layer.";
-    return;
-  }
-  if (!context_) {
-    FML_LOG(ERROR) << "Could not create metal surface because of invalid Skia metal context.";
-    return;
-  }
-
-  layer.get().pixelFormat = MTLPixelFormatBGRA8Unorm;
-
-  auto metal_device = fml::scoped_nsprotocol<id<MTLDevice>>([layer_.get().device retain]);
-  auto metal_queue = fml::scoped_nsprotocol<id<MTLCommandQueue>>([metal_device newCommandQueue]);
-
-  if (!metal_device || !metal_queue) {
-    FML_LOG(ERROR) << "Could not create metal device or queue.";
-    return;
-  }
-
-  command_queue_ = metal_queue;
+  layer_.get().framebufferOnly = NO;
 }
 
 GPUSurfaceMetal::~GPUSurfaceMetal() {
@@ -95,12 +51,19 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
   }
 
   const auto bounds = layer_.get().bounds.size;
-  if (bounds.width <= 0.0 || bounds.height <= 0.0) {
+  const auto scale = layer_.get().contentsScale;
+  if (bounds.width <= 0.0 || bounds.height <= 0.0 || scale <= 0.0) {
     FML_LOG(ERROR) << "Metal layer bounds were invalid.";
     return nullptr;
   }
 
+  const auto scaled_bounds = CGSizeMake(bounds.width * scale, bounds.height * scale);
+
   ReleaseUnusedDrawableIfNecessary();
+
+  if (!CGSizeEqualToSize(scaled_bounds, layer_.get().drawableSize)) {
+    layer_.get().drawableSize = scaled_bounds;
+  }
 
   auto surface = SkSurface::MakeFromCAMetalLayer(context_.get(),            // context
                                                  layer_.get(),              // layer
@@ -118,6 +81,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
   }
 
   auto submit_callback = [this](const SurfaceFrame& surface_frame, SkCanvas* canvas) -> bool {
+    TRACE_EVENT0("flutter", "GPUSurfaceMetal::Submit");
     canvas->flush();
 
     if (next_drawable_ == nullptr) {
@@ -159,9 +123,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
 SkMatrix GPUSurfaceMetal::GetRootTransformation() const {
   // This backend does not currently support root surface transformations. Just
   // return identity.
-  SkMatrix matrix;
-  matrix.reset();
-  return matrix;
+  return {};
 }
 
 // |Surface|
