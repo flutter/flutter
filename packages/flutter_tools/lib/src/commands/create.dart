@@ -142,8 +142,6 @@ class CreateCommand extends FlutterCommand {
     // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
       'androidx',
-      negatable: true,
-      defaultsTo: true,
       hide: true,
       help: 'Noop flag. (settings this flag to false has no effect)',
     );
