@@ -91,6 +91,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message)
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
