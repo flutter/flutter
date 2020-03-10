@@ -79,10 +79,11 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       || ((widget.handleSelectAll == null) != (oldWidget.handleSelectAll == null))) {
       // Change _TextSelectionToolbarContainer's key when the menu changes in
       // order to cause it to rebuild. This lets it recalculate its
-      // saved width for the new set of children.
+      // saved width for the new set of children, and it prevents AnimatedSize
+      // from animating the size change.
       _containerKey = UniqueKey();
       // If the menu items change, make sure the overflow menu is closed. This
-      // prevents an empty overflow menu and an incorrect saved width.
+      // prevents an empty overflow menu.
       _overflowOpen = false;
     }
     super.didUpdateWidget(oldWidget);
@@ -99,7 +100,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       if (widget.handlePaste != null)
         _getItem(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
-        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        _getItem(widget.handleSelectAll, 'select absolutely everything'),//localizations.selectAllButtonLabel),
     ];
 
     // If there is no option available, build an empty widget.
@@ -200,7 +201,8 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 
     // Save the width when the menu is closed. If the menu changes, this width
     // is invalid, so it's important that this RenderBox be recreated in that
-    // case.
+    // case. Currently, this is achieved by providing a new key to
+    // _TextSelectionToolbarContainer.
     if (!overflowOpen && _closedWidth == null) {
       _closedWidth = child.size.width;
     }
@@ -294,10 +296,10 @@ class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
 }
 
 class _ToolbarParentData extends ContainerBoxParentData<RenderBox> {
-  // Whether or not this child is painted.
-  //
-  // Children in the selection toolbar may be laid out for measurement purposes
-  // but not painted. This allows these children to be identified.
+  /// Whether or not this child is painted.
+  ///
+  /// Children in the selection toolbar may be laid out for measurement purposes
+  /// but not painted. This allows these children to be identified.
   bool shouldPaint;
 
   @override
@@ -319,7 +321,7 @@ class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   }
 }
 
-class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _ToolbarParentData> {
+class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarParentData> {
   _TextSelectionToolbarItemsRenderBox({
     @required bool isAbove,
     @required bool overflowOpen,
@@ -428,10 +430,13 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       final RenderBox child = renderObjectChild as RenderBox;
       final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
 
-      // The navigation button is placed after iterating all children, and there
-      // is no need to place children that won't be painted.
-      if (renderObjectChild == firstChild
-          || !_shouldPaintChild(renderObjectChild, i)) {
+      // Handle placing the navigation button after iterating all children.
+      if (renderObjectChild == navButton) {
+        return;
+      }
+
+      // There is no need to place children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
         childParentData.shouldPaint = false;
         return;
       }
