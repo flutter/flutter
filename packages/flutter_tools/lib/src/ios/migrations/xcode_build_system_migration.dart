@@ -42,7 +42,7 @@ class XcodeBuildSystemMigration extends IOSMigrator {
       logger.printStatus('Legacy build system detected, removing ${_xcodeWorkspaceSharedSettings.path}');
       _xcodeWorkspaceSharedSettings.deleteSync();
     }
-    
+
     return true;
   }
 }
