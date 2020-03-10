@@ -78,8 +78,4 @@ dev_dependencies:
   mockito: 4.1.1
   test_api: 0.2.15
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: 4b59
-=======
 # PUBSPEC CHECKSUM: 2056
->>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc

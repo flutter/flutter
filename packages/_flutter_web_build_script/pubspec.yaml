@@ -95,8 +95,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: a925
-=======
 # PUBSPEC CHECKSUM: f622
->>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc

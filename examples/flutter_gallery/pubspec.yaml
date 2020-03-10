@@ -274,8 +274,4 @@ flutter:
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
       - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: 9eab
-=======
 # PUBSPEC CHECKSUM: b7a6
->>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc
