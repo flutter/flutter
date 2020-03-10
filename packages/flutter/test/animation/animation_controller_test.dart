@@ -763,7 +763,7 @@ void main() {
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
-      expect(controller.animationBehavior, AnimationBehavior.normal);
+      expect(controller.animationBehavior, AnimationBehavior.preserve);
 
       final AnimationController repeating = AnimationController.unbounded(vsync: const TestVSync());
       expect(repeating.animationBehavior, AnimationBehavior.preserve);

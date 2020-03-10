@@ -237,7 +237,7 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
-    this.animationBehavior = AnimationBehavior.normal,
+    this.animationBehavior = AnimationBehavior.preserve,
     @required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
