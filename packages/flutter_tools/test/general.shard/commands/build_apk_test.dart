@@ -152,6 +152,26 @@ void main() {
         .thenAnswer((_) => Future<Process>.value(process));
       when(mockProcessManager.canRun(any)).thenReturn(false);
 
+      when(mockProcessManager.runSync(
+        argThat(contains(contains('gen_snapshot'))),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 255, '', ''));
+
+      when(mockProcessManager.runSync(
+        <String>['/usr/bin/xcode-select', '--print-path'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 0, '', ''));
+
+      when(mockProcessManager.run(
+        <String>['which', 'pod'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+      });
+
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
@@ -214,10 +234,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -242,10 +262,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Psplit-debug-info=${tempDir.path}',
           'assembleRelease',
         ],
@@ -274,9 +294,9 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -297,10 +317,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -352,10 +372,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),
@@ -403,10 +423,10 @@ void main() {
         <String>[
           gradlew,
           '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
         ],
         workingDirectory: anyNamed('workingDirectory'),

@@ -584,7 +584,9 @@ flutter:
       final AndroidDevice device = AndroidDevice('emulator-5555');
       expect(await device.emulatorId, isNull);
     }, overrides: <Type, Generator>{
-      AndroidConsoleSocketFactory: () => (String host, int port) => throw 'Fake socket error',
+      AndroidConsoleSocketFactory: () {
+        return (String host, int port) => throw Exception('Fake socket error');
+      },
       ProcessManager: () => mockProcessManager,
     });
 

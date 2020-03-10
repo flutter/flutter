@@ -11,7 +11,11 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:mockito/mockito.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -32,6 +36,8 @@ void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
   Platform linux;
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   Packages packages;
   Platform windows;
   MockHttpServer mockHttpServer;
@@ -176,6 +182,21 @@ void main() {
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/abcd%25E8%25B1%25A1%25E5%25BD%25A2%25E5%25AD%2597.png')));
+
+    expect(response.headers, allOf(<Matcher>[
+      containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
+      containsPair(HttpHeaders.contentTypeHeader, 'image/png'),
+      containsPair(HttpHeaders.etagHeader, isNotNull),
+      containsPair(HttpHeaders.cacheControlHeader, 'max-age=0, must-revalidate')
+    ]));
+    expect((await response.read().toList()).first, source.readAsBytesSync());
+  }));
+  test('serves files from web directory', () => testbed.run(() async {
+    final File source = globals.fs.file(globals.fs.path.join('web', 'foo.png'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(kTransparentImage);
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/foo.png')));
 
     expect(response.headers, allOf(<Matcher>[
       containsPair(HttpHeaders.contentLengthHeader, source.lengthSync().toString()),
@@ -346,6 +367,8 @@ void main() {
       invalidatedFiles: <Uri>[],
     );
 
+    expect(webDevFS.webAssetServer.getFile('/require.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('/dart_stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);

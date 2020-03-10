@@ -408,4 +408,44 @@ void main() {
       expect(_getOpacity(tester, 'Fade In'), 1.0);
     });
   });
+
+  testWidgets('DefaultTextStyleTransition builds fully featured DefaultTextStyle', (WidgetTester tester) async {
+    const DefaultTextStyleTransition styleTransition = DefaultTextStyleTransition(
+      style: AlwaysStoppedAnimation<TextStyle>(TextStyle()),
+      child: Text('step on legos!'),
+      textAlign: TextAlign.right,
+      softWrap: false,
+      overflow: TextOverflow.fade,
+      maxLines: 5,
+      textWidthBasis: TextWidthBasis.longestLine,
+      textHeightBehavior: TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+      ),
+    );
+
+    expect((styleTransition.child as Text).data, 'step on legos!');
+    expect(styleTransition.textAlign, TextAlign.right);
+    expect(styleTransition.softWrap, false);
+    expect(styleTransition.overflow, TextOverflow.fade);
+    expect(styleTransition.maxLines, 5);
+    expect(styleTransition.textWidthBasis, TextWidthBasis.longestLine);
+    expect(styleTransition.textHeightBehavior, const TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    ));
+
+    final DefaultTextStyle style = styleTransition.build(null) as DefaultTextStyle;
+
+    expect((style.child as Text).data, 'step on legos!');
+    expect(style.textAlign, TextAlign.right);
+    expect(style.softWrap, false);
+    expect(style.overflow, TextOverflow.fade);
+    expect(style.maxLines, 5);
+    expect(style.textWidthBasis, TextWidthBasis.longestLine);
+    expect(style.textHeightBehavior, const TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    ));
+  });
 }

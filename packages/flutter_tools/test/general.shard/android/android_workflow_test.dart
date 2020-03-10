@@ -169,32 +169,6 @@ void main() {
     Stdio: () => stdio,
   }));
 
-  testUsingContext('runLicenseManager errors for version < 26', () async {
-    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    when(sdk.sdkManagerVersion).thenReturn('25.0.0');
-
-    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => sdk,
-    FileSystem: () => fs,
-    ProcessManager: () => processManager,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-    Stdio: () => stdio,
-  }));
-
-  testUsingContext('runLicenseManager errors correctly for null version', () async {
-    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    when(sdk.sdkManagerVersion).thenReturn(null);
-
-    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
-  }, overrides: Map<Type, Generator>.unmodifiable(<Type, Generator>{
-    AndroidSdk: () => sdk,
-    FileSystem: () => fs,
-    ProcessManager: () => processManager,
-    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-    Stdio: () => stdio,
-  }));
-
   testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.canRunSucceeds = false;

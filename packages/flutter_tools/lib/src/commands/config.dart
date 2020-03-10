@@ -89,7 +89,7 @@ class ConfigCommand extends FlutterCommand {
     }
     return
       '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+      'Analytics reporting is currently ${globals.flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.
@@ -117,7 +117,7 @@ class ConfigCommand extends FlutterCommand {
       // We send the analytics event *before* toggling the flag intentionally
       // to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
-      flutterUsage.enabled = value;
+      globals.flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 

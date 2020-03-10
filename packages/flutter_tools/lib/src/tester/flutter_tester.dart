@@ -144,7 +144,7 @@ class FlutterTesterDevice extends Device {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
     await BundleBuilder().build(
-      buildMode: buildInfo.mode,
+      buildInfo: buildInfo,
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
@@ -194,7 +194,7 @@ class FlutterTesterDevice extends Device {
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Failed to launch $package: $error');
       return LaunchResult.failed();
     }

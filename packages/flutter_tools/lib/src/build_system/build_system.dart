@@ -379,7 +379,7 @@ class Environment {
 
   /// The `FLUTTER_ROOT` environment variable.
   ///
-  /// Defaults to to the value of [Cache.flutterRoot].
+  /// Defaults to the value of [Cache.flutterRoot].
   final Directory flutterRootDir;
 
   /// The `OUTPUT_DIR` environment variable.
@@ -582,7 +582,7 @@ class _BuildInstance {
           previousFile.deleteSync();
         }
       }
-    } catch (exception, stackTrace) {
+    } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);

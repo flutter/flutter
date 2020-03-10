@@ -22,6 +22,9 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
+import 'migrations/ios_migrator.dart';
+import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -84,6 +87,16 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project)) {
+    return XcodeBuildResult(success: false);
+  }
+
+  final List<IOSMigrator> migrators = <IOSMigrator>[
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    XcodeBuildSystemMigration(app.project, globals.logger),
+  ];
+
+  final IOSMigration migration = IOSMigration(migrators);
+  if (!migration.run()) {
     return XcodeBuildResult(success: false);
   }
 
@@ -290,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to ocassionally timeout. Here, we give
@@ -439,6 +452,20 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
     ).send();
   }
 
+  // Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS.
+  // or
+  // Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator.
+  if (result.stdout?.contains('Building for iOS') == true
+      && result.stdout?.contains('but the linked and embedded framework') == true
+      && result.stdout?.contains('was built for iOS') == true) {
+    globals.printError('');
+    globals.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+    globals.printError('');
+    globals.printError('You can temporarily work around this issue by running:');
+    globals.printError('  rm -rf ios/Flutter/App.framework');
+    return;
+  }
+
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -529,6 +556,7 @@ bool _checkXcodeVersion() {
   return true;
 }
 
+// TODO(jmagman): Refactor to IOSMigrator.
 bool upgradePbxProjWithFlutterAssets(IosProject project) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(xcodeProjectFile.existsSync());
