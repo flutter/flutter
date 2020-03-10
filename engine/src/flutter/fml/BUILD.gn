@@ -10,6 +10,7 @@ import("//flutter/testing/testing.gni")
 
 source_set("fml") {
   sources = [
+    "backtrace.h",
     "base32.cc",
     "base32.h",
     "build_config.h",
@@ -85,6 +86,12 @@ source_set("fml") {
     "unique_object.h",
     "wakeable.h",
   ]
+
+  if (is_mac || is_ios || is_linux) {
+    sources += [ "backtrace.cc" ]
+  } else {
+    sources += [ "backtrace_stub.cc" ]
+  }
 
   public_deps = []
 
@@ -229,6 +236,7 @@ executable("fml_unittests") {
   testonly = true
 
   sources = [
+    "backtrace_unittests.cc",
     "base32_unittest.cc",
     "command_line_unittest.cc",
     "file_unittest.cc",
