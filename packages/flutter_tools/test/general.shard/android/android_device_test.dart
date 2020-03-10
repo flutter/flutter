@@ -523,6 +523,8 @@ flutter:
     const String dummyEmulatorId = 'dummyEmulatorId';
     final Future<Socket> Function(String host, int port) unresponsiveSocket =
         (String host, int port) async => MockUnresponsiveAndroidConsoleSocket();
+    final Future<Socket> Function(String host, int port) disconnectingSocket =
+        (String host, int port) async => MockDisconnectingAndroidConsoleSocket();
     final Future<Socket> Function(String host, int port) workingSocket =
         (String host, int port) async => MockWorkingAndroidConsoleSocket(dummyEmulatorId);
     String hardware;
@@ -595,6 +597,14 @@ flutter:
       expect(await device.emulatorId, isNull);
     }, overrides: <Type, Generator>{
       AndroidConsoleSocketFactory: () => unresponsiveSocket,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns null on early disconnect', () async {
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, isNull);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => disconnectingSocket,
       ProcessManager: () => mockProcessManager,
     });
   });
@@ -978,6 +988,26 @@ class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
 
   @override
   void add(List<int> data) {}
+}
+
+/// An Android console socket that drops all input and returns no output.
+class MockDisconnectingAndroidConsoleSocket extends Mock implements Socket {
+  MockDisconnectingAndroidConsoleSocket() {
+    _controller.add('Android Console: Welcome!\n');
+    // Include OK in the same packet here. In the response to "avd name"
+    // it's sent alone to ensure both are handled.
+    _controller.add('Android Console: Some intro text\nOK\n');
+  }
+
+  final StreamController<String> _controller = StreamController<String>();
+
+  @override
+  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+
+  @override
+  void add(List<int> data) {
+    _controller.close();
+  }
 }
 
 class AndroidPackageTest extends ApplicationPackage {
