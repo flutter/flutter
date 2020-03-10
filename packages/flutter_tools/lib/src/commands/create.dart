@@ -239,13 +239,21 @@ class CreateCommand extends FlutterCommand {
     }
 
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    return utf8.decode(await _net.fetchUrl(snippetsUri));
+    final List<int> data = await _net.fetchUrl(snippetsUri);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    return utf8.decode(await _net.fetchUrl(snippetsUri, maxAttempts: 2));
+    final List<int> data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -259,8 +267,7 @@ class CreateCommand extends FlutterCommand {
       final String samplesJson = await _fetchSamplesIndexFromServer();
       if (samplesJson == null) {
         throwToolExit('Unable to download samples', exitCode: 2);
-      }
-      else {
+      } else {
         outputFile.writeAsStringSync(samplesJson);
         globals.printStatus('Wrote samples JSON to "$outputFilePath"');
       }
