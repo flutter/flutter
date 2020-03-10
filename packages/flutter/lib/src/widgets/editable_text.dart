@@ -1225,6 +1225,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // _lastFormattedUnmodifiedTextEditingValue tracks the last value
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
+  // _lastFormattedValue tracks the last post-format value, so that it can be
+  // without rerunning the formatter when the input value is repeated.
+  TextEditingValue _lastFormattedValue;
   // _receivedRemoteTextEditingValue is the direct value last passed in
   // updateEditingValue. This value does not get updated with the formatted
   // version.
@@ -1652,11 +1655,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
       }
+      _lastFormattedValue = value;
     }
     // If the text has changed or the selection has changed, we should update the
     // locally stored TextEditingValue to the new one.
     if (!isRepeatText || !isRepeatSelection) {
       _value = value;
+    } else if (textChanged && _lastFormattedValue != null) {
+      _value = _lastFormattedValue;
     }
     // Always attempt to send the value. If the value has changed, then it will send,
     // otherwise, it will short-circuit.
