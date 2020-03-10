@@ -25,7 +25,7 @@ final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
   environment: <String, String>{
     'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
-  }
+  },
 );
 
 // A minimum version of a response where a VS installation was found.
@@ -74,26 +74,26 @@ const List<String> _requiredComponents = <String>[
   'Microsoft.VisualStudio.Component.Windows10SDK.17763',
 ];
 
-
 // Sets up the mock environment so that searching for Visual Studio with
 // exactly the given required components will provide a result. By default it
 // return a preset installation, but the response can be overridden.
 void setMockVswhereResponse(
-  VisualStudio visualStudio, [
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
   List<String> requiredComponents,
   List<String> additionalArguments,
   Map<String, dynamic> response,
   String responseOverride,
 ]) {
-  visualStudio.fileSystem.file(vswherePath).createSync(recursive: true);
-  visualStudio.fileSystem.file(vcvarsPath).createSync(recursive: true);
-  final String finalResponse = responseOverride ??
-      json.encode(<Map<String, dynamic>>[response]);
+  fileSystem.file(vswherePath).createSync(recursive: true);
+  fileSystem.file(vcvarsPath).createSync(recursive: true);
+  final String finalResponse = responseOverride
+    ?? json.encode(<Map<String, dynamic>>[response]);
   final List<String> requirementArguments = requiredComponents == null
-      ? <String>[]
-      : <String>['-requires', ...requiredComponents];
+    ? <String>[]
+    : <String>['-requires', ...requiredComponents];
 
-  (visualStudio.processManager as FakeProcessManager).addCommand(FakeCommand(
+  processManager.addCommand(FakeCommand(
     command: <String>[
       vswherePath,
       '-format',
@@ -111,10 +111,12 @@ void setMockVswhereResponse(
 // return an installation.
 void setMockCompatibleVisualStudioInstallation(
   Map<String, dynamic> response,
-  VisualStudio visualStudio,
+  FileSystem fileSystem,
+  FakeProcessManager processManager,
 ) {
   setMockVswhereResponse(
-    visualStudio,
+    fileSystem,
+    processManager,
     _requiredComponents,
     <String>['-version', '16'],
     response,
@@ -125,10 +127,12 @@ void setMockCompatibleVisualStudioInstallation(
 // return a pre-release installation.
 void setMockPrereleaseVisualStudioInstallation(
   Map<String, dynamic> response,
-  VisualStudio visualStudio,
+  FileSystem fileSystem,
+  FakeProcessManager processManager,
 ) {
   setMockVswhereResponse(
-    visualStudio,
+    fileSystem,
+    processManager,
     _requiredComponents,
     <String>['-version', '16', '-prerelease'],
     response,
@@ -139,10 +143,12 @@ void setMockPrereleaseVisualStudioInstallation(
 // versions will return an installation.
 void setMockAnyVisualStudioInstallation(
   Map<String, dynamic> response,
-  VisualStudio visualStudio,
+  FileSystem fileSystem,
+  FakeProcessManager processManager,
 ) {
   setMockVswhereResponse(
-    visualStudio,
+    fileSystem,
+    processManager,
     null,
     <String>['-prerelease', '-all'],
     response,
@@ -152,10 +158,12 @@ void setMockAnyVisualStudioInstallation(
 // Set a pre-encoded query result.
 void setMockEncodedAnyVisualStudioInstallation(
   String response,
-  VisualStudio visualStudio,
+  FileSystem fileSystem,
+  FakeProcessManager processManager,
 ) {
   setMockVswhereResponse(
-    visualStudio,
+    fileSystem,
+    processManager,
     null,
     <String>['-prerelease', '-all'],
     null,
@@ -164,16 +172,17 @@ void setMockEncodedAnyVisualStudioInstallation(
 }
 
 // Create a visual studio instance with a FakeProcessManager.
-VisualStudio setupVisualStudio() {
+VisualStudioFixture setUpVisualStudio() {
   final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[]);
   final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
   final BufferLogger logger = BufferLogger.test();
-  return VisualStudio(
+  final VisualStudio visualStudio = VisualStudio(
     fileSystem: fileSystem,
     platform: windowsPlatform,
     logger: logger,
     processManager: processManager,
   );
+  return VisualStudioFixture(visualStudio, fileSystem, processManager);
 }
 
 void main() {
@@ -187,7 +196,7 @@ void main() {
       )).thenThrow(const ProcessException('vswhere', <String>[]));
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
-        fileSystem:  MemoryFileSystem.test(style: FileSystemStyle.windows),
+        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
         platform: windowsPlatform,
         processManager: mockProcessManager,
       );
@@ -204,7 +213,7 @@ void main() {
       )).thenThrow(const ProcessException('vswhere', <String>[]));
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
-        fileSystem:  MemoryFileSystem.test(style: FileSystemStyle.windows),
+        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
         platform: windowsPlatform,
         processManager: mockProcessManager,
       );
@@ -212,22 +221,19 @@ void main() {
       expect(visualStudio.vcvarsPath, isNull);
     });
 
-    testWithoutContext('isInstalled returns false when vswhere returns non-zero', () {
+    testWithoutContext(
+        'isInstalled returns false when vswhere returns non-zero', () {
       final MockProcessManager mockProcessManager = MockProcessManager();
       when(mockProcessManager.runSync(
         any,
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenAnswer((Invocation invocation) {
-        return FakeProcessResult(
-          exitCode: 1,
-          stderr: '',
-          stdout: ''
-        );
+        return FakeProcessResult(exitCode: 1, stderr: '', stdout: '');
       });
       final VisualStudio visualStudio = VisualStudio(
         logger: BufferLogger.test(),
-        fileSystem:  MemoryFileSystem.test(style: FileSystemStyle.windows),
+        fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
         platform: windowsPlatform,
         processManager: mockProcessManager,
       );
@@ -237,11 +243,24 @@ void main() {
     });
 
     testWithoutContext('VisualStudio getters return the right values if no installation is found', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, false);
       expect(visualStudio.isAtLeastMinimumVersion, false);
@@ -256,9 +275,14 @@ void main() {
     });
 
     testWithoutContext('necessaryComponentDescriptions suggest the right VS tools on major version 16', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(_defaultResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
 
@@ -266,11 +290,24 @@ void main() {
     });
 
     testWithoutContext('necessaryComponentDescriptions suggest the right VS tools on an old version', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_tooOldResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _tooOldResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       final String toolsString = visualStudio.necessaryComponentDescriptions()[1];
 
@@ -278,150 +315,311 @@ void main() {
     });
 
     testWithoutContext('isInstalled returns true even with missing status information', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_missingStatusResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _missingStatusResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
     });
 
     testWithoutContext('isInstalled returns true when VS is present but missing components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_defaultResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
     });
 
     testWithoutContext('isInstalled returns true when VS is present but too old', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_tooOldResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _tooOldResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
     });
 
     testWithoutContext('isInstalled returns true when a prerelease version of VS is present', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isPrerelease'] = true;
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(response, visualStudio);
-      setMockAnyVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isPrerelease, true);
     });
 
     testWithoutContext('isAtLeastMinimumVersion returns false when the version found is too old', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_tooOldResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _tooOldResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isAtLeastMinimumVersion, false);
     });
 
     testWithoutContext('isComplete returns false when an incomplete installation is found', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isComplete'] = false;
-      setMockAnyVisualStudioInstallation(response, visualStudio);
+      setMockAnyVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isComplete, false);
     });
 
-    testWithoutContext("isLaunchable returns false if the installation can't be launched", () {
-      final VisualStudio visualStudio = setupVisualStudio();
+    testWithoutContext(
+        "isLaunchable returns false if the installation can't be launched", () {
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isLaunchable'] = false;
-      setMockAnyVisualStudioInstallation(response, visualStudio);
+      setMockAnyVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isLaunchable, false);
     });
 
     testWithoutContext('isRebootRequired returns true if the installation needs a reboot', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isRebootRequired'] = true;
-      setMockAnyVisualStudioInstallation(response, visualStudio);
+      setMockAnyVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isRebootRequired, true);
     });
 
-
     testWithoutContext('hasNecessaryComponents returns false when VS is present but missing components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_defaultResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.hasNecessaryComponents, false);
     });
 
     testWithoutContext('vcvarsPath returns null when VS is present but missing components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_defaultResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.vcvarsPath, isNull);
     });
 
     testWithoutContext('vcvarsPath returns null when VS is present but with require components but installation is faulty', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isRebootRequired'] = true;
-      setMockCompatibleVisualStudioInstallation(response, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.vcvarsPath, isNull);
     });
 
     testWithoutContext('hasNecessaryComponents returns false when VS is present with required components but installation is faulty', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
       final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
         ..['isRebootRequired'] = true;
-      setMockCompatibleVisualStudioInstallation(response, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        response,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.hasNecessaryComponents, false);
     });
 
     testWithoutContext('VS metadata is available when VS is present, even if missing components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(_defaultResponse, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.displayName, equals('Visual Studio Community 2019'));
       expect(visualStudio.displayVersion, equals('16.2.5'));
@@ -430,21 +628,47 @@ void main() {
     });
 
     testWithoutContext('vcvarsPath returns null when VS is present but when vswhere returns invalid JSON', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(null, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockEncodedAnyVisualStudioInstallation('{', visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockEncodedAnyVisualStudioInstallation(
+        '{',
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.vcvarsPath, isNull);
     });
 
     testWithoutContext('Everything returns good values when VS is present with all components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
-      setMockCompatibleVisualStudioInstallation(_defaultResponse, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
-      setMockAnyVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        _defaultResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockAnyVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.isInstalled, true);
       expect(visualStudio.isAtLeastMinimumVersion, true);
@@ -453,7 +677,8 @@ void main() {
     });
 
     testWithoutContext('Metadata is for compatible version when latest is missing components', () {
-      final VisualStudio visualStudio = setupVisualStudio();
+      final VisualStudioFixture fixture = setUpVisualStudio();
+      final VisualStudio visualStudio = fixture.visualStudio;
 
       // Return a different version for queries without the required packages.
       final Map<String, dynamic> olderButCompleteVersionResponse = <String, dynamic>{
@@ -465,8 +690,16 @@ void main() {
         },
       };
 
-      setMockCompatibleVisualStudioInstallation(olderButCompleteVersionResponse, visualStudio);
-      setMockPrereleaseVisualStudioInstallation(null, visualStudio);
+      setMockCompatibleVisualStudioInstallation(
+        olderButCompleteVersionResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
+      setMockPrereleaseVisualStudioInstallation(
+        null,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
       // Return a different version for queries without the required packages.
       final Map<String, dynamic> incompleteVersionResponse = <String, dynamic>{
         'installationPath': visualStudioPath,
@@ -476,12 +709,24 @@ void main() {
           'productDisplayVersion': '16.1',
         },
       };
-      setMockAnyVisualStudioInstallation(incompleteVersionResponse, visualStudio);
+      setMockAnyVisualStudioInstallation(
+        incompleteVersionResponse,
+        fixture.fileSystem,
+        fixture.processManager,
+      );
 
       expect(visualStudio.displayName, equals('Visual Studio Community 2017'));
       expect(visualStudio.displayVersion, equals('15.9.12'));
     });
   });
+}
+
+class VisualStudioFixture {
+  VisualStudioFixture(this.visualStudio, this.fileSystem, this.processManager);
+
+  final VisualStudio visualStudio;
+  final FileSystem fileSystem;
+  final FakeProcessManager processManager;
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
