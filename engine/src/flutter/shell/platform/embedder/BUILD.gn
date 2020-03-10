@@ -137,6 +137,7 @@ if (current_toolchain == host_toolchain) {
       "//flutter/flow",
       "//flutter/lib/ui",
       "//flutter/runtime",
+      "//flutter/testing",
       "//flutter/testing:dart",
       "//flutter/testing:opengl",
       "//flutter/testing:skia",

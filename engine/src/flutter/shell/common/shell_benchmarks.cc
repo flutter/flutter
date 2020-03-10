@@ -7,6 +7,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/testing/elf_loader.h"
 #include "flutter/testing/testing.h"
 
 namespace flutter {
@@ -18,6 +19,8 @@ static void StartupAndShutdownShell(benchmark::State& state,
                                        fml::FilePermission::kRead);
   std::unique_ptr<Shell> shell;
   std::unique_ptr<ThreadHost> thread_host;
+  testing::ELFAOTSymbols aot_symbols;
+
   {
     benchmarking::ScopedPauseTiming pause(state, !measure_startup);
     Settings settings = {};
@@ -25,25 +28,10 @@ static void StartupAndShutdownShell(benchmark::State& state,
     settings.task_observer_remove = [](intptr_t) {};
 
     if (DartVM::IsRunningPrecompiledCode()) {
-      settings.vm_snapshot_data = [&]() {
-        return fml::FileMapping::CreateReadOnly(assets_dir, "vm_snapshot_data");
-      };
-
-      settings.isolate_snapshot_data = [&]() {
-        return fml::FileMapping::CreateReadOnly(assets_dir,
-                                                "isolate_snapshot_data");
-      };
-
-      settings.vm_snapshot_instr = [&]() {
-        return fml::FileMapping::CreateReadExecute(assets_dir,
-                                                   "vm_snapshot_instr");
-      };
-
-      settings.isolate_snapshot_instr = [&]() {
-        return fml::FileMapping::CreateReadExecute(assets_dir,
-                                                   "isolate_snapshot_instr");
-      };
-
+      aot_symbols = testing::LoadELFSymbolFromFixturesIfNeccessary();
+      FML_CHECK(
+          testing::PrepareSettingsForAOTWithSymbols(settings, aot_symbols))
+          << "Could not setup settings with AOT symbols.";
     } else {
       settings.application_kernels = [&]() {
         std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;

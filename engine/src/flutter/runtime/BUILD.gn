@@ -150,6 +150,7 @@ source_set("runtime_unittests_common") {
     "//flutter/fml",
     "//flutter/lib/snapshot",
     "//flutter/shell/common",
+    "//flutter/testing",
     "//flutter/testing:dart",
     "//flutter/third_party/tonic",
     "//third_party/dart/runtime/bin:elf_loader",
