@@ -54,7 +54,7 @@ import 'theme_data.dart';
 ///      body: Row(
 ///        children: <Widget>[
 ///          NavigationRail(
-///            _selectedIndex: _selectedIndex,
+///            selectedIndex: _selectedIndex,
 ///            labelType: NavigationRailLabelType.selected,
 ///            destinations: [
 ///              NavigationRailDestination(
@@ -83,7 +83,7 @@ import 'theme_data.dart';
 ///          // This is the main content.
 ///          Expanded(
 ///            child: Center(
-///              child: Text('_selectedIndex: $_selectedIndex'),
+///              child: Text('selectedIndex: $_selectedIndex'),
 ///            ),
 ///          )
 ///        ],
