@@ -447,14 +447,22 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void _updateSemanticActions() {
     SemanticsAction forward;
     SemanticsAction backward;
-    switch (axis) {
-      case Axis.vertical:
+    switch (axisDirection) {
+      case AxisDirection.up:
+        forward = SemanticsAction.scrollDown;
+        backward = SemanticsAction.scrollUp;
+        break;
+      case AxisDirection.right:
+        forward = SemanticsAction.scrollLeft;
+        backward = SemanticsAction.scrollRight;
+        break;
+      case AxisDirection.down:
         forward = SemanticsAction.scrollUp;
         backward = SemanticsAction.scrollDown;
         break;
-      case Axis.horizontal:
-        forward = SemanticsAction.scrollLeft;
-        backward = SemanticsAction.scrollRight;
+      case AxisDirection.left:
+        forward = SemanticsAction.scrollRight;
+        backward = SemanticsAction.scrollLeft;
         break;
     }
 

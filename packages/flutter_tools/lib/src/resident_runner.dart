@@ -193,7 +193,7 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $observatoryUri');
 
       vmService = service;
-      device.getLogReader(app: package).connectedVMService = vmService;
+      (await device.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -369,11 +369,11 @@ class FlutterDevice {
     return to;
   }
 
-  void startEchoingDeviceLog() {
+  Future<void> startEchoingDeviceLog() async {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = device.getLogReader(app: package).logLines;
+    final Stream<String> logStream = (await device.getLogReader(app: package)).logLines;
     if (logStream == null) {
       globals.printError('Failed to read device log stream');
       return;
@@ -393,8 +393,8 @@ class FlutterDevice {
     _loggingSubscription = null;
   }
 
-  void initLogReader() {
-    device.getLogReader(app: package).appPid = vmService.vm.pid;
+  Future<void> initLogReader() async {
+    (await device.getLogReader(app: package)).appPid = vmService.vm.pid;
   }
 
   Future<int> runHot({
@@ -426,7 +426,7 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     // Start the application.
     final Future<LaunchResult> futureResult = device.startApp(
@@ -499,7 +499,7 @@ class FlutterDevice {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     final LaunchResult result = await device.startApp(
       package,
