@@ -418,7 +418,8 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
         );
-      } on Exception catch (error) {
+      } on Exception catch (error, st) {
+        print('caught: $error, $st');
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = systemClock.now();

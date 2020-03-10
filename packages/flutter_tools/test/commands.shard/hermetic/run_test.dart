@@ -114,6 +114,37 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Fails with toolExit run in profile mode on emulator with machine flag', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('lib/main.dart').createSync(recursive: true);
+      final FakeDevice device = FakeDevice(isLocalEmulator: true);
+      when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+      when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+        '--machine',
+        '--profile',
+      ]), throwsToolExit(message: 'not supported for emulators'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => MockDeviceManager(),
+    });
+
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
       globals.fs.currentDirectory = globals.fs.directory(globals.fs.path.join('a', 'b', 'c'))
         ..createSync(recursive: true);
@@ -572,15 +603,14 @@ class TestRunCommand extends RunCommand {
   }
 }
 
-class MockStableFlutterVersion extends MockFlutterVersion {
-  @override
-  bool get isMaster => false;
-}
-
 class FakeDevice extends Fake implements Device {
+  FakeDevice({bool isLocalEmulator = false})
+   : _isLocalEmulator = isLocalEmulator;
+
   static const int kSuccess = 1;
   static const int kFailure = -1;
   TargetPlatform _targetPlatform = TargetPlatform.ios;
+  final bool _isLocalEmulator;
 
   @override
   String get id => 'fake_device';
@@ -588,7 +618,7 @@ class FakeDevice extends Fake implements Device {
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
   @override
-  Future<bool> get isLocalEmulator => Future<bool>.value(false);
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
   bool get supportsHotReload => false;
