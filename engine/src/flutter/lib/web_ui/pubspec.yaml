@@ -8,7 +8,7 @@ dependencies:
   meta: 1.1.7
 
 dev_dependencies:
-  http: 0.12.0+2
+  http: 0.12.0+4
   image: 2.1.4
   mockito: 4.1.1
   path: 1.6.4
