@@ -48,7 +48,7 @@ abstract class PersistentToolState {
   void updateLastActiveVersion(String fullGitHash, Channel channel);
 
   /// Whether this client was already determined to be or not be a bot.
-  bool isBot;
+  bool isRunningOnBot;
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -114,8 +114,8 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  bool get isBot => _config.getValue(_kAzureBot) as bool;
+  bool get isRunningOnBot => _config.getValue(_kAzureBot) as bool;
 
   @override
-  set isBot(bool value) => _config.setValue(_kAzureBot, value);
+  set isRunningOnBot(bool value) => _config.setValue(_kAzureBot, value);
 }

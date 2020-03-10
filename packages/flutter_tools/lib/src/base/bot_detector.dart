@@ -18,17 +18,16 @@ class BotDetector {
     _platform = platform,
     _azureDetector = AzureDetector(
       httpClientFactory: httpClientFactory,
-      persistentToolState: persistentToolState,
-    );
+    ),
+    _persistentToolState = persistentToolState;
 
   final Platform _platform;
   final AzureDetector _azureDetector;
-
-  bool _isRunningOnBot;
+  final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
-    if (_isRunningOnBot != null) {
-      return _isRunningOnBot;
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot;
     }
     if (
       // Explicitly stated to not be a bot.
@@ -39,10 +38,10 @@ class BotDetector {
       // When set, GA logs to a local file (normally for tests) so we don't need to filter.
       || _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
-      return _isRunningOnBot = false;
+      return _persistentToolState.isRunningOnBot = false;
     }
 
-    return _isRunningOnBot = _platform.environment['BOT'] == 'true'
+    return _persistentToolState.isRunningOnBot = _platform.environment['BOT'] == 'true'
 
       // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
       || _platform.environment['TRAVIS'] == 'true'
@@ -84,19 +83,15 @@ class BotDetector {
 class AzureDetector {
   AzureDetector({
     @required HttpClientFactory httpClientFactory,
-    @required PersistentToolState persistentToolState,
-  }) : _httpClientFactory = httpClientFactory,
-       _persistentToolState = persistentToolState;
+  }) : _httpClientFactory = httpClientFactory;
 
   static const String _serviceUrl = 'http://169.254.169.254/metadata/instance';
 
   final HttpClientFactory _httpClientFactory;
-  final PersistentToolState _persistentToolState;
 
   bool _isRunningOnAzure;
 
   Future<bool> get isRunningOnAzure async {
-    _isRunningOnAzure = _persistentToolState.isBot;
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure;
     }
@@ -111,16 +106,13 @@ class AzureDetector {
     } on SocketException {
       // If there is an error on the socket, it probalby means that we are not
       // running on Azure.
-      _persistentToolState.isBot = false;
       return _isRunningOnAzure = false;
     } on HttpException {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
-      _persistentToolState.isBot = true;
       return _isRunningOnAzure = true;
     }
     // We got a response. We're running on Azure.
-    _persistentToolState.isBot = true;
     return _isRunningOnAzure = true;
   }
 }
