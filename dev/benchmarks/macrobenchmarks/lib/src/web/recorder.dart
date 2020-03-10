@@ -73,18 +73,20 @@ abstract class Recorder {
 ///   static const String benchmarkName = 'for_loop';
 ///
 ///   @override
-///   void body() {
-///     double x = 0;
-///     for (int i = 0; i < 10000000; i++) {
-///       x *= 1.5;
-///     }
+///   void body(Profile profile) {
+///     profile.record('loop', () {
+///       double x = 0;
+///       for (int i = 0; i < 10000000; i++) {
+///         x *= 1.5;
+///       }
+///     });
 ///   }
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
   RawRecorder({@required String name}) : super._(name);
 
-  /// Called once all runs of this benchmark recorder.
+  /// Called once before all runs of this benchmark recorder.
   ///
   /// This is useful for doing one-time setup work that's needed for the
   /// benchmark.
@@ -415,25 +417,34 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 class Timeseries {
   Timeseries();
 
-  final List<num> _values = <num>[];
+  /// List of all the values that have been recorded.
+  ///
+  /// This list has no limit.
+  final List<num> _allValues = <num>[];
+
+  /// List of values that are being used for measurement purposes.
+  ///
+  /// [average], [standardDeviation] and [noise] are all based on this list, not
+  /// the [_allValues] list.
+  final List<num> _measuredValues = <num>[];
 
   /// The total amount of data collected, including ones that were dropped
   /// because of the sample size limit.
-  int count = 0;
+  int get count => _allValues.length;
 
-  double get average => _computeMean(_values);
+  double get average => _computeMean(_measuredValues);
 
   double get standardDeviation =>
-      _computeStandardDeviationForPopulation(_values);
+      _computeStandardDeviationForPopulation(_measuredValues);
 
   double get noise => standardDeviation / average;
 
   void add(num value) {
-    count++;
-    _values.add(value);
-    // Don't let the list grow beyond [_kMeasuredSampleCount].
-    if (_values.length > _kMeasuredSampleCount) {
-      _values.removeAt(0);
+    _measuredValues.add(value);
+    _allValues.add(value);
+    // Don't let the [_measuredValues] list grow beyond [_kMeasuredSampleCount].
+    if (_measuredValues.length > _kMeasuredSampleCount) {
+      _measuredValues.removeAt(0);
     }
   }
 }
@@ -459,9 +470,7 @@ class Profile {
   }
 
   void addDataPoint(String key, Duration duration) {
-    scoreData
-        .putIfAbsent(key, () => Timeseries())
-        .add(duration.inMicroseconds);
+    scoreData.putIfAbsent(key, () => Timeseries()).add(duration.inMicroseconds);
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -478,14 +487,16 @@ class Profile {
       return true;
     }
 
-    final List<bool> shouldContinueList = <bool>[];
-    for (final String key in scoreData.keys) {
+    // Accumulates all the messages to be printed when the final decision is to
+    // stop collecting data.
+    final StringBuffer buffer = StringBuffer();
+
+    final Iterable<bool> shouldContinueList = scoreData.keys.map((String key) {
       final Timeseries timeseries = scoreData[key];
 
       // Collect enough data points before considering to stop.
       if (timeseries.count < _kMinSampleCount) {
-        shouldContinueList.add(true);
-        continue;
+        return true;
       }
 
       // Is it still too noisy?
@@ -494,29 +505,33 @@ class Profile {
         // the assumption that this benchmark is always noisy and there's nothing
         // we can do about it.
         if (timeseries.count > _kMaxSampleCount) {
-          print(
+          buffer.writeln(
             'WARNING: Noise of benchmark "$name.$key" did not converge below '
-            '${_percent(_kNoiseThreshold)}. Stopping because it reached the '
+            '${_ratioToPercent(_kNoiseThreshold)}. Stopping because it reached the '
             'maximum number of samples $_kMaxSampleCount. Noise level is '
-            '${_percent(timeseries.noise)}.',
+            '${_ratioToPercent(timeseries.noise)}.',
           );
-          shouldContinueList.add(false);
+          return false;
         } else {
-          shouldContinueList.add(true);
+          return true;
         }
-        continue;
       }
 
-      print(
-        'SUCCESS: Benchmark converged below ${_percent(_kNoiseThreshold)}. '
-        'Noise level is ${_percent(timeseries.noise)}.',
+      buffer.writeln(
+        'SUCCESS: Benchmark converged below ${_ratioToPercent(_kNoiseThreshold)}. '
+        'Noise level is ${_ratioToPercent(timeseries.noise)}.',
       );
-      shouldContinueList.add(false);
-    }
+      return false;
+    });
 
     // If any of the score data needs to continue to be collected, we should
     // return true.
-    return shouldContinueList.any((bool element) => element);
+    final bool finalDecision =
+        shouldContinueList.any((bool element) => element);
+    if (!finalDecision) {
+      print(buffer.toString());
+    }
+    return finalDecision;
   }
 
   /// Returns a JSON representation of the profile that will be sent to the
@@ -548,7 +563,7 @@ class Profile {
       final Timeseries timeseries = scoreData[key];
       buffer.writeln('$key:');
       buffer.writeln(' | average: ${timeseries.average} μs');
-      buffer.writeln(' | noise: ${_percent(timeseries.noise)}');
+      buffer.writeln(' | noise: ${_ratioToPercent(timeseries.noise)}');
     }
     for (final String key in extraData.keys) {
       final dynamic value = extraData[key];
@@ -587,7 +602,7 @@ double _computeStandardDeviationForPopulation(Iterable<num> population) {
   return math.sqrt(sumOfSquaredDeltas / population.length);
 }
 
-String _percent(double value) {
+String _ratioToPercent(double value) {
   return '${(value * 100).toStringAsFixed(2)}%';
 }
 

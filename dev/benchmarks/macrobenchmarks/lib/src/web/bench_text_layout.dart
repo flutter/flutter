@@ -21,6 +21,8 @@ Paragraph _generateParagraph() {
 }
 
 /// Repeatedly lays out a paragraph using the DOM measurement approach.
+///
+/// Creates a different paragraph each time in order to avoid hitting the cache.
 class BenchTextDomLayout extends RawRecorder {
   BenchTextDomLayout() : super(name: benchmarkName);
 
@@ -36,6 +38,10 @@ class BenchTextDomLayout extends RawRecorder {
 }
 
 /// Repeatedly lays out a paragraph using the DOM measurement approach.
+///
+/// Uses the same paragraph content to make sure we hit the cache. It doesn't
+/// use the same paragraph instance because the layout method will shortcircuit
+/// in that case.
 class BenchTextDomCachedLayout extends RawRecorder {
   BenchTextDomCachedLayout() : super(name: benchmarkName);
 
