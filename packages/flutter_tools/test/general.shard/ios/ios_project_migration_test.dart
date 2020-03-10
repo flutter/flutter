@@ -12,6 +12,7 @@ import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -255,6 +256,84 @@ keep this 2
         );
         expect(() =>iosProjectMigration.migrate(), throwsToolExit(message: 'Your Xcode project requires migration'));
         verify(mockUsage.sendEvent('ios-migration', 'remove-frameworks', label: 'failure', value: null));
+      });
+    });
+
+    group('new Xcode build system', () {
+      MemoryFileSystem memoryFileSystem;
+      BufferLogger testLogger;
+      MockIosProject mockIosProject;
+      File xcodeWorkspaceSharedSettings;
+
+      setUp(() {
+        memoryFileSystem = MemoryFileSystem();
+        xcodeWorkspaceSharedSettings = memoryFileSystem.file('WorkspaceSettings.xcsettings');
+
+        testLogger = BufferLogger(
+          terminal: AnsiTerminal(
+            stdio: null,
+            platform: const LocalPlatform(),
+          ),
+          outputPreferences: OutputPreferences.test(),
+        );
+
+        mockIosProject = MockIosProject();
+        when(mockIosProject.xcodeWorkspaceSharedSettings).thenReturn(xcodeWorkspaceSharedSettings);
+      });
+
+      testWithoutContext('skipped if files are missing', () {
+        final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
+
+        expect(testLogger.traceText, contains('Xcode workspace settings not found, skipping migration'));
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('skipped if nothing to upgrade', () {
+        const String contents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildSystemType</key>
+	<string></string>
+</dict>
+</plist>''';
+        xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
+
+        final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isTrue);
+        expect(testLogger.statusText, isEmpty);
+      });
+
+      testWithoutContext('Xcode project is migrated', () {
+        const String contents = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BuildSystemType</key>
+	<string>Original</string>
+</dict>
+</plist>''';
+        xcodeWorkspaceSharedSettings.writeAsStringSync(contents);
+
+        final XcodeBuildSystemMigration iosProjectMigration = XcodeBuildSystemMigration(
+          mockIosProject,
+          testLogger,
+        );
+        expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
+
+        expect(testLogger.statusText, contains('Legacy build system detected, removing'));
       });
     });
   });
