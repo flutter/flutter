@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
+import '../persistent_tool_state.dart';
 import 'io.dart';
 import 'net.dart';
 
@@ -12,20 +13,21 @@ class BotDetector {
   BotDetector({
     @required HttpClientFactory httpClientFactory,
     @required Platform platform,
+    @required PersistentToolState persistentToolState,
   }) :
     _platform = platform,
     _azureDetector = AzureDetector(
       httpClientFactory: httpClientFactory,
-    );
+    ),
+    _persistentToolState = persistentToolState;
 
   final Platform _platform;
   final AzureDetector _azureDetector;
-
-  bool _isRunningOnBot;
+  final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
-    if (_isRunningOnBot != null) {
-      return _isRunningOnBot;
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot;
     }
     if (
       // Explicitly stated to not be a bot.
@@ -36,10 +38,10 @@ class BotDetector {
       // When set, GA logs to a local file (normally for tests) so we don't need to filter.
       || _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
-      return _isRunningOnBot = false;
+      return _persistentToolState.isRunningOnBot = false;
     }
 
-    return _isRunningOnBot = _platform.environment['BOT'] == 'true'
+    return _persistentToolState.isRunningOnBot = _platform.environment['BOT'] == 'true'
 
       // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
       || _platform.environment['TRAVIS'] == 'true'
@@ -94,7 +96,7 @@ class AzureDetector {
       return _isRunningOnAzure;
     }
     final HttpClient client = _httpClientFactory()
-      ..connectionTimeout = const Duration(seconds: 1);
+      ..connectionTimeout = const Duration(milliseconds: 250);
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
