@@ -93,4 +93,8 @@ flutter:
     - packages/flutter_gallery_assets/people/square/ali.png
     - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
 
+<<<<<<< HEAD
 # PUBSPEC CHECKSUM: 2d9e
+=======
+# PUBSPEC CHECKSUM: 6b9b
+>>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc

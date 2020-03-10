@@ -88,4 +88,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+<<<<<<< HEAD
 # PUBSPEC CHECKSUM: e4c1
+=======
+# PUBSPEC CHECKSUM: f2be
+>>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc

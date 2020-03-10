@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
@@ -41,7 +42,7 @@ Future<void> main() async {
 
     final Health driverHealth = await driver.checkHealth();
     expect(driverHealth.status, HealthStatus.ok);
-  });
+  }, skip: !Platform.isIOS);
 
     test('Merge thread to create and remove platform views should not crash', () async {
 
@@ -58,13 +59,13 @@ Future<void> main() async {
     await driver.waitUntilNoTransientCallbacks();
 
     // The animation of tapping a `RaisedButton` should pump enough frames to un-merge the thread.
-    final SerializableFinder no_action_button =
-        find.byValueKey('no_action_button');
-    await driver.waitFor(no_action_button);
-    await driver.tap(no_action_button);
+    final SerializableFinder unmergeButton =
+        find.byValueKey('unmerge_button');
+    await driver.waitFor(unmergeButton);
+    await driver.tap(unmergeButton);
     await driver.waitUntilNoTransientCallbacks();
 
     final Health driverHealth = await driver.checkHealth();
     expect(driverHealth.status, HealthStatus.ok);
-  });
+  }, skip: !Platform.isIOS);
 }

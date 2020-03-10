@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,7 +34,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Container(),
     ));
-  });
+  }, skip: !Platform.isIOS);
 
   testWidgets('un-merging thread after removing the platform view does not crash',
       (WidgetTester tester) async {
@@ -57,5 +58,5 @@ void main() {
     for (int i = 0; i < 100; i++) {
       await tester.pump();
     }
-  });
+  }, skip: !Platform.isIOS);
 }

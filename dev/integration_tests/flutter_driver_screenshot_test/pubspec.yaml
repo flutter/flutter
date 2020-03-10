@@ -81,4 +81,8 @@ flutter:
   assets:
     - assets/
 
+<<<<<<< HEAD
 # PUBSPEC CHECKSUM: 648a
+=======
+# PUBSPEC CHECKSUM: 1f87
+>>>>>>> ba9e80dee305b1d19c35b4465c68fe702572a9bc
