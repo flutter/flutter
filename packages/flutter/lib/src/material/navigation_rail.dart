@@ -444,13 +444,14 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
           elevation: elevation,
           color: backgroundColor,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _verticalSpacer,
               if (widget.leading != null)
                 ...<Widget>[
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 8.0),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: lerpDouble(widget.minWidth, widget.minExtendedWidth, _extendedAnimation.value),
+                    ),
                     child: widget.leading,
                   ),
                   _verticalSpacer,
@@ -460,7 +461,6 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   alignment: Alignment(0, groupAlignment),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       for (int i = 0; i < widget.destinations.length; i++)
                         _RailDestination(
@@ -483,8 +483,10 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           ),
                         ),
                       if (widget.trailing != null)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(start: 8.0),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: lerpDouble(widget.minWidth, widget.minExtendedWidth, _extendedAnimation.value),
+                          ),
                           child: widget.trailing,
                         ),
                     ],
@@ -651,7 +653,7 @@ class _RailDestination extends StatelessWidget {
         break;
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
-        final double lerpedPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue);
+        final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue);
         content = Container(
           constraints: BoxConstraints(
             minWidth: minWidth,
@@ -661,8 +663,9 @@ class _RailDestination extends StatelessWidget {
           child: ClipRect(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                SizedBox(height: lerpedPadding),
+                SizedBox(height: verticalPadding),
                 themedIcon,
                 Align(
                   alignment: Alignment.topCenter,
@@ -674,7 +677,7 @@ class _RailDestination extends StatelessWidget {
                     child: styledLabel,
                   ),
                 ),
-                SizedBox(height: lerpedPadding),
+                SizedBox(height: verticalPadding),
               ],
             ),
           ),
