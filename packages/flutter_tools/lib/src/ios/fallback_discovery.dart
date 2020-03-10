@@ -167,7 +167,7 @@ class FallbackDiscovery {
             throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
           }
           final LibraryRef library = (isolateResponse as Isolate).rootLib;
-          if (library.uri.startsWith('package:$packageName')) {
+          if (library != null && library.uri.startsWith('package:$packageName')) {
             UsageEvent(
               _kEventName,
               'success',
