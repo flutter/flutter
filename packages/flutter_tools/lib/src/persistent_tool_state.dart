@@ -81,7 +81,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
     Channel.beta: 'last-active-beta-version',
     Channel.stable: 'last-active-stable-version'
   };
-  static const String _kAzureBot = 'azure-bot';
+  static const String _kBotKey = 'is-bot';
 
   final Config _config;
 
@@ -114,8 +114,8 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  bool get isRunningOnBot => _config.getValue(_kAzureBot) as bool;
+  bool get isRunningOnBot => _config.getValue(_kBotKey) as bool;
 
   @override
-  set isRunningOnBot(bool value) => _config.setValue(_kAzureBot, value);
+  set isRunningOnBot(bool value) => _config.setValue(_kBotKey, value);
 }
