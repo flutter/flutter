@@ -629,11 +629,16 @@ class AndroidDevice extends Device {
     // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
-
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
         observatoryUri = await observatoryDiscovery.uri;
+        if (observatoryUri == null) {
+          globals.printError(
+            'Error waiting for a debug connection: '
+            'The log reader stopped unexpectedly',
+          );
+          return LaunchResult.failed();
+        }
       }
-
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
