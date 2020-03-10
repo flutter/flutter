@@ -334,6 +334,8 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRail.leading].
   ///
   /// ```dart
+  /// import 'dart:ui';
+  ///
   /// class NavigationRailExtendableFab extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
