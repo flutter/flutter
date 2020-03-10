@@ -382,6 +382,38 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
 /// foo\bar => r'foo\bar'
 /// ```
+String generateMessageString(String value) {
+  if (value.contains('\n'))
+    value = value.replaceAll('\n', '\\n');
+
+  if (!value.contains("'"))
+    return "'$value'";
+  if (!value.contains('"'))
+    return '"$value"';
+  if (!value.contains("'''"))
+    return "'''$value'''";
+  if (!value.contains('"""'))
+    return '"""$value"""';
+
+  return value.split("'''")
+    .map(generateString)
+    // If value contains more than 6 consecutive single quotes some empty strings may be generated.
+    // The following map removes them.
+    .map((String part) => part == "''" ? '' : part)
+    .join(" \"'''\" ");
+}
+
+/// Return `s` as a Dart-parseable string.
+///
+/// The result tries to avoid character escaping:
+///
+/// ```
+/// foo => 'foo'
+/// foo "bar" => 'foo "bar"'
+/// foo 'bar' => "foo 'bar'"
+/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// foo\bar => r'foo\bar'
+/// ```
 ///
 /// Strings with newlines are not supported.
 String generateString(String value) {

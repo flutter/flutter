@@ -164,11 +164,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    // Escape single and double quotes.
-    messageValue = messageValue.replaceAll("'", '\\\'');
-    messageValue = messageValue.replaceAll('"', '\\\"');
-
-    return "'$messageValue'";
+    return generateMessageString(messageValue);
   }
 
   if (message.isPlural) {
@@ -197,7 +193,14 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateClass(String className, AppResourceBundle bundle, Iterable<Message> messages) {
+String generateClass(String className, String fileName, AppResourceBundle bundle, Iterable<Message> messages) {
+  String getImportClass(LocaleInfo locale) {
+    if (locale.countryCode == null) {
+      return "import '$fileName.dart';";
+    }
+
+    return "import '${fileName}_${locale.languageCode}.dart';";
+  }
   final LocaleInfo locale = bundle.locale;
 
   String baseClassName = className;
@@ -209,9 +212,10 @@ String generateClass(String className, AppResourceBundle bundle, Iterable<Messag
     .where((Message message) => bundle.translationFor(message) != null)
     .map((Message message) => generateMethod(message, bundle));
 
-  return classTemplate
+  return classFileTemplate
     .replaceAll('@(language)', describeLocale(locale.toString()))
     .replaceAll('@(baseClass)', baseClassName)
+    .replaceAll('@(importClass)', getImportClass(locale))
     .replaceAll('@(class)', '$className${locale.camelCase()}')
     .replaceAll('@(localeName)', locale.toString())
     .replaceAll('@(methods)', methods.join('\n\n'));
@@ -515,12 +519,18 @@ class LocalizationsGenerator {
 
     final StringBuffer allMessagesClasses = StringBuffer();
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
+
+    final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      allMessagesClasses.writeln();
-      allMessagesClasses.writeln(
-        generateClass(className, _allBundles.bundleFor(locale), _allMessages)
+      final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_${locale.toString()}.dart'));
+      localeMessageFile.writeAsStringSync(
+        generateClass(className, fileName, _allBundles.bundleFor(locale), _allMessages)
       );
     }
+
+    final Iterable<String> localeImports = supportedLocales.map((LocaleInfo locale) {
+      return "import '${fileName}_${locale.toString()}.dart';";
+    });
 
     final String lookupBody = generateLookupBody(_allBundles, className);
 
@@ -530,7 +540,7 @@ class LocalizationsGenerator {
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
-      .replaceAll('@(allMessagesClasses)', allMessagesClasses.toString().trim())
+      .replaceAll('@(messageClassImports)', localeImports.join('\n'))
       .replaceAll('@(lookupName)', '_lookup$className')
       .replaceAll('@(lookupBody)', lookupBody);
   }
