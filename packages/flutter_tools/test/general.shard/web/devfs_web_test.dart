@@ -367,6 +367,8 @@ void main() {
       invalidatedFiles: <Uri>[],
     );
 
+    expect(webDevFS.webAssetServer.getFile('/require.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('/dart_stack_trace_mapper.js'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);

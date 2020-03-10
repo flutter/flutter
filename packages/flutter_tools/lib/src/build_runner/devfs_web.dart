@@ -511,14 +511,16 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
+      webAssetServer.writeFile('/require.js', requireJS.readAsStringSync());
+      webAssetServer.writeFile('/dart_stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
         '/main.dart.js',
         generateBootstrapScript(
-          requireUrl: _filePathToUriFragment(requireJS.path),
-          mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+          requireUrl: '/require.js',
+          mapperUrl: '/dart_stack_trace_mapper.js',
           entrypoint: '/$entrypoint.lib.js',
         ),
       );
@@ -603,19 +605,6 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
-}
-
-String _filePathToUriFragment(String path) {
-  if (globals.platform.isWindows) {
-    final bool startWithSlash = path.startsWith('/');
-    final String partial =
-        globals.fs.path.split(path).skip(startWithSlash ? 2 : 1).join('/');
-    if (partial.startsWith('/')) {
-      return partial;
-    }
-    return '/$partial';
-  }
-  return path;
 }
 
 class ReleaseAssetServer {
