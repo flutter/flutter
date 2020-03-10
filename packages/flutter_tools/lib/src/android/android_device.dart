@@ -319,9 +319,11 @@ class AndroidDevice extends Device {
         throwOnError: true,
       );
 
+      // This has been reported to return null on some devices. In this case,
+      // assume the lowest supported API to still allow Flutter to run.
       // Sample output: '22'
-      final String sdkVersion = await _getProperty('ro.build.version.sdk');
-
+      final String sdkVersion = await _getProperty('ro.build.version.sdk')
+        ?? minApiLevel.toString();
 
       final int sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
