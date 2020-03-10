@@ -287,7 +287,6 @@ keep this 2
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
-
         expect(xcodeWorkspaceSharedSettings.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode workspace settings not found, skipping migration'));
@@ -311,6 +310,7 @@ keep this 2
           testLogger,
         );
         expect(iosProjectMigration.migrate(), isTrue);
+        expect(xcodeWorkspaceSharedSettings.existsSync(), isTrue);
         expect(testLogger.statusText, isEmpty);
       });
 
