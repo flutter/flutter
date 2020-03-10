@@ -4,11 +4,13 @@
 
 #include "benchmarking.h"
 
+#include "flutter/fml/backtrace.h"
 #include "flutter/fml/icu_util.h"
 
 namespace benchmarking {
 
 int Main(int argc, char** argv) {
+  fml::InstallCrashHandler();
   benchmark::Initialize(&argc, argv);
   fml::icu::InitializeICU("icudtl.dat");
   ::benchmark::RunSpecifiedBenchmarks();

@@ -107,6 +107,10 @@ FILE: ../../../flutter/flow/view_holder.cc
 FILE: ../../../flutter/flow/view_holder.h
 FILE: ../../../flutter/flutter_frontend_server/bin/starter.dart
 FILE: ../../../flutter/flutter_frontend_server/lib/server.dart
+FILE: ../../../flutter/fml/backtrace.cc
+FILE: ../../../flutter/fml/backtrace.h
+FILE: ../../../flutter/fml/backtrace_stub.cc
+FILE: ../../../flutter/fml/backtrace_unittests.cc
 FILE: ../../../flutter/fml/base32.cc
 FILE: ../../../flutter/fml/base32.h
 FILE: ../../../flutter/fml/base32_unittest.cc
