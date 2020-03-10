@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -22,7 +23,6 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
-import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
@@ -189,7 +189,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       if (script.contains('flutter/examples/')) {
         return script.substring(0, script.indexOf('flutter/examples/') + 8);
       }
-    } catch (error) {
+    } on Exception catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
       print(userMessages.runnerNoRoot('$error'));
@@ -297,7 +297,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if (topLevelResults['suppress-analytics'] as bool) {
-          flutterUsage.suppressAnalytics = true;
+          globals.flutterUsage.suppressAnalytics = true;
         }
 
         _checkFlutterCopy();
@@ -321,7 +321,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
         deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
         if (topLevelResults['version'] as bool) {
-          flutterUsage.sendCommand('version');
+          globals.flutterUsage.sendCommand('version');
+          globals.flutterVersion.fetchTagsAndUpdate();
           String status;
           if (machineFlag) {
             status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());
@@ -421,6 +422,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
+  @visibleForTesting
   static void initFlutterRoot() {
     Cache.flutterRoot ??= defaultFlutterRoot;
   }

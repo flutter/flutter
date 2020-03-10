@@ -335,6 +335,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey turbo = LogicalKeyboardKey(0x00100000016, debugName: kReleaseMode ? null : 'Turbo');
 
+  /// Represents the logical "Privacy Screen Toggle" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey privacyScreenToggle = LogicalKeyboardKey(0x00100000017, debugName: kReleaseMode ? null : 'Privacy Screen Toggle');
+
   /// Represents the logical "Sleep" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1220,6 +1225,11 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mediaPlay = LogicalKeyboardKey(0x001000c00b0, debugName: kReleaseMode ? null : 'Media Play');
 
+  /// Represents the logical "Media Pause" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey mediaPause = LogicalKeyboardKey(0x001000c00b1, debugName: kReleaseMode ? null : 'Media Pause');
+
   /// Represents the logical "Media Record" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1663,6 +1673,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0100000014: suspend,
     0x0100000015: resume,
     0x0100000016: turbo,
+    0x0100000017: privacyScreenToggle,
     0x0100010082: sleep,
     0x0100010083: wakeUp,
     0x01000100b5: displayToggleIntExt,
@@ -1840,6 +1851,7 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x01000c009c: channelUp,
     0x01000c009d: channelDown,
     0x01000c00b0: mediaPlay,
+    0x01000c00b1: mediaPause,
     0x01000c00b2: mediaRecord,
     0x01000c00b3: mediaFastForward,
     0x01000c00b4: mediaRewind,
@@ -2121,6 +2133,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey turbo = PhysicalKeyboardKey(0x00000016, debugName: kReleaseMode ? null : 'Turbo');
+
+  /// Represents the location of the "Privacy Screen Toggle" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey privacyScreenToggle = PhysicalKeyboardKey(0x00000017, debugName: kReleaseMode ? null : 'Privacy Screen Toggle');
 
   /// Represents the location of the "Sleep" key on a generalized keyboard.
   ///
@@ -3054,6 +3072,12 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey mediaPlay = PhysicalKeyboardKey(0x000c00b0, debugName: kReleaseMode ? null : 'Media Play');
 
+  /// Represents the location of the "Media Pause" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey mediaPause = PhysicalKeyboardKey(0x000c00b1, debugName: kReleaseMode ? null : 'Media Pause');
+
   /// Represents the location of the "Media Record" key on a generalized
   /// keyboard.
   ///
@@ -3536,6 +3560,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00000014: suspend,
     0x00000015: resume,
     0x00000016: turbo,
+    0x00000017: privacyScreenToggle,
     0x00010082: sleep,
     0x00010083: wakeUp,
     0x000100b5: displayToggleIntExt,
@@ -3713,6 +3738,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x000c009c: channelUp,
     0x000c009d: channelDown,
     0x000c00b0: mediaPlay,
+    0x000c00b1: mediaPause,
     0x000c00b2: mediaRecord,
     0x000c00b3: mediaFastForward,
     0x000c00b4: mediaRewind,

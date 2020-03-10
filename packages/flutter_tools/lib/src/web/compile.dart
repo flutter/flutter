@@ -11,13 +11,13 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
+import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
@@ -27,7 +27,6 @@ Future<void> buildWeb(
   String target,
   BuildInfo buildInfo,
   bool initializePlatform,
-  List<String> dartDefines,
   bool csp,
 ) async {
   if (!flutterProject.web.existsSync()) {
@@ -50,10 +49,9 @@ Future<void> buildWeb(
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: jsonEncode(dartDefines),
+        kDartDefines: jsonEncode(buildInfo.dartDefines),
         kCspMode: csp.toString(),
-        // TODO(dnfield): Enable font subset. We need to get a kernel file to do
-        // that. https://github.com/flutter/flutter/issues/49730
+        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
       },
     ));
     if (!result.success) {
@@ -66,12 +64,12 @@ Future<void> buildWeb(
       }
       throwToolExit('Failed to compile application for the Web.');
     }
-  } catch (err) {
+  } on Exception catch (err) {
     throwToolExit(err.toString());
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// An indirection on web compilation.

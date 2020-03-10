@@ -834,7 +834,9 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: _padding.evaluate(animation),
+      padding: _padding
+        .evaluate(animation)
+        .clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity),
       child: widget.child,
     );
   }

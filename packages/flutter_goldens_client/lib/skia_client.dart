@@ -209,7 +209,7 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
-        ..writeln('An error occured when initializing golden file test with ')
+        ..writeln('An error occurred when initializing golden file test with ')
         ..writeln('goldctl.')
         ..writeln()
         ..writeln('Debug information for Gold:')
@@ -306,7 +306,7 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
-        ..writeln('An error occured when initializing golden file tryjob with ')
+        ..writeln('An error occurred when initializing golden file tryjob with ')
         ..writeln('goldctl.')
         ..writeln()
         ..writeln('Debug information for Gold:')
