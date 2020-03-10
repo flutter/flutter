@@ -334,7 +334,7 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRail.leading].
   ///
   /// ```dart
-  /// class ExtendableFab extends StatelessWidget {
+  /// class NavigationRailExtendableFab extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final animation = NavigationRail.extendedAnimation(context);
@@ -350,10 +350,13 @@ class NavigationRail extends StatefulWidget {
   ///             Align(
   ///               alignment: AlignmentDirectional.centerStart,
   ///               widthFactor: animation.value,
-  ///               child: FloatingActionButton.extended(
-  ///                 icon: Icon(Icons.add),
-  ///                 label: Text('CREATE'),
-  ///                 onPressed: () {},
+  ///               child: Padding(
+  ///                 padding: const EdgeInsetsDirectional.only(start: 8),
+  ///                 child: FloatingActionButton.extended(
+  ///                   icon: Icon(Icons.add),
+  ///                   label: Text('CREATE'),
+  ///                   onPressed: () {},
+  ///                 ),
   ///               ),
   ///             ) :
   ///             FloatingActionButton(

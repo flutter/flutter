@@ -30,7 +30,7 @@ void main() {
     expect(_unselectedIconStyle(tester).color, ThemeData().colorScheme.onSurface.withOpacity(0.64));
     expect(_selectedLabelStyle(tester).fontSize, 14.0);
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
-    expect(_destinationsColumn(tester).mainAxisAlignment, MainAxisAlignment.start);
+    expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
     expect(_labelType(tester), NavigationRailLabelType.none);
   });
 
@@ -41,7 +41,7 @@ void main() {
     const Color unselectedIconColor = Color(0x00000003);
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
-    const NavigationRailGroupAlignment groupAlignment = NavigationRailGroupAlignment.center;
+    const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
 
     await tester.pumpWidget(
@@ -72,7 +72,7 @@ void main() {
     expect(_unselectedIconStyle(tester).color, unselectedIconColor);
     expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
-    expect(_destinationsColumn(tester).mainAxisAlignment, _resolveGroupAlignment(groupAlignment));
+    expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
   });
 
@@ -83,7 +83,7 @@ void main() {
     const Color unselectedIconColor = Color(0x00000003);
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
-    const NavigationRailGroupAlignment groupAlignment = NavigationRailGroupAlignment.center;
+    const double groupAlignment = 0.0;
     const NavigationRailLabelType labelType = NavigationRailLabelType.all;
 
     await tester.pumpWidget(
@@ -97,7 +97,7 @@ void main() {
               unselectedIconTheme: IconThemeData(color: Color(0x00000097)),
               selectedLabelTextStyle: TextStyle(fontSize: 9.0),
               unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
-              groupAlignment: NavigationRailGroupAlignment.bottom,
+              groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
             ),
             child: NavigationRail(
@@ -122,7 +122,7 @@ void main() {
     expect(_unselectedIconStyle(tester).color, unselectedIconColor);
     expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
-    expect(_destinationsColumn(tester).mainAxisAlignment, _resolveGroupAlignment(groupAlignment));
+    expect(_destinationsAlign(tester).alignment, Alignment.center);
     expect(_labelType(tester), labelType);
   });
 
@@ -147,7 +147,7 @@ void main() {
       unselectedIconTheme: IconThemeData(color: Color(0x00000097)),
       selectedLabelTextStyle: TextStyle(fontSize: 9.0),
       unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
-      groupAlignment: NavigationRailGroupAlignment.bottom,
+      groupAlignment: 1.0,
       labelType: NavigationRailLabelType.selected,
     ).debugFillProperties(builder);
 
@@ -167,7 +167,7 @@ void main() {
     expect(description[5].contains('selectedIconTheme: IconThemeData'), isTrue);
     expect(description[5].contains('(color: Color(0x00000098))'), isTrue);
 
-    expect(description[6], 'groupAlignment: NavigationRailGroupAlignment.bottom');
+    expect(description[6], 'groupAlignment: 1.0');
     expect(description[7], 'labelType: NavigationRailLabelType.selected');
 
   });
@@ -234,12 +234,12 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
   ).text.style;
 }
 
-Column _destinationsColumn(WidgetTester tester) {
-  return tester.widget<Column>(
+Align _destinationsAlign(WidgetTester tester) {
+  return tester.firstWidget<Align>(
     find.descendant(
-      of: find.byType(NavigationRail),
-      matching: find.byType(Column),
-    ).at(1),
+      of: find.byType(Expanded),
+      matching: find.byType(Align),
+    ),
   );
 }
 
@@ -267,16 +267,4 @@ double _labelOpacity(WidgetTester tester, String text) {
     ),
   );
   return opacityWidget.opacity;
-}
-
-MainAxisAlignment _resolveGroupAlignment(NavigationRailGroupAlignment groupAlignment) {
-  switch (groupAlignment) {
-    case NavigationRailGroupAlignment.top:
-      return MainAxisAlignment.start;
-    case NavigationRailGroupAlignment.center:
-      return MainAxisAlignment.center;
-    case NavigationRailGroupAlignment.bottom:
-      return MainAxisAlignment.end;
-  }
-  return MainAxisAlignment.start;
 }
