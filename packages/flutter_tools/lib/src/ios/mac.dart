@@ -24,6 +24,7 @@ import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'migrations/ios_migrator.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -90,7 +91,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<IOSMigrator> migrators = <IOSMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage)
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    XcodeBuildSystemMigration(app.project, globals.logger),
   ];
 
   final IOSMigration migration = IOSMigration(migrators);
