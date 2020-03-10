@@ -223,7 +223,7 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyZip(File zipFile) =>
-    _processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
