@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
+#include "flutter/shell/platform/darwin/ios/ios_context.h"
 
 // A UIView that is used as the parent for embedded UIViews.
 //
@@ -53,7 +54,7 @@ CATransform3D GetCATransform3DFromSkMatrix(const SkMatrix& matrix);
 // The position of the `layer` should be unchanged after resetting the anchor.
 void ResetAnchor(CALayer* layer);
 
-class IOSGLContext;
+class IOSContextGL;
 class IOSSurface;
 
 struct FlutterPlatformViewLayer {
@@ -111,7 +112,7 @@ class FlutterPlatformViewsController {
   // Discards all platform views instances and auxiliary resources.
   void Reset();
 
-  bool SubmitFrame(GrContext* gr_context, std::shared_ptr<IOSGLContext> gl_context);
+  bool SubmitFrame(GrContext* gr_context, std::shared_ptr<IOSContext> ios_context);
 
   void OnMethodCall(FlutterMethodCall* call, FlutterResult& result);
 
@@ -173,7 +174,7 @@ class FlutterPlatformViewsController {
   // Dispose the views in `views_to_dispose_`.
   void DisposeViews();
   void EnsureOverlayInitialized(int64_t overlay_id,
-                                std::shared_ptr<IOSGLContext> gl_context,
+                                std::shared_ptr<IOSContext> ios_context,
                                 GrContext* gr_context);
 
   // This will return true after pre-roll if any of the embedded views

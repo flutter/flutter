@@ -44,6 +44,8 @@ shared_library("create_flutter_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
 
+  public = _flutter_framework_headers
+
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterBinaryMessengerRelay.mm",
@@ -81,12 +83,16 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/platform_message_router.mm",
     "framework/Source/vsync_waiter_ios.h",
     "framework/Source/vsync_waiter_ios.mm",
+    "ios_context.h",
+    "ios_context.mm",
+    "ios_context_gl.h",
+    "ios_context_gl.mm",
+    "ios_context_software.h",
+    "ios_context_software.mm",
     "ios_external_texture_gl.h",
     "ios_external_texture_gl.mm",
-    "ios_gl_context.h",
-    "ios_gl_context.mm",
-    "ios_gl_render_target.h",
-    "ios_gl_render_target.mm",
+    "ios_render_target_gl.h",
+    "ios_render_target_gl.mm",
     "ios_surface.h",
     "ios_surface.mm",
     "ios_surface_gl.h",
@@ -95,14 +101,9 @@ shared_library("create_flutter_framework_dylib") {
     "ios_surface_software.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
+    "rendering_api_selection.h",
+    "rendering_api_selection.mm",
   ]
-
-  if (shell_enable_metal) {
-    sources += [
-      "ios_surface_metal.h",
-      "ios_surface_metal.mm",
-    ]
-  }
 
   sources += _flutter_framework_headers
 
@@ -126,6 +127,13 @@ shared_library("create_flutter_framework_dylib") {
 
   if (shell_enable_metal) {
     defines += [ "FLUTTER_SHELL_ENABLE_METAL=1" ]
+
+    sources += [
+      "ios_context_metal.h",
+      "ios_context_metal.mm",
+      "ios_surface_metal.h",
+      "ios_surface_metal.mm",
+    ]
   }
 
   libs = [

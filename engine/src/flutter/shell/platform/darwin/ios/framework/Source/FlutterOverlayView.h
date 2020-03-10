@@ -13,7 +13,7 @@
 
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/shell.h"
-#include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
+#include "flutter/shell/platform/darwin/ios/ios_context_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
@@ -36,7 +36,7 @@
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithContentsScale:(CGFloat)contentsScale;
 - (std::unique_ptr<flutter::IOSSurface>)createSurface:
-    (std::shared_ptr<flutter::IOSGLContext>)gl_context;
+    (std::shared_ptr<flutter::IOSContext>)ios_context;
 
 @end
 

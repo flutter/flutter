@@ -26,6 +26,7 @@ class GPUSurfaceGL : public Surface {
                GPUSurfaceGLDelegate* delegate,
                bool render_to_surface);
 
+  // |Surface|
   ~GPUSurfaceGL() override;
 
   // |Surface|

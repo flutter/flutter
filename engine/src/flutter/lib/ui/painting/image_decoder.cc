@@ -282,6 +282,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
           })
           .SetIfFalse([&result, context = io_manager->GetResourceContext(),
                        &pixmap, queue = io_manager->GetSkiaUnrefQueue()] {
+            TRACE_EVENT0("flutter", "MakeCrossContextImageFromPixmap");
             sk_sp<SkImage> texture_image = SkImage::MakeCrossContextFromPixmap(
                 context.get(),  // context
                 pixmap,         // pixmap

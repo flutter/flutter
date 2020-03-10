@@ -20,12 +20,10 @@
 namespace flutter {
 
 PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
+                                 IOSRenderingAPI rendering_api,
                                  flutter::TaskRunners task_runners)
-    : PlatformView(delegate, std::move(task_runners)) {
-#if !TARGET_IPHONE_SIMULATOR
-  gl_context_ = std::make_shared<IOSGLContext>();
-#endif  // !TARGET_IPHONE_SIMULATOR
-}
+    : PlatformView(delegate, std::move(task_runners)),
+      ios_context_(IOSContext::Create(rendering_api)) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
@@ -76,7 +74,7 @@ void PlatformViewIOS::SetOwnerViewController(fml::WeakPtr<FlutterViewController>
 void PlatformViewIOS::attachView() {
   FML_DCHECK(owner_controller_);
   ios_surface_ =
-      [static_cast<FlutterView*>(owner_controller_.get().view) createSurface:gl_context_];
+      [static_cast<FlutterView*>(owner_controller_.get().view) createSurface:ios_context_];
   FML_DCHECK(ios_surface_ != nullptr);
 
   if (accessibility_bridge_) {
@@ -111,16 +109,7 @@ std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
 
 // |PlatformView|
 sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
-  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
-  if (!gl_context_ || !gl_context_->ResourceMakeCurrent()) {
-    FML_DLOG(INFO) << "Could not make resource context current on IO thread. "
-                      "Async texture uploads will be disabled. On Simulators, "
-                      "this is expected.";
-    return nullptr;
-  }
-
-  return ShellIOManager::CreateCompatibleResourceLoadingContext(
-      GrBackend::kOpenGL_GrBackend, GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+  return ios_context_->CreateResourceContext();
 }
 
 // |PlatformView|
