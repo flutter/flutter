@@ -488,27 +488,6 @@ void main() {
     expect(actualContents.contains('useAndroidX'), true);
   });
 
-  testUsingContext('non androidx app project', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), false);
-  });
-
   testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -523,23 +502,6 @@ void main() {
     expect(
       project.usesAndroidX,
       true,
-    );
-  });
-
-  testUsingContext('non androidx module', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--no-pub', '--no-androidx', projectDir.path]);
-
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
-    expect(
-      project.usesAndroidX,
-      false,
     );
   });
 
@@ -562,27 +524,6 @@ void main() {
     final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
 
     expect(actualContents.contains('useAndroidX'), true);
-  });
-
-  testUsingContext('non androidx plugin project', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), false);
   });
 
   testUsingContext('app supports Linux if requested', () async {
