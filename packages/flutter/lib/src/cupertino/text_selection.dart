@@ -42,6 +42,9 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
 
+// TODO(justinmc): Revisit this value.
+const double _kToolbarButtonMinimumWidth = 100.0;
+
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
   fontSize: 14.0,
@@ -384,7 +387,6 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
-    // TODO(justinmc): Test that a single long child is ellided.
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
@@ -628,13 +630,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     markNeedsLayout();
   }
 
-  @override
-  void performLayout() {
-    if (firstChild == null) {
-      performResize();
-      return;
-    }
-
+  void layoutChildren() {
     double pageWidth = 0.0;
     double parentWidth = 0.0;
     RenderBox buttonBack;
@@ -657,9 +653,73 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         }
       }
 
+      // The width of the menu is set by the first page.
+      child.layout(
+        constraints.loosen(),
+        parentUsesSize: true,
+      );
+
+      if (i == 0) {
+        buttonBack = child;
+        return;
+      }
+      if (i == 1) {
+        buttonForward = child;
+        return;
+      }
+      if (i == 2) {
+        buttonForwardDisabled = child;
+        return;
+      }
+    });
+  }
+
+  void placeChildren() {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      childParentData.shouldPaint = true;
+      childParentData.offset = Offset.zero;
+    });
+
+    size = Size(constraints.maxWidth, constraints.maxHeight);
+  }
+
+  @override
+  void performLayout() {
+    if (firstChild == null) {
+      performResize();
+      return;
+    }
+
+    double pageWidth = 0.0;
+    double parentWidth = constraints.maxWidth; // The width of the whole widget.
+    double firstPageWidth;
+    RenderBox buttonBack;
+    RenderBox buttonForward;
+    RenderBox buttonForwardDisabled;
+    int currentPage = 0;
+    int i = -1;
+    visitChildren((RenderObject renderObjectChild) {
+      i++;
+      final RenderBox child = renderObjectChild as RenderBox;
+      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+
+      double buttonWidth = 0.0;
+      if (i > 2) {
+        if (currentPage == 0) {
+          // If this is the last child, it's ok to fit without a forward button.
+          buttonWidth = i == childCount - 1 ? 0.0 : buttonForward.size.width;
+        } else {
+          buttonWidth = buttonBack.size.width + buttonForward.size.width;
+        }
+      }
+
+      // The width of the menu is set by the first page.
+      final double maxWidth = currentPage == 0 ? constraints.maxWidth : firstPageWidth;
       child.layout(
         BoxConstraints.loose(Size(
-          constraints.maxWidth - buttonWidth,
+          math.max(maxWidth - buttonWidth - pageWidth, _kToolbarButtonMinimumWidth),
           constraints.maxHeight,
         )),
         parentUsesSize: true,
@@ -681,10 +741,19 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       }
 
       // If this child causes the current page to overflow, move to the next
-      // page.
+      // page and relayout the child.
       if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
         currentPage++;
         pageWidth = buttonBack.size.width;
+        final double nextPageButtonWidth = buttonBack.size.width
+            + buttonForward.size.width;
+        child.layout(
+          BoxConstraints.loose(Size(
+            math.max(firstPageWidth - nextPageButtonWidth, _kToolbarButtonMinimumWidth),
+            constraints.maxHeight,
+          )),
+          parentUsesSize: true,
+        );
       }
       childParentData.offset = Offset(pageWidth, 0.0);
       pageWidth += child.size.width;
@@ -693,6 +762,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       // TODO(justinmc): Can I optimize by not laying out pages after the
       // current page?
 
+      if (currentPage == 0) {
+        firstPageWidth = pageWidth;
+      }
       if (currentPage == page) {
         parentWidth = pageWidth;
       }
