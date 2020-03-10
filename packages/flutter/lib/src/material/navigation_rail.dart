@@ -125,7 +125,7 @@ class NavigationRail extends StatefulWidget {
   /// defaults are used. See the individual properties for more information.
   ///
   /// Typically used within a [Row] of the [Scaffold.body] property.
-  NavigationRail({
+  const NavigationRail({
     this.backgroundColor,
     this.extended = false,
     this.leading,
