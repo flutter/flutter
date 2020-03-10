@@ -380,7 +380,6 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => r'foo\bar'
 /// ```
 String generateMessageString(String value) {
   if (value.contains('\n'))
