@@ -286,10 +286,6 @@ js.JsArray<double> makeSkiaColorStops(List<double> colorStops) {
   return jsColorStops;
 }
 
-// These must be kept in sync with `flow/layers/physical_shape_layer.cc`.
-const double kLightHeight = 600.0;
-const double kLightRadius = 800.0;
-
 void drawSkShadow(
   js.JsObject skCanvas,
   SkPath path,
