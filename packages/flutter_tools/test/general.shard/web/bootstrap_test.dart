@@ -11,7 +11,6 @@ void main() {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
-      entrypoint: 'foo/bar/main.js',
     );
     // require js source is interpolated correctly.
     expect(result, contains('requireEl.src = "require.js";'));

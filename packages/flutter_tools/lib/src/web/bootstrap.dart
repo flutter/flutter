@@ -16,7 +16,6 @@ import 'package:meta/meta.dart';
 String generateBootstrapScript({
   @required String requireUrl,
   @required String mapperUrl,
-  @required String entrypoint,
 }) {
   return '''
 "use strict";

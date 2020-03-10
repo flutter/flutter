@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
@@ -58,12 +59,17 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _digests;
 
   void performRestart(List<String> modules) {
-    for (final String key in modules) {
+    for (final String module in modules) {
       // We skip computing the digest by using the hashCode of the underlying buffer.
       // Whenever a file is updated, the corresponding Uint8List.view it corresponds
       // to will change.
-      _digests[key] = _files[key].hashCode.toString();
-      _modules[key] = key;
+      final String moduleName = module.startsWith('/')
+        ? module.substring(1)
+        : module;
+      final String name = moduleName.replaceAll('.lib.js', '');
+      final String path = moduleName.replaceAll('.js', '');
+      _modules[name] = path;
+      _digests[name] = Random().nextInt(123).toString();
     }
   }
 
@@ -122,7 +128,7 @@ class WebAssetServer implements AssetReader {
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
-          'lib',
+          '.lib.js',
           (String path) async => modules,
           (String path) async => digests,
         ),
@@ -186,6 +192,8 @@ class WebAssetServer implements AssetReader {
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
+    print('looking for $requestPath');
+    print(_files.keys.toList());
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = getFile(requestPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
@@ -300,9 +308,12 @@ class WebAssetServer implements AssetReader {
         codeStart,
         codeEnd - codeStart,
       );
-      final String fileName = filePath
-        .replaceFirst('/', '')
-        .replaceFirst('.lib.js', '.js');
+      String fileName = filePath.startsWith('/')
+        ? filePath.substring(1)
+        : filePath;
+      if (fileName == 'web_entrypoint.dart.lib.js')  {
+        fileName = 'packages/web_entrypoint.dart.lib.js';
+      }
       _files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
@@ -316,8 +327,7 @@ class WebAssetServer implements AssetReader {
         sourcemapStart,
         sourcemapEnd - sourcemapStart,
       );
-      final String sourcemapName = filePath
-        .replaceFirst('/', '') + '.map';
+      final String sourcemapName = '$fileName.map';
       _sourcemaps[sourcemapName] = sourcemapView;
 
       modules.add(fileName);
@@ -558,13 +568,12 @@ class WebDevFS implements DevFS {
         generateBootstrapScript(
           requireUrl: 'require.js',
           mapperUrl: 'stack_trace_mapper.js',
-          entrypoint: entrypoint,
         ),
       );
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
         generateMainModule(
-          entrypoint: entrypoint,
+          entrypoint: 'packages/$entrypoint',
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
