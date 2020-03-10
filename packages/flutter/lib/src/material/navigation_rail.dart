@@ -43,10 +43,10 @@ import 'theme_data.dart';
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
-/// `_currentIndex` updates according to the `onDestinationSelected` callback.
+/// `_selectedIndex` updates according to the `onDestinationSelected` callback.
 ///
 /// ```dart
-/// int _currentIndex = 0;
+/// int _selectedIndex = 0;
 ///
 ///  @override
 ///  Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ import 'theme_data.dart';
 ///      body: Row(
 ///        children: <Widget>[
 ///          NavigationRail(
-///            currentIndex: _currentIndex,
+///            _selectedIndex: _selectedIndex,
 ///            labelType: NavigationRailLabelType.selected,
 ///            destinations: [
 ///              NavigationRailDestination(
@@ -75,7 +75,7 @@ import 'theme_data.dart';
 ///            ],
 ///            onDestinationSelected: (int index) {
 ///              setState(() {
-///                _currentIndex = index;
+///                _selectedIndex = index;
 ///              });
 ///            },
 ///          ),
@@ -83,7 +83,7 @@ import 'theme_data.dart';
 ///          // This is the main content.
 ///          Expanded(
 ///            child: Center(
-///              child: Text('currentIndex: $_currentIndex'),
+///              child: Text('_selectedIndex: $_selectedIndex'),
 ///            ),
 ///          )
 ///        ],
