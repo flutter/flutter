@@ -517,9 +517,7 @@ class LocalizationsGenerator {
       _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
     );
 
-    final StringBuffer allMessagesClasses = StringBuffer();
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
-
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
       final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_${locale.toString()}.dart'));

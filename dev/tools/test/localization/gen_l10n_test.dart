@@ -1015,36 +1015,33 @@ void main() {
     });
   });
 
-  group('generateString', () {
+  group('generateMessageString', () {
     test('handles simple string', () {
-      expect(generateString('abc'), "'abc'");
+      expect(generateMessageString('abc'), "'abc'");
     });
     test('handles string with quote', () {
-      expect(generateString("ab'c"), '''"ab'c"''');
+      expect(generateMessageString("ab'c"), '''"ab'c"''');
     });
     test('handles string with double quote', () {
-      expect(generateString('ab"c'), """'ab"c'""");
+      expect(generateMessageString('ab"c'), """'ab"c'""");
     });
     test('handles string with both single and double quote', () {
-      expect(generateString('''a'b"c'''), """'''a'b"c'''""");
+      expect(generateMessageString('''a'b"c'''), """'''a'b"c'''""");
     });
     test('handles string with a triple single quote and a double quote', () {
-      expect(generateString("""a"b'''c"""), '''"""a"b\'''c"""''');
+      expect(generateMessageString("""a"b'''c"""), '''"""a"b\'''c"""''');
     });
     test('handles string with a triple double quote and a single quote', () {
-      expect(generateString('''a'b"""c'''), """'''a'b\"""c'''""");
+      expect(generateMessageString('''a'b"""c'''), """'''a'b\"""c'''""");
     });
     test('handles string with both triple single and triple double quote', () {
-      expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
+      expect(generateMessageString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
     });
     test('handles dollar', () {
-      expect(generateString(r'ab$c'), r"r'ab$c'");
+      expect(generateMessageString(r'ab$c'), "'ab\$c'");
     });
-    test('handles back slash', () {
-      expect(generateString(r'ab\c'), r"r'ab\c'");
-    });
-    test("doesn't support multiline strings", () {
-      expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
+    test('supports multiline strings', () {
+      expect(generateMessageString('ab\nc'), "'ab\\nc'");
     });
   });
 }

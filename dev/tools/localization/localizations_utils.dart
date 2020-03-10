@@ -380,7 +380,10 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// foo\bar => r'foo\bar'
 /// ```
+///
+/// Strings with backslashes are not supported.
 String generateMessageString(String value) {
   if (value.contains('\n'))
     value = value.replaceAll('\n', '\\n');
