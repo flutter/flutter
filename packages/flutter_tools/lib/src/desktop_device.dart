@@ -114,14 +114,20 @@ abstract class DesktopDevice extends Device {
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      onAttached(package, buildMode, process);
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      if (observatoryUri != null) {
+        onAttached(package, buildMode, process);
+        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      }
+      globals.printError(
+        'Error waiting for a debug connection: '
+        'The log reader stopped unexpectedly.',
+      );
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();
     }
+    return LaunchResult.failed();
   }
 
   @override
