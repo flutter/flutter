@@ -527,7 +527,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildVerticalBody(int index) {
+  Widget _buildVerticalBody(int index, {EdgeInsetsDirectional margin = 
+            (
+              start: 60.0,
+              end: 24.0,
+              bottom: 24.0,
+            }}) {
     return Stack(
       children: <Widget>[
         PositionedDirectional(
@@ -549,11 +554,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         AnimatedCrossFade(
           firstChild: Container(height: 0.0),
           secondChild: Container(
-            margin: const EdgeInsetsDirectional.only(
-              start: 60.0,
-              end: 24.0,
-              bottom: 24.0,
-            ),
+            margin: margin,
             child: Column(
               children: <Widget>[
                 widget.steps[index].content,
