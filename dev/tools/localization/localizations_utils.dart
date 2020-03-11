@@ -371,7 +371,7 @@ String generateClassDeclaration(
 class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
-/// Return `s` as a Dart-parseable string.
+/// Return the input string as a Dart-parseable string.
 ///
 /// The result tries to avoid character escaping:
 ///
@@ -380,14 +380,10 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => r'foo\bar'
+/// foo\bar => 'foo\\bar'
+/// foo$bar => 'foo\$bar'
 /// ```
-///
-/// Strings with backslashes are not supported.
 String generateMessageString(String value) {
-  if (value.contains('\n'))
-    value = value.replaceAll('\n', '\\n');
-
   if (!value.contains("'"))
     return "'$value'";
   if (!value.contains('"'))
@@ -399,18 +395,13 @@ String generateMessageString(String value) {
 
   return value.split("'''")
     .map(generateString)
-    // If value contains more than 6 consecutive single quotes some empty strings may be generated.
-    // The following map removes them.
+    // If value contains more than 6 consecutive single quotes some empty
+    // strings may be generated. The following map removes them.
     .map((String part) => part == "''" ? '' : part)
     .join(" \"'''\" ");
 }
 
-/// Returns the input String as a Dart-parseable string.
-///
-/// This function is typically used in Dart code generation from parsing an
-/// ARB (or JSON) file. For example, this function is used to generate the
-/// Material and Cupertino localizations files, and is also used by the
-/// localizations generation tool.
+/// Return the input string as a Dart-parseable string.
 ///
 /// The result tries to avoid character escaping:
 ///
@@ -419,21 +410,21 @@ String generateMessageString(String value) {
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => 'foo\\bar'
+/// foo\bar => r'foo\bar'
 /// ```
 ///
 /// Strings with newlines are not supported.
 String generateString(String value) {
   assert(!value.contains('\n'));
-
+  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
   if (!value.contains("'"))
-    return "'$value'";
+    return "$rawPrefix'$value'";
   if (!value.contains('"'))
-    return '"$value"';
+    return '$rawPrefix"$value"';
   if (!value.contains("'''"))
-    return "'''$value'''";
+    return "$rawPrefix'''$value'''";
   if (!value.contains('"""'))
-    return '"""$value"""';
+    return '$rawPrefix"""$value"""';
 
   return value.split("'''")
     .map(generateString)

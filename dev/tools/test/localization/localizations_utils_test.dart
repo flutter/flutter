@@ -7,6 +7,48 @@ import '../../localization/localizations_utils.dart';
 import '../common.dart';
 
 void main() {
+  group('generateMessageString', () {
+    test('handles simple string', () {
+      expect(generateMessageString('abc'), "'abc'");
+    });
+
+    test('handles string with quote', () {
+      expect(generateMessageString("ab'c"), '''"ab'c"''');
+    });
+
+    test('handles string with double quote', () {
+      expect(generateMessageString('ab"c'), """'ab"c'""");
+    });
+
+    test('handles string with both single and double quote', () {
+      expect(generateMessageString('''a'b"c'''), """'''a'b"c'''""");
+    });
+
+    test('handles string with a triple single quote and a double quote', () {
+      expect(generateMessageString("""a"b'''c"""), '''"""a"b\'''c"""''');
+    });
+
+    test('handles string with a triple double quote and a single quote', () {
+      expect(generateMessageString('''a'b"""c'''), """'''a'b\"""c'''""");
+    });
+
+    test('handles string with both triple single and triple double quote', () {
+      expect(generateMessageString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
+    });
+
+    test('handles dollar', () {
+      expect(generateMessageString(r'ab$c'), "'ab\$c'");
+    });
+
+    test('handles backslash', () {
+      expect(generateMessageString(r'ab\c'), "'ab\\c'");
+    });
+
+    test('handles newline character', () {
+      expect(generateMessageString('ab\nc'), "'ab\nc'");
+    });
+  });
+
   group('generateString', () {
     test('handles simple string', () {
       expect(generateString('abc'), "'abc'");
@@ -37,11 +79,11 @@ void main() {
     });
 
     test('handles dollar', () {
-      expect(generateString('ab\$c'), "'ab\$c'");
+      expect(generateString(r'ab$c'), r"r'ab$c'");
     });
 
     test('handles backslash', () {
-      expect(generateString('ab\\c'), "'ab\\c'");
+      expect(generateString(r'ab\c'), r"r'ab\c'");
     });
 
     test("doesn't support multiline strings", () {
