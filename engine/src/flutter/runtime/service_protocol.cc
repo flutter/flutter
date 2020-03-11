@@ -146,8 +146,7 @@ bool ServiceProtocol::HandleMessage(std::string_view method,
   return service_protocol->HandleMessage(method, params, response);
 }
 
-FML_WARN_UNUSED_RESULT
-static bool HandleMessageOnHandler(
+[[nodiscard]] static bool HandleMessageOnHandler(
     ServiceProtocol::Handler* handler,
     std::string_view method,
     const ServiceProtocol::Handler::ServiceProtocolMap& params,

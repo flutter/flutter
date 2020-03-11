@@ -79,7 +79,7 @@ class scoped_nsprotocol {
   // scoped_nsprotocol<>::release() is like scoped_ptr<>::release.  It is NOT a
   // wrapper for [object_ release].  To force a scoped_nsprotocol<> to call
   // [object_ release], use scoped_nsprotocol<>::reset().
-  NST release() FML_WARN_UNUSED_RESULT {
+  [[nodiscard]] NST release() {
     NST temp = object_;
     object_ = nil;
     return temp;

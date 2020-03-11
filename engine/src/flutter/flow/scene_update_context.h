@@ -162,9 +162,8 @@ class SceneUpdateContext {
   // CPU wait. Once Vulkan semaphores are available, this method must return
   // void and the implementation must submit surfaces on its own as soon as the
   // specific canvas operations are done.
-  FML_WARN_UNUSED_RESULT
-  std::vector<std::unique_ptr<SurfaceProducerSurface>> ExecutePaintTasks(
-      CompositorContext::ScopedFrame& frame);
+  [[nodiscard]] std::vector<std::unique_ptr<SurfaceProducerSurface>>
+  ExecutePaintTasks(CompositorContext::ScopedFrame& frame);
 
   float ScaleX() const { return metrics_->scale_x * top_scale_x_; }
   float ScaleY() const { return metrics_->scale_y * top_scale_y_; }
