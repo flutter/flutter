@@ -4273,14 +4273,23 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals(''));
     expect(state.wantKeepAlive, true);
 
+    expect(formatter.formatCallCount, 0);
     state.updateEditingValue(const TextEditingValue(text: '01'));
+    expect(formatter.formatCallCount, 1);
     state.updateEditingValue(const TextEditingValue(text: '012'));
+    expect(formatter.formatCallCount, 2);
     state.updateEditingValue(const TextEditingValue(text: '0123')); // Text change causes reformat
+    expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Selection change does not reformat
+    expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
@@ -4296,9 +4305,9 @@ void main() {
 }
 
 class MockTextFormatter extends TextInputFormatter {
-  MockTextFormatter() : _counter = 0, log = <String>[];
+  MockTextFormatter() : formatCallCount = 0, log = <String>[];
 
-  int _counter;
+  int formatCallCount;
   List<String> log;
 
   @override
@@ -4306,8 +4315,8 @@ class MockTextFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    _counter++;
-    log.add('[$_counter]: ${oldValue.text}, ${newValue.text}');
+    formatCallCount++;
+    log.add('[$formatCallCount]: ${oldValue.text}, ${newValue.text}');
     TextEditingValue finalValue;
     if (newValue.text.length < oldValue.text.length) {
       finalValue = _handleTextDeletion(oldValue, newValue);
@@ -4320,14 +4329,14 @@ class MockTextFormatter extends TextInputFormatter {
 
   TextEditingValue _handleTextDeletion(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    final String result = 'a' * (_counter - 2);
-    log.add('[$_counter]: deleting $result');
+    final String result = 'a' * (formatCallCount - 2);
+    log.add('[$formatCallCount]: deleting $result');
     return TextEditingValue(text: result);
   }
 
   TextEditingValue _formatText(TextEditingValue value) {
-    final String result = 'a' * _counter * 2;
-    log.add('[$_counter]: normal $result');
+    final String result = 'a' * formatCallCount * 2;
+    log.add('[$formatCallCount]: normal $result');
     return TextEditingValue(text: result);
   }
 }

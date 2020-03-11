@@ -1226,7 +1226,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
   // _lastFormattedValue tracks the last post-format value, so that it can be
-  // without rerunning the formatter when the input value is repeated.
+  // reused without rerunning the formatter when the input value is repeated.
   TextEditingValue _lastFormattedValue;
   // _receivedRemoteTextEditingValue is the direct value last passed in
   // updateEditingValue. This value does not get updated with the formatted
