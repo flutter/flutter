@@ -28,8 +28,7 @@ class AutoIsolateShutdown {
 
   bool IsValid() const { return isolate_ != nullptr && runner_; }
 
-  FML_WARN_UNUSED_RESULT
-  bool RunInIsolateScope(std::function<bool(void)> closure);
+  [[nodiscard]] bool RunInIsolateScope(std::function<bool(void)> closure);
 
   DartIsolate* get() {
     FML_CHECK(isolate_);

@@ -21,8 +21,7 @@ class AssetResolver {
 
   virtual bool IsValid() const = 0;
 
-  FML_WARN_UNUSED_RESULT
-  virtual std::unique_ptr<fml::Mapping> GetAsMapping(
+  [[nodiscard]] virtual std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const = 0;
 
  private:
