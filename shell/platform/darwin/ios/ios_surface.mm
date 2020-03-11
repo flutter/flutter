@@ -64,10 +64,6 @@ IOSSurface::IOSSurface(std::shared_ptr<IOSContext> ios_context,
 
 IOSSurface::~IOSSurface() = default;
 
-bool IOSSurface::ResourceContextMakeCurrent() {
-  return GetContext()->ResourceMakeCurrent();
-}
-
 std::shared_ptr<IOSContext> IOSSurface::GetContext() const {
   return ios_context_;
 }
