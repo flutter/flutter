@@ -37,11 +37,11 @@ void main() {
     });
 
     test('handles dollar', () {
-      expect(generateString(r'ab$c'), r"r'ab$c'");
+      expect(generateString('ab\$c'), "'ab\$c'");
     });
 
     test('handles backslash', () {
-      expect(generateString(r'ab\c'), r"r'ab\c'");
+      expect(generateString('ab\\c'), "'ab\\c'");
     });
 
     test("doesn't support multiline strings", () {

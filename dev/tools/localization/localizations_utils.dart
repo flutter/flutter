@@ -405,7 +405,12 @@ String generateMessageString(String value) {
     .join(" \"'''\" ");
 }
 
-/// Return `s` as a Dart-parseable string.
+/// Returns the input String as a Dart-parseable string.
+///
+/// This function is typically used in Dart code generation from parsing an
+/// ARB (or JSON) file. For example, this function is used to generate the
+/// Material and Cupertino localizations files, and is also used by the
+/// localizations generation tool.
 ///
 /// The result tries to avoid character escaping:
 ///
@@ -414,26 +419,26 @@ String generateMessageString(String value) {
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => r'foo\bar'
+/// foo\bar => 'foo\\bar'
 /// ```
 ///
 /// Strings with newlines are not supported.
 String generateString(String value) {
   assert(!value.contains('\n'));
-  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
+
   if (!value.contains("'"))
-    return "$rawPrefix'$value'";
+    return "'$value'";
   if (!value.contains('"'))
-    return '$rawPrefix"$value"';
+    return '"$value"';
   if (!value.contains("'''"))
-    return "$rawPrefix'''$value'''";
+    return "'''$value'''";
   if (!value.contains('"""'))
-    return '$rawPrefix"""$value"""';
+    return '"""$value"""';
 
   return value.split("'''")
     .map(generateString)
-    // If value contains more than 6 consecutive single quotes some empty strings may be generated.
-    // The following map removes them.
+    // If value contains more than 6 consecutive single quotes some empty
+    // strings may be generated. The following map removes them.
     .map((String part) => part == "''" ? '' : part)
     .join(" \"'''\" ");
 }
