@@ -202,6 +202,7 @@ class RaisedButton extends MaterialButton {
     Clip clipBehavior,
     FocusNode focusNode,
     bool autofocus,
+    EdgeInsetsGeometry padding,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -278,6 +279,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
     bool autofocus = false,
+    EdgeInsetsGeometry padding,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -311,6 +313,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          clipBehavior: clipBehavior,
          focusNode: focusNode,
          autofocus: autofocus,
+         padding: padding,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: Row(

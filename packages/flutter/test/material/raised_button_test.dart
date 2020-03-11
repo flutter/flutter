@@ -617,6 +617,39 @@ void main() {
     expect(box.size, equals(const Size(76, 36)));
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
+
+  testWidgets('RaisedButton.icon responds to applied padding', (WidgetTester tester) async {
+    const Key buttonKey = Key('test');
+    const Key labelKey = Key('label');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: RaisedButton.icon(
+              icon: const Icon(Icons.add),
+              padding: const EdgeInsets.all(16),
+              key: buttonKey,
+              onPressed: () {},
+              label: const Text(
+                'Hello',
+                key: labelKey,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Size buttonSize = tester.getSize(find.byKey(buttonKey));
+    final Size labelSize = tester.getSize(find.byKey(labelKey));
+
+    // By default the padding between icon and label is 8.0, and default
+    // size of Icon is 24 pixels * 24 pixels, hence
+    // height = 24 + 16 * 2 = 56 and
+    // width = 24 + width of Text + 8 + 16 * 32
+    expect(buttonSize, Size(labelSize.width + 8 + 24 + 32, 56));
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
