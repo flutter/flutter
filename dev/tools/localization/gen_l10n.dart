@@ -464,7 +464,14 @@ class LocalizationsGenerator {
     if (headerString != null) {
       header = headerString;
     } else if (headerFile != null) {
-      header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
+      try {
+        header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
+      } on FileSystemException catch (error) {
+        throw L10nException (
+          'Failed to read header file: "$headerFile". \n'
+          'FileSystemException: ${error.message}'
+        );
+      }
     }
   }
 

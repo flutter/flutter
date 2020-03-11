@@ -68,7 +68,8 @@ Future<void> main(List<String> arguments) async {
   parser.addOption(
     'header-file',
     help: 'The header to prepend to the generated Dart localizations '
-      'files. This option takes in a txt file. \n\n'
+      'files. The value of this option is the name of the file that '
+      'contains the header text. \n\n'
       'Alternatively, see the `header` option to pass in a string '
       'for a simpler header.'
   );

@@ -255,13 +255,10 @@ void main() {
 
   test('correctly adds a headerFile when it is set', () {
     final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-      ..createSync(recursive: true);
-    l10nDirectory.childFile(defaultTemplateArbFileName)
-      .writeAsStringSync(singleMessageArbFileString);
-    l10nDirectory.childFile(esArbFileName)
-      .writeAsStringSync(singleEsMessageArbFileString);
-    l10nDirectory.childFile('header.txt')
-      .writeAsStringSync('/// Sample header in a text file');
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
 
     LocalizationsGenerator generator;
     try {
@@ -307,6 +304,34 @@ void main() {
     }
 
     fail('Setting both headerFile and headerString should fail');
+  });
+
+  test('setting a headerFile that does not exist should fail', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName)
+      .writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory.childFile('header.txt')
+      .writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.tx', // Intentionally spelled incorrectly
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Failed to read header file'));
+      return;
+    }
+
+    fail('Setting headerFile that does not exist should fail');
   });
 
   group('loadResources', () {
