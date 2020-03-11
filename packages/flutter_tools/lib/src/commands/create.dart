@@ -143,7 +143,8 @@ class CreateCommand extends FlutterCommand {
     argParser.addFlag(
       'androidx',
       hide: true,
-      help: 'Noop flag. (settings this flag to false has no effect)',
+      negatable: true,
+      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
