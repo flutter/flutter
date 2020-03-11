@@ -228,10 +228,10 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        height: orientation == Orientation.portrait ? _inputPortraitHeight  : _inputLandscapeHeight,
+        height: orientation == Orientation.portrait ? _inputPortraitHeight : _inputLandscapeHeight,
         child: Column(
           children: <Widget>[
-            SizedBox(height: orientation == Orientation.portrait ? 16 : 26),
+            const Spacer(),
             TextFormField(
               decoration: InputDecoration(
                 border: const UnderlineInputBorder(),
@@ -251,6 +251,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
               autofocus: widget.autofocus,
               controller: _controller,
             ),
+            const Spacer(),
           ],
         ),
       );
