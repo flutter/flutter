@@ -572,10 +572,12 @@ class LocalizationsGenerator {
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      // If no country code, currently assume that this is the base class.
-      // TODO(shihaohong): Update this when script code is properly supported.
-      if (locale.countryCode == null) {
-        final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_$locale.dart'));
+      // LocaleInfo.toString should equal LocaleInfo.languageCode if it is
+      // the base class.
+      if (locale.toString() == locale.languageCode) {
+        final File localeMessageFile = _fs.file(
+          path.join(l10nDirectory.path, '${fileName}_$locale.dart'),
+        );
 
         // Generate the template for the base class.
         final String localeMessageClass = generateBaseClassFile(
