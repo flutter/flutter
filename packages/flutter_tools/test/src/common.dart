@@ -101,7 +101,7 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
   }
   if (message != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+    matcher = allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
   }
   return throwsA(matcher);
 }
