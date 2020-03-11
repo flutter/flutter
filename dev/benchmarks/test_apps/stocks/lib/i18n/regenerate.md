@@ -18,7 +18,7 @@ for more info.
 ```dart
 dart ${FLUTTER_PATH}/dev/tools/localization/bin/gen_l10n.dart --arb-dir=lib/i18n \
     --template-arb-file=stocks_en.arb --output-localization-file=stock_strings.dart \
-    --output-class=StockStrings
+    --output-class=StockStrings --header-file=header.txt
 ```
 
 The `StockStrings` class creates a delegate that performs message lookups
