@@ -51,5 +51,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "残り 1 文字（半角相当）",
   "remainingTextFieldCharacterCountOther": "残り $remainingCount 文字（半角相当）",
-  "refreshIndicatorSemanticLabel": "更新"
+  "refreshIndicatorSemanticLabel": "更新",
+  "moreButtonTooltip": "TBD"
 }
