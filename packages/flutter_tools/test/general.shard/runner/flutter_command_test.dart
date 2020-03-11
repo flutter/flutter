@@ -297,37 +297,30 @@ void main() {
           completer.complete();
         });
         final Completer<void> checkLockCompleter = Completer<void>();
-        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
-            commandFunction: () async {
-              await Cache.lock();
-              checkLockCompleter.complete();
-              final Completer<void> c = Completer<void>();
-              await c.future;
-              return null; // unreachable
-            }
-        );
+        final DummyFlutterCommand flutterCommand =
+            DummyFlutterCommand(commandFunction: () async {
+          await Cache.lock();
+          checkLockCompleter.complete();
+          final Completer<void> c = Completer<void>();
+          await c.future;
+          return null; // unreachable
+        });
+
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
-        try {
-          await Cache.lock();
-        } on AssertionError catch (error) {
-          expect(error.toString(), contains("'_lock == null': is not true."));
-        }
+        Cache.checkLockAcquired();
         signalController.add(mockSignal);
         await completer.future;
         await Cache.lock();
         Cache.releaseLockEarly();
-      },
-          overrides: <Type, Generator>{
-            ProcessInfo: () => mockProcessInfo,
-            Signals: () =>
-                FakeSignals(
-                  subForSigTerm: signalUnderTest,
-                  exitSignals: <ProcessSignal>[signalUnderTest],
-                ),
-            SystemClock: () => clock,
-            Usage: () => usage
-          });
+      }, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        Signals: () => FakeSignals(
+              subForSigTerm: signalUnderTest,
+              exitSignals: <ProcessSignal>[signalUnderTest],
+            ),
+        Usage: () => usage
+      });
     });
 
     testUsingCommandContext('report execution timing by default', () async {
