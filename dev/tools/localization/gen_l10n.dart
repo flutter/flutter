@@ -202,7 +202,10 @@ String generateClass(String className, AppResourceBundle bundle, Iterable<Messag
 
   String baseClassName = className;
   if (locale.countryCode != null) {
-    baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+    final String camelCasedLocaleInfo = LocaleInfo.fromString(
+      locale.languageCode,
+    ).camelCase();
+    baseClassName = '$className$camelCasedLocaleInfo';
   }
 
   final Iterable<String> methods = messages
@@ -261,7 +264,6 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
-
 
   /// The reference to the project's l10n directory.
   ///
@@ -443,7 +445,9 @@ class LocalizationsGenerator {
         if (localeString.runtimeType != String) {
           throw L10nException('Incorrect runtime type for $localeString');
         }
-        return LocaleInfo.fromString(localeString.toString());
+        return LocaleInfo.fromString(
+          localeString.toString(),
+        );
       }).toList();
     }
   }
