@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -7,7 +11,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'stock_strings_en.dart';
-import 'stock_strings_en_US.dart';
 import 'stock_strings_es.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps

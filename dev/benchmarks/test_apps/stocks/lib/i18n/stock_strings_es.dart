@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'stock_strings.dart';
