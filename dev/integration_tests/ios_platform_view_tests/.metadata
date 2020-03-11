@@ -4,7 +4,7 @@
 # This file should be version controlled and should not be manually edited.
 
 version:
-  revision: a2d0d0a2be50ec0aa728f552ba4ffa6296ab2898
-  channel: screenshot_test
+  revision: 29af887058161b6281d79e24200adad9ceab9dc1
+  channel: platform_view_test_reland
 
 project_type: app
