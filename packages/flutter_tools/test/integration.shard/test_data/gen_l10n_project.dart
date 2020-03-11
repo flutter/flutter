@@ -89,7 +89,7 @@ class Home extends StatelessWidget {
           },
         ),
         LocaleBuilder(
-          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
           callback: (BuildContext context) {
             results.add(AppLocalizations.of(context).helloWorld);
           },

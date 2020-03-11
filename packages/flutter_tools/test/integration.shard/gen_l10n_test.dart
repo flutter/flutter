@@ -81,7 +81,7 @@ void main() {
       '#l10n 2 (GB Hello World)\n'
       '#l10n 3 (Hello GB fallback World)\n'
       '#l10n 4 (中国你好世界)\n'
-      '#l10n 5 (中国你好世界)\n'
+      '#l10n 5 (台灣你好世界)\n'
       '#l10n 6 (Hello World)\n'
       '#l10n 7 (Hello World)\n'
       '#l10n 8 (Hello World)\n'
