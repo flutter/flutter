@@ -564,12 +564,6 @@ tasks:
     # Remove the flaky flag when we are sure the test is stable.
     flaky: true
 
-  ios_platform_view_tests:
-    description: >
-      Runs end-to-end tests with platform views in the scene.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
   # system_debug_ios:
   #   description: >
