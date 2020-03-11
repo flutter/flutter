@@ -94,7 +94,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService == null) {
         continue;
       }
-      device.initLogReader();
+      await device.initLogReader();
       await device.refreshViews();
       globals.printTrace('Connected to ${device.device.name}');
     }
@@ -131,7 +131,7 @@ class ColdRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol();
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
       // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
@@ -143,7 +143,7 @@ class ColdRunner extends ResidentRunner {
       return 2;
     }
     for (final FlutterDevice device in flutterDevices) {
-      device.initLogReader();
+      await device.initLogReader();
     }
     await refreshViews();
     for (final FlutterDevice device in flutterDevices) {

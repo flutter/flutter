@@ -152,6 +152,26 @@ void main() {
         .thenAnswer((_) => Future<Process>.value(process));
       when(mockProcessManager.canRun(any)).thenReturn(false);
 
+      when(mockProcessManager.runSync(
+        argThat(contains(contains('gen_snapshot'))),
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 255, '', ''));
+
+      when(mockProcessManager.runSync(
+        <String>['/usr/bin/xcode-select', '--print-path'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(0, 0, '', ''));
+
+      when(mockProcessManager.run(
+        <String>['which', 'pod'],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenAnswer((_) {
+        return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+      });
+
       mockAndroidSdk = MockAndroidSdk();
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
@@ -346,7 +366,13 @@ void main() {
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
+          arguments: <String>['--no-pub', '--template=app']);
+      // Simulate a non-androidx project.
+      tempDir
+        .childDirectory('flutter_project')
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=false');
 
       when(mockProcessManager.start(
         <String>[

@@ -101,7 +101,7 @@ Matcher throwsToolExit({ int exitCode, Pattern message }) {
     matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
   }
   if (message != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+    matcher = allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
   }
   return throwsA(matcher);
 }
@@ -139,7 +139,8 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     fail('ToolExit expected, but nothing thrown');
   } on ToolExit catch(e) {
     expect(e.message, messageMatcher);
-  } catch(e, trace) {
+  // Catch all exceptions to give a better test failure message.
+  } catch (e, trace) { // ignore: avoid_catches_without_on_clauses
     fail('ToolExit expected, got $e\n$trace');
   }
 }

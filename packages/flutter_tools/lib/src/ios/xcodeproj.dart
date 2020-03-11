@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -235,6 +236,10 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
   }
 
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
+  }
+
   return xcodeBuildSettings;
 }
 
@@ -349,7 +354,7 @@ class XcodeProjectInterpreter {
       );
       final String out = result.stdout.trim();
       return parseXcodeBuildSettings(out);
-    } catch(error) {
+    } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),

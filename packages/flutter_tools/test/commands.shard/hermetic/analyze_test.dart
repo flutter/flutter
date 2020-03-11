@@ -5,13 +5,29 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 const String _kFlutterRoot = '/data/flutter';
+
+/// Return true if [fileList] contains a path that resides inside the Flutter repository.
+/// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
+bool inRepo(List<String> fileList) {
+  if (fileList == null || fileList.isEmpty) {
+    fileList = <String>[globals.fs.path.current];
+  }
+  final String root = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot));
+  final String prefix = root + globals.fs.path.separator;
+  for (String file in fileList) {
+    file = globals.fs.path.normalize(globals.fs.path.absolute(file));
+    if (file == root || file.startsWith(prefix)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void main() {
   FileSystem fs;

@@ -93,7 +93,7 @@ GOTO :after_subroutine
   IF "%pubspec_yaml_timestamp%" == "%pubspec_lock_timestamp%" SET newer_file=""
   IF "%newer_file%" EQU "pubspec.yaml" GOTO do_snapshot
 
-  REM Everything is uptodate - exit subroutine
+  REM Everything is up-to-date - exit subroutine
   EXIT /B
 
   :do_sdk_update_and_snapshot
@@ -170,7 +170,7 @@ GOTO :after_subroutine
 
 REM Chaining the call to 'dart' and 'exit' with an ampersand ensures that
 REM Windows reads both commands into memory once before executing them. This
-REM avoids nasty errors that may otherwise occure when the dart command (e.g. as
+REM avoids nasty errors that may otherwise occur when the dart command (e.g. as
 REM part of 'flutter upgrade') modifies this batch script while it is executing.
 REM
 REM Do not use the CALL command in the next line to execute Dart. CALL causes
