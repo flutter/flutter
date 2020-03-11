@@ -21,7 +21,8 @@ namespace testing {
 
 using Embedder11yTest = testing::EmbedderTest;
 
-TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
+// TODO(52372): De-flake and re-enable.
+TEST_F(Embedder11yTest, DISABLED_A11yTreeIsConsistent) {
   auto& context = GetEmbedderContext();
 
   fml::AutoResetWaitableEvent latch;
