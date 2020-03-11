@@ -185,10 +185,10 @@ class @(class) extends @(baseClass) {
 
 @(methods)
 }
-
 @(subclasses)''';
 
 const String subclassTemplate = '''
+
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseLanguageClassName) {
   @(class)([String locale = '@(localeName)']) : super(locale);
