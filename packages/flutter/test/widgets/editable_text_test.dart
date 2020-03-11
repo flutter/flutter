@@ -4302,6 +4302,229 @@ void main() {
 
     expect(formatter.log, referenceLog);
   });
+
+  testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Simple mixed directional input.
+    state.updateEditingValue(const TextEditingValue(text: 'h'));
+    state.updateEditingValue(const TextEditingValue(text: 'he'));
+    state.updateEditingValue(const TextEditingValue(text: 'hel'));
+    state.updateEditingValue(const TextEditingValue(text: 'hell'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello'));
+    expect(state.currentTextEditingValue.text, equals('hello'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello '));
+    expect(state.currentTextEditingValue.text, equals('hello '));
+    state.updateEditingValue(const TextEditingValue(text: 'hello ا'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}ا'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْ'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ '));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ '));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter doesn\'t overwrite existing Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Does not overwrite existing RLM or LRM characters
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا \u{200E}ا ا '));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا \u{200E}ا ا \u{200F}'));
+
+    // Handles only directionality markers.
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200F}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200F}\u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter is not leaky Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Can be passed through formatter repeatedly without leaking/growing.
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Doesn't eat emojis
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Doesn't eat emojis
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
