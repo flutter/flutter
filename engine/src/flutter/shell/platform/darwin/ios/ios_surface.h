@@ -36,8 +36,6 @@ class IOSSurface : public ExternalViewEmbedder {
 
   ExternalViewEmbedder* GetExternalViewEmbedderIfEnabled();
 
-  bool ResourceContextMakeCurrent();
-
   virtual bool IsValid() const = 0;
 
   virtual void UpdateStorageSizeIfNecessary() = 0;
