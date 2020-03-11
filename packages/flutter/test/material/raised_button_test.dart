@@ -647,7 +647,7 @@ void main() {
     // By default the padding between icon and label is 8.0, and default
     // size of Icon is 24 pixels * 24 pixels, hence
     // height = 24 + 16 * 2 = 56 and
-    // width = 24 + width of Text + 8 + 16 * 32
+    // width = 24 + width of Text + 8 + 16 * 2
     expect(buttonSize, Size(labelSize.width + 8 + 24 + 32, 56));
   });
 }
