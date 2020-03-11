@@ -22,8 +22,7 @@ class Semaphore {
 
   bool IsValid() const;
 
-  FML_WARN_UNUSED_RESULT
-  bool TryWait();
+  [[nodiscard]] bool TryWait();
 
   void Signal();
 

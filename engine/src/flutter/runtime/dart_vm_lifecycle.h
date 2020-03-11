@@ -26,10 +26,10 @@ namespace flutter {
 // DartVMRef instances may be created on any thread.
 class DartVMRef {
  public:
-  FML_WARN_UNUSED_RESULT
-  static DartVMRef Create(Settings settings,
-                          fml::RefPtr<DartSnapshot> vm_snapshot = nullptr,
-                          fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr);
+  [[nodiscard]] static DartVMRef Create(
+      Settings settings,
+      fml::RefPtr<DartSnapshot> vm_snapshot = nullptr,
+      fml::RefPtr<DartSnapshot> isolate_snapshot = nullptr);
 
   DartVMRef(DartVMRef&&);
 

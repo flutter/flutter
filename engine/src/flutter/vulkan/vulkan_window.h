@@ -58,8 +58,7 @@ class VulkanWindow {
 
   bool CreateSkiaBackendContext(GrVkBackendContext* context);
 
-  FML_WARN_UNUSED_RESULT
-  bool RecreateSwapchain();
+  [[nodiscard]] bool RecreateSwapchain();
 
   FML_DISALLOW_COPY_AND_ASSIGN(VulkanWindow);
 };

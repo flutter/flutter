@@ -25,14 +25,11 @@ class VulkanCommandBuffer {
 
   VkCommandBuffer Handle() const;
 
-  FML_WARN_UNUSED_RESULT
-  bool Begin() const;
+  [[nodiscard]] bool Begin() const;
 
-  FML_WARN_UNUSED_RESULT
-  bool End() const;
+  [[nodiscard]] bool End() const;
 
-  FML_WARN_UNUSED_RESULT
-  bool InsertPipelineBarrier(
+  [[nodiscard]] bool InsertPipelineBarrier(
       VkPipelineStageFlagBits src_stage_flags,
       VkPipelineStageFlagBits dest_stage_flags,
       uint32_t /* mask of VkDependencyFlagBits */ dependency_flags,
