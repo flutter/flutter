@@ -296,16 +296,18 @@ void main() {
           restoreExitFunction();
           completer.complete();
         });
+        final Completer<void> checkLockCompleter = Completer<void>();
         final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
             commandFunction: () async {
               await Cache.lock();
+              checkLockCompleter.complete();
               final Completer<void> c = Completer<void>();
               await c.future;
               return null; // unreachable
             }
         );
         unawaited(flutterCommand.run());
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await checkLockCompleter.future;
         try {
           await Cache.lock();
         } on AssertionError catch (error) {
