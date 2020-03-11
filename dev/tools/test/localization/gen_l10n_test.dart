@@ -1014,34 +1014,4 @@ void main() {
       });
     });
   });
-
-  group('generateMessageString', () {
-    test('handles simple string', () {
-      expect(generateMessageString('abc'), "'abc'");
-    });
-    test('handles string with quote', () {
-      expect(generateMessageString("ab'c"), '''"ab'c"''');
-    });
-    test('handles string with double quote', () {
-      expect(generateMessageString('ab"c'), """'ab"c'""");
-    });
-    test('handles string with both single and double quote', () {
-      expect(generateMessageString('''a'b"c'''), """'''a'b"c'''""");
-    });
-    test('handles string with a triple single quote and a double quote', () {
-      expect(generateMessageString("""a"b'''c"""), '''"""a"b\'''c"""''');
-    });
-    test('handles string with a triple double quote and a single quote', () {
-      expect(generateMessageString('''a'b"""c'''), """'''a'b\"""c'''""");
-    });
-    test('handles string with both triple single and triple double quote', () {
-      expect(generateMessageString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
-    });
-    test('handles dollar', () {
-      expect(generateMessageString(r'ab$c'), "'ab\$c'");
-    });
-    test('supports multiline strings', () {
-      expect(generateMessageString('ab\nc'), "'ab\\nc'");
-    });
-  });
 }
