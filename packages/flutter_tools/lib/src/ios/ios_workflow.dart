@@ -6,6 +6,8 @@ import '../base/context.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
 
+// TODO(fujino): remove once internal references replaced by `globals.iosWorkflow`
+@Deprecated('Instead use globals.iosWorkflow')
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 
 class IOSWorkflow implements Workflow {

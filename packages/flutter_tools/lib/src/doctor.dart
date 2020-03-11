@@ -24,7 +24,6 @@ import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'intellij/intellij.dart';
-import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -77,7 +76,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
-      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+      if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         WebValidator(
@@ -108,8 +107,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     if (_workflows == null) {
       _workflows = <Workflow>[];
 
-      if (iosWorkflow.appliesToHostPlatform) {
-        _workflows.add(iosWorkflow);
+      if (globals.iosWorkflow.appliesToHostPlatform) {
+        _workflows.add(globals.iosWorkflow);
       }
 
       if (androidWorkflow.appliesToHostPlatform) {
