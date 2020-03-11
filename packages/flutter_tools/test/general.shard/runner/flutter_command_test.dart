@@ -308,9 +308,12 @@ void main() {
 
         unawaited(flutterCommand.run());
         await checkLockCompleter.future;
+
         Cache.checkLockAcquired();
+
         signalController.add(mockSignal);
         await completer.future;
+
         await Cache.lock();
         Cache.releaseLockEarly();
       }, overrides: <Type, Generator>{
