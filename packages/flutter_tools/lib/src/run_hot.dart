@@ -539,7 +539,7 @@ class HotRunner extends ResidentRunner {
           return null;
         }));
       }
-      for (final Isolate isolate in device.vmService.vm.isolates) {
+      for (final Isolate isolate in device?.vmService?.vm?.isolates ?? <Isolate>[]) {
         if (!uiIsolates.contains(isolate)) {
           operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
             'isolateId': isolate.id,
