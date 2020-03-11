@@ -548,7 +548,11 @@ class LocalizationsGenerator {
   String generateCode() {
     List<LocaleInfo> getLocalesForLanguage(String language) {
       return _allBundles.bundles
-        .where((AppResourceBundle bundle) => bundle.locale.languageCode == language && bundle.locale.toString() != language)
+        // Return locales for the language specified, except for the base locale itself
+        .where((AppResourceBundle bundle) {
+          return bundle.locale.languageCode == language
+              && bundle.locale.toString() != language;
+        })
         .map((AppResourceBundle bundle) => bundle.locale).toList();
     }
 
@@ -574,7 +578,7 @@ class LocalizationsGenerator {
         final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_$locale.dart'));
 
         // Generate the template for the base class.
-        String localeMessageClass = generateBaseClassFile(
+        final String localeMessageClass = generateBaseClassFile(
           className: className,
           fileName: outputFileName,
           header: header,
@@ -593,15 +597,20 @@ class LocalizationsGenerator {
           );
         }
 
-        localeMessageClass = localeMessageClass
-          .replaceAll('@(subclasses)', subclassStrings);
-        localeMessageFile.writeAsStringSync(localeMessageClass);
+        localeMessageFile.writeAsStringSync(
+          localeMessageClass.replaceAll('@(subclasses)', subclassStrings),
+        );
       }
     }
 
-    final Iterable<String> localeImports = supportedLocales.map((LocaleInfo locale) {
-      return "import '${fileName}_${locale.toString()}.dart';";
-    });
+    final Iterable<String> localeImports = supportedLocales
+      .where((LocaleInfo locale) {
+        // Return locales with only language code specified.
+        return locale.toString() == locale.languageCode;
+      })
+      .map((LocaleInfo locale) {
+        return "import '${fileName}_${locale.toString()}.dart';";
+      });
 
     final String lookupBody = generateLookupBody(_allBundles, className);
 
