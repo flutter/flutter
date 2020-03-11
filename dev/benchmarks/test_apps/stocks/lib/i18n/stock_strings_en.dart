@@ -21,6 +21,7 @@ class StockStringsEn extends StockStrings {
   @override
   String get portfolio => 'PORTFOLIO';
 }
+
 /// The translations for English, as used in the United States (`en_US`).
 class StockStringsEnUs extends StockStringsEn {
   StockStringsEnUs([String locale = 'en_US']) : super(locale);

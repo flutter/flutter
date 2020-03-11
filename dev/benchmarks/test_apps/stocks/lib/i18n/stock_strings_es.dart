@@ -21,3 +21,4 @@ class StockStringsEs extends StockStrings {
   @override
   String get portfolio => 'CARTERA';
 }
+

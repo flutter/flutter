@@ -185,6 +185,7 @@ class @(class) extends @(baseClass) {
 
 @(methods)
 }
+
 @(subclasses)''';
 
 const String subclassTemplate = '''
