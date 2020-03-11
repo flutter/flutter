@@ -62,12 +62,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     assert(onPressed != null);
     return FlatButton(
       child: Text(label),
-      onPressed: () {
-        setState(() {
-          _overflowOpen = false;
-        });
-        onPressed();
-      },
+      onPressed: onPressed,
     );
   }
 
@@ -100,7 +95,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
       if (widget.handlePaste != null)
         _getItem(widget.handlePaste, localizations.pasteButtonLabel),
       if (widget.handleSelectAll != null)
-        _getItem(widget.handleSelectAll, 'select absolutely everything'),//localizations.selectAllButtonLabel),
+        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
     ];
 
     // If there is no option available, build an empty widget.
