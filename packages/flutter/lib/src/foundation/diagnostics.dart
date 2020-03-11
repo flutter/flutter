@@ -3024,11 +3024,11 @@ class DiagnosticPropertiesBuilder {
 /// string and [DiagnosticsNode] debug representations describing the properties
 /// of an object.
 ///
-/// _This mixin is exists only to support plugins and packages that require
-/// older Flutter versions: Use the identical mixin [Diagnosticable] instead for
-/// all new code. If you are authoring code that needs to work on the stable
-/// branch as well as master (in a package, for instance), mix this in instead
-/// of extending [Diagnosticable]. Once [Diagnosticable] as a mixin reaches the
+/// _This mixin exists only to support plugins and packages that require older
+/// Flutter versions: Use the identical mixin [Diagnosticable] instead for all
+/// new code. If you are authoring code that needs to work on the stable branch
+/// as well as master (in a package, for instance), mix this in instead of
+/// extending [Diagnosticable]. Once [Diagnosticable] as a mixin reaches the
 /// stable channel, this class will be deprecated._
 mixin DiagnosticableMixin implements Diagnosticable {
   @override
