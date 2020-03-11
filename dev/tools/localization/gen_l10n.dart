@@ -504,9 +504,19 @@ class LocalizationsGenerator {
     final String outputFileName = path.basename(outputFile.path);
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
-      final String country = locale.countryCode;
-      final String countryArg = country == null ? '' : ', $country';
-      return 'Locale(\'${locale.languageCode}$countryArg\')';
+      final String languageCode = locale.languageCode;
+      final String countryCode = locale.countryCode;
+      final String scriptCode = locale.scriptCode;
+
+      if (countryCode == null && scriptCode == null) {
+        return 'Locale(\'$languageCode\')';
+      } else if (countryCode != null && scriptCode == null) {
+        return 'Locale(\'$languageCode\', \'$countryCode\')';
+      } else if (countryCode != null && scriptCode != null) {
+        return 'Locale.fromSubtags(languageCode: \'$languageCode\', countryCode: \'$countryCode\', scriptCode: \'$scriptCode\')';
+      } else {
+        return 'Locale.fromSubtags(languageCode: \'$languageCode\', scriptCode: \'$scriptCode\')';
+      }
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
