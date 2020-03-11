@@ -11,6 +11,7 @@ import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
@@ -398,7 +399,8 @@ class MemoryIOSink implements IOSink {
       (List<int> data) {
         try {
           add(data);
-        } catch (err, stack) {
+        // Catches all exceptions to propagate them to the completer.
+        } catch (err, stack) { // ignore: avoid_catches_without_on_clauses
           sub.cancel();
           completer.completeError(err, stack);
         }
@@ -632,8 +634,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 }
 
 void applyMocksToCommand(FlutterCommand command) {
-  command
-    ..applicationPackages = MockApplicationPackageStore();
+  command.applicationPackages = MockApplicationPackageStore();
 }
 
 /// Common functionality for tracking mock interaction
@@ -761,3 +762,18 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
+
+class AlwaysTrueBotDetector implements BotDetector {
+  const AlwaysTrueBotDetector();
+
+  @override
+  Future<bool> get isRunningOnBot async => true;
+}
+
+
+class AlwaysFalseBotDetector implements BotDetector {
+  const AlwaysFalseBotDetector();
+
+  @override
+  Future<bool> get isRunningOnBot async => false;
+}

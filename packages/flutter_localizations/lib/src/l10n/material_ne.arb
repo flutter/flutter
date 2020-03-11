@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "विस्तार गर्नुहोस्",
   "remainingTextFieldCharacterCountOne": "१ वर्ण बाँकी",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्णहरू बाँकी",
-  "refreshIndicatorSemanticLabel": "पुनः ताजा गर्नुहोस्"
+  "refreshIndicatorSemanticLabel": "पुनः ताजा गर्नुहोस्",
+  "moreButtonTooltip": "TBD"
 }

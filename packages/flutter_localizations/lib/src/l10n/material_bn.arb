@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "বড় করুন",
   "remainingTextFieldCharacterCountOne": "আর ১টি অক্ষর লেখা যাবে",
   "remainingTextFieldCharacterCountOther": "আর $remainingCountটি অক্ষর লেখা যাবে",
-  "refreshIndicatorSemanticLabel": "রিফ্রেশ করুন"
+  "refreshIndicatorSemanticLabel": "রিফ্রেশ করুন",
+  "moreButtonTooltip": "TBD"
 }

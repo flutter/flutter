@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
@@ -177,7 +178,7 @@ class AndroidDevice extends Device {
       } finally {
         console.destroy();
       }
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
       // If we fail to connect to the device, we should not fail so just return
       // an empty name. This data is best-effort.
@@ -219,13 +220,14 @@ class AndroidDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async =>
-      'Android ${await _sdkVersion} (API ${await _apiVersion})';
+      'Android ${await _sdkVersion} (API ${await apiVersion})';
 
   Future<String> get _sdkVersion => _getProperty('ro.build.version.release');
 
-  Future<String> get _apiVersion => _getProperty('ro.build.version.sdk');
+  @visibleForTesting
+  Future<String> get apiVersion => _getProperty('ro.build.version.sdk');
 
-  _AdbLogReader _logReader;
+  AdbLogReader _logReader;
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
@@ -299,7 +301,7 @@ class AndroidDevice extends Device {
         return true;
       }
       globals.printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.39 or later.');
-    } catch (error, trace) {
+    } on Exception catch (error, trace) {
       globals.printError('Error running ADB: $error', stackTrace: trace);
     }
 
@@ -317,9 +319,11 @@ class AndroidDevice extends Device {
         throwOnError: true,
       );
 
+      // This has been reported to return null on some devices. In this case,
+      // assume the lowest supported API to still allow Flutter to run.
       // Sample output: '22'
-      final String sdkVersion = await _getProperty('ro.build.version.sdk');
-
+      final String sdkVersion = await _getProperty('ro.build.version.sdk')
+        ?? minApiLevel.toString();
 
       final int sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
@@ -335,7 +339,7 @@ class AndroidDevice extends Device {
       }
 
       return true;
-    } catch (e, stacktrace) {
+    } on Exception catch (e, stacktrace) {
       globals.printError('Unexpected failure from adb: $e');
       globals.printError('Stacktrace: $stacktrace');
       return false;
@@ -366,7 +370,7 @@ class AndroidDevice extends Device {
     try {
       final RunResult listOut = await runAdbCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printTrace('$error');
       return false;
     }
@@ -432,7 +436,7 @@ class AndroidDevice extends Device {
         throwOnError: true,
       );
       uninstallOut = uninstallResult.stdout;
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('adb uninstall failed: $error');
       return false;
     }
@@ -554,7 +558,7 @@ class AndroidDevice extends Device {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
       // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = ProtocolDiscovery.observatory(
-        getLogReader(),
+        await getLogReader(),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -625,13 +629,18 @@ class AndroidDevice extends Device {
     // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
-
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
         observatoryUri = await observatoryDiscovery.uri;
+        if (observatoryUri == null) {
+          globals.printError(
+            'Error waiting for a debug connection: '
+            'The log reader stopped unexpectedly',
+          );
+          return LaunchResult.failed();
+        }
       }
-
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
@@ -677,10 +686,9 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ AndroidApk app }) {
+  FutureOr<DeviceLogReader> getLogReader({ AndroidApk app }) async {
     // The Android log reader isn't app-specific.
-    _logReader ??= _AdbLogReader(this);
-    return _logReader;
+    return _logReader ??= await AdbLogReader.createLogReader(this, globals.processManager);
   }
 
   @override
@@ -696,7 +704,7 @@ class AndroidDevice extends Device {
       output = runAdbCheckedSync(<String>[
         'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Failed to extract the most recent timestamp from the Android log: $error.');
       return null;
     }
@@ -1013,55 +1021,66 @@ void parseADBDeviceOutput(
 }
 
 /// A log reader that logs from `adb logcat`.
-class _AdbLogReader extends DeviceLogReader {
-  _AdbLogReader(this.device) {
+class AdbLogReader extends DeviceLogReader {
+  AdbLogReader._(this._adbProcess, this.name)  {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
       onCancel: _stop,
     );
   }
 
-  final AndroidDevice device;
+  @visibleForTesting
+  factory AdbLogReader.test(Process adbProcess, String name) = AdbLogReader._;
 
-  StreamController<String> _linesController;
-  Process _process;
-
-  @override
-  Stream<String> get logLines => _linesController.stream;
-
-  @override
-  String get name => device.name;
-
-  Future<void> _start() async {
-    final String lastTimestamp = device.lastLogcatTimestamp;
-    // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
-    final List<String> args = <String>[
-      'logcat',
-      '-v',
-      'time',
-    ];
+  /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
+  static Future<AdbLogReader> createLogReader(
+    AndroidDevice device,
+    ProcessManager processManager,
+  ) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
     final int apiVersion = (String v) {
       // If the API version string isn't found, conservatively assume that the
       // version is less recent than the one we're looking for.
       return v == null ? kLollipopVersionCode - 1 : int.tryParse(v);
-    }(await device._apiVersion);
-    if (apiVersion != null && apiVersion >= kLollipopVersionCode) {
-      args.addAll(<String>[
+    }(await device.apiVersion);
+
+    // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
+    final List<String> args = <String>[
+      'logcat',
+      '-v',
+      'time',
+      if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
+        // Empty `-T` means the timestamp of the logcat command invocation.
         '-T',
-        lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
-      ]);
-    }
+        device.lastLogcatTimestamp ?? '',
+      ],
+    ];
+    final Process process = await processManager.start(device.adbCommandForDevice(args));
+    return AdbLogReader._(process, device.name);
+  }
 
-    _process = await processUtils.start(device.adbCommandForDevice(args));
+  final Process _adbProcess;
 
+  @override
+  final String name;
+
+  StreamController<String> _linesController;
+
+  @override
+  Stream<String> get logLines => _linesController.stream;
+
+  void _start() {
     // We expect logcat streams to occasionally contain invalid utf-8,
     // see: https://github.com/flutter/flutter/pull/8864.
     const Utf8Decoder decoder = Utf8Decoder(reportErrors: false);
-    _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
-    _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
-    unawaited(_process.exitCode.whenComplete(() {
+    _adbProcess.stdout.transform<String>(decoder)
+      .transform<String>(const LineSplitter())
+      .listen(_onLine);
+    _adbProcess.stderr.transform<String>(decoder)
+      .transform<String>(const LineSplitter())
+      .listen(_onLine);
+    unawaited(_adbProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener) {
         _linesController.close();
       }
@@ -1101,6 +1120,11 @@ class _AdbLogReader extends DeviceLogReader {
   // adb logcat. We are currently passing 'time', which has the format:
   // mm-dd hh:mm:ss.milliseconds Priority/Tag( PID): ....
   void _onLine(String line) {
+    // This line might be processed after the subscription is closed but before
+    // adb stops streaming logs.
+    if (_linesController.isClosed) {
+      return;
+    }
     final Match timeMatch = AndroidDevice._timeRegExp.firstMatch(line);
     if (timeMatch == null || line.length == timeMatch.end) {
       return;
@@ -1160,7 +1184,8 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
-    _process?.kill();
+    _linesController.close();
+    _adbProcess?.kill();
   }
 
   @override

@@ -51,5 +51,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Ét tegn tilbage",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage",
-  "refreshIndicatorSemanticLabel": "Opdater"
+  "refreshIndicatorSemanticLabel": "Opdater",
+  "moreButtonTooltip": "TBD"
 }

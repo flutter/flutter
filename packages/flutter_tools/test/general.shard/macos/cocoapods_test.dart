@@ -68,7 +68,7 @@ void main() {
     projectUnderTest = FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
-    pretendPodVersionIs('1.6.0');
+    pretendPodVersionIs('1.8.0');
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -173,9 +173,17 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects at recommended version', () async {
+    testUsingContext('detects below recommended version', () async {
       pretendPodIsInstalled();
       pretendPodVersionIs('1.6.0');
+      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('detects at recommended version', () async {
+      pretendPodIsInstalled();
+      pretendPodVersionIs('1.8.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -183,7 +191,7 @@ void main() {
 
     testUsingContext('detects above recommended version', () async {
       pretendPodIsInstalled();
-      pretendPodVersionIs('1.6.1');
+      pretendPodVersionIs('1.8.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -387,7 +395,7 @@ void main() {
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch(e) {
+      } on Exception catch (e) {
         expect(e, isA<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
@@ -436,7 +444,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           engineDir: 'engine/path',
         );
         fail('ToolExit expected');
-      } catch (e) {
+      } on Exception catch (e) {
         expect(e, isA<ToolExit>());
         expect(
           testLogger.errorText,
@@ -575,7 +583,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsStringSync('Existing lock file.');
       await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
-        ..writeAsStringSync('Updated Podfile');
+        .writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
         xcodeProject: projectUnderTest.ios,
         engineDir: 'engine/path',

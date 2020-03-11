@@ -523,6 +523,8 @@ flutter:
     const String dummyEmulatorId = 'dummyEmulatorId';
     final Future<Socket> Function(String host, int port) unresponsiveSocket =
         (String host, int port) async => MockUnresponsiveAndroidConsoleSocket();
+    final Future<Socket> Function(String host, int port) disconnectingSocket =
+        (String host, int port) async => MockDisconnectingAndroidConsoleSocket();
     final Future<Socket> Function(String host, int port) workingSocket =
         (String host, int port) async => MockWorkingAndroidConsoleSocket(dummyEmulatorId);
     String hardware;
@@ -584,7 +586,9 @@ flutter:
       final AndroidDevice device = AndroidDevice('emulator-5555');
       expect(await device.emulatorId, isNull);
     }, overrides: <Type, Generator>{
-      AndroidConsoleSocketFactory: () => (String host, int port) => throw 'Fake socket error',
+      AndroidConsoleSocketFactory: () {
+        return (String host, int port) => throw Exception('Fake socket error');
+      },
       ProcessManager: () => mockProcessManager,
     });
 
@@ -593,6 +597,14 @@ flutter:
       expect(await device.emulatorId, isNull);
     }, overrides: <Type, Generator>{
       AndroidConsoleSocketFactory: () => unresponsiveSocket,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns null on early disconnect', () async {
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, isNull);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => disconnectingSocket,
       ProcessManager: () => mockProcessManager,
     });
   });
@@ -689,97 +701,6 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
-  });
-
-  group('logReader', () {
-    ProcessManager mockProcessManager;
-    AndroidSdk mockAndroidSdk;
-
-    setUp(() {
-      mockAndroidSdk = MockAndroidSdk();
-      mockProcessManager = MockProcessManager();
-    });
-
-    void setupGetprop({int apiVersion}) {
-      when(mockProcessManager.run(
-        argThat(contains('getprop')),
-        stderrEncoding: anyNamed('stderrEncoding'),
-        stdoutEncoding: anyNamed('stdoutEncoding'),
-      )).thenAnswer((_) {
-        final String buf = apiVersion == null
-          ? ''
-          : '[ro.build.version.sdk]: [$apiVersion]\n';
-        final ProcessResult result = ProcessResult(1, 0, buf, '');
-        return Future<ProcessResult>.value(result);
-      });
-    }
-
-    const int kLollipopVersionCode = 21;
-    void callsAdbLogcatCorrectly({int apiVersion}) {
-      testUsingContext('calls adb logcat with expected flags, apiVersion=$apiVersion', () async {
-        const String kLastLogcatTimestamp = '11-27 15:39:04.506';
-        setupGetprop(apiVersion: apiVersion);
-        when(mockAndroidSdk.adbPath).thenReturn('adb');
-        when(mockProcessManager.runSync(<String>[
-          'adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
-        ]))
-          .thenReturn(ProcessResult(0, 0, '$kLastLogcatTimestamp I/flutter: irrelevant', ''));
-
-        final Completer<void> logcatCompleter = Completer<void>();
-        when(mockProcessManager.start(argThat(contains('logcat'))))
-          .thenAnswer((_) {
-            logcatCompleter.complete();
-            return Future<Process>.value(createMockProcess());
-          });
-
-        final AndroidDevice device = AndroidDevice('1234');
-        final DeviceLogReader logReader = device.getLogReader();
-        logReader.logLines.listen((_) {});
-        await logcatCompleter.future;
-
-        verify(mockProcessManager.start(<String>[
-          'adb', '-s', '1234', 'logcat', '-v', 'time',
-          if (apiVersion != null && apiVersion >= kLollipopVersionCode)
-            ...<String>['-T', kLastLogcatTimestamp],
-        ])).called(1);
-      }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        ProcessManager: () => mockProcessManager,
-      });
-
-      testUsingContext('calls adb logcat with expected flags when the device logs are empty, apiVersion=$apiVersion', () async {
-        setupGetprop(apiVersion: apiVersion);
-        when(mockAndroidSdk.adbPath).thenReturn('adb');
-        when(mockProcessManager.runSync(<String>[
-          'adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
-        ])).thenReturn(ProcessResult(0, 0, '', ''));
-
-        final Completer<void> logcatCompleter = Completer<void>();
-        when(mockProcessManager.start(argThat(contains('logcat'))))
-          .thenAnswer((_) {
-            logcatCompleter.complete();
-            return Future<Process>.value(createMockProcess());
-          });
-
-        final AndroidDevice device = AndroidDevice('1234');
-        final DeviceLogReader logReader = device.getLogReader();
-        logReader.logLines.listen((_) {});
-        await logcatCompleter.future;
-
-        verify(mockProcessManager.start(<String>[
-          'adb', '-s', '1234', 'logcat', '-v', 'time',
-          if (apiVersion != null && apiVersion >= kLollipopVersionCode)
-            ...<String>['-T', ''],
-        ])).called(1);
-      }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        ProcessManager: () => mockProcessManager,
-      });
-    }
-
-    callsAdbLogcatCorrectly(apiVersion: kLollipopVersionCode);
-    callsAdbLogcatCorrectly(apiVersion: kLollipopVersionCode - 1);
-    callsAdbLogcatCorrectly();
   });
 
   test('Can parse adb shell dumpsys info', () {
@@ -1067,6 +988,26 @@ class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
 
   @override
   void add(List<int> data) {}
+}
+
+/// An Android console socket that drops all input and returns no output.
+class MockDisconnectingAndroidConsoleSocket extends Mock implements Socket {
+  MockDisconnectingAndroidConsoleSocket() {
+    _controller.add('Android Console: Welcome!\n');
+    // Include OK in the same packet here. In the response to "avd name"
+    // it's sent alone to ensure both are handled.
+    _controller.add('Android Console: Some intro text\nOK\n');
+  }
+
+  final StreamController<String> _controller = StreamController<String>();
+
+  @override
+  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
+
+  @override
+  void add(List<int> data) {
+    _controller.close();
+  }
 }
 
 class AndroidPackageTest extends ApplicationPackage {

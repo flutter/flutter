@@ -55,5 +55,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Залишився 1 символ",
   "remainingTextFieldCharacterCountOther": "Залишилося $remainingCount символу",
-  "refreshIndicatorSemanticLabel": "Оновити"
+  "refreshIndicatorSemanticLabel": "Оновити",
+  "moreButtonTooltip": "TBD"
 }

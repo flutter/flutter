@@ -24,6 +24,7 @@ import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'migrations/ios_migrator.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
@@ -90,13 +91,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<IOSMigrator> migrators = <IOSMigrator>[
-    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode)
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    XcodeBuildSystemMigration(app.project, globals.logger),
   ];
 
-  for (final IOSMigrator migrator in migrators) {
-    if (!migrator.migrate()) {
-      return XcodeBuildResult(success: false);
-    }
+  final IOSMigration migration = IOSMigration(migrators);
+  if (!migration.run()) {
+    return XcodeBuildResult(success: false);
   }
 
   if (!_checkXcodeVersion()) {
@@ -302,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to ocassionally timeout. Here, we give
@@ -458,7 +459,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       && result.stdout?.contains('but the linked and embedded framework') == true
       && result.stdout?.contains('was built for iOS') == true) {
     globals.printError('');
-    globals.printError('Your Xcode project requires migration. See https://github.com/flutter/flutter/issues/50568 for details.');
+    globals.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
     globals.printError('');
     globals.printError('You can temporarily work around this issue by running:');
     globals.printError('  rm -rf ios/Flutter/App.framework');

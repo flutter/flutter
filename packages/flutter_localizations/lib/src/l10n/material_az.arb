@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Genişləndirin",
   "remainingTextFieldCharacterCountOne": "1 simvol qalır",
   "remainingTextFieldCharacterCountOther": "$remainingCount simvol qalır",
-  "refreshIndicatorSemanticLabel": "Yeniləyin"
+  "refreshIndicatorSemanticLabel": "Yeniləyin",
+  "moreButtonTooltip": "TBD"
 }

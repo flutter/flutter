@@ -1519,8 +1519,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverOverlapAbsorber renderObject) {
-    renderObject
-      ..handle = handle;
+    renderObject.handle = handle;
   }
 
   @override
@@ -1694,8 +1693,7 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverOverlapInjector renderObject) {
-    renderObject
-      ..handle = handle;
+    renderObject.handle = handle;
   }
 
   @override
