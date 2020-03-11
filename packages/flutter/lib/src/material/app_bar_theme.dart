@@ -27,7 +27,7 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class AppBarTheme extends Diagnosticable {
+class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.AppBarTheme].
   const AppBarTheme({
     this.brightness,
