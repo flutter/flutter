@@ -1,4 +1,4 @@
-Signature: febcf996f3ac20d7902940b6212b454e
+Signature: 5b6ee2b86e42679c7b0e18a91feddf27
 
 UNUSED LICENSES:
 
@@ -397,7 +397,6 @@ ORIGIN: ../../../third_party/skia/bench/AndroidCodecBench.cpp + ../../../third_p
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.cpp
 FILE: ../../../third_party/skia/bench/AndroidCodecBench.h
-FILE: ../../../third_party/skia/bench/DrawLatticeBench.cpp
 FILE: ../../../third_party/skia/bench/EncodeBench.cpp
 FILE: ../../../third_party/skia/bench/GrMipMapBench.cpp
 FILE: ../../../third_party/skia/bench/HardStopGradientBench_ScaleNumColors.cpp
@@ -4088,8 +4087,6 @@ FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_3.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawAtlas_4.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmap.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapLattice.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapNine.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapRect.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapRect_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_drawBitmapRect_3.cpp
