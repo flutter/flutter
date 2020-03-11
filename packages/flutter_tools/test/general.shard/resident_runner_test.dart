@@ -92,6 +92,9 @@ void main() {
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
+    final MockVM mockVM = MockVM();
+    when(mockVMService.vm).thenReturn(mockVM);
+    when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
     when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
@@ -744,6 +747,7 @@ class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
+class MockVM extends Mock implements VM {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views, { Stream<Uri> observatoryUris })
     : super(device, buildInfo: BuildInfo.debug) {
