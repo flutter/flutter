@@ -163,7 +163,7 @@ enum MaterialTapTargetSize {
 /// ```
 /// {@end-tool}
 @immutable
-class ThemeData extends Diagnosticable {
+class ThemeData with Diagnosticable {
   /// Create a [ThemeData] given a set of preferred values.
   ///
   /// Default values will be derived for arguments that are omitted.
@@ -1697,7 +1697,7 @@ class _FifoCache<K, V> {
 ///  * [ThemeData.visualDensity], where this property is used to specify the base
 ///    horizontal density of Material components.
 ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
-class VisualDensity extends Diagnosticable {
+class VisualDensity with Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///
   /// All of the arguments must be non-null, and [horizontal] and [vertical]
