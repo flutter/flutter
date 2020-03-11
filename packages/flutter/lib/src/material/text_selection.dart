@@ -131,7 +131,9 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
                       _overflowOpen = !_overflowOpen;
                     });
                   },
-                  tooltip: _overflowOpen ? 'Back' : 'More',
+                  tooltip: _overflowOpen
+                      ? localizations.backButtonTooltip
+                      : localizations.moreButtonTooltip,
                 ),
               ),
               ...items,

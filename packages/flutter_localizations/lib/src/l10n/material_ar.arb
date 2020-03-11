@@ -58,5 +58,6 @@
   "remainingTextFieldCharacterCountZero": "لا أحرف متبقية",
   "remainingTextFieldCharacterCountOne": "حرف واحد متبقٍ",
   "remainingTextFieldCharacterCountOther": "$remainingCount حرف متبقٍ",
-  "refreshIndicatorSemanticLabel": "إعادة تحميل"
+  "refreshIndicatorSemanticLabel": "إعادة تحميل",
+  "moreButtonTooltip": "TBD"
 }

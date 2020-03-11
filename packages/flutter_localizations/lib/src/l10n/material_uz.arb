@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Yoyish",
   "remainingTextFieldCharacterCountOne": "1 ta belgi qoldi",
   "remainingTextFieldCharacterCountOther": "$remainingCount ta belgi qoldi",
-  "refreshIndicatorSemanticLabel": "Yangilash"
+  "refreshIndicatorSemanticLabel": "Yangilash",
+  "moreButtonTooltip": "TBD"
 }
