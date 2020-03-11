@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "දිග හරින්න",
   "remainingTextFieldCharacterCountOne": "අනුලකුණු 1ක් ඉතිරිය",
   "remainingTextFieldCharacterCountOther": "අනුලකුණු $remainingCountක් ඉතිරිය",
-  "refreshIndicatorSemanticLabel": "නැවුම් කරන්න"
+  "refreshIndicatorSemanticLabel": "නැවුම් කරන්න",
+  "moreButtonTooltip": "TBD"
 }

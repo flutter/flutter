@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "విస్తరించు",
   "remainingTextFieldCharacterCountOne": "1 అక్షరం మిగిలి ఉంది",
   "remainingTextFieldCharacterCountOther": "$remainingCount అక్షరాలు మిగిలి ఉన్నాయి",
-  "refreshIndicatorSemanticLabel": "రిఫ్రెష్ చేయి"
+  "refreshIndicatorSemanticLabel": "రిఫ్రెష్ చేయి",
+  "moreButtonTooltip": "TBD"
 }
