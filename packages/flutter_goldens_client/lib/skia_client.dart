@@ -307,6 +307,7 @@ class SkiaGoldClient {
       pullRequest = refs[refs.length - 2];
       cis = 'buildbucket';
     } else {
+      assert(ci == 'cirrus');
       pullRequest = platform.environment['CIRRUS_PR'];
       jobId = platform.environment['CIRRUS_TASK_ID'];
     }

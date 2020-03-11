@@ -272,6 +272,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
+      // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
       && !platform.environment.containsKey('GOLD_TRYJOB');
 
     return cirrusPostSubmit || luciPostSubmit;
