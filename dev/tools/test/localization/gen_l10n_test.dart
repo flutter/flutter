@@ -254,7 +254,7 @@ void main() {
   });
 
   test('correctly adds a headerFile when it is set', () {
-    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
       ..createSync(recursive: true)
       ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
       ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
@@ -278,14 +278,11 @@ void main() {
   });
 
   test('setting both a headerString and a headerFile should fail', () {
-    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-      ..createSync(recursive: true);
-    l10nDirectory.childFile(defaultTemplateArbFileName)
-      .writeAsStringSync(singleMessageArbFileString);
-    l10nDirectory.childFile(esArbFileName)
-      .writeAsStringSync(singleEsMessageArbFileString);
-    l10nDirectory.childFile('header.txt')
-      .writeAsStringSync('/// Sample header in a text file');
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
 
     LocalizationsGenerator generator;
     try {
