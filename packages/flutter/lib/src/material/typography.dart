@@ -82,7 +82,7 @@ enum ScriptCategory {
 ///    [ThemeData.primaryTextTheme], [ThemeData.accentTextTheme].
 ///  * <https://material.io/design/typography/>
 @immutable
-class Typography extends Diagnosticable {
+class Typography with Diagnosticable {
   /// Creates a typography instance.
   ///
   /// This constructor is identical to [Typography.material2014]. It is

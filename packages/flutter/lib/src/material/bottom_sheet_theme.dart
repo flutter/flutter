@@ -24,7 +24,7 @@ import 'package:flutter/rendering.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class BottomSheetThemeData extends Diagnosticable {
+class BottomSheetThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.bottomSheetTheme].
   const BottomSheetThemeData({
     this.backgroundColor,

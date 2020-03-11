@@ -52,5 +52,6 @@
   "remainingTextFieldCharacterCountZero": "Nav atlikusi neviena rakstzīme.",
   "remainingTextFieldCharacterCountOne": "Atlikusi 1 rakstzīme.",
   "remainingTextFieldCharacterCountOther": "Atlikušas $remainingCount rakstzīmes.",
-  "refreshIndicatorSemanticLabel": "Atsvaidzināt"
+  "refreshIndicatorSemanticLabel": "Atsvaidzināt",
+  "moreButtonTooltip": "TBD"
 }

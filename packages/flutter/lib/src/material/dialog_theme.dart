@@ -27,7 +27,7 @@ import 'theme.dart';
 ///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class DialogTheme extends Diagnosticable {
+class DialogTheme with Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({
     this.backgroundColor,

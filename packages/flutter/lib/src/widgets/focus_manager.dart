@@ -1352,7 +1352,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
