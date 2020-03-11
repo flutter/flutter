@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Прошири",
   "remainingTextFieldCharacterCountOne": "Преостанува уште 1 знак",
   "remainingTextFieldCharacterCountOther": "Преостануваат уште $remainingCount знаци",
-  "refreshIndicatorSemanticLabel": "Освежи"
+  "refreshIndicatorSemanticLabel": "Освежи",
+  "moreButtonTooltip": "TBD"
 }

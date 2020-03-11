@@ -17,7 +17,7 @@ import 'package:gen_keycodes/utils.dart';
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
 Future<String> getChromiumConversions() async {
-  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/keycode_converter_data.inc');
+  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/dom_code_data.inc');
   return await http.read(keyCodeMapUri);
 }
 
@@ -25,6 +25,11 @@ Future<String> getChromiumConversions() async {
 Future<String> getAndroidKeyCodes() async {
   final Uri keyCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
+}
+
+Future<String> getWindowsKeyCodes() async {
+  final Uri keyCodesUri = Uri.parse('https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.10240.0/um/WinUser.h');
+  return await http.read(keyCodesUri);
 }
 
 /// Get contents of the file that contains the scan codes in Android source.
@@ -84,12 +89,23 @@ Future<void> main(List<String> rawArguments) async {
         'If --glfw-keycodes is not specified, the input will be read from the '
         'correct file in the GLFW github repository.',
   );
-    argParser.addOption(
+  argParser.addOption(
+    'windows-keycodes',
+    defaultsTo: null,
+    help: 'The path to where the Windows keycodes header file should be read. '
+        'If --windows-keycodes is not specified, the input will be read from the '
+        'correct file in the Windows github repository.',
+  );
+  argParser.addOption(
+    'windows-domkey',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_windows_name.json'),
+    help: 'The path to where the Windows keycode to DomKey mapping is.',
+  );
+  argParser.addOption(
     'glfw-domkey',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_name_to_glfw_name.json'),
     help: 'The path to where the GLFW keycode to DomKey mapping is.',
   );
-
   argParser.addOption(
     'data',
     defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'key_data.json'),
@@ -170,10 +186,18 @@ Future<void> main(List<String> rawArguments) async {
       glfwKeyCodes = File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
     }
 
+    String windowsKeyCodes;
+    if (parsedArguments['windows-keycodes'] == null) {
+      windowsKeyCodes = await getWindowsKeyCodes();
+    } else {
+      windowsKeyCodes = File(parsedArguments['windows-keycodes'] as String).readAsStringSync();
+    }
+
+    final String windowsToDomKey = File(parsedArguments['windows-domkey'] as String).readAsStringSync();
     final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
     final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
-    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
+    data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey, windowsKeyCodes, windowsToDomKey);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     File(parsedArguments['data'] as String).writeAsStringSync(encoder.convert(data.toJson()));
