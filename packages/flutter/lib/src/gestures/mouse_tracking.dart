@@ -30,7 +30,7 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// movements.
 ///
 /// This is added to a layer and managed by the [MouseRegion] widget.
-class MouseTrackerAnnotation extends Diagnosticable {
+class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
   const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});

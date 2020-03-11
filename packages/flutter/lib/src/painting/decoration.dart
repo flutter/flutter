@@ -20,7 +20,7 @@ import 'image_provider.dart';
 /// shared between boxes; [BoxPainter] objects can cache resources to
 /// make painting on a particular surface faster.
 @immutable
-abstract class Decoration extends Diagnosticable {
+abstract class Decoration with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Decoration();

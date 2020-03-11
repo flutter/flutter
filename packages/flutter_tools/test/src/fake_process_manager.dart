@@ -165,7 +165,7 @@ class _FakeProcess implements Process {
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'Process.kill() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }
@@ -281,7 +281,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'ProcessManager.killPid() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }

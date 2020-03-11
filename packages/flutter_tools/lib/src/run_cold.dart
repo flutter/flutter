@@ -94,7 +94,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService == null) {
         continue;
       }
-      device.initLogReader();
+      await device.initLogReader();
       await device.refreshViews();
       globals.printTrace('Connected to ${device.device.name}');
     }
@@ -143,7 +143,7 @@ class ColdRunner extends ResidentRunner {
       return 2;
     }
     for (final FlutterDevice device in flutterDevices) {
-      device.initLogReader();
+      await device.initLogReader();
     }
     await refreshViews();
     for (final FlutterDevice device in flutterDevices) {

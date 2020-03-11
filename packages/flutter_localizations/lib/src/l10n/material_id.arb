@@ -51,5 +51,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Sisa 1 karakter",
   "remainingTextFieldCharacterCountOther": "Sisa $remainingCount karakter",
-  "refreshIndicatorSemanticLabel": "Memuat ulang"
+  "refreshIndicatorSemanticLabel": "Memuat ulang",
+  "moreButtonTooltip": "TBD"
 }

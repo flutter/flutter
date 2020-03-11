@@ -35,8 +35,6 @@ Future<int> run(
   String flutterVersion,
   Map<Type, Generator> overrides,
 }) async {
-  reportCrashes ??= !await globals.isRunningOnBot;
-
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
@@ -48,6 +46,8 @@ Future<int> run(
   commands.forEach(runner.addCommand);
 
   return runInContext<int>(() async {
+    reportCrashes ??= !await globals.isRunningOnBot;
+
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(

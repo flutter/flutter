@@ -635,7 +635,7 @@ class _DiagnosticsPathNode {
 }
 
 List<_DiagnosticsPathNode> _followDiagnosticableChain(
-  List<DiagnosticableMixin> chain, {
+  List<Diagnosticable> chain, {
   String name,
   DiagnosticsTreeStyle style,
 }) {
@@ -644,7 +644,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(
     return path;
   DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode(name: name, style: style);
   for (int i = 1; i < chain.length; i += 1) {
-    final DiagnosticableMixin target = chain[i];
+    final Diagnosticable target = chain[i];
     bool foundMatch = false;
     final List<DiagnosticsNode> children = diagnostic.getChildren();
     for (int j = 0; j < children.length; j += 1) {
@@ -1550,7 +1550,7 @@ mixin WidgetInspectorService {
       return true;
     }
     final Object value = node.value;
-    if (value is! DiagnosticableMixin) {
+    if (value is! Diagnosticable) {
       return true;
     }
     if (value is! Element || !isWidgetCreationTracked()) {
