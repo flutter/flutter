@@ -1,4 +1,4 @@
-Signature: fa5f1c44b7a7aec7c3ed020bed4b476b
+Signature: febcf996f3ac20d7902940b6212b454e
 
 UNUSED LICENSES:
 
@@ -2441,6 +2441,7 @@ FILE: ../../../third_party/skia/src/gpu/GrDrawingManager.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDrawingManager.h
 FILE: ../../../third_party/skia/src/gpu/GrFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGpuResourcePriv.h
+FILE: ../../../third_party/skia/src/gpu/GrManagedResource.h
 FILE: ../../../third_party/skia/src/gpu/GrMesh.h
 FILE: ../../../third_party/skia/src/gpu/GrNonAtomicRef.h
 FILE: ../../../third_party/skia/src/gpu/GrOpFlushState.cpp
@@ -2540,7 +2541,6 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkRenderTarget.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkResource.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexture.cpp
@@ -3905,6 +3905,7 @@ FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
