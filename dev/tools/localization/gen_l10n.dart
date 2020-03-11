@@ -193,29 +193,43 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateClass(String className, String fileName, AppResourceBundle bundle, Iterable<Message> messages) {
-  String getImportClass(LocaleInfo locale) {
-    if (locale.countryCode == null) {
-      return "import '$fileName.dart';";
-    }
-
-    return "import '${fileName}_${locale.languageCode}.dart';";
-  }
+String generateBaseClassFile({
+  String className,
+  String fileName,
+  String header,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+}) {
   final LocaleInfo locale = bundle.locale;
-
-  String baseClassName = className;
-  if (locale.countryCode != null) {
-    baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
-  }
-
   final Iterable<String> methods = messages
     .where((Message message) => bundle.translationFor(message) != null)
     .map((Message message) => generateMethod(message, bundle));
 
   return classFileTemplate
+    .replaceAll('@(header)', header)
     .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', baseClassName)
-    .replaceAll('@(importClass)', getImportClass(locale))
+    .replaceAll('@(baseClass)', className)
+    .replaceAll('@(fileName)', fileName)
+    .replaceAll('@(class)', '$className${locale.camelCase()}')
+    .replaceAll('@(localeName)', locale.toString())
+    .replaceAll('@(methods)', methods.join('\n\n'));
+}
+
+String generateSubclass({
+  String className,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+}) {
+  final LocaleInfo locale = bundle.locale;
+  final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+
+  final Iterable<String> methods = messages
+    .where((Message message) => bundle.translationFor(message) != null)
+    .map((Message message) => generateMethod(message, bundle));
+
+  return subclassTemplate
+    .replaceAll('@(language)', describeLocale(locale.toString()))
+    .replaceAll('@(baseLanguageClassName)', baseClassName)
     .replaceAll('@(class)', '$className${locale.camelCase()}')
     .replaceAll('@(localeName)', locale.toString())
     .replaceAll('@(methods)', methods.join('\n\n'));
@@ -529,8 +543,15 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
-  // Generate the AppLocalizations class, its LocalizationsDelegate subclass.
+  // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
+  // and all AppLocalizations subclasses for every locale.
   String generateCode() {
+    List<LocaleInfo> getLocalesForLanguage(String language) {
+      return _allBundles.bundles
+        .where((AppResourceBundle bundle) => bundle.locale.languageCode == language && bundle.locale.toString() != language)
+        .map((AppResourceBundle bundle) => bundle.locale).toList();
+    }
+
     final String directory = path.basename(l10nDirectory.path);
     final String outputFileName = path.basename(outputFile.path);
 
@@ -547,10 +568,35 @@ class LocalizationsGenerator {
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_${locale.toString()}.dart'));
-      localeMessageFile.writeAsStringSync(
-        generateClass(className, fileName, _allBundles.bundleFor(locale), _allMessages)
-      );
+      // If no country code, currently assume that this is the base class.
+      // TODO(shihaohong): Update this when script code is properly supported.
+      if (locale.countryCode == null) {
+        final File localeMessageFile = _fs.file(path.join(l10nDirectory.path, '${fileName}_$locale.dart'));
+
+        // Generate the template for the base class.
+        String localeMessageClass = generateBaseClassFile(
+          className: className,
+          fileName: outputFileName,
+          header: header,
+          bundle: _allBundles.bundleFor(locale),
+          messages: _allMessages,
+        );
+
+        // Every locale for the language except the base class.
+        final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
+        String subclassStrings = '';
+        for (final LocaleInfo locale in localesForLanguage) {
+          subclassStrings += generateSubclass(
+            className: className,
+            bundle: _allBundles.bundleFor(locale),
+            messages: _allMessages,
+          );
+        }
+
+        localeMessageClass = localeMessageClass
+          .replaceAll('@(subclasses)', subclassStrings);
+        localeMessageFile.writeAsStringSync(localeMessageClass);
+      }
     }
 
     final Iterable<String> localeImports = supportedLocales.map((LocaleInfo locale) {

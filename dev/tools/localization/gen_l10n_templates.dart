@@ -172,9 +172,10 @@ const String pluralMethodTemplate = '''
   }''';
 
 const String classFileTemplate = '''
+@(header)
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-@(importClass)
+import '@(fileName)';
 
 // ignore_for_file: unnecessary_brace_in_string_interps
 
@@ -183,7 +184,17 @@ class @(class) extends @(baseClass) {
   @(class)([String locale = '@(localeName)']) : super(locale);
 
 @(methods)
-}''';
+}
+@(subclasses)''';
+
+const String subclassTemplate = '''
+/// The translations for @(language) (`@(localeName)`).
+class @(class) extends @(baseLanguageClassName) {
+  @(class)([String locale = '@(localeName)']) : super(locale);
+
+@(methods)
+}
+''';
 
 const String baseClassGetterTemplate = '''
   // @(comment)
