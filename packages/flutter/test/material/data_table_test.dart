@@ -1030,7 +1030,8 @@ void main() {
     expect(tester.renderObject(find.text('column1')).attached, true);
     expect(tester.renderObject(find.text('column2')).attached, true);
 
-    // Wait for the tooltip timer
+    // Wait for the tooltip timer to expire to prevent it scheduling a new frame
+    // after the view is destroyed, which causes exceptions.
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 }
