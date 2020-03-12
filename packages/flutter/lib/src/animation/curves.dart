@@ -1452,7 +1452,7 @@ class Curves {
   ///
   /// A symmetric animation to [easeInToLinear].
   ///
-  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/linear_to_ease_out.mp4}
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear_to_ease_out.mp4}
   static const Cubic linearToEaseOut = Cubic(0.35, 0.91, 0.33, 0.97);
 
   /// A cubic animation curve that starts quickly and ends slowly. This is
