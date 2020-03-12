@@ -23,7 +23,7 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
     final Widget shadowWidget = _ShadowWidget(
       width: 24,
       height: 24,
-      color: _useColorFilter ? Colors.white : null,
+      useColorFilter: _useColorFilter,
       shadow: ui.Shadow(
         color: Colors.black45,
         offset: const Offset(0.0, 2.0),
@@ -122,13 +122,13 @@ class _ShadowWidget extends StatelessWidget {
   const _ShadowWidget({
     @required this.width,
     @required this.height,
-    @required this.color,
+    @required this.useColorFilter,
     @required this.shadow,
   });
 
   final double width;
   final double height;
-  final Color color;
+  final bool useColorFilter;
   final Shadow shadow;
 
   @override
@@ -138,7 +138,7 @@ class _ShadowWidget extends StatelessWidget {
       height: height,
       child: CustomPaint(
         painter: _ShadowPainter(
-          color: color,
+          useColorFilter: useColorFilter,
           shadow: shadow,
         ),
         size: Size(width, height),
@@ -150,11 +150,9 @@ class _ShadowWidget extends StatelessWidget {
 }
 
 class _ShadowPainter extends CustomPainter {
-  const _ShadowPainter({this.color, @required this.shadow});
+  const _ShadowPainter({this.useColorFilter, @required this.shadow});
 
-  // If null, we'll set no color filter.
-  final Color color;
-
+  final bool useColorFilter;
   final Shadow shadow;
 
   @override
@@ -162,7 +160,7 @@ class _ShadowPainter extends CustomPainter {
     final Rect rect = Offset.zero & size;
 
     final Paint paint = Paint();
-    if (color != null) {
+    if (useColorFilter) {
       paint.colorFilter = ColorFilter.mode(shadow.color, BlendMode.srcIn);
     }
 
@@ -172,9 +170,9 @@ class _ShadowPainter extends CustomPainter {
     canvas.drawRect(rect, Paint()..maskFilter = MaskFilter.blur(BlurStyle.normal, shadow.blurSigma));
     canvas.restore();
 
-    canvas.drawRect(rect, Paint()..color = color?? Colors.black);
+    canvas.drawRect(rect, Paint()..color = useColorFilter ? Colors.white : Colors.black);
   }
 
   @override
-  bool shouldRepaint(_ShadowPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_ShadowPainter oldDelegate) => oldDelegate.useColorFilter != useColorFilter;
 }
