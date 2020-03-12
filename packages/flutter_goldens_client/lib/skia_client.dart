@@ -325,7 +325,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
-  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+  Future<void> tryjobAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
 
@@ -357,8 +357,6 @@ class SkiaGoldClient {
         ..writeln();
       throw Exception(buf.toString());
     }
-
-    return true;
   }
 
   /// Executes the `imgtest check` command in the goldctl tool for unauthorized

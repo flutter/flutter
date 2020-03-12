@@ -372,10 +372,8 @@ void main() {
     });
   });
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
-    // This test does not matter, it can be approved at any time if rendering
-    // changes. The intention of this test is to validate integration changes
-    // with the Flutter Gold dashboard, and to make it apparent if the dashboard
-    // is not working.
+    // The test validates the Flutter Gold integration. Any changes to the
+    // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
       child: Container(
         color: const Color(0xFF42A5F5),
