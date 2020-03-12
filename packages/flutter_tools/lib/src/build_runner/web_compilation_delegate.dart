@@ -14,6 +14,7 @@ import 'package:path/path.dart' as path; // ignore: package_path_import
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
@@ -203,15 +204,34 @@ class BuildDaemonCreator {
       'lib',
       'build_script.dart',
     );
+    final String snapshot = globals.fs.path.join(
+      Cache.flutterRoot,
+      'bin',
+      'cache',
+      'build_script.snapshot',
+    );
     if (!globals.fs.isFileSync(buildScript)) {
       throwToolExit('Expected a file $buildScript to exist in the Flutter SDK.');
     }
-    // If we're missing the .packages file, perform a pub get.
-    if (!globals.fs.isFileSync(buildScriptPackages)) {
-      await pub.get(
-        context: PubContext.pubGet,
-        directory: globals.fs.file(buildScriptPackages).parent.path,
-      );
+
+    if (!globals.fs.isFileSync(snapshot)) {
+      // If we're missing the .packages file, perform a pub get.
+      if (!globals.fs.isFileSync(buildScriptPackages)) {
+        await pub.get(
+          context: PubContext.pubGet,
+          directory: globals.fs.file(buildScriptPackages).parent.path,
+        );
+      }
+
+      final ProcessResult snapshotResult = await globals.processManager.run(<String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--snapshot=$snapshot',
+        '--packages=$buildScriptPackages',
+        buildScript,
+      ]);
+      if (snapshotResult.exitCode != 0) {
+        throw ToolExit('Failed to generate snapshot for $buildScript.\n${snapshotResult.stdout ?? ''}\n${snapshotResult.stderr ?? ''}');
+      }
     }
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 

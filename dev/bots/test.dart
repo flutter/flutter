@@ -56,7 +56,7 @@ const int kWebShardCount = 8;
 /// Maximum number of Web tests to run in a single `flutter test`. We found that
 /// large batches can get flaky, possibly because we reuse a single instance of
 /// the browser, and after many tests the browser's state gets corrupted.
-const int kWebBatchSize = 20;
+const int kWebBatchSize = 1;
 
 /// Tests that we don't run on Web for various reasons.
 //
