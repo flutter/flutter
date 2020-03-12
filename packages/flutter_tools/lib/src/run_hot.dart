@@ -519,8 +519,7 @@ class HotRunner extends ResidentRunner {
         device.generator.accept();
       }
     }
-    // Check if the isolate is paused and resume it. Tag isolates
-    // which do not correspond with a flutter view so they can be killed.
+    // Check if the isolate is paused and resume it.
     final List<Future<void>> operations = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
       final Set<Isolate> uiIsolates = <Isolate>{};
@@ -539,6 +538,9 @@ class HotRunner extends ResidentRunner {
           return null;
         }));
       }
+      // The engine handles killing and recreating isolates that it has spawned
+      // ("uiIsolates"). The isolates that were spawned from these uiIsolates
+      // will not be restared, and so they must be manually killed.
       for (final Isolate isolate in device?.vmService?.vm?.isolates ?? <Isolate>[]) {
         if (!uiIsolates.contains(isolate)) {
           operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
