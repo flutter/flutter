@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -134,16 +132,15 @@ class VMService implements vm_service.VmService {
         final bool pause = params['pause'] as bool ?? false;
 
         if (isolateId.isEmpty) {
-          throw rpc.RpcException.invalidParams("Invalid 'isolateId': $isolateId");
+          throw vm_service.RPCError("Invalid 'isolateId': $isolateId", -32602, '');
         }
         try {
           await reloadSources(isolateId, force: force, pause: pause);
           return <String, String>{'type': 'Success'};
-        } on rpc.RpcException {
+        } on vm_service.RPCError {
           rethrow;
         } on Exception catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during Sources Reload: $e\n$st');
+          throw vm_service.RPCError('Error during Sources Reload: $e\n$st', -32000,  '');
         }
       });
       _delegateService.registerService('reloadSources', 'Flutter Tools');
@@ -165,10 +162,10 @@ class VMService implements vm_service.VmService {
         final String classId = params['class'] as String;
 
         if (libraryId.isEmpty) {
-          throw rpc.RpcException.invalidParams("Invalid 'libraryId': $libraryId");
+          throw vm_service.RPCError("Invalid 'libraryId': $libraryId", -32602, '');
         }
         if (classId.isEmpty) {
-          throw rpc.RpcException.invalidParams("Invalid 'classId': $classId");
+          throw vm_service.RPCError("Invalid 'classId': $classId", -32602, '');
         }
 
         globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
@@ -179,11 +176,10 @@ class VMService implements vm_service.VmService {
             classId: classId,
           );
           return <String, String>{'type': 'Success'};
-        } on rpc.RpcException {
+        } on vm_service.RPCError {
           rethrow;
         } on Exception catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during Sources Reload: $e\n$st');
+          throw vm_service.RPCError('Error during Sources Reload: $e\n$st', -32000, '');
         }
       });
       _delegateService.registerService('reloadMethod', 'Flutter Tools');
@@ -195,11 +191,10 @@ class VMService implements vm_service.VmService {
         try {
           await restart(pause: pause);
           return <String, String>{'type': 'Success'};
-        } on rpc.RpcException {
+        } on vm_service.RPCError {
           rethrow;
         } on Exception catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during Hot Restart: $e\n$st');
+          throw vm_service.RPCError('Error during Hot Restart: $e\n$st', -32000, '');
         }
       });
       _delegateService.registerService('hotRestart', 'Flutter Tools');
@@ -218,13 +213,11 @@ class VMService implements vm_service.VmService {
       _delegateService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
         final String isolateId = params['isolateId'] as String;
         if (isolateId is! String || isolateId.isEmpty) {
-          throw rpc.RpcException.invalidParams(
-              "Invalid 'isolateId': $isolateId");
+          throw throw vm_service.RPCError("Invalid 'isolateId': $isolateId", -32602, '');
         }
         final String expression = params['expression'] as String;
         if (expression is! String || expression.isEmpty) {
-          throw rpc.RpcException.invalidParams(
-              "Invalid 'expression': $expression");
+          throw throw vm_service.RPCError("Invalid 'expression': $expression", -32602, '');
         }
         final List<String> definitions = List<String>.from(params['definitions'] as List<dynamic>);
         final List<String> typeDefinitions = List<String>.from(params['typeDefinitions'] as List<dynamic>);
@@ -241,11 +234,14 @@ class VMService implements vm_service.VmService {
               'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
             },
           };
-        } on rpc.RpcException {
+        } on vm_service.RPCError {
           rethrow;
         } on Exception catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during expression compilation: $e\n$st');
+          throw vm_service.RPCError(
+            'Error during expression compilation: $e\n$st',
+            -32000,
+            '',
+          );
         }
       });
       _delegateService.registerService('compileExpression', 'Flutter Tools');
@@ -913,7 +909,8 @@ class VM extends ServiceObjectOwner {
     Map<String, dynamic> params = const <String, dynamic>{},
     bool truncateLogs = true,
   }) async {
-    final vm_service.Response response = await _vmService._delegateService.callServiceExtension(method, args: params);
+    final vm_service.Response response = await _vmService
+      ._delegateService.callServiceExtension(method, args: params);
     return response.json;
   }
 
@@ -1219,7 +1216,7 @@ class Isolate extends ServiceObjectOwner {
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
-    } on rpc.RpcException catch (e) {
+    } on vm_service.RPCError catch (e) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'code': e.code,
         'message': e.message,
@@ -1248,9 +1245,9 @@ class Isolate extends ServiceObjectOwner {
   }) async {
     try {
       return await invokeRpcRaw(method, params: params);
-    } on rpc.RpcException catch (e) {
+    } on vm_service.RPCError catch (err) {
       // If an application is not using the framework
-      if (e.code == rpc_error_code.METHOD_NOT_FOUND) {
+      if (err.code == -32601) {
         return null;
       }
       rethrow;

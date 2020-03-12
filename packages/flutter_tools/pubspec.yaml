@@ -18,7 +18,6 @@ dependencies:
   file: 5.1.0
   http: 0.12.0+4
   intl: 0.16.1
-  json_rpc_2: 2.1.0
   meta: 1.1.8
   multicast_dns: 0.2.2
   mustache_template: 1.0.0+1
@@ -27,10 +26,8 @@ dependencies:
   process: 3.0.12
   quiver: 2.0.5
   stack_trace: 1.9.3
-  stream_channel: 2.0.0
   usage: 3.4.1
   webdriver: 2.1.2
-  web_socket_channel: 1.1.0
   webkit_inspection_protocol: 0.5.0+1
   xml: 3.5.0
   yaml: 2.2.0

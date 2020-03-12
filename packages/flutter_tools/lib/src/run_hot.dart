@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:platform/platform.dart';
-import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'base/async_guard.dart';
@@ -110,9 +108,10 @@ class HotRunner extends ResidentRunner {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pause: pause);
     if (!result.isOk) {
-      throw rpc.RpcException(
-        rpc_error_code.INTERNAL_ERROR,
+      throw vm_service.RPCError(
         'Unable to reload sources',
+        -32603,
+        '',
       );
     }
   }
@@ -121,9 +120,10 @@ class HotRunner extends ResidentRunner {
     final OperationResult result =
       await restart(fullRestart: true, pause: pause);
     if (!result.isOk) {
-      throw rpc.RpcException(
-        rpc_error_code.INTERNAL_ERROR,
+      throw vm_service.RPCError(
         'Unable to restart',
+        -32603,
+        '',
       );
     }
   }
@@ -707,7 +707,7 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
-    } on rpc.RpcException {
+    } on vm_service.RPCError {
       restartEvent = 'exception';
       return OperationResult(1, 'hot restart failed to complete', fatal: true);
     } finally {
@@ -753,7 +753,7 @@ class HotRunner extends ResidentRunner {
           );
         },
       );
-    } on rpc.RpcException {
+    } on vm_service.RPCError {
       HotEvent('exception',
         targetPlatform: targetPlatform,
         sdkName: sdkName,
