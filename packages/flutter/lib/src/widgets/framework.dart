@@ -2887,7 +2887,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   // Custom implementation of `operator ==` optimized for the ".of" pattern
   // used with `InheritedWidgets`.
+  @nonVirtual
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) => identical(this, other);
 
   // Custom implementation of hash code optimized for the ".of" pattern used
@@ -2904,7 +2906,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   //
   //  * https://dart.dev/articles/dart-vm/numeric-computation, which
   //    explains how numbers are represented in Dart.
+  @nonVirtual
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => _cachedHash;
   final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
   static int _nextHashCode = 1;

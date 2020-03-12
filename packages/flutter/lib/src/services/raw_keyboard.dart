@@ -623,6 +623,7 @@ class RawKeyboard {
   void clearKeysPressed() => _keysPressed.clear();
 }
 
+@immutable
 class _ModifierSidePair extends Object {
   const _ModifierSidePair(this.modifier, this.side);
 

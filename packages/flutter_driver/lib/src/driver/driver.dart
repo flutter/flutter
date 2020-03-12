@@ -748,6 +748,7 @@ class CommonFinders {
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.
+@immutable
 class DriverOffset {
   /// Creates an offset.
   const DriverOffset(this.dx, this.dy);

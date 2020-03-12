@@ -29,6 +29,7 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class PopupMenuThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [PopupMenuTheme].
   const PopupMenuThemeData({
