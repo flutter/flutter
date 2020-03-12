@@ -920,7 +920,7 @@ void main() {
     expect(boxDecoration.border.bottom.width, thickness);
   });
 
-  testWidgets('DataTable column heading cell - no sort', (WidgetTester tester) async {
+  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
     Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -941,6 +941,7 @@ void main() {
       );
     }
 
+    // Start with without sorting
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(
         sortEnabled: false,
@@ -955,6 +956,7 @@ void main() {
       expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
     }
 
+    // Turn on sorting
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(
         sortEnabled: true,
@@ -968,6 +970,7 @@ void main() {
       expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsOneWidget);
     }
 
+    // Turn off sorting again
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(
         sortEnabled: false,
