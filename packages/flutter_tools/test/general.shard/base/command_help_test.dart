@@ -59,6 +59,7 @@ void _testMessageLength({
   expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.h.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.i.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.k.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.o.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.p.toString().length, lessThanOrEqualTo(expectedWidth));
   expect(commandHelp.q.toString().length, lessThanOrEqualTo(expectedWidth));

@@ -205,8 +205,9 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
-    // For real files, use a serialized file stat as a revision
-    final String etag = file.lastModifiedSync().toIso8601String();
+    // For real files, use a serialized file stat plus path as a revision.
+    // This allows us to update between canvaskit and non-canvaskit SDKs.
+    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
     if (ifNoneMatch == etag) {
       return shelf.Response.notModified();
     }
@@ -291,11 +292,22 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
+  /// Whether to use the cavaskit SDK for rendering.
+  bool canvasKitRendering = false;
+
   @visibleForTesting
   final File dartSdk = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
     'kernel',
     'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
     'dart_sdk.js',
   ));
 
@@ -307,14 +319,26 @@ class WebAssetServer implements AssetReader {
     'dart_sdk.js.map',
   ));
 
+  @visibleForTesting
+  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
+    'dart_sdk.js.map',
+  ));
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case '/dart_sdk.js':
-        return dartSdk;
-      case '.dart_sdk.js.map':
-        return dartSdkSourcemap;
+        return canvasKitRendering
+          ? canvasKitDartSdk
+          : dartSdk;
+      case '/dart_sdk.js.map':
+        return canvasKitRendering
+          ? canvasKitDartSdkSourcemap
+          : dartSdkSourcemap;
     }
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
@@ -405,7 +429,6 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final bool testMode;
 
-  @visibleForTesting
   WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
