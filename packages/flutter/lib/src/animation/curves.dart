@@ -1334,7 +1334,7 @@ class Curves {
   /// By default is the curve used to animate pages on iOS back to their original
   /// position if a swipe gesture is ended midway through a swipe.
   ///
-  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_out.mp4}
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_linear_to_slow_ease_in.mp4}
   static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
 
   /// A cubic animation curve that speeds up quickly and ends slowly.
