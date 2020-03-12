@@ -1026,7 +1026,7 @@ typedef StateSetter = void Function(VoidCallback fn);
 ///    be read by descendant widgets.
 ///  * [Widget], for an overview of widgets in general.
 @optionalTypeArgs
-abstract class State<T extends StatefulWidget> extends Diagnosticable {
+abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// The current configuration.
   ///
   /// A [State] object's configuration is the corresponding [StatefulWidget]
@@ -2054,7 +2054,7 @@ abstract class BuildContext {
 
   /// Whether the [widget] is currently updating the widget or render tree.
   ///
-  /// For [StatefullWidget]s and [StatelessWidget]s this flag is true while
+  /// For [StatefulWidget]s and [StatelessWidget]s this flag is true while
   /// their respective build methods are executing.
   /// [RenderObjectWidget]s set this to true while creating or configuring their
   /// associated [RenderObject]s.

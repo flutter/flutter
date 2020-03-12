@@ -71,6 +71,9 @@ abstract class MaterialLocalizations {
   /// The tooltip for the delete button on a [Chip].
   String get deleteButtonTooltip;
 
+  /// The tooltip for the more button on an overflowing text selection menu.
+  String get moreButtonTooltip;
+
   /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip;
 
@@ -560,6 +563,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get deleteButtonTooltip => 'Delete';
+
+  @override
+  String get moreButtonTooltip => 'More';
 
   @override
   String get nextMonthTooltip => 'Next month';

@@ -239,7 +239,7 @@ class HotRunner extends ResidentRunner {
     }
 
     for (final FlutterDevice device in flutterDevices) {
-      device.initLogReader();
+      await device.initLogReader();
     }
     try {
       final List<Uri> baseUris = await _initDevFS();
@@ -353,7 +353,7 @@ class HotRunner extends ResidentRunner {
             mainPath,
             <Uri>[],
             outputPath: dillOutputPath ??
-              getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
+              getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packagesFilePath : packagesFilePath,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );

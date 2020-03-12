@@ -527,14 +527,9 @@ public final class GeneratedPluginRegistrant {
 const String _androidPluginRegistryTemplateNewEmbedding = '''
 package io.flutter.plugins;
 
-{{#androidX}}
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
-{{/androidX}}
-{{^androidX}}
-import android.support.annotation.Keep;
-import android.support.annotation.NonNull;
-{{/androidX}}
+
 import io.flutter.embedding.engine.FlutterEngine;
 {{#needsShim}}
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
@@ -758,6 +753,7 @@ import 'package:{{name}}/{{file}}';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
+// ignore: public_member_api_docs
 void registerPlugins(PluginRegistry registry) {
 {{#plugins}}
   {{class}}.registerWith(registry.registrarFor({{class}}));

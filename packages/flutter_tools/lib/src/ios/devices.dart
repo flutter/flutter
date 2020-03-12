@@ -26,7 +26,6 @@ import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'fallback_discovery.dart';
 import 'ios_deploy.dart';
-import 'ios_workflow.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
@@ -36,7 +35,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListDevices;
+  bool get canListAnything => globals.iosWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices(globals.platform, globals.xcdevice);

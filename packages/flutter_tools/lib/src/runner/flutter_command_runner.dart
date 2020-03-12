@@ -322,6 +322,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if (topLevelResults['version'] as bool) {
           globals.flutterUsage.sendCommand('version');
+          globals.flutterVersion.fetchTagsAndUpdate();
           String status;
           if (machineFlag) {
             status = const JsonEncoder.withIndent('  ').convert(globals.flutterVersion.toJson());

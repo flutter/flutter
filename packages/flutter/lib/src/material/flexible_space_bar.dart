@@ -394,7 +394,15 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                   alignment: titleAlignment,
                   child: DefaultTextStyle(
                     style: titleStyle,
-                    child: title,
+                    child: LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        return Container(
+                          width: constraints.maxWidth / scaleValue,
+                          alignment: titleAlignment,
+                          child: title,
+                        );
+                      }
+                    ),
                   ),
                 ),
               ),

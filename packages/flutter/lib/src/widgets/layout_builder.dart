@@ -202,8 +202,9 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    LayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
+    @required LayoutWidgetBuilder builder,
+  }) : assert(builder != null),
+       super(key: key, builder: builder);
 
   @override
   LayoutWidgetBuilder get builder => super.builder;

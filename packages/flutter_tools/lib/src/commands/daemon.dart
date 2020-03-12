@@ -35,9 +35,7 @@ const String protocolVersion = '0.5.3';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false }) {
-    usesDartDefines();
-  }
+  DaemonCommand({ this.hidden = false });
 
   @override
   final String name = 'daemon';
@@ -62,7 +60,6 @@ class DaemonCommand extends FlutterCommand {
         final Daemon daemon = Daemon(
           stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: notifyingLogger,
-          dartDefines: dartDefines,
         );
 
         final int code = await daemon.onExit;
@@ -88,15 +85,7 @@ class Daemon {
     this.sendCommand, {
     this.notifyingLogger,
     this.logToStdout = false,
-    @required this.dartDefines,
   }) {
-    if (dartDefines == null) {
-      throw Exception(
-        'dartDefines must not be null. This is a bug in Flutter.\n'
-        'Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
-      );
-    }
-
     // Set up domains.
     _registerDomain(daemonDomain = DaemonDomain(this));
     _registerDomain(appDomain = AppDomain(this));
@@ -125,7 +114,6 @@ class Daemon {
   final DispatchCommand sendCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
-  final List<String> dartDefines;
 
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -471,7 +459,7 @@ class AppDomain extends Domain {
     String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
+      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
     }
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
@@ -481,11 +469,9 @@ class AppDomain extends Domain {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       flutterProject: flutterProject,
-      trackWidgetCreation: trackWidgetCreation,
       viewFilter: isolateFilter,
       target: target,
-      buildMode: options.buildInfo.mode,
-      dartDefines: daemon.dartDefines,
+      buildInfo: options.buildInfo,
     );
 
     ResidentRunner runner;
@@ -498,7 +484,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
-        dartDefines: daemon.dartDefines,
         urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
       );
     } else if (enableHotReload) {

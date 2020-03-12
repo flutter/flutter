@@ -10,9 +10,9 @@ import '../../project.dart';
 import '../../reporting/reporting.dart';
 import 'ios_migrator.dart';
 
-/// Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
-/// This caused issues switching between a real device and simulator due to architecture mismatch.
-/// Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
+// Xcode 11.4 requires linked and embedded frameworks to contain all targeted architectures before build phases are run.
+// This caused issues switching between a real device and simulator due to architecture mismatch.
+// Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
 class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
     IosProject project,
@@ -28,13 +28,8 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
   final Xcode _xcode;
   final Usage _usage;
 
-  /// Inspect [project] for necessary migrations and rewrite files as needed.
   @override
   bool migrate() {
-    return _migrateXcodeProjectInfoFile();
-  }
-
-  bool _migrateXcodeProjectInfoFile() {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace('Xcode project not found, skipping migration');
       return true;

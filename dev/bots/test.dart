@@ -71,6 +71,7 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/animated_icons_private_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/dialog_test.dart',

@@ -52,5 +52,6 @@
   "remainingTextFieldCharacterCountZero": "Hapana herufi zilizo baki",
   "remainingTextFieldCharacterCountOne": "Imesalia herufi 1",
   "remainingTextFieldCharacterCountOther": "Zimesalia herufi $remainingCount",
-  "refreshIndicatorSemanticLabel": "Onyesha upya"
+  "refreshIndicatorSemanticLabel": "Onyesha upya",
+  "moreButtonTooltip": "TBD"
 }
