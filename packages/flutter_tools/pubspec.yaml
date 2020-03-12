@@ -106,9 +106,9 @@ dev_dependencies:
 dependency_overrides:
   dwds:
     git:
-      url: https://github.com/dart-lang/webdev
+      url: https://github.com/dart-lang/webdev.git
       path: dwds
-
+      ref: improved-require
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
