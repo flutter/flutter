@@ -75,7 +75,6 @@ class DeviceManager {
       androidSdk: globals.androidSdk,
       androidWorkflow: androidWorkflow,
       processManager: globals.processManager,
-
     ),
     IOSDevices(),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
