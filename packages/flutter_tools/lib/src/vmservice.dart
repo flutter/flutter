@@ -110,7 +110,6 @@ typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
 /// This also implements the package:vm_service API to enable a gradual migration.
 class VMService implements vm_service.VmService {
   VMService(
-    // this._peer,
     this.httpAddress,
     this.wsAddress,
     ReloadSources reloadSources,
@@ -374,16 +373,6 @@ class VMService implements vm_service.VmService {
   Stream<vm_service.Event> onEvent(String streamId) {
     return _delegateService.onEvent(streamId);
   }
-
-  // Future<Map<String, dynamic>> _sendRequest(
-  //   String method,
-  //   Map<String, dynamic> params,
-  // ) {
-  //   return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
-  //     _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
-  //     _connectionError.future,
-  //   ]);
-  // }
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
     StreamController<ServiceEvent> controller = _eventControllers[eventName];
@@ -1468,7 +1457,6 @@ class FlutterView extends ServiceObject {
           }
         }
       });
-    await Future<void>.delayed(const Duration(seconds: 1));
     await owner.vm.runInView(viewId,
                              entryUri,
                              packagesUri,
