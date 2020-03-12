@@ -93,9 +93,9 @@ class HotRunner extends ResidentRunner {
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
-
+  // The initial launch is from a snapshot.
+  bool _runningFromSnapshot = true;
   DateTime firstBuildTime;
-  bool _shouldResetAssetDirectory = true;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -520,16 +520,14 @@ class HotRunner extends ResidentRunner {
       }
     }
     // Check if the isolate is paused and resume it.
-    final List<Future<void>> operations = <Future<void>>[];
+    final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
-      final Set<Isolate> uiIsolates = <Isolate>{};
       for (final FlutterView view in device.views) {
         if (view.uiIsolate == null) {
           continue;
         }
-        uiIsolates.add(view.uiIsolate);
         // Reload the isolate.
-        operations.add(view.uiIsolate.reload().then((ServiceObject _) {
+        futures.add(view.uiIsolate.reload().then((ServiceObject _) {
           final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
           if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
             // Resume the isolate so that it can be killed by the embedder.
@@ -538,22 +536,16 @@ class HotRunner extends ResidentRunner {
           return null;
         }));
       }
-      // The engine handles killing and recreating isolates that it has spawned
-      // ("uiIsolates"). The isolates that were spawned from these uiIsolates
-      // will not be restared, and so they must be manually killed.
-      for (final Isolate isolate in device?.vmService?.vm?.isolates ?? <Isolate>[]) {
-        if (!uiIsolates.contains(isolate)) {
-          operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
-            'isolateId': isolate.id,
-          }));
-        }
-      }
     }
-    await Future.wait(operations);
+    await Future.wait(futures);
 
+    // We are now running from source.
+    _runningFromSnapshot = false;
     await _launchFromDevFS(mainPath + '.dill');
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
+    // We are now running from sources.
+    _runningFromSnapshot = false;
     _addBenchmarkData('hotRestartMillisecondsToFrame',
         restartTimer.elapsed.inMilliseconds);
 
@@ -742,8 +734,10 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool pause,
   }) async {
+    final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
+    final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
     Status status = globals.logger.startProgress(
-      'Performing hot reload...',
+      '$progressPrefix hot reload...',
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.reload',
     );
@@ -794,6 +788,13 @@ class HotRunner extends ResidentRunner {
       }
     }
 
+    // The initial launch is from a script snapshot. When we reload from source
+    // on top of a script snapshot, the first reload will be a worst case reload
+    // because all of the sources will end up being dirty (library paths will
+    // change from host path to a device path). Subsequent reloads will
+    // not be affected, so we resume reporting reload times on the second
+    // reload.
+    bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = Stopwatch()..start();
 
     if (!_isPaused()) {
@@ -804,7 +805,6 @@ class HotRunner extends ResidentRunner {
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
-    bool shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
@@ -819,11 +819,10 @@ class HotRunner extends ResidentRunner {
       );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (final FlutterDevice device in flutterDevices) {
-        if (_shouldResetAssetDirectory) {
+        if (_runningFromSnapshot) {
           // Asset directory has to be set only once when we switch from
-          // running from bundle to uploaded files.
+          // running from snapshot to running from uploaded files.
           await device.resetAssetDirectory();
-          _shouldResetAssetDirectory = false;
         }
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause,
@@ -906,6 +905,8 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(allDevices);
 
+    // We are now running from source.
+    _runningFromSnapshot = false;
     // Check if any isolates are paused.
     final List<FlutterView> reassembleViews = <FlutterView>[];
     String serviceEventKind;

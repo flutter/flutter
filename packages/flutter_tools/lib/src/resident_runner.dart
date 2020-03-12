@@ -283,8 +283,8 @@ class FlutterDevice {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
-      for (final Isolate isolate in vmService.vm.isolates)
-        isolate.reloadSources(
+      for (final FlutterView view in views)
+        view.uiIsolate.reloadSources(
           pause: pause,
           rootLibUri: deviceEntryUri,
           packagesUri: devicePackagesUri,
