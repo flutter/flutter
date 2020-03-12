@@ -78,6 +78,7 @@ export 'dart:io'
         IOSink,
         // Link              NO! Use `file_system.dart`
         // NetworkInterface  NO! Use `io.dart`
+        OSError,
         pid,
         // Platform          NO! use `platform.dart`
         Process,
