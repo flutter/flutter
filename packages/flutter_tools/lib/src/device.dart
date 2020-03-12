@@ -7,7 +7,8 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import 'android/android_device.dart';
+import 'android/android_device_discovery.dart';
+import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
@@ -69,7 +70,12 @@ class DeviceManager {
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(),
+    AndroidDevices(
+      logger: globals.logger,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: globals.processManager,
+    ),
     IOSDevices(),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
