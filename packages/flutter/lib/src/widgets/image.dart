@@ -221,8 +221,8 @@ typedef ImageLoadingBuilder = Widget Function(
   ImageChunkEvent loadingProgress,
 );
 
-/// Signature for the method that is called when loading an image results in an
-/// error.
+/// Signature used by [Image.errorBuilder] to create a replacement widget to
+/// render instead of the image.
 typedef ImageErrorWidgetBuilder = Widget Function(
   BuildContext context,
   Object error,
@@ -837,9 +837,9 @@ class Image extends StatefulWidget {
 
   /// A builder function that is called if an error occurs during image loading.
   ///
-  /// If this builder is not provided, any exceptions will be reporetd to
+  /// If this builder is not provided, any exceptions will be reported to
   /// [FlutterError.onError]. If it is provided, the caller should either handle
-  /// or rethrow the exception.
+  /// the exception by providing a replacement widget, or rethrow the exception.
   ///
   /// {@tool dartpad --template=stateless_widget_material}
   ///
@@ -857,7 +857,12 @@ class Image extends StatefulWidget {
   ///     child: Image.network(
   ///       'https://example.does.not.exist/image.jpg',
   ///       errorBuilder: (BuildContext context, Object exception, StackTrace stackTrace) {
-  ///         print('An error occurred loading "https://example.does.not.exist/image.jpg": $exception');
+  ///         // Appropriate logging or analytics, e.g.
+  ///         // myAnalytics.recordError(
+  ///         //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
+  ///         //   exception,
+  ///         //   stackTrace,
+  ///         // );
   ///         return Text('😢');
   ///       },
   ///     ),
