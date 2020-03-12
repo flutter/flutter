@@ -631,9 +631,9 @@ docker_builder:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
   # Do not add more tasks here. The behavior of failing dependencies is non-ideal for infra health.
   # See also: https://github.com/flutter/flutter/pull/49454
-  depends_on:
-    - docs-linux
-    - analyze-linux
+  # depends_on:
+  #   - docs-linux
+  #   - analyze-linux
   build_script:
     - cd "$CIRRUS_WORKING_DIR/dev/ci/docker_linux"
     - ./docker_build.sh
