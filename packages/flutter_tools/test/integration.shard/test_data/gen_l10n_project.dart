@@ -78,7 +78,7 @@ class Home extends StatelessWidget {
               String languageCode = locale.languageCode;
               String countryCode = locale.countryCode;
               String scriptCode = locale.scriptCode;
-              results.add('supportedLocales index $n: languageCode:$languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
+              results.add('supportedLocales index $n: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
               n += 1;
             }
             return Container();

@@ -77,9 +77,9 @@ void main() {
     await subscription.cancel();
     expect(stdout.toString(),
       '#l10n 0 (--- supportedLocales tests ---)\n'
-      '#l10n 1 (supportedLocales index 0: languageCode:en, countryCode: null, scriptCode: null)\n'
-      '#l10n 2 (supportedLocales index 1: languageCode:en, countryCode: CA, scriptCode: null)\n'
-      '#l10n 3 (supportedLocales index 2: languageCode:en, countryCode: GB, scriptCode: null)\n'
+      '#l10n 1 (supportedLocales index 0: languageCode: en, countryCode: null, scriptCode: null)\n'
+      '#l10n 2 (supportedLocales index 1: languageCode: en, countryCode: CA, scriptCode: null)\n'
+      '#l10n 3 (supportedLocales index 2: languageCode: en, countryCode: GB, scriptCode: null)\n'
       '#l10n 4 (--- countryCode tests ---)\n'
       '#l10n 5 (CA Hello World)\n'
       '#l10n 6 (Hello CA fallback World)\n'
