@@ -204,8 +204,8 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   @override
   @protected
   void startTrackingPointer(int pointer, [Matrix4 transform]) {
-    // If the recognizer is tracked, it can be accepted and called [onTap],
-    // which is never expected to happen if `_down` is null.
+    // The recognizer should never track any pointers when `_down` is null,
+    // because calling `_checkDown` in this state will throw exception.
     assert(_down != null);
     super.startTrackingPointer(pointer, transform);
   }
