@@ -32,8 +32,8 @@ the tests, but it would add an extra point of failure.
 
 ### My new test won't run. There's a "ClassNotFoundException".
 
-See [shell/platform/android/embedding_bundle](Updating Embedding Dependencies).
+See [Updating Embedding Dependencies](../embedding_bundle).
 
 ### My new test won't compile. It can't find one of my imports.
 
-See [shell/platform/android/embedding_bundle](Updating Embedding Dependencies).
+See [Updating Embedding Dependencies](../embedding_bundle).
