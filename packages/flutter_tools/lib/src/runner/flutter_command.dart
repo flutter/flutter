@@ -622,6 +622,7 @@ abstract class FlutterCommand extends Command<void> {
 
   void _registerSignalHandlers(String commandPath, DateTime startTime) {
     final SignalHandler handler = (io.ProcessSignal s) {
+      Cache.releaseLockEarly();
       _sendPostUsage(
         commandPath,
         const FlutterCommandResult(ExitStatus.killed),
