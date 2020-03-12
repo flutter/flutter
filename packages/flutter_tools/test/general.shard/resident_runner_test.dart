@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -356,6 +357,15 @@ void main() {
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);
@@ -690,6 +700,8 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());

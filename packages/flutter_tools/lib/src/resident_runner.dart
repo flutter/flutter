@@ -84,6 +84,8 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
+        // initialize dill to/from a shared location for faster bootstrapping.
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -107,6 +109,8 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
+        // initialize dill to/from a shared location for faster bootstrapping.
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
     }
 
@@ -637,7 +641,6 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
-  @visibleForTesting
   final Directory artifactDirectory;
   final String packagesFilePath;
   final String projectRootPath;
@@ -1009,6 +1012,8 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
+      artifactDirectory.childFile('app.dill')
+        .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
       artifactDirectory.deleteSync(recursive: true);
     }
   }
