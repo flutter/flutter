@@ -11,6 +11,24 @@ namespace flutter {
 
 static constexpr const char* kVsyncFlowName = "VsyncFlow";
 
+#if defined(OS_FUCHSIA)
+//  ________  _________  ________  ________
+// |\   ____\|\___   ___\\   __  \|\   __  \
+// \ \  \___|\|___ \  \_\ \  \|\  \ \  \|\  \
+//  \ \_____  \   \ \  \ \ \  \\\  \ \   ____\
+//   \|____|\  \   \ \  \ \ \  \\\  \ \  \___|
+//     ____\_\  \   \ \__\ \ \_______\ \__\
+//    |\_________\   \|__|  \|_______|\|__|
+//    \|_________|
+//
+// Fuchsia benchmarks depend on this trace event's name.  Please do not change
+// it without checking that the changes are compatible with Fuchsia benchmarks
+// first!
+static constexpr const char* kVsyncTraceName = "vsync callback";
+#else
+static constexpr const char* kVsyncTraceName = "VsyncProcessCallback";
+#endif
+
 VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
     : task_runners_(std::move(task_runners)) {}
 
@@ -102,7 +120,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     task_runners_.GetUITaskRunner()->PostTaskForTime(
         [callback, flow_identifier, frame_start_time, frame_target_time]() {
-          FML_TRACE_EVENT("flutter", "VsyncProcessCallback", "StartTime",
+          FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
                           frame_start_time, "TargetTime", frame_target_time);
           fml::tracing::TraceEventAsyncComplete(
               "flutter", "VsyncSchedulingOverhead", fml::TimePoint::Now(),
