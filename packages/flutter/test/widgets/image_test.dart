@@ -1783,7 +1783,7 @@ class FailingImageProvider extends ImageProvider<int> {
   const FailingImageProvider({
     this.failOnObtainKey = false,
     this.failOnLoad = false,
-    this.throws,
+    @required this.throws,
   }) : assert(failOnLoad != null),
        assert(failOnObtainKey != null),
        assert(failOnLoad == true || failOnObtainKey == true),
