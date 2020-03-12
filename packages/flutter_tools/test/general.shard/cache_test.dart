@@ -436,6 +436,24 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('verifies iproxy for usbmuxd in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+      final File iproxy = iosUsbArtifacts.location.childFile('iproxy')
+        ..createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+
+      iproxy.deleteSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('Does not verify executables for openssl in isUpToDateInner', () async {
       final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', mockCache);
       when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
