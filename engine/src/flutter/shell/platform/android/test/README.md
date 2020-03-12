@@ -32,72 +32,8 @@ the tests, but it would add an extra point of failure.
 
 ### My new test won't run. There's a "ClassNotFoundException".
 
-Your test is probably using a dependency that we haven't needed yet. You
-probably need to find the dependency you need, add it to the
-`flutter/android/robolectric_bundle` CIPD package, and then re-run `gclient
-sync`. See ["Updating a CIPD dependency"](#Updating-a-CIPD-dependency) below.
+See [shell/platform/android/embedding_bundle](Updating Embedding Dependencies).
 
 ### My new test won't compile. It can't find one of my imports.
 
-You could be using a brand new dependency. If so, you'll need to add it to the
-CIPD package for the robolectric tests. See ["Updating a CIPD
-dependency"](#Updating-a-CIPD-dependency) below.
-
-Then you'll also need to add the jar to the `robolectric_tests` build target.
-Add `//third_party/robolectric/lib/<dependency.jar>` to
-`robolectric_tests._jar_dependencies` in `/shell/platform/android/BUILD.gn`.
-
-There's also a chance that you're using a dependency that we're relying on at
-runtime, but not compile time. If so you'll just need to update
-`_jar_dependencies` in `BUILD.gn`.
-
-### Updating a CIPD dependency
-
-See the Chromium instructions on ["Updating a CIPD
-dependency"](https://chromium.googlesource.com/chromium/src/+/master/docs/cipd.md#Updating-a-CIPD-dependency)
-for how to upload a package update to CIPD. Download and extract the latest
-package from CIPD and then copy
-[shell/platform/android/test/cipd.yaml](cipd.yaml) into the extracted directory
-to use as the base for the pre-existing package. Add new dependencies to `lib/`.
-
-Once you've uploaded the new version, also make sure to tag it with the updated
-timestamp and robolectric version (most likely still 3.8, unless you've migrated
-all the packages to 4+).
-
-    $ cipd set-tag flutter/android/robolectric_bundle --version=<new_version_hash> -tag=last_updated:<timestamp>
-
-Example of a last-updated timestamp: 2019-07-29T15:27:42-0700
-
-You can generate the same date format with `date +%Y-%m-%dT%T%z`.
-
-    $ cipd set-tag flutter/android/robolectric_bundle --version=<new_version_hash> -tag=robolectric_version:<robolectric_version>
-
-You can run `cipd describe flutter/android/robolectric_bundle
---version=<new_version_hash>` to verify. You should see:
-
-```
-Package:       flutter/android/robolectric_bundle
-Instance ID:   <new_version_hash>
-...
-Tags:
- last_updated:<timestamp>
- robolectric_version:<robolectric_version>
-```
-
-Then update the `DEPS` file (located at /src/flutter/DEPS) to use the new version by pointing to
-your new `last_updated_at` tag.
-
-```
-  'src/third_party/robolectric': {
-     'packages': [
-       {
-        'package': 'flutter/android/robolectric_bundle',
-        'version': 'last_updated:<timestamp>'
-       }
-     ],
-     'condition': 'download_android_deps',
-     'dep_type': 'cipd',
-   },
-```
-
-You can now re-run `gclient sync` to fetch the latest package version.
+See [shell/platform/android/embedding_bundle](Updating Embedding Dependencies).
