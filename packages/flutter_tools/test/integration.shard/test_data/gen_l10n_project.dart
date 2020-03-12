@@ -19,6 +19,8 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_TW.arb'), appZhHans);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhTw);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_TW_Hant.arb'), appZhTwHant);
     return super.setUpIn(dir);
   }
@@ -84,6 +86,18 @@ class Home extends StatelessWidget {
         ),
         LocaleBuilder(
           locale: Locale('zh'),
+          callback: (BuildContext context) {
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('zh', 'TW'),
+          callback: (BuildContext context) {
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
           callback: (BuildContext context) {
             results.add(AppLocalizations.of(context).helloWorld);
           },
@@ -336,7 +350,7 @@ void main() {
   final String appZh = r'''
 {
   "@@locale": "zh",
-  "helloWorld": "中国你好世界",
+  "helloWorld": "你好世界",
   "hello": "Hello {world}",
   "greeting": "{hello} {world}",
   "helloWorldOn": "Hello World on {date}",
@@ -355,10 +369,24 @@ void main() {
 }
 ''';
 
+  final String appZhHans = r'''
+{
+  "@@locale": "zh_Hans",
+  "helloWorld": "簡體你好世界"
+}
+  ''';
+
+  final String appZhTw = r'''
+{
+  "@@locale": "zh_TW",
+  "helloWorld": "台灣你好世界"
+}
+  ''';
+
   final String appZhTwHant = r'''
 {
   "@@locale": "zh_TW_Hant",
-  "helloWorld": "台灣你好世界"
+  "helloWorld": "繁體你好世界"
 }
 ''';
 }
