@@ -24,8 +24,11 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:test_api/src/backend/metadata.dart';
+import 'package:test_api/src/backend/group.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
+import 'package:test_api/src/backend/test.dart';
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -465,6 +468,69 @@ class OneOffHandler {
     }
     return handler(request.change(path: path));
   }
+}
+
+class FlutterWebRunnerSuite implements RunnerSuite {
+  @override
+  StreamChannel channel(String name) {
+    // TODO: implement channel
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future close() {
+    // TODO: implement close
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement config
+  SuiteConfiguration get config => throw UnimplementedError();
+
+  @override
+  // TODO: implement environment
+  Environment get environment => throw UnimplementedError();
+
+  @override
+  RunnerSuite filter(bool Function(Test) callback) {
+    // TODO: implement filter
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Map<String, >> gatherCoverage() {
+    // TODO: implement gatherCoverage
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement group
+  Group get group => throw UnimplementedError();
+
+  @override
+  // TODO: implement isDebugging
+  bool get isDebugging => throw UnimplementedError();
+
+  @override
+  // TODO: implement isLoadSuite
+  bool get isLoadSuite => throw UnimplementedError();
+
+  @override
+  // TODO: implement metadata
+  Metadata get metadata => throw UnimplementedError();
+
+  @override
+  // TODO: implement onDebugging
+  Stream<bool> get onDebugging => throw UnimplementedError();
+
+  @override
+  // TODO: implement path
+  String get path => throw UnimplementedError();
+
+  @override
+  // TODO: implement platform
+  SuitePlatform get platform => throw UnimplementedError();
+
 }
 
 class PathHandler {
