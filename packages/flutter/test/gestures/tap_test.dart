@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
@@ -903,5 +903,39 @@ void main() {
       GestureBinding.instance.gestureArena.sweep(down5.pointer);
       expect(recognized, <String>['secondaryCancel']);
     });
+  });
+
+  testGesture('A second tap after rejection is ignored', (GestureTester tester) {
+    bool didTap = false;
+
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTap = () {
+        didTap = true;
+      };
+    // Add drag recognizer for competition
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) {};
+
+    final TestPointer pointer1 = TestPointer(1);
+
+    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    drag.addPointer(down);
+    tap.addPointer(down);
+
+    tester.closeArena(1);
+
+    // One-finger moves, canceling the tap
+    tester.route(down);
+    tester.route(pointer1.move(const Offset(50.0, 0)));
+
+    // Add another finger
+    final TestPointer pointer2 = TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
+    drag.addPointer(down2);
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+
+    expect(didTap, isFalse);
   });
 }
