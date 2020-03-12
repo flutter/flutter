@@ -499,7 +499,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        await _vmService.callMethod('hotRestart');
+        try {
+          await _vmService.callMethod('hotRestart');
+        } catch (err) {
+          return OperationResult(1, 'Failed to recompile application.');
+        }
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
@@ -668,8 +672,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await restart(benchmarkMode: false, pause: pause, fullRestart: false);
         return <String, Object>{'type': 'Success'};
       });
-      // Note: can't register our own hot restart hook. Would be fixed by moving
-      // to DWDS digests.
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.

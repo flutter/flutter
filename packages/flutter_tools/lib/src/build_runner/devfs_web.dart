@@ -125,6 +125,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
@@ -192,8 +193,6 @@ class WebAssetServer implements AssetReader {
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
-    print('looking for $requestPath');
-    print(_files.keys.toList());
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = getFile(requestPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
@@ -308,12 +307,9 @@ class WebAssetServer implements AssetReader {
         codeStart,
         codeEnd - codeStart,
       );
-      String fileName = filePath.startsWith('/')
+      final String fileName = filePath.startsWith('/')
         ? filePath.substring(1)
         : filePath;
-      if (fileName == 'web_entrypoint.dart.lib.js')  {
-        fileName = 'packages/web_entrypoint.dart.lib.js';
-      }
       _files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
@@ -357,7 +353,7 @@ class WebAssetServer implements AssetReader {
     switch (path) {
       case 'dart_sdk.js':
         return dartSdk;
-      case '.dart_sdk.js.map':
+      case 'dart_sdk.js.map':
         return dartSdkSourcemap;
     }
     // If this is a dart file, it must be on the local file system and is
@@ -573,7 +569,7 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
         generateMainModule(
-          entrypoint: 'packages/$entrypoint',
+          entrypoint: entrypoint,
         ),
       );
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to

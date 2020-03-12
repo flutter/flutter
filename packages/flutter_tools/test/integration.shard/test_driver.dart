@@ -433,6 +433,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool chrome = false,
     File pidFile,
   }) async {
     await _setupProcess(
@@ -441,7 +442,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         '--disable-service-auth-codes',
         '--machine',
         '-d',
-        'flutter-tester',
+        if (chrome)
+          ...<String>['chrome', '--web-run-headless']
+        else
+          'flutter-tester',
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
