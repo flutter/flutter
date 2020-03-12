@@ -1012,8 +1012,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
-      artifactDirectory.childFile('app.dill')
-        .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      final File outputDill = artifactDirectory.childFile('app.dill');
+      if (outputDill.existsSync()) {
+        artifactDirectory.childFile('app.dill')
+          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }

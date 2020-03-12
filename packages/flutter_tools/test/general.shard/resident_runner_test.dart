@@ -366,6 +366,13 @@ void main() {
     expect(cacheDill.readAsStringSync(), 'hello');
   }));
 
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);
