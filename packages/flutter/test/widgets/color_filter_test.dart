@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       const RepaintBoundary(
         child: ColorFiltered(
-          colorFilter: ColorFilter.mode(Colors.blue, BlendMode.color),
+          colorFilter: ColorFilter.mode(Colors.red, BlendMode.color),
           child: Placeholder(),
         ),
       ),
