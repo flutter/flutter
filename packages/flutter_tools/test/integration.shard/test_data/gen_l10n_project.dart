@@ -66,6 +66,29 @@ class Home extends StatelessWidget {
     final List<String> results = [];
     return Row(
       children: <Widget>[
+        Builder(
+          builder: (BuildContext context) {
+            results.add('--- supportedLocales tests ---');
+          },
+        ),
+        Builder(
+          builder: (BuildContext context) {
+            int n = 0;
+            for (Locale locale in AppLocalizations.supportedLocales) {
+              String languageCode = locale.languageCode;
+              String countryCode = locale.countryCode;
+              String scriptCode = locale.scriptCode;
+              results.add('supportedLocales index $n: languageCode:$languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
+              n += 1;
+            }
+            return Container();
+          },
+        ),
+        Builder(
+          builder: (BuildContext context) {
+            results.add('--- countryCode tests ---');
+          },
+        ),
         LocaleBuilder(
           locale: Locale('en', 'CA'),
           callback: (BuildContext context) {
@@ -80,45 +103,50 @@ class Home extends StatelessWidget {
             results.add(AppLocalizations.of(context).hello("GB fallback World"));
           },
         ),
+        Builder(
+          builder: (BuildContext context) {
+            results.add('--- General formatting tests ---');
+          },
+        ),
         LocaleBuilder(
           locale: Locale('en'),
           callback: (BuildContext context) {
+            final AppLocalizations localizations = AppLocalizations.of(context);
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.hello("World")}',
+              '${localizations.greeting("Hello", "World")}',
+              '${localizations.helloWorldOn(DateTime(1960))}',
+              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
+              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
+              '${localizations.helloFor(123)}',
+              '${localizations.helloCost("price", 123)}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+              '${localizations.helloAdjectiveWorlds(0, "new")}',
+              '${localizations.helloAdjectiveWorlds(1, "new")}',
+              '${localizations.helloAdjectiveWorlds(2, "new")}',
+              '${localizations.helloWorldsOn(0, DateTime(1960))}',
+              '${localizations.helloWorldsOn(1, DateTime(1960))}',
+              '${localizations.helloWorldsOn(2, DateTime(1960))}',
+              '${localizations.helloWorldPopulation(0, 100)}',
+              '${localizations.helloWorldPopulation(1, 101)}',
+              '${localizations.helloWorldPopulation(2, 102)}',
+              '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.singleQuote}',
+              '${localizations.doubleQuote}',
+            ]);
+          },
+        ),
+        Builder(
+          builder: (BuildContext context) {
             int n = 0;
-            try {
-              final AppLocalizations localizations = AppLocalizations.of(context);
-              results.addAll(<String>[
-                '${localizations.helloWorld}',
-                '${localizations.hello("World")}',
-                '${localizations.greeting("Hello", "World")}',
-                '${localizations.helloWorldOn(DateTime(1960))}',
-                '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
-                '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
-                '${localizations.helloFor(123)}',
-                '${localizations.helloCost("price", 123)}',
-                '${localizations.helloWorlds(0)}',
-                '${localizations.helloWorlds(1)}',
-                '${localizations.helloWorlds(2)}',
-                '${localizations.helloAdjectiveWorlds(0, "new")}',
-                '${localizations.helloAdjectiveWorlds(1, "new")}',
-                '${localizations.helloAdjectiveWorlds(2, "new")}',
-                '${localizations.helloWorldsOn(0, DateTime(1960))}',
-                '${localizations.helloWorldsOn(1, DateTime(1960))}',
-                '${localizations.helloWorldsOn(2, DateTime(1960))}',
-                '${localizations.helloWorldPopulation(0, 100)}',
-                '${localizations.helloWorldPopulation(1, 101)}',
-                '${localizations.helloWorldPopulation(2, 102)}',
-                '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
-                '${localizations.singleQuote}',
-                '${localizations.doubleQuote}',
-              ]);
-              for (final String result in results) {
-                print('#l10n $n ($result)\n');
-                n += 1;
-              }
+            for (final String result in results) {
+              print('#l10n $n ($result)');
+              n += 1;
             }
-            finally {
-              print('#l10n END\n');
-            }
+            print('#l10n END');
           },
         ),
       ],
