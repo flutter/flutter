@@ -232,13 +232,16 @@ class VMService implements vm_service.VmService {
         final String libraryUri = params['libraryUri'] as String;
         final String klass = params['klass'] as String;
         final bool isStatic = params['isStatic'] as bool ?? false;
-
         try {
           final String kernelBytesBase64 = await compileExpression(isolateId,
               expression, definitions, typeDefinitions, libraryUri, klass,
               isStatic);
-          return <String, dynamic>{'type': 'Success',
-            'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
+          return <String, dynamic>{
+            'type': 'Success',
+            'result': <String, dynamic>{
+              'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
+            },
+          };
         } on rpc.RpcException {
           rethrow;
         } on Exception catch (e, st) {
