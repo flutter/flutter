@@ -215,6 +215,7 @@ class BuildDaemonCreator {
     }
 
     if (!globals.fs.isFileSync(snapshot)) {
+      globals.printTrace('Generating build_script.dart snapshot');
       // If we're missing the .packages file, perform a pub get.
       if (!globals.fs.isFileSync(buildScriptPackages)) {
         await pub.get(
@@ -232,6 +233,10 @@ class BuildDaemonCreator {
       if (snapshotResult.exitCode != 0) {
         throw ToolExit('Failed to generate snapshot for $buildScript.\n${snapshotResult.stdout ?? ''}\n${snapshotResult.stderr ?? ''}');
       }
+      if (!globals.fs.isFileSync(snapshot)) {
+        throw ToolExit('Failed to generate snapshot for $buildScript.\nSnapshot file is missing.');
+      }
+      globals.printTrace('Generated build_script.dart snapshot');
     }
     final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 
@@ -241,7 +246,7 @@ class BuildDaemonCreator {
     final List<String> args = <String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       '--packages=$buildScriptPackages',
-      buildScript,
+      snapshot,
       'daemon',
       '--skip-build-script-check',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
