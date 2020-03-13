@@ -357,6 +357,15 @@ void main() {
     webDevFS.webAssetServer.dartSdk
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
+    webDevFS.webAssetServer.dartSdkSourcemap
+      ..createSync(recursive: true)
+      ..writeAsStringSync('THERE');
+    webDevFS.webAssetServer.canvasKitDartSdk
+      ..createSync(recursive: true)
+      ..writeAsStringSync('OL');
+    webDevFS.webAssetServer.canvasKitDartSdkSourcemap
+      ..createSync(recursive: true)
+      ..writeAsStringSync('CHUM');
     webDevFS.webAssetServer.dartSdkSourcemap.createSync(recursive: true);
 
     await webDevFS.update(
@@ -373,12 +382,18 @@ void main() {
     expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
     expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
     expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'HELLO');
+    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
     webDevFS.webAssetServer.dartSdk.writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
     expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'BELLOW');
+
+    // Toggle CanvasKit
+    webDevFS.webAssetServer.canvasKitRendering = true;
+    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'OL');
+    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js.map'), 'CHUM');
 
     await webDevFS.destroy();
   }));
