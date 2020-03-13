@@ -193,13 +193,13 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateBaseClassFile({
+String generateBaseClassFile(
   String className,
   String fileName,
   String header,
   AppResourceBundle bundle,
   Iterable<Message> messages,
-}) {
+) {
   final LocaleInfo locale = bundle.locale;
   final Iterable<String> methods = messages
     .where((Message message) => bundle.translationFor(message) != null)
@@ -546,12 +546,18 @@ class LocalizationsGenerator {
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
   // and all AppLocalizations subclasses for every locale.
   String generateCode() {
+    bool isBaseClassLocale(LocaleInfo locale, String language) {
+      return locale.languageCode == language
+          && locale.countryCode == null
+          && locale.scriptCode == null;
+    }
+
     List<LocaleInfo> getLocalesForLanguage(String language) {
       return _allBundles.bundles
         // Return locales for the language specified, except for the base locale itself
         .where((AppResourceBundle bundle) {
-          return bundle.locale.languageCode == language
-              && bundle.locale.toString() != language;
+          final LocaleInfo locale = bundle.locale;
+          return !isBaseClassLocale(locale, language) && locale.languageCode == language;
         })
         .map((AppResourceBundle bundle) => bundle.locale).toList();
     }
@@ -572,44 +578,42 @@ class LocalizationsGenerator {
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      // LocaleInfo.toString should equal LocaleInfo.languageCode if it is
-      // the base class.
-      if (locale.toString() == locale.languageCode) {
+      if (isBaseClassLocale(locale, locale.languageCode)) {
         final File localeMessageFile = _fs.file(
           path.join(l10nDirectory.path, '${fileName}_$locale.dart'),
         );
 
-        // Generate the template for the base class.
-        final String localeMessageClass = generateBaseClassFile(
-          className: className,
-          fileName: outputFileName,
-          header: header,
-          bundle: _allBundles.bundleFor(locale),
-          messages: _allMessages,
+        // Generate the template for the base class file. Further string
+        // interpolation will be done to determine if there are
+        // subclasses that extend the base class.
+        final String languageBaseClassFile = generateBaseClassFile(
+          className,
+          outputFileName,
+          header,
+          _allBundles.bundleFor(locale),
+          _allMessages,
         );
 
         // Every locale for the language except the base class.
         final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
-        String subclassStrings = '';
-        for (final LocaleInfo locale in localesForLanguage) {
-          subclassStrings += generateSubclass(
+
+        // Generate every subclass that is needed for the particular language
+        final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
+          return generateSubclass(
             className: className,
             bundle: _allBundles.bundleFor(locale),
             messages: _allMessages,
           );
-        }
+        });
 
         localeMessageFile.writeAsStringSync(
-          localeMessageClass.replaceAll('@(subclasses)', subclassStrings),
+          languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join()),
         );
       }
     }
 
     final Iterable<String> localeImports = supportedLocales
-      .where((LocaleInfo locale) {
-        // Return locales with only language code specified.
-        return locale.toString() == locale.languageCode;
-      })
+      .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
       .map((LocaleInfo locale) {
         return "import '${fileName}_${locale.toString()}.dart';";
       });

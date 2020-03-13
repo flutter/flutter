@@ -191,7 +191,7 @@ const String subclassTemplate = '''
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseLanguageClassName) {
-  @(class)([String locale = '@(localeName)']) : super(locale);
+  @(class)(): super('@(localeName)');
 
 @(methods)
 }
