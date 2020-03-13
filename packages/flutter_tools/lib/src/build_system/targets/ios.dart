@@ -19,75 +19,6 @@ import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
 
-/// Copy the Flutter.framework and podspec from the engine cache.
-class UnpackIOSEngine extends Target {
-  const UnpackIOSEngine();
-
-  @override
-  List<String> get depfiles => <String>['ios_engine.d'];
-
-  @override
-  List<Target> get dependencies => const <Target>[];
-
-  @override
-  List<Source> get inputs => const <Source>[];
-
-  @override
-  String get name => 'unpack_ios_engine';
-
-  @override
-  List<Source> get outputs => <Source>[];
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'aot_assembly');
-    }
-    final FlutterProject flutterProject = FlutterProject.current();
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String iosFramework = globals.artifacts
-      .getArtifactPath(Artifact.flutterFramework, mode: buildMode, platform: TargetPlatform.ios);
-    final String iosPodfile = globals.fs.directory(iosFramework)
-      .parent.childFile('Flutter.podspec').path;
-    final List<File> inputs = globals.fs.directory(iosFramework)
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList()..add(globals.fs.file(iosPodfile));
-    Directory outputDirectory = environment.outputDir;
-    if (flutterProject.isModule) {
-      outputDirectory = environment.outputDir.childDirectory('engine')
-        ..createSync(recursive: true);
-    }
-
-    await globals.processManager.run(<String>[
-      'cp',
-      '-r',
-      '--',
-      iosFramework,
-      outputDirectory.path,
-    ]);
-    await globals.processManager.run(<String>[
-      'cp',
-      '-r',
-      '--',
-      iosPodfile,
-      outputDirectory.path,
-    ]);
-    final List<File> outputs = outputDirectory
-      .listSync(recursive: true)
-      .whereType<File>()
-      .toList();
-    final DepfileService depfileService = DepfileService(
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      platform: globals.platform,
-    );
-    final Depfile depfile = Depfile(inputs, outputs);
-    depfileService.writeToFile(depfile,
-      environment.buildDir.childFile('ios_engine.d'));
-  }
-}
-
 /// Supports compiling a dart kernel file to an assembly file.
 ///
 /// If more than one iOS arch is provided, then this rule will
@@ -303,7 +234,6 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
-    UnpackIOSEngine(),
   ];
 
   @override
