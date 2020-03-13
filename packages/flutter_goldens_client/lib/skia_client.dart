@@ -370,9 +370,6 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final String resultStdout = result.stdout.toString();
       if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
-        // TODO(Piinks): Remove throw for pixel comparison once
-        // https://github.com/flutter/cocoon/pull/651 is validated, and return
-        // true below.
         final List<String> failureLinks = await workDirectory.childFile('failures.json').readAsLines();
 
         final StringBuffer buf = StringBuffer()
@@ -647,6 +644,8 @@ class SkiaGoldClient {
     return false;
   }
 
+  /// Returns a list of arguments for initializing a tryjob based on the testing
+  /// environment.
   List<String> getCIArguments() {
     String pullRequest;
     String jobId;
