@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
@@ -69,7 +68,7 @@ class WebAssetServer implements AssetReader {
       final String name = moduleName.replaceAll('.lib.js', '');
       final String path = moduleName.replaceAll('.js', '');
       _modules[name] = path;
-      _digests[name] = Random().nextInt(123).toString();
+      _digests[name] = _files[moduleName].hashCode.toString();
     }
   }
 
@@ -227,7 +226,7 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('assets/', ''));
       file = globals.fs.file(potential);
     }
 
