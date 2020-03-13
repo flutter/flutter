@@ -622,13 +622,16 @@ void main() {
     const Key buttonKey = Key('test');
     const Key labelKey = Key('label');
     await tester.pumpWidget(
+      // When textDirection is set to TextDirection.ltr, the label appears on the
+      // right side of the icon. This is important in determining whether the
+      // horizontal padding is applied correctly later on
       Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: RaisedButton.icon(
               icon: const Icon(Icons.add),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16,5,10,12),
               key: buttonKey,
               onPressed: () {},
               label: const Text(
@@ -645,16 +648,14 @@ void main() {
     final Rect labelRect = tester.getRect(find.byKey(labelKey));
     final Rect iconRect = tester.getRect(find.byType(Icon));
 
-    // Check the position of Text and Icon
-    expect(paddingRect.right, labelRect.right + 16);
+    // The right padding should be applied on the right of the label, whereas the
+    // left padding should be applied on the left side of the icon.
+    expect(paddingRect.right, labelRect.right + 10);
     expect(paddingRect.left, iconRect.left - 16);
-    // Check which is the taller widget from Icon and Text and use that
-    // to check the top and bottom edges
-    final Rect tallerWidget =
-    iconRect.height > labelRect.height ? iconRect : labelRect;
-    expect(paddingRect.top, tallerWidget.top - 16);
-    expect(paddingRect.bottom, tallerWidget.bottom + 16);
-
+    // Use the taller widget to check the top and bottom padding.
+    final Rect tallerWidget = iconRect.height > labelRect.height ? iconRect : labelRect;
+    expect(paddingRect.top, tallerWidget.top - 5);
+    expect(paddingRect.bottom, tallerWidget.bottom + 12);
   });
 }
 
