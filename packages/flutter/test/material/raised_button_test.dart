@@ -631,7 +631,7 @@ void main() {
           child: Center(
             child: RaisedButton.icon(
               icon: const Icon(Icons.add),
-              padding: const EdgeInsets.fromLTRB(16,5,10,12),
+              padding: const EdgeInsets.fromLTRB(16, 5, 10, 12),
               key: buttonKey,
               onPressed: () {},
               label: const Text(
