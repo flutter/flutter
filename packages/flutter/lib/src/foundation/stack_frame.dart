@@ -102,11 +102,21 @@ class StackFrame {
     }
   }
 
+  static final RegExp _packageMatcher = RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$');
+  static final RegExp _lineMatcher = RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
+  static final RegExp _sdkMatcher = RegExp(r'^(dart-sdk.+) (\d+):(\d+)\s+(.+)$');
+
   static StackFrame _parseWebDebugFrame(String line) {
     final bool hasPackage = line.startsWith('package');
-    final RegExp parser = hasPackage
-        ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
-        : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
+    final bool isDartSdk = line.startsWith('dart-sdk');
+    RegExp parser;
+    if (hasPackage) {
+      parser = _packageMatcher;
+    } else if (isDartSdk) {
+      parser = _sdkMatcher;
+    } else {
+      parser = _lineMatcher;
+    }
     final Match match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
 
@@ -120,6 +130,12 @@ class StackFrame {
       packagePath = packageUri.path.replaceFirst(
         packageUri.pathSegments[0] + '/' +
         packageUri.pathSegments[1] + '/', '');
+    } else if (isDartSdk) {
+      packageScheme = 'org-dartlang';
+      final Uri packageUri = Uri.parse(match.group(1));
+      package = packageUri.pathSegments[0];
+      packagePath = packageUri.path.replaceFirst(
+        packageUri.pathSegments[0] + '/', '');
     }
 
     return StackFrame(
