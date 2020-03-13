@@ -498,7 +498,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
+        // Hot restart has not completed until the new isolate has spawned.
+        // wait for this to avoid returning too early.
+        final Future<void> onIsolate = _vmService.onIsolateEvent.firstWhere((vmservice.Event event) {
+          return event.kind == vmservice.EventKind.kIsolateStart;
+        });
         await _vmService.callMethod('hotRestart');
+        await onIsolate;
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
@@ -646,13 +652,19 @@ class _ResidentWebRunner extends ResidentWebRunner {
       // Cleanup old subscriptions. These will throw if there isn't anything
       // listening, which is fine because that is what we want to ensure.
       try {
-        await _vmService.streamCancel('Stdout');
+        await _vmService.streamCancel(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen('Stdout');
+        await _vmService.streamListen(vmservice.EventStreams.kStdout);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
+      }
+      try {
+        await _vmService.streamListen(vmservice.EventStreams.kIsolate);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
