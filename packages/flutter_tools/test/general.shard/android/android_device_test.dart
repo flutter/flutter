@@ -163,6 +163,64 @@ void main() {
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => mockProcessManager,
       });
+
+      final Map<String, TargetPlatform> targetPlatformMap = {
+        'android_arm': TargetPlatform.android_arm,
+        'android_arm64': TargetPlatform.android_arm64,
+        'android_x64': TargetPlatform.android_x64,
+        'android_x86': TargetPlatform.android_x86,
+        'null': null,
+      };
+      targetPlatformMap.forEach((k, v) {
+        final TargetPlatform targetPlatform = v;
+        testUsingContext('set targetPlatform $k', () async {
+          const String deviceId = '1234';
+          final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+
+          final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+          globals.config.setValue('android-sdk', sdkDir.path);
+          final File adbExe = globals.fs.file(getAdbPath(androidSdk));
+
+          when(mockAndroidSdk.licensesAvailable).thenReturn(true);
+          when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
+
+          when(mockProcessManager.run(
+            <String>[adbExe.path, '-s', deviceId, 'shell', 'getprop'],
+            stdoutEncoding: latin1,
+            stderrEncoding: latin1,
+          )).thenAnswer((_) async {
+            return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
+          });
+          when(mockProcessManager.run(
+              any,
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')
+          )).thenAnswer((_) async {
+            return ProcessResult(0, 0, '', '');
+          });
+          when(mockProcessManager.start(
+              any,
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')
+          )).thenAnswer((_) async {
+            return FakeProcess();
+          });
+
+          final LaunchResult launchResult = await device.startApp(
+            mockApk,
+            prebuiltApplication: true,
+            debuggingOptions: DebuggingOptions.disabled(
+               BuildInfo(BuildMode.debug, null, targetPlatform: targetPlatform, treeShakeIcons: false),
+            ),
+            platformArgs: <String, dynamic>{},
+          );
+          expect(launchResult.started, true);
+        }, overrides: <Type, Generator>{
+          AndroidSdk: () => mockAndroidSdk,
+          FileSystem: () => MemoryFileSystem(),
+          ProcessManager: () => mockProcessManager,
+        });
+      });
     });
   });
 
