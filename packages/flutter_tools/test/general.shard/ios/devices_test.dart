@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -38,28 +37,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-class MockIOSApp extends Mock implements IOSApp {}
-class MockApplicationPackage extends Mock implements ApplicationPackage {}
-class MockArtifacts extends Mock implements Artifacts {}
-class MockCache extends Mock implements Cache {}
-class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
-class MockDirectory extends Mock implements Directory {}
-class MockFile extends Mock implements File {}
-class MockFileSystem extends Mock implements FileSystem {}
-class MockForwardedPort extends Mock implements ForwardedPort {}
-class MockIMobileDevice extends Mock implements IMobileDevice {}
-class MockIOSDeploy extends Mock implements IOSDeploy {}
-class MockLogger extends Mock implements Logger {}
-class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
-class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
-class MockPlatform extends Mock implements Platform {}
-class MockPortForwarder extends Mock implements DevicePortForwarder {}
-// src/mocks.dart imports `MockProcessManager` which implements some methods, this is a full mock
-class FullMockProcessManager extends Mock implements ProcessManager {}
-class MockUsage extends Mock implements Usage {}
-class MockXcdevice extends Mock implements XCDevice {}
-class MockXcode extends Mock implements Xcode {}
-
 void main() {
   final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   macPlatform.operatingSystem = 'macos';
@@ -72,7 +49,7 @@ void main() {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     Artifacts mockArtifacts;
     MockCache mockCache;
-    MockLogger mockLogger;
+    Logger logger;
     IOSDeploy iosDeploy;
     FileSystem mockFileSystem;
 
@@ -82,11 +59,11 @@ void main() {
       const MapEntry<String, String> dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
       when(mockCache.dyLdLibEntry).thenReturn(dyLdLibEntry);
       mockFileSystem = MockFileSystem();
-      mockLogger = MockLogger();
+      logger = BufferLogger.test();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
-        logger: mockLogger,
+        logger: logger,
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
@@ -189,7 +166,7 @@ void main() {
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
           cache: mockCache,
-          logger: mockLogger,
+          logger: logger,
           platform: macPlatform,
           processManager: mockProcessManager,
         );
@@ -264,7 +241,7 @@ void main() {
       ForwardedPort forwardedPort;
       Artifacts mockArtifacts;
       MockCache mockCache;
-      MockLogger mockLogger;
+      Logger logger;
       IOSDeploy iosDeploy;
       FileSystem mockFileSystem;
 
@@ -300,7 +277,7 @@ void main() {
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
           cache: mockCache,
-          logger: mockLogger,
+          logger: logger,
           platform: macPlatform,
           processManager: FakeProcessManager.any(),
         );
@@ -979,7 +956,7 @@ void main() {
       MockArtifacts mockArtifacts;
       MockCache mockCache;
       MockFileSystem mockFileSystem;
-      MockLogger mockLogger;
+      Logger logger;
       MockPlatform mockPlatform;
       FullMockProcessManager mockProcessManager;
       const String iosDeployPath = '/path/to/ios-deploy';
@@ -1003,7 +980,7 @@ void main() {
 
         mockArtifacts = MockArtifacts();
         mockCache = MockCache();
-        mockLogger = MockLogger();
+        logger = BufferLogger.test();
         mockPlatform = MockPlatform();
         when(mockPlatform.environment).thenReturn(<String, String>{});
         when(mockPlatform.isMacOS).thenReturn(true);
@@ -1017,7 +994,7 @@ void main() {
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
           cache: mockCache,
-          logger: mockLogger,
+          logger: logger,
           platform: mockPlatform,
           processManager: mockProcessManager,
         );
@@ -1102,7 +1079,7 @@ void main() {
     MockArtifacts mockArtifacts;
     MockCache mockCache;
     MockFileSystem mockFileSystem;
-    MockLogger mockLogger;
+    Logger logger;
     FullMockProcessManager mockProcessManager;
     IOSDeploy iosDeploy;
 
@@ -1110,13 +1087,13 @@ void main() {
       mockXcdevice = MockXcdevice();
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
-      mockLogger = MockLogger();
+      logger = BufferLogger.test();
       mockFileSystem = MockFileSystem();
       mockProcessManager = FullMockProcessManager();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
-        logger: mockLogger,
+        logger: logger,
         platform: macPlatform,
         processManager: mockProcessManager,
       );
@@ -1201,7 +1178,7 @@ void main() {
     MockArtifacts mockArtifacts;
     MockCache mockCache;
     MockFileSystem mockFileSystem;
-    MockLogger mockLogger;
+    Logger logger;
     FullMockProcessManager mockProcessManager;
     IOSDeploy iosDeploy;
 
@@ -1210,13 +1187,13 @@ void main() {
       mockIosProject = MockIosProject();
       mockArtifacts = MockArtifacts();
       mockCache = MockCache();
-      mockLogger = MockLogger();
+      logger = BufferLogger.test();
       mockFileSystem = MockFileSystem();
       mockProcessManager = FullMockProcessManager();
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
-        logger: mockLogger,
+        logger: logger,
         platform: macPlatform,
         processManager: mockProcessManager,
       );
@@ -1302,7 +1279,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   group('isSupportedForProject', () {
     Artifacts mockArtifacts;
     MockCache mockCache;
-    MockLogger mockLogger;
+    Logger logger;
     IOSDeploy iosDeploy;
 
     setUp(() {
@@ -1311,7 +1288,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
-        logger: mockLogger,
+        logger: logger,
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
@@ -1417,10 +1394,31 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows {
     if (_workflows == null) {
       _workflows = <Workflow>[];
-      if (iosWorkflow.appliesToHostPlatform) {
-        _workflows.add(iosWorkflow);
+      if (globals.iosWorkflow.appliesToHostPlatform) {
+        _workflows.add(globals.iosWorkflow);
       }
     }
     return _workflows;
   }
 }
+
+class MockIOSApp extends Mock implements IOSApp {}
+class MockApplicationPackage extends Mock implements ApplicationPackage {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
+class MockDirectory extends Mock implements Directory {}
+class MockFile extends Mock implements File {}
+class MockFileSystem extends Mock implements FileSystem {}
+class MockForwardedPort extends Mock implements ForwardedPort {}
+class MockIMobileDevice extends Mock implements IMobileDevice {}
+class MockIOSDeploy extends Mock implements IOSDeploy {}
+class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
+class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
+class MockPlatform extends Mock implements Platform {}
+class MockPortForwarder extends Mock implements DevicePortForwarder {}
+// src/mocks.dart imports `MockProcessManager` which implements some methods, this is a full mock
+class FullMockProcessManager extends Mock implements ProcessManager {}
+class MockUsage extends Mock implements Usage {}
+class MockXcdevice extends Mock implements XCDevice {}
+class MockXcode extends Mock implements Xcode {}

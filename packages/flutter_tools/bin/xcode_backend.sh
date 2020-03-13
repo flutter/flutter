@@ -186,6 +186,7 @@ BuildApp() {
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dDartObfuscation="${dart_obfuscation_flag}"                          \
     -dEnableBitcode="${bitcode_flag}"                                     \
+    -dDartDefines="${DART_DEFINES}"                                       \
     "${build_mode}_ios_bundle_flutter_assets"
 
   if [[ $? -ne 0 ]]; then
@@ -290,29 +291,37 @@ EmbedFlutterFrameworks() {
 
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
-  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${PRODUCT_NAME}".app/Frameworks"
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
-  RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
 
   # Embed the actual Flutter.framework that the Flutter app expects to run against,
   # which could be a local build or an arch/type specific build.
-  # Remove it first since Xcode might be trying to hold some of these files - this way we're
-  # sure to get a clean copy.
-  RunCommand rm -rf -- "${xcode_frameworks_dir}/Flutter.framework"
-  RunCommand cp -Rv -- "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
+
+  # Copy Xcode behavior and don't copy over headers or modules.
+  RunCommand rsync -av --delete --filter "- .DS_Store/" --filter "- Headers/" --filter "- Modules/" "${flutter_ios_engine_folder}/Flutter.framework" "${xcode_frameworks_dir}/"
+  if [[ "$ACTION" != "install" ]]; then
+    # Strip bitcode from the destination unless archiving.
+    RunCommand "${DT_TOOLCHAIN_DIR}"/usr/bin/bitcode_strip "${flutter_ios_engine_folder}/Flutter.framework/Flutter" -r -o "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  fi
 
   # Sign the binaries we moved.
-  local identity="${EXPANDED_CODE_SIGN_IDENTITY_NAME:-$CODE_SIGN_IDENTITY}"
-  if [[ -n "$identity" && "$identity" != "\"\"" ]]; then
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/App.framework/App"
-    RunCommand codesign --force --verbose --sign "${identity}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
+  if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/Flutter.framework/Flutter"
   fi
+}
+
+EmbedAndThinFrameworks() {
+  EmbedFlutterFrameworks
+  ThinAppFrameworks
 }
 
 # Main entry point.
 if [[ $# == 0 ]]; then
-  # Backwards-compatibility: if no args are provided, build.
+  # Backwards-compatibility: if no args are provided, build and embed.
   BuildApp
+  EmbedFlutterFrameworks
 else
   case $1 in
     "build")
@@ -321,5 +330,7 @@ else
       ThinAppFrameworks ;;
     "embed")
       EmbedFlutterFrameworks ;;
+    "embed_and_thin")
+      EmbedAndThinFrameworks ;;
   esac
 fi

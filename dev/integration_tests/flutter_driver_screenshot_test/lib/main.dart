@@ -83,10 +83,14 @@ class _MyHomePageState extends State<_MyHomePage> {
             return (await deviceInfo.androidInfo).model;
           case TargetPlatform.fuchsia:
             return 'fuchsia';
-          default:
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
             return 'unsupported';
+            break;
         }
-        break;
+        assert(false, 'Unhandled Theme target platform ${Theme.of(context).platform}.');
+        return 'unsupported';
     }
     return 'unknown message: "$message"';
   }

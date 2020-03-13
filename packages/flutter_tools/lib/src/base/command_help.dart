@@ -175,7 +175,7 @@ class CommandHelpOption {
     this.description, {
     this.inParenthesis = '',
     @required Logger logger,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Platform platform,
     @required OutputPreferences outputPreferences,
   }) : _logger = logger,
@@ -185,7 +185,7 @@ class CommandHelpOption {
 
   final Logger _logger;
 
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
 
   final Platform _platform;
 

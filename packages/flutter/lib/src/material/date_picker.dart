@@ -908,6 +908,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         HapticFeedback.vibrate();
         break;
       case TargetPlatform.iOS:

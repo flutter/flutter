@@ -52,5 +52,6 @@
   "remainingTextFieldCharacterCountZero": "कोणतेही वर्ण शिल्लक नाहीत",
   "remainingTextFieldCharacterCountOne": "एक वर्ण शिल्लक",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण शिल्लक",
-  "refreshIndicatorSemanticLabel": "रिफ्रेश करा"
+  "refreshIndicatorSemanticLabel": "रिफ्रेश करा",
+  "moreButtonTooltip": "TBD"
 }

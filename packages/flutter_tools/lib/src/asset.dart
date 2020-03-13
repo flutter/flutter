@@ -128,7 +128,7 @@ class _ManifestAssetBundle implements AssetBundle {
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(manifestPath);
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
       globals.printError('$e');
       return 1;
@@ -335,7 +335,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
   final List<_Asset> result = <_Asset>[];
 
   for (final Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (final Map<dynamic, dynamic> font in family['fonts']) {
+    for (final Map<dynamic, dynamic> font in (family['fonts'] as List<dynamic>).cast<Map<dynamic, dynamic>>()) {
       final Uri entryUri = globals.fs.path.toUri(font['asset'] as String);
       result.add(_Asset(
         baseDir: globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
@@ -418,7 +418,7 @@ class LicenseCollector {
           licenseText = rawLicense;
         }
         packageLicenses.putIfAbsent(licenseText, () => <String>{})
-          ..addAll(packageNames);
+          .addAll(packageNames);
         allPackages.addAll(packageNames);
       }
     }

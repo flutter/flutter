@@ -754,7 +754,7 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
     if (result != null) {
       return result;
     }
-    // If the code reaches here, it means the the imageProvider.obtainKey was not
+    // If the code reaches here, it means the imageProvider.obtainKey was not
     // completed sync, so we initialize the completer for completion later.
     completer = Completer<_SizeAwareCacheKey>();
     return completer.future;

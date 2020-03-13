@@ -46,8 +46,17 @@ void main() {
 
       Future<Map<String, String>> captureEnvironment() async {
         flutterPlatform.loadChannel('test1.dart', MockSuitePlatform());
+        when(mockProcessManager.start(
+          any,
+          environment: anyNamed('environment')),
+        ).thenAnswer((_) {
+          return Future<Process>.value(MockProcess());
+        });
         await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
-        final VerificationResult toVerify = verify(mockProcessManager.start(any, environment: captureAnyNamed('environment')));
+        final VerificationResult toVerify = verify(mockProcessManager.start(
+          any,
+          environment: captureAnyNamed('environment'),
+        ));
         expect(toVerify.captured, hasLength(1));
         expect(toVerify.captured.first, isA<Map<String, String>>());
         return toVerify.captured.first as Map<String, String>;
@@ -145,6 +154,8 @@ void main() {
 class MockSuitePlatform extends Mock implements SuitePlatform {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
+class MockProcess extends Mock implements Process {}
 
 class MockPlatform extends Mock implements Platform {}
 

@@ -54,5 +54,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "un caracter rămas",
   "remainingTextFieldCharacterCountOther": "$remainingCount de caractere rămase",
-  "refreshIndicatorSemanticLabel": "Actualizați"
+  "refreshIndicatorSemanticLabel": "Actualizați",
+  "moreButtonTooltip": "TBD"
 }

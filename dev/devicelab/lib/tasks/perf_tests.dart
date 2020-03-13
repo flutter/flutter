@@ -362,50 +362,12 @@ class CompileTest {
       await flutter('packages', options: <String>['get']);
 
       final Map<String, dynamic> metrics = <String, dynamic>{
-        ...await _compileAot(),
         ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
         ...await _compileDebug(),
       };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
-  }
-
-  static Future<Map<String, dynamic>> _compileAot() async {
-    await flutter('clean');
-    final Stopwatch watch = Stopwatch()..start();
-    final List<String> options = <String>[
-      'aot',
-      '-v',
-      '--extra-gen-snapshot-options=--print_snapshot_sizes',
-      '--release',
-      '--no-pub',
-      '--target-platform',
-    ];
-    switch (deviceOperatingSystem) {
-      case DeviceOperatingSystem.ios:
-        options.add('ios');
-        break;
-      case DeviceOperatingSystem.android:
-        options.add('android-arm');
-        break;
-      case DeviceOperatingSystem.fuchsia:
-        throw Exception('Unsupported option for Fuchsia devices');
-    }
-    final String compileLog = await evalFlutter('build', options: options);
-    watch.stop();
-
-    final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
-    final Map<String, dynamic> metrics = <String, dynamic>{};
-    for (final Match m in metricExpression.allMatches(compileLog)) {
-      metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
-    }
-    if (metrics.length != _kSdkNameToMetricNameMapping.length) {
-      throw 'Expected metrics: ${_kSdkNameToMetricNameMapping.keys}, but got: ${metrics.keys}.';
-    }
-    metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
-
-    return metrics;
   }
 
   static Future<Map<String, dynamic>> _compileApp({ bool reportPackageContentSizes = false }) async {
@@ -485,22 +447,6 @@ class CompileTest {
     };
   }
 
-  static const Map<String, String> _kSdkNameToMetricNameMapping = <String, String> {
-    'VMIsolate': 'aot_snapshot_size_vmisolate',
-    'Isolate': 'aot_snapshot_size_isolate',
-    'ReadOnlyData': 'aot_snapshot_size_rodata',
-    'Instructions': 'aot_snapshot_size_instructions',
-    'Total': 'aot_snapshot_size_total',
-  };
-
-  static String _sdkNameToMetricName(String sdkName) {
-
-    if (!_kSdkNameToMetricNameMapping.containsKey(sdkName))
-      throw 'Unrecognized SDK snapshot metric name: $sdkName';
-
-    return _kSdkNameToMetricNameMapping[sdkName];
-  }
-
   static Future<Map<String, dynamic>> getSizesFromIosApp(String appPath) async {
     // Thin the binary to only contain one architecture.
     final String xcodeBackend = path.join(flutterDirectory.path, 'packages', 'flutter_tools', 'bin', 'xcode_backend.sh');
@@ -518,7 +464,6 @@ class CompileTest {
       'flutter_framework_uncompressed_bytes': await flutterFramework.length(),
     };
   }
-
 
   static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
     final  String output = await eval('unzip', <String>['-v', apkPath]);

@@ -581,8 +581,7 @@ class PaintingContext extends ClipContext {
         ..save()
         ..transform(effectiveTransform.storage);
       painter(this, offset);
-      canvas
-        ..restore();
+      canvas.restore();
       return null;
     }
   }

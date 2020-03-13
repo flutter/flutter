@@ -40,7 +40,6 @@ import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
-import 'linux/linux_workflow.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -138,10 +137,12 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
-      IOSSimulatorUtils: () => IOSSimulatorUtils(),
+      IOSSimulatorUtils: () => IOSSimulatorUtils(
+        simControl: globals.simControl,
+        xcode: globals.xcode,
+      ),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
-      LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
@@ -176,16 +177,26 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(),
-      Stdio: () => const Stdio(),
+      SimControl: () => SimControl(
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
+      Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),
       UserMessages: () => UserMessages(),
-      VisualStudio: () => VisualStudio(),
-      VisualStudioValidator: () => const VisualStudioValidator(),
+      VisualStudioValidator: () => VisualStudioValidator(
+        userMessages: globals.userMessages,
+        visualStudio: VisualStudio(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          logger: globals.logger,
+          processManager: globals.processManager,
+        )
+      ),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(

@@ -2,61 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/features.dart';
-import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
-
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/linux/linux_workflow.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  MockPlatform linux;
-  MockPlatform notLinux;
-  Testbed testbed;
+  final Platform linux = FakePlatform(
+    operatingSystem: 'linux',
+    environment: <String, String>{},
+  );
+  final Platform notLinux = FakePlatform(
+    operatingSystem: 'windows',
+    environment: <String, String>{},
+  );
+  final FeatureFlags enabledFlags = TestFeatureFlags(
+    isLinuxEnabled: true,
+  );
+  final FeatureFlags disabledFlags = TestFeatureFlags(isLinuxEnabled: false);
 
-  setUp(() {
-    linux = MockPlatform();
-    notLinux = MockPlatform();
-    when(linux.isLinux).thenReturn(true);
-    when(notLinux.isLinux).thenReturn(false);
-    testbed = Testbed(
-      overrides: <Type, Generator>{
-        Platform: () => linux,
-        FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-      },
+  testWithoutContext('Applies to Linux platform', () {
+    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+      platform: linux,
+      featureFlags: enabledFlags,
     );
-  });
 
-  test('Applies to linux platform', () => testbed.run(() {
     expect(linuxWorkflow.appliesToHostPlatform, true);
     expect(linuxWorkflow.canLaunchDevices, true);
     expect(linuxWorkflow.canListDevices, true);
     expect(linuxWorkflow.canListEmulators, false);
-  }));
+  });
 
-  test('Does not apply to non-linux platform', () => testbed.run(() {
+  testWithoutContext('Does not apply to non-Linux platform', () {
+    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+      platform: notLinux,
+      featureFlags: enabledFlags,
+    );
+
     expect(linuxWorkflow.appliesToHostPlatform, false);
     expect(linuxWorkflow.canLaunchDevices, false);
     expect(linuxWorkflow.canListDevices, false);
     expect(linuxWorkflow.canListEmulators, false);
-  }, overrides: <Type, Generator>{
-    Platform: () => notLinux,
-  }));
+  });
 
-  test('Does not apply when feature is disabled', () => testbed.run(() {
+  testWithoutContext('Does not apply when the Linux desktop feature is disabled', () {
+    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+      platform: linux,
+      featureFlags: disabledFlags,
+    );
+
     expect(linuxWorkflow.appliesToHostPlatform, false);
     expect(linuxWorkflow.canLaunchDevices, false);
     expect(linuxWorkflow.canListDevices, false);
     expect(linuxWorkflow.canListEmulators, false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
-  }));
-}
-
-class MockPlatform extends Mock implements Platform {
-  @override
-  final Map<String, String> environment = <String, String>{};
+  });
 }

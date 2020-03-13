@@ -10,11 +10,7 @@
 		2D4B11271E55A15A00FF14DB /* NativeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2D4B11261E55A15A00FF14DB /* NativeViewController.m */; };
 		2DD8945F1E5B87AF0010574F /* ic_add.png in Resources */ = {isa = PBXBuildFile; fileRef = 2DD8945E1E5B87AF0010574F /* ic_add.png */; };
 		2DE332E71E55C6D800393FD5 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DE332E61E55C6D800393FD5 /* MainViewController.m */; };
-		3B3967021E83382E004F5970 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B3967011E83382E004F5970 /* App.framework */; };
-		3B3967031E83382E004F5970 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B3967011E83382E004F5970 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3B3967051E83383D004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967041E83383D004F5970 /* AppFrameworkInfo.plist */; };
-		9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; };
-		9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */; };
 		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -30,8 +26,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3B3967031E83382E004F5970 /* App.framework in Embed Frameworks */,
-				9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -45,7 +39,6 @@
 		2DD8945E1E5B87AF0010574F /* ic_add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_add.png; sourceTree = "<group>"; };
 		2DE332E61E55C6D800393FD5 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		2DE332E81E55C6F100393FD5 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
-		3B3967011E83382E004F5970 /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = Flutter/App.framework; sourceTree = "<group>"; };
 		3B3967041E83383D004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		63EC5EC13E843CD861057871 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -53,7 +46,6 @@
 		7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
-		9740EEBA1CF902C7004384FC /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = Flutter/Flutter.framework; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146F21CF9000F007C117D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -69,8 +61,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */,
-				3B3967021E83382E004F5970 /* App.framework in Frameworks */,
 				A10521F6BE294095B24A8A75 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,9 +81,7 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
-				3B3967011E83382E004F5970 /* App.framework */,
 				3B3967041E83383D004F5970 /* AppFrameworkInfo.plist */,
-				9740EEBA1CF902C7004384FC /* Flutter.framework */,
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
@@ -241,7 +229,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin\n";
 		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -255,7 +243,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n";
 		};
 		C15931CF7E2D081FE06790F0 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

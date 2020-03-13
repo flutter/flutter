@@ -12,6 +12,7 @@ void macroPerfTest(
     String routeName,
     { Duration pageDelay,
       Duration duration = const Duration(seconds: 3),
+      Duration timeout = const Duration(seconds: 30),
       Future<void> driverOps(FlutterDriver driver),
       Future<void> setupOps(FlutterDriver driver),
     }) {
@@ -52,5 +53,5 @@ void macroPerfTest(
     summary.writeTimelineToFile(testName, pretty: true);
 
     driver.close();
-  });
+  }, timeout: Timeout(timeout));
 }

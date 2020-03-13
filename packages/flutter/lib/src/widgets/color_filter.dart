@@ -27,7 +27,7 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _ColorFilterRenderObject renderObject) {
-    renderObject..colorFilter = colorFilter;
+    renderObject.colorFilter = colorFilter;
   }
 
   @override

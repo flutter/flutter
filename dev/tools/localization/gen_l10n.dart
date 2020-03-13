@@ -163,6 +163,11 @@ String generateMethod(Message message, AppResourceBundle bundle) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}}');
       }
     }
+
+    // Escape single and double quotes.
+    messageValue = messageValue.replaceAll("'", '\\\'');
+    messageValue = messageValue.replaceAll('"', '\\\"');
+
     return "'$messageValue'";
   }
 
@@ -257,7 +262,6 @@ class LocalizationsGenerator {
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
 
-
   /// The reference to the project's l10n directory.
   ///
   /// It is assumed that all input files (e.g. [templateArbFile], arb files
@@ -317,6 +321,9 @@ class LocalizationsGenerator {
   /// [l10nDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
+  /// The header to be prepended to the generated Dart localization file.
+  String header = '';
+
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
@@ -330,11 +337,14 @@ class LocalizationsGenerator {
     String outputFileString,
     String classNameString,
     String preferredSupportedLocaleString,
+    String headerString,
+    String headerFile,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
+    _setHeader(headerString, headerFile);
     className = classNameString;
   }
 
@@ -443,6 +453,28 @@ class LocalizationsGenerator {
     }
   }
 
+  void _setHeader(String headerString, String headerFile) {
+    if (headerString != null && headerFile != null) {
+      throw L10nException(
+        'Cannot accept both header and header file arguments. \n'
+        'Please make sure to define only one or the other. '
+      );
+    }
+
+    if (headerString != null) {
+      header = headerString;
+    } else if (headerFile != null) {
+      try {
+        header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
+      } on FileSystemException catch (error) {
+        throw L10nException (
+          'Failed to read header file: "$headerFile". \n'
+          'FileSystemException: ${error.message}'
+        );
+      }
+    }
+  }
+
   static bool _isValidGetterAndMethodName(String name) {
     // Public Dart method name must not start with an underscore
     if (name[0] == '_')
@@ -500,7 +532,7 @@ class LocalizationsGenerator {
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String country = locale.countryCode;
-      final String countryArg = country == null ? '' : ', $country';
+      final String countryArg = country == null ? '' : "', '$country";
       return 'Locale(\'${locale.languageCode}$countryArg\')';
     });
 
@@ -520,6 +552,7 @@ class LocalizationsGenerator {
     final String lookupBody = generateLookupBody(_allBundles, className);
 
     return fileTemplate
+      .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')

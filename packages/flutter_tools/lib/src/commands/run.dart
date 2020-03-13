@@ -30,7 +30,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
-    usesDartDefines();
+    usesDartDefineOption();
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -204,7 +204,6 @@ class RunCommand extends RunCommandBase {
               'cannot be paired with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
         splitCommas: true,
         hide: true,
@@ -414,7 +413,6 @@ class RunCommand extends RunCommandBase {
         stdoutCommandResponse,
         notifyingLogger: NotifyingLogger(),
         logToStdout: true,
-        dartDefines: dartDefines,
       );
       AppInstance app;
       try {
@@ -431,7 +429,7 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
         );
-      } catch (error) {
+      } on Exception catch (error) {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = systemClock.now();
@@ -494,14 +492,12 @@ class RunCommand extends RunCommandBase {
         await FlutterDevice.create(
           device,
           flutterProject: flutterProject,
-          trackWidgetCreation: boolArg('track-widget-creation'),
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
           viewFilter: stringArg('isolate-filter'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
-          buildMode: getBuildMode(),
-          dartDefines: dartDefines,
+          buildInfo: getBuildInfo(),
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -535,7 +531,6 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
-        dartDefines: dartDefines,
         urlTunneller: null,
       );
     } else {

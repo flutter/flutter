@@ -841,6 +841,7 @@ abstract class BoxScrollView extends ScrollView {
 ///    scrolling.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///
@@ -1410,6 +1411,7 @@ class ListView extends BoxScrollView {
 ///    tiles that have a maximum cross-axis extent.
 ///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom
   /// [SliverGridDelegate].

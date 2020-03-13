@@ -24,8 +24,7 @@ mixin ServicesBinding on BindingBase {
     super.initInstances();
     _instance = this;
     _defaultBinaryMessenger = createBinaryMessenger();
-    window
-      ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
   }

@@ -483,7 +483,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable
-class PageTransitionsTheme extends Diagnosticable {
+class PageTransitionsTheme with Diagnosticable {
   /// Construct a PageTransitionsTheme.
   ///
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
@@ -494,7 +494,9 @@ class PageTransitionsTheme extends Diagnosticable {
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.

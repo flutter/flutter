@@ -122,6 +122,13 @@ TaskFunction createFlutterDriverScreenshotTest({
   );
 }
 
+TaskFunction createIOSPlatformViewTests() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
+    'lib/main.dart',
+  );
+}
+
 class DriverTest {
   DriverTest(
     this.testDirectory,

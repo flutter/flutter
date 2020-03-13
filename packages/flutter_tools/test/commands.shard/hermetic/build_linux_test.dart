@@ -20,16 +20,18 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
+const String _kTestFlutterRoot = '/flutter';
+
 final Platform linuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{
-    'FLUTTER_ROOT': '/',
+    'FLUTTER_ROOT': _kTestFlutterRoot
   }
 );
 final Platform notLinuxPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{
-    'FLUTTER_ROOT': '/',
+    'FLUTTER_ROOT': _kTestFlutterRoot,
   }
 );
 
@@ -44,6 +46,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    Cache.flutterRoot = _kTestFlutterRoot;
   });
 
   // Creates the mock files necessary to look like a Flutter project.
@@ -54,9 +57,29 @@ void main() {
   }
 
   // Creates the mock files necessary to run a build.
-  void setUpMockProjectFilesForBuild() {
-    fileSystem.file(fileSystem.path.join('linux', 'Makefile')).createSync(recursive: true);
+  void setUpMockProjectFilesForBuild({int templateVersion}) {
     setUpMockCoreProjectFiles();
+    fileSystem.file(fileSystem.path.join('linux', 'Makefile')).createSync(recursive: true);
+
+    final String versionFileSubpath = fileSystem.path.join('flutter', '.template_version');
+    const int expectedTemplateVersion = 10;  // Arbitrary value for tests.
+    final File sourceTemplateVersionfile = fileSystem.file(fileSystem.path.join(
+      fileSystem.path.absolute(Cache.flutterRoot),
+      'packages',
+      'flutter_tools',
+      'templates',
+      'app',
+      'linux.tmpl',
+      versionFileSubpath,
+    ));
+    sourceTemplateVersionfile.createSync(recursive: true);
+    sourceTemplateVersionfile.writeAsStringSync(expectedTemplateVersion.toString());
+
+    final File projectTemplateVersionFile = fileSystem.file(
+      fileSystem.path.join('linux', versionFileSubpath));
+    templateVersion ??= expectedTemplateVersion;
+    projectTemplateVersionFile.createSync(recursive: true);
+    projectTemplateVersionFile.writeAsStringSync(templateVersion.toString());
   }
 
   testUsingContext('Linux build fails when there is no linux project', () async {
@@ -84,6 +107,34 @@ void main() {
     Platform: () => notLinuxPlatform,
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build fails with instructions when template is too old', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild(templateVersion: 1);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    ), throwsToolExit(message: 'flutter create .'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('Linux build fails with instructions when template is too new', () async {
+    final BuildCommand command = BuildCommand();
+    setUpMockProjectFilesForBuild(templateVersion: 999);
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    ), throwsToolExit(message: 'Upgrade Flutter'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
   });
 
@@ -208,6 +259,32 @@ void main() {
 
   testUsingContext('linux can extract binary name from Makefile', () async {
     fileSystem.file('linux/Makefile')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+BINARY_NAME=fizz_bar
+''');
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('linux can extract binary name from app config', () async {
+    fileSystem.file('linux/Makefile')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+include app_configuration.mk
+''');
+    fileSystem.file('linux/app_configuration.mk')
       ..createSync(recursive: true)
       ..writeAsStringSync(r'''
 # Comment

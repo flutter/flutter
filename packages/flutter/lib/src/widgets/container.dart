@@ -473,7 +473,10 @@ class Container extends StatelessWidget {
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
-    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    if (color != null)
+      properties.add(DiagnosticsProperty<Color>('bg', color));
+    else
+      properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));

@@ -104,7 +104,7 @@ class AssembleCommand extends FlutterCommand {
         CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
         CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
       };
-    } catch (err) {
+    } on Exception {
       // We've failed to send usage.
     }
     return const <CustomDimensions, String>{};

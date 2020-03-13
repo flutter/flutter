@@ -32,9 +32,13 @@ class _PluginProjectInfo {
   }) {
     name = plugin.name;
     final File projectFile = fileSystem.directory(plugin.path).childDirectory('windows').childFile('plugin.vcxproj');
+    try {
     guid = VisualStudioProject(projectFile, fileSystem: fileSystem).guid;
-    if (guid == null) {
+    } on FileSystemException {
       throwToolExit('Unable to find a plugin.vcxproj for plugin "$name"');
+    }
+    if (guid == null) {
+      throwToolExit('Unable to find a plugin.vcxproj ID for plugin "$name"');
     }
   }
 

@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -184,6 +185,11 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
+  // iOS does not link on Flutter in any build phase. Add the linker flag.
+  if (!useMacOSConfig) {
+    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
+  }
+
   if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
@@ -228,6 +234,10 @@ List<String> _xcodeBuildSettingsLines({
 
   if (buildInfo.treeShakeIcons) {
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
+  }
+
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
   }
 
   return xcodeBuildSettings;
@@ -344,7 +354,7 @@ class XcodeProjectInterpreter {
       );
       final String out = result.stdout.trim();
       return parseXcodeBuildSettings(out);
-    } catch(error) {
+    } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),

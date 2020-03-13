@@ -361,7 +361,15 @@ void main() {
       expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
       expect(drawRect[1].color, colorToPaint);
       verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
-      });
+    });
+
+    testWidgets('ColoredBox - properties', (WidgetTester tester) async {
+      const ColoredBox box = ColoredBox(color: colorToPaint);
+      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+      box.debugFillProperties(properties);
+
+      expect(properties.properties.first.value, colorToPaint);
+    });
   });
 }
 

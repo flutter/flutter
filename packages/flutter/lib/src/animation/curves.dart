@@ -1657,6 +1657,10 @@ class Curves {
   /// animation to finish, and the negative effects of motion are minimized.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
+  ///
+  /// See also:
+  ///
+  ///  * [standardEasing], the name for this curve in the Material specification.
   static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
 
   /// A cubic animation curve that starts quickly, slows down, and then ends

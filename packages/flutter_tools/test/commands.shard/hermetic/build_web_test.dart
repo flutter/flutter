@@ -57,7 +57,6 @@ void main() {
       fileSystem.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
-      const <String>[],
       false,
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
@@ -77,7 +76,6 @@ void main() {
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     expect(await runner.run(), 1);
@@ -134,12 +132,12 @@ void main() {
 
     // Project files.
     fileSystem.file('.packages')
-      ..writeAsStringSync('''
+      .writeAsStringSync('''
 foo:lib/
 fizz:bar/lib/
 ''');
     fileSystem.file('pubspec.yaml')
-      ..writeAsStringSync('''
+      .writeAsStringSync('''
 name: foo
 
 dependencies:
@@ -167,7 +165,7 @@ flutter:
 class UrlLauncherPlugin {}
 ''');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
-      ..writeAsStringSync('void main() { }');
+      .writeAsStringSync('void main() { }');
 
     // Process calls. We're not testing that these invocations are correct because
     // that is covered in targets/web_test.dart.

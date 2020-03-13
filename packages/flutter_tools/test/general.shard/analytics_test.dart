@@ -48,18 +48,18 @@ void main() {
     // Ensure we don't send anything when analytics is disabled.
     testUsingContext("doesn't send when disabled", () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       await createProject(tempDir);
       expect(count, 0);
 
-      flutterUsage.enabled = true;
+      globals.flutterUsage.enabled = true;
       await createProject(tempDir);
-      expect(count, flutterUsage.isFirstRun ? 0 : 4);
+      expect(count, globals.flutterUsage.isFirstRun ? 0 : 4);
 
       count = 0;
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = DoctorCommand();
       final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
@@ -76,15 +76,15 @@ void main() {
     // Ensure we don't send for the 'flutter config' command.
     testUsingContext("config doesn't send", () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
-      flutterUsage.enabled = false;
+      globals.flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 
-      flutterUsage.enabled = true;
+      globals.flutterUsage.enabled = true;
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -282,7 +282,7 @@ void main() {
 
     testUsingContext("don't send on bots with unknown version", () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
@@ -297,8 +297,8 @@ void main() {
 
     testUsingContext("don't send on bots even when opted in", () async {
       int count = 0;
-      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
-      flutterUsage.enabled = true;
+      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.enabled = true;
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);

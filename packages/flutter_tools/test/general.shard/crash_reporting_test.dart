@@ -56,7 +56,7 @@ void main() {
 
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should print an explanatory message when there is a SocketException', () async {
@@ -77,7 +77,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should print an explanatory message when there is an HttpException', () async {
@@ -98,7 +98,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should send crash reports when async throws', () async {
@@ -120,7 +120,7 @@ void main() {
       expect(await exitCodeCompleter.future, 1);
       await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should send only one crash report when async throws many', () async {
@@ -151,7 +151,7 @@ void main() {
       await verifyCrashReportSent(requestInfo, crashes: 4);
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('should not send a crash report if on a user-branch', () async {
@@ -183,7 +183,7 @@ void main() {
 
       expect(testLogger.traceText, isNot(contains('Crash report sent')));
     }, overrides: <Type, Generator>{
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
 
     testUsingContext('can override base URL', () async {
@@ -223,7 +223,7 @@ void main() {
         },
         script: Uri(scheme: 'data'),
       ),
-      Stdio: () => const _NoStderr(),
+      Stdio: () => _NoStderr(),
     });
   });
 }
@@ -400,7 +400,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class _NoStderr extends Stdio {
-  const _NoStderr();
+  _NoStderr();
 
   @override
   IOSink get stderr => const _NoopIOSink();

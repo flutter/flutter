@@ -23,6 +23,7 @@ class BuildInfo {
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
+    this.dartDefines = const <String>[],
     this.targetPlatform,
     @required this.treeShakeIcons,
   });
@@ -47,10 +48,10 @@ class BuildInfo {
   final bool trackWidgetCreation;
 
   /// Extra command-line options for front-end.
-  final String extraFrontEndOptions;
+  final List<String> extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
-  final String extraGenSnapshotOptions;
+  final List<String> extraGenSnapshotOptions;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -72,6 +73,12 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
+  
+  /// Additional constant values to be made available in the Dart program.
+  ///
+  /// These values can be used with the const `fromEnvironment` constructors of
+  /// [bool], [String], [int], and [double].
+  final List<String> dartDefines;
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
   final TargetPlatform targetPlatform;
@@ -396,6 +403,7 @@ String getNameForDarwinArch(DarwinArch arch) {
 DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
+    case 'armv7f': // iPhone 4S.
       return DarwinArch.armv7;
     case 'arm64':
     case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.
@@ -403,8 +411,7 @@ DarwinArch getIOSArchForName(String arch) {
     case 'x86_64':
       return DarwinArch.x86_64;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported iOS arch name "$arch"');
 }
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch darwinArch}) {
@@ -485,8 +492,7 @@ AndroidArch getAndroidArchForName(String platform) {
     case 'android-x86':
       return AndroidArch.x86;
   }
-  assert(false);
-  return null;
+  throw Exception('Unsupported Android arch name "$platform"');
 }
 
 String getNameForAndroidArch(AndroidArch arch) {

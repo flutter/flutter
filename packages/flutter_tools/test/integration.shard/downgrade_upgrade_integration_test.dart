@@ -16,12 +16,13 @@ const String _kInitialVersion = 'v1.9.1+hotfix.6';
 const String _kBranch = 'stable';
 const FileSystem fileSystem = LocalFileSystem();
 const ProcessManager processManager = LocalProcessManager();
+final Stdio stdio = Stdio();
 final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
   terminal: AnsiTerminal(
     platform: const LocalPlatform(),
-    stdio: const Stdio(),
+    stdio: stdio,
   ),
-  stdio: const Stdio(),
+  stdio: stdio,
   outputPreferences: OutputPreferences.test(wrapText: true),
   timeoutConfiguration: const TimeoutConfiguration(),
 ));

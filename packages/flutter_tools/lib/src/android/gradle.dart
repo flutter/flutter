@@ -19,6 +19,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -297,6 +298,13 @@ Future<void> buildGradleApp({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo
+        .targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (target != null) {
     command.add('-Ptarget=$target');
@@ -322,11 +330,8 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
   }
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo
-      .targetArchs
-      .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
+  if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
+    command.add('-Pdart-defines=${jsonEncode(androidBuildInfo.buildInfo.dartDefines)}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
@@ -395,7 +400,7 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
@@ -537,11 +542,6 @@ Future<void> buildGradleAar({
     command.add('-Ptarget=$target');
   }
 
-  if (androidBuildInfo.targetArchs.isNotEmpty) {
-    final String targetPlatforms = androidBuildInfo.targetArchs
-        .map(getPlatformNameForAndroidArch).join(',');
-    command.add('-Ptarget-platform=$targetPlatforms');
-  }
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
@@ -571,6 +571,12 @@ Future<void> buildGradleAar({
         'in ${outputDirectory.path}'
       );
     }
+    command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
+        localEngineArtifacts.engineOutPath)}');
+  } else if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
 
   command.add(aarTask);
@@ -587,7 +593,7 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
   if (result.exitCode != 0) {
     globals.printStatus(result.stdout, wrap: false);
@@ -635,7 +641,7 @@ ${globals.terminal.bolden('Consuming the Module')}
             url '${repoDirectory.path}'
         }
         maven {
-            url 'http://download.flutter.io'
+            url 'https://storage.googleapis.com/download.flutter.io'
         }
       }
 
@@ -682,11 +688,11 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 
@@ -928,7 +934,7 @@ Directory _getLocalEngineRepo({
   assert(engineOutPath != null);
   assert(androidBuildInfo != null);
 
-  final String abi = getEnumName(androidBuildInfo.targetArchs.first);
+  final String abi = _getAbiByLocalEnginePath(engineOutPath);
   final Directory localEngineRepo = globals.fs.systemTempDirectory
     .createTempSync('flutter_tool_local_engine_repo.');
 
@@ -978,4 +984,28 @@ Directory _getLocalEngineRepo({
     );
   }
   return localEngineRepo;
+}
+
+String _getAbiByLocalEnginePath(String engineOutPath) {
+  String result = 'armeabi_v7a';
+  if (engineOutPath.contains('x86')) {
+    result = 'x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'x86_64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'arm64_v8a';
+  }
+  return result;
+}
+
+String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
+  String result = 'android-arm';
+  if (engineOutPath.contains('x86')) {
+    result = 'android-x86';
+  } else if (engineOutPath.contains('x64')) {
+    result = 'android-x64';
+  } else if (engineOutPath.contains('arm64')) {
+    result = 'android-arm64';
+  }
+  return result;
 }
