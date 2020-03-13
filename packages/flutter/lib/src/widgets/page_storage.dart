@@ -128,6 +128,7 @@ class PageStorageBucket {
 ///
 /// [PageStorageKey] is used by [Scrollable] if
 /// `keepScrollOffset` is enabled to save their [ScrollPosition]s.
+///
 /// {@tool dartpad --template=freeform}
 ///
 /// This sample shows how to explicitly use a [PageStorage] to
@@ -141,7 +142,7 @@ class PageStorageBucket {
 ///
 /// ```dart main
 /// void main() => runApp(MyApp());
-///```
+/// ```
 ///
 ///```dart
 /// class MyApp extends StatelessWidget {
