@@ -56,6 +56,7 @@ BuildApp() {
 
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
+  RunCommand rm -rf -- "${derived_dir}/App.framework"
 
   # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
@@ -103,8 +104,11 @@ BuildApp() {
     exit -1
   fi
 
+  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
   local flutter_engine_flag=""
   local local_engine_flag=""
+  local flutter_framework="${framework_path}/Flutter.framework"
+  local flutter_podspec="${framework_path}/Flutter.podspec"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -124,14 +128,28 @@ BuildApp() {
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
-
-  RunCommand pushd "${project_path}" > /dev/null
 
   local bitcode_flag=""
   if [[ $ENABLE_BITCODE == "YES" ]]; then
     bitcode_flag="true"
   fi
+
+  # TODO(jonahwilliams): move engine copying to build system.
+  if [[ -e "${project_path}/.ios" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
+    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
+    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
+  fi
+
+  RunCommand pushd "${project_path}" > /dev/null
 
   local verbose_flag=""
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
