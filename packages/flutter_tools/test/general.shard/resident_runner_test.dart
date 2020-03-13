@@ -368,6 +368,8 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
+    // does not support CanvasKit
+    expect(residentRunner.supportsCanvasKit, false);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -393,6 +395,11 @@ void main() {
           ''
         ].join('\n')
     ));
+  }));
+
+  test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
+    expect(() => residentRunner.toggleCanvaskit(),
+      throwsA(isA<Exception>()));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {

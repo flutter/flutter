@@ -665,6 +665,7 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+  bool get supportsCanvasKit => false;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -722,6 +723,13 @@ abstract class ResidentRunner {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  /// Toggle whether canvaskit is being used for rendering.
+  ///
+  /// Only supported on the web.
+  Future<void> toggleCanvaskit() {
+    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1043,6 +1051,9 @@ abstract class ResidentRunner {
         commandHelp.S.print();
         commandHelp.U.print();
       }
+      if (supportsCanvasKit){
+        commandHelp.k.print();
+      }
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1179,6 +1190,12 @@ class TerminalHandler {
       case 'I':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'k':
+        if (residentRunner.supportsCanvasKit) {
+          await residentRunner.toggleCanvaskit();
           return true;
         }
         return false;
