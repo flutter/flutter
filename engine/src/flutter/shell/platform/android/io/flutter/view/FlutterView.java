@@ -60,7 +60,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicLong;
 
-/** An Android view containing a Flutter app. */
+/**
+ * Deprecated Android view containing a Flutter app.
+ *
+ * <p>Deprecation: {@link io.flutter.embedding.android.FlutterView} is the new API that now replaces
+ * this class. See https://flutter.dev/go/android-project-migration for more migration details.
+ */
 public class FlutterView extends SurfaceView implements BinaryMessenger, TextureRegistry {
   /**
    * Interface for those objects that maintain and expose a reference to a {@code FlutterView} (such
