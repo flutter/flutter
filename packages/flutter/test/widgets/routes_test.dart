@@ -1294,6 +1294,28 @@ void main() {
       // It should refocus page one after pops.
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
+
+    testWidgets('child with local history can be disposed', (WidgetTester tester) async {
+      // Regression test: https://github.com/flutter/flutter/issues/52478
+      await tester.pumpWidget(MaterialApp(
+        home: WidgetWithLocalHistory(),
+      ));
+
+      final WidgetWithLocalHistoryState state = tester.state(find.byType(WidgetWithLocalHistory));
+      state.addLocalHistory();
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+
+      // Pumps a new widget to dispose WidgetWithLocalHistory. This should cause
+      // it to remove the local history entry from modal route during
+      // finalizeTree.
+      await tester.pumpWidget(const MaterialApp(
+        home: Text('dummy'),
+      ));
+      // Waits for modal route to update its internal state;
+      await tester.pump();
+      expect(tester.takeException(), null);
+    });
   });
 }
 
@@ -1388,5 +1410,31 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
       scopesRoute: true,
       explicitChildNodes: true,
     );
+  }
+}
+
+class WidgetWithLocalHistory extends StatefulWidget {
+  @override
+  WidgetWithLocalHistoryState createState() => WidgetWithLocalHistoryState();
+}
+
+class WidgetWithLocalHistoryState extends State<WidgetWithLocalHistory> {
+  LocalHistoryEntry _localHistory;
+
+  void addLocalHistory() {
+    final ModalRoute<dynamic> route = ModalRoute.of(context);
+    _localHistory = LocalHistoryEntry();
+    route.addLocalHistoryEntry(_localHistory);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _localHistory.remove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('dummy');
   }
 }
