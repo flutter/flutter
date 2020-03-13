@@ -26,6 +26,9 @@ import 'android.dart';
 import 'android_console.dart';
 import 'android_sdk.dart';
 
+// TODO(jonahwilliams): update google3 client after roll to remove export.
+export 'android_device_discovery.dart';
+
 enum _HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.
