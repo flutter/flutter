@@ -14,7 +14,7 @@ import 'build.dart';
 
 /// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
+  BuildAotCommand({this.aotBuilder}) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
@@ -51,10 +51,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
       );
-    // --track-widget-creation is exposed as a flag here to deal with build
-    // invalidation issues, but it is ignored -- there are no plans to support
-    // it for AOT mode.
-    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
   }
 
   AotBuilder aotBuilder;

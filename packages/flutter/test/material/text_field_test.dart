@@ -18,6 +18,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -140,45 +141,6 @@ void main() {
   const String kMoreThanFourLines =
     kThreeLines +
     "\nFourth line won't display and ends at";
-
-  // Returns the first RenderEditable.
-  RenderEditable findRenderEditable(WidgetTester tester) {
-    final RenderObject root = tester.renderObject(find.byType(EditableText));
-    expect(root, isNotNull);
-
-    RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditable) {
-        renderEditable = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderEditable, isNotNull);
-    return renderEditable;
-  }
-
-  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
-      return TextSelectionPoint(
-        box.localToGlobal(point.point),
-        point.direction,
-      );
-    }).toList();
-  }
-
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
-      ),
-      renderEditable,
-    );
-    expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
-  }
 
   setUp(() {
     debugResetSemanticsIdCounter();

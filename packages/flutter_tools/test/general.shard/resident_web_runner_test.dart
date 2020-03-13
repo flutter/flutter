@@ -425,6 +425,18 @@ void main() {
     expect(residentWebRunner.debuggingEnabled, true);
   }));
 
+  test('web resident runner can toggle CanvasKit', () => testbed.run(() async {
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null);
+    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
+
+    expect(residentWebRunner.supportsCanvasKit, true);
+    expect(webAssetServer.canvasKitRendering, false);
+
+    await residentWebRunner.toggleCanvaskit();
+
+    expect(webAssetServer.canvasKitRendering, true);
+  }));
+
   test('Exits when initial compile fails', () => testbed.run(() async {
     _setupMocks();
     when(mockWebDevFS.update(

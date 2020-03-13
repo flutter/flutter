@@ -193,7 +193,7 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $observatoryUri');
 
       vmService = service;
-      device.getLogReader(app: package).connectedVMService = vmService;
+      (await device.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -283,8 +283,8 @@ class FlutterDevice {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
-      for (final FlutterView view in views)
-        view.uiIsolate.reloadSources(
+      for (final Isolate isolate in vmService.vm.isolates)
+        isolate.reloadSources(
           pause: pause,
           rootLibUri: deviceEntryUri,
           packagesUri: devicePackagesUri,
@@ -369,11 +369,11 @@ class FlutterDevice {
     return to;
   }
 
-  void startEchoingDeviceLog() {
+  Future<void> startEchoingDeviceLog() async {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = device.getLogReader(app: package).logLines;
+    final Stream<String> logStream = (await device.getLogReader(app: package)).logLines;
     if (logStream == null) {
       globals.printError('Failed to read device log stream');
       return;
@@ -393,8 +393,8 @@ class FlutterDevice {
     _loggingSubscription = null;
   }
 
-  void initLogReader() {
-    device.getLogReader(app: package).appPid = vmService.vm.pid;
+  Future<void> initLogReader() async {
+    (await device.getLogReader(app: package)).appPid = vmService.vm.pid;
   }
 
   Future<int> runHot({
@@ -426,7 +426,7 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     // Start the application.
     final Future<LaunchResult> futureResult = device.startApp(
@@ -499,7 +499,7 @@ class FlutterDevice {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     final LaunchResult result = await device.startApp(
       package,
@@ -665,6 +665,7 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+  bool get supportsCanvasKit => false;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -722,6 +723,13 @@ abstract class ResidentRunner {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  /// Toggle whether canvaskit is being used for rendering.
+  ///
+  /// Only supported on the web.
+  Future<void> toggleCanvaskit() {
+    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1043,6 +1051,9 @@ abstract class ResidentRunner {
         commandHelp.S.print();
         commandHelp.U.print();
       }
+      if (supportsCanvasKit){
+        commandHelp.k.print();
+      }
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1179,6 +1190,12 @@ class TerminalHandler {
       case 'I':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'k':
+        if (residentRunner.supportsCanvasKit) {
+          await residentRunner.toggleCanvaskit();
           return true;
         }
         return false;

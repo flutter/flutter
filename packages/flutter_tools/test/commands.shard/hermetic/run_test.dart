@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -112,6 +113,38 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Fails with toolExit run in profile mode on emulator with machine flag', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('lib/main.dart').createSync(recursive: true);
+      final FakeDevice device = FakeDevice(isLocalEmulator: true);
+      when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+      when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+        '--machine',
+        '--profile',
+      ]), throwsToolExit(message: 'not supported for emulators'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => MockDeviceManager(),
+      Stdio: () => MockStdio(),
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -572,15 +605,14 @@ class TestRunCommand extends RunCommand {
   }
 }
 
-class MockStableFlutterVersion extends MockFlutterVersion {
-  @override
-  bool get isMaster => false;
-}
-
 class FakeDevice extends Fake implements Device {
+  FakeDevice({bool isLocalEmulator = false})
+   : _isLocalEmulator = isLocalEmulator;
+
   static const int kSuccess = 1;
   static const int kFailure = -1;
   TargetPlatform _targetPlatform = TargetPlatform.ios;
+  final bool _isLocalEmulator;
 
   @override
   String get id => 'fake_device';
@@ -588,7 +620,7 @@ class FakeDevice extends Fake implements Device {
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
   @override
-  Future<bool> get isLocalEmulator => Future<bool>.value(false);
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
   bool get supportsHotReload => false;

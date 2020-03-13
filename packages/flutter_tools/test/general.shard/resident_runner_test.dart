@@ -92,6 +92,9 @@ void main() {
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
+    final MockVM mockVM = MockVM();
+    when(mockVMService.vm).thenReturn(mockVM);
+    when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
     when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
@@ -365,6 +368,8 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
+    // does not support CanvasKit
+    expect(residentRunner.supportsCanvasKit, false);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -390,6 +395,11 @@ void main() {
           ''
         ].join('\n')
     ));
+  }));
+
+  test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
+    expect(() => residentRunner.toggleCanvaskit(),
+      throwsA(isA<Exception>()));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -744,6 +754,7 @@ class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
+class MockVM extends Mock implements VM {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views, { Stream<Uri> observatoryUris })
     : super(device, buildInfo: BuildInfo.debug) {

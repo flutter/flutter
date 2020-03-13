@@ -71,8 +71,8 @@ AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 IOSDeploy get iosDeploy => context.get<IOSDeploy>();
-IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
+IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
@@ -82,6 +82,7 @@ XCDevice get xcdevice => context.get<XCDevice>();
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
+  persistentToolState: persistentToolState,
 );
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
