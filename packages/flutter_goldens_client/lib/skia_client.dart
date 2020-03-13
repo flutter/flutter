@@ -21,6 +21,12 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 
+/// Enum representing the supported CI environments used by flutter/flutter.
+enum ContinuousIntegrationEnvironment {
+  luci,
+  cirrus,
+}
+
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
@@ -57,7 +63,7 @@ class SkiaGoldClient {
   final ProcessManager process;
 
   /// What testing environment we may be in, like Cirrus or Luci.
-  final String ci;
+  final ContinuousIntegrationEnvironment ci;
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
@@ -112,38 +118,43 @@ class SkiaGoldClient {
     List<String> authArguments;
     String failureContext;
 
-    if (ci == 'luci') {
-      authArguments = <String>[
-        'auth',
-        '--work-dir', workDirectory
-          .childDirectory('temp')
-          .path,
-        '--luci',
-      ];
-      failureContext = 'Luci environments authenticate using the file provided '
-        'by LUCI_CONTEXT. There may be an error with this file or Gold '
-        'authentication.';
-    } else {
-      if (_serviceAccount.isEmpty) {
-        final StringBuffer buf = StringBuffer()
-          ..writeln('The Gold service account is unavailable.')
-          ..writeln('Without a service account, Gold can not be authorized.')
-          ..writeln('Please check your user permissions and current comparator.');
-        throw Exception(buf.toString());
-      }
+    switch (ci) {
+      case ContinuousIntegrationEnvironment.luci:
+        authArguments = <String>[
+          'auth',
+          '--work-dir', workDirectory
+            .childDirectory('temp')
+            .path,
+          '--luci',
+        ];
+        failureContext =
+        'Luci environments authenticate using the file provided '
+          'by LUCI_CONTEXT. There may be an error with this file or Gold '
+          'authentication.';
+        break;
+      case ContinuousIntegrationEnvironment.cirrus:
+        print('cirrus');
+        if (_serviceAccount.isEmpty) {
+          final StringBuffer buf = StringBuffer()
+            ..writeln('The Gold service account is unavailable.')..writeln(
+              'Without a service account, Gold can not be authorized.')..writeln(
+              'Please check your user permissions and current comparator.');
+          throw Exception(buf.toString());
+        }
 
-      final File authorization = workDirectory.childFile('serviceAccount.json');
-      await authorization.writeAsString(_serviceAccount);
-      authArguments = <String>[
-        'auth',
-        '--service-account', authorization.path,
-        '--work-dir', workDirectory
-          .childDirectory('temp')
-          .path,
-      ];
-      failureContext = 'This could be caused by incorrect user permissions on '
-        'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
-        'comparator was chosen for the test case.';
+        final File authorization = workDirectory.childFile('serviceAccount.json');
+        await authorization.writeAsString(_serviceAccount);
+        authArguments = <String>[
+          'auth',
+          '--service-account', authorization.path,
+          '--work-dir', workDirectory
+            .childDirectory('temp')
+            .path,
+        ];
+        failureContext = 'This could be caused by incorrect user permissions on '
+          'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
+          'comparator was chosen for the test case.';
+        break;
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -170,7 +181,7 @@ class SkiaGoldClient {
   Future<void> emptyAuth() async {
     // We only use emptyAuth when the service account cannot be decrypted on
     // Cirrus.
-    assert(ci == 'cirrus');
+    assert(ci == ContinuousIntegrationEnvironment.cirrus);
 
     final List<String> authArguments = <String>[
       'auth',
@@ -651,16 +662,19 @@ class SkiaGoldClient {
     String pullRequest;
     String jobId;
     String cis;
-    if (ci == 'luci') {
-      jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
-      final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
-      pullRequest = refs[refs.length - 2];
-      cis = 'buildbucket';
-    } else {
-      assert(ci == 'cirrus');
-      pullRequest = platform.environment['CIRRUS_PR'];
-      jobId = platform.environment['CIRRUS_TASK_ID'];
-      cis = 'cirrus';
+
+    switch (ci) {
+      case ContinuousIntegrationEnvironment.luci:
+        jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
+        final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
+        pullRequest = refs[refs.length - 2];
+        cis = 'buildbucket';
+        break;
+      case ContinuousIntegrationEnvironment.cirrus:
+        pullRequest = platform.environment['CIRRUS_PR'];
+        jobId = platform.environment['CIRRUS_TASK_ID'];
+        cis = 'cirrus';
+        break;
     }
 
     return <String>[

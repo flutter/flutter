@@ -245,7 +245,9 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(
       baseDirectory,
-      ci: platform.environment.containsKey('CIRRUS_CI') ? 'cirrus' : 'luci',
+      ci: platform.environment.containsKey('CIRRUS_CI')
+        ? ContinuousIntegrationEnvironment.cirrus
+        : ContinuousIntegrationEnvironment.luci,
     );
     await goldens.auth();
     await goldens.imgtestInit();
@@ -340,7 +342,9 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(
       baseDirectory,
-      ci: platform.environment.containsKey('CIRRUS_CI') ? 'cirrus' : 'luci',
+      ci: platform.environment.containsKey('CIRRUS_CI')
+        ? ContinuousIntegrationEnvironment.cirrus
+        : ContinuousIntegrationEnvironment.luci,
     );
 
     bool onCirrusWithPermission = false;

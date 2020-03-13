@@ -108,6 +108,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: mockHttpClient,
+        ci: ContinuousIntegrationEnvironment.cirrus,
       );
 
       when(process.run(any))
@@ -183,7 +184,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: mockHttpClient,
-        ci: 'luci',
+        ci: ContinuousIntegrationEnvironment.luci,
       );
 
       final List<String> ciArguments = skiaClient.getCIArguments();
@@ -218,7 +219,7 @@ void main() {
         process: process,
         platform: platform,
         httpClient: mockHttpClient,
-        ci: 'cirrus',
+        ci: ContinuousIntegrationEnvironment.cirrus,
       );
 
       final List<String> ciArguments = skiaClient.getCIArguments();
