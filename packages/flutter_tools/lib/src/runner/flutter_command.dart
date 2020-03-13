@@ -500,7 +500,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// eachother.
-  BuildInfo getBuildInfo() {
+  BuildInfo getBuildInfo({TargetPlatform targetPlatform}) {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -536,13 +536,6 @@ abstract class FlutterCommand extends Command<void> {
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
         'combination with "--${FlutterOptions.kSplitDebugInfoOption}"',
       );
-    }
-
-    TargetPlatform targetPlatform;
-    if (argParser.options.containsKey('target-platform') &&
-        argResults['target-platform'] is String &&
-        argResults['target-platform'] != 'default') {
-      targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
     }
 
     return BuildInfo(getBuildMode(),

@@ -209,8 +209,8 @@ class RunCommand extends RunCommandBase {
         splitCommas: true,
         hide: true,
       )..addOption('target-platform',
-        defaultsTo: 'default',
-        allowed: <String>['default', 'android-arm', 'android-arm64', 'android-x86', 'android-x64'],
+        defaultsTo: null,
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'Specify the target platform when building the app for an '
             'Android device.\nIgnored on iOS.'
       );
@@ -342,7 +342,13 @@ class RunCommand extends RunCommandBase {
   }
 
   DebuggingOptions _createDebuggingOptions() {
-    final BuildInfo buildInfo = getBuildInfo();
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        stringArg('target-platform') != null) {
+      targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
+    }
+    final BuildInfo buildInfo = getBuildInfo(targetPlatform: targetPlatform);
+
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
