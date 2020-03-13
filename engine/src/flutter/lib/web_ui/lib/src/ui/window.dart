@@ -478,19 +478,17 @@ class Locale {
   int get hashCode => hashValues(languageCode, scriptCode, countryCode);
 
   @override
-  String toString() {
-    final StringBuffer out = StringBuffer(languageCode);
-    if (scriptCode != null) {
-      out.write('_$scriptCode');
-    }
-    if (_countryCode != null) {
-      out.write('_$countryCode');
-    }
-    return out.toString();
-  }
+  String toString() => _rawToString('_');
 
   // TODO(yjbanov): implement to match flutter native.
-  String toLanguageTag() => '_';
+  String toLanguageTag() => _rawToString('-');
+
+  String _rawToString(String separator) {
+    final StringBuffer out = StringBuffer(languageCode);
+    if (scriptCode != null) out.write('$separator$scriptCode');
+    if (_countryCode != null) out.write('$separator$countryCode');
+    return out.toString();
+  }
 }
 
 /// The most basic interface to the host operating system's user interface.
