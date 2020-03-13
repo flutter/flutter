@@ -529,6 +529,16 @@ void main() {
       Platform: _kNoColorOutputPlatform,
     });
 
+    testUsingContext('gen_snapshot binary not available', () async {
+        expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+        // gen_snapshot is downloaded on demand, and the doctor should not
+        // fail if the gen_snapshot binary is not present.
+        expect(testLogger.statusText, contains('No issues found!'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('version checking does not work', () async {
       final VersionCheckError versionCheckError = VersionCheckError('version error');
 
