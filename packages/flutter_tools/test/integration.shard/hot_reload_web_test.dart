@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -41,10 +42,10 @@ void main() {
     } finally {
       await subscription.cancel();
     }
-  });
+  }, skip: !Platform.isLinux); // only linux shards have Chrome installed.
 
   test('hot restart works without error', () async {
     await flutter.run(chrome: true);
     await flutter.hotRestart();
-  });
+  }, skip: !Platform.isLinux); // only linux shards have Chrome installed.
 }
