@@ -641,32 +641,20 @@ void main() {
       ),
     );
 
-    final Size buttonSize = tester.getSize(find.byKey(buttonKey));
-    final Size labelSize = tester.getSize(find.byKey(labelKey));
     final Rect paddingRect = tester.getRect(find.byType(Padding));
     final Rect labelRect = tester.getRect(find.byKey(labelKey));
     final Rect iconRect = tester.getRect(find.byType(Icon));
 
-    // Check the RaisedButton.icon size
-    // By default the padding between icon and label is 8.0, and default
-    // size of Icon is 24 pixels * 24 pixels, hence
-    // height = 24 + 16 * 2 = 56 and
-    // width = 24 + width of Text + 8 + 16 * 32
-    expect(buttonSize, Size(labelSize.width + 8 + 24 + 32, 56));
-
     // Check the position of Text and Icon
     expect(paddingRect.right, labelRect.right + 16);
-    // The height of Icon is 24 pixels which is more than Text
-    // Hence, we will subtract Icon Height - Text Height and divide by 2
-    expect(paddingRect.top, labelRect.top - (16 + (24-labelSize.height)/2));
-    expect(paddingRect.bottom, labelRect.bottom + (16 + (24-labelSize.height)/2));
-    // By default the padding between icon and label is 8.0,
-    // Icon width is 24 pixels and padding is 16, hence 8.0 + 16.0 + 24.0 = 48
-    expect(paddingRect.left,labelRect.left - 48);
-    expect(paddingRect.left,iconRect.left-16);
-    expect(paddingRect.top,iconRect.top-16);
-    expect(paddingRect.bottom,iconRect.bottom+16);
-    expect(paddingRect.right, iconRect.right + 8 + 16 + labelSize.width);
+    expect(paddingRect.left, iconRect.left - 16);
+    // Check which is the taller widget from Icon and Text and use that
+    // to check the top and bottom edges
+    final Rect tallerWidget =
+    iconRect.height > labelRect.height ? iconRect : labelRect;
+    expect(paddingRect.top, tallerWidget.top - 16);
+    expect(paddingRect.bottom, tallerWidget.bottom + 16);
+
   });
 }
 
