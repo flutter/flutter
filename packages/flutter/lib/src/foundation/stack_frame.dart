@@ -116,8 +116,10 @@ class StackFrame {
     if (hasPackage) {
       packageScheme = 'package';
       final Uri packageUri = Uri.parse(match.group(1));
-      package = packageUri.pathSegments[0];
-      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+      package = packageUri.pathSegments[1];
+      packagePath = packageUri.path.replaceFirst(
+        packageUri.pathSegments[0] + '/' +
+        packageUri.pathSegments[1] + '/', '');
     }
 
     return StackFrame(
