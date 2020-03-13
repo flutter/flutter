@@ -7,12 +7,9 @@ import 'dart:js_util' as js_util;
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 import 'recorder.dart';
-
-const MethodCodec codec = JSONMethodCodec();
 
 const String chars = '1234567890'
     'abcdefghijklmnopqrstuvwxyz'
