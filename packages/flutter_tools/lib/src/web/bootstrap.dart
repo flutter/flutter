@@ -73,10 +73,12 @@ window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
     window.\$dartStackTraceUtility.ready = true;
     let dart = dart_sdk.dart;
     window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-      url = url.replace(window.\$dartUriBase, window.\$dartUriBase + '/');
-      var module = window.\$requireLoader.urlToModuleId.get(url);
-      if (!module) return;
-      return dart.getSourceMap(module);
+      url = url.replace(window.\$dartUriBase + '/', '');
+      if (url == 'dart_sdk.js') {
+        return dart.getSourceMap('dart_sdk');
+      }
+      url = url.replace(".lib.js", "");
+      return dart.getSourceMap(url);
     });
   }
 });
