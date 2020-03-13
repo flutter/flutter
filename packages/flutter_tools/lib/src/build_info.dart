@@ -73,7 +73,7 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
-  
+
   /// Additional constant values to be made available in the Dart program.
   ///
   /// These values can be used with the const `fromEnvironment` constructors of
