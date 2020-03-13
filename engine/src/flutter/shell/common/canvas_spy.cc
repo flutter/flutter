@@ -139,20 +139,6 @@ void DidDrawCanvas::onDrawBitmapRect(const SkBitmap& bitmap,
   did_draw_ = true;
 }
 
-void DidDrawCanvas::onDrawBitmapNine(const SkBitmap& bitmap,
-                                     const SkIRect& center,
-                                     const SkRect& dst,
-                                     const SkPaint* paint) {
-  did_draw_ = true;
-}
-
-void DidDrawCanvas::onDrawBitmapLattice(const SkBitmap& bitmap,
-                                        const Lattice& lattice,
-                                        const SkRect& dst,
-                                        const SkPaint* paint) {
-  did_draw_ = true;
-}
-
 void DidDrawCanvas::onDrawImage(const SkImage* image,
                                 SkScalar left,
                                 SkScalar top,
@@ -201,8 +187,6 @@ void DidDrawCanvas::onDrawDrawable(SkDrawable* drawable,
 }
 
 void DidDrawCanvas::onDrawVerticesObject(const SkVertices* vertices,
-                                         const SkVertices::Bone bones[],
-                                         int boneCount,
                                          SkBlendMode bmode,
                                          const SkPaint& paint) {
   MarkDrawIfNonTransparentPaint(paint);
