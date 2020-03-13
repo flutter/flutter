@@ -165,11 +165,49 @@ void main() {
       );
     });
 
-    test('correctly inits tryjob for luci', () {
+    test('correctly inits tryjob for luci', () async {
       platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
           'GOLDCTL' : 'goldctl',
+          'SWARMING_TASK_ID' : '4ae997b50dfd4d11',
+          'LOGDOG_STREAM_PREFIX' : 'buildbucket/cr-buildbucket.appspot.com/8885996262141582672',
+          'GOLD_TRYJOB' : 'refs/pull/49815/head',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+        ci: 'luci',
+      );
+
+      final List<String> ciArguments = skiaClient.getCIArguments();
+
+      expect(
+        ciArguments,
+        equals(
+          <String>[
+            '--changelist', '49815',
+            '--cis', 'buildbucket',
+            '--jobid', '8885996262141582672',
+          ],
+        ),
+      );
+    });
+
+    test('correctly inits tryjob for cirrus', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+          'CIRRUS_CI' : 'true',
+          'CIRRUS_TASK_ID' : '8885996262141582672',
+          'CIRRUS_PR' : '49815',
         },
         operatingSystem: 'macos'
       );
@@ -183,74 +221,17 @@ void main() {
         ci: 'cirrus',
       );
 
-      when(process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: '/flutter',
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(12345678, 0, '12345678', '')));
-
-      when(process.run(
-        <String>[
-          'goldctl',
-          'imgtest', 'init',
-          '--instance', 'flutter',
-          '--work-dir', '/workDirectory/temp',
-          '--commit', '12345678',
-          '--keys-file', '/workDirectory/keys.json',
-          '--failure-file', '/workDirectory/failures.json',
-          '--passfail',
-        ],
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 1, 'fail', 'fail')));
-      final Future<void> test =  skiaClient.imgtestInit();
+      final List<String> ciArguments = skiaClient.getCIArguments();
 
       expect(
-        test,
-        throwsException,
-      );
-    });
-
-    test('correctly inits tryjob for cirrus', () {
-      platform = FakePlatform(
-        environment: <String, String>{
-          'FLUTTER_ROOT': _kFlutterRoot,
-          'GOLDCTL' : 'goldctl',
-        },
-        operatingSystem: 'macos'
-      );
-
-      skiaClient = SkiaGoldClient(
-        workDirectory,
-        fs: fs,
-        process: process,
-        platform: platform,
-        httpClient: mockHttpClient,
-      );
-
-      when(process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: '/flutter',
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(12345678, 0, '12345678', '')));
-
-      when(process.run(
-        <String>[
-          'goldctl',
-          'imgtest', 'init',
-          '--instance', 'flutter',
-          '--work-dir', '/workDirectory/temp',
-          '--commit', '12345678',
-          '--keys-file', '/workDirectory/keys.json',
-          '--failure-file', '/workDirectory/failures.json',
-          '--passfail',
-        ],
-      )).thenAnswer((_) => Future<ProcessResult>
-        .value(ProcessResult(123, 1, 'fail', 'fail')));
-      final Future<void> test =  skiaClient.imgtestInit();
-
-      expect(
-        test,
-        throwsException,
+        ciArguments,
+        equals(
+          <String>[
+            '--changelist', '49815',
+            '--cis', 'cirrus',
+            '--jobid', '8885996262141582672',
+          ],
+        ),
       );
     });
 

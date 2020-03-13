@@ -298,21 +298,6 @@ class SkiaGoldClient {
     await failures.create();
     final String commitHash = await _getCurrentCommit();
 
-    String pullRequest;
-    String jobId;
-    String cis = ci;
-    if (ci == 'luci') {
-      jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
-      final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
-      pullRequest = refs[refs.length - 2];
-      cis = 'buildbucket';
-    } else {
-      assert(ci == 'cirrus');
-      pullRequest = platform.environment['CIRRUS_PR'];
-      jobId = platform.environment['CIRRUS_TASK_ID'];
-    }
-
-
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
@@ -324,10 +309,8 @@ class SkiaGoldClient {
       '--failure-file', failures.path,
       '--passfail',
       '--crs', 'github',
-      '--changelist', pullRequest,
-      '--cis', cis,
-      '--jobid', jobId,
       '--patchset_id', commitHash,
+      ...getCIArguments(),
     ];
 
     if (imgtestInitArguments.contains(null)) {
@@ -662,6 +645,29 @@ class SkiaGoldClient {
       return !(decoded['GSUtil'] as bool);
     }
     return false;
+  }
+
+  List<String> getCIArguments() {
+    String pullRequest;
+    String jobId;
+    String cis;
+    if (ci == 'luci') {
+      jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
+      final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
+      pullRequest = refs[refs.length - 2];
+      cis = 'buildbucket';
+    } else {
+      assert(ci == 'cirrus');
+      pullRequest = platform.environment['CIRRUS_PR'];
+      jobId = platform.environment['CIRRUS_TASK_ID'];
+      cis = 'cirrus';
+    }
+
+    return <String>[
+      '--changelist', pullRequest,
+      '--cis', cis,
+      '--jobid', jobId,
+    ];
   }
 }
 
