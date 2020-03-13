@@ -1413,10 +1413,10 @@ class _RenderListTile extends RenderBox {
       }
     }
 
-    // This attempts to implement the red lines for the vertical position of the
+    // This attempts to implement the redlines for the vertical position of the
     // leading and trailing icons on the spec page:
     //   https://material.io/design/components/lists.html#specs
-    // The interpretation for these red lines is as follows:
+    // The interpretation for these redlines is as follows:
     //  - For large tiles (> 72dp), both leading and trailing controls should be
     //    a fixed distance from top. As per guidelines this is set to 16dp.
     //  - For smaller tiles, trailing should always be centered. Leading can be
