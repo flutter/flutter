@@ -232,7 +232,7 @@ class WebAssetServer implements AssetReader {
 
     if (!file.existsSync()) {
       final String webPath = globals.fs.path.join(
-        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath);
       file = globals.fs.file(webPath);
     }
 

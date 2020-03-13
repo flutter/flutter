@@ -18,9 +18,6 @@ void main() {
     expect(result, contains('mapperEl.src = "mapper.js";'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
-    // bootstrap main module has correct imports.
-    expect(result, contains('require(["foo/bar/main.js", "dart_sdk"],'
-      ' function(app, dart_sdk) {'));
   });
 
   test('generateMainModule embeds urls correctly', () {
