@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
 import 'dart:math';
 import 'dart:ui';
 
@@ -49,14 +51,11 @@ class ParagraphGenerator {
 
 /// Sends a platform message to the web engine to enable/disable the usage of
 /// the new canvas-based text measurement implementation.
-void _useCanvasText(bool useCanvas) {
-  window.sendPlatformMessage(
-    'flutter/experiments',
-    codec.encodeMethodCall(MethodCall(
-      'enableWebExperiments',
-      <String, dynamic>{'useCanvasText': useCanvas},
-    )),
-    (_) {},
+void _useCanvasText(bool useCanvasText) {
+  js_util.callMethod(
+    html.window,
+    '_flutter_internal_update_experiment',
+    <dynamic>['useCanvasText', useCanvasText],
   );
 }
 
