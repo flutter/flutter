@@ -44,7 +44,8 @@ import java.util.Set;
  * interaction.
  *
  * <p>Multiple {@code FlutterEngine}s may exist, execute Dart code, and render UIs within a single
- * Android app.
+ * Android app. Flutter at this point makes no guarantees on the performance of running multiple
+ * engines. Use at your own risk. See https://github.com/flutter/flutter/issues/37644 for details.
  *
  * <p>To start running Dart and/or Flutter within this {@code FlutterEngine}, get a reference to
  * this engine's {@link DartExecutor} and then use {@link

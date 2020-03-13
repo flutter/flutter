@@ -15,7 +15,13 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 
-/** Base class for activities that use Flutter. */
+/**
+ * Deprecated base class for activities that use Flutter.
+ *
+ * <p>Deprecation: {@link io.flutter.embedding.android.FlutterActivity} is the new API that now
+ * replaces this class. See https://flutter.dev/go/android-project-migration for more migration
+ * details.
+ */
 public class FlutterActivity extends Activity
     implements FlutterView.Provider, PluginRegistry, ViewFactory {
   private static final String TAG = "FlutterActivity";
