@@ -164,14 +164,15 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      final Map<String, TargetPlatform> targetPlatformMap = {
+      final Map<String, TargetPlatform> targetPlatformMap = <String, TargetPlatform>{
         'android_arm': TargetPlatform.android_arm,
         'android_arm64': TargetPlatform.android_arm64,
         'android_x64': TargetPlatform.android_x64,
         'android_x86': TargetPlatform.android_x86,
         'null': null,
       };
-      targetPlatformMap.forEach((k, v) {
+
+      targetPlatformMap.forEach((String k, TargetPlatform v) {
         final TargetPlatform targetPlatform = v;
         testUsingContext('set targetPlatform $k', () async {
           const String deviceId = '1234';
