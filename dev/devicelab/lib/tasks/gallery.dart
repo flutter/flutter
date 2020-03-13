@@ -26,7 +26,7 @@ class GalleryTransitionTest {
     await device.unlock();
     final String deviceId = device.deviceId;
     final Directory galleryDirectory =
-        dir('${flutterDirectory.path}/examples/flutter_gallery');
+        dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 

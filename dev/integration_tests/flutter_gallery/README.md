@@ -15,7 +15,7 @@ the [Flutter Setup](https://flutter.dev/setup/) guide.
 
 ### Building and installing the Flutter app
 
-* `cd $FLUTTER_ROOT/examples/flutter_gallery`
+* `cd $FLUTTER_ROOT/dev/integration_tests/flutter_gallery`
 * `flutter pub get`
 * `flutter run --release`
 
