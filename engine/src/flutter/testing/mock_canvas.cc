@@ -262,13 +262,6 @@ void MockCanvas::onDrawImageNine(const SkImage*,
   FML_DCHECK(false);
 }
 
-void MockCanvas::onDrawBitmapNine(const SkBitmap&,
-                                  const SkIRect&,
-                                  const SkRect&,
-                                  const SkPaint*) {
-  FML_DCHECK(false);
-}
-
 void MockCanvas::onDrawImageLattice(const SkImage*,
                                     const Lattice&,
                                     const SkRect&,
@@ -276,16 +269,7 @@ void MockCanvas::onDrawImageLattice(const SkImage*,
   FML_DCHECK(false);
 }
 
-void MockCanvas::onDrawBitmapLattice(const SkBitmap&,
-                                     const Lattice&,
-                                     const SkRect&,
-                                     const SkPaint*) {
-  FML_DCHECK(false);
-}
-
 void MockCanvas::onDrawVerticesObject(const SkVertices*,
-                                      const SkVertices::Bone[],
-                                      int,
                                       SkBlendMode,
                                       const SkPaint&) {
   FML_DCHECK(false);
