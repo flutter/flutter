@@ -103,7 +103,6 @@ class StackFrame {
   }
 
   static StackFrame _parseWebDebugFrame(String line) {
-    print('PARSING: $line');
     final bool hasPackage = line.startsWith('package');
     final RegExp parser = hasPackage
         ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
