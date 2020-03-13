@@ -24,6 +24,9 @@ import io.flutter.view.TextureRegistry;
  * registrant class is, again by default, called from the application's main {@link Activity}, which
  * defaults to an instance of {@link io.flutter.app.FlutterActivity}, itself a {@link
  * PluginRegistry}.
+ *
+ * <p>This class is now deprecated. See https://flutter.dev/go/android-project-migration for
+ * migration details.
  */
 public interface PluginRegistry {
   /**

@@ -51,11 +51,27 @@ import java.lang.reflect.Method;
  * <p>{@code FlutterActivity} is the simplest and most direct way to integrate Flutter within an
  * Android app.
  *
+ * <p><strong>FlutterActivity responsibilities</strong>
+ *
+ * <p>{@code FlutterActivity} maintains the following responsibilities:
+ *
+ * <ul>
+ *   <li>Displays an Android launch screen.
+ *   <li>Displays a Flutter splash screen.
+ *   <li>Configures the status bar appearance.
+ *   <li>Chooses the Dart execution app bundle path and entrypoint.
+ *   <li>Chooses Flutter's initial route.
+ *   <li>Renders {@code Activity} transparently, if desired.
+ *   <li>Offers hooks for subclasses to provide and configure a {@link FlutterEngine}.
+ * </ul>
+ *
  * <p><strong>Dart entrypoint, initial route, and app bundle path</strong>
  *
  * <p>The Dart entrypoint executed within this {@code Activity} is "main()" by default. To change
  * the entrypoint that a {@code FlutterActivity} executes, subclass {@code FlutterActivity} and
- * override {@link #getDartEntrypointFunctionName()}.
+ * override {@link #getDartEntrypointFunctionName()}. For non-main Dart entrypoints to not be
+ * tree-shaken away, you need to annotate those functions with {@code @pragma('vm:entry-point')} in
+ * Dart.
  *
  * <p>The Flutter route that is initially loaded within this {@code Activity} is "/". The initial
  * route may be specified explicitly by passing the name of the route as a {@code String} in {@link
@@ -73,11 +89,8 @@ import java.lang.reflect.Method;
  *   <li>{@link #getInitialRoute()}
  * </ul>
  *
- * <p>The Dart entrypoint and app bundle path are not supported as {@code Intent} parameters due to
- * security concerns. If such configurations were exposed via {@code Intent}, then a {@code
- * FlutterActivity} that is {@code exported} from your Android app would allow other apps to invoke
- * arbitrary Dart entrypoints in your app by specifying different Dart entrypoints for your {@code
- * FlutterActivity}. Therefore, these configurations are not available via {@code Intent}.
+ * <p>The Dart entrypoint and app bundle path are not supported as {@code Intent} parameters since
+ * your Dart library entrypoints are your private APIs and Intents are invocable by other processes.
  *
  * <p><strong>Using a cached FlutterEngine</strong>
  *
@@ -85,8 +98,10 @@ import java.lang.reflect.Method;
  * new one. Use {@link #withCachedEngine(String)} to build a {@code FlutterActivity} {@code Intent}
  * that is configured to use an existing, cached {@link FlutterEngine}. {@link
  * io.flutter.embedding.engine.FlutterEngineCache} is the cache that is used to obtain a given
- * cached {@link FlutterEngine}. An {@code IllegalStateException} will be thrown if a cached engine
- * is requested but does not exist in the cache.
+ * cached {@link FlutterEngine}. You must create and put a {@link FlutterEngine} into the {@link
+ * io.flutter.embedding.engine.FlutterEngineCache} yourself before using the {@link
+ * #withCachedEngine(String)} builder. An {@code IllegalStateException} will be thrown if a cached
+ * engine is requested but does not exist in the cache.
  *
  * <p>When using a cached {@link FlutterEngine}, that {@link FlutterEngine} should already be
  * executing Dart code, which means that the Dart entrypoint and initial route have already been
@@ -104,6 +119,9 @@ import java.lang.reflect.Method;
  *       pre-warming a {@link FlutterEngine} would have no impact in this situation.
  *   <li>When you are unsure when/if you will need to display a Flutter experience.
  * </ul>
+ *
+ * <p>See https://flutter.dev/docs/development/add-to-app/performance for additional performance
+ * explorations on engine loading.
  *
  * <p>The following illustrates how to pre-warm and cache a {@link FlutterEngine}:
  *
@@ -125,20 +143,6 @@ import java.lang.reflect.Method;
  * <p>If Flutter is needed in a location that can only use a {@code View}, consider using a {@link
  * FlutterView}. Using a {@link FlutterView} requires forwarding some calls from an {@code
  * Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a {@code Fragment}.
- *
- * <p><strong>FlutterActivity responsibilities</strong>
- *
- * <p>{@code FlutterActivity} maintains the following responsibilities:
- *
- * <ul>
- *   <li>Displays an Android launch screen.
- *   <li>Displays a Flutter splash screen.
- *   <li>Configures the status bar appearance.
- *   <li>Chooses the Dart execution app bundle path and entrypoint.
- *   <li>Chooses Flutter's initial route.
- *   <li>Renders {@code Activity} transparently, if desired.
- *   <li>Offers hooks for subclasses to provide and configure a {@link FlutterEngine}.
- * </ul>
  *
  * <p><strong>Launch Screen and Splash Screen</strong>
  *
@@ -196,8 +200,12 @@ public class FlutterActivity extends Activity
   private static final String TAG = "FlutterActivity";
 
   /**
-   * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes a {@code
-   * main()} Dart entrypoint, and displays the "/" route as Flutter's initial route.
+   * Creates an {@link Intent} that launches a {@code FlutterActivity}, which creates a {@link
+   * FlutterEngine} that executes a {@code main()} Dart entrypoint, and displays the "/" route as
+   * Flutter's initial route.
+   *
+   * <p>Consider using the {@link #withCachedEngine(String)} {@link Intent} builder to control when
+   * the {@link FlutterEngine} should be created in your application.
    */
   @NonNull
   public static Intent createDefaultIntent(@NonNull Context launchContext) {
