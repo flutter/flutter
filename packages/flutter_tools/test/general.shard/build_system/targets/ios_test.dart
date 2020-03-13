@@ -45,7 +45,7 @@ void main() {
         kTargetPlatform: 'ios',
       });
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'macos'),
+      Platform: () => FakePlatform(operatingSystem: 'macos', environment: const <String, String>{}),
     });
   });
 
