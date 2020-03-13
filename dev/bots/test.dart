@@ -688,7 +688,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
   final List<String> batch = <String>[];
   for (int i = 0; i < tests.length; i += 1) {
     final String testFilePath = tests[i];
-    batch.add(testFilePath);
+    if (!testFilePath.contains('dummy_test.dart'))
+      batch.add(testFilePath);
     if (batch.length == kWebBatchSize || i == tests.length - 1) {
       await runCommand(
         flutter,
@@ -700,6 +701,8 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
           '--platform=chrome',
           ...?flutterTestArgs,
           ...batch,
+          if (workingDirectory.endsWith('packages/flutter'))
+            'test/dummy_test.dart',
         ],
         workingDirectory: workingDirectory,
         environment: <String, String>{
