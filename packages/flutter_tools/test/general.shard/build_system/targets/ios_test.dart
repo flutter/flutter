@@ -115,7 +115,7 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
@@ -144,7 +144,7 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
 
     // Real framework
     environment.buildDir

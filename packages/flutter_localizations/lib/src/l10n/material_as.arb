@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "বিস্তাৰ কৰক",
   "remainingTextFieldCharacterCountOne": "১টা বর্ণ বাকী আছে",
   "remainingTextFieldCharacterCountOther": "$remainingCountটা বর্ণ বাকী আছে",
-  "refreshIndicatorSemanticLabel": "ৰিফ্ৰেশ্ব কৰক"
+  "refreshIndicatorSemanticLabel": "ৰিফ্ৰেশ্ব কৰক",
+  "moreButtonTooltip": "TBD"
 }

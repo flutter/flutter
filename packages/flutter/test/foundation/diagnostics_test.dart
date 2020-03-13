@@ -180,7 +180,7 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object> json, Dia
   }
   expect(json['propertyType'], equals(property.propertyType.toString()));
   expect(json.containsKey('defaultLevel'), isTrue);
-  if (property.value is DiagnosticableMixin) {
+  if (property.value is Diagnosticable) {
     expect(json['isDiagnosticableValue'], isTrue);
   } else {
     expect(json.containsKey('isDiagnosticableValue'), isFalse);

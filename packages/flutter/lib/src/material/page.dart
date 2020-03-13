@@ -82,10 +82,10 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     final Widget result = builder(context);
     assert(() {
       if (result == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The builder for route "${settings.name}" returned null.'),
-          ErrorDescription('Route builders must never return null.')
-        ]);
+        throw FlutterError(
+          'The builder for route "${settings.name}" returned null.\n'
+          'Route builders must never return null.'
+        );
       }
       return true;
     }());

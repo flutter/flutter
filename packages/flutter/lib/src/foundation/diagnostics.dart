@@ -215,7 +215,7 @@ class TextTreeConfiguration {
     this.isBlankLineBetweenPropertiesAndChildren = true,
     this.beforeName = '',
     this.suffixLineOne = '',
-    this.manditoryFooter = '',
+    this.mandatoryFooter = '',
   }) : assert(prefixLineOne != null),
        assert(prefixOtherLines != null),
        assert(prefixLastChildLineOne != null),
@@ -363,7 +363,7 @@ class TextTreeConfiguration {
   final String footer;
 
   /// Footer to add even for root nodes.
-  final String manditoryFooter;
+  final String mandatoryFooter;
 
   /// Add a blank line between properties and children if both are present.
   final bool isBlankLineBetweenPropertiesAndChildren;
@@ -600,7 +600,7 @@ final TextTreeConfiguration errorTextConfiguration = TextTreeConfiguration(
   prefixOtherLinesRootNode: '',
   beforeName:               '══╡ ',
   suffixLineOne:            ' ╞══',
-  manditoryFooter:          '═════',
+  mandatoryFooter:          '═════',
   // No need to add a blank line as the footer makes the boundary of this
   // subtree unambiguous.
   addBlankLineIfNoChildren: false,
@@ -1341,9 +1341,9 @@ class TextTreeRenderer {
           if (childConfig.footer.isNotEmpty) {
             builder.prefixOtherLines = prefixChildrenRaw;
             builder.write('${childConfig.childLinkSpace}${childConfig.footer}');
-            if (childConfig.manditoryFooter.isNotEmpty) {
+            if (childConfig.mandatoryFooter.isNotEmpty) {
               builder.writeStretched(
-                childConfig.manditoryFooter,
+                childConfig.mandatoryFooter,
                 math.max(builder.wrapWidth, _wrapWidthProperties + childPrefixOtherLines.length),
               );
             }
@@ -1362,9 +1362,9 @@ class TextTreeRenderer {
           if (childConfig.footer.isNotEmpty) {
             builder.prefixOtherLines = prefixChildrenRaw;
             builder.write('${childConfig.linkCharacter}${childConfig.footer}');
-            if (childConfig.manditoryFooter.isNotEmpty) {
+            if (childConfig.mandatoryFooter.isNotEmpty) {
               builder.writeStretched(
-                childConfig.manditoryFooter,
+                childConfig.mandatoryFooter,
                 math.max(builder.wrapWidth, _wrapWidthProperties + childPrefixOtherLines.length),
               );
             }
@@ -1373,8 +1373,8 @@ class TextTreeRenderer {
         }
       }
     }
-    if (parentConfiguration == null && config.manditoryFooter.isNotEmpty) {
-      builder.writeStretched(config.manditoryFooter, builder.wrapWidth);
+    if (parentConfiguration == null && config.mandatoryFooter.isNotEmpty) {
+      builder.writeStretched(config.mandatoryFooter, builder.wrapWidth);
       builder.write(config.lineBreak);
     }
     return builder.build();
@@ -2640,7 +2640,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T v = value;
     List<Map<String, Object>> properties;
-    if (delegate.expandPropertyValues && delegate.includeProperties && v is DiagnosticableMixin && getProperties().isEmpty) {
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
       delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
       properties = DiagnosticsNode.toJsonList(
@@ -2666,7 +2666,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (value is DiagnosticableMixin || value is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     if (v is num)
       // Workaround for https://github.com/flutter/flutter/issues/39937#issuecomment-529558033.
@@ -2846,7 +2846,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getProperties();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getProperties();
       }
     }
@@ -2860,7 +2860,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       if (object is DiagnosticsNode) {
         return object.getChildren();
       }
-      if (object is DiagnosticableMixin) {
+      if (object is Diagnosticable) {
         return object.toDiagnosticsNode(style: style).getChildren();
       }
     }
@@ -2870,7 +2870,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
 /// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
 /// to implement [getChildren] and [getProperties].
-class DiagnosticableNode<T extends DiagnosticableMixin> extends DiagnosticsNode {
+class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   /// Create a diagnostics describing a [DiagnosticableMixin] value.
   ///
   /// The [value] argument must not be null.
@@ -3017,41 +3017,50 @@ class DiagnosticPropertiesBuilder {
   String emptyBodyDescription;
 }
 
-// Examples can assume:
-// class ExampleSuperclass extends Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+// TODO(gspencergoog): Remove DiagnosticableMixin once the mixin Diagnosticable is in stable.
+// https://github.com/flutter/flutter/issues/50498
 
-/// A base class for providing string and [DiagnosticsNode] debug
-/// representations describing the properties of an object.
+/// A mixin class implementing the [Diagnosticable] interface that provides
+/// string and [DiagnosticsNode] debug representations describing the properties
+/// of an object.
 ///
-/// The string debug representation is generated from the intermediate
-/// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
-/// also used by debugging tools displaying interactive trees of objects and
-/// properties.
-///
-/// See also:
-///
-///  * [DiagnosticableTree], which extends this class to also describe the
-///    children of a tree structured object.
-///  * [DiagnosticableMixin], which provides the implementation for
-///    [Diagnosticable], and can be used to add diagnostics to classes which
-///    already have a base class.
-///  * [DiagnosticableMixin.debugFillProperties], which lists best practices
-///    for specifying the properties of a [DiagnosticsNode]. The most common use
-///    case is to override [debugFillProperties] defining custom properties for
-///    a subclass of [DiagnosticableTreeMixin] using the existing
-///    [DiagnosticsProperty] subclasses.
-///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
-///    for describing the children of a [DiagnosticsNode]. Typically the base
-///    class already describes the children of a node properly or a node has
-///    no children.
-///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
-///    nodes without properties or children. There are many
-///    [DiagnosticsProperty] subclasses to handle common use cases.
-abstract class Diagnosticable with DiagnosticableMixin {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const Diagnosticable();
+/// _This mixin exists only to support plugins and packages that require older
+/// Flutter versions: Use the identical mixin [Diagnosticable] instead for all
+/// new code. If you are authoring code that needs to work on the stable branch
+/// as well as master (in a package, for instance), mix this in instead of
+/// extending [Diagnosticable]. Once [Diagnosticable] as a mixin reaches the
+/// stable channel, this class will be deprecated._
+mixin DiagnosticableMixin implements Diagnosticable {
+  @override
+  String toStringShort() => describeIdentity(this);
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    String fullString;
+    assert(() {
+      fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+      return true;
+    }());
+    return fullString ?? toStringShort();
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return DiagnosticableNode<Diagnosticable>(
+      name: name,
+      value: this,
+      style: style,
+    );
+  }
+
+  @override
+  @protected
+  @mustCallSuper
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) { }
 }
+
+// Examples can assume:
+// class ExampleSuperclass with Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
 
 /// A mixin class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
@@ -3077,7 +3086,7 @@ abstract class Diagnosticable with DiagnosticableMixin {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
-mixin DiagnosticableMixin {
+mixin Diagnosticable {
   /// A brief description of this object, usually just the [runtimeType] and the
   /// [hashCode].
   ///
@@ -3106,7 +3115,7 @@ mixin DiagnosticableMixin {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<DiagnosticableMixin>(
+    return DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,
@@ -3338,7 +3347,7 @@ mixin DiagnosticableMixin {
 ///  * [DiagnosticableTreeMixin], a mixin that implements this class.
 ///  * [DiagnosticableMixin], which should be used instead of this class to
 ///    provide diagnostics for objects without children.
-abstract class DiagnosticableTree extends Diagnosticable {
+abstract class DiagnosticableTree with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const DiagnosticableTree();

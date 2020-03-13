@@ -116,7 +116,7 @@ Future<void> main() async {
 ''';
     }
     environment.buildDir.childFile('main.dart')
-      ..writeAsStringSync(contents);
+      .writeAsStringSync(contents);
   }
 }
 
@@ -156,9 +156,26 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = PackageMap.globalPackagesPath;
+    final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+    final List<String> dartDefines = parseDartDefines(environment);
 
-    final ProcessResult result = await globals.processManager.run(<String>[
+    // Run the dart2js compilation in two stages, so that icon tree shaking can
+    // parse the kernel file for web builds.
+    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
+      '--libraries-spec=$specPath',
+      '-o',
+      outputKernel.path,
+      '--packages=$packageFile',
+      '--cfe-only',
+      environment.buildDir.childFile('main.dart').path,
+    ]);
+    if (kernelResult.exitCode != 0) {
+      throw Exception(kernelResult.stdout + kernelResult.stderr);
+    }
+    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
@@ -167,35 +184,42 @@ class Dart2JSTarget extends Target {
       else
         '-O4',
       if (buildMode == BuildMode.profile)
-        '--no-minify',
-      '-o',
-      outputFile.path,
-      '--packages=$packageFile',
-      if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (final String dartDefine in dartDefines)
+        '-D$dartDefine',
+      if (buildMode == BuildMode.profile)
+        '--no-minify',
       if (csp)
         '--csp',
-      for (final String dartDefine in parseDartDefines(environment))
-        '-D$dartDefine',
-      environment.buildDir.childFile('main.dart').path,
+      '-o',
+      outputFile.path,
+      environment.buildDir.childFile('app.dill').path,
     ]);
-    if (result.exitCode != 0) {
-      throw Exception(result.stdout + result.stderr);
+    if (javaScriptResult.exitCode != 0) {
+      throw Exception(javaScriptResult.stdout + javaScriptResult.stderr);
     }
     final File dart2jsDeps = environment.buildDir
-      .childFile('main.dart.js.deps');
+      .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       globals.printError('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }
-    final Depfile depfile = Depfile.parseDart2js(
-      environment.buildDir.childFile('main.dart.js.deps'),
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    final Depfile depfile = depfileService.parseDart2js(
+      environment.buildDir.childFile('app.dill.deps'),
       outputFile,
     );
-    depfile.writeToFile(environment.buildDir.childFile('dart2js.d'));
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('dart2js.d'),
+    );
   }
 }
 
@@ -247,7 +271,15 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
     final Directory webResources = environment.projectDir
       .childDirectory('web');
@@ -269,8 +301,10 @@ class WebReleaseBundle extends Target {
       outputResourcesFiles.add(outputFile);
     }
     final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
-    resourceFile.writeToFile(environment.buildDir.childFile('web_resources.d'));
-
+    depfileService.writeToFile(
+      resourceFile,
+      environment.buildDir.childFile('web_resources.d'),
+    );
   }
 }
 
@@ -320,7 +354,15 @@ class WebServiceWorker extends Target {
     final String serviceWorker = generateServiceWorker(uriToHash);
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
-    depfile.writeToFile(environment.buildDir.childFile('service_worker.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('service_worker.d'),
+    );
   }
 }
 

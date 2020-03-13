@@ -198,8 +198,7 @@ class InkRipple extends InteractiveInkFeature {
       ..forward();
     // This confirm may have been preceded by a cancel.
     _fadeInController.forward();
-    _fadeOutController
-      ..animateTo(1.0, duration: _kFadeOutDuration);
+    _fadeOutController.animateTo(1.0, duration: _kFadeOutDuration);
   }
 
   @override

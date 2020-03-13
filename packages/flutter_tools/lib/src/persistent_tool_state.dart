@@ -9,6 +9,7 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'version.dart';
 
 /// A class that represents global (non-project-specific) internal state that
 /// must persist across tool invocations.
@@ -37,6 +38,17 @@ abstract class PersistentToolState {
   ///
   /// May give null if the value has not been set.
   bool redisplayWelcomeMessage;
+
+  /// Returns the last active version for a given [channel].
+  ///
+  /// If there was no active prior version, returns `null` instead.
+  String lastActiveVersion(Channel channel);
+
+  /// Update the last active version for a given [channel].
+  void updateLastActiveVersion(String fullGitHash, Channel channel);
+
+  /// Whether this client was already determined to be or not be a bot.
+  bool isRunningOnBot;
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
@@ -63,6 +75,13 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
+  static const Map<Channel, String> _lastActiveVersionKeys = <Channel,String>{
+    Channel.master: 'last-active-master-version',
+    Channel.dev: 'last-active-dev-version',
+    Channel.beta: 'last-active-beta-version',
+    Channel.stable: 'last-active-stable-version'
+  };
+  static const String _kBotKey = 'is-bot';
 
   final Config _config;
 
@@ -72,7 +91,31 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
+  String lastActiveVersion(Channel channel) {
+    final String versionKey = _versionKeyFor(channel);
+    assert(versionKey != null);
+    return _config.getValue(versionKey) as String;
+  }
+
+  @override
   set redisplayWelcomeMessage(bool value) {
     _config.setValue(_kRedisplayWelcomeMessage, value);
   }
+
+  @override
+  void updateLastActiveVersion(String fullGitHash, Channel channel) {
+    final String versionKey = _versionKeyFor(channel);
+    assert(versionKey != null);
+    _config.setValue(versionKey, fullGitHash);
+  }
+
+  String _versionKeyFor(Channel channel) {
+    return _lastActiveVersionKeys[channel];
+  }
+
+  @override
+  bool get isRunningOnBot => _config.getValue(_kBotKey) as bool;
+
+  @override
+  set isRunningOnBot(bool value) => _config.setValue(_kBotKey, value);
 }

@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
@@ -70,11 +71,14 @@ class DeviceManager {
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
     AndroidDevices(),
     IOSDevices(),
-    IOSSimulators(),
+    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),
     MacOSDevices(),
-    LinuxDevices(),
+    LinuxDevices(
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    ),
     WindowsDevices(),
     WebDevices(),
   ]);
@@ -100,8 +104,8 @@ class DeviceManager {
   /// specifiedDeviceId = 'all'.
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
-  Stream<Device> getDevicesById(String deviceId) async* {
-    final List<Device> devices = await getAllConnectedDevices().toList();
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    final List<Device> devices = await getAllConnectedDevices();
     deviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
         device.id.toLowerCase() == deviceId ||
@@ -113,18 +117,15 @@ class DeviceManager {
     final Device exactMatch = devices.firstWhere(
         exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
-      yield exactMatch;
-      return;
+      return <Device>[exactMatch];
     }
 
     // Match on a id or name starting with [deviceId].
-    for (final Device device in devices.where(startsWithDeviceId)) {
-      yield device;
-    }
+    return devices.where(startsWithDeviceId).toList();
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
-  Stream<Device> getDevices() {
+  Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
         : getAllConnectedDevices();
@@ -135,12 +136,13 @@ class DeviceManager {
   }
 
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() async* {
-    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
-      for (final Device device in await discoverer.devices) {
-        yield device;
-      }
-    }
+  Future<List<Device>> getAllConnectedDevices() async {
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        discoverer.devices,
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.
@@ -170,7 +172,7 @@ class DeviceManager {
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
-    List<Device> devices = await getDevices().toList();
+    List<Device> devices = await getDevices();
 
     // Always remove web and fuchsia devices from `--all`. This setting
     // currently requires devices to share a frontend_server and resident
@@ -381,7 +383,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ covariant ApplicationPackage app });
+  FutureOr<DeviceLogReader> getLogReader({ covariant ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -536,6 +538,8 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
+    this.webRunHeadless = false,
+    this.webBrowserDebugPort,
     this.vmserviceOutFile,
     this.fastStart = false,
    }) : debuggingEnabled = true;
@@ -545,6 +549,8 @@ class DebuggingOptions {
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
+      this.webRunHeadless = false,
+      this.webBrowserDebugPort,
       this.cacheSkSL = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
@@ -585,6 +591,17 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
+
+  /// Whether to run the browser in headless mode.
+  ///
+  /// Some CI environments do not provide a display and fail to launch the
+  /// browser with full graphics stack. Some browsers provide a special
+  /// "headless" mode that runs the browser with no graphics.
+  final bool webRunHeadless;
+
+  /// The port the browser should use for its debugging protocol.
+  final int webBrowserDebugPort;
+
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;

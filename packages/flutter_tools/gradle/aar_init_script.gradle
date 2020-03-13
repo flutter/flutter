@@ -57,7 +57,7 @@ void configureProject(Project project, String outputDir) {
     // as a result, add the dependency on the embedding.
     project.repositories {
         maven {
-            url "http://download.flutter.io"
+            url "https://storage.googleapis.com/download.flutter.io"
         }
     }
     String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")

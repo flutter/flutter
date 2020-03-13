@@ -476,4 +476,18 @@ void main() {
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
   });
 
+  testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
+    // This test makes sure that the ThemeData debug output doesn't get too
+    // verbose, which has been a problem in the past.
+
+    const ColorScheme darkColors = ColorScheme.dark();
+    final ThemeData darkTheme = ThemeData.from(colorScheme: darkColors);
+
+    expect(darkTheme.toString().length, lessThan(200));
+
+    const ColorScheme lightColors = ColorScheme.light();
+    final ThemeData lightTheme = ThemeData.from(colorScheme: lightColors);
+
+    expect(lightTheme.toString().length, lessThan(200));
+  });
 }

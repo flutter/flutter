@@ -32,7 +32,7 @@ void main() {
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
         platform: platform,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
         osUtils: MockOperatingSystemUtils(),
       );
       artifacts = CachedArtifacts(
@@ -84,7 +84,7 @@ void main() {
         rootOverride: cacheRoot,
         fileSystem: fileSystem,
         platform: platform,
-        logger: MockLogger(),
+        logger: BufferLogger.test(),
         osUtils: MockOperatingSystemUtils(),
       );
       artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
@@ -146,5 +146,4 @@ void main() {
   });
 }
 
-class MockLogger extends Mock implements Logger {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

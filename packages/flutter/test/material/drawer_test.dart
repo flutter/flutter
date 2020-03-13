@@ -148,9 +148,7 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    BoxDecoration decoration = getScrim().decoration as BoxDecoration;
-    expect(decoration.color, Colors.black54);
-    expect(decoration.shape, BoxShape.rectangle);
+    expect(getScrim().color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
@@ -162,9 +160,7 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    decoration = getScrim().decoration as BoxDecoration;
-    expect(decoration.color, const Color(0xFF323232));
-    expect(decoration.shape, BoxShape.rectangle);
+    expect(getScrim().color, const Color(0xFF323232));
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();

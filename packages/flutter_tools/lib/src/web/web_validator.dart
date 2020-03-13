@@ -2,20 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+
+import '../base/file_system.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 import 'chrome.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
-  const WebValidator() : super('Chrome - develop for the web');
+  const WebValidator({
+    @required Platform platform,
+    @required ChromeLauncher chromeLauncher,
+    @required FileSystem fileSystem,
+  }) : _platform = platform,
+       _chromeLauncher = chromeLauncher,
+       _fileSystem = fileSystem,
+       super('Chrome - develop for the web');
+
+  final Platform _platform;
+  final ChromeLauncher _chromeLauncher;
+  final FileSystem _fileSystem;
 
   @override
   Future<ValidationResult> validate() async {
-    final String chrome = findChromeExecutable();
-    final bool canRunChrome = chromeLauncher.canFindChrome();
+    final String chrome = findChromeExecutable(_platform, _fileSystem);
+    final bool canRunChrome = _chromeLauncher.canFindChrome();
     final List<ValidationMessage> messages = <ValidationMessage>[
-      if (globals.platform.environment.containsKey(kChromeEnvironment))
+      if (_platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChrome)
           ValidationMessage.hint('$chrome is not executable.')
         else

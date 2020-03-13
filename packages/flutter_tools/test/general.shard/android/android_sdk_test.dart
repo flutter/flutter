@@ -60,11 +60,27 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('returns sdkmanager path', () {
+    testUsingContext('returns sdkmanager path under cmdline tools', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      globals.fs.file(
+        globals.fs.path.join(sdk.directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager')
+      ).createSync(recursive: true);
+
+      expect(sdk.sdkManagerPath, globals.fs.path.join(sdk.directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('returns sdkmanager path under tools if cmdline doesnt exist', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      globals.config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+
       expect(sdk.sdkManagerPath, globals.fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -80,6 +96,13 @@ void main() {
       when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
+      if (globals.platform.isMacOS) {
+        when(globals.processManager.runSync(
+          <String>['/usr/libexec/java_home'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenReturn(ProcessResult(0, 0, '', ''));
+      }
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -112,6 +135,13 @@ void main() {
       when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
+      if (globals.platform.isMacOS) {
+        when(globals.processManager.runSync(
+          <String>['/usr/libexec/java_home'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenReturn(ProcessResult(0, 0, '', ''));
+      }
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,

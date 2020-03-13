@@ -201,6 +201,7 @@ class CompileMacOSFramework extends Target {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
@@ -210,6 +211,7 @@ class CompileMacOSFramework extends Target {
       darwinArch: DarwinArch.x86_64,
       packagesPath: environment.projectDir.childFile('.packages').path,
       splitDebugInfo: splitDebugInfo,
+      dartObfuscation: dartObfuscation,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -286,7 +288,15 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, assetDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
     // Copy Info.plist template.
     assetDirectory.parent.childFile('Info.plist')
@@ -321,7 +331,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       try {
         final File sourceFile = environment.buildDir.childFile('app.dill');
         sourceFile.copySync(assetDirectory.childFile('kernel_blob.bin').path);
-      } catch (err) {
+      } on Exception catch (err) {
         throw Exception('Failed to copy app.dill: $err');
       }
       // Copy precompiled runtimes.
@@ -334,7 +344,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
             assetDirectory.childFile('vm_snapshot_data').path);
         globals.fs.file(isolateSnapshotData).copySync(
             assetDirectory.childFile('isolate_snapshot_data').path);
-      } catch (err) {
+      } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
     }

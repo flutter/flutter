@@ -104,7 +104,7 @@ class AssembleCommand extends FlutterCommand {
         CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
         CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
       };
-    } catch (err) {
+    } on Exception {
       // We've failed to send usage.
     }
     return const <CustomDimensions, String>{};
@@ -202,7 +202,12 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed('depfile')) {
       final File depfileFile = globals.fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      depfile.writeToFile(globals.fs.file(depfileFile));
+      final DepfileService depfileService = DepfileService(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      );
+      depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }
     return FlutterCommandResult.success();
   }

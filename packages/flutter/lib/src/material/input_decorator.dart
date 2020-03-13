@@ -13,6 +13,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'input_border.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 const Duration _kTransitionDuration = Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
@@ -496,6 +497,9 @@ class _Decoration {
     @required this.floatingLabelProgress,
     this.border,
     this.borderGap,
+    this.alignLabelWithHint,
+    this.isDense,
+    this.visualDensity,
     this.icon,
     this.input,
     this.label,
@@ -507,8 +511,6 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-    this.alignLabelWithHint,
-    this.isDense,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -522,6 +524,7 @@ class _Decoration {
   final _InputBorderGap borderGap;
   final bool alignLabelWithHint;
   final bool isDense;
+  final VisualDensity visualDensity;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -542,10 +545,14 @@ class _Decoration {
       return false;
     return other is _Decoration
         && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
         && other.floatingLabelHeight == floatingLabelHeight
         && other.floatingLabelProgress == floatingLabelProgress
         && other.border == border
         && other.borderGap == borderGap
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.isDense == isDense
+        && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
         && other.label == label
@@ -556,8 +563,7 @@ class _Decoration {
         && other.suffixIcon == suffixIcon
         && other.helperError == helperError
         && other.counter == counter
-        && other.container == container
-        && other.alignLabelWithHint == alignLabelWithHint;
+        && other.container == container;
   }
 
   @override
@@ -568,6 +574,9 @@ class _Decoration {
       floatingLabelProgress,
       border,
       borderGap,
+      alignLabelWithHint,
+      isDense,
+      visualDensity,
       icon,
       input,
       label,
@@ -579,7 +588,6 @@ class _Decoration {
       helperError,
       counter,
       container,
-      alignLabelWithHint,
     );
   }
 }
@@ -1045,6 +1053,7 @@ class _RenderDecoration extends RenderBox {
     );
 
     // Calculate the height of the input text container.
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
     final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
     final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
@@ -1055,12 +1064,13 @@ class _RenderDecoration extends RenderBox {
       + fixAboveInput
       + inputHeight
       + fixBelowInput
-      + contentPadding.bottom,
+      + contentPadding.bottom
+      + densityOffset.dy,
     );
     final double minContainerHeight = decoration.isDense || expands
       ? 0.0
-      : kMinInteractiveDimension;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
+      : kMinInteractiveDimension + densityOffset.dy;
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -1096,7 +1106,7 @@ class _RenderDecoration extends RenderBox {
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1247,6 +1257,7 @@ class _RenderDecoration extends RenderBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
     final _RenderDecorationLayout layout = _layout(constraints);
 
@@ -1923,7 +1934,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration _effectiveDecoration;
   InputDecoration get decoration {
     _effectiveDecoration ??= widget.decoration.applyDefaults(
-      Theme.of(context).inputDecorationTheme
+      Theme.of(context).inputDecorationTheme,
     );
     return _effectiveDecoration;
   }
@@ -2200,9 +2211,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: kMinInteractiveDimension,
-            minHeight: kMinInteractiveDimension,
+          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
+            const BoxConstraints(
+              minWidth: kMinInteractiveDimension,
+              minHeight: kMinInteractiveDimension,
+            ),
           ),
           child: IconTheme.merge(
             data: IconThemeData(
@@ -2219,9 +2232,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: kMinInteractiveDimension,
-            minHeight: kMinInteractiveDimension,
+          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
+            const BoxConstraints(
+              minWidth: kMinInteractiveDimension,
+              minHeight: kMinInteractiveDimension,
+            ),
           ),
           child: IconTheme.merge(
             data: IconThemeData(
@@ -2299,11 +2314,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         floatingLabelProgress: _floatingLabelController.value,
         border: border,
         borderGap: _borderGap,
+        alignLabelWithHint: decoration.alignLabelWithHint,
+        isDense: decoration.isDense,
+        visualDensity: themeData.visualDensity,
         icon: icon,
         input: widget.child,
         label: label,
-        alignLabelWithHint: decoration.alignLabelWithHint,
-        isDense: decoration.isDense,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
@@ -2463,6 +2479,7 @@ class InputDecoration {
     this.isDense,
     this.contentPadding,
     this.prefixIcon,
+    this.prefixIconConstraints,
     this.prefix,
     this.prefixText,
     this.prefixStyle,
@@ -2470,6 +2487,7 @@ class InputDecoration {
     this.suffix,
     this.suffixText,
     this.suffixStyle,
+    this.suffixIconConstraints,
     this.counter,
     this.counterText,
     this.counterStyle,
@@ -2533,10 +2551,12 @@ class InputDecoration {
        prefix = null,
        prefixText = null,
        prefixStyle = null,
+       prefixIconConstraints = null,
        suffix = null,
        suffixIcon = null,
        suffixText = null,
        suffixStyle = null,
+       suffixIconConstraints = null,
        counter = null,
        counterText = null,
        counterStyle = null,
@@ -2754,6 +2774,58 @@ class InputDecoration {
   ///  * [suffixIcon], which is the same but on the trailing edge.
   final Widget prefixIcon;
 
+  /// The constraints for the prefix icon.
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding [prefixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows the differences between two `TextField` widgets when
+  /// [prefixIconConstraints] is set to the default value and when one is not.
+  ///
+  /// Note that [isDense] must be set to true to be able to
+  /// set the constraints smaller than 48px.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  ///     child: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             hintText: 'Normal Icon Constraints',
+  ///             prefixIcon: Icon(Icons.search),
+  ///           ),
+  ///         ),
+  ///         SizedBox(height: 10),
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             isDense: true,
+  ///             hintText:'Smaller Icon Constraints',
+  ///             prefixIcon: Icon(Icons.search),
+  ///             prefixIconConstraints: BoxConstraints(
+  ///               minHeight: 32,
+  ///               minWidth: 32,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final BoxConstraints prefixIconConstraints;
+
   /// Optional widget to place on the line before the input.
   ///
   /// This can be used, for example, to add some padding to text that would
@@ -2866,6 +2938,61 @@ class InputDecoration {
   ///
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle suffixStyle;
+
+  /// The constraints for the suffix icon.
+  ///
+  /// This can be used to modify the [BoxConstraints] surrounding [suffixIcon].
+  ///
+  /// This property is particularly useful for getting the decoration's height
+  /// less than 48px. This can be achieved by setting [isDense] to true and
+  /// setting the constraints' minimum height and width to a value lower than
+  /// 48px.
+  ///
+  /// If null, a [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  ///
+  /// {@tool dartpad --template=stateless_widget_scaffold}
+  /// This example shows the differences between two `TextField` widgets when
+  /// [suffixIconConstraints] is set to the default value and when one is not.
+  ///
+  /// Note that [isDense] must be set to true to be able to
+  /// set the constraints smaller than 48px.
+  ///
+  /// If null, [BoxConstraints] with a minimum width and height of 48px is
+  /// used.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Padding(
+  ///     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+  ///     child: Column(
+  ///       mainAxisAlignment: MainAxisAlignment.center,
+  ///       children: <Widget>[
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             hintText: 'Normal Icon Constraints',
+  ///             suffixIcon: Icon(Icons.search),
+  ///           ),
+  ///         ),
+  ///         SizedBox(height: 10),
+  ///         TextField(
+  ///           decoration: InputDecoration(
+  ///             isDense: true,
+  ///             hintText:'Smaller Icon Constraints',
+  ///             suffixIcon: Icon(Icons.search),
+  ///             suffixIconConstraints: BoxConstraints(
+  ///               minHeight: 32,
+  ///               minWidth: 32,
+  ///             ),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final BoxConstraints suffixIconConstraints;
 
   /// Optional text to place below the line as a character count.
   ///
@@ -3151,11 +3278,13 @@ class InputDecoration {
     Widget prefixIcon,
     Widget prefix,
     String prefixText,
+    BoxConstraints prefixIconConstraints,
     TextStyle prefixStyle,
     Widget suffixIcon,
     Widget suffix,
     String suffixText,
     TextStyle suffixStyle,
+    BoxConstraints suffixIconConstraints,
     Widget counter,
     String counterText,
     TextStyle counterStyle,
@@ -3195,10 +3324,12 @@ class InputDecoration {
       prefix: prefix ?? this.prefix,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
+      prefixIconConstraints: prefixIconConstraints ?? this.prefixIconConstraints,
       suffixIcon: suffixIcon ?? this.suffixIcon,
       suffix: suffix ?? this.suffix,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
+      suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
       counter: counter ?? this.counter,
       counterText: counterText ?? this.counterText,
       counterStyle: counterStyle ?? this.counterStyle,
@@ -3282,10 +3413,12 @@ class InputDecoration {
         && other.prefix == prefix
         && other.prefixText == prefixText
         && other.prefixStyle == prefixStyle
+        && other.prefixIconConstraints == prefixIconConstraints
         && other.suffixIcon == suffixIcon
         && other.suffix == suffix
         && other.suffixText == suffixText
         && other.suffixStyle == suffixStyle
+        && other.suffixIconConstraints == suffixIconConstraints
         && other.counter == counter
         && other.counterText == counterText
         && other.counterStyle == counterStyle
@@ -3334,10 +3467,12 @@ class InputDecoration {
       prefix,
       prefixText,
       prefixStyle,
+      prefixIconConstraints,
       suffixIcon,
       suffix,
       suffixText,
       suffixStyle,
+      suffixIconConstraints,
       counter,
       counterText,
       counterStyle,
@@ -3376,10 +3511,12 @@ class InputDecoration {
       if (prefix != null) 'prefix: $prefix',
       if (prefixText != null) 'prefixText: $prefixText',
       if (prefixStyle != null) 'prefixStyle: $prefixStyle',
+      if (prefixIconConstraints != null) 'prefixIconConstraints: $prefixIconConstraints',
       if (suffixIcon != null) 'suffixIcon: $suffixIcon',
       if (suffix != null) 'suffix: $suffix',
       if (suffixText != null) 'suffixText: $suffixText',
       if (suffixStyle != null) 'suffixStyle: $suffixStyle',
+      if (suffixIconConstraints != null) 'suffixIconConstraints: $suffixIconConstraints',
       if (counter != null) 'counter: $counter',
       if (counterText != null) 'counterText: $counterText',
       if (counterStyle != null) 'counterStyle: $counterStyle',
@@ -3411,7 +3548,7 @@ class InputDecoration {
 /// The [InputDecoration.applyDefaults] method is used to combine a input
 /// decoration theme with an [InputDecoration] object.
 @immutable
-class InputDecorationTheme extends Diagnosticable {
+class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///

@@ -15,14 +15,64 @@ import 'cache.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
+/// The names of each channel/branch in order of increasing stability.
+enum Channel {
+  master,
+  dev,
+  beta,
+  stable,
+}
+
+/// The flutter GitHub repository.
+const String _flutterGit = 'https://github.com/flutter/flutter.git';
+
+/// Retrieve a human-readable name for a given [channel].
+///
+/// Requires [FlutterVersion.officialChannels] to be correctly ordered.
+String getNameForChannel(Channel channel) {
+  return FlutterVersion.officialChannels.elementAt(channel.index);
+}
+
+/// Retrieve the [Channel] representation for a string [name].
+///
+/// Returns `null` if [name] is not in the list of official channels, according
+/// to [FlutterVersion.officialChannels].
+Channel getChannelForName(String name) {
+  if (FlutterVersion.officialChannels.contains(name)) {
+    return Channel.values[FlutterVersion.officialChannels.toList().indexOf(name)];
+  }
+  return null;
+}
+
 class FlutterVersion {
-  FlutterVersion([this._clock = const SystemClock()]) {
-    _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
-    _gitTagVersion = GitTagVersion.determine();
+  /// Parses the Flutter version from currently available tags in the local
+  /// repo.
+  ///
+  /// Call [fetchTagsAndUpdate] to update the version based on the latest tags
+  /// available upstream.
+  FlutterVersion([this._clock = const SystemClock(), this._workingDirectory]) {
+    _frameworkRevision = _runGit(
+      gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
+      processUtils,
+      _workingDirectory,
+    );
+    _gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: _workingDirectory, fetchTags: false);
+    _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
+  }
+
+  /// Fetchs tags from the upstream Flutter repository and re-calculates the
+  /// version.
+  ///
+  /// This carries a performance penalty, and should only be called when the
+  /// user explicitly wants to get the version, e.g. for `flutter --version` or
+  /// `flutter doctor`.
+  void fetchTagsAndUpdate() {
+    _gitTagVersion = GitTagVersion.determine(processUtils, workingDirectory: _workingDirectory, fetchTags: true);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
   }
 
   final SystemClock _clock;
+  final String _workingDirectory;
 
   String _repositoryUrl;
   String get repositoryUrl {
@@ -60,11 +110,19 @@ class FlutterVersion {
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
   String get channel {
     if (_channel == null) {
-      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+      final String channel = _runGit(
+        'git rev-parse --abbrev-ref --symbolic @{u}',
+        processUtils,
+        _workingDirectory,
+      );
       final int slash = channel.indexOf('/');
       if (slash != -1) {
         final String remote = channel.substring(0, slash);
-        _repositoryUrl = _runGit('git ls-remote --get-url $remote');
+        _repositoryUrl = _runGit(
+          'git ls-remote --get-url $remote',
+          processUtils,
+          _workingDirectory,
+        );
         _channel = channel.substring(slash + 1);
       } else if (channel.isEmpty) {
         _channel = 'unknown';
@@ -88,7 +146,11 @@ class FlutterVersion {
 
   String _frameworkAge;
   String get frameworkAge {
-    return _frameworkAge ??= _runGit(gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '));
+    return _frameworkAge ??= _runGit(
+      gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
+      processUtils,
+      _workingDirectory,
+    );
   }
 
   String _frameworkVersion;
@@ -190,7 +252,7 @@ class FlutterVersion {
         'remote',
         'add',
         _versionCheckRemote,
-        'https://github.com/flutter/flutter.git',
+        _flutterGit,
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
       return _latestGitCommitDate(
@@ -226,7 +288,7 @@ class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', processUtils);
       return branch == 'HEAD' ? channel : branch;
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
@@ -485,7 +547,7 @@ class VersionCheckStamp {
         } else {
           globals.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
         globals.printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
@@ -599,10 +661,10 @@ String _runSync(List<String> command, { bool lenient = true }) {
   return '';
 }
 
-String _runGit(String command) {
+String _runGit(String command, ProcessUtils processUtils, [String workingDirectory]) {
   return processUtils.runSync(
     command.split(' '),
-    workingDirectory: Cache.flutterRoot,
+    workingDirectory: workingDirectory ?? Cache.flutterRoot,
   ).stdout.trim();
 }
 
@@ -658,8 +720,11 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
-  static GitTagVersion determine() {
-    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags'));
+  static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
+    if (fetchTags) {
+      _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
+    }
+    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 
   static GitTagVersion parse(String version) {

@@ -10,7 +10,6 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcodebuild.
@@ -93,5 +92,5 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

@@ -12,5 +12,6 @@ void main() {
     kCullOpacityRouteName,
     pageDelay: const Duration(seconds: 1),
     duration: const Duration(seconds: 10),
+    timeout: const Duration(seconds: 45),
   );
 }

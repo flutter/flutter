@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Zgjero",
   "remainingTextFieldCharacterCountOne": "1 karakter i mbetur",
   "remainingTextFieldCharacterCountOther": "$remainingCount karaktere të mbetura",
-  "refreshIndicatorSemanticLabel": "Rifresko"
+  "refreshIndicatorSemanticLabel": "Rifresko",
+  "moreButtonTooltip": "TBD"
 }

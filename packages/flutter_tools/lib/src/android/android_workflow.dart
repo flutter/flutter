@@ -122,7 +122,7 @@ class AndroidValidator extends DoctorValidator {
           final List<String> versionLines = (result.stderr as String).split('\n');
           javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
-      } catch (error) {
+      } on Exception catch (error) {
         _logger.printTrace(error.toString());
       }
       if (javaVersionText == null || javaVersionText.isEmpty) {
@@ -287,7 +287,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         final List<String> versionLines = (result.stderr as String).split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printTrace(error.toString());
     }
     if (javaVersion == null) {
@@ -359,12 +359,6 @@ class AndroidLicenseValidator extends DoctorValidator {
       throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
     }
 
-    final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
-    if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
-      // SDK manager is found, but needs to be updated.
-      throwToolExit(userMessages.androidSdkManagerOutdated(androidSdk.sdkManagerPath));
-    }
-
     try {
       final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
@@ -389,7 +383,7 @@ class AndroidLicenseValidator extends DoctorValidator {
           globals.stdio.addStdoutStream(process.stdout),
           globals.stdio.addStderrStream(process.stderr),
         ]);
-      } catch (err, stack) {
+      } on Exception catch (err, stack) {
         globals.printTrace('Echoing stdout or stderr from the license subprocess failed:');
         globals.printTrace('$err\n$stack');
       }

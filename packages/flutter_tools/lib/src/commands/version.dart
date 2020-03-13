@@ -17,10 +17,16 @@ import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
-    usesPubOption(hide: true);
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
+    );
+    // Don't use usesPubOption here. That will cause the version command to
+    // require a pubspec.yaml file, which it doesn't need.
+    argParser.addFlag('pub',
+      defaultsTo: true,
+      hide: true,
+      help: 'Whether to run "flutter pub get" after switching versions.',
     );
   }
 
@@ -57,8 +63,29 @@ class VersionCommand extends FlutterCommand {
     final List<String> tags = await getTags();
     if (argResults.rest.isEmpty) {
       tags.forEach(globals.printStatus);
-      return const FlutterCommandResult(ExitStatus.success);
+      return FlutterCommandResult.success();
     }
+
+    globals.printStatus(
+      '╔══════════════════════════════════════════════════════════════════════════════╗\n'
+      '║ Warning: "flutter version" will leave the SDK in a detached HEAD state.      ║\n'
+      '║ If you are using the command to return to a previously installed SDK version ║\n'
+      '║ consider using the "flutter downgrade" command instead.                      ║\n'
+      '╚══════════════════════════════════════════════════════════════════════════════╝\n',
+      emphasis: true,
+    );
+    if (globals.stdio.stdinHasTerminal) {
+      globals.terminal.usesTerminalUi = true;
+      final String result = await globals.terminal.promptForCharInput(
+        <String>['y', 'n'],
+        logger: globals.logger,
+        prompt: 'Are you sure you want to proceed?'
+      );
+      if (result == 'n') {
+        return FlutterCommandResult.success();
+      }
+    }
+
     final String version = argResults.rest[0].replaceFirst('v', '');
     if (!tags.contains('v$version')) {
       globals.printError('There is no version: $version');
@@ -89,8 +116,8 @@ class VersionCommand extends FlutterCommand {
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
-    } catch (e) {
-      throwToolExit('Unable to checkout version branch for version $version.');
+    } on Exception catch (e) {
+      throwToolExit('Unable to checkout version branch for version $version: $e');
     }
 
     final FlutterVersion flutterVersion = FlutterVersion();
@@ -117,7 +144,7 @@ class VersionCommand extends FlutterCommand {
     globals.printStatus(flutterVersion.toString());
 
     final String projectRoot = findProjectRoot();
-    if (projectRoot != null && shouldRunPub) {
+    if (projectRoot != null && boolArg('pub')) {
       globals.printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,

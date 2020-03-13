@@ -115,8 +115,8 @@ class FileHashStore {
     FileStorage fileStorage;
     try {
       fileStorage = FileStorage.fromBuffer(data);
-    } catch (err) {
-      _logger.printTrace('Filestorage format changed');
+    } on Exception catch (err) {
+      _logger.printTrace('Filestorage format changed: $err');
       cacheFile.deleteSync();
       return;
     }

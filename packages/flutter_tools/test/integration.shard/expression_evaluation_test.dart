@@ -107,7 +107,7 @@ void batch2() {
   }
 
   Future<void> cleanProject() async {
-    await _flutter?.quit();
+    await _flutter?.waitForCompletion();
     tryToDelete(tempDir);
   }
 

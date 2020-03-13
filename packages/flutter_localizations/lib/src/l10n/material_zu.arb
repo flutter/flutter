@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Nweba",
   "remainingTextFieldCharacterCountOne": "1 uhlamvu olusele",
   "remainingTextFieldCharacterCountOther": "$remainingCount izinhlamvu ezisele",
-  "refreshIndicatorSemanticLabel": "Vuselela"
+  "refreshIndicatorSemanticLabel": "Vuselela",
+  "moreButtonTooltip": "TBD"
 }

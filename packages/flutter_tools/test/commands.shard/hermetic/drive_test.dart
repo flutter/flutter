@@ -42,10 +42,10 @@ void main() {
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
       fs.directory('test_driver').createSync();
-      fs.file('pubspec.yaml')..createSync();
+      fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
-      appStarter = (DriveCommand command) {
+      appStarter = (DriveCommand command, Uri webUri) {
         throw 'Unexpected call to appStarter';
       };
       testRunner = (List<String> testArgs, Map<String, String> environment) {
@@ -91,7 +91,7 @@ void main() {
 
     testUsingContext('returns 1 when app fails to run', () async {
       testDeviceManager.addDevice(MockDevice());
-      appStarter = expectAsync1((DriveCommand command) async => null);
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async => null);
 
       final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -170,7 +170,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync1((DriveCommand command) async {
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
         return LaunchResult.succeeded();
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
@@ -207,7 +207,7 @@ void main() {
       final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      appStarter = expectAsync1((DriveCommand command) async {
+      appStarter = expectAsync2((DriveCommand command, Uri webUri) async {
         return LaunchResult.succeeded();
       });
       testRunner = (List<String> testArgs, Map<String, String> environment) async {
@@ -699,10 +699,6 @@ void main() {
     test('macOS Safari', () {
       final Map<String, dynamic> expected = <String, dynamic>{
         'browserName': 'safari',
-        'safari.options': <String, dynamic>{
-          'skipExtensionInstallation': true,
-          'cleanSession': true
-        }
       };
 
       expect(getDesiredCapabilities(Browser.safari, false), expected);
@@ -716,6 +712,19 @@ void main() {
       };
 
       expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
+    });
+
+    test('android chrome', () {
+      final Map<String, dynamic> expected = <String, dynamic>{
+        'browserName': 'chrome',
+        'platformName': 'android',
+        'goog:chromeOptions': <String, dynamic>{
+          'androidPackage': 'com.android.chrome',
+          'args': <String>['--disable-fullscreen']
+        },
+      };
+
+      expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
     });
   });
 }

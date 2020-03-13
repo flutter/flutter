@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "ପ୍ରସାରିତ କରନ୍ତୁ",
   "remainingTextFieldCharacterCountOne": "1ଟି ଅକ୍ଷର ବାକି ଅଛି",
   "remainingTextFieldCharacterCountOther": "$remainingCountଟି ଅକ୍ଷର ବାକି ଅଛି",
-  "refreshIndicatorSemanticLabel": "ରିଫ୍ରେସ୍ କରନ୍ତୁ"
+  "refreshIndicatorSemanticLabel": "ରିଫ୍ରେସ୍ କରନ୍ତୁ",
+  "moreButtonTooltip": "TBD"
 }

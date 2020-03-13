@@ -6,8 +6,9 @@ stocks app uses the [Dart `intl` package](https://github.com/dart-lang/intl).
 
 Rebuilding everything requires two steps.
 
-1. Create or update the English and Spanish localizations, `stocks_en_US.arb`
-and `stocks_es_ES.arb`. See the [ARB specification](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
+1. Create or update the English and Spanish localizations,
+`stocks_en_US.arb`, `stocks_en.arb`, and `stocks_es.arb`. See the
+[ARB specification](https://github.com/google/app-resource-bundle/wiki/ApplicationResourceBundleSpecification)
 for more info.
 
 2. With `examples/stocks` as the current directory, generate a
@@ -16,11 +17,13 @@ for more info.
 
 ```dart
 dart ${FLUTTER_PATH}/dev/tools/localization/bin/gen_l10n.dart --arb-dir=lib/i18n \
-    --template-arb-file=stocks_en_US.arb --output-localization-file=stock_strings.dart \
-    --output-class=StockStrings
+    --template-arb-file=stocks_en.arb --output-localization-file=stock_strings.dart \
+    --output-class=StockStrings --header-file=header.txt
 ```
 
-The `StockStrings` class uses the generated `initializeMessages()`function
-(`messages_all.dart`) to load the localized messages and `Intl.message()`
-to look them up. The generated class's API documentation explains how to add
-the new localizations delegate and supported locales to the Flutter application.
+The `StockStrings` class creates a delegate that performs message lookups
+based on the locale of the device. In this case, the stocks app supports
+`en`, `en_US`, and `es`. Thus, the `StockStringsEn` and `StockStringsEs`
+classes extends `StockStrings`. `StockStringsEnUs` extends
+`StockStringsEn`. This allows `StockStringsEnUs` to fall back on messages
+in `StockStringsEn`.

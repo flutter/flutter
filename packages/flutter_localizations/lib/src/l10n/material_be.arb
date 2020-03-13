@@ -54,5 +54,6 @@
   "collapsedIconTapHint": "Разгарнуць",
   "remainingTextFieldCharacterCountOne": "Застаўся 1 сімвал",
   "remainingTextFieldCharacterCountOther": "Засталося $remainingCount сімвала",
-  "refreshIndicatorSemanticLabel": "Абнавіць"
+  "refreshIndicatorSemanticLabel": "Абнавіць",
+  "moreButtonTooltip": "TBD"
 }

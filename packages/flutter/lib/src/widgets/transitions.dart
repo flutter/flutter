@@ -23,41 +23,16 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
-///{@tool snippet}
+///{@tool dartpad --template=stateful_widget_material_ticker}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedWidget].
 ///
-/// ```dart
-/// class Spinner extends StatefulWidget {
-///   @override
-///   _SpinnerState createState() => _SpinnerState();
-/// }
+/// ```dart imports
+/// import 'dart:math' as math;
+/// ```
 ///
-/// class _SpinnerState extends State<Spinner> with TickerProviderStateMixin {
-///   AnimationController _controller;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _controller = AnimationController(
-///       duration: const Duration(seconds: 10),
-///       vsync: this,
-///     )..repeat();
-///   }
-///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return SpinningContainer(controller: _controller);
-///   }
-/// }
-///
+/// ```dart preamble
 /// class SpinningContainer extends AnimatedWidget {
 ///   const SpinningContainer({Key key, AnimationController controller})
 ///       : super(key: key, listenable: controller);
@@ -71,6 +46,30 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 ///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
 ///     );
 ///   }
+/// }
+/// ```
+///
+/// ```dart
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 10),
+///     vsync: this,
+///   )..repeat();
+/// }
+///
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return SpinningContainer(controller: _controller);
 /// }
 /// ```
 /// {@end-tool}
@@ -1035,62 +1034,56 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool snippet}
+/// {@tool dartpad --template=stateful_widget_material_ticker}
 ///
-/// This code defines a widget called `Spinner` that spins a green square
-/// continually. It is built with an [AnimatedBuilder] and makes use of the
-/// [child] feature to avoid having to rebuild the [Container] each time. The
-/// resulting animation is shown below the code.
+/// This code defines a widget that spins a green square continually. It is
+/// built with an [AnimatedBuilder] and makes use of the [child] feature to
+/// avoid having to rebuild the [Container] each time.
+///
+/// ```dart imports
+/// import 'dart:math' as math;
+/// ```
 ///
 /// ```dart
-/// class Spinner extends StatefulWidget {
-///   @override
-///   _SpinnerState createState() => _SpinnerState();
+/// AnimationController _controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   _controller = AnimationController(
+///     duration: const Duration(seconds: 10),
+///     vsync: this,
+///   )..repeat();
 /// }
 ///
-/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
-///   AnimationController _controller;
+/// @override
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
 ///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _controller = AnimationController(
-///       duration: const Duration(seconds: 10),
-///       vsync: this,
-///     )..repeat();
-///   }
-///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return AnimatedBuilder(
-///       animation: _controller,
-///       child: Container(
-///         width: 200.0,
-///         height: 200.0,
-///         color: Colors.green,
-///         child: const Center(
-///           child: Text('Wee'),
-///         ),
+/// @override
+/// Widget build(BuildContext context) {
+///   return AnimatedBuilder(
+///     animation: _controller,
+///     child: Container(
+///       width: 200.0,
+///       height: 200.0,
+///       color: Colors.green,
+///       child: const Center(
+///         child: Text('Whee!'),
 ///       ),
-///       builder: (BuildContext context, Widget child) {
-///         return Transform.rotate(
-///           angle: _controller.value * 2.0 * math.pi,
-///           child: child,
-///         );
-///       },
-///     );
-///   }
+///     ),
+///     builder: (BuildContext context, Widget child) {
+///       return Transform.rotate(
+///         angle: _controller.value * 2.0 * math.pi,
+///         child: child,
+///       );
+///     },
+///   );
 /// }
 /// ```
 /// {@end-tool}
-///
-/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_builder.mp4}
 ///
 /// See also:
 ///

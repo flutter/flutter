@@ -20,10 +20,13 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
 // BuildContext context;
+
+const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
 /// A material design dialog.
 ///
@@ -48,9 +51,12 @@ class Dialog extends StatelessWidget {
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
     this.insetAnimationCurve = Curves.decelerate,
+    this.insetPadding = _defaultInsetPadding,
+    this.clipBehavior = Clip.none,
     this.shape,
     this.child,
-  }) : super(key: key);
+  }) : assert(clipBehavior != null),
+       super(key: key);
 
   /// {@template flutter.material.dialog.backgroundColor}
   /// The background color of the surface of this [Dialog].
@@ -86,6 +92,26 @@ class Dialog extends StatelessWidget {
   /// {@endtemplate}
   final Curve insetAnimationCurve;
 
+  /// {@template flutter.material.dialog.insetPadding}
+  /// The amount of padding added to [MediaQueryData.viewInsets] on the outside
+  /// of the dialog. This defines the minimum space between the screen's edges
+  /// and the dialog.
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0)`.
+  /// {@endtemplate}
+  final EdgeInsets insetPadding;
+
+  /// {@template flutter.material.dialog.clipBehavior}
+  /// Controls how the contents of the dialog are clipped (or not) to the given
+  /// [shape].
+  ///
+  /// See the enum [Clip] for details of all possible options and their common
+  /// use cases.
+  ///
+  /// Defaults to [Clip.none], and must not be null.
+  /// {@endtemplate}
+  final Clip clipBehavior;
+
   /// {@template flutter.material.dialog.shape}
   /// The shape of this dialog's border.
   ///
@@ -108,8 +134,9 @@ class Dialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
+    final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
     return AnimatedPadding(
-      padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      padding: effectivePadding,
       duration: insetAnimationDuration,
       curve: insetAnimationCurve,
       child: MediaQuery.removeViewInsets(
@@ -126,6 +153,7 @@ class Dialog extends StatelessWidget {
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
+              clipBehavior: clipBehavior,
               child: child,
             ),
           ),
@@ -223,13 +251,17 @@ class AlertDialog extends StatelessWidget {
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
     this.actionsOverflowDirection,
+    this.actionsOverflowButtonSpacing,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
+    this.insetPadding = _defaultInsetPadding,
+    this.clipBehavior = Clip.none,
     this.shape,
     this.scrollable = false,
   }) : assert(contentPadding != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -342,6 +374,22 @@ class AlertDialog extends StatelessWidget {
   /// * [ButtonBar], which [actions] configures to lay itself out.
   final VerticalDirection actionsOverflowDirection;
 
+  /// The spacing between [actions] when the button bar overflows.
+  ///
+  /// If the widgets in [actions] do not fit into a single row, they are
+  /// arranged into a column. This parameter provides additional
+  /// vertical space in between buttons when it does overflow.
+  ///
+  /// Note that the button spacing may appear to be more than
+  /// the value provided. This is because most buttons adhere to the
+  /// [MaterialTapTargetSize] of 48px. So, even though a button
+  /// might visually be 36px in height, it might still take up to
+  /// 48px vertically.
+  ///
+  /// If null then no spacing will be added in between buttons in
+  /// an overflow state.
+  final double actionsOverflowButtonSpacing;
+
   /// The padding that surrounds each button in [actions].
   ///
   /// This is different from [actionsPadding], which defines the padding
@@ -375,6 +423,12 @@ class AlertDialog extends StatelessWidget {
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;
+
+  /// {@macro flutter.material.dialog.insetPadding}
+  final EdgeInsets insetPadding;
+
+  /// {@macro flutter.material.dialog.clipBehavior}
+  final Clip clipBehavior;
 
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
@@ -410,6 +464,8 @@ class AlertDialog extends StatelessWidget {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
       }
     }
@@ -445,6 +501,7 @@ class AlertDialog extends StatelessWidget {
         child: ButtonBar(
           buttonPadding: buttonPadding,
           overflowDirection: actionsOverflowDirection,
+          overflowButtonSpacing: actionsOverflowButtonSpacing,
           children: actions,
         ),
       );
@@ -499,6 +556,8 @@ class AlertDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: backgroundColor,
       elevation: elevation,
+      insetPadding: insetPadding,
+      clipBehavior: clipBehavior,
       shape: shape,
       child: dialogChild,
     );
@@ -737,6 +796,8 @@ class SimpleDialog extends StatelessWidget {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
       }
     }
@@ -815,6 +876,9 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// By default, `useRootNavigator` is `true` and the dialog route created by
 /// this method is pushed to the root navigator.
 ///
+/// The `routeSettings` argument is passed to [showGeneralDialog],
+/// see [RouteSettings] for details.
+///
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
@@ -843,6 +907,7 @@ Future<T> showDialog<T>({
   Widget child,
   WidgetBuilder builder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(child == null || builder == null);
   assert(useRootNavigator != null);
@@ -869,5 +934,6 @@ Future<T> showDialog<T>({
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
     useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
   );
 }

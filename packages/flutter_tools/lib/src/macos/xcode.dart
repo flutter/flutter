@@ -15,6 +15,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
@@ -325,7 +326,7 @@ class XCDevice {
       if (errorProperties != null) {
         final String errorMessage = _parseErrorMessage(errorProperties);
         if (errorMessage.contains('not paired')) {
-          UsageEvent('device', 'ios-trust-failure').send();
+          UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
         }
         _logger.printTrace(errorMessage);
 
@@ -349,6 +350,10 @@ class XCDevice {
         name: device['name'] as String,
         cpuArchitecture: _cpuArchitecture(deviceProperties),
         sdkVersion: _sdkVersion(deviceProperties),
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+        iosDeploy: globals.iosDeploy,
+        platform: globals.platform,
       ));
     }
     return devices;
@@ -401,11 +406,15 @@ class XCDevice {
       final String architecture = deviceProperties['architecture'] as String;
       try {
         cpuArchitecture = getIOSArchForName(architecture);
-      } catch (error) {
-        // Fallback to default iOS architecture. Future-proof against a theoretical version
-        // of Xcode that changes this string to something slightly different like "ARM64".
+      } on Exception {
+        // Fallback to default iOS architecture. Future-proof against a
+        // theoretical version of Xcode that changes this string to something
+        // slightly different like "ARM64".
         cpuArchitecture ??= defaultIOSArchs.first;
-        _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
+        _logger.printError(
+          'Unknown architecture $architecture, defaulting to '
+          '${getNameForDarwinArch(cpuArchitecture)}',
+        );
       }
     }
     return cpuArchitecture;

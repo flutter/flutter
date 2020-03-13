@@ -312,7 +312,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = PlistParser.instance.getValueFromFile(
+    final String id = globals.plistParser.getValueFromFile(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
