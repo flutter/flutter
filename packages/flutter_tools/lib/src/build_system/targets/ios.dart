@@ -77,8 +77,14 @@ class UnpackIOSEngine extends Target {
       .listSync(recursive: true)
       .whereType<File>()
       .toList();
+    final DepfileService depfileService = DepfileService(
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+    );
     final Depfile depfile = Depfile(inputs, outputs);
-    depfile.writeToFile(environment.buildDir.childFile('ios_engine.d'));
+    depfileService.writeToFile(depfile,
+      environment.buildDir.childFile('ios_engine.d'));
   }
 }
 

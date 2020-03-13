@@ -175,7 +175,7 @@ void main() {
     environment.outputDir.createSync();
     environment.buildDir.createSync(recursive: true);
     globals.fs.directory('bin/cache/artifacts/engine/ios-profile/Flutter.framework')
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(command: <String>[
         'cp',
@@ -207,7 +207,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('A');
     globals.fs.file('pubspec.yaml')
-      ..writeAsStringSync('''
+      .writeAsStringSync('''
 flutter:
   module:
     androidPackage: com.example.iosadd2appflutter
