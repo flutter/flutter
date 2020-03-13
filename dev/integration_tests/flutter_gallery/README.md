@@ -1,30 +1,9 @@
 # Flutter gallery
 
-A demo app for Flutter's material design and cupertino widgets, as
-well as many other features of the Flutter SDK.
+An older copy of the Flutter gallery demo application used for integration testing.
 
-## Building
-
-You can follow these instructions to build the gallery app
-and install it onto your device.
-
-### Prerequisites
-
-If you are new to Flutter, please first follow
-the [Flutter Setup](https://flutter.dev/setup/) guide.
-
-### Building and installing the Flutter app
-
-* `cd $FLUTTER_ROOT/dev/integration_tests/flutter_gallery`
-* `flutter pub get`
-* `flutter run --release`
-
-The `flutter run --release` command both builds and installs the Flutter app.
-
-## Prerelease checklist
-
-* Verify that the About box's license page scrolls and reveals its long
-long stream of license texts.
+For the current Flutter gallery app sample, see the samples repo:
+https://github.com/flutter/samples/tree/master/gallery
 
 ## Icon
 
