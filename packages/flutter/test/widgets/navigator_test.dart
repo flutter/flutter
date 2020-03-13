@@ -1777,7 +1777,7 @@ void main() {
       Animation<double> primaryAnimationOfRouteThree;
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       List<Page<dynamic>> myPages = <Page<dynamic>>[
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('1'),
           name:'initial',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1802,7 +1802,7 @@ void main() {
       expect(find.text('initial'), findsOneWidget);
 
       myPages = <Page<dynamic>>[
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('1'),
           name:'initial',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1816,7 +1816,7 @@ void main() {
             );
           },
         ),
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('2'),
           name:'second',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1830,7 +1830,7 @@ void main() {
             );
           },
         ),
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('3'),
           name:'third',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1879,7 +1879,7 @@ void main() {
       // correctly.
 
       myPages = <Page<dynamic>>[
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('1'),
           name:'initial',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1893,7 +1893,7 @@ void main() {
             );
           },
         ),
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('2'),
           name:'second',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1934,8 +1934,8 @@ void main() {
       Animation<double> primaryAnimationOfRouteTwo;
       Animation<double> secondaryAnimationOfRouteThree;
       Animation<double> primaryAnimationOfRouteThree;
-      List<Page<dynamic>> myPages = <PageBuilder<void>>[
-        PageBuilder<void>(
+      List<Page<dynamic>> myPages = <CustomBuilderPage<void>>[
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('1'),
           name:'initial',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1949,7 +1949,7 @@ void main() {
             );
           },
         ),
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('2'),
           name:'second',
           routeBuilder: (BuildContext context, RouteSettings settings) {
@@ -1963,7 +1963,7 @@ void main() {
             );
           },
         ),
-        PageBuilder<void>(
+        CustomBuilderPage<void>(
           key: const ValueKey<String>('3'),
           name:'third',
           routeBuilder: (BuildContext context, RouteSettings settings) {

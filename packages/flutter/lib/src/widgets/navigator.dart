@@ -38,7 +38,7 @@ typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
 
 /// Creates a route for the given context and route settings.
 ///
-/// Used by [PageBuilder.routeBuilder].
+/// Used by [CustomBuilderPage.routeBuilder].
 typedef RouteBuilder<T> = Route<T> Function(BuildContext context, RouteSettings settings);
 
 /// Creates a series of one or more routes.
@@ -495,7 +495,7 @@ class RouteSettings {
 ///
 ///  * [Navigator.pages], which accepts a list of [Page]s and updates its routes
 ///    history.
-///  * [PageBuilder], a [Page] subclass that provides the API to build a
+///  * [CustomBuilderPage], a [Page] subclass that provides the API to build a
 ///    customized route.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
@@ -507,7 +507,7 @@ abstract class Page<T> extends RouteSettings {
     Object arguments,
   }) : super(name: name, arguments: arguments);
 
-  /// The key associates with this page.
+  /// The key associated with this page.
   ///
   /// This key will be used for comparing pages in [canUpdate].
   final LocalKey key;
@@ -534,12 +534,12 @@ abstract class Page<T> extends RouteSettings {
 ///
 /// The type argument `T` is the corresponding [Route]'s return type, as
 /// used by [Route.currentResult], [Route.popped], and [Route.didPop].
-class PageBuilder<T> extends Page<T> {
+class CustomBuilderPage<T> extends Page<T> {
   /// Creates a page that can be inserted into [Navigator.pages].
   ///
   /// Use [routeBuilder] to specify the route that will be created from this
   /// page.
-  const PageBuilder({
+  const CustomBuilderPage({
     @required LocalKey key,
     @required this.routeBuilder,
     String name,
@@ -615,48 +615,41 @@ abstract class StageableRoute{
   /// Whether this route is entering the screen.
   bool get isEntering;
 
-  // Whether this route is exiting the screen. This is used for asserting the
-  // output results of transition delegate.
   bool _debugWaitingForExitDecision = false;
 
   /// Marks the [route] to be pushed with transition.
   ///
-  /// During [TransitionDelegate.resolve], the entering routes (where
-  /// [StageableRoute.isEntering] is true) in `newPageRouteHistory` use this
-  /// method to indicate the routes should be pushed into the screen with an
-  /// animated transition.
+  /// During [TransitionDelegate.resolve], this can be called on an entering
+  /// route (where [StageableRoute.isEntering] is true) in indicate that the
+  /// route should be pushed onto the [Navigator] with an animated transition.
   void markForPush();
 
   /// Marks the [route] to be added without transition.
   ///
-  /// During [TransitionDelegate.resolve], the entering routes (where
-  /// [StageableRoute.isEntering] is true) in `newPageRouteHistory` use this
-  /// method to indicate the routes should be added into the screen without an
-  /// animated transition.
+  /// During [TransitionDelegate.resolve], this can be called on an entering
+  /// route (where [StageableRoute.isEntering] is true) in indicate that the
+  /// route should be added onto the [Navigator] without an animated transition.
   void markForAdd();
 
   /// Marks the [route] to be popped with transition.
   ///
-  /// During [TransitionDelegate.resolve], the exiting routes in
-  /// `locationToExitingPageRoute` and their corresponding pageless routes use
-  /// this method to indicate the routes should be popped out of the screen with
+  /// During [TransitionDelegate.resolve], this can be called on an exiting
+  /// route to indicate that the route should be popped off the [Navigator] with
   /// an animated transition.
   void markForPop([dynamic result]);
 
   /// Marks the [route] to be completed without transition.
   ///
-  /// During [TransitionDelegate.resolve], the exiting routes in
-  /// `locationToExitingPageRoute` and their corresponding pageless routes use
-  /// this method to indicate the routes should be completed and removed from
-  /// the screen without an animated transition.
+  /// During [TransitionDelegate.resolve], this can be called on an exiting
+  /// route to indicate that the route should be completed with the provided
+  /// result and removed from the [Navigator] without an animated transition.
   void markForComplete([dynamic result]);
 
   /// Marks the [route] to be removed without transition.
   ///
-  /// During [TransitionDelegate.resolve], the exiting routes in
-  /// `locationToExitingPageRoute` and their corresponding pageless routes use
-  /// this method to indicate the routes should be removed from the screen
-  /// without completion.
+  /// During [TransitionDelegate.resolve], this can be called on an exiting
+  /// route to indicate that the route should be removed from the [Navigator]
+  /// without completing and without an animated transition.
   void markForRemove();
 }
 
@@ -688,15 +681,15 @@ abstract class TransitionDelegate<T> {
       locationToExitingPageRoute: locationToExitingPageRoute,
       pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
     );
-    // Verifies the integrity after the decisions has made.
+    // Verifies the integrity after the decisions have been made.
     //
     // Here are the rules:
     // - All the entering routes in newPageRouteHistory must either be pushed or added.
-    // - All the exiting routes in locationToExitingPageRoute must either be popped or removed.
-    // - All the pageless routes must either be popped or removed.
+    // - All the exiting routes in locationToExitingPageRoute must either be popped, completed or removed.
+    // - All the pageless routes that belong to exiting routes must either be popped, completed or removed.
     // - All the entering routes in the result must preserve the same order as
-    //   the entering routes in newPageRouteHistory and contain all exiting
-    //   routes.
+    //   the entering routes in newPageRouteHistory, and the result must contain
+    //   all exiting routes.
     //     ex:
     //
     //     newPageRouteHistory = [A, B, C]
@@ -712,7 +705,7 @@ abstract class TransitionDelegate<T> {
     assert(() {
       final List<StageableRoute> resultsToVerify = results.toList(growable: false);
       final Set<StageableRoute> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
-      // Firstly, verify all exiting route has been marked.
+      // Firstly, verify all exiting routes have been marked.
       for (final StageableRoute exitingPageRoute in exitingPageRoutes) {
         assert(!exitingPageRoute._debugWaitingForExitDecision);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
@@ -749,35 +742,36 @@ abstract class TransitionDelegate<T> {
     return results;
   }
 
-  /// A method that will be called by the [Navigator] for deciding how route
-  /// transitions in or out of the screen.
+  /// A method that will be called by the [Navigator] to decide how routes
+  /// transition in or out of the screen when [Navigator.pages] is updated.
   ///
-  /// The [newPageRouteHistory] represents the new page-based route after the
-  /// pages update. If a route in [newPageRouteHistory] has its
+  /// The `newPageRouteHistory` list contains all page-based routes in order
+  /// that will be on the [Navigator]'s history stack after this update
+  /// completes. If a route in `newPageRouteHistory` has its
   /// [StageableRoute.isEntering] set to true, this route requires explicit
-  /// decision on how it transition in the screen. To make a decision, use
-  /// [StageableRoute.markForPush] or [StageableRoute.markForAdd].
+  /// decision on how it should transition onto the Navigator. To make a
+  /// decision, call [StageableRoute.markForPush] or [StageableRoute.markForAdd].
   ///
-  /// The [locationToExitingPageRoute] represents the pages-based routes that
+  /// The `locationToExitingPageRoute` represents the pages-based routes that
   /// are removed from the routes history after page update and require explicit
   /// decision on how to transition off the screen. This map records page-based
   /// routes to be removed with the location of the route in the original route
   /// history before the update. The key location is the page-based route
   /// directly below the removed route. The key location is null if the route to
   /// be removed is the bottom most route. To make a decision for a removed
-  /// route, use [StageableRoute.markForPop], [StageableRoute.markForComplete]
+  /// route, call [StageableRoute.markForPop], [StageableRoute.markForComplete]
   /// or [StageableRoute.markForRemove].
   ///
-  /// The [pageRouteToPagelessRoutes] records the page-based routes and their
+  /// The `pageRouteToPagelessRoutes` records the page-based routes and their
   /// associated pageless routes. If a page-based route is to be removed, its
   /// associated pageless routes also require explicit decisions on how to
   /// transition off the screen.
   ///
   /// Once all the decisions have been made, this method must merge the removed
-  /// routes and the [newPageRouteHistory] and return the merged result. The
+  /// routes and the `newPageRouteHistory` and return the merged result. The
   /// order in the result will be the order the [Navigator] used for updating
   /// the route history. The return list must preserve the same order of routes
-  /// in [newPageRouteHistory]. The removed routes, however, can be inserted
+  /// in `newPageRouteHistory`. The removed routes, however, can be inserted
   /// into the return list freely as long as all of them are included.
   ///
   /// See also:
@@ -905,83 +899,9 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// if it is provided. A change in [Navigator.pages] will trigger an update to
 /// the stack of [Route]s. The [Navigator] will update its routes to match the
 /// new configuration of its [Navigator.pages]. To use this API, one can use
-/// [PageBuilder] or create a [Page] subclass and defines a list of [Page]s for
-/// [Navigator.pages]. A [Navigator.onPopPage] callback is also required to
-/// properly clean up the input pages in case of a pop.
-///
-/// {@tool sample --template=freeform}
-/// The following example demonstrates how to initialize a list of
-/// [Page]s and use [Navigator.pages].
-///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
-/// ```dart main
-/// void main() {
-///   WidgetsFlutterBinding.ensureInitialized();
-///   runApp(
-///     MediaQuery(
-///       data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-///       child: Localizations(
-///         locale: const Locale('en', 'US'),
-///         delegates: const <LocalizationsDelegate<dynamic>>[
-///           DefaultMaterialLocalizations.delegate,
-///           DefaultWidgetsLocalizations.delegate
-///         ],
-///         child: Directionality(
-///           textDirection: TextDirection.ltr,
-///           child: Navigator(
-///             pages: myPages,
-///             onPopPage: _onPopPage,
-///           ),
-///         ),
-///       ),
-///     )
-///   );
-/// }
-/// ```
-///
-/// ```dart
-/// final List<Page<dynamic>> myPages = <Page<dynamic>>[
-///   PageBuilder<dynamic>(
-///     key: const ValueKey<String>('first'),
-///     name: 'first',
-///     routeBuilder: (BuildContext context, RouteSettings settings) {
-///       return MaterialPageRoute(
-///         settings: settings,
-///         builder: (BuildContext context) {
-///           return Scaffold(
-///             appBar: AppBar(title: const Text('first')),
-///             body: Center(child: const Text('first page')),
-///           );
-///         }
-///       );
-///     },
-///   ),
-///   PageBuilder<dynamic>(
-///     key: const ValueKey<String>('second'),
-///     name: 'second',
-///     routeBuilder: (BuildContext context, RouteSettings settings) {
-///       return MaterialPageRoute(
-///         settings: settings,
-///         builder: (BuildContext context) {
-///           return Scaffold(
-///             appBar: AppBar(title: const Text('second')),
-///             body: Center(child: const Text('second page')),
-///           );
-///         }
-///       );
-///     },
-///   )
-/// ];
-///
-/// bool _onPopPage(Route<dynamic> route, dynamic result) {
-///   myPages.removeWhere((Page<dynamic> page) => route.settings == page);
-///   return route.didPop(result);
-/// }
-/// ```
-/// {@end-tool}
+/// [CustomBuilderPage] or create a [Page] subclass and defines a list of
+/// [Page]s for [Navigator.pages]. A [Navigator.onPopPage] callback is also
+/// required to properly clean up the input pages in case of a pop.
 ///
 /// By Default, the [Navigator] will use [DefaultTransitionDelegate] to decide
 /// how routes transition in or out of the screen. To customize it, define a
@@ -1049,7 +969,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// Mobile apps often manage a large number of routes and it's often
 /// easiest to refer to them by name. Route names, by convention,
 /// use a path-like structure (for example, '/a/b/c').
-/// The app's home page-based route is named '/' by default.
+/// The app's home page route is named '/' by default.
 ///
 /// The [MaterialApp] can be created
 /// with a [Map<String, WidgetBuilder>] which maps from a route's name to
@@ -1359,7 +1279,7 @@ class Navigator extends StatefulWidget {
   ///
   /// Some [Route]s do not correspond to [Page] objects, namely, those that are
   /// added to the history using the [Navigator] API ([push] and friends). A
-  /// [Route] that does not correspond to a [Page] object is called pageless
+  /// [Route] that does not correspond to a [Page] object is called a pageless
   /// route and is tied to the [Route] that _does_ correspond to a [Page] object
   /// that is below it in the history.
   ///
@@ -2250,6 +2170,7 @@ class Navigator extends StatefulWidget {
 //   route entry will exit that state.
 // # These states await futures or other events, then transition automatically.
 enum _RouteLifecycle {
+  staging, // we will wait for transition delegate to decide what to do with this route.
   //
   // routes that are present:
   //
@@ -2273,7 +2194,6 @@ enum _RouteLifecycle {
   // routes that are completely removed from the navigator and overlay.
   dispose, // we will dispose the route momentarily
   disposed, // we have disposed the route
-  staging, // we will wait for transition delegate to decide what to do with this route.
 }
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
@@ -2452,13 +2372,22 @@ class _RouteEntry extends StageableRoute {
     currentState = _RouteLifecycle.disposed;
   }
 
-  bool get willBePresent => currentState.index <= _RouteLifecycle.idle.index;
-  bool get isPresent => currentState.index <= _RouteLifecycle.remove.index;
+  bool get willBePresent {
+    return currentState.index <= _RouteLifecycle.idle.index &&
+           currentState.index >= _RouteLifecycle.add.index;
+  }
+
+  bool get isPresent {
+    return currentState.index <= _RouteLifecycle.remove.index &&
+           currentState.index >= _RouteLifecycle.add.index;
+  }
+
   bool get suitableForAnnouncement {
     return currentState.index <= _RouteLifecycle.removing.index &&
-      currentState.index >= _RouteLifecycle.push.index;
+           currentState.index >= _RouteLifecycle.push.index;
   }
-  bool get canTransitition {
+
+  bool get suitableForTransitionAnimation {
     return currentState.index <= _RouteLifecycle.remove.index &&
            currentState.index >= _RouteLifecycle.push.index;
   }
@@ -2475,7 +2404,7 @@ class _RouteEntry extends StageableRoute {
   }
 
   static final _RouteEntryPredicate isPresentPredicate = (_RouteEntry entry) => entry.isPresent;
-  static final _RouteEntryPredicate canTransititionPredicate = (_RouteEntry entry) => entry.canTransitition;
+  static final _RouteEntryPredicate suitableForTransitionAnimationPredicate = (_RouteEntry entry) => entry.suitableForTransitionAnimation;
   static final _RouteEntryPredicate willBePresentPredicate = (_RouteEntry entry) => entry.willBePresent;
 
   static _RouteEntryPredicate isRoutePredicate(Route<dynamic> route) {
@@ -2649,10 +2578,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }());
 
     // This attempts to diff the new pages list (widget.pages) with
-    // the old _RouteEntry[s] list (_history), and produce a new list of
+    // the old _RouteEntry[s] list (_history), and produces a new list of
     // _RouteEntry[s] to be the new list of _history. This method roughly
     // follows the same outline of RenderObjectElement.updateChildren.
-
+    //
     // The cases it tries to optimize for are:
     //  - the old list is empty
     //  - All the pages in the new list can match the page-based routes in the old
@@ -2663,9 +2592,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // Page-based routes without keys might be synced but there is no guarantee.
 
     // The general approach is to sync the entire new list backwards, as follows:
-    // 1. Walk the lists from the top, syncing nodes, and records pageless routes,
+    // 1. Walk the lists from the bottom, syncing nodes, and record pageless routes,
     //    until you no longer have matching nodes.
-    // 2. Walk the lists from the bottom, without syncing nodes, until you no
+    // 2. Walk the lists from the top, without syncing nodes, until you no
     //    longer have matching nodes. We'll sync these nodes at the end. We
     //    don't sync them now because we want to sync all the nodes in order
     //    from beginning to end.
@@ -2674,15 +2603,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     // 3. Walk the narrowed part of the old list to get the list of
     //    keys.
     // 4. Walk the narrowed part of the new list forwards:
-    //     * Creates a new _RouteEntry for non-keyed items and records them for
+    //     * Create a new _RouteEntry for non-keyed items and record them for
     //       transitionDelegate.
     //     * Sync keyed items with the source if it exists.
-    // 5. Walk the the narrowed part of the old list again to records the
-    //    _RouteEntry[s] ,as well as pageless routes, needed to be removed for
+    // 5. Walk the narrowed part of the old list again to records the
+    //    _RouteEntry[s], as well as pageless routes, needed to be removed for
     //    transitionDelegate.
-    // 5. Walk the bottom of the list again, syncing the nodes and recording
+    // 5. Walk the top of the list again, syncing the nodes and recording
     //    pageless routes.
-    // 6. Use transitionDelegate to for explicit decisions on how _RouteEntry[s]
+    // 6. Use transitionDelegate for explicit decisions on how _RouteEntry[s]
     //    transition in or off the screens.
     // 7. Fill pageless routes back into the new history.
 
@@ -3053,7 +2982,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         index -= 1;
         continue;
       }
-      final _RouteEntry next = _getRouteAfter(index + 1, _RouteEntry.canTransititionPredicate);
+      final _RouteEntry next = _getRouteAfter(index + 1, _RouteEntry.suitableForTransitionAnimationPredicate);
 
       if (next?.route != entry.lastAnnouncedNextRoute) {
         if (entry.shouldAnnounceChangeToNext(next?.route)) {
@@ -3061,7 +2990,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         entry.lastAnnouncedNextRoute = next?.route;
       }
-      final _RouteEntry previous = _getRouteBefore(index - 1, _RouteEntry.canTransititionPredicate);
+      final _RouteEntry previous = _getRouteBefore(index - 1, _RouteEntry.suitableForTransitionAnimationPredicate);
       if (previous?.route != entry.lastAnnouncedPreviousRoute) {
         entry.route.didChangePrevious(previous?.route);
         entry.lastAnnouncedPreviousRoute = previous?.route;
