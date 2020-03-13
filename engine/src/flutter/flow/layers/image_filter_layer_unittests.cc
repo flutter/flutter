@@ -83,8 +83,47 @@ TEST_F(ImageFilterLayerTest, SimpleFilter) {
   auto layer = std::make_shared<ImageFilterLayer>(layer_filter);
   layer->Add(mock_layer);
 
+  const SkRect child_rounded_bounds =
+      SkRect::MakeLTRB(5.0f, 6.0f, 21.0f, 22.0f);
+
   layer->Preroll(preroll_context(), initial_transform);
-  EXPECT_EQ(layer->paint_bounds(), child_bounds);
+  EXPECT_EQ(layer->paint_bounds(), child_rounded_bounds);
+  EXPECT_TRUE(layer->needs_painting());
+  EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
+
+  SkPaint filter_paint;
+  filter_paint.setImageFilter(layer_filter);
+  layer->Paint(paint_context());
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 2}},
+                MockCanvas::DrawCall{
+                    2, MockCanvas::DrawPathData{child_path, child_paint}},
+                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
+}
+
+TEST_F(ImageFilterLayerTest, SimpleFilterBounds) {
+  const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
+  const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
+  const SkPath child_path = SkPath().addRect(child_bounds);
+  const SkPaint child_paint = SkPaint(SkColors::kYellow);
+  const SkMatrix filter_transform = SkMatrix::MakeScale(2.0, 2.0);
+  auto layer_filter = SkImageFilter::MakeMatrixFilter(
+      filter_transform, SkFilterQuality::kMedium_SkFilterQuality, nullptr);
+  auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
+  auto layer = std::make_shared<ImageFilterLayer>(layer_filter);
+  layer->Add(mock_layer);
+
+  const SkRect filter_bounds = SkRect::MakeLTRB(10.0f, 12.0f, 42.0f, 44.0f);
+
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_EQ(layer->paint_bounds(), filter_bounds);
   EXPECT_TRUE(layer->needs_painting());
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
@@ -123,10 +162,12 @@ TEST_F(ImageFilterLayerTest, MultipleChildren) {
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
+  SkRect children_rounded_bounds = SkRect::Make(children_bounds.roundOut());
+
   layer->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
-  EXPECT_EQ(layer->paint_bounds(), children_bounds);
+  EXPECT_EQ(layer->paint_bounds(), children_rounded_bounds);
   EXPECT_TRUE(mock_layer1->needs_painting());
   EXPECT_TRUE(mock_layer2->needs_painting());
   EXPECT_TRUE(layer->needs_painting());
@@ -172,12 +213,17 @@ TEST_F(ImageFilterLayerTest, Nested) {
   layer1->Add(layer2);
 
   SkRect children_bounds = child_path1.getBounds();
-  children_bounds.join(child_path2.getBounds());
+  children_bounds.join(SkRect::Make(child_path2.getBounds().roundOut()));
+  const SkRect children_rounded_bounds =
+      SkRect::Make(children_bounds.roundOut());
+  const SkRect mock_layer2_rounded_bounds =
+      SkRect::Make(child_path2.getBounds().roundOut());
+
   layer1->Preroll(preroll_context(), initial_transform);
   EXPECT_EQ(mock_layer1->paint_bounds(), child_path1.getBounds());
   EXPECT_EQ(mock_layer2->paint_bounds(), child_path2.getBounds());
-  EXPECT_EQ(layer1->paint_bounds(), children_bounds);
-  EXPECT_EQ(layer2->paint_bounds(), mock_layer2->paint_bounds());
+  EXPECT_EQ(layer1->paint_bounds(), children_rounded_bounds);
+  EXPECT_EQ(layer2->paint_bounds(), mock_layer2_rounded_bounds);
   EXPECT_TRUE(mock_layer1->needs_painting());
   EXPECT_TRUE(mock_layer2->needs_painting());
   EXPECT_TRUE(layer1->needs_painting());
