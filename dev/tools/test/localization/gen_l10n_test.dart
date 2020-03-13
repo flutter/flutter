@@ -233,6 +233,104 @@ void main() {
     });
   });
 
+  test('correctly adds a headerString when it is set', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a String should not fail: \n${e.message}');
+    }
+
+    expect(generator.header, '/// Sample header');
+  });
+
+  test('correctly adds a headerFile when it is set', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      fail('Setting a header through a file should not fail: \n${e.message}');
+    }
+
+    expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('setting both a headerString and a headerFile should fail', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString)
+      ..childFile('header.txt').writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header for localizations file.',
+        headerFile: 'header.txt',
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Cannot accept both header and header file arguments'));
+      return;
+    }
+
+    fail('Setting both headerFile and headerString should fail');
+  });
+
+  test('setting a headerFile that does not exist should fail', () {
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(singleMessageArbFileString);
+    l10nDirectory.childFile(esArbFileName)
+      .writeAsStringSync(singleEsMessageArbFileString);
+    l10nDirectory.childFile('header.txt')
+      .writeAsStringSync('/// Sample header in a text file');
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerFile: 'header.tx', // Intentionally spelled incorrectly
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('Failed to read header file'));
+      return;
+    }
+
+    fail('Setting headerFile that does not exist should fail');
+  });
+
   group('loadResources', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
@@ -248,7 +346,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -277,7 +375,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('en'));
@@ -308,7 +406,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
@@ -419,7 +517,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       if (Platform.isWindows) {
@@ -470,7 +568,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -514,7 +612,7 @@ void main() {
         );
         generator.loadResources();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail: \n$e');
+        fail('Setting language and locales should not fail: \n${e.message}');
       }
 
       // @@locale property should hold higher priority

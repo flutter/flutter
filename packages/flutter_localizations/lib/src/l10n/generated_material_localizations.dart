@@ -99,6 +99,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Maak toe';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Volgende maand';
 
   @override
@@ -301,6 +304,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'አሰናብት';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'ቀጣይ ወር';
@@ -507,6 +513,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'رفض';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'الشهر التالي';
 
   @override
@@ -709,6 +718,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'পৰৱৰ্তী মাহ';
@@ -915,6 +927,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'İmtina edin';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Növbəti ay';
 
   @override
@@ -1117,6 +1132,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Адхіліць';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Наступны месяц';
@@ -1323,6 +1341,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Отхвърляне';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Следващият месец';
 
   @override
@@ -1525,6 +1546,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'খারিজ করুন';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'পরের মাস';
@@ -1731,6 +1755,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Odbaci';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Sljedeći mjesec';
 
   @override
@@ -1933,6 +1960,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Mes següent';
@@ -2139,6 +2169,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Zavřít';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Další měsíc';
 
   @override
@@ -2343,6 +2376,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Afvis';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Næste måned';
 
   @override
@@ -2545,6 +2581,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Nächster Monat';
@@ -2781,6 +2820,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Παράβλεψη';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Επόμενος μήνας';
 
   @override
@@ -2983,6 +3025,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get moreButtonTooltip => 'More';
 
   @override
   String get nextMonthTooltip => 'Next month';
@@ -3532,6 +3577,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Cerrar';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Mes siguiente';
@@ -5361,6 +5409,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Loobu';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Järgmine kuu';
 
   @override
@@ -5563,6 +5614,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Baztertu';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Hurrengo hilabetea';
@@ -5769,6 +5823,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'نپذیرفتن';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'ماه بعد';
 
   @override
@@ -5971,6 +6028,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ohita';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Seuraava kuukausi';
@@ -6177,6 +6237,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'I-dismiss';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Susunod na buwan';
 
   @override
@@ -6379,6 +6442,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ignorer';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Mois suivant';
@@ -6639,6 +6705,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Ignorar';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Mes seguinte';
 
   @override
@@ -6841,6 +6910,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Nächster Monat';
@@ -7047,6 +7119,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'છોડી દો';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'આગલો મહિનો';
 
   @override
@@ -7249,6 +7324,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'סגירה';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'החודש הבא';
@@ -7455,6 +7533,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'खारिज करें';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'अगला महीना';
 
   @override
@@ -7657,6 +7738,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Sljedeći mjesec';
@@ -7863,6 +7947,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Elvetés';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Következő hónap';
 
   @override
@@ -8065,6 +8152,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Փակել';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Հաջորդ ամիս';
@@ -8271,6 +8361,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Tutup';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Bulan berikutnya';
 
   @override
@@ -8473,6 +8566,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Hunsa';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Næsti mánuður';
@@ -8679,6 +8775,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Ignora';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Mese successivo';
 
   @override
@@ -8881,6 +8980,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '閉じる';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => '来月';
@@ -9087,6 +9189,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'დახურვა';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'შემდეგი თვე';
 
   @override
@@ -9289,6 +9394,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Жабу';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Келесі ай';
@@ -9495,6 +9603,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'ខែ​​ក្រោយ';
 
   @override
@@ -9697,6 +9808,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => '\u{cae}\u{cc1}\u{c82}\u{ca6}\u{cbf}\u{ca8}\u{20}\u{ca4}\u{cbf}\u{c82}\u{c97}\u{cb3}\u{cc1}';
@@ -9903,6 +10017,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => '닫기';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => '다음 달';
 
   @override
@@ -10105,6 +10222,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Жабуу';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Кийинки ай';
@@ -10311,6 +10431,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ປິດໄວ້';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'ເດືອນໜ້າ';
 
   @override
@@ -10513,6 +10636,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Atsisakyti';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Kitas mėnuo';
@@ -10719,6 +10845,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Nerādīt';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Nākamais mēnesis';
 
   @override
@@ -10921,6 +11050,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Отфрли';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Следниот месец';
@@ -11127,6 +11259,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'അടുത്ത മാസം';
 
   @override
@@ -11329,6 +11464,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Дараах сар';
@@ -11535,6 +11673,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'डिसमिस करा';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'पुढील महिना';
 
   @override
@@ -11737,6 +11878,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Tolak';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Bulan depan';
@@ -11943,6 +12087,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ပယ်ရန်';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'နောက်လ';
 
   @override
@@ -12145,6 +12292,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Neste måned';
@@ -12351,6 +12501,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'अर्को महिना';
 
   @override
@@ -12553,6 +12706,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Sluiten';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Volgende maand';
@@ -12759,6 +12915,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'ପରବର୍ତ୍ତୀ ମାସ';
 
   @override
@@ -12961,6 +13120,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'ਅਗਲਾ ਮਹੀਨਾ';
@@ -13167,6 +13329,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Zamknij';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Następny miesiąc';
 
   @override
@@ -13371,6 +13536,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'رد کړه';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'بله میاشت';
 
   @override
@@ -13573,6 +13741,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Dispensar';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Próximo mês';
@@ -13857,6 +14028,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Închideți';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Luna viitoare';
 
   @override
@@ -14059,6 +14233,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Закрыть';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Следующий месяц';
@@ -14265,6 +14442,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ඉවත ලන්න';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'ඊළඟ මාසය';
 
   @override
@@ -14467,6 +14647,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Odmietnuť';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Budúci mesiac';
@@ -14673,6 +14856,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Opusti';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Naslednji mesec';
 
   @override
@@ -14877,6 +15063,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Hiq';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Muaji i ardhshëm';
 
   @override
@@ -15079,6 +15268,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Одбаци';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Следећи месец';
@@ -15489,6 +15681,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Stäng';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Nästa månad';
 
   @override
@@ -15691,6 +15886,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Ondoa';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Mwezi ujao';
@@ -15897,6 +16095,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'அடுத்த மாதம்';
 
   @override
@@ -16099,6 +16300,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'విస్మరించు';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'తర్వాత నెల';
@@ -16305,6 +16509,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'ปิด';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'เดือนหน้า';
 
   @override
@@ -16507,6 +16714,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Susunod na buwan';
@@ -16713,6 +16923,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Kapat';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Gelecek ay';
 
   @override
@@ -16915,6 +17128,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Закрити';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Наступний місяць';
@@ -17121,6 +17337,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'برخاست کریں';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'اگلا مہینہ';
 
   @override
@@ -17323,6 +17542,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Yopish';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Keyingi oy';
@@ -17529,6 +17751,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get modalBarrierDismissLabel => 'Bỏ qua';
 
   @override
+  String get moreButtonTooltip => 'TBD';
+
+  @override
   String get nextMonthTooltip => 'Tháng sau';
 
   @override
@@ -17731,6 +17956,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => '关闭';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => '下个月';
@@ -18208,6 +18436,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => 'Cashisa';
+
+  @override
+  String get moreButtonTooltip => 'TBD';
 
   @override
   String get nextMonthTooltip => 'Inyanga ezayo';

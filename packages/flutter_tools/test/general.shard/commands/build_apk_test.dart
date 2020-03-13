@@ -366,7 +366,13 @@ void main() {
 
     testUsingContext("reports when the app isn't using AndroidX", () async {
       final String projectPath = await createProject(tempDir,
-          arguments: <String>['--no-pub', '--no-androidx', '--template=app']);
+          arguments: <String>['--no-pub', '--template=app']);
+      // Simulate a non-androidx project.
+      tempDir
+        .childDirectory('flutter_project')
+        .childDirectory('android')
+        .childFile('gradle.properties')
+        .writeAsStringSync('android.useAndroidX=false');
 
       when(mockProcessManager.start(
         <String>[

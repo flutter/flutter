@@ -51,5 +51,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 حرف باقی ہے",
   "remainingTextFieldCharacterCountOther": "$remainingCount حروف باقی ہیں",
-  "refreshIndicatorSemanticLabel": "ریفریش کریں"
+  "refreshIndicatorSemanticLabel": "ریفریش کریں",
+  "moreButtonTooltip": "TBD"
 }

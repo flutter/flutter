@@ -159,7 +159,7 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTr
 ///  * [ImageChunkListener], the means by which callers get notified of
 ///    these events.
 @immutable
-class ImageChunkEvent extends Diagnosticable {
+class ImageChunkEvent with Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent({
     @required this.cumulativeBytesLoaded,
@@ -212,7 +212,7 @@ class ImageChunkEvent extends Diagnosticable {
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
 ///    [ImageStream] in a [Widget].
-class ImageStream extends Diagnosticable {
+class ImageStream with Diagnosticable {
   /// Create an initially unbound image stream.
   ///
   /// Once an [ImageStreamCompleter] is available, call [setCompleter].
@@ -324,7 +324,7 @@ class ImageStream extends Diagnosticable {
 /// [ImageStreamListener] objects are rarely constructed directly. Generally, an
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
-abstract class ImageStreamCompleter extends Diagnosticable {
+abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
   ImageInfo _currentImage;
   FlutterErrorDetails _currentError;

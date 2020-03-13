@@ -22,7 +22,6 @@ import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import 'ios_workflow.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -41,7 +40,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListDevices;
+  bool get canListAnything => globals.iosWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices() async => _iosSimulatorUtils.getAttachedDevices();
@@ -445,13 +444,19 @@ class IOSSimulator extends Device {
 
     try {
       final Uri deviceUri = await observatoryDiscovery.uri;
-      return LaunchResult.succeeded(observatoryUri: deviceUri);
+      if (deviceUri != null) {
+        return LaunchResult.succeeded(observatoryUri: deviceUri);
+      }
+      globals.printError(
+        'Error waiting for a debug connection: '
+        'The log reader failed unexpectedly',
+      );
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
     } finally {
-      await observatoryDiscovery.cancel();
+      await observatoryDiscovery?.cancel();
     }
+    return LaunchResult.failed();
   }
 
   Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath) async {

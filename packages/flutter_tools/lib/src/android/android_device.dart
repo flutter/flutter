@@ -319,9 +319,11 @@ class AndroidDevice extends Device {
         throwOnError: true,
       );
 
+      // This has been reported to return null on some devices. In this case,
+      // assume the lowest supported API to still allow Flutter to run.
       // Sample output: '22'
-      final String sdkVersion = await _getProperty('ro.build.version.sdk');
-
+      final String sdkVersion = await _getProperty('ro.build.version.sdk')
+        ?? minApiLevel.toString();
 
       final int sdkVersionParsed = int.tryParse(sdkVersion);
       if (sdkVersionParsed == null) {
@@ -627,11 +629,16 @@ class AndroidDevice extends Device {
     // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
-
       if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
         observatoryUri = await observatoryDiscovery.uri;
+        if (observatoryUri == null) {
+          globals.printError(
+            'Error waiting for a debug connection: '
+            'The log reader stopped unexpectedly',
+          );
+          return LaunchResult.failed();
+        }
       }
-
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');

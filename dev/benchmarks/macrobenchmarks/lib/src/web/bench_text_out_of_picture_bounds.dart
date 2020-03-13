@@ -27,7 +27,7 @@ import 'test_data.dart';
 ///
 /// This reproduces the bug where we render more than visible causing
 /// performance issues: https://github.com/flutter/flutter/issues/48516
-class BenchTextOutOfPictureBounds extends RawRecorder {
+class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
   BenchTextOutOfPictureBounds() : super(name: benchmarkName) {
     const Color red = Color.fromARGB(255, 255, 0, 0);
     const Color green = Color.fromARGB(255, 0, 255, 0);

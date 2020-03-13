@@ -68,6 +68,31 @@ void main() {
     ), Uri.parse('http://localhost:1'));
   });
 
+  testUsingContext('Selects assumed port when another isolate has no root library', () async {
+    when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef.parse(<String, Object>{})..id = '1',
+        IsolateRef.parse(<String, Object>{})..id = '2',
+      ];
+    });
+    when(mockVmService.getIsolate('1')).thenAnswer((Invocation invocation) async {
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = null;
+    });
+    when(mockVmService.getIsolate('2')).thenAnswer((Invocation invocation) async {
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = (LibraryRef.parse(<String, Object>{})..uri = 'package:hello/main.dart');
+    });
+    expect(await fallbackDiscovery.discover(
+      assumedDevicePort: 23,
+      deivce: null,
+      hostVmservicePort: 1,
+      packageId: null,
+      usesIpv6: false,
+      packageName: 'hello',
+    ), Uri.parse('http://localhost:1'));
+  });
+
   testUsingContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
       return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
