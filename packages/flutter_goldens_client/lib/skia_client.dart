@@ -310,8 +310,9 @@ class SkiaGoldClient {
       '--passfail',
       '--crs', 'github',
       '--patchset_id', commitHash,
-      ...getCIArguments(),
     ];
+
+    imgtestInitArguments.addAll(getCIArguments());
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
