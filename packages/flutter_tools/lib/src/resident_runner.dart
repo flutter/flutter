@@ -75,6 +75,12 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    // For both web and non-web platforms we initialize dill to/from
+    // a shared location for faster bootstrapping. If this process fails
+    // due to a kernel target or version mismatch, no error is reported
+    // and the compiler starts up as normal. Unexpected errors will print
+    // a warning message and dump some debug information which can be
+    // used to file a bug, but the compiler will still bootstrap correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
@@ -84,7 +90,6 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        // initialize dill to/from a shared location for faster bootstrapping.
         initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
@@ -109,7 +114,6 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
-        // initialize dill to/from a shared location for faster bootstrapping.
         initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
     }
