@@ -15,7 +15,8 @@ import 'framework.dart';
 /// not be objects whose identity will change each time the widget is created.
 ///
 /// See also:
-/// * [PageStorage], which is the closet ancestor for [PageStorageKey].
+///
+///  * [PageStorage], which is the closet ancestor for [PageStorageKey].
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
   const PageStorageKey(T value) : super(value);
