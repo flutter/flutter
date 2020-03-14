@@ -165,17 +165,14 @@ class Xcode {
     );
   }
 
-  Future<String> sdkLocation(SdkType sdk, Map<String, String> environment) async {
-    // If this is run an Xcode script build phase, the SDKROOT is already exported.
-    if (environment.containsKey('SDKROOT')) {
-      return environment['SDKROOT'];
-    }
+  Future<String> sdkLocation(SdkType sdk) async {
     assert(sdk != null);
     final RunResult runResult = await _processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
+      throwOnError: true,
     );
     if (runResult.exitCode != 0) {
-      throwToolExit('Could not find SDK location: ${runResult.stderr}');
+      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
     }
     return runResult.stdout.trim();
   }

@@ -412,7 +412,7 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-isysroot', await globals.xcode.sdkLocation(sdk, globals.platform.environment),
+      '-isysroot', await globals.xcode.sdkLocation(sdk),
       '-o', outputFile.path,
     ]);
   } finally {
