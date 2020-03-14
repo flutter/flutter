@@ -29,14 +29,7 @@ def main():
 
   classpath = [
     args.android_source_root,
-    args.third_party + '/android_support/android_support_compat.jar',
-    args.third_party + '/android_support/android_support_annotations.jar',
-    args.third_party + '/android_support/android_support_fragment.jar',
-    args.third_party + '/android_support/android_arch_lifecycle_common.jar',
-    args.third_party + '/android_support/android_arch_lifecycle_common_java8.jar',
-    args.third_party + '/android_support/android_arch_lifecycle_runtime.jar',
-    args.third_party + '/android_support/android_arch_lifecycle_viewmodel.jar',
-    args.third_party + '/android_tools/sdk/platforms/android-29/android.jar',
+    os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)

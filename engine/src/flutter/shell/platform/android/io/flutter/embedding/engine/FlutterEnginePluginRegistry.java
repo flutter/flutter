@@ -6,14 +6,14 @@ package io.flutter.embedding.engine;
 
 import android.app.Activity;
 import android.app.Service;
-import android.arch.lifecycle.Lifecycle;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
 import io.flutter.Log;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;

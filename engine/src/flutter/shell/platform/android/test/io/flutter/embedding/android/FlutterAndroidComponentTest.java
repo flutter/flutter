@@ -11,11 +11,11 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;

@@ -5,7 +5,7 @@
 package io.flutter.embedding.engine.plugins.broadcastreceiver;
 
 import android.content.BroadcastReceiver;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Binding that gives {@link BroadcastReceiverAware} plugins access to an associated {@link

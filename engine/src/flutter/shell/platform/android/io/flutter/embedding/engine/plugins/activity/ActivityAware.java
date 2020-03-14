@@ -4,7 +4,7 @@
 
 package io.flutter.embedding.engine.plugins.activity;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * {@link FlutterPlugin} that is interested in {@link Activity} lifecycle events related to a {@link

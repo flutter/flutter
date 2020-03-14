@@ -1,0 +1,3 @@
+# Don't include the jars in the engine repo.
+lib/
+.gradle

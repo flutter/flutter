@@ -6,9 +6,9 @@ package io.flutter.view;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
 import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.FlutterJNI;

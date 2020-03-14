@@ -5,14 +5,14 @@
 package io.flutter.embedding.android;
 
 import android.app.Activity;
-import android.arch.lifecycle.Lifecycle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
 import io.flutter.embedding.engine.FlutterEngine;
 
 /**
  * Configures a {@link FlutterEngine} after it is created, e.g., adds plugins.
  *
- * <p>This interface may be applied to a {@link android.support.v4.app.FragmentActivity} that owns a
+ * <p>This interface may be applied to a {@link androidx.fragment.app.FragmentActivity} that owns a
  * {@code FlutterFragment}.
  */
 public interface FlutterEngineConfigurator {

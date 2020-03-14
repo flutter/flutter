@@ -7,9 +7,9 @@ package dev.flutter.scenarios;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.internal.runner.junit4.statement.UiThreadStatement;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.internal.runner.junit4.statement.UiThreadStatement;
+import androidx.test.runner.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import java.util.concurrent.CompletableFuture;
