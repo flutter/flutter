@@ -31,12 +31,17 @@ void main() {
 
   test('newly added code executes during hot restart', () async {
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen(stdout.writeln);
+    final Completer<void> onReloadWorked = Completer<void>();
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      if (line.contains('(RELOAD WORKED)')) {
+        onReloadWorked.complete();
+      }
+    });
     await flutter.run(chrome: true);
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
+      await onReloadWorked.future;
     } finally {
       await subscription.cancel();
     }
