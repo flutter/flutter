@@ -164,7 +164,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    return generateMessageString(messageValue);
+    return generateString(messageValue, shouldEscapeDollar: false);
   }
 
   if (message.isPlural) {

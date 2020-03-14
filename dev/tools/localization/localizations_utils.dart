@@ -373,17 +373,35 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 
 /// Return the input string as a Dart-parseable string.
 ///
-/// The result tries to avoid character escaping:
+/// When [shouldEscapeDollar] is set to true, the
+/// result avoids character escaping, with the
+/// exception of the dollar sign:
 ///
 /// ```
+/// foo$bar = 'foo\$bar'
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
 /// foo\bar => 'foo\\bar'
-/// foo$bar => 'foo\$bar'
 /// ```
-String generateMessageString(String value) {
+///
+/// When [shouldEscapeDollar] is set to false, the
+/// result tries to avoid character escaping:
+///
+/// ```
+/// foo$bar => 'foo\\\$bar'
+/// ```
+///
+/// [shouldEscapeDollar] is true by default.
+///
+/// Strings with newlines are not supported.
+String generateString(String value, {bool shouldEscapeDollar = true}) {
+  assert(!value.contains('\n'));
+  if (shouldEscapeDollar) {
+    value = value.replaceAll('\$', '\\\$');
+  }
+
   if (!value.contains("'"))
     return "'$value'";
   if (!value.contains('"'))
@@ -394,40 +412,7 @@ String generateMessageString(String value) {
     return '"""$value"""';
 
   return value.split("'''")
-    .map(generateString)
-    // If value contains more than 6 consecutive single quotes some empty
-    // strings may be generated. The following map removes them.
-    .map((String part) => part == "''" ? '' : part)
-    .join(" \"'''\" ");
-}
-
-/// Return the input string as a Dart-parseable string.
-///
-/// The result tries to avoid character escaping:
-///
-/// ```
-/// foo => 'foo'
-/// foo "bar" => 'foo "bar"'
-/// foo 'bar' => "foo 'bar'"
-/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => r'foo\bar'
-/// ```
-///
-/// Strings with newlines are not supported.
-String generateString(String value) {
-  assert(!value.contains('\n'));
-  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
-  if (!value.contains("'"))
-    return "$rawPrefix'$value'";
-  if (!value.contains('"'))
-    return '$rawPrefix"$value"';
-  if (!value.contains("'''"))
-    return "$rawPrefix'''$value'''";
-  if (!value.contains('"""'))
-    return '$rawPrefix"""$value"""';
-
-  return value.split("'''")
-    .map(generateString)
+    .map((String part) => generateString(part, shouldEscapeDollar: shouldEscapeDollar))
     // If value contains more than 6 consecutive single quotes some empty
     // strings may be generated. The following map removes them.
     .map((String part) => part == "''" ? '' : part)
