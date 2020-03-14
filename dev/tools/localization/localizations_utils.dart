@@ -396,7 +396,8 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// [shouldEscapeDollar] is true by default.
 ///
 /// Strings with newlines are not supported.
-String generateString(String value, {bool shouldEscapeDollar = true}) {
+String generateString(String value, { bool shouldEscapeDollar = true }) {
+  assert(shouldEscapeDollar != null);
   assert(!value.contains('\n'));
   if (shouldEscapeDollar) {
     value = value.replaceAll('\$', '\\\$');
