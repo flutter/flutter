@@ -114,8 +114,8 @@ abstract class FlutterTestDriver {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
     }));
-    transformToLines(_process.stdout).listen((String line) { _stdout.add(line); print(line); });
-    transformToLines(_process.stderr).listen((String line) { _stderr.add(line); print(line); });
+    transformToLines(_process.stdout).listen(_stdout.add);
+    transformToLines(_process.stderr).listen(_stderr.add);
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
     _stderr.stream.listen(_errorBuffer.writeln);
