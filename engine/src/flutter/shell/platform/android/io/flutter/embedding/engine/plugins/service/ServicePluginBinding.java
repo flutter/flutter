@@ -5,8 +5,8 @@
 package io.flutter.embedding.engine.plugins.service;
 
 import android.app.Service;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /** Binding that gives {@link ServiceAware} plugins access to an associated {@link Service}. */
 public interface ServicePluginBinding {

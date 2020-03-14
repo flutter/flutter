@@ -4,9 +4,9 @@
 
 package io.flutter.embedding.engine.plugins.contentprovider;
 
-import android.arch.lifecycle.Lifecycle;
 import android.content.ContentProvider;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
 
 /**
  * Control surface through which a {@link ContentProvider} attaches to a {@link FlutterEngine}.

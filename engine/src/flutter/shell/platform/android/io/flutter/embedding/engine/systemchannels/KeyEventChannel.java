@@ -5,10 +5,10 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.JSONMessageCodec;

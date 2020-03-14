@@ -4,7 +4,7 @@
 
 package io.flutter.embedding.engine.plugins.shim;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -21,14 +21,18 @@ import java.util.Set;
  * plugin API behind the scenes.
  *
  * <p>The following is an example usage of {@code ShimPluginRegistry} within a {@code
- * FlutterActivity}: {@code // Create the FlutterEngine that will back the Flutter UI. FlutterEngine
- * flutterEngine = new FlutterEngine(context);
+ * FlutterActivity}:
  *
- * <p>// Create a ShimPluginRegistry and wrap the FlutterEngine with the shim. ShimPluginRegistry
- * shimPluginRegistry = new ShimPluginRegistry(flutterEngine, platformViewsController);
+ * <pre>
+ * // Create the FlutterEngine that will back the Flutter UI.
+ * FlutterEngine flutterEngine = new FlutterEngine(context);
  *
- * <p>// Use the GeneratedPluginRegistrant to add every plugin that's in the pubspec.
- * GeneratedPluginRegistrant.registerWith(shimPluginRegistry); }
+ * // Create a ShimPluginRegistry and wrap the FlutterEngine with the shim.
+ * ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine, platformViewsController);
+ *
+ * // Use the GeneratedPluginRegistrant to add every plugin that's in the pubspec.
+ * GeneratedPluginRegistrant.registerWith(shimPluginRegistry);
+ * </pre>
  */
 public class ShimPluginRegistry implements PluginRegistry {
   private static final String TAG = "ShimPluginRegistry";

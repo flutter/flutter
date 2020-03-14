@@ -44,27 +44,23 @@ android {
     embedding "androidx.fragment:fragment:1.1.0"
 
     def lifecycle_version = "2.2.0"
-    embedding "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
     embedding "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    embedding "androidx.lifecycle:lifecycle-common:$lifecycle_version"
     embedding "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-service:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-process:$lifecycle_version"
-    embedding "androidx.lifecycle:lifecycle-reactivestreams:$lifecycle_version"
 
     // Testing
-    embeddingTesting "androidx.arch.core:core-testing:2.1.0"
     embeddingTesting "org.robolectric:android-all:8.1.0-robolectric-4611349"
     // This is required by the robolectric test.
     embeddingTesting_duplicated "org.robolectric:android-all:4.1.2_r1-robolectric-r1"
-    embeddingTesting "org.robolectric:robolectric:3.8"
-    embeddingTesting "org.robolectric:junit:3.8"
-    embeddingTesting "org.robolectric:shadows-framework:3.8"
-    embeddingTesting "org.robolectric:resources:3.8"
     embeddingTesting "org.mockito:mockito-all:1.10.19"
-    embeddingTesting "junit:junit:4.13-beta-3"
+    embeddingTesting ("org.robolectric:robolectric:4.3") {
+      // org.hamcrest is added by org.mockito:mockito-all
+      exclude group: "org.hamcrest", module:"hamcrest-core"
+    }
+    embeddingTesting ("junit:junit:4.13") {
+      // org.hamcrest is added by org.mockito:mockito-all
+      exclude group: "org.hamcrest", module:"hamcrest-core"
+    }
   }
 }
 

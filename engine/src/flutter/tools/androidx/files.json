@@ -1,0 +1,53 @@
+[
+  {
+    "url": "https://maven.google.com/androidx/lifecycle/lifecycle-common/2.2.0/lifecycle-common-2.2.0.jar",
+    "out_file_name": "androidx_lifecycle_common.jar",
+    "maven_dependency": "androidx.lifecycle:lifecycle-common:2.2.0",
+    "provides": [
+      "androidx.lifecycle.Lifecycle",
+      "androidx.lifecycle.LifecycleObserver",
+      "androidx.lifecycle.LifecycleOwner"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/lifecycle/lifecycle-common-java8/2.2.0/lifecycle-common-java8-2.2.0.jar",
+    "out_file_name": "androidx_lifecycle_common_java8.jar",
+    "maven_dependency": "androidx.lifecycle:lifecycle-common-java8:2.2.0",
+    "provides": [
+      "androidx.lifecycle.DefaultLifecycleObserver"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/lifecycle/lifecycle-runtime/2.2.0/lifecycle-runtime-2.2.0.aar",
+    "out_file_name": "androidx_lifecycle_runtime.aar",
+    "maven_dependency": "androidx.lifecycle:lifecycle-runtime:2.2.0",
+    "provides": [
+      "androidx.lifecycle.LifecycleRegistry"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/fragment/fragment/1.1.0/fragment-1.1.0.aar",
+    "out_file_name": "androidx_fragment.aar",
+    "maven_dependency": "androidx.fragment:fragment:1.1.0",
+    "provides": [
+      "androidx.fragment.app.Fragment",
+      "androidx.fragment.app.FragmentActivity"
+    ]
+  },
+  {
+    "url": "https://maven.google.com/androidx/annotation/annotation/1.1.0/annotation-1.1.0.jar",
+    "out_file_name": "androidx_annotation.jar",
+    "maven_dependency": "androidx.annotation:annotation:1.1.0",
+    "provides": [
+      "androidx.annotation.CallSuper",
+      "androidx.annotation.FloatRange",
+      "androidx.annotation.IntDef",
+      "androidx.annotation.Keep",
+      "androidx.annotation.NonNull",
+      "androidx.annotation.Nullable",
+      "androidx.annotation.RequiresApi",
+      "androidx.annotation.UiThread",
+      "androidx.annotation.VisibleForTesting"
+    ]
+  }
+]

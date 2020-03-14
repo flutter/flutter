@@ -290,10 +290,10 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   android_out_dir = os.path.join(out_dir, android_variant)
   EnsureJavaTestsAreBuilt(android_out_dir)
 
-  robolectric_dir = os.path.join(buildroot_dir, 'third_party', 'robolectric', 'lib')
+  embedding_deps_dir = os.path.join(buildroot_dir, 'third_party', 'android_embedding_dependencies', 'lib')
   classpath = map(str, [
     os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-29', 'android.jar'),
-    os.path.join(robolectric_dir, '*'), # Wildcard for all jars in the directory
+    os.path.join(embedding_deps_dir, '*'), # Wildcard for all jars in the directory
     os.path.join(android_out_dir, 'flutter.jar'),
     os.path.join(android_out_dir, 'robolectric_tests.jar')
   ])
@@ -302,7 +302,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   command = [
     'java',
     '-Drobolectric.offline=true',
-    '-Drobolectric.dependency.dir=' + robolectric_dir,
+    '-Drobolectric.dependency.dir=' + embedding_deps_dir,
     '-classpath', ':'.join(classpath),
     '-Drobolectric.logging=stdout',
     'org.junit.runner.JUnitCore',

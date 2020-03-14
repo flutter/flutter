@@ -4,7 +4,7 @@
 
 package io.flutter.embedding.engine.plugins.service;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /** A {@link FlutterPlugin} that wants to know when it is running within a {@link Service}. */
 public interface ServiceAware {
