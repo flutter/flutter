@@ -5,8 +5,8 @@
 package io.flutter.plugin.platform;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
 import android.view.View;
+import androidx.annotation.NonNull;
 
 /** A handle to an Android view to be embedded in the Flutter hierarchy. */
 public interface PlatformView {

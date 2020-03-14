@@ -5,9 +5,9 @@
 package io.flutter.embedding.engine.plugins.service;
 
 import android.app.Service;
-import android.arch.lifecycle.Lifecycle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
 
 /**
  * Control surface through which a {@link Service} attaches to a {@link FlutterEngine}.

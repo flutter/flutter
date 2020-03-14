@@ -497,11 +497,11 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/robolectric': {
+  'src/third_party/android_embedding_dependencies': {
      'packages': [
        {
-        'package': 'flutter/android/robolectric_bundle',
-        'version': 'last_updated:2019-09-09T16:47:38-0700'
+        'package': 'flutter/android/embedding_bundle',
+        'version': 'last_updated:2020-03-13T15:42:26-0700'
        }
      ],
      'condition': 'download_android_deps',
@@ -592,15 +592,6 @@ hooks = [
     'condition': 'download_windows_deps',
     'pattern': '.',
     'action': ['python', 'src/build/vs_toolchain.py', 'update'],
-  },
-  {
-    'name': 'download_android_support',
-    'pattern': '.',
-    'condition': 'download_android_deps',
-    'action': [
-        'python',
-        'src/flutter/tools/android_support/download_android_support.py',
-    ],
   },
   {
     'name': 'generate_package_files',

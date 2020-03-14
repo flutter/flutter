@@ -11,10 +11,10 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import androidx.annotation.NonNull;
 import io.flutter.view.TextureRegistry;
 
 @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)

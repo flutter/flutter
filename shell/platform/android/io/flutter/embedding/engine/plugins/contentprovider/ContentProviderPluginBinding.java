@@ -5,7 +5,7 @@
 package io.flutter.embedding.engine.plugins.contentprovider;
 
 import android.content.ContentProvider;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * Binding that gives {@link ContentProviderAware} plugins access to an associated {@link

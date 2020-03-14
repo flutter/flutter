@@ -4,7 +4,7 @@
 
 package io.flutter.plugin.common;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
 import java.util.Map;
 import org.json.JSONObject;

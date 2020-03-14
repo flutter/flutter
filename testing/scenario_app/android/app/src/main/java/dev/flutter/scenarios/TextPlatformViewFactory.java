@@ -5,7 +5,7 @@
 package dev.flutter.scenarios;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import io.flutter.plugin.common.MessageCodec;
 import io.flutter.plugin.common.StringCodec;
 import io.flutter.plugin.platform.PlatformView;

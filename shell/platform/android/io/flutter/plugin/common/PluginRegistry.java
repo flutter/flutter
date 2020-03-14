@@ -219,7 +219,7 @@ public interface PluginRegistry {
     /**
      * Adds a callback allowing the plugin to take part in handling incoming calls to {@code
      * Activity#onRequestPermissionsResult(int, String[], int[])} or {@code
-     * android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int,
+     * androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int,
      * String[], int[])}.
      *
      * <p>This registrar is for Flutter's v1 embedding. To listen for permission results in the v2
