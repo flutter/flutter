@@ -292,29 +292,34 @@ class LongPressDraggable<T> extends Draggable<T> {
     VoidCallback onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
-  }) : super(
-    key: key,
-    child: child,
-    feedback: feedback,
-    data: data,
-    axis: axis,
-    childWhenDragging: childWhenDragging,
-    feedbackOffset: feedbackOffset,
-    dragAnchor: dragAnchor,
-    maxSimultaneousDrags: maxSimultaneousDrags,
-    onDragStarted: onDragStarted,
-    onDraggableCanceled: onDraggableCanceled,
-    onDragEnd: onDragEnd,
-    onDragCompleted: onDragCompleted,
-    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
-  );
+    this.longPressDelay = kLongPressTimeout,
+  }) : assert(longPressDelay != null),
+       super(
+         key: key,
+         child: child,
+         feedback: feedback,
+         data: data,
+         axis: axis,
+         childWhenDragging: childWhenDragging,
+         feedbackOffset: feedbackOffset,
+         dragAnchor: dragAnchor,
+         maxSimultaneousDrags: maxSimultaneousDrags,
+         onDragStarted: onDragStarted,
+         onDraggableCanceled: onDraggableCanceled,
+         onDragEnd: onDragEnd,
+         onDragCompleted: onDragCompleted,
+         ignoringFeedbackSemantics: ignoringFeedbackSemantics,
+       );
 
   /// Whether haptic feedback should be triggered on drag start.
   final bool hapticFeedbackOnStart;
 
+  /// How long to wait before considering a press to be a long press.
+  final Duration longPressDelay;
+
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer()
+    return DelayedMultiDragGestureRecognizer(delay: longPressDelay)
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
         if (result != null && hapticFeedbackOnStart)

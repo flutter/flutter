@@ -4,8 +4,9 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'material.dart';
@@ -51,9 +52,97 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// child that could possibly be displayed in the list view instead of just
 /// those children that are actually visible.
 ///
-/// All [children] must have a key.
+/// All [children] must have a [Key].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+/// This example shows a re-orderable list with drag handles.
+///
+/// The drag handles are part of the children in the list. By default the whole
+/// child is draggable. This example limits the drag action to the drag handle
+/// by placing the rest of the child inside of an [IgnorePointer].
+///
+/// ```dart
+/// List<Widget> children;
+/// ScrollController controller;
+///
+/// @override
+/// void initState() {
+///   super.initState();
+///   controller = ScrollController();
+///   children = List<Widget>.generate(5, (int index) {
+///     return Row(
+///       crossAxisAlignment: CrossAxisAlignment.center,
+///       mainAxisAlignment: MainAxisAlignment.spaceAround,
+///       key: ValueKey<int>(index),
+///       children: <Widget>[
+///         Icon(Icons.drag_handle, color: Colors.grey),
+///         IgnorePointer(
+///           child: SizedBox(
+///             width: 50,
+///             child: Text(
+///               'Item $index',
+///             ),
+///           ),
+///         ),
+///       ],
+///     );
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Theme(
+///     data: ThemeData.light(),
+///     child: DefaultTextStyle(
+///       style: ThemeData.light().textTheme.bodyText1,
+///       child: Container(
+///         color: Colors.white,
+///         child: Center(
+///           child: Container(
+///             width: 100,
+///             height: 124,
+///             decoration: ShapeDecoration(
+///               shape: RoundedRectangleBorder(
+///                 side: BorderSide(),
+///                 borderRadius: BorderRadius.all(
+///                   Radius.circular(4.0),
+///                 ),
+///               ),
+///             ),
+///             child: ReorderableListView(
+///               scrollController: controller,
+///               dragDelay: Duration.zero,
+///               children: children,
+///               onReorder: (int from, int to) {
+///                 print('Reordering $from to $to.');
+///                 setState(() {
+///                   // Actually swap the children.
+///                   if (to < children.length && to >= 0) {
+///                     children.insert(to, children.removeAt(from));
+///                   } else {
+///                     children.add(children.removeAt(from));
+///                   }
+///                   // Just because this list is small, scroll back to the
+///                   // beginning after each reorder. If the list were a longer
+///                   // list, this probably wouldn't be desirable.
+///                   controller.animateTo(
+///                     0,
+///                     duration: const Duration(milliseconds: 100),
+///                     curve: Curves.easeInOut,
+///                   );
+///                 });
+///               },
+///             ),
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
@@ -66,9 +155,11 @@ class ReorderableListView extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
+    this.dragDelay = kLongPressTimeout,
   }) : assert(scrollDirection != null),
        assert(onReorder != null),
        assert(children != null),
+       assert(dragDelay != null),
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
@@ -121,6 +212,13 @@ class ReorderableListView extends StatefulWidget {
   /// into a new position.
   final ReorderCallback onReorder;
 
+  /// The delay after the beginning of the press before starting to drag for
+  /// reordering.
+  ///
+  /// If set to [Duration.zero], the drag will occur immediately. Use
+  /// [Duration.zero] if the list child is showing a drag handle.
+  final Duration dragDelay;
+
   @override
   _ReorderableListViewState createState() => _ReorderableListViewState();
 }
@@ -155,6 +253,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           onReorder: widget.onReorder,
           padding: widget.padding,
           reverse: widget.reverse,
+          longPressDelay: widget.dragDelay,
         );
       },
     );
@@ -181,6 +280,7 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.padding,
     @required this.onReorder,
     @required this.reverse,
+    @required this.longPressDelay,
   });
 
   final Widget header;
@@ -190,6 +290,7 @@ class _ReorderableListContent extends StatefulWidget {
   final EdgeInsets padding;
   final ReorderCallback onReorder;
   final bool reverse;
+  final Duration longPressDelay;
 
   @override
   _ReorderableListContentState createState() => _ReorderableListContentState();
@@ -455,36 +556,61 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {
       final Widget toWrapWithSemantics = wrapWithSemantics();
 
+      Widget child;
+      final Widget feedback = Container(
+        alignment: Alignment.topLeft,
+        // These constraints will limit the cross axis of the drawn widget.
+        constraints: constraints,
+        child: Material(
+          elevation: 6.0,
+          child: toWrapWithSemantics,
+        ),
+      );
+      final Widget dragChild =  _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics;
+      final DraggableCanceledCallback canceledCallback = (Velocity velocity, Offset offset) => onDragEnded();
+
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
-      Widget child = LongPressDraggable<Key>(
-        maxSimultaneousDrags: 1,
-        axis: widget.scrollDirection,
-        data: toWrap.key,
-        ignoringFeedbackSemantics: false,
-        feedback: Container(
-          alignment: Alignment.topLeft,
-          // These constraints will limit the cross axis of the drawn widget.
-          constraints: constraints,
-          child: Material(
-            elevation: 6.0,
-            child: toWrapWithSemantics,
-          ),
-        ),
-        child: _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics,
-        childWhenDragging: const SizedBox(),
-        dragAnchor: DragAnchor.child,
-        onDragStarted: onDragStarted,
-        // When the drag ends inside a DragTarget widget, the drag
-        // succeeds, and we reorder the widget into position appropriately.
-        onDragCompleted: onDragEnded,
-        // When the drag does not end inside a DragTarget widget, the
-        // drag fails, but we still reorder the widget to the last position it
-        // had been dragged to.
-        onDraggableCanceled: (Velocity velocity, Offset offset) {
-          onDragEnded();
-        },
-      );
+      if (widget.longPressDelay != Duration.zero) {
+        child = LongPressDraggable<Key>(
+          maxSimultaneousDrags: 1,
+          axis: widget.scrollDirection,
+          data: toWrap.key,
+          ignoringFeedbackSemantics: false,
+          feedback: feedback,
+          child: dragChild,
+          childWhenDragging: const SizedBox(),
+          dragAnchor: DragAnchor.child,
+          onDragStarted: onDragStarted,
+          // When the drag ends inside a DragTarget widget, the drag
+          // succeeds, and we reorder the widget into position appropriately.
+          onDragCompleted: onDragEnded,
+          // When the drag does not end inside a DragTarget widget, the
+          // drag fails, but we still reorder the widget to the last position it
+          // had been dragged to.
+          onDraggableCanceled: canceledCallback,
+          longPressDelay: widget.longPressDelay,
+        );
+      } else {
+        child = Draggable<Key>(
+          maxSimultaneousDrags: 1,
+          axis: widget.scrollDirection,
+          data: toWrap.key,
+          ignoringFeedbackSemantics: false,
+          feedback: feedback,
+          child: dragChild,
+          childWhenDragging: const SizedBox(),
+          dragAnchor: DragAnchor.child,
+          onDragStarted: onDragStarted,
+          // When the drag ends inside a DragTarget widget, the drag
+          // succeeds, and we reorder the widget into position appropriately.
+          onDragCompleted: onDragEnded,
+          // When the drag does not end inside a DragTarget widget, the
+          // drag fails, but we still reorder the widget to the last position it
+          // had been dragged to.
+          onDraggableCanceled: canceledCallback,
+        );
+      }
 
       // The target for dropping at the end of the list doesn't need to be
       // draggable.
