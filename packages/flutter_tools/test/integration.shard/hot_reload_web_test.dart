@@ -19,7 +19,7 @@ void main() {
   FlutterRunTestDriver flutter;
 
   setUp(() async {
-    tempDir = createResolvedTempDirectorySync('hot_reload_test.');
+    tempDir = createResolvedTempDirectorySync('hot_reload_web_test.');
     await project.setUpIn(tempDir);
     flutter = FlutterRunTestDriver(tempDir);
   });
@@ -36,16 +36,9 @@ void main() {
     project.uncommentHotReloadPrint();
     try {
       await flutter.hotRestart();
-      // On the web we don't know exactly when main will return yet.
-      await Future<void>.delayed(const Duration(seconds: 1));
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
     } finally {
       await subscription.cancel();
     }
-  }, skip: !Platform.isLinux); // only linux shards have Chrome installed.
-
-  test('hot restart works without error', () async {
-    await flutter.run(chrome: true);
-    await flutter.hotRestart();
   }, skip: !Platform.isLinux); // only linux shards have Chrome installed.
 }
