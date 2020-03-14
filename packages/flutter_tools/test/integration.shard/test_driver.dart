@@ -439,7 +439,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
-        '--disable-service-auth-codes',
+        if (!chrome)
+          '--disable-service-auth-codes',
         '--machine',
         '-d',
         if (chrome)
