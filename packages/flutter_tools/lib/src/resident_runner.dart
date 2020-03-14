@@ -76,11 +76,11 @@ class FlutterDevice {
       targetModel = TargetModel.flutterRunner;
     }
     // For both web and non-web platforms we initialize dill to/from
-    // a shared location for faster bootstrapping. If this process fails
+    // a shared location for faster bootstrapping. If the compiler fails
     // due to a kernel target or version mismatch, no error is reported
     // and the compiler starts up as normal. Unexpected errors will print
     // a warning message and dump some debug information which can be
-    // used to file a bug, but the compiler will still bootstrap correctly.
+    // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
