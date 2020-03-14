@@ -180,7 +180,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('opacity_test.offset.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
