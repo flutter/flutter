@@ -105,7 +105,7 @@ abstract class FlutterTestDriver {
         .followedBy(arguments)
         .toList(),
       workingDirectory: _projectFolder.path,
-      environment: <String, String>{'FLUTTER_TEST': 'true'},
+      environment: <String, String>{'FLUTTER_TEST': 'true', 'FLUTTER_WEB': 'true'},
     );
 
     // This class doesn't use the result of the future. It's made available
