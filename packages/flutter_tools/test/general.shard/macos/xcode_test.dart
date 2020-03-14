@@ -178,6 +178,36 @@ void main() {
       expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
       expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
+
+    group('SDK location', () {
+      const String sdkroot = 'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
+
+      testWithoutContext('environment', () async {
+        expect(await xcode.sdkLocation(SdkType.iPhone, <String, String>{'SDKROOT': sdkroot}), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path iphoneos', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.iPhone, <String, String>{}), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path macosx', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.macOS, <String, String>{}), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path fails', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 1, '', 'xcrun: error:')));
+
+        expect(() async => await xcode.sdkLocation(SdkType.iPhone, <String, String>{}),
+          throwsToolExit(message: 'Could not find SDK location'));
+      });
+    });
   });
 
   group('xcdevice', () {
