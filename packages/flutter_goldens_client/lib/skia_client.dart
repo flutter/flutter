@@ -133,7 +133,6 @@ class SkiaGoldClient {
           'authentication.';
         break;
       case ContinuousIntegrationEnvironment.cirrus:
-        print('cirrus');
         if (_serviceAccount.isEmpty) {
           final StringBuffer buf = StringBuffer()
             ..writeln('The Gold service account is unavailable.')..writeln(
@@ -627,7 +626,7 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'CI' : ci,
+      'CI' : ci.toString().split('.').last,
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
