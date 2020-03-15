@@ -9,7 +9,7 @@ import '../../src/common.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  test('WebWorkflow applies on Linux', () {
+  testWithoutContext('WebWorkflow applies on Linux', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(operatingSystem: 'linux'),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -21,7 +21,7 @@ void main() {
     expect(workflow.canListEmulators, false);
   });
 
-  test('WebWorkflow applies on macOS', () {
+  testWithoutContext('WebWorkflow applies on macOS', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(operatingSystem: 'macos'),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -33,7 +33,7 @@ void main() {
     expect(workflow.canListEmulators, false);
   });
 
-  test('WebWorkflow applies on Windows', () {
+  testWithoutContext('WebWorkflow applies on Windows', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(operatingSystem: 'windows'),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -45,7 +45,7 @@ void main() {
     expect(workflow.canListEmulators, false);
   });
 
-  test('WebWorkflow does not apply on other platforms', () {
+  testWithoutContext('WebWorkflow does not apply on other platforms', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(operatingSystem: 'fuchsia'),
       featureFlags: TestFeatureFlags(isWebEnabled: true),
@@ -54,7 +54,7 @@ void main() {
     expect(workflow.appliesToHostPlatform, false);
   });
 
-  test('WebWorkflow does not apply if feature flag is disabled', () {
+  testWithoutContext('WebWorkflow does not apply if feature flag is disabled', () {
     final WebWorkflow workflow = WebWorkflow(
       platform: FakePlatform(operatingSystem: 'linux'),
       featureFlags: TestFeatureFlags(),
