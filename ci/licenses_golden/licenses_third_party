@@ -1,4 +1,4 @@
-Signature: b2a998d040384765d4bf2b5aa6e318ef
+Signature: aeb67aa32318e9bbd3b7b420ac0760c9
 
 UNUSED LICENSES:
 
@@ -8281,6 +8281,7 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_array.d
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_number.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_string.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/math_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/native_helper.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/regexp_helper.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/string_helper.dart
