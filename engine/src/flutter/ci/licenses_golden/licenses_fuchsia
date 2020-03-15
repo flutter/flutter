@@ -1,4 +1,4 @@
-Signature: 8f652d8bf0e8a2e1e3edcf50cf29c0e8
+Signature: e2ec6f495e5d7854d864d8a261e829df
 
 UNUSED LICENSES:
 
@@ -534,7 +534,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
@@ -1532,7 +1534,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/channel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/channelcontrol.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/cookie.fidl
@@ -2266,7 +2270,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
@@ -3268,7 +3274,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/stream.cc
 ----------------------------------------------------------------------------------------------------
