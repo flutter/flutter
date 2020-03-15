@@ -30,7 +30,6 @@ void main() {
   });
 
   test('newly added code executes during hot restart', () async {
-    final StringBuffer stdout = StringBuffer();
     final Completer<void> onReloadWorked = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
       if (line.contains('(RELOAD WORKED)')) {
