@@ -440,7 +440,7 @@ void main() {
   test('Generated service worker correctly inlines file hashes', () {
     final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
 
-    expect(result, contains('{\n  "foo": "abcd"\n};'));
+    expect(result, contains('{\n  "/foo": "abcd"\n};'));
   });
 
   test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
