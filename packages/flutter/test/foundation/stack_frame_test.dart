@@ -46,7 +46,7 @@ void main() {
       StackFrame.fromStackString(webStackTrace),
       webStackTraceFrames,
     );
-  });
+  }, skip: true); // `flutter run` and `flutter test` have different stack traces on the web
 
   test('Parses ...',  () {
     expect(
