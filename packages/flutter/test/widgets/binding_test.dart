@@ -205,7 +205,7 @@ void main() {
     FlutterError.onError = oldHandler;
     const String toMatch = '...     Normal element mounting (';
     expect(toMatch.allMatches(filteredStack)?.length, 1);
-  });
+  }, skip: kIsWeb); // The `flutter run` and `flutter test` commands produce different output.
 }
 
 class TestStatefulWidget extends StatefulWidget {

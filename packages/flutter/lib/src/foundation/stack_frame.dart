@@ -131,7 +131,7 @@ class StackFrame {
         packageUri.pathSegments[0] + '/' +
         packageUri.pathSegments[1] + '/', '');
     } else if (isDartSdk) {
-      packageScheme = 'org-dartlang';
+      packageScheme = 'dart';
       final Uri packageUri = Uri.parse(match.group(1));
       package = packageUri.pathSegments[0];
       packagePath = packageUri.path.replaceFirst(
