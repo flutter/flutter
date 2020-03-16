@@ -580,7 +580,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
+    final Template template = Template.fromName(path, fileSystem: globals.fs);
     template.render(
       target,
       <String, dynamic>{
@@ -729,7 +729,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
+    final Template template = Template.fromName(path, fileSystem: globals.fs);
     template.render(
       target,
       <String, dynamic>{

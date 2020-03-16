@@ -674,7 +674,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   }
 
   int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
-    final Template template = Template.fromName(templateName);
+    final Template template = Template.fromName(templateName, fileSystem: globals.fs);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 
