@@ -710,6 +710,39 @@ void main() {
   });
 
   group('generateCode', () {
+    test('should generate a file per language', () {
+      const String singleEnCaMessageArbFileString = '''
+{
+  "title": "Canadian Title"
+}''';
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_en_CA.arb').writeAsStringSync(singleEnCaMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.loadResources();
+        generator.writeOutputFile();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en.dart')), true);
+      expect(fs.isFileSync(path.join('lib', 'l10n', 'output-localization-file_en_US.dart')), false);
+
+      final String englishLocalizationsFile = fs.file(
+        path.join('lib', 'l10n', 'output-localization-file_en.dart')
+      ).readAsStringSync();
+      expect(englishLocalizationsFile, contains('class AppLocalizationsEnCa extends AppLocalizationsEn'));
+      expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
+    });
+
     group('DateTime tests', () {
       test('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''
