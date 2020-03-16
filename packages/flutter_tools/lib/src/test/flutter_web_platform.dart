@@ -352,7 +352,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
-    final RunnerSuite suite = await browserManager
+    final FlutterWebRunnerSuite suite = await browserManager
         .load(path, suiteUrl, suiteConfig, message);
     if (_closed) {
       return null;
@@ -471,66 +471,88 @@ class OneOffHandler {
 }
 
 class FlutterWebRunnerSuite implements RunnerSuite {
+  FlutterWebRunnerSuite(this.testFile, this._delegate);
+
+  final String testFile;
+  final RunnerSuite _delegate;
+
   @override
   StreamChannel channel(String name) {
-    // TODO: implement channel
-    throw UnimplementedError();
+    //print('>>> $testFile: channel($name)');
+    return _delegate.channel(name);
   }
   
   @override
   Future close() {
-    // TODO: implement close
-    throw UnimplementedError();
+    //print('>>> $testFile: close()');
+    return _delegate.close();
   }
 
   @override
-  // TODO: implement config
-  SuiteConfiguration get config => throw UnimplementedError();
+  SuiteConfiguration get config {
+    //print('>>> $testFile: get config');
+    return _delegate.config;
+  }
 
   @override
-  // TODO: implement environment
-  Environment get environment => throw UnimplementedError();
+  Environment get environment {
+    //print('>>> $testFile: get environment');
+    return _delegate.environment;
+  }
 
   @override
   RunnerSuite filter(bool Function(Test) callback) {
-    // TODO: implement filter
-    throw UnimplementedError();
+    //print('>>> $testFile: filter(<function>)');
+    return _delegate.filter(callback);
   }
 
   @override
-  Future<Map<String, >> gatherCoverage() {
-    // TODO: implement gatherCoverage
-    throw UnimplementedError();
+  Future<Map<String, dynamic>> gatherCoverage() {
+    //print('>>> $testFile: gatherCoverage()');
+    return _delegate.gatherCoverage();
   }
 
   @override
-  // TODO: implement group
-  Group get group => throw UnimplementedError();
+  Group get group {
+    //print('>>> $testFile: get group');
+    return _delegate.group;
+  }
 
   @override
-  // TODO: implement isDebugging
-  bool get isDebugging => throw UnimplementedError();
+  bool get isDebugging {
+    //print('>>> $testFile: get isDebugging');
+    return _delegate.isDebugging;
+  }
 
   @override
-  // TODO: implement isLoadSuite
-  bool get isLoadSuite => throw UnimplementedError();
+  bool get isLoadSuite {
+    //print('>>> $testFile: get isLoadSuite');
+    return _delegate.isLoadSuite;
+  }
 
   @override
-  // TODO: implement metadata
-  Metadata get metadata => throw UnimplementedError();
+  Metadata get metadata {
+    //print('>>> $testFile: get metadata');
+    return _delegate.metadata;
+  }
 
   @override
-  // TODO: implement onDebugging
-  Stream<bool> get onDebugging => throw UnimplementedError();
+  Stream<bool> get onDebugging {
+    //print('>>> $testFile: get onDebugging');
+    return _delegate.onDebugging;
+  }
 
   @override
-  // TODO: implement path
-  String get path => throw UnimplementedError();
+  String get path {
+    //print('>>> $testFile: get path');
+    return _delegate.path;
+  }
 
   @override
-  // TODO: implement platform
-  SuitePlatform get platform => throw UnimplementedError();
-
+  SuitePlatform get platform {
+    //print('>>> $testFile: get platform');
+    return _delegate.platform;
+  }
 }
 
 class PathHandler {
@@ -644,21 +666,6 @@ class BrowserManager {
   /// This is connected to a page running `static/host.dart`.
   MultiChannel<dynamic> _channel;
 
-  /// A pool that ensures that limits the number of initial connections the
-  /// manager will wait for at once.
-  ///
-  /// This isn't the *total* number of connections; any number of iframes may be
-  /// loaded in the same browser. However, the browser can only load so many at
-  /// once, and we want a timeout in case they fail so we only wait for so many
-  /// at once.
-  // The number 1 is chosen to disallow multiple iframes in the same browser. This
-  // is because in some environments, such as Cirrus CI, tests end up stuck and
-  // time out eventually. The exact reason for timeouts is unknown, but the
-  // hypothesis is that we were the first ones to attempt to run DDK-compiled
-  // tests concurrently in the browser. DDK is known to produce an order of
-  // magnitude bigger and somewhat slower code, which may overload the browser.
-  final Pool _pool = Pool(1);
-
   /// The ID of the next suite to be loaded.
   ///
   /// This is used to ensure that the suites can be referred to consistently
@@ -754,6 +761,8 @@ class BrowserManager {
         this, null, _browser.remoteDebuggerUri, _onRestartController.stream);
   }
 
+  Future<void> _suiteLock;
+
   /// Tells the browser to load a test suite from the URL [url].
   ///
   /// [url] should be an HTML page with a reference to the JS-compiled test
@@ -762,12 +771,21 @@ class BrowserManager {
   ///
   /// If [mapper] is passed, it's used to map stack traces for errors coming
   /// from this test suite.
-  Future<RunnerSuite> load(
+  Future<FlutterWebRunnerSuite> load(
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
     Object message,
   ) async {
+    while (_suiteLock != null) {
+      print('>>> $path waiting for another test to finish');
+      await _suiteLock;
+    }
+
+    print('>>> Loading $path');
+    final Completer<void> _suiteCompleter = Completer<void>();
+    _suiteLock = _suiteCompleter.future;
+
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
       'browser': _runtime.identifier,
@@ -782,6 +800,9 @@ class BrowserManager {
       _controllers.remove(controller);
       _channel.sink
           .add(<String, Object>{'command': 'closeSuite', 'id': suiteID});
+      print('>>> $path finished');
+      _suiteLock = null;
+      _suiteCompleter.complete();
     }
 
     // The virtual channel will be closed when the suite is closed, in which
@@ -790,31 +811,30 @@ class BrowserManager {
     final int suiteChannelID = virtualChannel.id;
     final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
       StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
+        print('>>> $path is done');
         closeIframe();
         sink.close();
       }),
     );
 
-    return await _pool.withResource<RunnerSuite>(() async {
-      _channel.sink.add(<String, Object>{
-        'command': 'loadSuite',
-        'url': url.toString(),
-        'id': suiteID,
-        'channel': suiteChannelID,
-      });
-
-      try {
-        controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
-            suiteConfig, await _environment, suiteChannel, message);
-
-        _controllers.add(controller);
-        return await controller.suite;
-      // Not limiting to catching Exception because the exception is rethrown.
-      } catch (_) { // ignore: avoid_catches_without_on_clauses
-        closeIframe();
-        rethrow;
-      }
+    _channel.sink.add(<String, Object>{
+      'command': 'loadSuite',
+      'url': url.toString(),
+      'id': suiteID,
+      'channel': suiteChannelID,
     });
+
+    try {
+      controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
+          suiteConfig, await _environment, suiteChannel, message);
+
+      _controllers.add(controller);
+      return FlutterWebRunnerSuite(path, await controller.suite);
+    // Not limiting to catching Exception because the exception is rethrown.
+    } catch (_) { // ignore: avoid_catches_without_on_clauses
+      closeIframe();
+      rethrow;
+    }
   }
 
   /// An implementation of [Environment.displayPause].
