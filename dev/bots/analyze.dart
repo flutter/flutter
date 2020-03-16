@@ -320,7 +320,7 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
             name.startsWith('packages/flutter/test/engine/') ||
             name.startsWith('examples/layers/test/smoketests/raw/') ||
             name.startsWith('examples/layers/test/smoketests/rendering/') ||
-            name.startsWith('examples/flutter_gallery/test/calculator')) {
+            name.startsWith('dev/integration_tests/flutter_gallery/test/calculator')) {
           // We only exempt driver tests, some of our special trivial tests.
           // Driver tests aren't typically expected to use TypeMatcher and company.
           // The trivial tests don't typically do anything at all and it would be
@@ -817,92 +817,92 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   Hash256(0xD29D4E0AF9256DC9, 0x2D0A8F8810608A5E, 0x64A132AD8B397CA2, 0xC4DDC0B1C26A68C3),
 
   // packages/flutter_tools/templates/app/web/icons/Icon-192.png.copy.tmpl
-  // examples/flutter_gallery/web/icons/Icon-192.png
+  // dev/integration_tests/flutter_gallery/web/icons/Icon-192.png
   Hash256(0x3DCE99077602F704, 0x21C1C6B2A240BC9B, 0x83D64D86681D45F2, 0x154143310C980BE3),
 
   // packages/flutter_tools/templates/app/web/icons/Icon-512.png.copy.tmpl
-  // examples/flutter_gallery/web/icons/Icon-512.png
+  // dev/integration_tests/flutter_gallery/web/icons/Icon-512.png
   Hash256(0xBACCB205AE45f0B4, 0x21BE1657259B4943, 0xAC40C95094AB877F, 0x3BCBE12CD544DCBE),
 
   // packages/flutter_tools/templates/app/web/favicon.png.copy.tmpl
-  // examples/flutter_gallery/web/favicon.png
+  // dev/integration_tests/flutter_gallery/web/favicon.png
   Hash256(0x7AB2525F4B86B65D, 0x3E4C70358A17E5A1, 0xAAF6F437f99CBCC0, 0x46DAD73d59BB9015),
 
   // GALLERY ICONS
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_background.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_background.png
   Hash256(0x03CFDE53C249475C, 0x277E8B8E90AC8A13, 0xE5FC13C358A94CCB, 0x67CA866C9862A0DD),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_foreground.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_foreground.png
   Hash256(0x86A83E23A505EFCC, 0x39C358B699EDE12F, 0xC088EE516A1D0C73, 0xF3B5D74DDAD164B1),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
   Hash256(0xD813B1A77320355E, 0xB68C485CD47D0F0F, 0x3C7E1910DCD46F08, 0x60A6401B8DC13647),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_background.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_background.png
   Hash256(0x35AFA76BD5D6053F, 0xEE927436C78A8794, 0xA8BA5F5D9FC9653B, 0xE5B96567BB7215ED),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_foreground.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_foreground.png
   Hash256(0x263CE9B4F1F69B43, 0xEBB08AE9FE8F80E7, 0x95647A59EF2C040B, 0xA8AEB246861A7DFF),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
   Hash256(0x5E1A93C3653BAAFF, 0x1AAC6BCEB8DCBC2F, 0x2AE7D68ECB07E507, 0xCB1FA8354B28313A),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_background.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_background.png
   Hash256(0xA5C77499151DDEC6, 0xDB40D0AC7321FD74, 0x0646C0C0F786743F, 0x8F3C3C408CAC5E8C),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_foreground.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_foreground.png
   Hash256(0x33DE450980A2A16B, 0x1982AC7CDC1E7B01, 0x919E07E0289C2139, 0x65F85BCED8895FEF),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
   Hash256(0xC3B8577F4A89BA03, 0x830944FB06C3566B, 0x4C99140A2CA52958, 0x089BFDC3079C59B7),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_background.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_background.png
   Hash256(0xDEBC241D6F9C5767, 0x8980FDD46FA7ED0C, 0x5B8ACD26BCC5E1BC, 0x473C89B432D467AD),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_foreground.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_foreground.png
   Hash256(0xBEFE5F7E82BF8B64, 0x148D869E3742004B, 0xF821A9F5A1BCDC00, 0x357D246DCC659DC2),
 
-  // examples/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+  // dev/integration_tests/flutter_gallery/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
   Hash256(0xC385404341FF9EDD, 0x30FBE76F0EC99155, 0x8EA4F4AFE8CC0C60, 0x1CA3EDEF177E1DA8),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-1024.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-1024.png
   Hash256(0x6BE5751A29F57A80, 0x36A4B31CC542C749, 0x984E49B22BD65CAA, 0x75AE8B2440848719),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-120.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-120.png
   Hash256(0x9972A2264BFA8F8D, 0x964AFE799EADC1FA, 0x2247FB31097F994A, 0x1495DC32DF071793),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-152.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-152.png
   Hash256(0x4C7CC9B09BEEDA24, 0x45F57D6967753910, 0x57D68E1A6B883D2C, 0x8C52701A74F1400F),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-167.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-167.png
   Hash256(0x66DACAC1CFE4D349, 0xDBE994CB9125FFD7, 0x2D795CFC9CF9F739, 0xEDBB06CE25082E9C),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-180.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-180.png
   Hash256(0x5188621015EBC327, 0xC9EF63AD76E60ECE, 0xE82BDC3E4ABF09E2, 0xEE0139FA7C0A2BE5),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-20.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-20.png
   Hash256(0x27D2752D04EE9A6B, 0x78410E208F74A6CD, 0xC90D9E03B73B8C60, 0xD05F7D623E790487),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-29.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-29.png
   Hash256(0xBB20556B2826CF85, 0xD5BAC73AA69C2AC3, 0x8E71DAD64F15B855, 0xB30CB73E0AF89307),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-40.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-40.png
   Hash256(0x623820FA45CDB0AC, 0x808403E34AD6A53E, 0xA3E9FDAE83EE0931, 0xB020A3A4EF2CDDE7),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-58.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-58.png
   Hash256(0xC6D631D1E107215E, 0xD4A58FEC5F3AA4B5, 0x0AE9724E07114C0C, 0x453E5D87C2CAD3B3),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-60.png
   Hash256(0x4B6F58D1EB8723C6, 0xE717A0D09FEC8806, 0x90C6D1EF4F71836E, 0x618672827979B1A2),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-76.png
   Hash256(0x0A1744CC7634D508, 0xE85DD793331F0C8A, 0x0B7C6DDFE0975D8F, 0x29E91C905BBB1BED),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-80.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-80.png
   Hash256(0x24032FBD1E6519D6, 0x0BA93C0D5C189554, 0xF50EAE23756518A2, 0x3FABACF4BD5DAF08),
 
-  // examples/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-87.png
+  // dev/integration_tests/flutter_gallery/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-87.png
   Hash256(0xC17BAE6DF6BB234A, 0xE0AF4BEB0B805F12, 0x14E74EB7AA9A30F1, 0x5763689165DA7DDF),
 
 
