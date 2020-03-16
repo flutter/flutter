@@ -105,6 +105,7 @@ class RunCommand extends RunCommandBase {
       ..addOption('trace-whitelist',
         help: 'Filters out all trace events except those that are specified in '
               'this comma separated list of whitelisted prefixes.',
+        valueHelp: 'foo,bar',
       )
       ..addFlag('endless-trace-buffer',
         negatable: false,
