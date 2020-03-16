@@ -656,6 +656,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
+      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // in the frontend_server.
       '--debugger-module-names',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
