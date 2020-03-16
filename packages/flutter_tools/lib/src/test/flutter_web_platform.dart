@@ -24,11 +24,8 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/metadata.dart';
-import 'package:test_api/src/backend/group.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
-import 'package:test_api/src/backend/test.dart';
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -352,7 +349,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
-    final FlutterWebRunnerSuite suite = await browserManager
+    final RunnerSuite suite = await browserManager
         .load(path, suiteUrl, suiteConfig, message);
     if (_closed) {
       return null;
@@ -467,91 +464,6 @@ class OneOffHandler {
       return shelf.Response.notFound(null);
     }
     return handler(request.change(path: path));
-  }
-}
-
-class FlutterWebRunnerSuite implements RunnerSuite {
-  FlutterWebRunnerSuite(this.testFile, this._delegate);
-
-  final String testFile;
-  final RunnerSuite _delegate;
-
-  @override
-  StreamChannel channel(String name) {
-    //print('>>> $testFile: channel($name)');
-    return _delegate.channel(name);
-  }
-  
-  @override
-  Future close() {
-    //print('>>> $testFile: close()');
-    return _delegate.close();
-  }
-
-  @override
-  SuiteConfiguration get config {
-    //print('>>> $testFile: get config');
-    return _delegate.config;
-  }
-
-  @override
-  Environment get environment {
-    //print('>>> $testFile: get environment');
-    return _delegate.environment;
-  }
-
-  @override
-  RunnerSuite filter(bool Function(Test) callback) {
-    //print('>>> $testFile: filter(<function>)');
-    return _delegate.filter(callback);
-  }
-
-  @override
-  Future<Map<String, dynamic>> gatherCoverage() {
-    //print('>>> $testFile: gatherCoverage()');
-    return _delegate.gatherCoverage();
-  }
-
-  @override
-  Group get group {
-    //print('>>> $testFile: get group');
-    return _delegate.group;
-  }
-
-  @override
-  bool get isDebugging {
-    //print('>>> $testFile: get isDebugging');
-    return _delegate.isDebugging;
-  }
-
-  @override
-  bool get isLoadSuite {
-    //print('>>> $testFile: get isLoadSuite');
-    return _delegate.isLoadSuite;
-  }
-
-  @override
-  Metadata get metadata {
-    //print('>>> $testFile: get metadata');
-    return _delegate.metadata;
-  }
-
-  @override
-  Stream<bool> get onDebugging {
-    //print('>>> $testFile: get onDebugging');
-    return _delegate.onDebugging;
-  }
-
-  @override
-  String get path {
-    //print('>>> $testFile: get path');
-    return _delegate.path;
-  }
-
-  @override
-  SuitePlatform get platform {
-    //print('>>> $testFile: get platform');
-    return _delegate.platform;
   }
 }
 
@@ -761,7 +673,10 @@ class BrowserManager {
         this, null, _browser.remoteDebuggerUri, _onRestartController.stream);
   }
 
-  Future<void> _suiteLock;
+  /// Allows only one test suite (typically one test file) to be loaded and run
+  /// at any given point in time. Loading more than one file at a time is known
+  /// to lead to flaky tests.
+  final Pool _suiteLock = Pool(1);
 
   /// Tells the browser to load a test suite from the URL [url].
   ///
@@ -771,20 +686,13 @@ class BrowserManager {
   ///
   /// If [mapper] is passed, it's used to map stack traces for errors coming
   /// from this test suite.
-  Future<FlutterWebRunnerSuite> load(
+  Future<RunnerSuite> load(
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
     Object message,
   ) async {
-    while (_suiteLock != null) {
-      print('>>> $path waiting for another test to finish');
-      await _suiteLock;
-    }
-
-    print('>>> Loading $path');
-    final Completer<void> _suiteCompleter = Completer<void>();
-    _suiteLock = _suiteCompleter.future;
+    final PoolResource lockResource = await _suiteLock.request();
 
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
@@ -800,11 +708,6 @@ class BrowserManager {
       _controllers.remove(controller);
       _channel.sink
           .add(<String, Object>{'command': 'closeSuite', 'id': suiteID});
-      print('>>> $path finished');
-      _suiteLock = null;
-      if (!_suiteCompleter.isCompleted) {
-        _suiteCompleter.complete();
-      }
     }
 
     // The virtual channel will be closed when the suite is closed, in which
@@ -813,9 +716,9 @@ class BrowserManager {
     final int suiteChannelID = virtualChannel.id;
     final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
       StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
-        print('>>> $path is done');
         closeIframe();
         sink.close();
+        lockResource.release();
       }),
     );
 
@@ -831,7 +734,7 @@ class BrowserManager {
           suiteConfig, await _environment, suiteChannel, message);
 
       _controllers.add(controller);
-      return FlutterWebRunnerSuite(path, await controller.suite);
+      return await controller.suite;
     // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) { // ignore: avoid_catches_without_on_clauses
       closeIframe();
