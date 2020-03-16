@@ -21,12 +21,6 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 
-/// Enum representing the supported CI environments used by flutter/flutter.
-enum ContinuousIntegrationEnvironment {
-  luci,
-  cirrus,
-}
-
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
@@ -35,7 +29,6 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
-    this.ci,
     io.HttpClient httpClient,
   }) : assert(workDirectory != null),
        assert(fs != null),
@@ -45,25 +38,22 @@ class SkiaGoldClient {
 
   /// The file system to use for storing the local clone of the repository.
   ///
-  /// This is useful in tests, where a local file system (the default) can be
-  /// replaced by a memory file system.
+  /// This is useful in tests, where a local file system (the default) can
+  /// be replaced by a memory file system.
   final FileSystem fs;
 
   /// A wrapper for the [dart:io.Platform] API.
   ///
-  /// This is useful in tests, where the system platform (the default) can be
-  /// replaced by a mock platform instance.
+  /// This is useful in tests, where the system platform (the default) can
+  /// be replaced by a mock platform instance.
   final Platform platform;
 
   /// A controller for launching sub-processes.
   ///
-  /// This is useful in tests, where the real process manager (the default) can
-  /// be replaced by a mock process manager that doesn't really create
+  /// This is useful in tests, where the real process manager (the default)
+  /// can be replaced by a mock process manager that doesn't really create
   /// sub-processes.
   final ProcessManager process;
-
-  /// What testing environment we may be in, like Cirrus or Luci.
-  final ContinuousIntegrationEnvironment ci;
 
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
@@ -79,9 +69,9 @@ class SkiaGoldClient {
   /// A map of known golden file tests and their associated positive image
   /// hashes.
   ///
-  /// This is set and used by the [FlutterLocalFileComparator] and the
-  /// [_UnauthorizedFlutterPreSubmitComparator] to test against golden masters
-  /// maintained in the Flutter Gold dashboard.
+  /// This is set and used by the [FlutterLocalFileComparator] and
+  /// [FlutterPreSubmitFileComparator] to test against golden masters maintained
+  /// in the Flutter Gold dashboard.
   Map<String, List<String>> get expectations => _expectations;
   Map<String, List<String>> _expectations;
 
@@ -104,57 +94,31 @@ class SkiaGoldClient {
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
   ///
-  /// This ensures that the goldctl tool is authorized and ready for testing.
-  /// Used by the [FlutterPostSubmitFileComparator] and the
-  /// [_AuthorizedFlutterPreSubmitComparator].
-  ///
-  /// Based on the current environment, the goldctl tool may be authorized by
-  /// a service account provided by Cirrus, or through the context provided by a
-  /// luci environment.
+  /// This ensures that the goldctl tool is authorized and ready for testing. It
+  /// will only be called once for each instance of
+  /// [FlutterSkiaGoldFileComparator].
   Future<void> auth() async {
     if (await clientIsAuthorized())
       return;
 
-    List<String> authArguments;
-    String failureContext;
-
-    switch (ci) {
-      case ContinuousIntegrationEnvironment.luci:
-        authArguments = <String>[
-          'auth',
-          '--work-dir', workDirectory
-            .childDirectory('temp')
-            .path,
-          '--luci',
-        ];
-        failureContext =
-        'Luci environments authenticate using the file provided '
-          'by LUCI_CONTEXT. There may be an error with this file or Gold '
-          'authentication.';
-        break;
-      case ContinuousIntegrationEnvironment.cirrus:
-        if (_serviceAccount.isEmpty) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('The Gold service account is unavailable.')..writeln(
-              'Without a service account, Gold can not be authorized.')..writeln(
-              'Please check your user permissions and current comparator.');
-          throw Exception(buf.toString());
-        }
-
-        final File authorization = workDirectory.childFile('serviceAccount.json');
-        await authorization.writeAsString(_serviceAccount);
-        authArguments = <String>[
-          'auth',
-          '--service-account', authorization.path,
-          '--work-dir', workDirectory
-            .childDirectory('temp')
-            .path,
-        ];
-        failureContext = 'This could be caused by incorrect user permissions on '
-          'Cirrus, if the debug information below contains ENCRYPTED, the wrong '
-          'comparator was chosen for the test case.';
-        break;
+    if (_serviceAccount.isEmpty) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('The Gold service account is unavailable.')
+        ..writeln('Without a service account, Gold can not be authorized.')
+        ..writeln('Please check your user permissions and current comparator.');
+      throw Exception(buf.toString());
     }
+
+    final File authorization = workDirectory.childFile('serviceAccount.json');
+    await authorization.writeAsString(_serviceAccount);
+
+    final List<String> authArguments = <String>[
+      'auth',
+      '--service-account', authorization.path,
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+    ];
 
     final io.ProcessResult result = await io.Process.run(
       _goldctl,
@@ -164,7 +128,10 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold authorization failed.')
-        ..writeln(failureContext)
+        ..writeln('This could be caused by incorrect user permissions, if the ')
+        ..writeln('debug information below contains ENCRYPTED, the wrong ')
+        ..writeln('comparator was chosen for the test case.')
+        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -178,10 +145,6 @@ class SkiaGoldClient {
   /// It will only be called once for each instance of an
   /// [_UnauthorizedFlutterPreSubmitComparator].
   Future<void> emptyAuth() async {
-    // We only use emptyAuth when the service account cannot be decrypted on
-    // Cirrus.
-    assert(ci == ContinuousIntegrationEnvironment.cirrus);
-
     final List<String> authArguments = <String>[
       'auth',
       '--work-dir', workDirectory
@@ -208,8 +171,7 @@ class SkiaGoldClient {
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
-  /// backend, the `init` argument initializes the current test. Used by the
-  /// [FlutterPostSubmitFileComparator].
+  /// backend, the `init` argument initializes the current test.
   Future<void> imgtestInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -265,7 +227,7 @@ class SkiaGoldClient {
   /// result.
   ///
   /// The [testName] and [goldenFile] parameters reference the current
-  /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
+  /// comparison being evaluated by the [FlutterSkiaGoldFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
@@ -298,8 +260,7 @@ class SkiaGoldClient {
   /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
-  /// backend, the `init` argument initializes the current tryjob. Used by the
-  /// [_AuthorizedFlutterPreSubmitComparator].
+  /// backend, the `init` argument initializes the current tryjob.
   Future<void> tryjobInit() async {
     final File keys = workDirectory.childFile('keys.json');
     final File failures = workDirectory.childFile('failures.json');
@@ -307,6 +268,9 @@ class SkiaGoldClient {
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
     final String commitHash = await _getCurrentCommit();
+    final String pullRequest = platform.environment['CIRRUS_PR'];
+    final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+
 
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
@@ -319,10 +283,11 @@ class SkiaGoldClient {
       '--failure-file', failures.path,
       '--passfail',
       '--crs', 'github',
+      '--changelist', pullRequest,
+      '--cis', 'cirrus',
+      '--jobid', cirrusTaskID,
       '--patchset_id', commitHash,
     ];
-
-    imgtestInitArguments.addAll(getCIArguments());
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
@@ -487,12 +452,11 @@ class SkiaGoldClient {
   /// Returns a boolean value for whether or not the given test and current pull
   /// request are ignored on Flutter Gold.
   ///
-  /// This is only relevant when used by the
-  /// [_UnauthorizedFlutterPreSubmitComparator] when a golden file test fails.
-  /// In order to land a change to an existing golden file, an ignore must be
-  /// set up in Flutter Gold. This will serve as a flag to permit the change to
-  /// land, protect against any unwanted changes, and ensure that changes that
-  /// have landed are triaged.
+  /// This is only relevant when used by the [FlutterPreSubmitFileComparator]
+  /// when a golden file test fails. In order to land a change to an existing
+  /// golden file, an ignore must be set up in Flutter Gold. This will serve as
+  /// a flag to permit the change to land, protect against any unwanted changes,
+  /// and ensure that changes that have landed are triaged.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
     bool ignoreIsActive = false;
     testName = cleanTestName(testName);
@@ -610,7 +574,6 @@ class SkiaGoldClient {
   String _getKeysJSON() {
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
-      'CI' : ci.toString().split('.').last,
     };
     if (platform.environment[_kTestBrowserKey] != null)
       keys['Browser'] = platform.environment[_kTestBrowserKey];
@@ -638,34 +601,6 @@ class SkiaGoldClient {
     }
     return false;
   }
-
-  /// Returns a list of arguments for initializing a tryjob based on the testing
-  /// environment.
-  List<String> getCIArguments() {
-    String pullRequest;
-    String jobId;
-    String cis;
-
-    switch (ci) {
-      case ContinuousIntegrationEnvironment.luci:
-        jobId = platform.environment['LOGDOG_STREAM_PREFIX'].split('/').last;
-        final List<String> refs = platform.environment['GOLD_TRYJOB'].split('/');
-        pullRequest = refs[refs.length - 2];
-        cis = 'buildbucket';
-        break;
-      case ContinuousIntegrationEnvironment.cirrus:
-        pullRequest = platform.environment['CIRRUS_PR'];
-        jobId = platform.environment['CIRRUS_TASK_ID'];
-        cis = 'cirrus';
-        break;
-    }
-
-    return <String>[
-      '--changelist', pullRequest,
-      '--cis', cis,
-      '--jobid', jobId,
-    ];
-  }
 }
 
 /// Used to make HttpRequests during testing.
@@ -688,10 +623,7 @@ class SkiaGoldDigest {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
       paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
-        <String, List<String>>{
-          'Platform': <String>[],
-          'Browser' : <String>[],
-        }),
+        <String, List<String>>{'Platform': <String>[]}),
       testName: json['test'] as String,
       status: json['status'] as String,
     );
