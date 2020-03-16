@@ -50,6 +50,11 @@ abstract class DevFSContent {
     return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
   }
 
+  Stream<List<int>> contentsAsGzip1CompressedStream() {
+    final GZipCodec gzip = GZipCodec(level: 1);
+    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
+  }
+
   /// Return the list of files this content depends on.
   List<String> get fileDependencies => <String>[];
 }
@@ -312,7 +317,7 @@ class _DevFSHttpWriter {
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-        final Stream<List<int>> contents = content.contentsAsCompressedStream();
+        final Stream<List<int>> contents = content.contentsAsGzip1CompressedStream();
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
         response.listen((_) => null,
