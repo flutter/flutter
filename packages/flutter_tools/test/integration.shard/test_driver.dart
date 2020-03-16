@@ -105,6 +105,7 @@ abstract class FlutterTestDriver {
         .followedBy(arguments)
         .toList(),
       workingDirectory: _projectFolder.path,
+      // The web environment variable has the same effect as `flutter config --enable-web`.
       environment: <String, String>{'FLUTTER_TEST': 'true', 'FLUTTER_WEB': 'true'},
     );
 
