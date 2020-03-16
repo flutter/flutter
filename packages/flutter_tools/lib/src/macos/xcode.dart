@@ -169,10 +169,9 @@ class Xcode {
     assert(sdk != null);
     final RunResult runResult = await _processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
-      throwOnError: true,
     );
     if (runResult.exitCode != 0) {
-      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
+      throwToolExit('Could not find SDK location: ${runResult.stderr}');
     }
     return runResult.stdout.trim();
   }
