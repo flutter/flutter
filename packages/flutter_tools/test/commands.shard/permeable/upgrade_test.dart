@@ -285,7 +285,7 @@ void main() {
 
       expect(_match(' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'), true);
       expect(_match(' delete mode 100644 doc/index.html'), true);
-      expect(_match(' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'), true);
+      expect(_match(' create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart'), true);
 
       expect(_match('Fast-forward'), true);
     });
