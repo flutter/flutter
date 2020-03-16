@@ -66,8 +66,6 @@ Map<String, String> _useCdKeys(Map<CustomDimensions, String> parameters) {
       MapEntry<String, String>(cdKey(k), v));
 }
 
-Usage get flutterUsage => Usage.instance;
-
 abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
@@ -83,13 +81,10 @@ abstract class Usage {
                       logFile: logFile,
                       runningOnBot: runningOnBot);
 
-  /// Returns [Usage] active in the current app context.
-  static Usage get instance => context.get<Usage>();
-
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, String> parameters,
-  }) => flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
+  }) => globals.flutterUsage.sendCommand(command, parameters: _useCdKeys(parameters));
 
   /// Whether this is the first run of the tool.
   bool get isFirstRun;

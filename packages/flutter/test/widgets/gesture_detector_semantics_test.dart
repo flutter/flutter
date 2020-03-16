@@ -122,8 +122,7 @@ void main() {
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
-            instance
-              ..onTap = () { logs.add('tap'); };
+            instance.onTap = () { logs.add('tap'); };
           },
         ),
       });
@@ -146,8 +145,7 @@ void main() {
                 HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
                   () => HorizontalDragGestureRecognizer(),
                   (HorizontalDragGestureRecognizer instance) {
-                    instance
-                      ..onStart = (_) { logs.add('horizontal'); };
+                    instance.onStart = (_) { logs.add('horizontal'); };
                   },
                 ),
               },

@@ -67,6 +67,7 @@ void main() {
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
     expect(data.boldText, false);
+    expect(data.highContrast, false);
     expect(data.platformBrightness, Brightness.light);
     expect(data.physicalDepth, equals(WidgetsBinding.instance.window.physicalDepth));
   });
@@ -87,6 +88,7 @@ void main() {
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
     expect(copied.boldText, data.boldText);
+    expect(copied.highContrast, data.highContrast);
     expect(copied.platformBrightness, data.platformBrightness);
   });
 
@@ -117,6 +119,7 @@ void main() {
       invertColors: true,
       disableAnimations: true,
       boldText: true,
+      highContrast: true,
       platformBrightness: Brightness.dark,
     );
     expect(copied.size, customSize);
@@ -132,6 +135,7 @@ void main() {
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
     expect(copied.boldText, true);
+    expect(copied.highContrast, true);
     expect(copied.platformBrightness, Brightness.dark);
   });
 
@@ -158,6 +162,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -190,6 +195,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
@@ -215,6 +221,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -244,6 +251,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -269,6 +277,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -301,6 +310,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
@@ -326,6 +336,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -355,6 +366,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
@@ -380,6 +392,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -412,6 +425,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
@@ -437,6 +451,7 @@ void main() {
           invertColors: true,
           disableAnimations: true,
           boldText: true,
+          highContrast: true,
         ),
         child: Builder(
           builder: (BuildContext context) {
@@ -466,6 +481,7 @@ void main() {
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
     expect(unpadded.boldText, true);
+    expect(unpadded.highContrast, true);
   });
 
   testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {

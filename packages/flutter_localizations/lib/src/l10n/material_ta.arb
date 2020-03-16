@@ -52,5 +52,6 @@
   "remainingTextFieldCharacterCountZero": "எழுத்துக்கள் எதுவும் இல்லை",
   "remainingTextFieldCharacterCountOne": "1 எழுத்து மீதமுள்ளது",
   "remainingTextFieldCharacterCountOther": "$remainingCount எழுத்துகள் மீதமுள்ளன",
-  "refreshIndicatorSemanticLabel": "ரெஃப்ரெஷ் செய்யும்"
+  "refreshIndicatorSemanticLabel": "ரெஃப்ரெஷ் செய்யும்",
+  "moreButtonTooltip": "TBD"
 }

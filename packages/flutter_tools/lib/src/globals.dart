@@ -17,13 +17,20 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
+import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'cache.dart';
+import 'ios/ios_deploy.dart';
+import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
+import 'ios/plist_parser.dart';
+import 'ios/simulators.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'reporting/reporting.dart';
 import 'version.dart';
+import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 Cache get cache => context.get<Cache>();
@@ -31,6 +38,7 @@ Config get config => context.get<Config>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
+Usage get flutterUsage => context.get<Usage>();
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
@@ -62,6 +70,10 @@ AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+IOSDeploy get iosDeploy => context.get<IOSDeploy>();
+IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
+IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
+SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 
@@ -70,6 +82,7 @@ XCDevice get xcdevice => context.get<XCDevice>();
 final BotDetector _defaultBotDetector = BotDetector(
   httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
   platform: platform,
+  persistentToolState: persistentToolState,
 );
 
 BotDetector get botDetector => context.get<BotDetector>() ?? _defaultBotDetector;
@@ -145,4 +158,19 @@ final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
 );
 
 /// The global Stdio wrapper.
-Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+Stdio get stdio => context.get<Stdio>() ?? (_stdioInstance ??= Stdio());
+Stdio _stdioInstance;
+
+PlistParser get plistParser => context.get<PlistParser>() ?? (
+  _plistInstance ??= PlistParser(
+    fileSystem: fs,
+    processManager: processManager,
+    logger: logger,
+));
+PlistParser _plistInstance;
+
+/// The [ChromeLauncher] instance.
+ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
+
+/// The global template renderer
+TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

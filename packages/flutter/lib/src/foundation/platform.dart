@@ -45,11 +45,17 @@ enum TargetPlatform {
   /// Fuchsia: <https://fuchsia.googlesource.com/>
   fuchsia,
 
-  /// iOS: <http://www.apple.com/ios/>
+  /// iOS: <https://www.apple.com/ios/>
   iOS,
 
-  /// macOS: <http://www.apple.com/macos>
+  /// Linux: <https://www.linux.org>
+  linux,
+
+  /// macOS: <https://www.apple.com/macos>
   macOS,
+
+  /// Windows: <https://www.windows.com>
+  windows,
 }
 
 /// Override the [defaultTargetPlatform].

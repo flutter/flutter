@@ -103,7 +103,7 @@ import 'typography.dart';
 ///    globally adjusted, such as the color scheme.
 ///  * <https://material.io/design/typography/>
 @immutable
-class TextTheme extends Diagnosticable {
+class TextTheme with Diagnosticable {
   /// Creates a text theme that uses the given values.
   ///
   /// Rather than creating a new text theme, consider using [Typography.black]

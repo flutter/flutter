@@ -615,11 +615,11 @@ class WidgetsApp extends StatefulWidget {
   /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] and [Locale.countryCode] only
-  ///  1. [Locale.languageCode] only
-  ///  1. [Locale.countryCode] only when all preferred locales fail to match
-  ///  1. Returns the first element of [supportedLocales] as a fallback
+  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  5. [Locale.countryCode] only when all preferred locales fail to match
+  ///  6. Returns the first element of [supportedLocales] as a fallback
   ///
   /// When more than one supported locale matches one of these criteria, only
   /// the first matching locale is returned.
@@ -919,6 +919,8 @@ class WidgetsApp extends StatefulWidget {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return _defaultShortcuts;
       case TargetPlatform.macOS:
         return _defaultMacOsShortcuts;
@@ -1018,14 +1020,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The onUnknownRoute callback returned null.'),
-          ErrorDescription(
-            'When the $runtimeType requested the route $settings from its '
-            'onUnknownRoute callback, the callback returned null. Such callbacks '
-            'must never return null.'
-          )
-        ]);
+        throw FlutterError(
+          'The onUnknownRoute callback returned null.\n'
+          'When the $runtimeType requested the route $settings from its '
+          'onUnknownRoute callback, the callback returned null. Such callbacks '
+          'must never return null.'
+        );
       }
       return true;
     }());

@@ -92,7 +92,7 @@ class FuchsiaSdk {
             .transform(const LineSplitter()));
       });
       return controller.stream;
-    } catch (exception) {
+    } on Exception catch (exception) {
       globals.printTrace('$exception');
     }
     return const Stream<String>.empty();

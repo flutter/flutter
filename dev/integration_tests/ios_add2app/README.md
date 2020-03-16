@@ -13,7 +13,7 @@ The following functionality is currently implemented:
    (FullScreenViewController.m).
 1. A demo of pushing a FlutterViewController on as a child view.
 1. A demo of showing both the native and the Flutter views using a platform
-   channel to to interact with each other (HybridViewController.m).
+   channel to interact with each other (HybridViewController.m).
 1. A demo of showing two FlutterViewControllers simultaneously
    (DualViewController.m).
 

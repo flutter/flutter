@@ -10,7 +10,11 @@ import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
@@ -45,6 +49,9 @@ class WebAssetServer implements AssetReader {
 
   /// Start the web asset server on a [hostname] and [port].
   ///
+  /// If [testMode] is true, do not actually initialize dwds or the shelf static
+  /// server.
+  ///
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
@@ -53,14 +60,20 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint,
-  ) async {
+    Uri entrypoint, {
+    bool testMode = false,
+  }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
+      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+      // ignore: deprecated_member_use
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
       final WebAssetServer server = WebAssetServer(httpServer, packages, address);
+      if (testMode) {
+        return server;
+      }
 
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
@@ -78,6 +91,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message)
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
@@ -103,6 +117,8 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
@@ -130,6 +146,10 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
+    // Track etag headers for better caching of resources.
+    final String ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
+    headers[HttpHeaders.cacheControlHeader] = 'max-age=0, must-revalidate';
+
     // NOTE: shelf removes leading `/` for some reason.
     final String requestPath = request.url.path.startsWith('/')
       ?  request.url.path
@@ -139,16 +159,29 @@ class WebAssetServer implements AssetReader {
     // Attempt to look up the file by URI.
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = getFile(requestPath);
+      // Use the underlying buffer hashCode as a revision string. This buffer is
+      // replaced whenever the frontend_server produces new output files, which
+      // will also change the hashCode.
+      final String etag = bytes.hashCode.toString();
+      if (ifNoneMatch == etag) {
+        return shelf.Response.notModified();
+      }
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/javascript';
+      headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_sourcemaps.containsKey(requestPath)) {
       final List<int> bytes = getSourceMap(requestPath);
+      final String etag = bytes.hashCode.toString();
+      if (ifNoneMatch == etag) {
+        return shelf.Response.notModified();
+      }
       headers[HttpHeaders.contentLengthHeader] = bytes.length.toString();
       headers[HttpHeaders.contentTypeHeader] = 'application/json';
+      headers[HttpHeaders.etagHeader] = etag;
       return shelf.Response.ok(bytes, headers: headers);
     }
 
@@ -158,13 +191,27 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
       file = globals.fs.file(potential);
+    }
+
+    if (!file.existsSync()) {
+      final String webPath = globals.fs.path.join(
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+      file = globals.fs.file(webPath);
     }
 
     if (!file.existsSync()) {
       return shelf.Response.notFound('');
     }
+
+    // For real files, use a serialized file stat plus path as a revision.
+    // This allows us to update between canvaskit and non-canvaskit SDKs.
+    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
+    if (ifNoneMatch == etag) {
+      return shelf.Response.notModified();
+    }
+
     final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
     // browsers will refuse to render images/show video et cetera. If the tool
@@ -179,6 +226,7 @@ class WebAssetServer implements AssetReader {
     mimeType ??= _kDefaultMimeType;
     headers[HttpHeaders.contentLengthHeader] = length.toString();
     headers[HttpHeaders.contentTypeHeader] = mimeType;
+    headers[HttpHeaders.etagHeader] = etag;
     return shelf.Response.ok(file.openRead(), headers: headers);
   }
 
@@ -244,8 +292,54 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
+  /// Whether to use the cavaskit SDK for rendering.
+  bool canvasKitRendering = false;
+
+  @visibleForTesting
+  final File dartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd',
+    'dart_sdk.js.map',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
+    'dart_sdk.js.map',
+  ));
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
+    // Return the actual file objects so that local engine changes are automatically picked up.
+    switch (path) {
+      case '/dart_sdk.js':
+        return canvasKitRendering
+          ? canvasKitDartSdk
+          : dartSdk;
+      case '/dart_sdk.js.map':
+        return canvasKitRendering
+          ? canvasKitDartSdkSourcemap
+          : dartSdkSourcemap;
+    }
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
     // consider the case of Dart files as assets.
@@ -309,7 +403,12 @@ class ConnectionResult {
   final DebugConnection debugConnection;
 }
 
+/// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
+  /// Create a new [WebDevFS] instance.
+  ///
+  /// [testMode] is true, do not actually initialize dwds or the shelf static
+  /// server.
   WebDevFS({
     @required this.hostname,
     @required this.port,
@@ -318,6 +417,7 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    this.testMode = false,
   });
 
   final Uri entrypoint;
@@ -327,8 +427,8 @@ class WebDevFS implements DevFS {
   final UrlTunneller urlTunneller;
   final BuildMode buildMode;
   final bool enableDwds;
+  final bool testMode;
 
-  @visibleForTesting
   WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
@@ -376,7 +476,8 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri get baseUri => null;
+  Uri get baseUri => _baseUri;
+  Uri _baseUri;
 
   @override
   Future<Uri> create() async {
@@ -387,8 +488,10 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
+      testMode: testMode,
     );
-    return Uri.parse('http://$hostname:$port');
+    _baseUri = Uri.parse('http://$hostname:$port');
+    return _baseUri;
   }
 
   @override
@@ -431,14 +534,16 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
+      webAssetServer.writeFile('/require.js', requireJS.readAsStringSync());
+      webAssetServer.writeFile('/dart_stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
         '/main.dart.js',
         generateBootstrapScript(
-          requireUrl: _filePathToUriFragment(requireJS.path),
-          mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+          requireUrl: '/require.js',
+          mapperUrl: '/dart_stack_trace_mapper.js',
           entrypoint: '/$entrypoint.lib.js',
         ),
       );
@@ -450,8 +555,7 @@ class WebDevFS implements DevFS {
       );
       // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
       webAssetServer.writeFile('/basic.digests', '{}');
-      webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
-      webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
@@ -498,6 +602,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
+
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
@@ -516,22 +621,6 @@ class WebDevFS implements DevFS {
   ));
 
   @visibleForTesting
-  final File dartSdk = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js',
-  ));
-
-  @visibleForTesting
-  final File dartSdkSourcemap = globals.fs.file(globals.fs.path.join(
-    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
-    'kernel',
-    'amd',
-    'dart_sdk.js.map',
-  ));
-
-  @visibleForTesting
   final File stackTraceMapper = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
     'lib',
@@ -539,19 +628,6 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
-}
-
-String _filePathToUriFragment(String path) {
-  if (globals.platform.isWindows) {
-    final bool startWithSlash = path.startsWith('/');
-    final String partial =
-        globals.fs.path.split(path).skip(startWithSlash ? 2 : 1).join('/');
-    if (partial.startsWith('/')) {
-      return partial;
-    }
-    return '/$partial';
-  }
-  return path;
 }
 
 class ReleaseAssetServer {
@@ -563,7 +639,9 @@ class ReleaseAssetServer {
   final List<Uri> _searchPaths = <Uri>[
     globals.fs.directory(getWebBuildDirectory()).uri,
     globals.fs.directory(Cache.flutterRoot).uri,
+    globals.fs.directory(Cache.flutterRoot).parent.uri,
     globals.fs.currentDirectory.uri,
+    globals.fs.directory(globals.fsUtils.homeDirPath).uri,
   ];
 
   Future<shelf.Response> handle(shelf.Request request) async {

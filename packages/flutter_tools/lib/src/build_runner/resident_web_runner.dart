@@ -48,7 +48,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
-    @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   }) {
     return _ResidentWebRunner(
@@ -58,7 +57,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       debuggingOptions: debuggingOptions,
       ipv6: ipv6,
       stayResident: stayResident,
-      dartDefines: dartDefines,
       urlTunneller: urlTunneller,
     );
   }
@@ -71,24 +69,22 @@ const String kExitMessage =  'Failed to establish connection with the applicatio
 /// A hot-runner which handles browser specific delegation.
 abstract class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    this.device, {
+    FlutterDevice device, {
     String target,
     @required this.flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required this.dartDefines,
   }) : super(
-          <FlutterDevice>[],
+          <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
         );
 
-  final FlutterDevice device;
+  FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
-  final List<String> dartDefines;
   DateTime firstBuildTime;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
@@ -250,6 +246,12 @@ abstract class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
+  Future<void> stopEchoingDeviceLog() async {
+    // Do nothing for ResidentWebRunner
+    await device.stopEchoingDeviceLog();
+  }
+
+  @override
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     try {
       await _vmService?.callServiceExtension(
@@ -352,7 +354,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required List<String> dartDefines,
     @required this.urlTunneller,
   }) : super(
           device,
@@ -361,7 +362,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
-          dartDefines: dartDefines,
         );
 
   final UrlTunneller urlTunneller;
@@ -426,7 +426,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             target,
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
-            dartDefines,
             false,
           );
         }
@@ -492,7 +491,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           target,
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
-          dartDefines,
           false,
         );
       } on ToolExit {
@@ -532,7 +530,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
@@ -567,7 +565,13 @@ class _ResidentWebRunner extends ResidentWebRunner {
         .childFile('generated_plugin_registrant.dart')
         .absolute.path;
       final Uri generatedImport = packageUriMapper.map(generatedPath);
-      final String importedEntrypoint = packageUriMapper.map(main).toString() ?? 'file://$main';
+      String importedEntrypoint = packageUriMapper.map(main)?.toString();
+      // Special handling for entrypoints that are not under lib, such as test scripts.
+      if (importedEntrypoint == null) {
+        final String parent = globals.fs.file(main).parent.path;
+        flutterDevices.first.generator.addFileSystemRoot(parent);
+        importedEntrypoint = 'org-dartlang-app:///${globals.fs.path.basename(main)}';
+      }
 
       final String entrypoint = <String>[
         'import "$importedEntrypoint" as entrypoint;',
@@ -704,5 +708,21 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
+  }
+
+  @override
+  bool get supportsCanvasKit => supportsServiceProtocol;
+
+  @override
+  Future<void> toggleCanvaskit() async {
+    final WebDevFS webDevFS = device.devFS as WebDevFS;
+    webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
+    await _wipConnection?.sendCommand('Page.reload');
+  }
+
+  @override
+  Future<void> exitApp() async {
+    await device.exitApps();
+    appFinished();
   }
 }

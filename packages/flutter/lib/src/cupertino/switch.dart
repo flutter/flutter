@@ -459,7 +459,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   bool get isInteractive => onChanged != null;
 
-
   @override
   bool hitTestSelf(Offset position) => true;
 

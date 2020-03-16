@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -816,4 +817,20 @@ void main() {
   // issue or similar. See https://github.com/flutter/flutter/issues/43763
   // for more info.
   }, skip: true);
+
+  test('TextPainter caret height and line height', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr
+      ..strutStyle = const StrutStyle(fontSize: 50.0);
+
+    const String text = 'A';
+    painter.text = const TextSpan(text: text, style: TextStyle(height: 1.0));
+    painter.layout();
+
+    final double caretHeight = painter.getFullHeightForCaret(
+      const ui.TextPosition(offset: 0),
+      ui.Rect.zero,
+    );
+    expect(caretHeight, 50.0);
+  }, skip: kIsWeb);
 }

@@ -142,16 +142,16 @@ abstract class MultiChildLayoutDelegate {
     final RenderBox child = _idToChild[childId];
     assert(() {
       if (child == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $this custom multichild layout delegate tried to lay out a non-existent child.'),
-          ErrorDescription('There is no child with the id "$childId".')
-        ]);
+        throw FlutterError(
+          'The $this custom multichild layout delegate tried to lay out a non-existent child.\n'
+          'There is no child with the id "$childId".'
+        );
       }
       if (!_debugChildrenNeedingLayout.remove(child)) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.'),
-          ErrorDescription('Each child must be laid out exactly once.')
-        ]);
+        throw FlutterError(
+          'The $this custom multichild layout delegate tried to lay out the child with id "$childId" more than once.\n'
+          'Each child must be laid out exactly once.'
+        );
       }
       try {
         assert(constraints.debugAssertIsValid(isAppliedConstraint: true));
@@ -182,15 +182,15 @@ abstract class MultiChildLayoutDelegate {
     final RenderBox child = _idToChild[childId];
     assert(() {
       if (child == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $this custom multichild layout delegate tried to position out a non-existent child:'),
-          ErrorDescription('There is no child with the id "$childId".')
-        ]);
+        throw FlutterError(
+          'The $this custom multichild layout delegate tried to position out a non-existent child:\n'
+          'There is no child with the id "$childId".'
+        );
       }
       if (offset == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('The $this custom multichild layout delegate provided a null position for the child with id "$childId".')
-        ]);
+        throw FlutterError(
+          'The $this custom multichild layout delegate provided a null position for the child with id "$childId".'
+        );
       }
       return true;
     }());

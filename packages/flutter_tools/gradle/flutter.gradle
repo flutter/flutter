@@ -41,7 +41,7 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    private static final String MAVEN_REPO      = "http://download.flutter.io";
+    private static final String MAVEN_REPO      = "https://storage.googleapis.com/download.flutter.io";
 
     // The platforms that can be passed to the `--Ptarget-platform` flag.
     private static final String PLATFORM_ARM32  = "android-arm";
@@ -607,9 +607,17 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('split-debug-info')) {
             splitDebugInfoValue = project.property('split-debug-info')
         }
+        Boolean dartObfuscationValue = false
+        if (project.hasProperty('dart-obfuscation')) {
+            dartObfuscationValue = project.property('dart-obfuscation').toBoolean();
+        }
         Boolean treeShakeIconsOptionsValue = false
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
+        }
+        String dartDefinesValue = null
+        if (project.hasProperty('dart-defines')) {
+            dartDefinesValue = project.property('dart-defines')
         }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
@@ -647,10 +655,12 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
+                dartObfuscation dartObfuscationValue
+                dartDefines dartDefinesValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                            commandLine('cmd', '/c', 'attrib -r ${assetsDirectory}/* /s')
+                            commandLine('cmd', '/c', "attrib -r ${assetsDirectory}/* /s")
                         } else {
                             commandLine('chmod', '-R', 'u+w', assetsDirectory)
                         }
@@ -792,6 +802,10 @@ abstract class BaseFlutterTask extends DefaultTask {
     String splitDebugInfo
     @Optional @Input
     Boolean treeShakeIcons
+    @Optional @Input
+    Boolean dartObfuscation
+    @Optional @Input
+    String dartDefines
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -854,6 +868,12 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (treeShakeIcons == true) {
                 args "-dTreeShakeIcons=true"
             }
+            if (dartObfuscation == true) {
+                args "-dDartObfuscation=true"
+            }
+            if (dartDefines != null) {
+                args "-dDartDefines=${dartDefines}"
+            }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
@@ -891,13 +911,13 @@ class FlutterTask extends BaseFlutterTask {
         }
     }
 
-    FileCollection readDependencies(File dependenciesFile) {
+    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
       if (dependenciesFile.exists()) {
         // Dependencies file has Makefile syntax:
         //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
         String depText = dependenciesFile.text
         // So we split list of files by non-escaped(by backslash) space,
-        def matcher = depText.split(': ')[1] =~ /(\\ |[^\s])+/
+        def matcher = depText.split(': ')[inputs ? 1 : 0] =~ /(\\ |[^\s])+/
         // then we replace all escaped spaces with regular spaces
         def depList = matcher.collect{it[0].replaceAll("\\\\ ", " ")}
         return project.files(depList)
@@ -909,9 +929,18 @@ class FlutterTask extends BaseFlutterTask {
     FileCollection getSourceFiles() {
         FileCollection sources = project.files()
         for (File depfile in getDependenciesFiles()) {
-          sources += readDependencies(depfile)
+          sources += readDependencies(depfile, true)
         }
         return sources + project.files('pubspec.yaml')
+    }
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        FileCollection sources = project.files()
+        for (File depfile in getDependenciesFiles()) {
+          sources += readDependencies(depfile, false)
+        }
+        return sources
     }
 
     @TaskAction

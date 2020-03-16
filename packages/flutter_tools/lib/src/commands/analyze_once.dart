@@ -5,15 +5,18 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../dart/sdk.dart' as sdk;
-import '../globals.dart' as globals;
 import 'analyze.dart';
 import 'analyze_base.dart';
 
@@ -21,13 +24,24 @@ import 'analyze_base.dart';
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     ArgResults argResults,
-    this.repoRoots,
-    this.repoPackages, {
+    List<String> repoRoots,
+    List<Directory> repoPackages, {
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+    @required AnsiTerminal terminal,
     this.workingDirectory,
-  }) : super(argResults);
-
-  final List<String> repoRoots;
-  final List<Directory> repoPackages;
+  }) : super(
+        argResults,
+        repoRoots: repoRoots,
+        repoPackages: repoPackages,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        terminal: terminal,
+      );
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
@@ -35,14 +49,14 @@ class AnalyzeOnce extends AnalyzeBase {
   @override
   Future<void> analyze() async {
     final String currentDirectory =
-        (workingDirectory ?? globals.fs.currentDirectory).path;
+        (workingDirectory ?? fileSystem.currentDirectory).path;
 
     // find directories from argResults.rest
     final Set<String> directories = Set<String>.from(argResults.rest
-        .map<String>((String path) => globals.fs.path.canonicalize(path)));
+        .map<String>((String path) => fileSystem.path.canonicalize(path)));
     if (directories.isNotEmpty) {
       for (final String directory in directories) {
-        final FileSystemEntityType type = globals.fs.typeSync(directory);
+        final FileSystemEntityType type = fileSystem.typeSync(directory);
 
         if (type == FileSystemEntityType.notFound) {
           throwToolExit("'$directory' does not exist");
@@ -79,6 +93,11 @@ class AnalyzeOnce extends AnalyzeBase {
     final AnalysisServer server = AnalysisServer(
       sdkPath,
       directories.toList(),
+      fileSystem: fileSystem,
+      platform: platform,
+      logger: logger,
+      processManager: processManager,
+      terminal: terminal,
     );
 
     StreamSubscription<bool> subscription;
@@ -108,9 +127,9 @@ class AnalyzeOnce extends AnalyzeBase {
     final Stopwatch timer = Stopwatch()..start();
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
-        : globals.fs.path.basename(directories.first);
+        : fileSystem.path.basename(directories.first);
     final Status progress = argResults['preamble'] as bool
-        ? globals.logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
+        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
         : null;
 
     await analysisCompleter.future;
@@ -135,11 +154,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     // report errors
     if (errors.isNotEmpty && (argResults['preamble'] as bool)) {
-      globals.printStatus('');
+      logger.printStatus('');
     }
     errors.sort();
     for (final AnalysisError error in errors) {
-      globals.printStatus(error.toString(), hangingIndent: 7);
+      logger.printStatus(error.toString(), hangingIndent: 7);
     }
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
@@ -154,7 +173,7 @@ class AnalyzeOnce extends AnalyzeBase {
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
       final int errorCount = errors.length;
-      globals.printStatus('');
+      logger.printStatus('');
       if (undocumentedMembers > 0) {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
@@ -168,9 +187,9 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['congratulate'] as bool) {
       if (undocumentedMembers > 0) {
-        globals.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
+        logger.printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
       } else {
-        globals.printStatus('No issues found! (ran in ${seconds}s)');
+        logger.printStatus('No issues found! (ran in ${seconds}s)');
       }
     }
   }

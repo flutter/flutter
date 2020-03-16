@@ -134,7 +134,7 @@ name: example''')
 
       // touch .packages to make sure its change time is after pubspec.yaml's
       globals.fs.file('.packages')
-        ..setLastModifiedSync(modifiedTime);
+        .setLastModifiedSync(modifiedTime);
 
       // Even though the previous file was removed, it is left in the
       // asset manifest and not updated. This is due to the devfs not

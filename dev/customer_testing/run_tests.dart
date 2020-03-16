@@ -259,7 +259,7 @@ class TestFile {
   const TestFile._(this.contacts, this.fetch, this.update, this.tests);
 
   // (e-mail regexp from HTML standard)
-  static final RegExp _email = RegExp(r'''^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$''');
+  static final RegExp _email = RegExp(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$");
   static final RegExp _fetch1 = RegExp(r'^git(?: -c core.longPaths=true)? clone https://github.com/[-a-zA-Z0-9]+/[-_a-zA-Z0-9]+.git tests$');
   static final RegExp _fetch2 = RegExp(r'^git(?: -c core.longPaths=true)? -C tests checkout [0-9a-f]+$');
 

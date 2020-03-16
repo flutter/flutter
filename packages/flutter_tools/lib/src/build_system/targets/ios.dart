@@ -40,6 +40,7 @@ abstract class AotAssemblyBase extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
@@ -63,6 +64,7 @@ abstract class AotAssemblyBase extends Target {
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
+        dartObfuscation: dartObfuscation,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -374,8 +376,8 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
-  } catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+  } on Exception catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
   }
 
   final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
@@ -418,8 +420,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       tempDir.deleteSync(recursive: true);
     } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
-    } catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+    } on Exception catch (e) {
+      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
 }

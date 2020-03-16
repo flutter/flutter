@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -36,9 +37,10 @@ void main() {
   });
 
   testUsingContext('LinuxDevice: no devices listed if platform unsupported', () async {
-    expect(await LinuxDevices().devices, <Device>[]);
-  }, overrides: <Type, Generator>{
-    Platform: () => notLinux,
+    expect(await LinuxDevices(
+      platform: notLinux,
+      featureFlags: featureFlags,
+    ).devices, <Device>[]);
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {

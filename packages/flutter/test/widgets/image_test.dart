@@ -1535,6 +1535,91 @@ void main() {
     expect(imageCache.containsKey(provider), true);
     expect(provider.loadCallCount, 1);
   });
+
+  testWidgets('evict an image during precache', (WidgetTester tester) async {
+    // This test checks that the live image tracking does not hold on to a
+    // pending image that will never complete because it has been evicted from
+    // the cache.
+    // The scenario may arise in a test harness that is trying to load real
+    // images using `tester.runAsync()`, and wants to make sure that widgets
+    // under test have not also tried to resolve the image in a FakeAsync zone.
+    // The image loaded in the FakeAsync zone will never complete, and the
+    // runAsync call wants to make sure it gets a load attempt from the correct
+    // zone.
+    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+    final MemoryImage provider = MemoryImage(bytes);
+
+    await tester.runAsync(() async {
+      final List<Future<void>> futures = <Future<void>>[];
+      await tester.pumpWidget(Builder(builder: (BuildContext context) {
+        futures.add(precacheImage(provider, context));
+        imageCache.evict(provider);
+        futures.add(precacheImage(provider, context));
+        return const SizedBox.expand();
+      }));
+      await Future.wait<void>(futures);
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, true);
+
+      // Schedule a frame to get precacheImage to stop listening.
+      SchedulerBinding.instance.scheduleFrame();
+      await tester.pump();
+      expect(imageCache.statusForKey(provider).keepAlive, true);
+      expect(imageCache.statusForKey(provider).live, false);
+    });
+  });
+
+  testWidgets('errorBuilder - fails on key', (WidgetTester tester) async {
+    final UniqueKey errorKey = UniqueKey();
+    Object caughtException;
+    await tester.pumpWidget(
+      Image(
+        image: const FailingImageProvider(failOnObtainKey: true, throws: 'threw'),
+        errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
+          caughtException = error;
+          return SizedBox.expand(key: errorKey);
+        },
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byKey(errorKey), findsOneWidget);
+    expect(caughtException.toString(), 'threw');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('errorBuilder - fails on load', (WidgetTester tester) async {
+    final UniqueKey errorKey = UniqueKey();
+    Object caughtException;
+    await tester.pumpWidget(
+      Image(
+        image: const FailingImageProvider(failOnLoad: true, throws: 'threw'),
+        errorBuilder: (BuildContext context, Object error, StackTrace stackTrace) {
+          caughtException = error;
+          return SizedBox.expand(key: errorKey);
+        },
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byKey(errorKey), findsOneWidget);
+    expect(caughtException.toString(), 'threw');
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('no errorBuilder - failure reported to FlutterError', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Image(
+        image: FailingImageProvider(failOnLoad: true, throws: 'threw'),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(tester.takeException(), 'threw');
+  });
 }
 
 class ConfigurationAwareKey {
@@ -1692,4 +1777,42 @@ class DebouncingImageProvider extends ImageProvider<Object> {
 
   @override
   ImageStreamCompleter load(Object key, DecoderCallback decode) => imageProvider.load(key, decode);
+}
+
+class FailingImageProvider extends ImageProvider<int> {
+  const FailingImageProvider({
+    this.failOnObtainKey = false,
+    this.failOnLoad = false,
+    @required this.throws,
+  }) : assert(failOnLoad != null),
+       assert(failOnObtainKey != null),
+       assert(failOnLoad == true || failOnObtainKey == true),
+       assert(throws != null);
+
+  final bool failOnObtainKey;
+  final bool failOnLoad;
+  final Object throws;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    if (failOnObtainKey) {
+      throw throws;
+    }
+    return SynchronousFuture<int>(hashCode);
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    if (failOnLoad) {
+      throw throws;
+    }
+    return OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(
+        ImageInfo(
+          image: TestImage(),
+          scale: 0,
+        ),
+      ),
+    );
+  }
 }

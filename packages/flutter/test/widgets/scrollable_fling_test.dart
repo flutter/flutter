@@ -45,6 +45,22 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     final double androidResult = getCurrentOffset();
 
+    await pumpTest(tester, TargetPlatform.linux);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getCurrentOffset(), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getCurrentOffset(), dragOffset);
+    await tester.pump(const Duration(seconds: 5));
+    final double linuxResult = getCurrentOffset();
+
+    await pumpTest(tester, TargetPlatform.windows);
+    await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
+    expect(getCurrentOffset(), dragOffset);
+    await tester.pump(); // trigger fling
+    expect(getCurrentOffset(), dragOffset);
+    await tester.pump(const Duration(seconds: 5));
+    final double windowsResult = getCurrentOffset();
+
     await pumpTest(tester, TargetPlatform.iOS);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
     // Scroll starts ease into the scroll on iOS.
@@ -65,6 +81,14 @@ void main() {
 
     expect(androidResult, lessThan(iOSResult)); // iOS is slipperier than Android
     expect(androidResult, lessThan(macOSResult)); // macOS is slipperier than Android
+    expect(linuxResult, lessThan(iOSResult)); // iOS is slipperier than Linux
+    expect(linuxResult, lessThan(macOSResult)); // macOS is slipperier than Linux
+    expect(windowsResult, lessThan(iOSResult)); // iOS is slipperier than Windows
+    expect(windowsResult, lessThan(macOSResult)); // macOS is slipperier than Windows
+    expect(windowsResult, equals(androidResult));
+    expect(windowsResult, equals(androidResult));
+    expect(linuxResult, equals(androidResult));
+    expect(linuxResult, equals(androidResult));
   });
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {

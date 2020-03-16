@@ -54,8 +54,6 @@ Future<int> runTest({bool coverage = false}) async {
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
       step = TestStep.buildingFlutterTool;
-    } else if (step == TestStep.starting && entry.contains('Shuffling test order')) {
-      // ignore this line
     } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
       // ignore this line
     } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {

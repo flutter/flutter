@@ -837,6 +837,8 @@ Future<T> showMenu<T>({
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
       label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
@@ -1096,6 +1098,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return const Icon(Icons.more_vert);
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:

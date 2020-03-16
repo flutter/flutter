@@ -51,5 +51,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "នៅសល់​ 1 តួ​ទៀត",
   "remainingTextFieldCharacterCountOther": "នៅសល់ $remainingCount តួ​ទៀត",
-  "refreshIndicatorSemanticLabel": "ផ្ទុកឡើងវិញ"
+  "refreshIndicatorSemanticLabel": "ផ្ទុកឡើងវិញ",
+  "moreButtonTooltip": "TBD"
 }

@@ -17,16 +17,12 @@ import 'package:platform/platform.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockPlatform extends Mock implements Platform {}
-
 void main() {
   ProcessManager processManager;
   Logger logger;
 
   setUp(() {
-    logger = MockLogger();
+    logger = BufferLogger.test();
     processManager = MockProcessManager();
   });
 
@@ -570,5 +566,7 @@ void main() {
   });
 }
 
-class MockLogger extends Mock implements Logger {}
 class MockXcode extends Mock implements Xcode {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockPlatform extends Mock implements Platform {}

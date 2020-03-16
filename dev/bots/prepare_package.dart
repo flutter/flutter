@@ -110,7 +110,7 @@ class ProcessRunner {
   /// [Directory.current] if [defaultWorkingDirectory] is not set.
   ///
   /// Set `failOk` if [runProcess] should not throw an exception when the
-  /// command completes with a a non-zero exit code.
+  /// command completes with a non-zero exit code.
   Future<String> runProcess(
     List<String> commandLine, {
     Directory workingDirectory,

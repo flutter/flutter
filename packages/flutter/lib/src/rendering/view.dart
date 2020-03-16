@@ -255,7 +255,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.

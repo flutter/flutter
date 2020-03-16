@@ -210,7 +210,7 @@ class UpgradeCommandRunner {
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-    } catch (e) {
+    } on Exception {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
         "Run 'git remote add origin "
@@ -279,7 +279,7 @@ class UpgradeCommandRunner {
       final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
       alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
         newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
     }
     return alreadyUpToDate;

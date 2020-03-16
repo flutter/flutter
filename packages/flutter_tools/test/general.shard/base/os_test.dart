@@ -19,8 +19,6 @@ const String kExecutable = 'foo';
 const String kPath1 = '/bar/bin/$kExecutable';
 const String kPath2 = '/another/bin/$kExecutable';
 
-class MockLogger extends Mock implements Logger {}
-
 void main() {
   MockProcessManager mockProcessManager;
 
@@ -31,7 +29,7 @@ void main() {
   OperatingSystemUtils createOSUtils(Platform platform) {
     return OperatingSystemUtils(
       fileSystem: MemoryFileSystem(),
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
       platform: platform,
       processManager: mockProcessManager,
     );

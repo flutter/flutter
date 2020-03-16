@@ -40,7 +40,8 @@ class GitHubTemplateCreator {
       String doctorText
     ) async {
     final String title = '[tool_crash] $errorString';
-    final String body = '''## Command
+    final String body = '''
+## Command
 ```
 $command
 ```
@@ -135,7 +136,7 @@ ${_projectMetadataInformation()}
       } else {
         globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
-    } catch (sendError) {
+    } on Exception catch (sendError) {
       globals.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 

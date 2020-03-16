@@ -79,7 +79,7 @@ linter:
     # - avoid_returning_this # there are plenty of valid reasons to return this
     # - avoid_setters_without_getters # not yet tested
     # - avoid_shadowing_type_parameters # not yet tested
-    # - avoid_single_cascade_in_expression_statements # not yet tested
+    - avoid_single_cascade_in_expression_statements
     - avoid_slow_async_io
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types

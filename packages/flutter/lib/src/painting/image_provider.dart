@@ -642,9 +642,19 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// This function is used by [load].
   @protected
   Future<ui.Codec> _loadAsync(AssetBundleImageKey key, DecoderCallback decode) async {
-    final ByteData data = await key.bundle.load(key.name);
-    if (data == null)
-      throw 'Unable to read data';
+    ByteData data;
+    // Hot reload/restart could change whether an asset bundle or key in a
+    // bundle are available, or if it is a network backed bundle.
+    try {
+      data = await key.bundle.load(key.name);
+    } on FlutterError {
+      PaintingBinding.instance.imageCache.evict(key);
+      rethrow;
+    }
+    if (data == null) {
+      PaintingBinding.instance.imageCache.evict(key);
+      throw StateError('Unable to read data');
+    }
     return await decode(data.buffer.asUint8List());
   }
 }
@@ -726,9 +736,28 @@ class ResizeImage extends ImageProvider<_SizeAwareCacheKey> {
   }
 
   @override
-  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
-    final Object providerCacheKey = await imageProvider.obtainKey(configuration);
-    return _SizeAwareCacheKey(providerCacheKey, width, height);
+  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) {
+    Completer<_SizeAwareCacheKey> completer;
+    // If the imageProvider.obtainKey future is synchronous, then we will be able to fill in result with
+    // a value before completer is initialized below.
+    SynchronousFuture<_SizeAwareCacheKey> result;
+    imageProvider.obtainKey(configuration).then((Object key) {
+      if (completer == null) {
+        // This future has completed synchronously (completer was never assigned),
+        // so we can directly create the synchronous result to return.
+        result = SynchronousFuture<_SizeAwareCacheKey>(_SizeAwareCacheKey(key, width, height));
+      } else {
+        // This future did not synchronously complete.
+        completer.complete(_SizeAwareCacheKey(key, width, height));
+      }
+    });
+    if (result != null) {
+      return result;
+    }
+    // If the code reaches here, it means the imageProvider.obtainKey was not
+    // completed sync, so we initialize the completer for completion later.
+    completer = Completer<_SizeAwareCacheKey>();
+    return completer.future;
   }
 }
 
@@ -808,8 +837,12 @@ class FileImage extends ImageProvider<FileImage> {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
-    if (bytes.lengthInBytes == 0)
+
+    if (bytes.lengthInBytes == 0) {
+      // The file may become available later.
+      PaintingBinding.instance.imageCache.evict(key);
       throw StateError('$file is empty and cannot be loaded as an image.');
+    }
 
     return await decode(bytes);
   }

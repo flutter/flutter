@@ -2,22 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/context.dart';
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 
 class PlistParser {
-  const PlistParser();
+  PlistParser({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final ProcessUtils _processUtils;
 
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
   static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
   static const String kCFBundleExecutable = 'CFBundleExecutable';
-
-  static PlistParser get instance => context.get<PlistParser>() ?? const PlistParser();
 
   /// Parses the plist file located at [plistFilePath] and returns the
   /// associated map of key/value property list pairs.
@@ -29,26 +39,26 @@ class PlistParser {
   Map<String, dynamic> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
-    if (!globals.fs.isFileSync(executable)) {
+    if (!_fileSystem.isFileSync(executable)) {
       throw const FileNotFoundException(executable);
     }
-    if (!globals.fs.isFileSync(plistFilePath)) {
+    if (!_fileSystem.isFileSync(plistFilePath)) {
       return const <String, dynamic>{};
     }
 
-    final String normalizedPlistPath = globals.fs.path.absolute(plistFilePath);
+    final String normalizedPlistPath = _fileSystem.path.absolute(plistFilePath);
 
     try {
       final List<String> args = <String>[
         executable, '-convert', 'json', '-o', '-', normalizedPlistPath,
       ];
-      final String jsonContent = processUtils.runSync(
+      final String jsonContent = _processUtils.runSync(
         args,
         throwOnError: true,
       ).stdout.trim();
       return castStringKeyedMap(json.decode(jsonContent));
     } on ProcessException catch (error) {
-      globals.printTrace('$error');
+      _logger.printTrace('$error');
       return const <String, dynamic>{};
     }
   }
