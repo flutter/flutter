@@ -2,8 +2,8 @@
 
 An older copy of the Flutter gallery demo application used for integration testing.
 
-For the current Flutter gallery app sample, see the samples repo:
-https://github.com/flutter/samples/tree/master/gallery
+For the current Flutter gallery app sample, see this repo:
+https://github.com/flutter/gallery
 
 ## Icon
 

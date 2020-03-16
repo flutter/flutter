@@ -14,7 +14,7 @@ Available examples include:
   that shows the text "hello, world."
 
 - **Flutter gallery** The flutter gallery app no longer lives in this repo.
-  Please see the [gallery in the samples repo](https://github.com/flutter/samples/tree/master/gallery).
+  Please see the [gallery repo](https://github.com/flutter/gallery).
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
   in the Flutter framework. For details, see the [layers
