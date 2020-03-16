@@ -30,13 +30,14 @@ import 'ios_workflow.dart';
 import 'mac.dart';
 
 class IOSDevices extends PollingDeviceDiscovery {
+  // TODO(fujino): make these required and remove fallbacks once internal invocations migrated
   IOSDevices({
-    @required Platform platform,
-    @required XCDevice xcdevice,
-    @required IOSWorkflow iosWorkflow,
-  }) : _platform = platform,
-       _xcdevice = xcdevice,
-       _iosWorkflow = iosWorkflow,
+    Platform platform,
+    XCDevice xcdevice,
+    IOSWorkflow iosWorkflow,
+  }) : _platform = platform ?? globals.platform,
+       _xcdevice = xcdevice ?? globals.xcdevice,
+       _iosWorkflow = iosWorkflow ?? globals.iosWorkflow,
        super('iOS devices');
 
   final Platform _platform;
