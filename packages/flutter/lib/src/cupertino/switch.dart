@@ -274,8 +274,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (!isInteractive)
-      return;
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.

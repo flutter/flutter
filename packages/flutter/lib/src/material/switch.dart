@@ -561,6 +561,24 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   @override
+  set value(bool newValue) {
+    assert(value != null);
+    super.value = newValue;
+    // The widget is rebuilt and we have pending position animation to play.
+    if (_needsPositionAnimation) {
+      _needsPositionAnimation = false;
+      position
+        ..curve = null
+        ..reverseCurve = null;
+      if (newValue)
+        positionController.forward();
+      else
+        positionController.reverse();
+    }
+  }
+
+
+  @override
   void detach() {
     _cachedThumbPainter?.dispose();
     _cachedThumbPainter = null;
@@ -570,6 +588,8 @@ class _RenderSwitch extends RenderToggleable {
   double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
 
   HorizontalDragGestureRecognizer _drag;
+
+  bool _needsPositionAnimation = false;
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive)
@@ -594,10 +614,10 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5)
-      positionController.forward();
-    else
-      positionController.reverse();
+    _needsPositionAnimation = true;
+
+    if (position.value >= 0.5 != value)
+      onChanged(!value);
     reactionController.reverse();
   }
 
