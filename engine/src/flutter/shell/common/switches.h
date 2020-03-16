@@ -129,6 +129,11 @@ DEF_SWITCH(TraceSkia,
            "Trace Skia calls. This is useful when debugging the GPU threed."
            "By default, Skia tracing is not enabled to reduce the number of "
            "traced events")
+DEF_SWITCH(
+    TraceWhitelist,
+    "trace-whitelist",
+    "Filters out all trace events except those that are specified in this "
+    "comma separated list of whitelisted prefixes.")
 DEF_SWITCH(DumpSkpOnShaderCompilation,
            "dump-skp-on-shader-compilation",
            "Automatically dump the skp that triggers new shader compilations. "

@@ -180,6 +180,16 @@ static void RecordStartupTimestamp() {
   }
 }
 
+static void Tokenize(const std::string& input,
+                     std::vector<std::string>* results,
+                     char delimiter) {
+  std::istringstream ss(input);
+  std::string token;
+  while (std::getline(ss, token, delimiter)) {
+    results->push_back(token);
+  }
+}
+
 // Though there can be multiple shells, some settings apply to all components in
 // the process. These have to be setup before the shell or any of its
 // sub-components can be initialized. In a perfect world, this would be empty.
@@ -203,6 +213,12 @@ static void PerformInitializationTasks(const Settings& settings) {
 
     if (settings.trace_skia) {
       InitSkiaEventTracer(settings.trace_skia);
+    }
+
+    if (!settings.trace_whitelist.empty()) {
+      std::vector<std::string> prefixes;
+      Tokenize(settings.trace_whitelist, &prefixes, ',');
+      fml::tracing::TraceSetWhitelist(prefixes);
     }
 
     if (!settings.skia_deterministic_rendering_on_cpu) {

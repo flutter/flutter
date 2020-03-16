@@ -107,6 +107,9 @@ FILE: ../../../flutter/flow/view_holder.cc
 FILE: ../../../flutter/flow/view_holder.h
 FILE: ../../../flutter/flutter_frontend_server/bin/starter.dart
 FILE: ../../../flutter/flutter_frontend_server/lib/server.dart
+FILE: ../../../flutter/fml/ascii_trie.cc
+FILE: ../../../flutter/fml/ascii_trie.h
+FILE: ../../../flutter/fml/ascii_trie_unittests.cc
 FILE: ../../../flutter/fml/backtrace.cc
 FILE: ../../../flutter/fml/backtrace.h
 FILE: ../../../flutter/fml/backtrace_stub.cc
