@@ -15,7 +15,7 @@ Future<void> main() async {
 }
 
 final Directory flutterGalleryDir =
-    dir(path.join(flutterDirectory.path, flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'));
+    dir(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'flutter_gallery'));
 final Directory editedFlutterGalleryDir =
     dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 
