@@ -205,8 +205,9 @@ void main() {
     // just set the start position.
     await gesture.moveBy(const Offset(20.0, 0.0));
     await gesture.moveBy(const Offset(20.0, 0.0));
-    expect(value, isTrue);
+    expect(value, isFalse);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
@@ -214,11 +215,14 @@ void main() {
     await gesture.moveBy(const Offset(20.0, 0.0));
     expect(value, isTrue);
     await gesture.up();
+    expect(value, isTrue);
     await tester.pump();
 
     gesture = await tester.startGesture(switchRect.center);
     await gesture.moveBy(const Offset(-20.0, 0.0));
     await gesture.moveBy(const Offset(-20.0, 0.0));
+    expect(value, isTrue);
+    await gesture.up();
     expect(value, isFalse);
   });
 
@@ -487,6 +491,84 @@ void main() {
 
     expect(value, isTrue);
     expect(tester.hasRunningAnimations, false);
+  });
+
+  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Switch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = value || newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Move a little to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isFalse);
+    final RenderToggleable renderObject = tester.renderObject<RenderToggleable>(
+      find.descendant(
+        of: find.byType(Switch),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget.runtimeType.toString() == '_SwitchRenderObjectWidget',
+        ),
+      ),
+    );
+    expect(renderObject.position.value, lessThan(0.5));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    expect(renderObject.position.value, 0);
+
+    // Move past the middle.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, greaterThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
+
+    // Now move back to the left, the revert animation should play.
+    gesture = await tester.startGesture(tester.getRect(find.byType(Switch)).center);
+    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(renderObject.position.value, lessThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(renderObject.position.value, 1.0);
   });
 
   testWidgets('switch has semantic events', (WidgetTester tester) async {

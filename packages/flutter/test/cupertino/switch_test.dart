@@ -415,6 +415,77 @@ void main() {
     expect(value, isFalse);
   });
 
+  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: CupertinoSwitch(
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = value || newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Move a little to the right, not past the middle.
+    TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-kTouchSlop + 5.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isFalse);
+    final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
+    expect(position.value, lessThan(0.5));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    expect(position.value, 0);
+
+    // Move past the middle.
+    gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    await gesture.moveBy(const Offset(kTouchSlop + 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(position.value, greaterThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(position.value, 1.0);
+
+    // Now move back to the left, the revert animation should play.
+    gesture = await tester.startGesture(tester.getRect(find.byType(CupertinoSwitch)).center);
+    await gesture.moveBy(const Offset(-kTouchSlop - 0.1, 0.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(value, isTrue);
+    expect(position.value, lessThan(0.5));
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    expect(position.value, 1.0);
+  });
+
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(

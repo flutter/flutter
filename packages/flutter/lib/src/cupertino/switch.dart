@@ -144,7 +144,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   HorizontalDragGestureRecognizer _drag;
 
   AnimationController _positionController;
-  CurvedAnimation _position;
+  CurvedAnimation position;
 
   AnimationController _reactionController;
   Animation<double> _reaction;
@@ -177,7 +177,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       value: widget.value ? 1.0 : 0.0,
       vsync: this,
     );
-    _position = CurvedAnimation(
+    position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.linear,
     );
@@ -200,7 +200,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   void didUpdateWidget(CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _drag..dragStartBehavior = widget.dragStartBehavior;
+    _drag.dragStartBehavior = widget.dragStartBehavior;
 
     if (needsPositionAnimation || oldWidget.value != widget.value)
       _resumePositionAnimation(isLinear: needsPositionAnimation);
@@ -214,7 +214,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   // widget.value changes.
   void _resumePositionAnimation({ bool isLinear = true }) {
     needsPositionAnimation = false;
-    _position
+    position
       ..curve = isLinear ? null : Curves.ease
       ..reverseCurve = isLinear ? null : Curves.ease.flipped;
     if (widget.value)
@@ -258,7 +258,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      _position
+      position
         ..curve = null
         ..reverseCurve = null;
       final double delta = details.primaryDelta / _kTrackInnerLength;
@@ -277,7 +277,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.
-    if (_position.value >= 0.5 != widget.value)
+    if (position.value >= 0.5 != widget.value)
       widget.onChanged(!widget.value);
     _reactionController.reverse();
   }
@@ -289,7 +289,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
   }
@@ -398,7 +400,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _state = state,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-         state._position.addListener(markNeedsPaint);
+         state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
   }
 
@@ -486,7 +488,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    final double currentValue = _state._position.value;
+    final double currentValue = _state.position.value;
     final double currentReactionValue = _state._reaction.value;
 
     double visualPosition;
