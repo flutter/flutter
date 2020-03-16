@@ -658,6 +658,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--target=$targetModel',
       // TODO(jonahwilliams): remove once this becomes the default behavior
       // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/52693
       '--debugger-module-names',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
