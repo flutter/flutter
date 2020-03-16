@@ -802,7 +802,9 @@ class BrowserManager {
           .add(<String, Object>{'command': 'closeSuite', 'id': suiteID});
       print('>>> $path finished');
       _suiteLock = null;
-      _suiteCompleter.complete();
+      if (!_suiteCompleter.isCompleted) {
+        _suiteCompleter.complete();
+      }
     }
 
     // The virtual channel will be closed when the suite is closed, in which
