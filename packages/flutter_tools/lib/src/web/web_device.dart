@@ -185,7 +185,7 @@ class WebDevices extends PollingDeviceDiscovery {
   bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return <Device>[
       if (_chromeIsAvailable)
         _webDevice,

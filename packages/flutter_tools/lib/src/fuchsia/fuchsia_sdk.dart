@@ -47,12 +47,12 @@ class FuchsiaSdk {
   /// Example output:
   ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
-  Future<String> listDevices() async {
+  Future<String> listDevices({ Duration timeout }) async {
     if (fuchsiaArtifacts.devFinder == null ||
         !fuchsiaArtifacts.devFinder.existsSync()) {
       return null;
     }
-    final List<String> devices = await fuchsiaDevFinder.list();
+    final List<String> devices = await fuchsiaDevFinder.list(timeout: timeout);
     if (devices == null) {
       return null;
     }
