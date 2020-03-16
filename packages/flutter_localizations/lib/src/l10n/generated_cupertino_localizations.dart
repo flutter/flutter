@@ -547,7 +547,7 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => "পে'ষ্ট কৰক";
+  String get pasteButtonLabel => 'পে\'ষ্ট কৰক';
 
   @override
   String get postMeridiemAbbreviation => 'অপৰাহ্ন';
@@ -2145,10 +2145,10 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get datePickerHourSemanticsLabelMany => null;
 
   @override
-  String get datePickerHourSemanticsLabelOne => "\$hour o'clock";
+  String get datePickerHourSemanticsLabelOne => '\$hour o\'clock';
 
   @override
-  String get datePickerHourSemanticsLabelOther => "\$hour o'clock";
+  String get datePickerHourSemanticsLabelOther => '\$hour o\'clock';
 
   @override
   String get datePickerHourSemanticsLabelTwo => null;
@@ -4466,7 +4466,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get timerPickerSecondLabelZero => null;
 
   @override
-  String get todayLabel => "aujourd'hui";
+  String get todayLabel => 'aujourd\'hui';
 }
 
 /// The translations for French, as used in Canada (`fr_CA`).
@@ -4509,7 +4509,7 @@ class CupertinoLocalizationFrCa extends CupertinoLocalizationFr {
   String get postMeridiemAbbreviation => 'pm';
 
   @override
-  String get todayLabel => "Aujourd'hui";
+  String get todayLabel => 'Aujourd\'hui';
 
   @override
   String get timerPickerMinuteLabelOne => 'min';

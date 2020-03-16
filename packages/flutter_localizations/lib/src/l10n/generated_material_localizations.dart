@@ -459,7 +459,7 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'حول "\$applicationName"';
+  String get aboutListTileTitleRaw => 'حول \"\$applicationName\"';
 
   @override
   String get alertDialogLabel => 'تنبيه';
@@ -702,7 +702,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get deleteButtonTooltip => 'মচক';
 
   @override
-  String get dialogLabel => "ডায়ল'গ";
+  String get dialogLabel => 'ডায়ল\'গ';
 
   @override
   String get drawerLabel => 'নেভিগেশ্বন মেনু';
@@ -741,10 +741,10 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleApproximateRaw => '\$rowCountৰ \$firstRow–\$lastRow';
 
   @override
-  String get pasteButtonLabel => "পে'ষ্ট কৰক";
+  String get pasteButtonLabel => 'পে\'ষ্ট কৰক';
 
   @override
-  String get popupMenuLabel => "প'পআপ মেনু";
+  String get popupMenuLabel => 'প\'পআপ মেনু';
 
   @override
   String get postMeridiemAbbreviation => 'অপৰাহ্ন';
@@ -813,7 +813,7 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => "১টা বস্তু বাছনি কৰা হ'ল";
+  String get selectedRowCountTitleOne => '১টা বস্তু বাছনি কৰা হ\'ল';
 
   @override
   String get selectedRowCountTitleOther => '\$selectedRowCountটা বস্তু বাছনি কৰা হ’ল';
@@ -1080,7 +1080,7 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => 'Інфармацыя пра праграму "\$applicationName"';
+  String get aboutListTileTitleRaw => 'Інфармацыя пра праграму \"\$applicationName\"';
 
   @override
   String get alertDialogLabel => 'Абвестка';
@@ -1971,7 +1971,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get nextPageTooltip => 'Pàgina següent';
 
   @override
-  String get okButtonLabel => "D'ACORD";
+  String get okButtonLabel => 'D\'ACORD';
 
   @override
   String get openAppDrawerTooltip => 'Obre el menú de navegació';
@@ -1980,7 +1980,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get pageRowsInfoTitleRaw => '\$firstRow-\$lastRow de \$rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => "\$firstRow-\$lastRow d'aproximadament \$rowCount";
+  String get pageRowsInfoTitleApproximateRaw => '\$firstRow-\$lastRow d\'aproximadament \$rowCount';
 
   @override
   String get pasteButtonLabel => 'ENGANXA';
@@ -2022,7 +2022,7 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get reorderItemDown => 'Mou avall';
 
   @override
-  String get reorderItemLeft => "Mou cap a l'esquerra";
+  String get reorderItemLeft => 'Mou cap a l\'esquerra';
 
   @override
   String get reorderItemRight => 'Mou cap a la dreta';
@@ -2055,10 +2055,10 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => "S'ha seleccionat 1 element";
+  String get selectedRowCountTitleOne => 'S\'ha seleccionat 1 element';
 
   @override
-  String get selectedRowCountTitleOther => "S'han seleccionat \$selectedRowCount elements";
+  String get selectedRowCountTitleOther => 'S\'han seleccionat \$selectedRowCount elements';
 
   @override
   String get selectedRowCountTitleTwo => null;
@@ -8844,7 +8844,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get reorderItemToEnd => 'Sposta alla fine';
 
   @override
-  String get reorderItemToStart => "Sposta all'inizio";
+  String get reorderItemToStart => 'Sposta all\'inizio';
 
   @override
   String get reorderItemUp => 'Sposta su';
@@ -13197,7 +13197,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get reorderItemUp => 'ਉੱਪਰ ਲਿਜਾਓ';
 
   @override
-  String get rowsPerPageTitle => "ਹਰ ਪੰਨੇ 'ਤੇ ਕਤਾਰਾਂ:";
+  String get rowsPerPageTitle => 'ਹਰ ਪੰਨੇ \'ਤੇ ਕਤਾਰਾਂ:';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.tall;
