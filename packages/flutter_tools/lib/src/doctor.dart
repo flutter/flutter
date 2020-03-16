@@ -56,6 +56,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
+  final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
+  final WebWorkflow webWorkflow = WebWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
   @override
   List<DoctorValidator> get validators {
     if (_validators != null) {
@@ -67,11 +77,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators,
       ...VsCodeValidator.installedValidators,
     ];
-    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    );
-
     _validators = <DoctorValidator>[
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
@@ -119,10 +124,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows.add(fuchsiaWorkflow);
       }
 
-      final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
-        platform: globals.platform,
-        featureFlags: featureFlags,
-      );
       if (linuxWorkflow.appliesToHostPlatform) {
         _workflows.add(linuxWorkflow);
       }
