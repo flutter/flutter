@@ -498,13 +498,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
-        // Hot restart has not completed until the new isolate has spawned.
-        // wait for this to avoid returning too early.
-        final Future<void> onIsolate = _vmService.onIsolateEvent.firstWhere((vmservice.Event event) {
-          return event.kind == vmservice.EventKind.kIsolateStart;
-        });
         await _vmService.callMethod('hotRestart');
-        await onIsolate;
       } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
