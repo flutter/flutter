@@ -507,11 +507,9 @@ class _ResidentWebRunner extends ResidentWebRunner {
         });
       }
     } on Exception catch (err) {
-      globals.printError(err.toString());
-      return OperationResult(1, err.toString());
+      return OperationResult(1, err.toString(), fatal: true);
     } on WipError catch (err) {
-      globals.printError(err.toString());
-      return OperationResult(1, err.toString());
+      return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();
     }
