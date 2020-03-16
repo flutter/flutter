@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-// This test runs "//examples/flutter_gallery/test/live_smoketest.dart", which communicates
+// This test runs "//dev/integration_tests/flutter_gallery/test/live_smoketest.dart", which communicates
 // with the Java code to report its status. If this test fails due to a problem on the Dart
 // side, you can debug that by just running that file directly using `flutter run`.
 
@@ -18,7 +18,7 @@ Future<void> main() async {
 
   await task(() async {
     final Directory galleryDirectory =
-      dir('${flutterDirectory.path}/examples/flutter_gallery');
+      dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory(galleryDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
