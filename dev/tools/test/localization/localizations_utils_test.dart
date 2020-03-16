@@ -52,7 +52,7 @@ void main() {
       expect(generateString(r'ab\nc'), "'ab\\\\nc'");
     });
 
-    test("does not support multiline strings", () {
+    test('does not support multiline strings', () {
       expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
     });
   });

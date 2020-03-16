@@ -409,7 +409,7 @@ String generateString(String value, { bool escapeDollar = true }) {
     'contain newlines.'
   );
 
-  const backslash = '__BACKSLASH__';
+  const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
     'Input string cannot contain the sequence: '
