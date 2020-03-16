@@ -346,7 +346,6 @@ class WebServiceWorker extends Target {
       // Do not force caching of source maps.
       if (file.path.endsWith('main.dart.js.map')) {
         continue;
-
       }
       final String url = globals.fs.path.toUri(
         globals.fs.path.relative(
