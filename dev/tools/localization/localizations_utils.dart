@@ -373,17 +373,21 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 
 /// Return the input string as a Dart-parseable string.
 ///
+/// ```
+/// foo => 'foo'
+/// foo "bar" => 'foo "bar"'
+/// foo 'bar' => "foo 'bar'"
+/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\\\nbar'
+/// ```
+///
 /// When [shouldEscapeDollar] is set to true, the
 /// result avoids character escaping, with the
 /// exception of the dollar sign:
 ///
 /// ```
 /// foo$bar = 'foo\$bar'
-/// foo => 'foo'
-/// foo "bar" => 'foo "bar"'
-/// foo 'bar' => "foo 'bar'"
-/// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => 'foo\\bar'
 /// ```
 ///
 /// When [shouldEscapeDollar] is set to false, the
