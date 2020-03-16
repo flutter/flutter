@@ -4,16 +4,21 @@
 
 // @dart = 2.6
 part of engine;
+
 final bool _supportsDecode = js_util.getProperty(
         js_util.getProperty(
             js_util.getProperty(html.window, 'Image'), 'prototype'),
         'decode') !=
     null;
 
+typedef WebOnlyImageCodecChunkCallback = void Function(
+    int cumulativeBytesLoaded, int expectedTotalBytes);
+
 class HtmlCodec implements ui.Codec {
   final String src;
+  final WebOnlyImageCodecChunkCallback chunkCallback;
 
-  HtmlCodec(this.src);
+  HtmlCodec(this.src, {this.chunkCallback});
 
   @override
   int get frameCount => 1;
@@ -24,11 +29,20 @@ class HtmlCodec implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() async {
     final Completer<ui.FrameInfo> completer = Completer<ui.FrameInfo>();
+    // Currently there is no way to watch decode progress, so
+    // we add 0/100 , 100/100 progress callbacks to enable loading progress
+    // builders to create UI.
+    if (chunkCallback != null) {
+      chunkCallback(0, 100);
+    }
     if (_supportsDecode) {
       final html.ImageElement imgElement = html.ImageElement();
       imgElement.src = src;
       js_util.setProperty(imgElement, 'decoding', 'async');
       imgElement.decode().then((dynamic _) {
+        if (chunkCallback != null) {
+          chunkCallback(100, 100);
+        }
         final HtmlImage image = HtmlImage(
           imgElement,
           imgElement.naturalWidth,
@@ -61,6 +75,9 @@ class HtmlCodec implements ui.Codec {
       completer.completeError(event);
     });
     loadSubscription = imgElement.onLoad.listen((html.Event event) {
+      if (chunkCallback != null) {
+        chunkCallback(100, 100);
+      }
       loadSubscription.cancel();
       errorSubscription.cancel();
       final HtmlImage image = HtmlImage(
