@@ -396,28 +396,23 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// [shouldEscapeDollar] is true by default.
 ///
 /// Strings with newlines are not supported.
-String generateString(String value, { bool shouldEscapeDollar = true }) {
-  assert(shouldEscapeDollar != null);
+String generateString(String value, { bool escapeDollar = true }) {
+  assert(escapeDollar != null);
   assert(!value.contains('\n'));
-  if (shouldEscapeDollar) {
+
+  const backslash = '__BACKSLASH__';
+  assert(!value.contains(backslash));
+  value = value.replaceAll('\\', backslash);
+
+  if (escapeDollar)
     value = value.replaceAll('\$', '\\\$');
-  }
 
-  if (!value.contains("'"))
-    return "'$value'";
-  if (!value.contains('"'))
-    return '"$value"';
-  if (!value.contains("'''"))
-    return "'''$value'''";
-  if (!value.contains('"""'))
-    return '"""$value"""';
+  value = value
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll(backslash, '\\\\');
 
-  return value.split("'''")
-    .map((String part) => generateString(part, shouldEscapeDollar: shouldEscapeDollar))
-    // If value contains more than 6 consecutive single quotes some empty
-    // strings may be generated. The following map removes them.
-    .map((String part) => part == "''" ? '' : part)
-    .join(" \"'''\" ");
+  return "'$value'";
 }
 
 /// Only used to generate localization strings for the Kannada locale ('kn') because

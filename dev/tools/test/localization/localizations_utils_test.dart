@@ -13,39 +13,39 @@ void main() {
     });
 
     test('handles string with quote', () {
-      expect(generateString("ab'c"), '''"ab'c"''');
+      expect(generateString("ab'c"), "'ab\\\'c'");
     });
 
     test('handles string with double quote', () {
-      expect(generateString('ab"c'), """'ab"c'""");
+      expect(generateString('ab"c'), "'ab\\\"c'");
     });
 
     test('handles string with both single and double quote', () {
-      expect(generateString('''a'b"c'''), """'''a'b"c'''""");
+      expect(generateString('''a'b"c'''), '\'a\\\'b\\"c\'');
     });
 
     test('handles string with a triple single quote and a double quote', () {
-      expect(generateString("""a"b'''c"""), '''"""a"b\'''c"""''');
+      expect(generateString("""a"b'''c"""), '\'a\\"b\\\'\\\'\\\'c\'');
     });
 
     test('handles string with a triple double quote and a single quote', () {
-      expect(generateString('''a'b"""c'''), """'''a'b\"""c'''""");
+      expect(generateString('''a'b"""c'''), '\'a\\\'b\\"\\"\\"c\'');
     });
 
     test('handles string with both triple single and triple double quote', () {
-      expect(generateString('''a\'''\'''\''b"""c'''), """'a' "'''"  "'''" '''''b\"""c'''""");
+      expect(generateString('''a\'''b"""c'''), '\'a\\\'\\\'\\\'b\\"\\"\\"c\'');
     });
 
-    test('escapes dollar when shouldEscapeDollarSign is true', () {
-      expect(generateString(r'ab$c', shouldEscapeDollar: true), "'ab\\\$c'");
+    test('escapes dollar when escapeDollar is true', () {
+      expect(generateString(r'ab$c', escapeDollar: true), "'ab\\\$c'");
     });
 
-    test('does not escape dollar when shouldEscapeDollar is false', () {
-      expect(generateString(r'ab$c', shouldEscapeDollar: false), "'ab\$c'");
+    test('does not escape dollar when escapeDollar  is false', () {
+      expect(generateString(r'ab$c', escapeDollar: false), "'ab\$c'");
     });
 
     test('handles backslash', () {
-      expect(generateString('ab\\c'), "'ab\\c'");
+      expect(generateString(r'ab\c'), "'ab\\\\c'");
     });
 
     test("doesn't support multiline strings", () {
