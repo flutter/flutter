@@ -10,21 +10,27 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import 'adb.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
-import 'android_workflow.dart';
+import 'android_workflow.dart' hide androidWorkflow;
+import 'android_workflow.dart' as workflow show androidWorkflow;
 
 /// Device discovery for Android physical devices and emulators.s
 class AndroidDevices extends PollingDeviceDiscovery {
+  // TODO(jonahwilliams): make these required after google3 is updated.
   AndroidDevices({
-    @required AndroidWorkflow androidWorkflow,
-    @required ProcessManager processManager,
-    @required Logger logger,
-    @required AndroidSdk androidSdk,
-  }) : _androidWorkflow = androidWorkflow,
-       _androidSdk = androidSdk,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+    AndroidWorkflow androidWorkflow,
+    ProcessManager processManager,
+    Logger logger,
+    AndroidSdk androidSdk,
+  }) : _androidWorkflow = androidWorkflow ?? workflow.androidWorkflow,
+       _androidSdk = androidSdk ?? globals.androidSdk,
+       _processUtils = ProcessUtils(
+         logger: logger ?? globals.logger,
+         processManager: processManager ?? globals.processManager,
+        ),
        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;
