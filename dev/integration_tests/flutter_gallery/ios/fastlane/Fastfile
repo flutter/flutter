@@ -29,7 +29,7 @@ platform :ios do
     setup_travis
 
     # Relative to this file.
-    raw_version = File.read('../../../../version')
+    raw_version = File.read('../../../../../version')
     puts "Building and deploying version #{raw_version}..."
 
     update_app_identifier(
