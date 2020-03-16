@@ -112,6 +112,8 @@ namespace tracing {
 using TraceArg = const char*;
 using TraceIDArg = int64_t;
 
+void TraceSetWhitelist(const std::vector<std::string>& whitelist);
+
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
                         TraceIDArg id,

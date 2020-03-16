@@ -272,6 +272,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_skia =
       command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
 
+  command_line.GetOptionValue(FlagForSwitch(Switch::TraceWhitelist),
+                              &settings.trace_whitelist);
+
   settings.trace_systrace =
       command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
 
