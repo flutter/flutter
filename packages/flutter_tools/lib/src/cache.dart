@@ -1274,6 +1274,9 @@ class IosUsbArtifacts extends CachedArtifact {
       'idevicescreenshot',
       'idevicesyslog',
     ],
+    'usbmuxd': <String>[
+      'iproxy',
+    ],
   };
 
   @override

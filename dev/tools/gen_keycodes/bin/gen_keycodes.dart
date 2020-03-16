@@ -7,10 +7,11 @@ import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
+import 'package:gen_keycodes/cc_code_gen.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
-import 'package:gen_keycodes/code_gen.dart';
+import 'package:gen_keycodes/dart_code_gen.dart';
 import 'package:gen_keycodes/key_data.dart';
 import 'package:gen_keycodes/utils.dart';
 
@@ -215,7 +216,24 @@ Future<void> main(List<String> rawArguments) async {
     mapsFile.createSync(recursive: true);
   }
 
-  final CodeGenerator generator = CodeGenerator(data);
+  final DartCodeGenerator generator = DartCodeGenerator(data);
   await codeFile.writeAsString(generator.generateKeyboardKeys());
   await mapsFile.writeAsString(generator.generateKeyboardMaps());
+
+  final CcCodeGenerator ccCodeGenerator = CcCodeGenerator(data);
+  for (final String platform in <String>['android', 'darwin', 'glfw', 'fuchsia', 'linux', 'windows']) {
+    final File platformFile = File(path.join(flutterRoot.path, '..', path.join('engine', 'src', 'flutter', 'shell', 'platform', platform, 'keycodes', 'keyboard_map_$platform.h')));
+    if (!platformFile.existsSync()) {
+      platformFile.createSync(recursive: true);
+    }
+    print('Writing map ${platformFile.absolute}');
+    await platformFile.writeAsString(ccCodeGenerator.generateKeyboardMaps(platform));
+  }
+
+  final File webPlatformFile = File(path.join(flutterRoot.path, '..', 'engine', 'src', 'flutter', path.join('lib', 'web_ui', 'lib', 'src', 'engine', 'keycodes', 'keyboard_map_web.dart')));
+  if (!webPlatformFile.existsSync()) {
+    webPlatformFile.createSync(recursive: true);
+  }
+  print('Writing map ${webPlatformFile.absolute}');
+  await webPlatformFile.writeAsString(generator.generateWebKeyboardMap());
 }

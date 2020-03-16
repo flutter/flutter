@@ -532,7 +532,7 @@ class LocalizationsGenerator {
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
       final String country = locale.countryCode;
-      final String countryArg = country == null ? '' : ', $country';
+      final String countryArg = country == null ? '' : "', '$country";
       return 'Locale(\'${locale.languageCode}$countryArg\')';
     });
 
