@@ -194,28 +194,104 @@ task:
     #   script:
     #     - dart --enable-asserts ./dev/bots/test.dart
 
-    - name: web_tests-0-linux
+    ### RUN 1
+    - name: web_tests1-0-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-1-linux
+    - name: web_tests1-1-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-2-linux
+    - name: web_tests1-2-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-3-linux
+    - name: web_tests1-3-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-4-linux
+    - name: web_tests1-4-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-5-linux
+    - name: web_tests1-5-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-6-linux
+    - name: web_tests1-6-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-7_last-linux # last Web shard must end with _last
+    - name: web_tests1-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 2
+    - name: web_tests2-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests2-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 3
+    - name: web_tests3-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests3-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 4
+    - name: web_tests4-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests4-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
     # - name: build_tests-linux
