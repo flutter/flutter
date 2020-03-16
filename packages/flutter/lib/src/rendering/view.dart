@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -15,6 +14,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'mouse_tracking.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
