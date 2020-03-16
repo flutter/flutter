@@ -422,9 +422,12 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
-    if (serverPath == null || serverPath.trim().isEmpty) {
-      return null;
+    // TODO(jonahwilliams): ensure devtools can correctly hide this file.
+    final bool isEntrypointRequest = serverPath == null || serverPath.isEmpty;
+    if (isEntrypointRequest) {
+      return '/* no sourcemaps available. */';
     }
+
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();

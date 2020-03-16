@@ -401,6 +401,10 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
+    // Generated entrypoint.
+    expect(await webDevFS.webAssetServer.dartSourceContents(null),
+      contains('/* no sourcemaps available. */'));
+
     await webDevFS.destroy();
   }));
 }

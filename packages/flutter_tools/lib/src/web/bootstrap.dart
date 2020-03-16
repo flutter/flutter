@@ -54,10 +54,6 @@ String generateMainModule({@required String entrypoint}) {
 define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
-  if (typeof document != 'undefined') {
-    window.postMessage({ type: "DDC_STATE_CHANGE", state: "start" }, "*");
-  }
 
   // See the generateMainModule doc comment.
   var child = {};
