@@ -52,5 +52,6 @@
   "collapsedIconTapHint": "Жаю",
   "remainingTextFieldCharacterCountZero": "Таңбалар қалмады",
   "remainingTextFieldCharacterCountOther": "$remainingCount таңба қалды.",
-  "refreshIndicatorSemanticLabel": "Жаңарту"
+  "refreshIndicatorSemanticLabel": "Жаңарту",
+  "moreButtonTooltip": "TBD"
 }

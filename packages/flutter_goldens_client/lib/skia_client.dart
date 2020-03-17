@@ -325,7 +325,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
-  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+  Future<void> tryjobAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
 
@@ -343,36 +343,20 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 
-    if (result.exitCode != 0) {
-      final String resultStdout = result.stdout.toString();
-      if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
-        final List<String> failureLinks = await workDirectory.childFile('failures.json').readAsLines();
-
-        final StringBuffer buf = StringBuffer()
-          ..writeln('The golden file "$testName" ')
-          ..writeln('did not match the expected image.')
-          ..writeln('To view the closest matching image, the actual image generated, ')
-          ..writeln('and the visual difference, visit: ')
-          ..writeln(failureLinks.last)
-          ..writeln('There you can also triage this image (e.g. because this ')
-          ..writeln('is an intentional change).')
-          ..writeln();
-        throw Exception(buf.toString());
-      } else {
-        final StringBuffer buf = StringBuffer()
-          ..writeln('Unexpected Gold tryjobAdd failure.')
-          ..writeln('Tryjob execution for golden file test $testName failed for')
-          ..writeln('a reason unrelated to pixel comparison.')
-          ..writeln()
-          ..writeln('Debug information for Gold:')
-          ..writeln('stdout: ${result.stdout}')
-          ..writeln('stderr: ${result.stderr}')
-          ..writeln();
-        throw Exception(buf.toString());
-      }
+    final String resultStdout = result.stdout.toString();
+    if (result.exitCode != 0 &&
+      !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Unexpected Gold tryjobAdd failure.')
+        ..writeln('Tryjob execution for golden file test $testName failed for')
+        ..writeln('a reason unrelated to pixel comparison.')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}')
+        ..writeln();
+      throw Exception(buf.toString());
     }
-
-    return result.exitCode == 0;
   }
 
   /// Executes the `imgtest check` command in the goldctl tool for unauthorized

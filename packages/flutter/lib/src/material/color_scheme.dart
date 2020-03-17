@@ -16,7 +16,7 @@ import 'theme_data.dart';
 /// The [Theme] has a color scheme, [ThemeData.colorScheme], which is constructed
 /// with [ColorScheme.fromSwatch].
 @immutable
-class ColorScheme extends Diagnosticable {
+class ColorScheme with Diagnosticable {
   /// Create a ColorScheme instance.
   const ColorScheme({
     @required this.primary,

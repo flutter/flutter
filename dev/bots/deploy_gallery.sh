@@ -32,7 +32,7 @@ if [[ "$OS" == "linux" ]]; then
   export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/docker_linux/Gemfile"
   # ANDROID_SDK_ROOT must be set in the env.
   (
-    cd examples/flutter_gallery
+    cd dev/integration_tests/flutter_gallery
     flutter build apk --release -t lib/main_publish.dart
   )
   echo "Android Flutter Gallery built"
@@ -44,7 +44,7 @@ if [[ "$OS" == "linux" ]]; then
     fi
     set -x
     (
-      cd examples/flutter_gallery/android
+      cd dev/integration_tests/flutter_gallery/android
       bundle exec fastlane deploy_play_store
     )
   else
@@ -54,7 +54,7 @@ elif [[ "$OS" == "darwin" ]]; then
   echo "Building Flutter Gallery $version for iOS..."
   export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
   (
-    cd examples/flutter_gallery
+    cd dev/integration_tests/flutter_gallery
     flutter build ios --release --no-codesign -t lib/main_publish.dart
 
     # flutter build ios will run CocoaPods script. Check generated locations.
@@ -92,7 +92,7 @@ elif [[ "$OS" == "darwin" ]]; then
     if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
       echo "Archiving with distribution profile and deploying to TestFlight..."
       (
-        cd examples/flutter_gallery/ios
+        cd dev/integration_tests/flutter_gallery/ios
         export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
         bundle exec fastlane build_and_deploy_testflight upload:true
       )
@@ -102,7 +102,7 @@ elif [[ "$OS" == "darwin" ]]; then
       # the secrets aren't available on PRs.
       echo "Testing archiving with distribution profile..."
       (
-        cd examples/flutter_gallery/ios
+        cd dev/integration_tests/flutter_gallery/ios
         # Cirrus Mac VMs come with an old version of fastlane which was causing
         # dependency issues (https://github.com/flutter/flutter/issues/43435),
         # so explicitly use the version specified in $BUNDLE_GEMFILE.

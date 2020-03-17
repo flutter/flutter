@@ -55,5 +55,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "נותר תו אחד",
   "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים",
-  "refreshIndicatorSemanticLabel": "רענון"
+  "refreshIndicatorSemanticLabel": "רענון",
+  "moreButtonTooltip": "TBD"
 }

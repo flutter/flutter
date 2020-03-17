@@ -145,11 +145,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices();
+    final String text = await fuchsiaSdk.listDevices(timeout: timeout);
     if (text == null || text.isEmpty) {
       return <Device>[];
     }

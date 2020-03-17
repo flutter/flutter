@@ -526,7 +526,12 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices() async => _devices;
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    lastPollingTimeout = timeout;
+    return _devices;
+  }
+
+  Duration lastPollingTimeout;
 
   @override
   bool get supportsPlatform => true;
@@ -534,14 +539,22 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => true;
 
-  void addDevice(MockAndroidDevice device) {
+  void addDevice(Device device) {
     _devices.add(device);
-
     _onAddedController.add(device);
   }
 
-  @override
-  Future<List<Device>> get devices async => _devices;
+  void _removeDevice(Device device) {
+    _devices.remove(device);
+    _onRemovedController.add(device);
+  }
+
+  void setDevices(List<Device> devices) {
+    while(_devices.isNotEmpty) {
+      _removeDevice(_devices.first);
+    }
+    devices.forEach(addDevice);
+  }
 
   @override
   Stream<Device> get onAdded => _onAddedController.stream;

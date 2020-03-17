@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "გაშლა",
   "remainingTextFieldCharacterCountOne": "დარჩა 1 სიმბოლო",
   "remainingTextFieldCharacterCountOther": "დარჩა $remainingCount სიმბოლო",
-  "refreshIndicatorSemanticLabel": "განახლება"
+  "refreshIndicatorSemanticLabel": "განახლება",
+  "moreButtonTooltip": "TBD"
 }
