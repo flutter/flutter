@@ -10,9 +10,13 @@
 #    private fields, especially on the Window object):
 
 analyzer:
-  # this test pretends to be part of dart:ui and results in lots of false
-  # positives.
-  exclude: [ testing/dart/window_hooks_integration_test.dart ]
+  exclude: [
+    # this test pretends to be part of dart:ui and results in lots of false
+    # positives.
+    testing/dart/window_hooks_integration_test.dart,
+    # Fixture depends on dart:ui and raises false positives.
+    flutter_frontend_server/test/fixtures/lib/main.dart
+  ]
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false

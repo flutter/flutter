@@ -24,6 +24,7 @@ export 'src/engine.dart'
         webOnlySetPluginHandler,
         webOnlyInitializeEngine;
 
+part 'src/ui/annotations.dart';
 part 'src/ui/canvas.dart';
 part 'src/ui/channel_buffers.dart';
 part 'src/ui/compositing.dart';
