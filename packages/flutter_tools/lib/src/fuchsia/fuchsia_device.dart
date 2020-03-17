@@ -558,14 +558,14 @@ class FuchsiaDevice extends Device {
 
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
-    if (fuchsiaArtifacts.sshConfig == null) {
+    if (globals.fuchsiaArtifacts.sshConfig == null) {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
     return await processUtils.run(<String>[
       'ssh',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       id, // Device's IP address.
       command,
     ]);
@@ -573,14 +573,14 @@ class FuchsiaDevice extends Device {
 
   /// Transfer the file [origin] from the device to [destination].
   Future<RunResult> scp(String origin, String destination) async {
-    if (fuchsiaArtifacts.sshConfig == null) {
+    if (globals.fuchsiaArtifacts.sshConfig == null) {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
     return await processUtils.run(<String>[
       'scp',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '$id:$origin',
       destination,
     ]);
@@ -742,7 +742,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       'ssh',
       '-6',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '-nNT',
       '-vvv',
       '-f',
@@ -774,7 +774,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     final List<String> command = <String>[
       'ssh',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '-O',
       'cancel',
       '-vvv',
