@@ -171,6 +171,14 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
+    // This does not count grapheme clusters (i.e. characters visible to the user),
+    // it counts Unicode runes, which leaves out a number of useful possible
+    // characters (like many emoji), so this will be inaccurate in the
+    // presence of those characters. The Dart lang bug
+    // https://github.com/dart-lang/sdk/issues/28404 has been filed to
+    // address this in Dart.
+    // TODO(justinmc): convert this to count actual characters using Dart's
+    // characters package (https://pub.dev/packages/characters).
     if (maxLength != null && maxLength > 0 && newValue.text.runes.length > maxLength) {
       return oldValue;
     }
