@@ -655,6 +655,12 @@ class _ResidentWebRunner extends ResidentWebRunner {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
+      try {
+        await _vmService.streamListen(vmservice.EventStreams.kIsolate);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
+      }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
         globals.printStatus(message);
