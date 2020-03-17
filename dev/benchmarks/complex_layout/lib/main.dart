@@ -629,6 +629,7 @@ class GalleryDrawer extends StatelessWidget {
             },
             trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex'),
           ),
+          DummyPlatformView(),
           ListTile(
             leading: const Icon(Icons.brightness_5),
             title: const Text('Light'),
