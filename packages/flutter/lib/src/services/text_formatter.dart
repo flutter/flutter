@@ -167,9 +167,9 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// characters.
   final int maxLength;
 
-  // Truncate the given TextEditingValue to maxLength runes.
   // TODO(justinmc): This should be updated to use characters instead of runes,
   // see the comment in formatEditUpdate.
+  /// Truncate the given TextEditingValue to maxLength runes.
   @visibleForTesting
   static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final TextSelection newSelection = value.selection.copyWith(
