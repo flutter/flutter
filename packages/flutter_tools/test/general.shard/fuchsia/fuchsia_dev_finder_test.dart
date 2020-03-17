@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_dev_finder.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
@@ -18,115 +17,124 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  group('fuchsia device-finder', () {
-    MockFuchsiaArtifacts mockFuchsiaArtifacts;
-    MockProcessManager mockProcessManager;
-    BufferLogger logger;
-    MemoryFileSystem memoryFileSystem;
-    File deviceFinder;
-    FuchsiaDevFinder fuchsiaDevFinder;
+  MockFuchsiaArtifacts mockFuchsiaArtifacts;
+  BufferLogger logger;
+  MemoryFileSystem memoryFileSystem;
+  File deviceFinder;
 
-    setUp(() {
-      mockFuchsiaArtifacts = MockFuchsiaArtifacts();
-      mockProcessManager = MockProcessManager();
-      memoryFileSystem = MemoryFileSystem();
-      logger = BufferLogger.test();
-      deviceFinder = memoryFileSystem.file('device-finder');
+  setUp(() {
+    mockFuchsiaArtifacts = MockFuchsiaArtifacts();
+    memoryFileSystem = MemoryFileSystem();
+    logger = BufferLogger.test();
+    deviceFinder = memoryFileSystem.file('device-finder');
 
-      when(mockFuchsiaArtifacts.devFinder).thenReturn(deviceFinder);
+    when(mockFuchsiaArtifacts.devFinder).thenReturn(deviceFinder);
+  });
 
-      fuchsiaDevFinder = FuchsiaDevFinder(
+  group('device-finder list', () {
+    testWithoutContext('device-finder not found', () {
+      final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
         fuchsiaArtifacts: mockFuchsiaArtifacts,
         logger: logger,
-        processManager: mockProcessManager
+        processManager: FakeProcessManager.any(),
       );
+
+      expect(() async => await fuchsiaDevFinder.list(),
+        throwsToolExit(message: 'Fuchsia device-finder tool not found.'));
     });
 
-    group('list', () {
-      testWithoutContext('device-finder not found', () {
-        expect(() async => await fuchsiaDevFinder.list(),
-          throwsToolExit(message: 'Fuchsia device-finder tool not found.'));
-      });
+    testWithoutContext('no devices', () async {
+      deviceFinder.createSync();
 
-      testWithoutContext('no devices', () async {
-        deviceFinder.createSync();
-
-        when(mockProcessManager.run(
-          <String>[
-            deviceFinder.path,
-            'list',
-            '-full',
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ deviceFinder.path, 'list', '-full',
           ],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenAnswer(
-            (_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'list.go:72: no devices found'))
-        );
+          exitCode: 1,
+          stderr: 'list.go:72: no devices found',
+        ),
+      ]);
 
-        expect(await fuchsiaDevFinder.list(), isNull);
-        expect(logger.errorText, isEmpty);
-      });
+      final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
+        fuchsiaArtifacts: mockFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
 
-      testWithoutContext('error', () async {
-        deviceFinder.createSync();
+      expect(await fuchsiaDevFinder.list(), isNull);
+      expect(logger.errorText, isEmpty);
+    });
 
-        when(mockProcessManager.run(
-          <String>[
-            deviceFinder.path,
-            'list',
-            '-full',
+    testWithoutContext('error', () async {
+      deviceFinder.createSync();
+
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ deviceFinder.path, 'list', '-full',
           ],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenAnswer(
-            (_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'unexpected error'))
-        );
+          exitCode: 1,
+          stderr: 'unexpected error',
+        ),
+      ]);
 
-        expect(await fuchsiaDevFinder.list(), isNull);
-        expect(logger.errorText, contains('unexpected error'));
-      });
+      final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
+        fuchsiaArtifacts: mockFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
 
-      testWithoutContext('devices found', () async {
-        deviceFinder.createSync();
+      expect(await fuchsiaDevFinder.list(), isNull);
+      expect(logger.errorText, contains('unexpected error'));
+    });
 
-        when(mockProcessManager.run(
-          <String>[
-            deviceFinder.path,
-            'list',
-            '-full',
+    testWithoutContext('devices found', () async {
+      deviceFinder.createSync();
+
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[ deviceFinder.path, 'list', '-full',
           ],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenAnswer(
-            (_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'device1\ndevice2', ''))
-        );
+          exitCode: 0,
+          stdout: 'device1\ndevice2',
+        ),
+      ]);
 
-        expect(await fuchsiaDevFinder.list(), <String>['device1', 'device2']);
-        expect(logger.errorText, isEmpty);
-      });
+      final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
+        fuchsiaArtifacts: mockFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
 
-      testWithoutContext('timeout', () async {
-        deviceFinder.createSync();
+      expect(await fuchsiaDevFinder.list(), <String>['device1', 'device2']);
+      expect(logger.errorText, isEmpty);
+    });
 
-        when(mockProcessManager.run(
-          <String>[
+    testWithoutContext('timeout', () async {
+      deviceFinder.createSync();
+
+      final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
             deviceFinder.path,
             'list',
             '-full',
             '-timeout',
             '2000ms',
           ],
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'),
-        )).thenAnswer(
-            (_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'device1', ''))
-        );
+          exitCode: 0,
+          stdout: 'device1',
+        ),
+      ]);
 
-        expect(await fuchsiaDevFinder.list(timeout: const Duration(seconds: 2)), <String>['device1']);
-      });
+      final FuchsiaDevFinder fuchsiaDevFinder = FuchsiaDevFinder(
+        fuchsiaArtifacts: mockFuchsiaArtifacts,
+        logger: logger,
+        processManager: processManager,
+      );
+
+      expect(await fuchsiaDevFinder.list(timeout: const Duration(seconds: 2)), <String>['device1']);
     });
   });
 }
 
 class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
-class MockProcessManager extends Mock implements ProcessManager {}
