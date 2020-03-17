@@ -368,7 +368,7 @@ class IOSDevice extends Device {
  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
     processManager: globals.processManager,
     logger: globals.logger,
-    dyLdLibEntry: null,
+    dyLdLibEntry: globals.cache.dyLdLibEntry,
     id: id,
     iproxyPath: _iproxyPath,
   );
