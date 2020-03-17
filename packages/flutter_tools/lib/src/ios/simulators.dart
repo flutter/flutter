@@ -22,7 +22,6 @@ import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import 'ios_workflow.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
 
@@ -41,10 +40,10 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListDevices;
+  bool get canListAnything => globals.iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => _iosSimulatorUtils.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async => _iosSimulatorUtils.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {

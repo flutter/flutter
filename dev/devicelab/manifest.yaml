@@ -190,6 +190,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  color_filter_and_fade_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.

@@ -340,18 +340,26 @@ class WebServiceWorker extends Target {
       .where((File file) => !file.path.endsWith('flutter_service_worker.js')
         && !globals.fs.path.basename(file.path).startsWith('.'))
       .toList();
-    // TODO(jonahwilliams): determine whether this needs to be made more efficient.
-    final Map<String, String> uriToHash = <String, String>{
-      for (File file in contents)
-        // Do not force caching of source maps.
-        if (!file.path.endsWith('main.dart.js.map'))
-        '/${globals.fs.path.toUri(globals.fs.path.relative(file.path, from: environment.outputDir.path)).toString()}':
-          md5.convert(await file.readAsBytes()).toString(),
-    };
+
+    final Map<String, String> urlToHash = <String, String>{};
+    for (final File file in contents) {
+      // Do not force caching of source maps.
+      if (file.path.endsWith('main.dart.js.map')) {
+        continue;
+      }
+      final String url = globals.fs.path.toUri(
+        globals.fs.path.relative(
+          file.path,
+          from: environment.outputDir.path),
+        ).toString();
+      final String hash = md5.convert(await file.readAsBytes()).toString();
+      urlToHash[url] = hash;
+    }
+
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final String serviceWorker = generateServiceWorker(uriToHash);
+    final String serviceWorker = generateServiceWorker(urlToHash);
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(

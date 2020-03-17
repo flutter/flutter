@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -38,6 +39,26 @@ void main() {
       await expectDevice('Nexus 5', <Device>[device1]);
       await expectDevice('0553790', <Device>[device1]);
       await expectDevice('Nexus', <Device>[device1, device2]);
+    });
+
+    testUsingContext('getAllConnectedDevices caches', () async {
+      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
+      expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+
+      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      deviceManager.resetDevices(<Device>[device2]);
+      expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+    });
+
+    testUsingContext('refreshAllConnectedDevices does not cache', () async {
+      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
+      expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device1]);
+
+      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      deviceManager.resetDevices(<Device>[device2]);
+      expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
     });
   });
 
@@ -164,13 +185,19 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager(this.allDevices);
-
-  final List<Device> allDevices;
-  bool isAlwaysSupportedOverride;
-
+  TestDeviceManager(List<Device> allDevices) {
+    _deviceDiscoverer = MockPollingDeviceDiscovery();
+    resetDevices(allDevices);
+  }
   @override
-  Future<List<Device>> getAllConnectedDevices() async => allDevices;
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[_deviceDiscoverer];
+  MockPollingDeviceDiscovery _deviceDiscoverer;
+
+  void resetDevices(List<Device> allDevices) {
+    _deviceDiscoverer.setDevices(allDevices);
+  }
+
+  bool isAlwaysSupportedOverride;
 
   @override
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {

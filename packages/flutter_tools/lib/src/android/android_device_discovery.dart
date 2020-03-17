@@ -44,7 +44,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     final String adbPath = getAdbPath(_androidSdk);
     if (adbPath == null) {
       return <AndroidDevice>[];

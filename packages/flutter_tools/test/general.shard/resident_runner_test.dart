@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -356,6 +357,22 @@ void main() {
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
 
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     when(mockDevice.supportsHotRestart).thenReturn(true);
     when(mockDevice.supportsScreenshot).thenReturn(true);
@@ -368,6 +385,8 @@ void main() {
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
+    // does not support CanvasKit
+    expect(residentRunner.supportsCanvasKit, false);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -393,6 +412,11 @@ void main() {
           ''
         ].join('\n')
     ));
+  }));
+
+  test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
+    expect(() => residentRunner.toggleCanvaskit(),
+      throwsA(isA<Exception>()));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -690,6 +714,8 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());
