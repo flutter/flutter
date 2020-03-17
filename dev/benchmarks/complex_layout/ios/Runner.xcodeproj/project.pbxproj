@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		647B792C24207B8900ABA501 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 647B792B24207B8900ABA501 /* AppDelegate.m */; };
+		647B792F24207D1600ABA501 /* DummyPlatformView.m in Sources */ = {isa = PBXBuildFile; fileRef = 647B792E24207D1600ABA501 /* DummyPlatformView.m */; };
+		647B793224208A4200ABA501 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 647B793024208A4200ABA501 /* GeneratedPluginRegistrant.m */; };
 		746232561E83B9DF00CC1A5E /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 746232551E83B9DF00CC1A5E /* AppFrameworkInfo.plist */; };
 		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -28,6 +31,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		647B792824207ADD00ABA501 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		647B792B24207B8900ABA501 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		647B792D24207CC400ABA501 /* DummyPlatformView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DummyPlatformView.h; sourceTree = "<group>"; };
+		647B792E24207D1600ABA501 /* DummyPlatformView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DummyPlatformView.m; sourceTree = "<group>"; };
+		647B793024208A4200ABA501 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		647B793124208A4200ABA501 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		746232551E83B9DF00CC1A5E /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Flutter.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Flutter.xcconfig; path = Flutter/Flutter.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
@@ -80,11 +89,17 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				647B793124208A4200ABA501 /* GeneratedPluginRegistrant.h */,
+				647B793024208A4200ABA501 /* GeneratedPluginRegistrant.m */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				97C146F11CF9000F007C117D /* Supporting Files */,
+				647B792824207ADD00ABA501 /* AppDelegate.h */,
+				647B792B24207B8900ABA501 /* AppDelegate.m */,
+				647B792D24207CC400ABA501 /* DummyPlatformView.h */,
+				647B792E24207D1600ABA501 /* DummyPlatformView.m */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -186,7 +201,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				647B792C24207B8900ABA501 /* AppDelegate.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
+				647B792F24207D1600ABA501 /* DummyPlatformView.m in Sources */,
+				647B793224208A4200ABA501 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +275,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Flutter.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -363,6 +382,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Flutter.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -383,6 +403,7 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Flutter.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
