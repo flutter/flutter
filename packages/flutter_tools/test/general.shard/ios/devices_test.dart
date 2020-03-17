@@ -169,6 +169,12 @@ void main() {
       IOSDevice device;
       IOSDeploy iosDeploy;
       FakeProcessManager fakeProcessManager;
+      const String iosDeployPath = '/path/to/ios-deploy';
+
+      setUp(() {
+        when(mockArtifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios))
+          .thenReturn(iosDeployPath);
+      });
 
       testWithoutContext('isAppInstalled() catches ProcessException from ios-deploy', () async {
         final MockIOSApp mockApp = MockIOSApp();
@@ -176,7 +182,7 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>[
-              null,
+              iosDeployPath,
               '--id',
               deviceId,
               '--exists',
@@ -221,7 +227,7 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>[
-              null,
+              iosDeployPath,
               '--id',
               deviceId,
               '--bundle',
@@ -260,7 +266,7 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           FakeCommand(
             command: const <String>[
-              null,
+              iosDeployPath,
               '--id',
               deviceId,
               '--uninstall_only',
@@ -1066,16 +1072,15 @@ void main() {
       });
 
       testWithoutContext('installApp() calls ios-deploy', () async {
-        final List<String> args = <String>[
-          iosDeployPath,
-          '--id',
-          deviceId,
-          '--bundle',
-          bundlePath,
-          '--no-wifi',
-        ];
         final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(command: args),
+          const FakeCommand(command: <String>[
+            iosDeployPath,
+            '--id',
+            deviceId,
+            '--bundle',
+            bundlePath,
+            '--no-wifi',
+          ]),
         ]);
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
@@ -1101,16 +1106,15 @@ void main() {
       });
 
       testWithoutContext('uninstallApp() calls ios-deploy', () async {
-        final List<String> args = <String>[
-          iosDeployPath,
-          '--id',
-          deviceId,
-          '--uninstall_only',
-          '--bundle_id',
-          appId,
-        ];
         final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(command: args),
+          const FakeCommand(command: <String>[
+            iosDeployPath,
+            '--id',
+            deviceId,
+            '--uninstall_only',
+            '--bundle_id',
+            appId,
+          ]),
         ]);
         iosDeploy = IOSDeploy(
           artifacts: mockArtifacts,
