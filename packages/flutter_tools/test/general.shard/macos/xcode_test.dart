@@ -178,6 +178,32 @@ void main() {
       expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
       expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
+
+    group('SDK location', () {
+      const String sdkroot = 'Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk';
+
+      testWithoutContext('--show-sdk-path iphoneos', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.iPhone), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path macosx', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'macosx', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 0, sdkroot, '')));
+
+        expect(await xcode.sdkLocation(SdkType.macOS), sdkroot);
+      });
+
+      testWithoutContext('--show-sdk-path fails', () async {
+        when(processManager.run(<String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'])).thenAnswer((_) =>
+        Future<ProcessResult>.value(ProcessResult(1, 1, '', 'xcrun: error:')));
+
+        expect(() async => await xcode.sdkLocation(SdkType.iPhone),
+          throwsToolExit(message: 'Could not find SDK location'));
+      });
+    });
   });
 
   group('xcdevice', () {
@@ -357,6 +383,18 @@ void main() {
         expect(devices[2].cpuArchitecture, DarwinArch.arm64); // Defaults to arm64 for unknown architecture.
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
+      });
+
+      testWithoutContext('uses timeout', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        when(processManager.run(any))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, '[]', '')));
+        await xcdevice.getAvailableTetheredIOSDevices(timeout: const Duration(seconds: 20));
+        verify(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '20'])).called(1);
       });
 
       testUsingContext('ignores "Preparing debugger support for iPhone" error', () async {

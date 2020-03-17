@@ -128,7 +128,7 @@ class DeviceManager {
     return devices.where(startsWithDeviceId).toList();
   }
 
-  /// Return the list of connected devices, filtered by any user-specified device id.
+  /// Returns the list of connected devices, filtered by any user-specified device id.
   Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
@@ -139,11 +139,21 @@ class DeviceManager {
     return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
-  /// Return the list of all connected devices.
+  /// Returns the list of all connected devices.
   Future<List<Device>> getAllConnectedDevices() async {
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer.devices,
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Returns the list of all connected devices. Discards existing cache of devices.
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async {
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        discoverer.discoverDevices(timeout: timeout),
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
@@ -241,7 +251,11 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> get devices;
+
+  /// Return all connected devices. Discards existing cache of devices.
+  Future<List<Device>> discoverDevices({ Duration timeout });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -260,7 +274,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ItemListNotifier<Device> _items;
   Timer _timer;
 
-  Future<List<Device>> pollingGetDevices();
+  Future<List<Device>> pollingGetDevices({ Duration timeout });
 
   void startPolling() {
     if (_timer == null) {
@@ -272,7 +286,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   Timer _initTimer() {
     return Timer(_pollingInterval, () async {
       try {
-        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
         _items.updateWithNewList(devices);
       } on TimeoutException {
         globals.printTrace('Device poll timed out. Will retry.');
@@ -288,7 +302,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> get devices async {
-    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices());
+    return _populateDevices();
+  }
+
+  @override
+  Future<List<Device>> discoverDevices({ Duration timeout }) async {
+    _items = null;
+    return _populateDevices(timeout: timeout);
+  }
+
+  Future<List<Device>> _populateDevices({ Duration timeout }) async {
+    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
     return _items.items;
   }
 

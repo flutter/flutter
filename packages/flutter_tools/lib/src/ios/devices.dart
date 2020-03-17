@@ -51,14 +51,14 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!_platform.isMacOS) {
       throw UnsupportedError(
         'Control of iOS devices or simulators only supported on macOS.'
       );
     }
 
-    return await _xcdevice.getAvailableTetheredIOSDevices();
+    return await _xcdevice.getAvailableTetheredIOSDevices(timeout: timeout);
   }
 
   @override
