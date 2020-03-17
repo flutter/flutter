@@ -344,7 +344,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       ),
     );
 
-    final Widget dialog = OrientationBuilder(
+    return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         assert(orientation != null);
         switch (orientation) {
@@ -369,8 +369,6 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         }
         return null;
       });
-
-    return dialog;
   }
 
   @override
@@ -428,12 +426,11 @@ class _DatePickerSubheaderState extends State<_DatePickerSubheader>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      value: widget.mode == DatePickerMode.year ? 1 : 0,
+      value: widget.mode == DatePickerMode.year ? 0.5 : 0,
+      upperBound: 0.5,
       duration: const Duration(milliseconds: 200),
       vsync: this,
-    )..addListener(() => setState(() {
-      // Animation's value has changed here.
-    }));
+    );
   }
 
   @override
@@ -485,8 +482,8 @@ class _DatePickerSubheaderState extends State<_DatePickerSubheader>
                             ),
                           ),
                         ),
-                        Transform.rotate(
-                          angle: _controller.value * math.pi,
+                        RotationTransition(
+                          turns: _controller,
                           child: Icon(
                             Icons.arrow_drop_down,
                             color: controlColor,
