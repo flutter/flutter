@@ -71,6 +71,7 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/animated_icons_private_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/dialog_test.dart',
@@ -243,7 +244,15 @@ Future<void> _runToolCoverage() async {
     coverage: 'coverage',
   );
   await runCommand(pub,
-    <String>['run', 'coverage:format_coverage', '--lcov', '--in=coverage', '--out=coverage/lcov.info'],
+    <String>[
+      'run',
+      'coverage:format_coverage',
+      '--lcov',
+      '--in=coverage',
+      '--out=coverage/lcov.info',
+      '--packages=.packages',
+      '--report-on=lib/'
+    ],
     workingDirectory: toolRoot,
     outputMode: OutputMode.discard,
   );
@@ -412,8 +421,8 @@ Future<void> _runFrameworkTests() async {
       tests: <String>[ path.join('test', 'widgets') + path.separator ],
     );
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
   }
 
   Future<void> runLibraries() async {

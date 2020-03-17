@@ -22,16 +22,12 @@ class AotBuilder {
   Future<void> build({
     @required TargetPlatform platform,
     @required String outputPath,
-    @required BuildMode buildMode,
+    @required BuildInfo buildInfo,
     @required String mainDartFile,
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     bool reportTimings = false,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
-    List<String> extraFrontEndOptions,
-    List<String> extraGenSnapshotOptions,
-    @required List<String> dartDefines,
-    @required bool treeShakeIcons,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -41,14 +37,14 @@ class AotBuilder {
       if (platform != TargetPlatform.ios) {
         throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $platform).');
       }
-      await validateBitcode(buildMode, platform);
+      await validateBitcode(buildInfo.mode, platform);
     }
 
     Status status;
     if (!quiet) {
-      final String typeName = globals.artifacts.getEngineType(platform, buildMode);
+      final String typeName = globals.artifacts.getEngineType(platform, buildInfo.mode);
       status = globals.logger.startProgress(
-        'Building AOT snapshot in ${getFriendlyModeName(buildMode)} mode ($typeName)...',
+        'Building AOT snapshot in ${getFriendlyModeName(buildInfo.mode)} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
     }
@@ -58,13 +54,13 @@ class AotBuilder {
       // Compile to kernel.
       final String kernelOut = await snapshotter.compileKernel(
         platform: platform,
-        buildMode: buildMode,
+        buildMode: buildInfo.mode,
         mainPath: mainDartFile,
         packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: false,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         outputPath: outputPath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        dartDefines: dartDefines,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        dartDefines: buildInfo.dartDefines
       );
       if (kernelOut == null) {
         throwToolExit('Compiler terminated unexpectedly.');
@@ -85,11 +81,11 @@ class AotBuilder {
           exitCodes[iosArch] = snapshotter.build(
             platform: platform,
             darwinArch: iosArch,
-            buildMode: buildMode,
+            buildMode: buildInfo.mode,
             mainPath: kernelOut,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            extraGenSnapshotOptions: extraGenSnapshotOptions,
+            extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
             bitcode: bitcode,
             quiet: quiet,
             splitDebugInfo: null,
@@ -124,11 +120,11 @@ class AotBuilder {
         // Android AOT snapshot.
         final int snapshotExitCode = await snapshotter.build(
           platform: platform,
-          buildMode: buildMode,
+          buildMode: buildInfo.mode,
           mainPath: kernelOut,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
           bitcode: false,
           splitDebugInfo: null,
           dartObfuscation: false,

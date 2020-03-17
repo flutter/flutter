@@ -2483,7 +2483,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
   bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
-    // the x, y parameters have the top left of the node's box as the origin
+    // The x, y parameters have the top left of the node's box as the origin.
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData as ParentDataType;

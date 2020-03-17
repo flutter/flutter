@@ -60,7 +60,7 @@ abstract class AnalyzeBase {
         } finally {
           resultsFile.close();
         }
-      } catch (e) {
+      } on Exception catch (e) {
         logger.printError('Failed to save output to "${argResults['write']}": $e');
       }
     }

@@ -381,7 +381,7 @@ abstract class CopyFlutterAotBundle extends Target {
 
 /// Dart defines are encoded inside [Environment] as a JSON array.
 List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines)) {
+  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
     return const <String>[];
   }
 
@@ -389,7 +389,7 @@ List<String> parseDartDefines(Environment environment) {
   try {
     final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
-  } on FormatException catch (_) {
+  } on FormatException {
     throw Exception(
       'The value of -D$kDartDefines is not formatted correctly.\n'
       'The value must be a JSON-encoded list of strings but was:\n'

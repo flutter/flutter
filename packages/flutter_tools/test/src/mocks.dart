@@ -11,6 +11,7 @@ import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
@@ -398,7 +399,8 @@ class MemoryIOSink implements IOSink {
       (List<int> data) {
         try {
           add(data);
-        } catch (err, stack) {
+        // Catches all exceptions to propagate them to the completer.
+        } catch (err, stack) { // ignore: avoid_catches_without_on_clauses
           sub.cancel();
           completer.completeError(err, stack);
         }
@@ -524,7 +526,12 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices() async => _devices;
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    lastPollingTimeout = timeout;
+    return _devices;
+  }
+
+  Duration lastPollingTimeout;
 
   @override
   bool get supportsPlatform => true;
@@ -532,14 +539,22 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => true;
 
-  void addDevice(MockAndroidDevice device) {
+  void addDevice(Device device) {
     _devices.add(device);
-
     _onAddedController.add(device);
   }
 
-  @override
-  Future<List<Device>> get devices async => _devices;
+  void _removeDevice(Device device) {
+    _devices.remove(device);
+    _onRemovedController.add(device);
+  }
+
+  void setDevices(List<Device> devices) {
+    while(_devices.isNotEmpty) {
+      _removeDevice(_devices.first);
+    }
+    devices.forEach(addDevice);
+  }
 
   @override
   Stream<Device> get onAdded => _onAddedController.stream;
@@ -760,3 +775,18 @@ class MockStdIn extends Mock implements IOSink {
 }
 
 class MockStream extends Mock implements Stream<List<int>> {}
+
+class AlwaysTrueBotDetector implements BotDetector {
+  const AlwaysTrueBotDetector();
+
+  @override
+  Future<bool> get isRunningOnBot async => true;
+}
+
+
+class AlwaysFalseBotDetector implements BotDetector {
+  const AlwaysFalseBotDetector();
+
+  @override
+  Future<bool> get isRunningOnBot async => false;
+}

@@ -47,6 +47,10 @@ class DataColumn {
   /// [Icon] (typically using size 18), or a [Row] with an icon and
   /// some text.
   ///
+  /// By default, this widget will only occupy the minimal space. If you want
+  /// it to take the entire remaining space, e.g. when you want to use [Center],
+  /// you can wrap it with an [Expanded].
+  ///
   /// The label should not include the sort indicator.
   final Widget label;
 
@@ -516,18 +520,23 @@ class DataTable extends StatelessWidget {
     bool sorted,
     bool ascending,
   }) {
-    if (onSort != null) {
-      final Widget arrow = _SortArrow(
-        visible: sorted,
-        down: sorted ? ascending : null,
-        duration: _sortArrowAnimationDuration,
-      );
-      const Widget arrowPadding = SizedBox(width: _sortArrowPadding);
-      label = Row(
-        textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[ label, arrowPadding, arrow ],
-      );
+    List<Widget> arrowWithPadding() {
+      return onSort == null ? const <Widget>[] : <Widget>[
+        _SortArrow(
+          visible: sorted,
+          down: sorted ? ascending : null,
+          duration: _sortArrowAnimationDuration,
+        ),
+        const SizedBox(width: _sortArrowPadding),
+      ];
     }
+    label = Row(
+      textDirection: numeric ? TextDirection.rtl : null,
+      children: <Widget>[
+        label,
+        ...arrowWithPadding(),
+      ],
+    );
     label = Container(
       padding: padding,
       height: headingRowHeight,
@@ -553,12 +562,12 @@ class DataTable extends StatelessWidget {
         child: label,
       );
     }
-    if (onSort != null) {
-      label = InkWell(
-        onTap: onSort,
-        child: label,
-      );
-    }
+    // TODO(dkwingsmt): Only wrap Inkwell if onSort != null. Blocked by
+    // https://github.com/flutter/flutter/issues/51152
+    label = InkWell(
+      onTap: onSort,
+      child: label,
+    );
     return label;
   }
 
@@ -702,7 +711,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
+        onSort: column.onSort != null ? () => column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );

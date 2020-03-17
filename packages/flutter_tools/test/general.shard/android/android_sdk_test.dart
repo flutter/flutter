@@ -96,6 +96,13 @@ void main() {
       when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
+      if (globals.platform.isMacOS) {
+        when(globals.processManager.runSync(
+          <String>['/usr/libexec/java_home'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenReturn(ProcessResult(0, 0, '', ''));
+      }
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -128,6 +135,13 @@ void main() {
       when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
+      if (globals.platform.isMacOS) {
+        when(globals.processManager.runSync(
+          <String>['/usr/libexec/java_home'],
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment'),
+        )).thenReturn(ProcessResult(0, 0, '', ''));
+      }
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,

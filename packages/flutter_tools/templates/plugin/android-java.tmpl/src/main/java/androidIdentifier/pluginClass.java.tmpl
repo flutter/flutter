@@ -1,12 +1,8 @@
 package {{androidIdentifier}};
 
 {{#useAndroidEmbeddingV2}}
-{{#androidX}}
 import androidx.annotation.NonNull;
-{{/androidX}}
-{{^androidX}}
-import android.support.annotation.NonNull;
-{{/androidX}}
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;

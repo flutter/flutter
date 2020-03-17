@@ -55,5 +55,6 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Zostáva 1 znak",
   "remainingTextFieldCharacterCountOther": "Zostáva $remainingCount znakov",
-  "refreshIndicatorSemanticLabel": "Obnoviť"
+  "refreshIndicatorSemanticLabel": "Obnoviť",
+  "moreButtonTooltip": "TBD"
 }

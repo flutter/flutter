@@ -145,11 +145,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices();
+    final String text = await fuchsiaSdk.listDevices(timeout: timeout);
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
@@ -271,7 +271,7 @@ class FuchsiaDevice extends Device {
         packageRepo.deleteSync(recursive: true);
       }
       packageRepo.createSync(recursive: true);
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printError('Failed to create Fuchisa package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
@@ -384,7 +384,7 @@ class FuchsiaDevice extends Device {
       globals.printTrace("Removing the tool's package repo: at ${packageRepo.path}");
       try {
         packageRepo.deleteSync(recursive: true);
-      } catch (e) {
+      } on Exception catch (e) {
         globals.printError('Failed to remove Fuchsia package repo directory '
                    'at ${packageRepo.path}: $e.');
       }
@@ -467,9 +467,9 @@ class FuchsiaDevice extends Device {
             'Failed to delete screenshot.ppm from the device:\n$deleteResult'
           );
         }
-      } catch (_) {
+      } on Exception catch (e) {
         globals.printError(
-          'Failed to delete screenshot.ppm from the device'
+          'Failed to delete screenshot.ppm from the device: $e'
         );
       }
     }

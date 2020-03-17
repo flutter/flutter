@@ -91,6 +91,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message)
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
@@ -204,8 +205,9 @@ class WebAssetServer implements AssetReader {
       return shelf.Response.notFound('');
     }
 
-    // For real files, use a serialized file stat as a revision
-    final String etag = file.lastModifiedSync().toIso8601String();
+    // For real files, use a serialized file stat plus path as a revision.
+    // This allows us to update between canvaskit and non-canvaskit SDKs.
+    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
     if (ifNoneMatch == etag) {
       return shelf.Response.notModified();
     }
@@ -290,11 +292,22 @@ class WebAssetServer implements AssetReader {
     return modules;
   }
 
+  /// Whether to use the cavaskit SDK for rendering.
+  bool canvasKitRendering = false;
+
   @visibleForTesting
   final File dartSdk = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
     'kernel',
     'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
     'dart_sdk.js',
   ));
 
@@ -306,14 +319,26 @@ class WebAssetServer implements AssetReader {
     'dart_sdk.js.map',
   ));
 
+  @visibleForTesting
+  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
+    'dart_sdk.js.map',
+  ));
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
       case '/dart_sdk.js':
-        return dartSdk;
-      case '.dart_sdk.js.map':
-        return dartSdkSourcemap;
+        return canvasKitRendering
+          ? canvasKitDartSdk
+          : dartSdk;
+      case '/dart_sdk.js.map':
+        return canvasKitRendering
+          ? canvasKitDartSdkSourcemap
+          : dartSdkSourcemap;
     }
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
@@ -404,7 +429,6 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final bool testMode;
 
-  @visibleForTesting
   WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
@@ -510,14 +534,16 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
+      webAssetServer.writeFile('/require.js', requireJS.readAsStringSync());
+      webAssetServer.writeFile('/dart_stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
       webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile(
         '/main.dart.js',
         generateBootstrapScript(
-          requireUrl: _filePathToUriFragment(requireJS.path),
-          mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+          requireUrl: '/require.js',
+          mapperUrl: '/dart_stack_trace_mapper.js',
           entrypoint: '/$entrypoint.lib.js',
         ),
       );
@@ -602,19 +628,6 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
-}
-
-String _filePathToUriFragment(String path) {
-  if (globals.platform.isWindows) {
-    final bool startWithSlash = path.startsWith('/');
-    final String partial =
-        globals.fs.path.split(path).skip(startWithSlash ? 2 : 1).join('/');
-    if (partial.startsWith('/')) {
-      return partial;
-    }
-    return '/$partial';
-  }
-  return path;
 }
 
 class ReleaseAssetServer {

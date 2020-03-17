@@ -139,11 +139,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
+    // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
       'androidx',
+      hide: true,
       negatable: true,
-      defaultsTo: true,
-      help: 'Generate a project using the AndroidX support libraries',
+      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
@@ -239,13 +240,21 @@ class CreateCommand extends FlutterCommand {
     }
 
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    return utf8.decode(await _net.fetchUrl(snippetsUri));
+    final List<int> data = await _net.fetchUrl(snippetsUri);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    return utf8.decode(await _net.fetchUrl(snippetsUri, maxAttempts: 2));
+    final List<int> data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -259,12 +268,11 @@ class CreateCommand extends FlutterCommand {
       final String samplesJson = await _fetchSamplesIndexFromServer();
       if (samplesJson == null) {
         throwToolExit('Unable to download samples', exitCode: 2);
-      }
-      else {
+      } else {
         outputFile.writeAsStringSync(samplesJson);
         globals.printStatus('Wrote samples JSON to "$outputFilePath"');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
     }
   }
@@ -394,7 +402,6 @@ class CreateCommand extends FlutterCommand {
       flutterRoot: flutterRoot,
       renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
-      androidX: boolArg('androidx'),
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
@@ -404,7 +411,7 @@ class CreateCommand extends FlutterCommand {
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      globals.printStatus('Creating project $relativeDirPath... androidx: ${boolArg('androidx')}');
+      globals.printStatus('Creating project $relativeDirPath...');
     } else {
       if (sampleCode != null && !overwrite) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
@@ -612,7 +619,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String projectName,
     String projectDescription,
     String androidLanguage,
-    bool androidX,
     String iosLanguage,
     String flutterRoot,
     bool renderDriverTest = false,
@@ -637,7 +643,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'macosIdentifier': appleIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'androidX': androidX,
       'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,

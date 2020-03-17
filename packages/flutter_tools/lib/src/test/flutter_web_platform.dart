@@ -743,7 +743,8 @@ class BrowserManager {
 
         _controllers.add(controller);
         return await controller.suite;
-      } catch (_) {
+      // Not limiting to catching Exception because the exception is rethrown.
+      } catch (_) { // ignore: avoid_catches_without_on_clauses
         closeIframe();
         rethrow;
       }
@@ -997,7 +998,7 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } catch (ex) {
+        } on Exception catch (ex) {
           print(jsonEncode({'success': false, 'message': '\$ex'}));
         }
       }

@@ -210,7 +210,7 @@ class UpgradeCommandRunner {
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-    } catch (e) {
+    } on Exception {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
         "Run 'git remote add origin "
@@ -279,7 +279,7 @@ class UpgradeCommandRunner {
       final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
       alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
         newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
     }
     return alreadyUpToDate;
@@ -335,7 +335,7 @@ class UpgradeCommandRunner {
 
   //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
   //  delete mode 100644 doc/index.html
-  //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
+  //  create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart
   static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
 
   static bool matchesGitLine(String line) {

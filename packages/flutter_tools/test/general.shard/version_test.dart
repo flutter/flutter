@@ -413,6 +413,33 @@ void main() {
     );
   });
 
+  testUsingContext('determine does not call fetch --tags', () {
+    final MockProcessUtils processUtils = MockProcessUtils();
+    when(processUtils.runSync(
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
+    when(processUtils.runSync(
+      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+
+    GitTagVersion.determine(processUtils, workingDirectory: '.');
+
+    verifyNever(processUtils.runSync(
+      <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    ));
+    verify(processUtils.runSync(
+      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).called(1);
+  });
+
   testUsingContext('determine calls fetch --tags', () {
     final MockProcessUtils processUtils = MockProcessUtils();
     when(processUtils.runSync(
@@ -426,7 +453,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
 
-    GitTagVersion.determine(processUtils, '.');
+    GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
 
     verify(processUtils.runSync(
       <String>['git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags'],

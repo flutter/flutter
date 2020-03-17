@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -42,6 +43,7 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    globals.flutterVersion.fetchTagsAndUpdate();
     if (argResults.wasParsed('check-for-remote-artifacts')) {
       final String engineRevision = stringArg('check-for-remote-artifacts');
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {

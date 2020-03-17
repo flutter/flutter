@@ -17,6 +17,7 @@ import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
@@ -54,7 +55,7 @@ class BundleBuilder {
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
     @required TargetPlatform platform,
-    BuildMode buildMode,
+    BuildInfo buildInfo,
     String mainPath,
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
@@ -77,7 +78,7 @@ class BundleBuilder {
     packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
-      buildMode: buildMode ?? BuildMode.debug,
+      buildMode: buildInfo.mode,
       targetPlatform: platform,
       mainPath: mainPath,
       flutterProject: flutterProject,
@@ -86,6 +87,7 @@ class BundleBuilder {
       precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
       treeShakeIcons: treeShakeIcons,
+      dartDefines: buildInfo.dartDefines,
     );
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -111,6 +113,7 @@ Future<void> buildWithAssemble({
   @required bool precompiled,
   bool trackWidgetCreation,
   @required bool treeShakeIcons,
+  List<String> dartDefines,
 }) async {
   // If the precompiled flag was not passed, force us into debug mode.
   buildMode = precompiled ? buildMode : BuildMode.debug;
@@ -126,6 +129,8 @@ Future<void> buildWithAssemble({
       kTargetPlatform: getNameForTargetPlatform(targetPlatform),
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
+      if (dartDefines != null && dartDefines.isNotEmpty)
+        kDartDefines: jsonEncode(dartDefines),
     },
   );
   final Target target = buildMode == BuildMode.debug

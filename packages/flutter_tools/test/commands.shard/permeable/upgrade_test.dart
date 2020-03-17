@@ -231,12 +231,6 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
-              'git', 'fetch', 'https://github.com/flutter/flutter.git', '--tags',
-            ],
-            stdout: 'From https://github.com/flutter/flutter\n * branch                HEAD       -> FETCH_HEAD',
-          ),
-          const FakeCommand(
-            command: <String>[
               'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
             ],
             stdout: 'v1.12.16-19-gb45b676af',
@@ -291,7 +285,7 @@ void main() {
 
       expect(_match(' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'), true);
       expect(_match(' delete mode 100644 doc/index.html'), true);
-      expect(_match(' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'), true);
+      expect(_match(' create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart'), true);
 
       expect(_match('Fast-forward'), true);
     });

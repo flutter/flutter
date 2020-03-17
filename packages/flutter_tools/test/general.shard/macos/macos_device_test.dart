@@ -13,20 +13,27 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   group(MacOSDevice, () {
-    final MockPlatform notMac = MockPlatform();
     final MacOSDevice device = MacOSDevice();
     final MockProcessManager mockProcessManager = MockProcessManager();
+
+    final MockPlatform notMac = MockPlatform();
     when(notMac.isMacOS).thenReturn(false);
     when(notMac.environment).thenReturn(const <String, String>{});
+
+    final MockPlatform mockMacPlatform = MockPlatform();
+    when(mockMacPlatform.isMacOS).thenReturn(true);
+
     when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
       return ProcessResult(0, 1, '', '');
     });
@@ -46,6 +53,22 @@ void main() {
       expect(await MacOSDevices().devices, <Device>[]);
     }, overrides: <Type, Generator>{
       Platform: () => notMac,
+    });
+
+    testUsingContext('devices', () async {
+      expect(await MacOSDevices().devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockMacPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    });
+
+    testUsingContext('discoverDevices', () async {
+      // Timeout ignored.
+      final List<Device> devices = await MacOSDevices().discoverDevices(timeout: const Duration(seconds: 10));
+      expect(devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockMacPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     });
 
     testUsingContext('isSupportedForProject is true with editable host app', () async {

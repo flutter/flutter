@@ -35,7 +35,6 @@ Future<void> main() async {
           'create',
           options: <String>[
             '--org', 'io.flutter.devicelab',
-            '--androidx',
             'hello',
           ],
         );

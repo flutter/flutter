@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Жайып көрсөтүү",
   "remainingTextFieldCharacterCountOne": "1 белги калды",
   "remainingTextFieldCharacterCountOther": "$remainingCount белги калды",
-  "refreshIndicatorSemanticLabel": "Жаңыртуу"
+  "refreshIndicatorSemanticLabel": "Жаңыртуу",
+  "moreButtonTooltip": "TBD"
 }

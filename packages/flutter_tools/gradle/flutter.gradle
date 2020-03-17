@@ -615,6 +615,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('tree-shake-icons')) {
             treeShakeIconsOptionsValue = project.property('tree-shake-icons').toBoolean()
         }
+        String dartDefinesValue = null
+        if (project.hasProperty('dart-defines')) {
+            dartDefinesValue = project.property('dart-defines')
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -652,6 +656,7 @@ class FlutterPlugin implements Plugin<Project> {
                 splitDebugInfo splitDebugInfoValue
                 treeShakeIcons treeShakeIconsOptionsValue
                 dartObfuscation dartObfuscationValue
+                dartDefines dartDefinesValue
                 doLast {
                     project.exec {
                         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -799,6 +804,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean treeShakeIcons
     @Optional @Input
     Boolean dartObfuscation
+    @Optional @Input
+    String dartDefines
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
@@ -863,6 +870,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (dartObfuscation == true) {
                 args "-dDartObfuscation=true"
+            }
+            if (dartDefines != null) {
+                args "-dDartDefines=${dartDefines}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
