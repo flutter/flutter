@@ -58,7 +58,7 @@ class IOSDevices extends PollingDeviceDiscovery {
       );
     }
 
-    return await _xcdevice.getAvailableTetheredIOSDevices(timeout: timeout);
+    return await _xcdevice.getAvailableIOSDevices(timeout: timeout);
   }
 
   @override
@@ -73,11 +73,18 @@ class IOSDevices extends PollingDeviceDiscovery {
   }
 }
 
+enum IOSDeviceInterface {
+  none,
+  usb,
+  network,
+}
+
 class IOSDevice extends Device {
   IOSDevice(String id, {
     @required FileSystem fileSystem,
     @required this.name,
     @required this.cpuArchitecture,
+    @required this.interfaceType,
     @required String sdkVersion,
     @required Platform platform,
     @required Artifacts artifacts,
@@ -123,15 +130,20 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsHotReload => true;
+  bool get supportsHotReload => interfaceType == IOSDeviceInterface.usb;
 
   @override
-  bool get supportsHotRestart => true;
+  bool get supportsHotRestart => interfaceType == IOSDeviceInterface.usb;
+
+  @override
+  bool get supportsFlutterExit => interfaceType == IOSDeviceInterface.usb;
 
   @override
   final String name;
 
   final DarwinArch cpuArchitecture;
+
+  final IOSDeviceInterface interfaceType;
 
   Map<IOSApp, DeviceLogReader> _logReaders;
 
@@ -178,6 +190,7 @@ class IOSDevice extends Device {
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: <String>[],
+        interfaceType: interfaceType,
       );
     } on ProcessException catch (e) {
       _logger.printError(e.message);
@@ -319,6 +332,7 @@ class IOSDevice extends Device {
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
+        interfaceType: interfaceType,
       );
       if (installationResult != 0) {
         _logger.printError('Could not run ${bundle.path} on $id.');
@@ -410,7 +424,7 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => _iMobileDevice.isInstalled;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled && interfaceType == IOSDeviceInterface.usb;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
