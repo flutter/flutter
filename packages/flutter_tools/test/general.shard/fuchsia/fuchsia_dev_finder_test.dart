@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -24,7 +22,7 @@ void main() {
 
   setUp(() {
     mockFuchsiaArtifacts = MockFuchsiaArtifacts();
-    memoryFileSystem = MemoryFileSystem();
+    memoryFileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     deviceFinder = memoryFileSystem.file('device-finder');
 
@@ -48,8 +46,7 @@ void main() {
 
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[ deviceFinder.path, 'list', '-full',
-          ],
+          command: <String>[ deviceFinder.path, 'list', '-full' ],
           exitCode: 1,
           stderr: 'list.go:72: no devices found',
         ),
@@ -70,8 +67,7 @@ void main() {
 
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[ deviceFinder.path, 'list', '-full',
-          ],
+          command: <String>[ deviceFinder.path, 'list', '-full' ],
           exitCode: 1,
           stderr: 'unexpected error',
         ),
@@ -92,8 +88,7 @@ void main() {
 
       final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
-          command: <String>[ deviceFinder.path, 'list', '-full',
-          ],
+          command: <String>[ deviceFinder.path, 'list', '-full' ],
           exitCode: 0,
           stdout: 'device1\ndevice2',
         ),
