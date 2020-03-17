@@ -69,7 +69,8 @@ void main() {
         when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
       }
 
-      void _setupMockProcessManager(ProcessManager mockProcessManager, String deviceId, ProcessResult getPropResult) {
+      void _setupMockProcessManager(ProcessManager mockProcessManager,
+          String deviceId, ProcessResult getPropResult) {
         final File adbExe = globals.fs.file(getAdbPath(androidSdk));
         when(mockProcessManager.run(
           <String>[adbExe.path, '-s', deviceId, 'shell', 'getprop'],
@@ -78,31 +79,31 @@ void main() {
         )).thenAnswer((_) async {
           return getPropResult;
         });
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
+        when(mockProcessManager.run(any,
+                workingDirectory: anyNamed('workingDirectory'),
+                environment: anyNamed('environment')))
+            .thenAnswer((_) async {
           return ProcessResult(0, 0, '', '');
         });
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
+        when(mockProcessManager.start(any,
+                workingDirectory: anyNamed('workingDirectory'),
+                environment: anyNamed('environment')))
+            .thenAnswer((_) async {
           return FakeProcess();
         });
       }
 
       testUsingContext('succeeds with --cache-sksl', () async {
         const String deviceId = '1234';
-        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+        final AndroidDevice device =
+            AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
         globals.config.setValue('android-sdk', sdkDir.path);
 
         _setupMockAndroidSdk(mockAndroidSdk);
-        _setupMockProcessManager(mockProcessManager, deviceId, ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
+        _setupMockProcessManager(mockProcessManager, deviceId,
+            ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -115,8 +116,9 @@ void main() {
         );
 
         expect(launchResult.started, isTrue);
-        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
-          contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
+        expect(
+            verify(mockProcessManager.run(captureAny)).captured.last.join(','),
+            contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
@@ -125,13 +127,15 @@ void main() {
 
       testUsingContext('can run a release build on x64', () async {
         const String deviceId = '1234';
-        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+        final AndroidDevice device =
+            AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
         globals.config.setValue('android-sdk', sdkDir.path);
 
         _setupMockAndroidSdk(mockAndroidSdk);
-        _setupMockProcessManager(mockProcessManager, deviceId, ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
+        _setupMockProcessManager(mockProcessManager, deviceId,
+            ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -150,13 +154,15 @@ void main() {
 
       testUsingContext('test trace whitelist flag', () async {
         const String deviceId = '1234';
-        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+        final AndroidDevice device =
+            AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
         globals.config.setValue('android-sdk', sdkDir.path);
 
         _setupMockAndroidSdk(mockAndroidSdk);
-        _setupMockProcessManager(mockProcessManager, deviceId, ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
+        _setupMockProcessManager(mockProcessManager, deviceId,
+            ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', ''));
 
         final LaunchResult launchResult = await device.startApp(
           mockApk,
@@ -169,8 +175,9 @@ void main() {
         );
 
         expect(launchResult.started, isTrue);
-        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
-          contains(<String>['--ez', 'trace-whitelist', 'foo'].join(',')));
+        expect(
+            verify(mockProcessManager.run(captureAny)).captured.last.join(','),
+            contains(<String>['--ez', 'trace-whitelist', 'foo'].join(',')));
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
