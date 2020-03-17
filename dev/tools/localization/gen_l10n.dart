@@ -164,11 +164,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    // Escape single and double quotes.
-    messageValue = messageValue.replaceAll("'", '\\\'');
-    messageValue = messageValue.replaceAll('"', '\\\"');
-
-    return "'$messageValue'";
+    return generateString(messageValue, escapeDollar: false);
   }
 
   if (message.isPlural) {
@@ -197,21 +193,43 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateClass(String className, AppResourceBundle bundle, Iterable<Message> messages) {
+String generateBaseClassFile(
+  String className,
+  String fileName,
+  String header,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+) {
   final LocaleInfo locale = bundle.locale;
+  final Iterable<String> methods = messages
+    .where((Message message) => bundle.translationFor(message) != null)
+    .map((Message message) => generateMethod(message, bundle));
 
-  String baseClassName = className;
-  if (locale.countryCode != null) {
-    baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
-  }
+  return classFileTemplate
+    .replaceAll('@(header)', header)
+    .replaceAll('@(language)', describeLocale(locale.toString()))
+    .replaceAll('@(baseClass)', className)
+    .replaceAll('@(fileName)', fileName)
+    .replaceAll('@(class)', '$className${locale.camelCase()}')
+    .replaceAll('@(localeName)', locale.toString())
+    .replaceAll('@(methods)', methods.join('\n\n'));
+}
+
+String generateSubclass({
+  String className,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+}) {
+  final LocaleInfo locale = bundle.locale;
+  final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
   final Iterable<String> methods = messages
     .where((Message message) => bundle.translationFor(message) != null)
     .map((Message message) => generateMethod(message, bundle));
 
-  return classTemplate
+  return subclassTemplate
     .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', baseClassName)
+    .replaceAll('@(baseLanguageClassName)', baseClassName)
     .replaceAll('@(class)', '$className${locale.camelCase()}')
     .replaceAll('@(localeName)', locale.toString())
     .replaceAll('@(methods)', methods.join('\n\n'));
@@ -525,8 +543,25 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
-  // Generate the AppLocalizations class, its LocalizationsDelegate subclass.
+  // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
+  // and all AppLocalizations subclasses for every locale.
   String generateCode() {
+    bool isBaseClassLocale(LocaleInfo locale, String language) {
+      return locale.languageCode == language
+          && locale.countryCode == null
+          && locale.scriptCode == null;
+    }
+
+    List<LocaleInfo> getLocalesForLanguage(String language) {
+      return _allBundles.bundles
+        // Return locales for the language specified, except for the base locale itself
+        .where((AppResourceBundle bundle) {
+          final LocaleInfo locale = bundle.locale;
+          return !isBaseClassLocale(locale, language) && locale.languageCode == language;
+        })
+        .map((AppResourceBundle bundle) => bundle.locale).toList();
+    }
+
     final String directory = path.basename(l10nDirectory.path);
     final String outputFileName = path.basename(outputFile.path);
 
@@ -540,14 +575,48 @@ class LocalizationsGenerator {
       _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
     );
 
-    final StringBuffer allMessagesClasses = StringBuffer();
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
+    final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      allMessagesClasses.writeln();
-      allMessagesClasses.writeln(
-        generateClass(className, _allBundles.bundleFor(locale), _allMessages)
-      );
+      if (isBaseClassLocale(locale, locale.languageCode)) {
+        final File localeMessageFile = _fs.file(
+          path.join(l10nDirectory.path, '${fileName}_$locale.dart'),
+        );
+
+        // Generate the template for the base class file. Further string
+        // interpolation will be done to determine if there are
+        // subclasses that extend the base class.
+        final String languageBaseClassFile = generateBaseClassFile(
+          className,
+          outputFileName,
+          header,
+          _allBundles.bundleFor(locale),
+          _allMessages,
+        );
+
+        // Every locale for the language except the base class.
+        final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
+
+        // Generate every subclass that is needed for the particular language
+        final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
+          return generateSubclass(
+            className: className,
+            bundle: _allBundles.bundleFor(locale),
+            messages: _allMessages,
+          );
+        });
+
+        localeMessageFile.writeAsStringSync(
+          languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join()),
+        );
+      }
     }
+
+    final Iterable<String> localeImports = supportedLocales
+      .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
+      .map((LocaleInfo locale) {
+        return "import '${fileName}_${locale.toString()}.dart';";
+      });
 
     final String lookupBody = generateLookupBody(_allBundles, className);
 
@@ -558,7 +627,7 @@ class LocalizationsGenerator {
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
-      .replaceAll('@(allMessagesClasses)', allMessagesClasses.toString().trim())
+      .replaceAll('@(messageClassImports)', localeImports.join('\n'))
       .replaceAll('@(lookupName)', '_lookup$className')
       .replaceAll('@(lookupBody)', lookupBody);
   }

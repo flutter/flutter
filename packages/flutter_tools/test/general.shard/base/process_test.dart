@@ -360,6 +360,20 @@ void main() {
       );
       expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
     });
+
+    testWithoutContext('catches Exception and returns false', () {
+      when(mockProcessManager.runSync(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('catches ArgumentError and returns false', () {
+      when(mockProcessManager.runSync(<String>['nonesuch'])).thenThrow(
+        ArgumentError('Invalid argument(s): Cannot find executable for nonesuch')
+      );
+      expect(processUtils.exitsHappySync(<String>['nonesuch']), isFalse);
+    });
   });
 
   group('exitsHappy', () {
@@ -386,6 +400,20 @@ void main() {
         return Future<ProcessResult>.value(ProcessResult(0, 1, '', ''));
       });
       expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('catches Exception and returns false', () async {
+      when(mockProcessManager.run(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('catches ArgumentError and returns false', () async {
+      when(mockProcessManager.run(<String>['nonesuch'])).thenThrow(
+        ArgumentError('Invalid argument(s): Cannot find executable for nonesuch'),
+      );
+      expect(await processUtils.exitsHappy(<String>['nonesuch']), isFalse);
     });
   });
 

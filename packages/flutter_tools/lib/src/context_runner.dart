@@ -197,7 +197,10 @@ Future<T> runInContext<T>(
           processManager: globals.processManager,
         )
       ),
-      WebWorkflow: () => const WebWorkflow(),
+      WebWorkflow: () => WebWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(
         logger: globals.logger,
