@@ -31,6 +31,8 @@ DevFSConfig get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
+  static final GZipCodec gzip = GZipCodec(level: 1);
+
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
@@ -47,11 +49,6 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
-  }
-
-  Stream<List<int>> contentsAsGzip1CompressedStream() {
-    final GZipCodec gzip = GZipCodec(level: 1);
     return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
   }
 
@@ -317,7 +314,7 @@ class _DevFSHttpWriter {
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-        final Stream<List<int>> contents = content.contentsAsGzip1CompressedStream();
+        final Stream<List<int>> contents = content.contentsAsCompressedStream();
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
         response.listen((_) => null,
