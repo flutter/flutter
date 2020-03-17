@@ -3419,7 +3419,7 @@ void main() {
   testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37420.
     final TextEditingController textController = TextEditingController();
-    final String testValue = '0123456789';
+    const String testValue = '0123456789';
 
     await tester.pumpWidget(boilerplate(
       child: TextField(

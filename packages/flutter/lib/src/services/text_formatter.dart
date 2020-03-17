@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'text_editing.dart';
 import 'text_input.dart';
 
@@ -169,7 +170,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   // Truncate the given TextEditingValue to maxLength runes.
   // TODO(justinmc): This should be updated to use characters instead of runes,
   // see the comment in formatEditUpdate.
-  static TextEditingValue _truncate(TextEditingValue value, int maxLength) {
+  @visibleForTesting
+  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
     final TextSelection newSelection = value.selection.copyWith(
         baseOffset: math.min(value.selection.start, maxLength),
         extentOffset: math.min(value.selection.end, maxLength),
@@ -206,7 +208,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       if (oldValue.text.runes.length == maxLength) {
         return oldValue;
       }
-      return _truncate(newValue, maxLength);
+      return truncate(newValue, maxLength);
     }
     return newValue;
   }
