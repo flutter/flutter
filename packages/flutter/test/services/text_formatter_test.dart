@@ -36,7 +36,7 @@ void main() {
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
-        final TextEditingValue formatted = formatter.formatEditUpdate( 
+        final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
           newValue
         );
@@ -56,7 +56,7 @@ void main() {
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
-        final TextEditingValue formatted = formatter.formatEditUpdate( 
+        final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
           newValue
         );
@@ -76,7 +76,7 @@ void main() {
         );
         final LengthLimitingTextInputFormatter formatter =
             LengthLimitingTextInputFormatter(maxLength);
-        final TextEditingValue formatted = formatter.formatEditUpdate( 
+        final TextEditingValue formatted = formatter.formatEditUpdate(
           oldValue,
           newValue
         );
