@@ -2224,14 +2224,22 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
       // We add/subtract from these as we insert/remove markers.
       int selectionBase = newValue.selection.baseOffset;
       int selectionExtent = newValue.selection.extentOffset;
+      int composingStart = newValue.composing.start;
+      int composingEnd = newValue.composing.end;
 
-      void addToSelection() {
+      void addToLength() {
         selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
         selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
+
+        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
+        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
       }
-      void subtractFromSelection() {
+      void subtractFromLength() {
         selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
         selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
+
+        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
+        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
       }
 
       bool previousWasWhitespace = false;
@@ -2247,11 +2255,11 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
           if (previousWasWhitespace) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           outputCodepoints.add(codepoint);
-          addToSelection();
+          addToLength();
           outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
 
           previousWasWhitespace = true;
@@ -2260,7 +2268,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
           if (previousWasWhitespace) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           outputCodepoints.add(codepoint);
@@ -2273,7 +2281,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           if (!previousWasDirectionalityMarker &&
               previousWasWhitespace &&
               getDirection(codepoint) == _previousNonWhitespaceDirection) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           // Normal character, track its codepoint add it to the string.
@@ -2293,6 +2301,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           affinity: newValue.selection.affinity,
           isDirectional: newValue.selection.isDirectional
         ),
+        composing: TextRange(start: composingStart, end: composingEnd),
       );
     }
     return newValue;
