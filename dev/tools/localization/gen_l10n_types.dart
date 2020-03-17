@@ -104,11 +104,11 @@ const Set<String> _validNumberFormats = <String>{
 //
 // Example of code that uses named parameters:
 // final NumberFormat format = NumberFormat.compact(
-//   locale: _localeName,
+//   locale: localeName,
 // );
 //
 // Example of code that uses positional parameters:
-// final NumberFormat format = NumberFormat.scientificPattern(_localeName);
+// final NumberFormat format = NumberFormat.scientificPattern(localeName);
 const Set<String> _numberFormatsWithNamedParameters = <String>{
   'compact',
   'compactCurrency',
