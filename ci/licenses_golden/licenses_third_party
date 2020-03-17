@@ -1,4 +1,4 @@
-Signature: 56228b548fb4601b5ee5f50085425ab7
+Signature: e37c5e14e602cb25f0926be1d16143cb
 
 UNUSED LICENSES:
 
@@ -7778,6 +7778,11 @@ FILE: ../../../third_party/dart/runtime/vm/dispatch_table.h
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_test_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/visitor.cc
 FILE: ../../../third_party/dart/samples/ffi/async/async_test.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
