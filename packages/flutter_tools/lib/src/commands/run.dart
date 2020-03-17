@@ -102,6 +102,11 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
       )
+      ..addOption('trace-whitelist',
+        help: 'Filters out all trace events except those that are specified in '
+              'this comma separated list of whitelisted prefixes.',
+        valueHelp: 'foo,bar',
+      )
       ..addFlag('endless-trace-buffer',
         negatable: false,
         help: 'Enable tracing to the endless tracer. This is useful when '
@@ -360,6 +365,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: boolArg('enable-software-rendering'),
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
+        traceWhitelist: stringArg('trace-whitelist'),
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,

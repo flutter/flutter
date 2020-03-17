@@ -677,6 +677,43 @@ void main() {
         expect(await device.stopApp(mockApp), isFalse);
       });
 
+      testUsingContext('trace whitelist flags', () async {
+        final IOSDevice device = IOSDevice(
+          '123',
+          name: 'iPhone 1',
+          fileSystem: mockFileSystem,
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          platform: mockPlatform,
+          artifacts: mockArtifacts,
+          iosDeploy: mockIosDeploy,
+        );
+        when(mockIosDeploy.installApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: <String>[],
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        when(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation invocation) => Future<int>.value(0));
+        await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.disabled(
+            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
+            traceWhitelist: 'foo'),
+          platformArgs: <String, dynamic>{},
+        );
+        final VerificationResult toVerify = verify(mockIosDeploy.runApp(
+          deviceId: device.id,
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: captureAnyNamed('launchArguments'),
+        ));
+        expect(toVerify.captured[0], contains('--trace-whitelist="foo"'));
+        await device.stopApp(mockApp);
+      });
+
       testUsingContext('succeeds with --cache-sksl', () async {
         final IOSDevice device = IOSDevice(
           '123',
