@@ -17,9 +17,6 @@ import 'fuchsia_pm.dart';
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context.get<FuchsiaSdk>();
 
-/// The [FuchsiaArtifacts] instance.
-FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
-
 /// Returns [true] if the current platform supports Fuchsia targets.
 bool isFuchsiaSupportedPlatform() {
   return globals.platform.isLinux || globals.platform.isMacOS;
@@ -37,7 +34,11 @@ class FuchsiaSdk {
   /// Interface to the 'device-finder' tool.
   FuchsiaDevFinder _fuchsiaDevFinder;
   FuchsiaDevFinder get fuchsiaDevFinder =>
-      _fuchsiaDevFinder ??= FuchsiaDevFinder();
+      _fuchsiaDevFinder ??= FuchsiaDevFinder(
+        fuchsiaArtifacts: globals.fuchsiaArtifacts,
+        logger: globals.logger,
+        processManager: globals.processManager
+      );
 
   /// Interface to the 'kernel_compiler' tool.
   FuchsiaKernelCompiler _fuchsiaKernelCompiler;
@@ -48,8 +49,8 @@ class FuchsiaSdk {
   ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
   Future<String> listDevices({ Duration timeout }) async {
-    if (fuchsiaArtifacts.devFinder == null ||
-        !fuchsiaArtifacts.devFinder.existsSync()) {
+    if (globals.fuchsiaArtifacts.devFinder == null ||
+        !globals.fuchsiaArtifacts.devFinder.existsSync()) {
       return null;
     }
     final List<String> devices = await fuchsiaDevFinder.list(timeout: timeout);
@@ -67,8 +68,8 @@ class FuchsiaSdk {
       final StreamController<String> controller = StreamController<String>(onCancel: () {
         process.kill();
       });
-      if (fuchsiaArtifacts.sshConfig == null ||
-          !fuchsiaArtifacts.sshConfig.existsSync()) {
+      if (globals.fuchsiaArtifacts.sshConfig == null ||
+          !globals.fuchsiaArtifacts.sshConfig.existsSync()) {
         globals.printError('Cannot read device logs: No ssh config.');
         globals.printError('Have you set FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR?');
         return null;
@@ -77,7 +78,7 @@ class FuchsiaSdk {
       final List<String> cmd = <String>[
         'ssh',
         '-F',
-        fuchsiaArtifacts.sshConfig.absolute.path,
+        globals.fuchsiaArtifacts.sshConfig.absolute.path,
         id, // The device's IP.
         remoteCommand,
       ];
