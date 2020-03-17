@@ -1,0 +1,21 @@
+{
+  "name": "FlutterMacOS",
+  "version": "1.0.0",
+  "summary": "High-performance, high-fidelity cross-platform apps.",
+  "description": "Flutter is Google's portable UI toolkit for building beautiful, natively-compiled applications for mobile, web, and desktop from a single codebase.",
+  "homepage": "https://flutter.dev",
+  "license": {
+    "type": "MIT"
+  },
+  "authors": {
+    "Flutter Dev Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "git": "https://github.com/flutter/engine",
+    "tag": "1.0.0"
+  },
+  "platforms": {
+    "osx": "10.11"
+  },
+  "vendored_frameworks": "FlutterMacOS.framework"
+}

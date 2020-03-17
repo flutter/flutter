@@ -1,0 +1,21 @@
+{
+  "name": "url_launcher",
+  "version": "0.0.1",
+  "summary": "No-op implementation of the macos url_launcher to avoid build issues on macos",
+  "description": "No-op implementation of the url_launcher plugin to avoid build issues on macos.\nhttps://github.com/flutter/flutter/issues/46618",
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/url_launcher",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Flutter Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "platforms": {
+    "osx": "10.11"
+  }
+}

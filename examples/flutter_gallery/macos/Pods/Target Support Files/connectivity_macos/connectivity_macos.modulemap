@@ -1,0 +1,6 @@
+framework module connectivity_macos {
+  umbrella header "connectivity_macos-umbrella.h"
+
+  export *
+  module * { export * }
+}

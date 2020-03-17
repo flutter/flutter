@@ -1,0 +1,30 @@
+{
+  "name": "url_launcher_macos",
+  "version": "0.0.1",
+  "summary": "Flutter macos plugin for launching a URL.",
+  "description": "A macOS implementation of the url_launcher plugin.",
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/url_launcher/url_launcher_macos",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Flutter Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "FlutterMacOS": [
+
+    ]
+  },
+  "platforms": {
+    "osx": "10.11"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES"
+  },
+  "swift_versions": "5.0",
+  "swift_version": "5.0"
+}

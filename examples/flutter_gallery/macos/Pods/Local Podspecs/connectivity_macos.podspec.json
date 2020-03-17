@@ -1,0 +1,28 @@
+{
+  "name": "connectivity_macos",
+  "version": "0.0.1",
+  "summary": "Flutter plugin for checking connectivity",
+  "description": "Desktop implementation of the connectivity plugin",
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/connectivity/connectivity_macos",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Flutter Team": "flutter-dev@googlegroups.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "dependencies": {
+    "FlutterMacOS": [
+
+    ],
+    "Reachability": [
+
+    ]
+  },
+  "platforms": {
+    "osx": "10.11"
+  }
+}

@@ -1,0 +1,6 @@
+framework module url_launcher_macos {
+  umbrella header "url_launcher_macos-umbrella.h"
+
+  export *
+  module * { export * }
+}

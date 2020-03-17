@@ -1,0 +1,9 @@
+// This is a generated file; do not edit or check into version control.
+FLUTTER_ROOT=/Users/dnfield/src/flutter/flutter
+FLUTTER_APPLICATION_PATH=/Users/dnfield/src/flutter/flutter/examples/flutter_gallery
+FLUTTER_BUILD_DIR=build
+FLUTTER_FRAMEWORK_DIR=/Users/dnfield/src/flutter/engine/src/out/host_profile_unopt
+FLUTTER_BUILD_NAME=1.0.0
+FLUTTER_BUILD_NUMBER=1
+FLUTTER_ENGINE=/Users/dnfield/src/flutter/engine/src
+LOCAL_ENGINE=host_profile_unopt
