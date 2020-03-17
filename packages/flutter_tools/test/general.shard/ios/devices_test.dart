@@ -253,7 +253,7 @@ void main() {
           id: device.id,
           iproxyPath: mockArtifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios),
           logger: logger,
-          processManager: globals.processManager,
+          processManager: FakeProcessManager.any(),
         );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;

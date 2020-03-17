@@ -365,7 +365,7 @@ class IOSDevice extends Device {
   }
 
   @override
- DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
     processManager: globals.processManager,
     logger: globals.logger,
     dyLdLibEntry: globals.cache.dyLdLibEntry,
