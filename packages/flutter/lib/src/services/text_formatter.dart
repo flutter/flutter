@@ -166,6 +166,27 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// characters.
   final int maxLength;
 
+  // Truncate the given TextEditingValue to maxLength runes.
+  // TODO(justinmc): This should be updated to use characters instead of runes,
+  // see the comment in formatEditUpdate.
+  static TextEditingValue _truncate(TextEditingValue value, int maxLength) {
+    final TextSelection newSelection = value.selection.copyWith(
+        baseOffset: math.min(value.selection.start, maxLength),
+        extentOffset: math.min(value.selection.end, maxLength),
+    );
+    final RuneIterator iterator = RuneIterator(value.text);
+    if (iterator.moveNext())
+      for (int count = 0; count < maxLength; ++count)
+        if (!iterator.moveNext())
+          break;
+    final String truncated = value.text.substring(0, iterator.rawIndex);
+    return TextEditingValue(
+      text: truncated,
+      selection: newSelection,
+      composing: TextRange.empty,
+    );
+  }
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue, // unused.
@@ -180,7 +201,12 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     // TODO(justinmc): convert this to count actual characters using Dart's
     // characters package (https://pub.dev/packages/characters).
     if (maxLength != null && maxLength > 0 && newValue.text.runes.length > maxLength) {
-      return oldValue;
+      // If already at the maximum and tried to enter even more, keep the old
+      // value.
+      if (oldValue.text.runes.length == maxLength) {
+        return oldValue;
+      }
+      return _truncate(newValue, maxLength);
     }
     return newValue;
   }
