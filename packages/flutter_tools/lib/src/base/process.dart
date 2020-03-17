@@ -542,6 +542,9 @@ class _DefaultProcessUtils implements ProcessUtils {
     } on Exception catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
+    } on ArgumentError catch (error) {
+      _logger.printTrace('$cli failed with $error');
+      return false;
     }
   }
 
@@ -554,6 +557,9 @@ class _DefaultProcessUtils implements ProcessUtils {
     try {
       return (await _processManager.run(cli, environment: environment)).exitCode == 0;
     } on Exception catch (error) {
+      _logger.printTrace('$cli failed with $error');
+      return false;
+    } on ArgumentError catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }
