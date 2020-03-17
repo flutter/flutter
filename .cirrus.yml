@@ -294,6 +294,106 @@ task:
     - name: web_tests4-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
+    ### RUN 5
+    - name: web_tests5-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests5-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 6
+    - name: web_tests6-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests6-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 7
+    - name: web_tests7-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests7-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
+    ### RUN 8
+    - name: web_tests9-0-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-1-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-2-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-3-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-4-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-5-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-6-linux
+      << : *WEB_SHARD_TEMPLATE
+
+    - name: web_tests9-7_last-linux # last Web shard must end with _last
+      << : *WEB_SHARD_TEMPLATE
+
     # - name: build_tests-linux
     #   environment:
     #     # With 1 CPU and 4G of RAM, as of October 2019, build_tests-linux would get OOM-killed.
