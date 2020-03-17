@@ -330,6 +330,23 @@ def RunDartTests(build_dir, filter, verbose_dart_snapshot):
       RunDartTest(build_dir, dart_test_file, verbose_dart_snapshot, True)
       RunDartTest(build_dir, dart_test_file, verbose_dart_snapshot, False)
 
+
+def RunFrontEndServerTests(build_dir):
+  test_dir = os.path.join(buildroot_dir, 'flutter', 'flutter_frontend_server')
+  dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
+  for dart_test_file in dart_tests:
+    opts = [
+      dart_test_file,
+      os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
+      os.path.join(build_dir, 'flutter_patched_sdk')]
+    RunEngineExecutable(
+      build_dir,
+      os.path.join('dart-sdk', 'bin', 'dart'),
+      None,
+      flags=opts,
+      cwd=test_dir)
+
+
 def RunConstFinderTests(build_dir):
   test_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'const_finder', 'test')
   opts = [
@@ -376,6 +393,7 @@ def main():
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
     RunDartTests(build_dir, dart_filter, args.verbose_dart_snapshot)
     RunConstFinderTests(build_dir)
+    RunFrontEndServerTests(build_dir)
 
   if 'java' in types:
     assert not IsWindows(), "Android engine files can't be compiled on Windows."
