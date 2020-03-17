@@ -370,28 +370,28 @@ task:
       << : *WEB_SHARD_TEMPLATE
 
     ### RUN 8
-    - name: web_tests9-0-linux
+    - name: web_tests8-0-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-1-linux
+    - name: web_tests8-1-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-2-linux
+    - name: web_tests8-2-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-3-linux
+    - name: web_tests8-3-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-4-linux
+    - name: web_tests8-4-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-5-linux
+    - name: web_tests8-5-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-6-linux
+    - name: web_tests8-6-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests9-7_last-linux # last Web shard must end with _last
+    - name: web_tests8-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
     # - name: build_tests-linux
