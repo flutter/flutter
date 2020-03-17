@@ -60,7 +60,6 @@ export 'dart:io'
         exitCode,
         // File,              NO! Use `file_system.dart`
         // FileSystemEntity,  NO! Use `file_system.dart`
-        gzip,
         GZipCodec,
         HandshakeException,
         HttpClient,
