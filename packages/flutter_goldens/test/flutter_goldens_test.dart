@@ -582,6 +582,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
+              'GOLDCTL' : 'goldctl',
             },
             operatingSystem: 'macos'
           );
@@ -701,6 +702,7 @@ void main() {
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
               'SWARMING_TASK_ID' : '12345678990',
+              'GOLDCTL' : 'goldctl',
               'GOLD_TRYJOB' : 'git/ref/12345/head'
             },
             operatingSystem: 'macos'

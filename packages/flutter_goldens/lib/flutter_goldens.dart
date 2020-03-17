@@ -34,7 +34,7 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
   } else if (FlutterSkippingFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromDefaultComparator(
-      'Golden file testing is not executed on some Cirrus shards.'
+      'Golden file testing is not executed on some Cirrus & Luci environments.'
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
@@ -84,9 +84,9 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///
 ///  The [FlutterSkippingFileComparator] is utilized to skip tests outside
 ///  of the appropriate environments described above. Currently, some Cirrus
-///  test shards do not execute golden file testing, and as such do not require
-///  a comparator. This comparator is also used when an internet connection is
-///  unavailable.
+///  test shards and Luci environments do not execute golden file testing, and
+///  as such do not require a comparator. This comparator is also used when an
+///  internet connection is unavailable.
 abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir], and retrieve golden baselines
@@ -274,6 +274,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPostSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
+      && platform.environment.containsKey('GOLDCTL')
       // Luci tryjob environments contain this value to inform the [FlutterPreSubmitComparator].
       && !platform.environment.containsKey('GOLD_TRYJOB');
 
@@ -395,6 +396,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
 
     final bool luciPreSubmit = platform.environment.containsKey('SWARMING_TASK_ID')
+      && platform.environment.containsKey('GOLDCTL')
       && platform.environment.containsKey('GOLD_TRYJOB');
     return cirrusPreSubmit || luciPreSubmit;
   }
@@ -475,8 +477,9 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
 /// A [FlutterGoldenFileComparator] for testing conditions that do not execute
 /// golden file tests.
 ///
-/// Currently, this comparator is used in some Cirrus test shards, and when an
-/// internet connection is not available for contacting Gold.
+/// Currently, this comparator is used in some Cirrus test shards and Luci
+/// environments, as well as when an internet connection is not available for
+/// contacting Gold.
 ///
 /// See also:
 ///
