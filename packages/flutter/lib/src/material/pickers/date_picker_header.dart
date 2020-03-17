@@ -9,6 +9,11 @@ import '../icon_button.dart';
 import '../text_theme.dart';
 import '../theme.dart';
 
+// NOTE: This is an internal implementation file. Even though there are public
+// classes and functions defined here, they are only meant to be used by the
+// date picker implementation and are not exported as part of the Material library.
+// See pickers.dart for exactly what is considered part of the public API.
+
 const double _datePickerHeaderLandscapeWidth = 152.0;
 const double _datePickerHeaderPortraitHeight = 120.0;
 const double _headerPaddingLandscape = 16.0;
@@ -38,6 +43,7 @@ class DatePickerHeader extends StatelessWidget {
     @required this.onIconPressed,
   }) : assert(helpText != null),
        assert(orientation != null),
+       assert(isShort != null),
        super(key: key);
 
   /// The text that is displayed at the top of the header.
@@ -46,8 +52,6 @@ class DatePickerHeader extends StatelessWidget {
   final String helpText;
 
   /// The text that is displayed at the center of the header.
-  ///
-  /// This will display the selected date in large typography.
   final String titleText;
 
   /// The semantic label associated with the [titleText].
@@ -69,7 +73,8 @@ class DatePickerHeader extends StatelessWidget {
   /// landscape orientation, in order to account for the keyboard height.
   final bool isShort;
 
-  /// The icon to display.
+  /// The mode-switching icon that will be displayed in the lower right 
+  /// in portrait, and lower left in landscape.
   ///
   /// The available icons are described in [Icons].
   final IconData icon;
@@ -93,7 +98,7 @@ class DatePickerHeader extends StatelessWidget {
     final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
     final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
-    final TextStyle helpStyle = textTheme.overline?.apply(
+    final TextStyle helpStyle = textTheme.overline?.copyWith(
       color: onPrimarySurfaceColor,
     );
 
@@ -146,7 +151,6 @@ class DatePickerHeader extends StatelessWidget {
             ),
           ],
         );
-        break;
       case Orientation.landscape:
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +187,6 @@ class DatePickerHeader extends StatelessWidget {
             ),
           ],
         );
-        break;
     }
     return null;
   }

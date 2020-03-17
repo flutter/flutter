@@ -35,7 +35,9 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// The returned [Future] resolves to the date selected by the user when the
 /// user confirms the dialog. If the user cancels the dialog, null is returned.
 ///
-/// The [initialDate] is the initially shown and selected date in the picker.
+/// When the date picker is first displayed, it will show the month of
+/// [initialDate], with [initialDate] selected.
+/// 
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
 /// allowable date. [initialDate] must either fall between these dates,
 /// or be equal to one of them. For each of these [DateTime] parameters, only
@@ -60,7 +62,7 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 ///   * [cancelText], label on the cancel button.
 ///   * [confirmText], label on the ok button.
 ///   * [errorFormatText], message used when the input text isn't in a proper date format.
-///   * [errorInvalidText], message used when the input date isn't a selectable date.
+///   * [errorInvalidText], message used when the input text isn't a selectable date.
 ///   * [fieldHintText], text used to prompt the user when no text has been entered in the field.
 ///   * [fieldLabelText], label for the date text input field.
 ///   * [helpText], label on the top of the dialog.
@@ -85,7 +87,6 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// calendar date picker initially appear in the [DatePickerMode.year] or
 /// [DatePickerMode.day] mode. It defaults to [DatePickerMode.day], and
 /// must be non-null.
-///
 Future<DateTime> showDatePicker({
   @required BuildContext context,
   @required DateTime initialDate,
@@ -297,7 +298,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         case DatePickerEntryMode.calendar:
           _entryMode = DatePickerEntryMode.input;
           break;
-
         case DatePickerEntryMode.input:
           _formKey.currentState.save();
           _entryMode = DatePickerEntryMode.calendar;
@@ -340,6 +340,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Orientation orientation = MediaQuery.of(context).orientation;
     final TextTheme textTheme = theme.textTheme;
+    // Constrain the textScaleFactor to the largest supported value to prevent
+    // layout issues.
     final double textScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 1.3);
 
     final String dateText = _selectedDate != null
@@ -350,8 +352,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       ? colorScheme.onPrimary
       : colorScheme.onSurface;
     final TextStyle dateStyle = orientation == Orientation.landscape
-      ? textTheme.headline5?.apply(color: dateColor)
-      : textTheme.headline4?.apply(color: dateColor);
+      ? textTheme.headline5?.copyWith(color: dateColor)
+      : textTheme.headline4?.copyWith(color: dateColor);
 
     final Widget actions = ButtonBar(
       buttonTextTheme: ButtonTextTheme.primary,

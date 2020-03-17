@@ -37,7 +37,8 @@ const double _yearPickerRowSpacing = 8.0;
 /// Displays a grid of days for a given month and allows the user to select a date.
 ///
 /// Days are arranged in a rectangular grid with one column for each day of the
-/// week. It provides controls to change the year and month that the grid is showing.
+/// week. Controls are provided to change the year and month that the grid is
+/// showing.
 ///
 /// The calendar picker widget is rarely used directly. Instead, consider using
 /// [showDatePicker], which will create a dialog that uses this as well as provides
@@ -45,8 +46,9 @@ const double _yearPickerRowSpacing = 8.0;
 ///
 /// See also:
 ///
-///  * [showDatePicker], which shows a dialog that contains a material design
-///    date picker.
+///  * [showDatePicker], which creates a Dialog that contains a [CalendarDatePicker]
+///    and provides an optional compact view where the user can enter a date as
+///    a line of text.
 ///  * [showTimePicker], which shows a dialog that contains a material design
 ///    time picker.
 ///
@@ -478,7 +480,7 @@ class _DatePickerSubheaderState extends State<_DatePickerSubheader>
                           child: Text(
                             widget.title,
                             overflow: TextOverflow.ellipsis,
-                            style: textTheme.subtitle2?.apply(
+                            style: textTheme.subtitle2?.copyWith(
                               color: controlColor,
                             ),
                           ),

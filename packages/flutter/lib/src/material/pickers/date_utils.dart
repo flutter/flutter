@@ -3,7 +3,12 @@
 // found in the LICENSE file.
 
 
-// Common helper functions for all pickers.
+// Common date utility functions used by the date picker implementation
+
+// NOTE: This is an internal implementation file. Even though there are public
+// classes and functions defined here, they are only meant to be used by the
+// date picker implementation and are not exported as part of the Material library.
+// See pickers.dart for exactly what is considered part of the public API.
 
 import '../material_localizations.dart';
 
@@ -51,8 +56,8 @@ DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
   return DateTime(monthDate.year, monthDate.month + monthsToAdd);
 }
 
-/// Computes the offset from the first day of week that the first day of the
-/// [month] falls on.
+/// Computes the offset from the first day of the week that the first day of
+/// the [month] falls on.
 ///
 /// For example, September 1, 2017 falls on a Friday, which in the calendar
 /// localized for United States English appears as:
@@ -105,7 +110,6 @@ int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
 /// This applies the leap year logic introduced by the Gregorian reforms of
 /// 1582. It will not give valid results for dates prior to that time.
 int getDaysInMonth(int year, int month) {
-  const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   if (month == DateTime.february) {
     final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
         (year % 400 == 0);
@@ -113,5 +117,6 @@ int getDaysInMonth(int year, int month) {
       return 29;
     return 28;
   }
+  const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   return daysInMonth[month - 1];
 }

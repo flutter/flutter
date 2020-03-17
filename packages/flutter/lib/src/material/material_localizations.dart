@@ -481,7 +481,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
   int _getDaysInMonth(int year, int month) {
-    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
           (year % 400 == 0);
@@ -489,6 +488,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         return 29;
       return 28;
     }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     return daysInMonth[month - 1];
   }
 

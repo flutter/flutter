@@ -17,16 +17,17 @@ import 'date_utils.dart' as utils;
 const double _inputPortraitHeight = 98.0;
 const double _inputLandscapeHeight = 108.0;
 
-/// A [TextFormField] configured to input and validate a date entered by the user.
+/// A [TextFormField] configured to accept and validate a date entered by the user.
 ///
 /// The text entered into this field will be constrained to only allow digits
-/// and separators. When saved or submitted,the text will be parsed into a
+/// and separators. When saved or submitted, the text will be parsed into a
 /// [DateTime] according to the ambient locale. If the input text doesn't parse
-/// into a date, a format error message will be displayed under the field.
+/// into a date, the [errorFormatText] message will be displayed under the field.
 ///
 /// [firstDate], [lastDate], and [selectableDayPredicate] provide constraints on
 /// what days are valid. If the input date isn't in the date range or doesn't pass
-/// the given predicate an invalid date text will be displayed under the field.
+/// the given predicate, then the [errorInvalidText] message will be displayed 
+/// under the field.
 ///
 /// See also:
 ///
@@ -36,9 +37,9 @@ const double _inputLandscapeHeight = 108.0;
 ///    input into a [DateTime].
 ///
 class InputDatePickerFormField extends StatefulWidget {
-  /// Creates a [TextFormField] configured to input and validate a date.
+  /// Creates a [TextFormField] configured to accept and validate a date.
   ///
-  /// If the optional [initialDate] is provided it will be used to populate
+  /// If the optional [initialDate] is provided, then it will be used to populate
   /// the text field. If the [fieldHintText] is provided, it will be shown.
   ///
   /// If [initialDate] is provided, it must not be before [firstDate] or after
