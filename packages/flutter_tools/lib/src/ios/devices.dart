@@ -38,7 +38,10 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => globals.iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices(globals.platform, globals.xcdevice);
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) {
+    return IOSDevice.getAttachedDevices(
+        globals.platform, globals.xcdevice, timeout: timeout);
+  }
 
   @override
   Future<List<String>> getDiagnostics() => IOSDevice.getDiagnostics(globals.platform, globals.xcdevice);
@@ -109,12 +112,12 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  static Future<List<IOSDevice>> getAttachedDevices(Platform platform, XCDevice xcdevice) async {
+  static Future<List<IOSDevice>> getAttachedDevices(Platform platform, XCDevice xcdevice, { Duration timeout }) async {
     if (!platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on macOS.');
     }
 
-    return await xcdevice.getAvailableTetheredIOSDevices();
+    return await xcdevice.getAvailableTetheredIOSDevices(timeout: timeout);
   }
 
   static Future<List<String>> getDiagnostics(Platform platform, XCDevice xcdevice) async {

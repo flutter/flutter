@@ -12,6 +12,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
+@(messageClassImports)
+
 // ignore_for_file: unnecessary_brace_in_string_interps
 
 /// Callers can lookup localized strings with an instance of @(class) returned
@@ -67,10 +69,10 @@ import 'package:intl/intl.dart' as intl;
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
 abstract class @(class) {
-  @(class)(String locale) : assert(locale != null), _localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  @(class)(String locale) : assert(locale != null), localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   // ignore: unused_field
-  final String _localeName;
+  final String localeName;
 
   static @(class) of(BuildContext context) {
     return Localizations.of<@(class)>(context, @(class));
@@ -117,8 +119,6 @@ class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
   bool shouldReload(_@(class)Delegate old) => false;
 }
 
-@(allMessagesClasses)
-
 @(class) @(lookupName)(Locale locale) {
   switch(locale.languageCode) {
     @(lookupBody)
@@ -130,14 +130,14 @@ class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
 
 const String numberFormatTemplate = '''
     final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
-      locale: _localeName,
+      locale: localeName,
       @(parameters)
     );
     final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
 const String dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(_localeName);
+    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
 
@@ -166,18 +166,36 @@ const String pluralMethodTemplate = '''
 @(numberFormatting)
     return intl.Intl.pluralLogic(
       @(count),
-      locale: _localeName,
+      locale: localeName,
 @(pluralLogicArgs),
     );
   }''';
 
-const String classTemplate = '''
+const String classFileTemplate = '''
+@(header)
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import '@(fileName)';
+
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {
   @(class)([String locale = '@(localeName)']) : super(locale);
 
 @(methods)
-}''';
+}
+@(subclasses)''';
+
+const String subclassTemplate = '''
+
+/// The translations for @(language) (`@(localeName)`).
+class @(class) extends @(baseLanguageClassName) {
+  @(class)(): super('@(localeName)');
+
+@(methods)
+}
+''';
 
 const String baseClassGetterTemplate = '''
   // @(comment)

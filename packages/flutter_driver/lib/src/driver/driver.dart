@@ -665,7 +665,7 @@ abstract class FlutterDriver {
   /// action will time out). For these cases, the sync mechanism can be disabled
   /// by wrapping the actions to be performed by this [runUnsynchronized] method.
   ///
-  /// With frame sync disabled, its the responsibility of the test author to
+  /// With frame sync disabled, it's the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
