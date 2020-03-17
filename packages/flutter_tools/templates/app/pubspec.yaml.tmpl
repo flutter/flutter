@@ -1,8 +1,9 @@
 name: {{projectName}}
 description: {{description}}
-{{#withPluginHook}}
-publish_to: 'none'
-{{/withPluginHook}}
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 {{^withPluginHook}}
 
 # The following defines the version and build number for your application.
