@@ -262,13 +262,11 @@ class Chrome {
   final ChromeConnection chromeConnection;
   final Uri remoteDebuggerUri;
 
-  static Completer<Chrome> _currentCompleter = Completer<Chrome>();
-
-  Future<void> get onExit => _currentCompleter.future;
+  Future<int> get onExit => _process.exitCode;
 
   Future<void> close() async {
-    if (_currentCompleter.isCompleted) {
-      _currentCompleter = Completer<Chrome>();
+    if (ChromeLauncher._currentCompleter.isCompleted) {
+      ChromeLauncher._currentCompleter = Completer<Chrome>();
     }
     chromeConnection.close();
     _process?.kill();
