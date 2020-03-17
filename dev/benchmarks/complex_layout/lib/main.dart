@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -676,6 +678,30 @@ class FancyDrawerHeader extends StatelessWidget {
         bottom: false,
         child: Placeholder(),
       ),
+    );
+  }
+}
+
+class DummyPlatformView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    const String viewType = 'benchmarks/complex_layout/DummyPlatformView';
+    StatefulWidget nativeView;
+    if (Platform.isIOS) {
+      nativeView = const UiKitView(
+        viewType: viewType,
+      );
+    } else if (Platform.isAndroid) {
+      nativeView = const AndroidView(
+        viewType: viewType,
+      );
+    } else {
+      assert(false, 'Invalid platform');
+    }
+    return Container(
+      color: Colors.purple,
+      height: 200.0,
+      child: nativeView,
     );
   }
 }
