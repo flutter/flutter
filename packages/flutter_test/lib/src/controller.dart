@@ -245,6 +245,21 @@ abstract class WidgetController {
     }
   }
 
+  /// Returns a list of all the [Annotator] objects in the rendering.
+  List<Annotator> get annotators => _walkAnnotators(binding.renderView.debugAnnotator).toList();
+  Iterable<Annotator> _walkAnnotators(Annotator annotator) sync* {
+    TestAsyncUtils.guardSync();
+    yield annotator;
+    if (annotator is ContainerAnnotator) {
+      final ContainerAnnotator root = annotator;
+      Annotator child = root.firstChild;
+      while (child != null) {
+        yield* _walkAnnotators(child);
+        child = child.nextSibling;
+      }
+    }
+  }
+
   // INTERACTION
 
   /// Dispatch a pointer down / pointer up sequence at the center of

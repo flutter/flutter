@@ -7,19 +7,21 @@ import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 
-/// Annotates a region of the layer tree with a value.
+/// Annotates a region on the screen with a value (known as an annotation).
+/// 
+/// Annotations do not affect painting, but can be searched between frames.
 ///
 /// See also:
 ///
-///  * [Layer.find], for an example of how this value is retrieved.
-///  * [AnnotatedRegionLayer], the layer pushed into the layer tree.
+///  * [RenderView.search] and [RenderView.searchFirst], which search annotations
+///    at a location.
 class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
   /// Creates a new annotated region to insert [value] into the layer tree.
   ///
   /// Neither [child] nor [value] may be null.
   ///
-  /// [sized] defaults to true and controls whether the annotated region will
-  /// clip its child.
+  /// The [sized] defaults to true and controls whether the boundary of this
+  /// widget will be used to clip the annotation.
   const AnnotatedRegion({
     Key key,
     @required Widget child,
@@ -29,17 +31,18 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
        assert(child != null),
        super(key: key, child: child);
 
-  /// A value which can be retrieved using [Layer.find].
+  /// A value which can be retrieved using [RenderView.search] and
+  /// [RenderView.searchFirst].
   final T value;
 
-  /// If false, the layer pushed into the tree will not be provided with a size.
+  /// If true, the size of this widget will be used to bound the annotated
+  /// region.
+  /// 
+  /// If false, the annotated region is unbounded except for clips along its
+  /// ancestors.
   ///
-  /// An [AnnotatedRegionLayer] with a size checks that the offset provided in
-  /// [Layer.find] is within the bounds, returning null otherwise.
-  ///
-  /// See also:
-  ///
-  ///  * [AnnotatedRegionLayer], for a description of this behavior.
+  /// Annotations will only be added to the result if the bound contains
+  /// the target position of the search.
   final bool sized;
 
   @override

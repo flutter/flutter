@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui' show Offset, Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'basic_types.dart';
+import 'basic_types.dart' show Axis;
 
 /// Utility functions for working with matrices.
 class MatrixUtils {

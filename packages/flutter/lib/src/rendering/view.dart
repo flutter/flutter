@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'annotation.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
@@ -80,7 +81,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (configuration == value)
       return;
     _configuration = value;
-    replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
+    _updateMatrices();
+    replaceRootLayer(_createNewRootLayer(), _createNewRootAnnotator());
     assert(_rootTransform != null);
     markNeedsLayout();
   }
@@ -89,12 +91,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
-  /// When this setting is enabled, Flutter will hit-test the layer tree at the
-  /// top and bottom of the screen on each frame looking for an
-  /// [AnnotatedRegionLayer] with an instance of a [SystemUiOverlayStyle]. The
-  /// hit-test result from the top of the screen provides the status bar settings
-  /// and the hit-test result from the bottom of the screen provides the system
-  /// nav bar settings.
+  /// When this setting is enabled, Flutter will search the annotator tree for
+  /// the first instance of [SystemUiOverlayStyle] on each frame. The search
+  /// result from the top of the screen provides the status bar settings and the
+  /// search result from the bottom of the screen provides the system nav bar
+  /// settings.
   ///
   /// Setting this to false does not cause previous automatic adjustments to be
   /// reset, nor does setting it to true cause the app to update immediately.
@@ -133,18 +134,28 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(owner != null);
     assert(_rootTransform == null);
     scheduleInitialLayout();
-    scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
+    _updateMatrices();
+    scheduleInitialPaint(_createNewRootLayer(), _createNewRootAnnotator());
     assert(_rootTransform != null);
   }
 
   Matrix4 _rootTransform;
+  Matrix4 _updateMatrices() {
+    return _rootTransform = configuration.toMatrix();
+  }
 
-  TransformLayer _updateMatricesAndCreateNewRootLayer() {
-    _rootTransform = configuration.toMatrix();
+  TransformLayer _createNewRootLayer() {
     final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;
+  }
+
+  TransformAnnotator _createNewRootAnnotator() {
+    final TransformAnnotator rootAnnotator = TransformAnnotator(transform: _rootTransform);
+    rootAnnotator.attach(this);
+    assert(_rootTransform != null);
+    return rootAnnotator;
   }
 
   // We never call layout() on this class, so this should never get
@@ -189,19 +200,50 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
+  /// Search for all annotations of type `T` under the logical position
+  /// specified by `position`.
+  ///
+  /// Returns a result with empty entries if no matching annotations are found.
+  /// 
+  /// Annotations are added by pushing [Annotator]s during [RenderObject.paint].
+  ///
+  /// See also:
+  ///
+  ///  * [search], which finds all annotations at the given position.
+  ///  * [search], which finds all annotations at the given position.
+  AnnotationResult<T> search<T>(Offset position) {
+    final AnnotationResult<T> result = AnnotationResult<T>();
+    annotator.search<T>(result, position * configuration.devicePixelRatio);
+    return result;
+  }
+
+  /// Search for the first annotation of type `T` under the logical position
+  /// specified by `position`.
+  ///
+  /// Returns null if no matching annotations are found.
+  /// 
+  /// Annotations are added by pushing [Annotator]s during [RenderObject.paint].
+  ///
+  /// See also:
+  ///
+  ///  * [search], which finds all annotations at the given position.
+  AnnotationEntry<T> searchFirst<T>(Offset position) {
+    final AnnotationResult<T> result = AnnotationResult<T>(stopsAtFirstResult: true);
+    annotator.search<T>(result, position * configuration.devicePixelRatio);
+    return result.entries.isNotEmpty ? result.entries.first : null;
+  }
+
   /// Determines the set of mouse tracker annotations at the given position.
   ///
   /// See also:
   ///
-  ///  * [Layer.findAllAnnotations], which is used by this method to find all
+  ///  * [search], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAllAnnotations<MouseTrackerAnnotation>(
-      position * configuration.devicePixelRatio
-    ).annotations;
+    return search<MouseTrackerAnnotation>(position).annotations;
   }
 
   @override
@@ -244,14 +286,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void _updateSystemChrome() {
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
-    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    final Offset top = Offset(bounds.center.dx, _window.padding.top) / _window.devicePixelRatio;
+    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom) / _window.devicePixelRatio;
+    final SystemUiOverlayStyle upperOverlayStyle = searchFirst<SystemUiOverlayStyle>(top)?.annotation;
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        lowerOverlayStyle = searchFirst<SystemUiOverlayStyle>(bottom)?.annotation;
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:

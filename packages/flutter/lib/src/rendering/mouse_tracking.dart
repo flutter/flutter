@@ -255,6 +255,20 @@ class MouseTracker extends ChangeNotifier {
     );
   }
 
+  List<MouseTrackerAnnotation> _debugFindDuplicates(Iterator<MouseTrackerAnnotation> iterator) {
+    final Set<MouseTrackerAnnotation> appeared = <MouseTrackerAnnotation>{};
+    final List<MouseTrackerAnnotation> duplicate = <MouseTrackerAnnotation>[];
+    while (iterator.moveNext()) {
+      final MouseTrackerAnnotation member = iterator.current;
+      if (!appeared.contains(member)) {
+        appeared.add(member);
+      } else {
+        duplicate.add(member);
+      }
+    }
+    return duplicate;
+  }
+
   // Find the annotations that is hovered by the device of the `state`.
   //
   // If the device is not connected, an empty set is returned without calling
@@ -262,9 +276,16 @@ class MouseTracker extends ChangeNotifier {
   LinkedHashSet<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
-    return (_mouseStates.containsKey(device))
-      ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
-      : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
+    if (!_mouseStates.containsKey(device))
+      return <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
+    final Iterable<MouseTrackerAnnotation> foundAnnotations = annotationFinder(globalPosition);
+    assert(() {
+      final List<MouseTrackerAnnotation> duplicates = _debugFindDuplicates(foundAnnotations.iterator);
+      assert(duplicates.isEmpty, 'Unexpected duplicate annotaions returned from annotationFinder: $duplicates');
+      return true;
+    }());
+    final LinkedHashSet<MouseTrackerAnnotation> result = LinkedHashSet<MouseTrackerAnnotation>.from(foundAnnotations);
+    return result;
   }
 
   static bool get _duringBuildPhase {

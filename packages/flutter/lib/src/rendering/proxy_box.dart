@@ -14,6 +14,7 @@ import 'package:flutter/semantics.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
+import 'annotation.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
@@ -2829,17 +2830,38 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
+  bool _searchAnnotations(AnnotationResult<MouseTrackerAnnotation> result, Offset localPosition, {@required bool onlyFirst}) {
+    if (size != null && !size.contains(localPosition)) {
+      return false;
+    }
+    result.add(AnnotationEntry<MouseTrackerAnnotation>(
+      annotation: _hoverAnnotation,
+      localPosition: localPosition,
+    ));
+    return opaque;
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_annotationIsActive) {
-      // Annotated region layers are not retained because they do not create engine layers.
+      // TODO(dkwingsmt): Remove layer-based annotation with pure annotation
+      // after the migration. https://flutter.dev/go/annotator-tree
+      // ignore: deprecated_member_use_from_same_package
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
         offset: offset,
         opaque: opaque,
+        skipSelfDuringAnnotationTreeSearch: true,
       );
-      context.pushLayer(layer, super.paint, offset);
+      final ContainerAnnotator annotator = SingleTypeAnnotator<MouseTrackerAnnotation>(
+        _searchAnnotations,
+        offset,
+        debugOwner: this,
+      );
+      context.pushAnnotator(annotator, () {
+        context.pushLayer(layer, super.paint, offset);
+      });
     } else {
       super.paint(context, offset);
     }
@@ -5026,12 +5048,15 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 }
 
-/// Render object which inserts an [AnnotatedRegionLayer] into the layer tree.
+/// Annotates a region on the screen with a value (known as an annotation).
+/// 
+/// Annotations do not affect painting, but can be searched between frames.
 ///
 /// See also:
 ///
-///  * [Layer.find], for an example of how this value is retrieved.
-///  * [AnnotatedRegionLayer], the layer this render object creates.
+///  * [AnnotatedRegion], which is a widget that uses this object.
+///  * [RenderView.search] and [RenderView.searchFirst], which search annotations
+///    at a location.
 class RenderAnnotatedRegion<T> extends RenderProxyBox {
 
   /// Creates a new [RenderAnnotatedRegion] to insert [value] into the
@@ -5051,7 +5076,8 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
        _sized = sized,
        super(child);
 
-  /// A value which can be retrieved using [Layer.find].
+  /// A value which can be retrieved using [RenderView.search] and
+  /// [RenderView.searchFirst].
   T get value => _value;
   T _value;
   set value (T newValue) {
@@ -5061,27 +5087,57 @@ class RenderAnnotatedRegion<T> extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  /// Whether the render object will pass its [size] to the [AnnotatedRegionLayer].
+  /// If true, the size of this widget will be used to bound the annotated
+  /// region.
+  /// 
+  /// If false, the annotated region is unbounded except for clips along its
+  /// ancestors.
+  ///
+  /// Annotations will only be added to the result if the bound contains
+  /// the target position of the search.
   bool get sized => _sized;
   bool _sized;
   set sized(bool value) {
     if (_sized == value)
       return;
     _sized = value;
+    // TODO(dkwingsmt): Remove the markNeedsPaint call after removing
+    // layer-based annotation.
     markNeedsPaint();
   }
 
   @override
   final bool alwaysNeedsCompositing = true;
 
+  bool _searchAnnotations(AnnotationResult<T> result, Offset localPosition) {
+    if (sized && size != null && !size.contains(localPosition)) {
+      return false;
+    }
+    result.add(AnnotationEntry<T>(
+      annotation: value,
+      localPosition: localPosition,
+    ));
+    return false;
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Annotated region layers are not retained because they do not create engine layers.
+    // TODO(dkwingsmt): Remove layer-based annotation with pure annotation
+    // after the migration. https://flutter.dev/go/annotator-tree
+    // ignore: deprecated_member_use_from_same_package
     final AnnotatedRegionLayer<T> layer = AnnotatedRegionLayer<T>(
       value,
       size: sized ? size : null,
       offset: sized ? offset : null,
+      skipSelfDuringAnnotationTreeSearch: true,
     );
-    context.pushLayer(layer, super.paint, offset);
+    final ContainerAnnotator annotator = SingleTypeAnnotator<T>(
+      _searchAnnotations,
+      offset,
+      debugOwner: this,
+    );
+    context.pushAnnotator(annotator, () {
+      context.pushLayer(layer, super.paint, offset);
+    });
   }
 }

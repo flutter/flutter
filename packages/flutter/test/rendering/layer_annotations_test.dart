@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: deprecated_member_use_from_same_package
+// These tests will be removed after deprecation https://flutter.dev/go/annotator-tree
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';

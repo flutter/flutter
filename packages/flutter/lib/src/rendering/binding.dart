@@ -450,6 +450,11 @@ void debugDumpLayerTree() {
   debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
+/// Prints a textual representation of the entire annotation tree.
+void debugDumpAnnotationTree() {
+  debugPrint(RendererBinding.instance?.renderView?.debugAnnotator?.toStringDeep() ?? 'Annotation tree unavailable.');
+}
+
 /// Prints a textual representation of the entire semantics tree.
 /// This will only work if there is a semantics client attached.
 /// Otherwise, a notice that no semantics are available will be printed.
