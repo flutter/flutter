@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'text_editing.dart';
 import 'text_input.dart';
 
@@ -166,35 +167,48 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// characters.
   final int maxLength;
 
+  // TODO(justinmc): This should be updated to use characters instead of runes,
+  // see the comment in formatEditUpdate.
+  /// Truncate the given TextEditingValue to maxLength runes.
+  @visibleForTesting
+  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
+    final TextSelection newSelection = value.selection.copyWith(
+        baseOffset: math.min(value.selection.start, maxLength),
+        extentOffset: math.min(value.selection.end, maxLength),
+    );
+    final RuneIterator iterator = RuneIterator(value.text);
+    if (iterator.moveNext())
+      for (int count = 0; count < maxLength; ++count)
+        if (!iterator.moveNext())
+          break;
+    final String truncated = value.text.substring(0, iterator.rawIndex);
+    return TextEditingValue(
+      text: truncated,
+      selection: newSelection,
+      composing: TextRange.empty,
+    );
+  }
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
+    // This does not count grapheme clusters (i.e. characters visible to the user),
+    // it counts Unicode runes, which leaves out a number of useful possible
+    // characters (like many emoji), so this will be inaccurate in the
+    // presence of those characters. The Dart lang bug
+    // https://github.com/dart-lang/sdk/issues/28404 has been filed to
+    // address this in Dart.
+    // TODO(justinmc): convert this to count actual characters using Dart's
+    // characters package (https://pub.dev/packages/characters).
     if (maxLength != null && maxLength > 0 && newValue.text.runes.length > maxLength) {
-      final TextSelection newSelection = newValue.selection.copyWith(
-          baseOffset: math.min(newValue.selection.start, maxLength),
-          extentOffset: math.min(newValue.selection.end, maxLength),
-      );
-      // This does not count grapheme clusters (i.e. characters visible to the user),
-      // it counts Unicode runes, which leaves out a number of useful possible
-      // characters (like many emoji), so this will be inaccurate in the
-      // presence of those characters. The Dart lang bug
-      // https://github.com/dart-lang/sdk/issues/28404 has been filed to
-      // address this in Dart.
-      // TODO(gspencer): convert this to count actual characters when Dart
-      // supports that.
-      final RuneIterator iterator = RuneIterator(newValue.text);
-      if (iterator.moveNext())
-        for (int count = 0; count < maxLength; ++count)
-          if (!iterator.moveNext())
-            break;
-      final String truncated = newValue.text.substring(0, iterator.rawIndex);
-      return TextEditingValue(
-        text: truncated,
-        selection: newSelection,
-        composing: TextRange.empty,
-      );
+      // If already at the maximum and tried to enter even more, keep the old
+      // value.
+      if (oldValue.text.runes.length == maxLength) {
+        return oldValue;
+      }
+      return truncate(newValue, maxLength);
     }
     return newValue;
   }
