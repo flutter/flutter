@@ -53,7 +53,7 @@ class CrashReportSender {
   }
 
   final http.Client _client;
-  final Usage _usage = Usage.instance;
+  final Usage _usage = globals.flutterUsage;
 
   Uri get _baseUrl {
     final String overrideUrl = globals.platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
@@ -126,7 +126,9 @@ class CrashReportSender {
       } else {
         globals.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
-    } catch (sendError, sendStackTrace) {
+    // Catch all exceptions to print the message that makes clear that the
+    // crash logger crashed.
+    } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
       if (sendError is SocketException || sendError is HttpException) {
         globals.printError('Failed to send crash report due to a network error: $sendError');
       } else {

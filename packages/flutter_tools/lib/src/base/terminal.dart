@@ -85,7 +85,58 @@ class OutputPreferences {
   }
 }
 
-class AnsiTerminal {
+/// The command line terminal, if available.
+abstract class Terminal {
+  factory Terminal.test() = _TestTerminal;
+
+  /// Whether the current terminal supports color escape codes.
+  bool get supportsColor;
+
+  /// Whether the current terminal can display emoji.
+  bool get supportsEmoji;
+
+  /// Whether we are interacting with the flutter tool via the terminal.
+  ///
+  /// If not set, defaults to false.
+  bool get usesTerminalUi;
+  set usesTerminalUi(bool value);
+
+  String bolden(String message);
+
+  String color(String message, TerminalColor color);
+
+  String clearScreen();
+
+  set singleCharMode(bool value);
+
+  /// Return keystrokes from the console.
+  ///
+  /// Useful when the console is in [singleCharMode].
+  Stream<String> get keystrokes;
+
+  /// Prompts the user to input a character within a given list. Re-prompts if
+  /// entered character is not in the list.
+  ///
+  /// The `prompt`, if non-null, is the text displayed prior to waiting for user
+  /// input each time. If `prompt` is non-null and `displayAcceptedCharacters`
+  /// is true, the accepted keys are printed next to the `prompt`.
+  ///
+  /// The returned value is the user's input; if `defaultChoiceIndex` is not
+  /// null, and the user presses enter without any other input, the return value
+  /// will be the character in `acceptedCharacters` at the index given by
+  /// `defaultChoiceIndex`.
+  ///
+  /// If [usesTerminalUi] is false, throws a [StateError].
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    @required Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  });
+}
+
+class AnsiTerminal implements Terminal {
   AnsiTerminal({
     @required io.Stdio stdio,
     @required Platform platform,
@@ -122,12 +173,14 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
+  @override
   bool get supportsColor => _platform.stdoutSupportsAnsi ?? false;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
   // which sets the WT_SESSION environment variable. See:
   // https://github.com/microsoft/terminal/blob/master/doc/user-docs/index.md#tips-and-tricks
+  @override
   bool get supportsEmoji => !_platform.isWindows
     || _platform.environment.containsKey('WT_SESSION');
 
@@ -135,11 +188,10 @@ class AnsiTerminal {
     '(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})',
   );
 
-  /// Whether we are interacting with the flutter tool via the terminal.
-  ///
-  /// If not set, defaults to false.
+  @override
   bool usesTerminalUi = false;
 
+  @override
   String bolden(String message) {
     assert(message != null);
     if (!supportsColor || message.isEmpty) {
@@ -160,6 +212,7 @@ class AnsiTerminal {
         : result;
   }
 
+  @override
   String color(String message, TerminalColor color) {
     assert(message != null);
     if (!supportsColor || color == null || message.isEmpty) {
@@ -181,8 +234,10 @@ class AnsiTerminal {
         : result;
   }
 
+  @override
   String clearScreen() => supportsColor ? clear : '\n\n';
 
+  @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
       return;
@@ -200,27 +255,13 @@ class AnsiTerminal {
 
   Stream<String> _broadcastStdInString;
 
-  /// Return keystrokes from the console.
-  ///
-  /// Useful when the console is in [singleCharMode].
+  @override
   Stream<String> get keystrokes {
     _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
-  /// Prompts the user to input a character within a given list. Re-prompts if
-  /// entered character is not in the list.
-  ///
-  /// The `prompt`, if non-null, is the text displayed prior to waiting for user
-  /// input each time. If `prompt` is non-null and `displayAcceptedCharacters`
-  /// is true, the accepted keys are printed next to the `prompt`.
-  ///
-  /// The returned value is the user's input; if `defaultChoiceIndex` is not
-  /// null, and the user presses enter without any other input, the return value
-  /// will be the character in `acceptedCharacters` at the index given by
-  /// `defaultChoiceIndex`.
-  ///
-  /// If [usesTerminalUi] is false, throws a [StateError].
+  @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     @required Logger logger,
@@ -261,4 +302,40 @@ class AnsiTerminal {
     }
     return choice;
   }
+}
+
+class _TestTerminal implements Terminal {
+  @override
+  bool usesTerminalUi;
+
+  @override
+  String bolden(String message) => message;
+
+  @override
+  String clearScreen() => '\n\n';
+
+  @override
+  String color(String message, TerminalColor color) => message;
+
+  @override
+  Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {
+    @required Logger logger,
+    String prompt,
+    int defaultChoiceIndex,
+    bool displayAcceptedCharacters = true,
+  }) {
+    throw UnsupportedError('promptForCharInput not supported in the test terminal.');
+  }
+
+  @override
+  set singleCharMode(bool value) { }
+
+  @override
+  bool get supportsColor => false;
+
+  @override
+  bool get supportsEmoji => false;
 }

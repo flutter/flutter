@@ -29,7 +29,7 @@ class VisualStudioProject {
   /// The content of the project file.
   xml.XmlDocument content;
 
-  /// Whether or not the the project file was correctly parsed.
+  /// Whether or not the project file was correctly parsed.
   ///
   /// If false, this could indicate that the project file is damaged, or that
   /// it's an unsupported project type.

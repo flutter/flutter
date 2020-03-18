@@ -7,7 +7,8 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import 'android/android_device.dart';
+import 'android/android_device_discovery.dart';
+import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
@@ -15,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart' as globals;
 import 'ios/devices.dart';
@@ -68,13 +70,21 @@ class DeviceManager {
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(),
+    AndroidDevices(
+      logger: globals.logger,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: globals.processManager,
+    ),
     IOSDevices(),
-    IOSSimulators(),
+    IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),
     MacOSDevices(),
-    LinuxDevices(),
+    LinuxDevices(
+      platform: globals.platform,
+      featureFlags: featureFlags,
+    ),
     WindowsDevices(),
     WebDevices(),
   ]);
@@ -120,7 +130,7 @@ class DeviceManager {
     return devices.where(startsWithDeviceId).toList();
   }
 
-  /// Return the list of connected devices, filtered by any user-specified device id.
+  /// Returns the list of connected devices, filtered by any user-specified device id.
   Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
@@ -131,11 +141,21 @@ class DeviceManager {
     return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
-  /// Return the list of all connected devices.
+  /// Returns the list of all connected devices.
   Future<List<Device>> getAllConnectedDevices() async {
     final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
       for (final DeviceDiscovery discoverer in _platformDiscoverers)
         discoverer.devices,
+    ]);
+
+    return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
+  }
+
+  /// Returns the list of all connected devices. Discards existing cache of devices.
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async {
+    final List<List<Device>> devices = await Future.wait<List<Device>>(<Future<List<Device>>>[
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
+        discoverer.discoverDevices(timeout: timeout),
     ]);
 
     return devices.expand<Device>((List<Device> deviceList) => deviceList).toList();
@@ -233,7 +253,11 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
+  /// Return all connected devices, cached on subsequent calls.
   Future<List<Device>> get devices;
+
+  /// Return all connected devices. Discards existing cache of devices.
+  Future<List<Device>> discoverDevices({ Duration timeout });
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
@@ -252,7 +276,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ItemListNotifier<Device> _items;
   Timer _timer;
 
-  Future<List<Device>> pollingGetDevices();
+  Future<List<Device>> pollingGetDevices({ Duration timeout });
 
   void startPolling() {
     if (_timer == null) {
@@ -264,7 +288,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   Timer _initTimer() {
     return Timer(_pollingInterval, () async {
       try {
-        final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+        final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
         _items.updateWithNewList(devices);
       } on TimeoutException {
         globals.printTrace('Device poll timed out. Will retry.');
@@ -280,7 +304,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> get devices async {
-    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices());
+    return _populateDevices();
+  }
+
+  @override
+  Future<List<Device>> discoverDevices({ Duration timeout }) async {
+    _items = null;
+    return _populateDevices(timeout: timeout);
+  }
+
+  Future<List<Device>> _populateDevices({ Duration timeout }) async {
+    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
     return _items.items;
   }
 
@@ -379,7 +413,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ covariant ApplicationPackage app });
+  FutureOr<DeviceLogReader> getLogReader({ covariant ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -522,6 +556,7 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
+    this.traceWhitelist,
     this.traceSystrace = false,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
@@ -548,6 +583,7 @@ class DebuggingOptions {
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
+      this.traceWhitelist,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -574,6 +610,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final String traceWhitelist;
   final bool traceSystrace;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;

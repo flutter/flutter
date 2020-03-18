@@ -192,7 +192,7 @@ void main() {
   testUsingContext('analytics sent on success', () async {
     MockDirectory.findCache = true;
     await pub.get(context: PubContext.flutterTests, checkLastModified: false);
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(0),
@@ -212,7 +212,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'failure')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(1),
@@ -232,7 +232,7 @@ void main() {
     } on ToolExit {
       // Ignore.
     }
-    verify(flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
+    verify(globals.flutterUsage.sendEvent('pub-result', 'flutter-tests', label: 'version-solving-failed')).called(1);
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
     ProcessManager: () => MockProcessManager(
@@ -260,7 +260,7 @@ void main() {
         ],
         onRun: () {
           globals.fs.file('.packages')
-            ..setLastModifiedSync(DateTime(2002));
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -280,7 +280,7 @@ void main() {
         ],
         onRun: () {
           globals.fs.file('pubspec.yaml')
-            ..setLastModifiedSync(DateTime(2002));
+            .setLastModifiedSync(DateTime(2002));
         }
       ),
       const FakeCommand(
@@ -309,9 +309,9 @@ void main() {
       testLogger.clear();
       // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+        .setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
@@ -321,14 +321,13 @@ void main() {
       testLogger.clear();
       // bad scenario 2: pub changes pubspec.yaml instead
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(2001));
+        .setLastModifiedSync(DateTime(2001));
       try {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
         expect(true, isFalse, reason: 'pub.get did not throw');
-      } catch (error) {
-        expect(error, isA<Exception>());
+      } on ToolExit catch (error) {
         expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
@@ -337,9 +336,9 @@ void main() {
       expect(globals.fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
       // bad scenario 3: pubspec.yaml was created in the future
       globals.fs.file('.packages')
-        ..setLastModifiedSync(DateTime(2000));
+        .setLastModifiedSync(DateTime(2000));
       globals.fs.file('pubspec.yaml')
-        ..setLastModifiedSync(DateTime(9999));
+        .setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, contains('Running "flutter pub get" in /...\n'));

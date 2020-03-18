@@ -305,7 +305,7 @@ enum Thumb {
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-class SliderThemeData extends Diagnosticable {
+class SliderThemeData with Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values. All the values
   /// must be specified.
   ///
@@ -578,7 +578,7 @@ class SliderThemeData extends Diagnosticable {
 
   /// The shape that will be used to draw the [RangeSlider]'s track.
   ///
-  /// The [SliderTrackShape.getPreferredRect] method is used to to map
+  /// The [SliderTrackShape.getPreferredRect] method is used to map
   /// slider-relative gesture coordinates to the correct thumb position on the
   /// track. It is also used to horizontally position the tick marks, when the
   /// slider is discrete.

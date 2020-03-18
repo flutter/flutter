@@ -170,7 +170,7 @@ class DartVm {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
-    for (final Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
+    for (final Map<String, dynamic> jsonIsolate in (jsonVmRef['isolates'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final String name = jsonIsolate['name'] as String;
       if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
@@ -213,7 +213,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: timeout);
-    for (final Map<String, dynamic> jsonView in rpcResponse['views']) {
+    for (final Map<String, dynamic> jsonView in (rpcResponse['views'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);

@@ -476,7 +476,7 @@ void main() {
 
       try {
         await device.takeScreenshot(globals.fs.file('file.ppm'));
-      } catch (_) {
+      } on Exception {
         assert(false);
       }
       expect(
@@ -534,8 +534,8 @@ void main() {
 
       try {
         await device.takeScreenshot(globals.fs.file('file.ppm'));
-      } catch (_) {
-        assert(false);
+      } on Exception catch (e) {
+        fail('Unexpected exception: $e');
       }
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -1344,7 +1344,7 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return <String>['192.168.42.172 scare-cable-skip-joy'];
   }
 
@@ -1356,7 +1356,7 @@ class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
 
 class FailingDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return null;
   }
 

@@ -190,7 +190,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
       return exitCode;
     } finally {
-      globals.fs.currentDirectory = saved;
+      globals.fs.currentDirectory = saved.path;
       await platform.close();
     }
   }

@@ -169,10 +169,9 @@ class Xcode {
     assert(sdk != null);
     final RunResult runResult = await _processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
-      throwOnError: true,
     );
     if (runResult.exitCode != 0) {
-      throwToolExit('Could not find iPhone SDK location: ${runResult.stderr}');
+      throwToolExit('Could not find SDK location: ${runResult.stderr}');
     }
     return runResult.stdout.trim();
   }
@@ -228,7 +227,10 @@ class XCDevice {
     return _xcdevicePath;
   }
 
-  Future<List<dynamic>> _getAllDevices({bool useCache = false}) async {
+  Future<List<dynamic>> _getAllDevices({
+    bool useCache = false,
+    @required Duration timeout
+  }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
       return null;
@@ -244,7 +246,7 @@ class XCDevice {
           'xcdevice',
           'list',
           '--timeout',
-          '1',
+          timeout.inSeconds.toString(),
         ],
         throwOnError: true,
       );
@@ -265,9 +267,9 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// List of devices available over USB.
-  Future<List<IOSDevice>> getAvailableTetheredIOSDevices() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices();
+  /// [timeout] defaults to 1 second.
+  Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 1));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -326,7 +328,7 @@ class XCDevice {
       if (errorProperties != null) {
         final String errorMessage = _parseErrorMessage(errorProperties);
         if (errorMessage.contains('not paired')) {
-          UsageEvent('device', 'ios-trust-failure').send();
+          UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
         }
         _logger.printTrace(errorMessage);
 
@@ -406,11 +408,15 @@ class XCDevice {
       final String architecture = deviceProperties['architecture'] as String;
       try {
         cpuArchitecture = getIOSArchForName(architecture);
-      } catch (error) {
-        // Fallback to default iOS architecture. Future-proof against a theoretical version
-        // of Xcode that changes this string to something slightly different like "ARM64".
+      } on Exception {
+        // Fallback to default iOS architecture. Future-proof against a
+        // theoretical version of Xcode that changes this string to something
+        // slightly different like "ARM64".
         cpuArchitecture ??= defaultIOSArchs.first;
-        _logger.printError('Unknown architecture $architecture, defaulting to ${getNameForDarwinArch(cpuArchitecture)}');
+        _logger.printError(
+          'Unknown architecture $architecture, defaulting to '
+          '${getNameForDarwinArch(cpuArchitecture)}',
+        );
       }
     }
     return cpuArchitecture;
@@ -497,7 +503,10 @@ class XCDevice {
 
   /// List of all devices reporting errors.
   Future<List<String>> getDiagnostics() async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(useCache: true);
+    final List<dynamic> allAvailableDevices = await _getAllDevices(
+      useCache: true,
+      timeout: const Duration(seconds: 1)
+    );
 
     if (allAvailableDevices == null) {
       return const <String>[];

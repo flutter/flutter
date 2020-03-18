@@ -168,7 +168,7 @@ abstract class Route<T> {
     // For example, ModalRoute create a focus scope in its overlay entries. The
     // focused child can only be attached to navigator after initState which
     // will be guarded by the asynchronous gap.
-    TickerFuture.complete()..then<void>((void _) {
+    TickerFuture.complete().then<void>((void _) {
       navigator.focusScopeNode.requestFocus();
     });
   }

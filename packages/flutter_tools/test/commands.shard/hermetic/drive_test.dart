@@ -42,7 +42,7 @@ void main() {
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
       fs.directory('test_driver').createSync();
-      fs.file('pubspec.yaml')..createSync();
+      fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
       appStarter = (DriveCommand command, Uri webUri) {
@@ -712,6 +712,19 @@ void main() {
       };
 
       expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
+    });
+
+    test('android chrome', () {
+      final Map<String, dynamic> expected = <String, dynamic>{
+        'browserName': 'chrome',
+        'platformName': 'android',
+        'goog:chromeOptions': <String, dynamic>{
+          'androidPackage': 'com.android.chrome',
+          'args': <String>['--disable-fullscreen']
+        },
+      };
+
+      expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
     });
   });
 }

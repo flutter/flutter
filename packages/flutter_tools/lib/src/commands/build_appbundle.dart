@@ -26,7 +26,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     addShrinkingFlag();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
-
+    usesDartDefineOption();
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addMultiOption('target-platform',

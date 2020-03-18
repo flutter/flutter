@@ -18,7 +18,6 @@ import '../../src/mocks.dart';
 
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
-class MockLogger extends Mock implements Logger {}
 class MockPlatform extends Mock implements Platform {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -28,7 +27,7 @@ void main () {
     Artifacts mockArtifacts;
     Cache mockCache;
     IOSDeploy iosDeploy;
-    Logger mockLogger;
+    Logger logger;
     Platform mockPlatform;
     ProcessManager mockProcessManager;
     const String iosDeployPath = '/path/to/ios-deploy';
@@ -42,7 +41,7 @@ void main () {
       mockCache = MockCache();
       const MapEntry<String, String> mapEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', '/path/to/libs');
       when(mockCache.dyLdLibEntry).thenReturn(mapEntry);
-      mockLogger = MockLogger();
+      logger = BufferLogger.test();
       mockPlatform = MockPlatform();
       when(mockPlatform.environment).thenReturn(<String, String>{
         'PATH': '/usr/local/bin:/usr/bin',
@@ -51,7 +50,7 @@ void main () {
       iosDeploy = IOSDeploy(
         artifacts: mockArtifacts,
         cache: mockCache,
-        logger: mockLogger,
+        logger: logger,
         platform: mockPlatform,
         processManager: mockProcessManager,
       );

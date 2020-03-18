@@ -1067,6 +1067,8 @@ plugin1=${plugin1.path}
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
 
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+
       final Directory rootDirectory = fileSystem.currentDirectory;
       cache = Cache(
         rootOverride: rootDirectory,
@@ -1414,7 +1416,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -1580,7 +1582,7 @@ plugin1=${plugin1.path}
         .childDirectory('apk')
         .childDirectory('release')
         .childFile('app-release.apk')
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
       await buildGradleApp(
         project: FlutterProject.current(),
@@ -1662,7 +1664,7 @@ plugin1=${plugin1.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('build apk uses selected local engine', () async {
+    testUsingContext('build apk uses selected local engine,the engine abi is arm', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm'));
@@ -1754,7 +1756,286 @@ plugin1=${plugin1.path}
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('build aar uses selected local engine', () async {
+    testUsingContext(
+        'build apk uses selected local engine,the engine abi is arm64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm64'));
+
+      fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
+
+      fileSystem.file('android/gradlew').createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+
+      fileSystem.file('android/build.gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      when(mockProcessManager.start(any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+          .thenAnswer((_) {
+        return Future<Process>.value(
+            createMockProcess(
+              exitCode: 1,
+            )
+        );
+      });
+
+      await expectLater(() async {
+        await buildGradleApp(
+          project: FlutterProject.current(),
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+      }, throwsToolExit());
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.start(
+            captureAny,
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory')
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm64'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext(
+        'build apk uses selected local engine,the engine abi is x86', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x86'));
+
+      fileSystem.file('out/android_x86/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
+
+      fileSystem.file('android/gradlew').createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+
+      fileSystem.file('android/build.gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      when(mockProcessManager.start(any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+          .thenAnswer((_) {
+        return Future<Process>.value(
+            createMockProcess(
+              exitCode: 1,
+            )
+        );
+      });
+
+      await expectLater(() async {
+        await buildGradleApp(
+          project: FlutterProject.current(),
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+      }, throwsToolExit());
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.start(
+            captureAny,
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory')
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_x86'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext(
+        'build apk uses selected local engine,the engine abi is x64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x64'));
+
+      fileSystem.file('out/android_x64/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
+
+      fileSystem.file('android/gradlew').createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+
+      fileSystem.file('android/build.gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('android')
+          .childDirectory('app')
+          .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      when(mockProcessManager.start(any,
+          workingDirectory: anyNamed('workingDirectory'),
+          environment: anyNamed('environment')))
+          .thenAnswer((_) {
+        return Future<Process>.value(
+            createMockProcess(
+              exitCode: 1,
+            )
+        );
+      });
+
+      await expectLater(() async {
+        await buildGradleApp(
+          project: FlutterProject.current(),
+          androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(
+              BuildMode.release,
+              null,
+              treeShakeIcons: false,
+            ),
+          ),
+          target: 'lib/main.dart',
+          isBuildingBundle: false,
+          localGradleErrors: const <GradleHandledError>[],
+        );
+      }, throwsToolExit());
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.start(
+            captureAny,
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory')
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_x64'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('build aar uses selected local engine，the engine abi is arm', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm'));
@@ -1849,6 +2130,300 @@ plugin1=${plugin1.path}
       FileSystemUtils: () => fileSystemUtils,
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext(
+        'build aar uses selected local engine，the engine abi is arm64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_arm64'));
+
+      fileSystem.file('out/android_arm64/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_arm64/arm64_v8a_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/arm64_v8a_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_arm64/flutter_embedding_release.pom').createSync(recursive: true);
+
+      final File manifestFile = fileSystem.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      fileSystem.directory('.android/gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('.android/gradle/wrapper')
+          .createSync(recursive: true);
+
+      fileSystem.file('.android/gradlew').createSync(recursive: true);
+
+      fileSystem.file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+
+      fileSystem.file('.android/build.gradle')
+          .createSync(recursive: true);
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+        project: FlutterProject.current(),
+        outputDirectory: fileSystem.directory('build/'),
+        target: '',
+        buildNumber: '2.0',
+      );
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.run(
+          captureAny,
+          environment: anyNamed('environment'),
+          workingDirectory: anyNamed('workingDirectory'),
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/.android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm64'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+      expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
+
+      // Verify the local engine repo is copied into the generated Maven repo.
+      final List<dynamic> copyDirectoryArguments = verify(
+          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
+      ).captured;
+
+      expect(copyDirectoryArguments.length, 2);
+      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
+      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fileSystemUtils,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext(
+        'build aar uses selected local engine，the engine abi is x86', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x86'));
+
+      fileSystem.file('out/android_x86/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_x86/x86_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x86/x86_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x86/flutter_embedding_release.pom').createSync(recursive: true);
+
+      final File manifestFile = fileSystem.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      fileSystem.directory('.android/gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('.android/gradle/wrapper')
+          .createSync(recursive: true);
+
+      fileSystem.file('.android/gradlew').createSync(recursive: true);
+
+      fileSystem.file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+
+      fileSystem.file('.android/build.gradle')
+          .createSync(recursive: true);
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+        project: FlutterProject.current(),
+        outputDirectory: fileSystem.directory('build/'),
+        target: '',
+        buildNumber: '2.0',
+      );
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.run(
+          captureAny,
+          environment: anyNamed('environment'),
+          workingDirectory: anyNamed('workingDirectory'),
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/.android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_x86'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+      expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
+
+      // Verify the local engine repo is copied into the generated Maven repo.
+      final List<dynamic> copyDirectoryArguments = verify(
+          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
+      ).captured;
+
+      expect(copyDirectoryArguments.length, 2);
+      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
+      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fileSystemUtils,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext(
+        'build aar uses selected local engine，the engine abi is x64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: anyNamed('platform'), mode: anyNamed('mode'))).thenReturn('engine');
+      when(mockArtifacts.engineOutPath).thenReturn(fileSystem.path.join('out', 'android_x64'));
+
+      fileSystem.file('out/android_x64/flutter_embedding_release.pom')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <version>1.0.0-73fd6b049a80bcea2db1f26c7cee434907cd188b</version>
+  <dependencies>
+  </dependencies>
+</project>
+''');
+      fileSystem.file('out/android_x64/x86_64_release.pom').createSync(recursive: true);
+      fileSystem.file('out/android_x64/x86_64_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.jar').createSync(recursive: true);
+      fileSystem.file('out/android_x64/flutter_embedding_release.pom').createSync(recursive: true);
+
+      final File manifestFile = fileSystem.file('pubspec.yaml');
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('''
+        flutter:
+          module:
+            androidPackage: com.example.test
+        '''
+      );
+
+      fileSystem.directory('.android/gradle')
+          .createSync(recursive: true);
+
+      fileSystem.directory('.android/gradle/wrapper')
+          .createSync(recursive: true);
+
+      fileSystem.file('.android/gradlew').createSync(recursive: true);
+
+      fileSystem.file('.android/gradle.properties')
+          .writeAsStringSync('irrelevant');
+
+      fileSystem.file('.android/build.gradle')
+          .createSync(recursive: true);
+
+      // Let any process start. Assert after.
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
+
+      fileSystem.directory('build/outputs/repo').createSync(recursive: true);
+
+      when(fileSystemUtils.copyDirectorySync(any, any)).thenReturn(null);
+
+      await buildGradleAar(
+        androidBuildInfo: const AndroidBuildInfo(
+            BuildInfo(BuildMode.release, null, treeShakeIcons: false)),
+        project: FlutterProject.current(),
+        outputDirectory: fileSystem.directory('build/'),
+        target: '',
+        buildNumber: '2.0',
+      );
+
+      final List<String> actualGradlewCall = verify(
+        mockProcessManager.run(
+          captureAny,
+          environment: anyNamed('environment'),
+          workingDirectory: anyNamed('workingDirectory'),
+        ),
+      ).captured.last as List<String>;
+
+      expect(actualGradlewCall, contains('/.android/gradlew'));
+      expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_x64'));
+      expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
+      expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+      expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
+
+      // Verify the local engine repo is copied into the generated Maven repo.
+      final List<dynamic> copyDirectoryArguments = verify(
+          fileSystemUtils.copyDirectorySync(captureAny, captureAny)
+      ).captured;
+
+      expect(copyDirectoryArguments.length, 2);
+      expect((copyDirectoryArguments.first as Directory).path, '/.tmp_rand0/flutter_tool_local_engine_repo.rand0');
+      expect((copyDirectoryArguments.last as Directory).path, 'build/outputs/repo');
+
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      AndroidStudio: () => mockAndroidStudio,
+      Artifacts: () => mockArtifacts,
+      Cache: () => cache,
+      Platform: () => android,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fileSystemUtils,
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('printHowToConsumeAar', () {
@@ -1873,7 +2448,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -1925,7 +2500,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -1964,7 +2539,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2004,7 +2579,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2048,7 +2623,7 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory
     .childDirectory(directoryName)
-    ..createSync(recursive: true);
+    .createSync(recursive: true);
 
   bundleDirectory
     .childDirectory(directoryName)
@@ -2080,5 +2655,4 @@ class MockFlutterProject extends Mock implements FlutterProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockitoAndroidSdk extends Mock implements AndroidSdk {}
 class MockUsage extends Mock implements Usage {}

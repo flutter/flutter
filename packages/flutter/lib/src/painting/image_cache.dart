@@ -82,7 +82,7 @@ class ImageCache {
   /// not fit into the _pendingImages or _cache objects.
   ///
   /// Unlike _cache, the [_CachedImage] for this may have a null byte size.
-  final Map<Object, _CachedImage> _liveImages = <Object, _CachedImage>{};
+  final Map<Object, _LiveImage> _liveImages = <Object, _LiveImage>{};
 
   /// Maximum number of entries to store in the cache.
   ///
@@ -237,7 +237,8 @@ class ImageCache {
       // will never complete, e.g. it was loaded in a FakeAsync zone.
       // In such a case, we need to make sure subsequent calls to
       // putIfAbsent don't return this image that may never complete.
-      _liveImages.remove(key);
+      final _LiveImage image = _liveImages.remove(key);
+      image?.removeListener();
     }
     final _PendingImage pendingImage = _pendingImages.remove(key);
     if (pendingImage != null) {
@@ -285,18 +286,17 @@ class ImageCache {
     }
   }
 
-  void _trackLiveImage(Object key, _CachedImage image) {
+  void _trackLiveImage(Object key, _LiveImage image, { bool debugPutOk = true }) {
     // Avoid adding unnecessary callbacks to the completer.
     _liveImages.putIfAbsent(key, () {
+      assert(debugPutOk);
       // Even if no callers to ImageProvider.resolve have listened to the stream,
       // the cache is listening to the stream and will remove itself once the
       // image completes to move it from pending to keepAlive.
       // Even if the cache size is 0, we still add this listener.
-      image.completer.addOnLastListenerRemovedCallback(() {
-        _liveImages.remove(key);
-      });
+      image.completer.addOnLastListenerRemovedCallback(image.handleRemove);
       return image;
-    });
+    }).sizeBytes ??= image.sizeBytes;
   }
 
   /// Returns the previously cached [ImageStream] for the given key, if available;
@@ -341,7 +341,7 @@ class ImageCache {
       }
       // The image might have been keptAlive but had no listeners (so not live).
       // Make sure the cache starts tracking it as live again.
-      _trackLiveImage(key, image);
+      _trackLiveImage(key, _LiveImage(image.completer, image.sizeBytes, () => _liveImages.remove(key)));
       _cache[key] = image;
       return image.completer;
     }
@@ -357,7 +357,7 @@ class ImageCache {
 
     try {
       result = loader();
-      _trackLiveImage(key, _CachedImage(result, null));
+      _trackLiveImage(key, _LiveImage(result, null, () => _liveImages.remove(key)));
     } catch (error, stackTrace) {
       if (!kReleaseMode) {
         timelineTask.finish(arguments: <String, dynamic>{
@@ -392,13 +392,20 @@ class ImageCache {
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
 
       final _CachedImage image = _CachedImage(result, imageSize);
-      if (!_liveImages.containsKey(key)) {
-        assert(syncCall);
-        result.addOnLastListenerRemovedCallback(() {
-          _liveImages.remove(key);
-        });
-      }
-      _liveImages[key] = image;
+
+      _trackLiveImage(
+        key,
+        _LiveImage(
+          result,
+          imageSize,
+          () => _liveImages.remove(key),
+        ),
+        // This should result in a put if `loader()` above executed
+        // synchronously, in which case syncCall is true and we arrived here
+        // before we got a chance to track the image otherwise.
+        debugPutOk: syncCall,
+      );
+
       final _PendingImage pendingImage = untrackedPendingImage ?? _pendingImages.remove(key);
       if (pendingImage != null) {
         pendingImage.removeListener();
@@ -469,6 +476,9 @@ class ImageCache {
   /// memory pressure, since the live image caching only tracks image instances
   /// that are also being held by at least one other object.
   void clearLiveImages() {
+    for (final _LiveImage image in _liveImages.values) {
+      image.removeListener();
+    }
     _liveImages.clear();
   }
 
@@ -577,7 +587,18 @@ class _CachedImage {
   _CachedImage(this.completer, this.sizeBytes);
 
   final ImageStreamCompleter completer;
-  final int sizeBytes;
+  int sizeBytes;
+}
+
+class _LiveImage extends _CachedImage {
+  _LiveImage(ImageStreamCompleter completer, int sizeBytes, this.handleRemove)
+      : super(completer, sizeBytes);
+
+  final VoidCallback handleRemove;
+
+  void removeListener() {
+    completer.removeOnLastListenerRemovedCallback(handleRemove);
+  }
 }
 
 class _PendingImage {

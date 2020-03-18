@@ -20,10 +20,8 @@ import 'timeline.dart';
 /// An implementation of the Flutter Driver using the WebDriver.
 ///
 /// Example of how to test WebFlutterDriver:
-///   1. Have Selenium server (https://bit.ly/2TlkRyu) and WebDriver binary (https://chromedriver.chromium.org/downloads) downloaded and placed under the same folder
-///   2. Launch WebDriver Server: java -jar selenium-server-standalone-3.141.59.jar
-///   3. Launch Flutter Web application: flutter run -v -d chrome --target=test_driver/scroll_perf_web.dart
-///   4. Run test script: flutter drive --target=test_driver/scroll_perf_web.dart -v --use-existing-app=/application address/
+///   1. Launch WebDriver binary: ./chromedriver --port=4444
+///   2. Run test script: flutter drive --target=test_driver/scroll_perf_web.dart -d web-server --release
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection].
@@ -47,7 +45,7 @@ class WebFlutterDriver extends FlutterDriver {
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
   /// Driver also depends on environment variables DRIVER_SESSION_ID,
   /// BROWSER_SUPPORTS_TIMELINE, DRIVER_SESSION_URI, DRIVER_SESSION_SPEC
-  /// and DRIVER_SESSION_CAPABILITIES for configurations.
+  /// and ANDROID_CHROME_ON_EMULATOR for configurations.
   static Future<FlutterDriver> connectWeb(
       {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -56,7 +54,7 @@ class WebFlutterDriver extends FlutterDriver {
       'session-id': Platform.environment['DRIVER_SESSION_ID'],
       'session-uri': Platform.environment['DRIVER_SESSION_URI'],
       'session-spec': Platform.environment['DRIVER_SESSION_SPEC'],
-      'session-capabilities': Platform.environment['DRIVER_SESSION_CAPABILITIES'],
+      'android-chrome-on-emulator': Platform.environment['ANDROID_CHROME_ON_EMULATOR'] == 'true',
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings, timeout: timeout);
@@ -183,7 +181,7 @@ class FlutterWebConnection {
     _supportsTimelineAction = value;
   }
 
-  /// Starts WebDriver with the given [capabilities] and
+  /// Starts WebDriver with the given [settings] and
   /// establishes the connection to Flutter Web application.
   static Future<FlutterWebConnection> connect(
       String url,
@@ -195,6 +193,13 @@ class FlutterWebConnection {
         settings['session-id'].toString(),
         uri: Uri.parse(settings['session-uri'].toString()),
         spec: _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+    if (settings['android-chrome-on-emulator'] == true) {
+      final Uri localUri = Uri.parse(url);
+      // Converts to Android Emulator Uri.
+      // Hardcode the host to 10.0.2.2 based on
+      // https://developer.android.com/studio/run/emulator-networking
+      url = Uri(scheme: localUri.scheme, host: '10.0.2.2', port:localUri.port).toString();
+    }
     await driver.get(url);
 
     await waitUntilExtensionInstalled(driver, timeout);

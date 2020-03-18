@@ -131,7 +131,6 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   # Android on-device tests
 
@@ -185,6 +184,18 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  textfield_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of textfield on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  color_filter_and_fade_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -220,7 +231,6 @@ tasks:
       Checks that `flutter run --release` does not crash.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true # https://github.com/flutter/flutter/issues/45416.
 
   platform_interaction_test:
     description: >
@@ -319,11 +329,17 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_defines_test:
+    description: >
+      Builds an APK with a --dart-define and verifies it can be used as a constant
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["linux/android"]
+
   android_obfuscate_test:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   complex_layout_semantics_perf:
@@ -397,11 +413,17 @@ tasks:
 
   # iOS on-device tests
 
-  ios_obfuscate_test:
+  ios_defines_test:
     description: >
-      Builds an obfuscated APK and verifies a dart identifier cannot be found
+      Builds a Framework with a --dart-define and verifies it can be used as a constant
     stage: devicelab
     flaky: true
+    required_agent_capabilities: ["mac/ios"]
+
+  ios_content_validation_test:
+    description: >
+      Builds an obfuscated app and verifies contents and structure
+    stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
   tiles_scroll_perf_ios__timeline_summary:
@@ -548,6 +570,12 @@ tasks:
     # Remove the flaky flag when we are sure the test is stable.
     flaky: true
 
+  ios_platform_view_tests:
+    description: >
+      Runs end-to-end tests with platform views in the scene.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
   # system_debug_ios:
   #   description: >
@@ -567,7 +595,6 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true # marked as flaky while infra is under heavy development
 
   build_benchmark_ios:
     description: >
@@ -721,7 +748,6 @@ tasks:
       placeholder.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   analyzer_benchmark:
     description: >

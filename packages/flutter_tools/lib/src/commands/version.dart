@@ -41,6 +41,7 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
+    globals.flutterVersion.fetchTagsAndUpdate();
     RunResult runResult;
     try {
       runResult = await processUtils.run(
@@ -116,8 +117,8 @@ class VersionCommand extends FlutterCommand {
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
-    } catch (e) {
-      throwToolExit('Unable to checkout version branch for version $version.');
+    } on Exception catch (e) {
+      throwToolExit('Unable to checkout version branch for version $version: $e');
     }
 
     final FlutterVersion flutterVersion = FlutterVersion();

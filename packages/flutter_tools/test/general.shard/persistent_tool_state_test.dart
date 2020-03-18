@@ -7,11 +7,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
-
-class MockLogger extends Mock implements Logger {}
 
 void main() {
   testWithoutContext('state can be set and persists', () {
@@ -21,7 +18,7 @@ void main() {
     final File stateFile = directory.childFile('.flutter_tool_state');
     final PersistentToolState state1 = PersistentToolState.test(
       directory: directory,
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
     );
     expect(state1.redisplayWelcomeMessage, null);
     state1.redisplayWelcomeMessage = true;
@@ -32,7 +29,7 @@ void main() {
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
     );
     expect(state2.redisplayWelcomeMessage, false);
   });
@@ -42,7 +39,7 @@ void main() {
     final Directory directory = fileSystem.directory('state_dir')..createSync();
     final PersistentToolState state1 = PersistentToolState.test(
       directory: directory,
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
     );
 
     state1.updateLastActiveVersion('abc', Channel.master);
@@ -52,7 +49,7 @@ void main() {
 
     final PersistentToolState state2 = PersistentToolState.test(
       directory: directory,
-      logger: MockLogger(),
+      logger: BufferLogger.test(),
     );
 
     expect(state2.lastActiveVersion(Channel.master), 'abc');

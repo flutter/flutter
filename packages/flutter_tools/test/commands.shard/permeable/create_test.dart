@@ -488,27 +488,6 @@ void main() {
     expect(actualContents.contains('useAndroidX'), true);
   });
 
-  testUsingContext('non androidx app project', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), false);
-  });
-
   testUsingContext('androidx is used by default in a module project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -523,23 +502,6 @@ void main() {
     expect(
       project.usesAndroidX,
       true,
-    );
-  });
-
-  testUsingContext('non androidx module', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--template=module', '--no-pub', '--no-androidx', projectDir.path]);
-
-    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
-    expect(
-      project.usesAndroidX,
-      false,
     );
   });
 
@@ -564,28 +526,7 @@ void main() {
     expect(actualContents.contains('useAndroidX'), true);
   });
 
-  testUsingContext('non androidx plugin project', () async {
-    Cache.flutterRoot = '../..';
-    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
-    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
-
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
-
-    void expectExists(String relPath) {
-      expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
-    }
-
-    expectExists('android/gradle.properties');
-
-    final String actualContents = await globals.fs.file(projectDir.path + '/android/gradle.properties').readAsString();
-
-    expect(actualContents.contains('useAndroidX'), false);
-  });
-
-  testUsingContext('app supports macOS if requested', () async {
+  testUsingContext('app supports Linux if requested', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -595,9 +536,54 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('app does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
+  });
+
+  testUsingContext('plugin supports Linux if requested', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+  });
+
+  testUsingContext('plugin does not include Linux by default', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+
+    expect(projectDir.childDirectory('linux').childFile('Makefile').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
   testUsingContext('app does not include macOS by default', () async {
@@ -1238,6 +1224,28 @@ void main() {
     HttpClientFactory: () =>
         () => MockHttpClient(200, result: samplesIndexJson),
   });
+
+  testUsingContext('Throws tool exit on empty samples index', () async {
+    final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-samples',
+      outputFile,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(
+        exitCode: 2,
+        message: 'Unable to download samples',
+    ));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () =>
+        () => MockHttpClient(200, result: ''),
+  });
+
   testUsingContext('provides an error to the user if samples json download fails', () async {
     final String outputFile = globals.fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();

@@ -137,7 +137,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
         'isolate_snapshot.bin')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
 
     final String inputKernel = globals.fs.path.join(environment.buildDir.path, 'app.dill');
     final String outputKernel = globals.fs.path.join('App.framework', 'Versions', 'A', 'Resources',
@@ -160,7 +160,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
         'isolate_snapshot.bin')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        ..createSync(recursive: true);
+        .createSync(recursive: true);
     final String outputKernel = globals.fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'kernel_blob.bin');
     final String precompiledVm = globals.fs.path.join('App.framework', 'Resources',

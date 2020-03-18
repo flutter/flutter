@@ -18,10 +18,15 @@ class BenchBuildMaterialCheckbox extends WidgetBuildRecorder {
 
   @override
   Widget createWidget() {
-    return Column(
-      children: List<Widget>.generate(10, (int i) {
-        return _buildRow();
-      }),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Column(
+          children: List<Widget>.generate(10, (int i) {
+            return _buildRow();
+          }),
+        ),
+      ),
     );
   }
 

@@ -30,9 +30,7 @@ class FakeCommand {
     this.completer,
   }) : assert(command != null),
        assert(duration != null),
-       assert(exitCode != null),
-       assert(stdout != null),
-       assert(stderr != null);
+       assert(exitCode != null);
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
@@ -139,8 +137,12 @@ class _FakeProcess implements Process {
         }
         return _exitCode;
       }),
-      stderr = Stream<List<int>>.value(utf8.encode(_stderr)),
-      stdout = Stream<List<int>>.value(utf8.encode(_stdout));
+      stderr = _stderr == null
+        ? const Stream<List<int>>.empty()
+        : Stream<List<int>>.value(utf8.encode(_stderr)),
+      stdout = _stdout == null
+        ? const Stream<List<int>>.empty()
+        : Stream<List<int>>.value(utf8.encode(_stdout));
 
   final int _exitCode;
 
@@ -165,7 +167,7 @@ class _FakeProcess implements Process {
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'Process.kill() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }
@@ -201,6 +203,11 @@ abstract class FakeProcessManager implements ProcessManager {
   ///
   /// This is a no-op on [FakeProcessManager.any].
   void addCommand(FakeCommand command);
+
+  /// Whether this fake has more [FakeCommand]s that are expected to run.
+  ///
+  /// This is always `true` for [FakeProcessManager.any].
+  bool get hasRemainingExpectations;
 
   @protected
   FakeCommand findCommand(List<String> command, String workingDirectory, Map<String, String> environment);
@@ -276,7 +283,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'ProcessManager.killPid() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }
@@ -299,6 +306,9 @@ class _FakeAnyProcessManager extends FakeProcessManager {
 
   @override
   void addCommand(FakeCommand command) { }
+
+  @override
+  bool get hasRemainingExpectations => true;
 }
 
 class _SequenceProcessManager extends FakeProcessManager {
@@ -325,4 +335,7 @@ class _SequenceProcessManager extends FakeProcessManager {
   void addCommand(FakeCommand command) {
     _commands.add(command);
   }
+
+  @override
+  bool get hasRemainingExpectations => _commands.isNotEmpty;
 }

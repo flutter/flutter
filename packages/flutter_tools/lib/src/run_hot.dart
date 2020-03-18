@@ -93,9 +93,9 @@ class HotRunner extends ResidentRunner {
   bool _didAttach = false;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
-  // The initial launch is from a snapshot.
-  bool _runningFromSnapshot = true;
+
   DateTime firstBuildTime;
+  bool _shouldResetAssetDirectory = true;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -186,7 +186,7 @@ class HotRunner extends ResidentRunner {
         final Map<String, dynamic> firstReport = reports.first;
         await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
       }
-    } catch (error) {
+    } on Exception catch (error) {
       return OperationResult(1, error.toString());
     }
 
@@ -197,7 +197,7 @@ class HotRunner extends ResidentRunner {
     }
 
     globals.printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
-    flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
     return OperationResult.ok;
   }
 
@@ -215,20 +215,31 @@ class HotRunner extends ResidentRunner {
         compileExpression: _compileExpressionService,
         reloadMethod: reloadMethod,
       );
-    } catch (error) {
+    // Catches all exceptions, non-Exception objects are rethrown.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
+      if (error is! Exception && error is! String) {
+        rethrow;
+      }
       globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
-      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      // TODO(blasten): Remove this check once
+      // https://issuetracker.google.com/issues/132325318 has been fixed.
       if (await hasDeviceRunningAndroidQ(flutterDevices) &&
           error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318.');
+        globals.printStatus(
+          '🔨 If you are using an emulator running Android Q Beta, '
+          'consider using an emulator running API level 29 or lower.',
+        );
+        globals.printStatus(
+          'Learn more about the status of this issue on '
+          'https://issuetracker.google.com/issues/132325318.',
+        );
       }
       return 2;
     }
 
     for (final FlutterDevice device in flutterDevices) {
-      device.initLogReader();
+      await device.initLogReader();
     }
     try {
       final List<Uri> baseUris = await _initDevFS();
@@ -242,7 +253,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printError('Error initializing DevFS: $error');
       return 3;
     }
@@ -342,7 +353,7 @@ class HotRunner extends ResidentRunner {
             mainPath,
             <Uri>[],
             outputPath: dillOutputPath ??
-              getDefaultApplicationKernelPath(trackWidgetCreation: device.trackWidgetCreation),
+              getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packagesFilePath : packagesFilePath,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
@@ -509,14 +520,16 @@ class HotRunner extends ResidentRunner {
       }
     }
     // Check if the isolate is paused and resume it.
-    final List<Future<void>> futures = <Future<void>>[];
+    final List<Future<void>> operations = <Future<void>>[];
     for (final FlutterDevice device in flutterDevices) {
+      final Set<Isolate> uiIsolates = <Isolate>{};
       for (final FlutterView view in device.views) {
         if (view.uiIsolate == null) {
           continue;
         }
+        uiIsolates.add(view.uiIsolate);
         // Reload the isolate.
-        futures.add(view.uiIsolate.reload().then((ServiceObject _) {
+        operations.add(view.uiIsolate.reload().then((ServiceObject _) {
           final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
           if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
             // Resume the isolate so that it can be killed by the embedder.
@@ -525,21 +538,27 @@ class HotRunner extends ResidentRunner {
           return null;
         }));
       }
+      // The engine handles killing and recreating isolates that it has spawned
+      // ("uiIsolates"). The isolates that were spawned from these uiIsolates
+      // will not be restared, and so they must be manually killed.
+      for (final Isolate isolate in device?.vmService?.vm?.isolates ?? <Isolate>[]) {
+        if (!uiIsolates.contains(isolate)) {
+          operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
+            'isolateId': isolate.id,
+          }));
+        }
+      }
     }
-    await Future.wait(futures);
+    await Future.wait(operations);
 
-    // We are now running from source.
-    _runningFromSnapshot = false;
     await _launchFromDevFS(mainPath + '.dill');
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
-    // We are now running from sources.
-    _runningFromSnapshot = false;
     _addBenchmarkData('hotRestartMillisecondsToFrame',
         restartTimer.elapsed.inMilliseconds);
 
     // Send timing analytics.
-    flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+    globals.flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
 
     // In benchmark mode, make sure all stream notifications have finished.
     if (benchmarkMode) {
@@ -597,7 +616,7 @@ class HotRunner extends ResidentRunner {
     if (!(reloadReport['success'] as bool)) {
       if (printErrors) {
         globals.printError('Hot reload was rejected:');
-        for (final Map<String, dynamic> notice in reloadReport['details']['notices']) {
+        for (final Map<String, dynamic> notice in (reloadReport['details']['notices'] as List<dynamic>).cast<Map<String, dynamic>>()) {
           globals.printError('${notice['message']}');
         }
       }
@@ -723,10 +742,8 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool pause,
   }) async {
-    final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
-    final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
     Status status = globals.logger.startProgress(
-      '$progressPrefix hot reload...',
+      'Performing hot reload...',
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.reload',
     );
@@ -777,13 +794,6 @@ class HotRunner extends ResidentRunner {
       }
     }
 
-    // The initial launch is from a script snapshot. When we reload from source
-    // on top of a script snapshot, the first reload will be a worst case reload
-    // because all of the sources will end up being dirty (library paths will
-    // change from host path to a device path). Subsequent reloads will
-    // not be affected, so we resume reporting reload times on the second
-    // reload.
-    bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = Stopwatch()..start();
 
     if (!_isPaused()) {
@@ -794,6 +804,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
+    bool shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
@@ -808,10 +819,11 @@ class HotRunner extends ResidentRunner {
       );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (final FlutterDevice device in flutterDevices) {
-        if (_runningFromSnapshot) {
+        if (_shouldResetAssetDirectory) {
           // Asset directory has to be set only once when we switch from
-          // running from snapshot to running from uploaded files.
+          // running from bundle to uploaded files.
           await device.resetAssetDirectory();
+          _shouldResetAssetDirectory = false;
         }
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause,
@@ -872,7 +884,7 @@ class HotRunner extends ResidentRunner {
         return OperationResult(errorCode, errorMessage);
       }
       return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       globals.printTrace('Hot reload failed: $error\n$stackTrace');
       return OperationResult(1, '$error');
     }
@@ -894,8 +906,6 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(allDevices);
 
-    // We are now running from source.
-    _runningFromSnapshot = false;
     // Check if any isolates are paused.
     final List<FlutterView> reassembleViews = <FlutterView>[];
     String serviceEventKind;
@@ -936,7 +946,7 @@ class HotRunner extends ResidentRunner {
         () async {
           try {
             await view.uiIsolate.flutterReassemble();
-          } catch (error) {
+          } on Exception catch (error) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
             return;
@@ -1013,7 +1023,7 @@ class HotRunner extends ResidentRunner {
     }
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime) {
-      flutterUsage.sendTiming('hot', 'reload', reloadDuration);
+      globals.flutterUsage.sendTiming('hot', 'reload', reloadDuration);
     }
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,

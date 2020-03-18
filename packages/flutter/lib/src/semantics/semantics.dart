@@ -172,7 +172,7 @@ class CustomSemanticsAction {
 ///
 /// Typically obtained from [SemanticsNode.getSemanticsData].
 @immutable
-class SemanticsData extends Diagnosticable {
+class SemanticsData with Diagnosticable {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
@@ -3997,7 +3997,7 @@ String _concatStrings({
 /// See also:
 ///
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
-abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
+abstract class SemanticsSortKey with Diagnosticable implements Comparable<SemanticsSortKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const SemanticsSortKey({this.name});

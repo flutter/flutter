@@ -20,10 +20,10 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'intellij/intellij.dart';
-import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
@@ -56,6 +56,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
+  final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
+  final WebWorkflow webWorkflow = WebWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
   @override
   List<DoctorValidator> get validators {
     if (_validators != null) {
@@ -67,12 +77,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators,
       ...VsCodeValidator.installedValidators,
     ];
-
     _validators = <DoctorValidator>[
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
-      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+      if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         WebValidator(
@@ -103,8 +112,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     if (_workflows == null) {
       _workflows = <Workflow>[];
 
-      if (iosWorkflow.appliesToHostPlatform) {
-        _workflows.add(iosWorkflow);
+      if (globals.iosWorkflow.appliesToHostPlatform) {
+        _workflows.add(globals.iosWorkflow);
       }
 
       if (androidWorkflow.appliesToHostPlatform) {
@@ -189,7 +198,7 @@ class Doctor {
       ValidationResult result;
       try {
         result = await asyncGuard<ValidationResult>(() => validator.validate());
-      } catch (exception) {
+      } on Exception catch (exception) {
         // We're generating a summary, so drop the stack trace.
         result = ValidationResult.crash(exception);
       }
@@ -271,10 +280,10 @@ class Doctor {
       ValidationResult result;
       try {
         result = await validatorTask.result;
-      } catch (exception, stackTrace) {
-        result = ValidationResult.crash(exception, stackTrace);
-      } finally {
         status.stop();
+      } on Exception catch (exception, stackTrace) {
+        result = ValidationResult.crash(exception, stackTrace);
+        status.cancel();
       }
 
       switch (result.type) {
@@ -428,7 +437,7 @@ class GroupedValidator extends DoctorValidator {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
-      } catch (exception, stackTrace) {
+      } on Exception catch (exception, stackTrace) {
         results.add(ValidationResult.crash(exception, stackTrace));
       }
     }
@@ -658,7 +667,7 @@ bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
     return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
-  } catch (error) {
+  } on Exception {
     return false;
   }
 }
@@ -786,7 +795,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
           String installPath;
           try {
             installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
-          } catch (e) {
+          } on Exception {
             // ignored
           }
           if (installPath != null && globals.fs.isDirectorySync(installPath)) {

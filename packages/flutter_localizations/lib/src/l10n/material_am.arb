@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "ዘርጋ",
   "remainingTextFieldCharacterCountOne": "1 ቁምፊ ይቀራል",
   "remainingTextFieldCharacterCountOther": "$remainingCount ቁምፊዎች ይቀራሉ",
-  "refreshIndicatorSemanticLabel": "አድስ"
+  "refreshIndicatorSemanticLabel": "አድስ",
+  "moreButtonTooltip": "TBD"
 }

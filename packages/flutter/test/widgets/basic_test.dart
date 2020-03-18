@@ -361,8 +361,32 @@ void main() {
       expect(drawRect[0], const Rect.fromLTWH(0, 0, 800, 600));
       expect(drawRect[1].color, colorToPaint);
       verify(mockContext.paintChild(renderSizedBox, Offset.zero)).called(1);
-      });
+    });
+
+    testWidgets('ColoredBox - properties', (WidgetTester tester) async {
+      const ColoredBox box = ColoredBox(color: colorToPaint);
+      final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
+      box.debugFillProperties(properties);
+
+      expect(properties.properties.first.value, colorToPaint);
+    });
   });
+  testWidgets('Inconsequential golden test', (WidgetTester tester) async {
+    // The test validates the Flutter Gold integration. Any changes to the
+    // golden file can be approved at any time.
+    await tester.pumpWidget(RepaintBoundary(
+      child: Container(
+        color: const Color(0xFF42A5F5),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('inconsequential_golden_file.png'),
+    );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
+  }, skip: isBrowser);
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);

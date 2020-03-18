@@ -436,7 +436,7 @@ class FloatingActionButton extends StatelessWidget {
           'FloatingActionButtons using ThemeData.accentIconTheme '
           'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
           'instead. See '
-          'https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency. '
+          'https://flutter.dev/go/remove-fab-accent-theme-dependency. '
           'This feature was deprecated after v1.13.2.'
         );
       }
@@ -563,8 +563,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
-    renderObject
-      ..textDirection = Directionality.of(context);
+    renderObject.textDirection = Directionality.of(context);
   }
 }
 
@@ -582,6 +581,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = Size(

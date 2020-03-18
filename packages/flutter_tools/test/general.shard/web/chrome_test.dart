@@ -34,10 +34,10 @@ void main() {
   Platform platform;
   FakeProcessManager processManager;
   OperatingSystemUtils operatingSystemUtils;
-  MockLogger logger;
+  Logger logger;
 
   setUp(() {
-    logger = MockLogger();
+    logger = BufferLogger.test();
     operatingSystemUtils = MockOperatingSystemUtils();
     when(operatingSystemUtils.findFreePort())
         .thenAnswer((Invocation invocation) async {
@@ -163,4 +163,3 @@ void main() {
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockLogger extends Mock implements Logger {}

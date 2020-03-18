@@ -181,6 +181,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     size = constraints.biggest;
 
     if (child == null) {

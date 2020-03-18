@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages_file.dart' as packages_file;
 
 import '../globals.dart' as globals;

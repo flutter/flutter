@@ -995,7 +995,6 @@ void main() {
           dragStartBehavior: DragStartBehavior.down,
           style: TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -1316,7 +1315,6 @@ void main() {
               child: SelectableText(
                 text,
                 maxLines: 3,
-                strutStyle: StrutStyle.disabled,
               ),
             ),
           ),

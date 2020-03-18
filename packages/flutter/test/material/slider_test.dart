@@ -1250,7 +1250,7 @@ void main() {
         ));
 
     semantics.dispose();
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1497,7 +1497,7 @@ void main() {
       await gesture.up();
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia]) {
+    for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows]) {
       value = 0.5;
       await tester.pumpWidget(buildFrame(platform));
       await tester.pumpAndSettle(); // Finish the theme change animation.

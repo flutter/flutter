@@ -144,7 +144,7 @@ class FlutterTesterDevice extends Device {
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
     await BundleBuilder().build(
-      buildMode: buildInfo.mode,
+      buildInfo: buildInfo,
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
@@ -157,6 +157,7 @@ class FlutterTesterDevice extends Device {
 
     command.add(applicationKernelFilePath);
 
+    ProtocolDiscovery observatoryDiscovery;
     try {
       globals.printTrace(command.join(' '));
 
@@ -185,7 +186,7 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
-      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
+      observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -193,11 +194,19 @@ class FlutterTesterDevice extends Device {
       );
 
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
-    } catch (error) {
+      if (observatoryUri != null) {
+        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      }
+      globals.printError(
+        'Failed to launch $package: '
+        'The log reader failed unexpectedly.',
+      );
+    } on Exception catch (error) {
       globals.printError('Failed to launch $package: $error');
-      return LaunchResult.failed();
+    } finally {
+      await observatoryDiscovery?.cancel();
     }
+    return LaunchResult.failed();
   }
 
   @override
@@ -237,7 +246,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 }

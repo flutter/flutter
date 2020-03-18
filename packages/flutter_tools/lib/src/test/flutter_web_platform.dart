@@ -10,7 +10,11 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/discovery.dart';
+// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+// ignore: deprecated_member_use
 import 'package:package_config/packages.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
@@ -98,6 +102,8 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
+  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+  // ignore: deprecated_member_use
   final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
 
   final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
@@ -212,6 +218,8 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
     if (request.requestedUri.pathSegments.first == 'packages') {
+      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
+      // ignore: deprecated_member_use
       final Packages packages = await _packagesFuture;
       final Uri fileUri = packages.resolve(Uri(
         scheme: 'package',
@@ -735,7 +743,8 @@ class BrowserManager {
 
         _controllers.add(controller);
         return await controller.suite;
-      } catch (_) {
+      // Not limiting to catching Exception because the exception is rethrown.
+      } catch (_) { // ignore: avoid_catches_without_on_clauses
         closeIframe();
         rethrow;
       }
@@ -989,7 +998,7 @@ void main() async {
         try {
           bool success = await goldenFileComparator.compare(bytes, goldenKey);
           print(jsonEncode({'success': success}));
-        } catch (ex) {
+        } on Exception catch (ex) {
           print(jsonEncode({'success': false, 'message': '\$ex'}));
         }
       }

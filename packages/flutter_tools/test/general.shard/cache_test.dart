@@ -231,7 +231,7 @@ void main() {
           null,
         });
         fail('Mock thrown exception expected');
-      } catch (e) {
+      } on Exception {
         verify(artifact1.update());
         // Don't continue when retrieval fails.
         verifyNever(artifact2.update());
@@ -423,11 +423,29 @@ void main() {
       final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
         ..createSync();
       iosUsbArtifacts.location.childFile('idevicesyslog')
-        ..createSync();
+        .createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), true);
 
       ideviceScreenshotFile.deleteSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('verifies iproxy for usbmuxd in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+      final File iproxy = iosUsbArtifacts.location.childFile('iproxy')
+        ..createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+
+      iproxy.deleteSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{

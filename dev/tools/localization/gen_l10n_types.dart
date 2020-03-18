@@ -104,11 +104,11 @@ const Set<String> _validNumberFormats = <String>{
 //
 // Example of code that uses named parameters:
 // final NumberFormat format = NumberFormat.compact(
-//   locale: _localeName,
+//   locale: localeName,
 // );
 //
 // Example of code that uses positional parameters:
-// final NumberFormat format = NumberFormat.scientificPattern(_localeName);
+// final NumberFormat format = NumberFormat.scientificPattern(localeName);
 const Set<String> _numberFormatsWithNamedParameters = <String>{
   'compact',
   'compactCurrency',
@@ -423,6 +423,23 @@ class AppResourceBundleCollection {
         languageToLocales[bundle.locale.languageCode].add(bundle.locale);
       }
     }
+
+    languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
+      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
+        return locale.toString();
+      }).toList();
+      if (!localeStrings.contains(language)) {
+        throw L10nException(
+          'Arb file for a fallback, $language, does not exist, even though \n'
+          'the following locale(s) exist: $listOfCorrespondingLocales. \n'
+          'When locales specify a script code or country code, a \n'
+          'base locale (without the script code or country code) should \n'
+          'exist as the fallback. Please create a {fileName}_$language.arb \n'
+          'file.'
+        );
+      }
+    });
+
     return AppResourceBundleCollection._(directory, localeToBundle, languageToLocales);
   }
 

@@ -57,7 +57,7 @@ flutter:
     - a/b/c/foo
 '''
       );
-      globals.fs.file('.packages')..createSync();
+      globals.fs.file('.packages').createSync();
 
       final List<String> assets = <String>[
         'a/b/c/foo',
