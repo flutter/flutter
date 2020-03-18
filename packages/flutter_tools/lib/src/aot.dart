@@ -87,9 +87,9 @@ class AotBuilder {
         kTargetPlatform: getNameForTargetPlatform(platform),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kDartDefines: jsonEncode(buildInfo.dartDefines),
-        if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
+        if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
           kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-        if (buildInfo.extraFrontEndOptions.isNotEmpty)
+        if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
           kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
         if (platform == TargetPlatform.ios)
           kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
