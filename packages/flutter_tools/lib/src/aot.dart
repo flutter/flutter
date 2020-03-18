@@ -41,12 +41,12 @@ class AotBuilder {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.android_x86:
         throwToolExit('$platform is not supported in AOT.');
         break;
+      case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
         throwToolExit(
           "To build release for fuchsia, use 'flutter build fuchsia --release'"
