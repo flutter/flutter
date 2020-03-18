@@ -277,7 +277,7 @@ Future<void> _runToolTests() async {
       // on Windows.
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
-        : ''
+        : '';
       await _pubRunTest(
         toolsPath,
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
