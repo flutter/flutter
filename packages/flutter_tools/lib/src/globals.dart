@@ -27,6 +27,7 @@ import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
+import 'ios/xcodeproj.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
@@ -78,6 +79,7 @@ IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 XCDevice get xcdevice => context.get<XCDevice>();
 

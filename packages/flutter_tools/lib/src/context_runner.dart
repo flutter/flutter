@@ -206,7 +206,7 @@ Future<T> runInContext<T>(
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,

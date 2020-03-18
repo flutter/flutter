@@ -72,7 +72,7 @@ void main() {
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
 
-        verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
+        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
