@@ -17,7 +17,6 @@ void main() {
   // and 65535; this test verifies we are killing iproxy processes when
   // we timeout on a port
   testWithoutContext('IOSDevicePortForwarder.forward will kill iproxy processes before invoking a second', () async {
-    const String deviceId = '123';
     const int devicePort = 456;
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
