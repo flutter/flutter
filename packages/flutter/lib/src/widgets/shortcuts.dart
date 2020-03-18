@@ -79,9 +79,6 @@ class KeySet<T extends KeyboardKey> {
 
   /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => UnmodifiableSetView<T>(_keys);
-  // This needs to be a hash set to be sure that the hashCode accessor returns
-  // consistent results. LinkedHashSet (the default Set implementation) depends
-  // upon insertion order, and HashSet does not.
   final HashSet<T> _keys;
 
   @override
@@ -93,9 +90,22 @@ class KeySet<T extends KeyboardKey> {
         && setEquals<T>(other._keys, _keys);
   }
 
+  // Cached hash code.
+  int _hashCode;
+
   @override
   int get hashCode {
-    return hashList(_keys);
+    // Keys are first sorted by hash to make sure the result of hashList is order independent.
+    if (_hashCode == null) {
+      final List<int> sortedHashes = <int>[];
+      for (final T key in _keys) {
+        sortedHashes.add(key.hashCode);
+      }
+      sortedHashes.sort();
+      _hashCode = hashList(sortedHashes);
+    }
+
+    return _hashCode;
   }
 }
 

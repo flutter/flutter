@@ -132,8 +132,8 @@ void main() {
       final Map<LogicalKeySet, String> map = <LogicalKeySet, String>{set1: 'one'};
       expect(set2 == set3, isTrue);
       expect(set2 == set4, isTrue);
-      expect(set2.hashCode == set3.hashCode, isTrue);
-      expect(set2.hashCode == set4.hashCode, isTrue);
+      expect(set2.hashCode, set3.hashCode);
+      expect(set2.hashCode, set4.hashCode);
       expect(map.containsKey(set1), isTrue);
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
