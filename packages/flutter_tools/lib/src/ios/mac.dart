@@ -181,12 +181,15 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  
+  final String toolchain = platform.environment['XCODE_TOOLCHAIN'] ?? "XcodeDefault";
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
     '-configuration', configuration,
+    '-toolchain', toolchain
   ];
 
   if (globals.logger.isVerbose) {
