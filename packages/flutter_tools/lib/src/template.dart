@@ -236,9 +236,15 @@ Directory templateDirectoryInPackage(String name, FileSystem fileSystem) {
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
 }
 
+// Returns the directory containing the 'name' template directory in
+// flutter_template_images, to resolve image placeholder against.
 Directory templateImageDirectory(String name, FileSystem fileSystem) {
-  final PackageMap packageConfig = PackageMap(fileSystem.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', kPackagesFileName));
+  final String packageFilePath = fileSystem.path.join(
+      Cache.flutterRoot, 'packages', 'flutter_tools', kPackagesFileName);
+  if (!fileSystem.file(packageFilePath).existsSync()) {
+    return null;
+  }
+  final PackageMap packageConfig = PackageMap(packageFilePath);
   final Uri imagePackageLibDir = packageConfig.map['flutter_template_images'];
   return fileSystem.directory(imagePackageLibDir)
       .parent
