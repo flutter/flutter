@@ -266,7 +266,7 @@ class Chrome {
   Future<int> get onExit => _process.exitCode;
 
   Future<void> close() async {
-    if (ChromeLauncher._currentCompleter.isCompleted) {
+    if (ChromeLauncher.hasChromeInstance) {
       ChromeLauncher._currentCompleter = Completer<Chrome>();
     }
     chromeConnection.close();
