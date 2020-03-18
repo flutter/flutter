@@ -115,6 +115,11 @@ void main() {
     when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onIsolateEvent).thenAnswer((Invocation _) {
+      return Stream<Event>.fromIterable(<Event>[
+        Event(kind: EventKind.kIsolateStart, timestamp: 1),
+      ]);
+    });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
@@ -426,7 +431,7 @@ void main() {
   }));
 
   test('web resident runner can toggle CanvasKit', () => testbed.run(() async {
-    final WebAssetServer webAssetServer = WebAssetServer(null, null, null);
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null);
     when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
 
     expect(residentWebRunner.supportsCanvasKit, true);
