@@ -78,7 +78,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 void main() {
   // TODO(jonahwilliams): This test doesn't really belong here but
   // I don't have a better place for it for now.
-  testUsingContext('disposing device disposes the portForwarder and logReader', () async {
+  testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
     final DevicePortForwarder devicePortForwarder = MockDevicePortForwarder();
     final DeviceLogReader deviceLogReader = MockDeviceLogReader();
@@ -235,7 +235,7 @@ void main() {
       Usage: () => MockUsage(),
     });
 
-  // Still uses context for analytics and mDNS.
+  // Still uses context for TimeoutConfiguration and usage
   testUsingContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -262,6 +262,8 @@ void main() {
     expect(launchResult.hasObservatory, false);
     expect(await device.stopApp(iosApp), false);
     expect(processManager.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
   });
 
   // Still uses context for analytics and mDNS.
