@@ -76,7 +76,11 @@ class DeviceManager {
       androidWorkflow: androidWorkflow,
       processManager: globals.processManager,
     ),
-    IOSDevices(),
+    IOSDevices(
+      platform: globals.platform,
+      xcdevice: globals.xcdevice,
+      iosWorkflow: globals.iosWorkflow,
+    ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),

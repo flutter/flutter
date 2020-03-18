@@ -241,11 +241,6 @@ void main() {
       mockArtifacts = MockArtifacts();
       mockXcode = MockXcode();
       when(mockXcode.sdkLocation(any)).thenAnswer((_) => Future<String>.value(kSDKPath));
-
-      for (final BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
-            platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
-      }
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
