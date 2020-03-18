@@ -104,7 +104,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     globals.printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     globals.printError('Open Xcode to fix the problem:');
@@ -545,12 +545,12 @@ bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {
     return false;
   }
-  if (!xcodeProjectInterpreter.isInstalled) {
+  if (!globals.xcodeProjectInterpreter.isInstalled) {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   if (!globals.xcode.isVersionSatisfactory) {
-    globals.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
+    globals.printError('Found "${globals.xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }
   return true;
