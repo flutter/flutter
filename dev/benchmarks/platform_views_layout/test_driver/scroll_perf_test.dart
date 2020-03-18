@@ -54,14 +54,11 @@ void main() {
       summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
-    test('complex_layout_scroll_perf', () async {
-      await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
-    });
-
-    test('tiles_scroll_perf', () async {
-      await driver.tap(find.byTooltip('Open navigation menu'));
-      await driver.tap(find.byValueKey('scroll-switcher'));
-      await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
+    test('platform_views_scroll_perf', () async {
+      // Disable frame sync, since there are ongoing animations.
+      await driver.runUnsynchronized(() async {
+        await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
+      });
     });
   });
 }

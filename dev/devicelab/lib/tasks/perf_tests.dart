@@ -32,7 +32,7 @@ TaskFunction createTilesScrollPerfTest() {
 
 TaskFunction createPlatformViewsScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/complex_layout',
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/scroll_perf.dart',
     'platform_views_scroll_perf',
   ).run;
