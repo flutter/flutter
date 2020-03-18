@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -13,7 +11,7 @@ void main() {
   );
 }
 
-enum ScrollMode { complex, tile, platformView }
+enum ScrollMode { complex, tile }
 
 class ComplexLayoutApp extends StatefulWidget {
   @override
@@ -25,24 +23,10 @@ class ComplexLayoutApp extends StatefulWidget {
 class ComplexLayoutAppState extends State<ComplexLayoutApp> {
   @override
   Widget build(BuildContext context) {
-    Widget homeWidget;
-
-    switch (scrollMode) {
-      case ScrollMode.complex:
-        homeWidget = const ComplexLayout();
-      break;
-      case ScrollMode.tile:
-        homeWidget = const TileScrollLayout();
-      break;
-      case ScrollMode.platformView:
-        homeWidget = const PlatformViewLayout();
-      break;
-    }
     return MaterialApp(
       theme: lightTheme ? ThemeData.light() : ThemeData.dark(),
       title: 'Advanced Layout',
-      home: homeWidget,
-    );
+      home: scrollMode == ScrollMode.complex ? const ComplexLayout() : const TileScrollLayout());
   }
 
   bool _lightTheme = true;
@@ -625,11 +609,6 @@ class GalleryDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
-    final Map<ScrollMode, String> nextScrollMode = <ScrollMode, String>{
-      ScrollMode.complex: 'Tile',
-      ScrollMode.tile: 'Platform Views',
-      ScrollMode.platformView: 'Complex',
-    };
     return Drawer(
       // Note: for real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
@@ -643,13 +622,10 @@ class GalleryDrawer extends StatelessWidget {
             key: const Key('scroll-switcher'),
             title: const Text('Scroll Mode'),
             onTap: () {
-              final int nextScrollModeIndex = (ScrollMode.values.indexOf(currentMode) + 1) %
-                ScrollMode.values.length;
-              final ScrollMode nextScrollMode = ScrollMode.values[nextScrollModeIndex];
-              _changeScrollMode(context, nextScrollMode);
+              _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex);
              Navigator.pop(context);
             },
-            trailing: Text(nextScrollMode[currentMode]),
+            trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex'),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_5),
@@ -700,97 +676,6 @@ class FancyDrawerHeader extends StatelessWidget {
         bottom: false,
         child: Placeholder(),
       ),
-    );
-  }
-}
-
-class RotationContainer extends StatefulWidget {
-  const RotationContainer({Key key}) : super(key: key);
-
-  @override
-  _RotationContainerState createState() => _RotationContainerState();
-}
-
-class _RotationContainerState extends State<RotationContainer>
-  with SingleTickerProviderStateMixin {
-  AnimationController _rotationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _rotationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-      value: 1,
-    );
-    _rotationController.repeat();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: Tween<double>(begin: 0.0, end: 1.0).animate(_rotationController),
-      child: Container(
-        color: Colors.purple,
-        width: 50.0,
-        height: 50.0,
-      ),
-    );
-  }
-}
-
-class PlatformViewLayout extends StatelessWidget {
-  const PlatformViewLayout({ Key key }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
-      body: ListView.builder(
-        key: const Key('platform-views-scroll'), // This key is used by the driver test.
-        itemCount: 200,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Material(
-              elevation: (index % 5 + 1).toDouble(),
-              color: Colors.white,
-              child: Stack(
-                children: const <Widget> [
-                  DummyPlatformView(),
-                  RotationContainer(),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-      drawer: const GalleryDrawer(),
-    );
-  }
-}
-
-class DummyPlatformView extends StatelessWidget {
-  const DummyPlatformView({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    const String viewType = 'benchmarks/complex_layout/DummyPlatformView';
-    StatefulWidget nativeView;
-    if (Platform.isIOS) {
-      nativeView = const UiKitView(
-        viewType: viewType,
-      );
-    } else if (Platform.isAndroid) {
-      nativeView = const AndroidView(
-        viewType: viewType,
-      );
-    } else {
-      assert(false, 'Invalid platform');
-    }
-    return Container(
-      color: Colors.purple,
-      height: 200.0,
-      child: nativeView,
     );
   }
 }
