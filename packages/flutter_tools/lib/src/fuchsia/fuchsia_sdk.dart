@@ -156,4 +156,10 @@ class FuchsiaArtifacts {
 
   /// The pm tool.
   final File pm;
+
+  /// Returns true if the [sshConfig] file is not null and exists.
+  bool validateSshConfig() {
+    return sshConfig != null
+        && sshConfig.existsSync();
+  }
 }
