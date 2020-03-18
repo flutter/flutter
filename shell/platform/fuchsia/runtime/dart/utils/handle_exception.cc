@@ -64,6 +64,11 @@ fuchsia::feedback::CrashReport BuildCrashReport(
         error.substr(delimiter_pos + 2 /*to get rid of the leading ': '*/);
   }
 
+  // Truncate error message to the maximum length allowed for the crash_reporter
+  // FIDL call
+  error_message = error_message.substr(
+      0, fuchsia::feedback::MAX_EXCEPTION_MESSAGE_LENGTH - 1);
+
   fuchsia::feedback::RuntimeCrashReport dart_report;
   dart_report.set_exception_type(error_type);
   dart_report.set_exception_message(error_message);
