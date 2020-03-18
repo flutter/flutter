@@ -2729,8 +2729,12 @@ class InputDecoration {
   /// [errorText], and [counterText].
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then `contentPadding` is
-  /// [EdgeInsets.zero].
+  /// [border]. If the [border] is [OutlineInputBorder] then `contentPadding` is 
+  /// `EdgeInsets.LTRB(12, 24, 12, 16)`. If the [border] is [UnderlineInputBorder] 
+  /// or [InputBorder.none] then `contentPadding` is `EdgeInsets.LTRB(0, 12, 0, 12)`.
+  /// If the [border] is [UnderlineInputBorder] or [InputBorder.none] and if
+  /// [filled] is true then `contentPadding` is `EdgeInsets.LTRB(12, 12, 12, 12)`. 
+  /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
   final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
