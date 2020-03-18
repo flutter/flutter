@@ -53,11 +53,6 @@ const int kDeviceLabShardCount = 4;
 /// The last shard also runs the Web plugin tests.
 const int kWebShardCount = 8;
 
-/// Maximum number of Web tests to run in a single `flutter test`. We found that
-/// large batches can get flaky, possibly because we reuse a single instance of
-/// the browser, and after many tests the browser's state gets corrupted.
-const int kWebBatchSize = 20;
-
 /// Tests that we don't run on Web for various reasons.
 //
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
@@ -685,31 +680,23 @@ Future<void> _runWebDebugTest(String target) async {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) async {
-  final List<String> batch = <String>[];
-  for (int i = 0; i < tests.length; i += 1) {
-    final String testFilePath = tests[i];
-    batch.add(testFilePath);
-    if (batch.length == kWebBatchSize || i == tests.length - 1) {
-      await runCommand(
-        flutter,
-        <String>[
-          'test',
-          if (ciProvider == CiProviders.cirrus)
-            '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
-          '-v',
-          '--platform=chrome',
-          ...?flutterTestArgs,
-          ...batch,
-        ],
-        workingDirectory: workingDirectory,
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-          'FLUTTER_LOW_RESOURCE_MODE': 'true',
-        },
-      );
-      batch.clear();
-    }
-  }
+  await runCommand(
+    flutter,
+    <String>[
+      'test',
+      if (ciProvider == CiProviders.cirrus)
+        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
+      '-v',
+      '--platform=chrome',
+      ...?flutterTestArgs,
+      ...tests,
+    ],
+    workingDirectory: workingDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+      'FLUTTER_LOW_RESOURCE_MODE': 'true',
+    },
+  );
 }
 
 Future<void> _pubRunTest(String workingDirectory, {

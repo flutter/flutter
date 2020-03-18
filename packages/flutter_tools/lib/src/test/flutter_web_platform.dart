@@ -256,10 +256,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       Uint8List bytes;
 
       try {
-        final Runtime browser = Runtime.chrome;
-        final BrowserManager browserManager = await _browserManagerFor(browser);
-        final ChromeTab chromeTab = await browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
-          return tab.url.contains(browserManager._browser.url);
+        final ChromeTab chromeTab = await _browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
+          return tab.url.contains(_browserManager._browser.url);
         });
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
@@ -303,10 +301,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   bool get _closed => _closeMemo.hasRun;
 
-  // A map from browser identifiers to futures that will complete to the
-  // [BrowserManager]s for those browsers, or `null` if they failed to load.
-  final Map<Runtime, Future<BrowserManager>> _browserManagers =
-      <Runtime, Future<BrowserManager>>{};
+  BrowserManager _browserManager;
 
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
@@ -330,6 +325,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     return shelf.Response.notFound('Not found.');
   }
 
+  /// Allows only one test suite (typically one test file) to be loaded and run
+  /// at any given point in time. Loading more than one file at a time is known
+  /// to lead to flaky tests.
+  final Pool _suiteLock = Pool(1);
+
   @override
   Future<RunnerSuite> load(
     String path,
@@ -340,17 +340,28 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_closed) {
       return null;
     }
+    final PoolResource lockResource = await _suiteLock.request();
+
     final Runtime browser = platform.runtime;
-    final BrowserManager browserManager = await _browserManagerFor(browser);
-    if (_closed || browserManager == null) {
+    try {
+      _browserManager = await _launchBrowser(browser);
+    } on Error catch (_) {
+      await _suiteLock.close();
+      rethrow;
+    }
+
+    if (_closed) {
       return null;
     }
 
     final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
             globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
-    final RunnerSuite suite = await browserManager
-        .load(path, suiteUrl, suiteConfig, message);
+    final RunnerSuite suite = await _browserManager.load(path, suiteUrl, suiteConfig, message, onDone: () async {
+      await _browserManager.close();
+      _browserManager = null;
+      lockResource.release();
+    });
     if (_closed) {
       return null;
     }
@@ -364,11 +375,11 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// Returns the [BrowserManager] for [runtime], which should be a browser.
   ///
   /// If no browser manager is running yet, starts one.
-  Future<BrowserManager> _browserManagerFor(Runtime browser) {
-    final Future<BrowserManager> managerFuture = _browserManagers[browser];
-    if (managerFuture != null) {
-      return managerFuture;
+  Future<BrowserManager> _launchBrowser(Runtime browser) {
+    if (_browserManager != null) {
+      throw StateError('Another browser is currently running.');
     }
+
     final Completer<WebSocketChannel> completer =
         Completer<WebSocketChannel>.sync();
     final String path =
@@ -383,48 +394,29 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     globals.printTrace('Serving tests at $hostUrl');
 
-    final Future<BrowserManager> future = BrowserManager.start(
+    return BrowserManager.start(
       browser,
       hostUrl,
       completer.future,
       headless: !_config.pauseAfterLoad,
     );
-
-    // Store null values for browsers that error out so we know not to load them
-    // again.
-    _browserManagers[browser] = future.catchError((dynamic _) => null);
-
-    return future;
   }
 
   @override
-  Future<void> closeEphemeral() {
-    final List<Future<BrowserManager>> managers =
-        _browserManagers.values.toList();
-    _browserManagers.clear();
-    return Future.wait(managers.map((Future<BrowserManager> manager) async {
-      final BrowserManager result = await manager;
-      if (result == null) {
-        return;
-      }
-      await result.close();
-    }));
+  Future<void> closeEphemeral() async {
+    if (_browserManager != null) {
+      await _browserManager.close();
+    }
   }
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-    final List<Future<dynamic>> futures = _browserManagers.values
-      .map<Future<dynamic>>((Future<BrowserManager> future) async {
-        final BrowserManager result = await future;
-        if (result == null) {
-          return;
-        }
-        await result.close();
-      })
-      .toList();
-    futures.add(_server.close());
-    futures.add(_testGoldenComparator.close());
-    await Future.wait<void>(futures);
+    await Future.wait<void>(<Future<dynamic>>[
+      if (_browserManager != null)
+        _browserManager.close(),
+      _server.close(),
+      _testGoldenComparator.close(),
+    ]);
   });
 }
 
@@ -578,21 +570,6 @@ class BrowserManager {
   /// This is connected to a page running `static/host.dart`.
   MultiChannel<dynamic> _channel;
 
-  /// A pool that ensures that limits the number of initial connections the
-  /// manager will wait for at once.
-  ///
-  /// This isn't the *total* number of connections; any number of iframes may be
-  /// loaded in the same browser. However, the browser can only load so many at
-  /// once, and we want a timeout in case they fail so we only wait for so many
-  /// at once.
-  // The number 1 is chosen to disallow multiple iframes in the same browser. This
-  // is because in some environments, such as Cirrus CI, tests end up stuck and
-  // time out eventually. The exact reason for timeouts is unknown, but the
-  // hypothesis is that we were the first ones to attempt to run DDK-compiled
-  // tests concurrently in the browser. DDK is known to produce an order of
-  // magnitude bigger and somewhat slower code, which may overload the browser.
-  final Pool _pool = Pool(1);
-
   /// The ID of the next suite to be loaded.
   ///
   /// This is used to ensure that the suites can be referred to consistently
@@ -654,8 +631,8 @@ class BrowserManager {
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
-    unawaited(chrome.onExit.then((void _) {
-      throwToolExit('${runtime.name} exited before connecting.');
+    unawaited(chrome.onExit.then((int browserExitCode) {
+      throwToolExit('${runtime.name} exited with code $browserExitCode before connecting.');
     }).catchError((dynamic error, StackTrace stackTrace) {
       if (completer.isCompleted) {
         return;
@@ -700,7 +677,9 @@ class BrowserManager {
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
-    Object message,
+    Object message, {
+      Future<void> Function() onDone,
+    }
   ) async {
     url = url.replace(fragment: Uri.encodeFull(jsonEncode(<String, Object>{
       'metadata': suiteConfig.metadata.serialize(),
@@ -726,29 +705,28 @@ class BrowserManager {
       StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
         closeIframe();
         sink.close();
+        onDone();
       }),
     );
 
-    return await _pool.withResource<RunnerSuite>(() async {
-      _channel.sink.add(<String, Object>{
-        'command': 'loadSuite',
-        'url': url.toString(),
-        'id': suiteID,
-        'channel': suiteChannelID,
-      });
-
-      try {
-        controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
-            suiteConfig, await _environment, suiteChannel, message);
-
-        _controllers.add(controller);
-        return await controller.suite;
-      // Not limiting to catching Exception because the exception is rethrown.
-      } catch (_) { // ignore: avoid_catches_without_on_clauses
-        closeIframe();
-        rethrow;
-      }
+    _channel.sink.add(<String, Object>{
+      'command': 'loadSuite',
+      'url': url.toString(),
+      'id': suiteID,
+      'channel': suiteChannelID,
     });
+
+    try {
+      controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
+        suiteConfig, await _environment, suiteChannel, message);
+
+      _controllers.add(controller);
+      return await controller.suite;
+    // Not limiting to catching Exception because the exception is rethrown.
+    } catch (_) { // ignore: avoid_catches_without_on_clauses
+      closeIframe();
+      rethrow;
+    }
   }
 
   /// An implementation of [Environment.displayPause].
