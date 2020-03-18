@@ -152,6 +152,7 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   home_scroll_perf__timeline_summary:
     description: >
