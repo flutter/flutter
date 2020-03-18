@@ -353,8 +353,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       : endpoints.last.point.dy + _kToolbarContentDistance;
 
     final List<Widget> items = <Widget>[];
-    final Widget onePhysicalPixelVerticalDivider =
-    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    //final Widget onePhysicalPixelVerticalDivider =
+    //SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final EdgeInsets arrowPadding = isArrowPointingDown
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
@@ -390,6 +390,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
+    // TODO(justinmc): Delete commented out long buttons.
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     //addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
@@ -539,8 +540,9 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       value: 1.0,
       vsync: this,
       // This was eyeballed on a physical iOS device running iOS 13.
-      duration: Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 150),
     );
+    super.initState();
   }
 
   @override
@@ -565,7 +567,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
               onPressed: _handlePreviousPage,
               padding: arrowPadding,
               pressedOpacity: 0.7,
-              child: Text('◀', style: _kToolbarButtonFontStyle),
+              child: const Text('◀', style: _kToolbarButtonFontStyle),
             ),
             CupertinoButton(
               borderRadius: null,
@@ -574,7 +576,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
               onPressed: _handleNextPage,
               padding: arrowPadding,
               pressedOpacity: 0.7,
-              child: Text('▶', style: _kToolbarButtonFontStyle),
+              child: const Text('▶', style: _kToolbarButtonFontStyle),
             ),
             CupertinoButton(
               borderRadius: null,
@@ -583,7 +585,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
               onPressed: () {},
               padding: arrowPadding,
               pressedOpacity: 1.0,
-              child: Text('▶', style: _kToolbarButtonDisabledFontStyle),
+              child: const Text('▶', style: _kToolbarButtonDisabledFontStyle),
             ),
             ...widget.children,
           ],
@@ -613,8 +615,7 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _CupertinoTextSelectionToolbarItemsRenderBox renderObject) {
-    renderObject
-      ..page = page;
+    renderObject.page = page;
   }
 
   @override
