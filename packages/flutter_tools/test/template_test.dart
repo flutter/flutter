@@ -55,7 +55,21 @@ void main() {
       throwsUnsupportedError);
   }));
 
-  test('Template.fromName runs pub get if flutter_template_images is missing', () => testbed.run(() async {
+  test('Template.fromName runs pub get if .packages is missing flutter_template_images', () => testbed.run(() async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    Cache.flutterRoot = '/flutter';
+    final File packagesFile = fileSystem.directory(Cache.flutterRoot)
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .childFile('.packages');
+    packagesFile.createSync(recursive: true);
+
+    // Attempting to run pub in a test throws.
+    await expectLater(Template.fromName('app', fileSystem: fileSystem),
+      throwsUnsupportedError);
+  }));
+
+  test('Template.fromName runs pub get if flutter_template_images directory is missing', () => testbed.run(() async {
     final MemoryFileSystem fileSystem = MemoryFileSystem();
     Cache.flutterRoot = '/flutter';
     final File packagesFile = fileSystem.directory(Cache.flutterRoot)
