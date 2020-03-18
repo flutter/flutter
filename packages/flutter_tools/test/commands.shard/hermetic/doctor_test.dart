@@ -722,7 +722,8 @@ void main() {
   testUsingContext('WebWorkflow is a part of validator workflows if enabled', () async {
     when(globals.processManager.canRun(any)).thenReturn(true);
 
-    expect(DoctorValidatorsProvider.defaultInstance.workflows.contains(webWorkflow), true);
+    expect(DoctorValidatorsProvider.defaultInstance.workflows,
+      contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => MockProcessManager(),
