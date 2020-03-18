@@ -8,6 +8,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
+import 'dart/pub.dart';
 import 'globals.dart' as globals hide fs;
 
 /// Expands templates in a directory to a destination. All files that must
@@ -56,10 +57,10 @@ class Template {
     }
   }
 
-  factory Template.fromName(String name, { @required FileSystem fileSystem }) {
+  static Future<Template> fromName(String name, { @required FileSystem fileSystem }) async {
     // All named templates are placed in the 'templates' directory
-    final Directory templateDir = templateDirectoryInPackage(name, fileSystem);
-    final Directory imageDir = templateImageDirectory(name, fileSystem);
+    final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
+    final Directory imageDir = await _templateImageDirectory(name, fileSystem);
     return Template(templateDir, templateDir, imageDir, fileSystem: fileSystem);
   }
 
@@ -230,7 +231,7 @@ class Template {
   }
 }
 
-Directory templateDirectoryInPackage(String name, FileSystem fileSystem) {
+Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
   final String templatesDir = fileSystem.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
@@ -238,16 +239,31 @@ Directory templateDirectoryInPackage(String name, FileSystem fileSystem) {
 
 // Returns the directory containing the 'name' template directory in
 // flutter_template_images, to resolve image placeholder against.
-Directory templateImageDirectory(String name, FileSystem fileSystem) {
-  final String packageFilePath = fileSystem.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', kPackagesFileName);
+Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) async {
+  final String toolPackagePath = fileSystem.path.join(
+      Cache.flutterRoot, 'packages', 'flutter_tools');
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
+  // Ensure that .packgaes is present.
   if (!fileSystem.file(packageFilePath).existsSync()) {
-    return null;
+    await _ensurePackageDependencies(toolPackagePath);
   }
   final PackageMap packageConfig = PackageMap(packageFilePath);
   final Uri imagePackageLibDir = packageConfig.map['flutter_template_images'];
+  // Ensure that the template image package is present.
+  if (!fileSystem.directory(imagePackageLibDir).existsSync()) {
+    await _ensurePackageDependencies(toolPackagePath);
+  }
   return fileSystem.directory(imagePackageLibDir)
       .parent
       .childDirectory('templates')
       .childDirectory(name);
+}
+
+// Runs 'pub get' for the given path to ensure that .packages is created and
+// all dependencies are present.
+Future<void> _ensurePackageDependencies(String packagePath) async {
+  await pub.get(
+    context: PubContext.pubGet,
+    directory: packagePath,
+  );
 }

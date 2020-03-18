@@ -524,7 +524,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(globals.fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate(globals.fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
@@ -543,7 +543,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('package', directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPackage,
@@ -560,7 +560,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
@@ -588,13 +588,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
-    generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (boolArg('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
+      generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
     if (boolArg('pub')) {
@@ -673,8 +673,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
-    final Template template = Template.fromName(templateName, fileSystem: globals.fs);
+  Future<int> _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) async {
+    final Template template = await Template.fromName(templateName, fileSystem: globals.fs);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 

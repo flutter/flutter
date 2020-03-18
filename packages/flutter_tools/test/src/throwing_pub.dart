@@ -16,7 +16,7 @@ class ThrowingPub implements Pub {
     bool retry,
     bool showTraceForErrors,
   }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+    throw UnsupportedError('Attempted to invoke pub during test.');
   }
 
   @override
@@ -29,11 +29,11 @@ class ThrowingPub implements Pub {
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
   }) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+    throw UnsupportedError('Attempted to invoke pub during test.');
   }
 
   @override
   Future<void> interactively(List<String> arguments, {String directory}) {
-    throw UnsupportedError('Attempted to inovke pub during test.');
+    throw UnsupportedError('Attempted to invoke pub during test.');
   }
 }
