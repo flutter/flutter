@@ -31,7 +31,7 @@ FLUTTER_EXPORT
  *
  * The implementation of this method should create a new `UIView` and return it.
  *
- * @param frame The rectangle for the newly created `UIView` measued in points.
+ * @param frame The rectangle for the newly created `UIView` measured in points.
  * @param viewId A unique identifier for this `UIView`.
  * @param args Parameters for creating the `UIView` sent from the Dart side of the Flutter app.
  *   If `createArgsCodec` is not implemented, or if no creation arguments were sent from the Dart
