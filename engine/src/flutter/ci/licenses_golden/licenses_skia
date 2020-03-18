@@ -1,4 +1,4 @@
-Signature: 1d2146938d498ef1d575dbcb48b3a6c4
+Signature: f6ee895fc3ce532637a0356908ecb67f
 
 UNUSED LICENSES:
 
@@ -3903,6 +3903,8 @@ FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
+FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
+FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
@@ -5167,6 +5169,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/docs/examples/50_percent_gray.cpp
 FILE: ../../../third_party/skia/docs/examples/50_percent_srgb.cpp
 FILE: ../../../third_party/skia/docs/examples/BlendModes.cpp
+FILE: ../../../third_party/skia/docs/examples/Canvas_saveLayer_4.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTab.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTabs.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_Wheel.cpp
@@ -5595,13 +5598,17 @@ FILE: ../../../third_party/skia/gm/verifiers/gmverifier.cpp
 FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/modules/skottie/src/Adapter.h
-FILE: ../../../third_party/skia/modules/skottie/src/Animator.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/Animator.h
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
 FILE: ../../../third_party/skia/modules/skottie/src/Path.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Animator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Animator.h
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.h
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Scalar.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
