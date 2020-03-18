@@ -10,10 +10,12 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
+#include "flutter/shell/platform/common/cpp/path_utils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/glfw/glfw_event_loop.h"
 #include "flutter/shell/platform/glfw/key_event_handler.h"
@@ -507,6 +509,25 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
                 &engine_properties.switches[engine_properties.switches_count]);
   }
 
+  std::filesystem::path assets_path =
+      std::filesystem::u8path(engine_properties.assets_path);
+  std::filesystem::path icu_path =
+      std::filesystem::u8path(engine_properties.icu_data_path);
+  if (assets_path.is_relative() || icu_path.is_relative()) {
+    // Treat relative paths as relative to the directory of this executable.
+    std::filesystem::path executable_location =
+        flutter::GetExecutableDirectory();
+    if (executable_location.empty()) {
+      std::cerr << "Unable to find executable location to resolve paths."
+                << std::endl;
+      return nullptr;
+    }
+    assets_path = std::filesystem::path(executable_location) / assets_path;
+    icu_path = std::filesystem::path(executable_location) / icu_path;
+  }
+  std::string assets_path_string = assets_path.u8string();
+  std::string icu_path_string = assets_path.u8string();
+
   FlutterRendererConfig config = {};
   if (window == nullptr) {
     config.type = kOpenGL;
@@ -528,8 +549,8 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
   }
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = engine_properties.assets_path;
-  args.icu_data_path = engine_properties.icu_data_path;
+  args.assets_path = assets_path_string.c_str();
+  args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = GLFWOnFlutterPlatformMessage;
