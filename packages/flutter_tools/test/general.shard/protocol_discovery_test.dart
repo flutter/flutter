@@ -10,11 +10,11 @@ import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fakes.dart';
 
 void main() {
   group('service_protocol discovery', () {
-    MockDeviceLogReader logReader;
+    FakeDeviceLogReader logReader;
     ProtocolDiscovery discoverer;
 
     /// Performs test set-up functionality that must be performed as part of
@@ -37,7 +37,7 @@ void main() {
       int devicePort,
       Duration throttleDuration = const Duration(milliseconds: 200),
     }) {
-      logReader = MockDeviceLogReader();
+      logReader = FakeDeviceLogReader();
       discoverer = ProtocolDiscovery.observatory(
         logReader,
         ipv6: false,
@@ -261,7 +261,7 @@ void main() {
 
     group('port forwarding', () {
       testUsingContext('default port', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -282,7 +282,7 @@ void main() {
       });
 
       testUsingContext('specified port', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -303,7 +303,7 @@ void main() {
       });
 
       testUsingContext('specified port zero', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -324,7 +324,7 @@ void main() {
       });
 
       testUsingContext('ipv6', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
@@ -345,7 +345,7 @@ void main() {
       });
 
       testUsingContext('ipv6 with Ascii Escape code', () async {
-        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final FakeDeviceLogReader logReader = FakeDeviceLogReader();
         final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
           portForwarder: MockPortForwarder(99),
