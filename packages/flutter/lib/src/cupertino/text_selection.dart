@@ -389,8 +389,11 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     }
 
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
+    //addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
+    //addToolbarButtonIfNeeded('Copyyyyyyyyyyyyyyyyyyyyyyyyyyyy', canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
+    //addToolbarButtonIfNeeded('Pasteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
 
     return CupertinoTextSelectionToolbar._(
@@ -547,6 +550,8 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
+    // TODO(justinmc): You didn't realize that there is a divider between items
+    // in widget.children! That's why there are more than you expect!
     return DecoratedBox(
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: FadeTransition(
@@ -612,6 +617,24 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
     renderObject
       ..page = page;
   }
+
+  @override
+  _CupertinoTextSelectionToolbarItemsElement createElement() => _CupertinoTextSelectionToolbarItemsElement(this);
+}
+
+class _CupertinoTextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
+  _CupertinoTextSelectionToolbarItemsElement(
+    MultiChildRenderObjectWidget widget,
+  ) : super(widget);
+
+  static bool _shouldPaint(Element child) {
+    return (child.renderObject.parentData as _ToolbarItemsParentData).shouldPaint;
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.where(_shouldPaint).forEach(visitor);
+  }
 }
 
 class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _ToolbarItemsParentData> {
@@ -631,6 +654,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     markNeedsLayout();
   }
 
+  /*
   void layoutChildren() {
     double pageWidth = 0.0;
     double parentWidth = 0.0;
@@ -685,6 +709,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
     size = Size(constraints.maxWidth, constraints.maxHeight);
   }
+  */
 
   @override
   void performLayout() {
