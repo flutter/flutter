@@ -24,8 +24,8 @@ import 'theme_data.dart';
 /// which defines the app's [Scaffold] body.
 ///
 /// The appearance of all of the [NavigationRail]s within an app can be
-/// specified with [NavigationRailTheme]. If the theme's property is null, then
-/// the default values are based on the [Theme]'s [ThemeData.textTheme],
+/// specified with [NavigationRailTheme]. The default values for null theme
+/// properties are based on the [Theme]'s [ThemeData.textTheme],
 /// [ThemeData.iconTheme], and [ThemeData.colorScheme].
 ///
 /// The navigation rail is meant for layouts with wide viewports, such as a
@@ -43,7 +43,7 @@ import 'theme_data.dart';
 /// This example shows a [NavigationRail] used within a Scaffold with 3
 /// [NavigationRailDestination]s. The main content is separated by a divider
 /// (although elevation on the navigation rail can be used instead). The
-/// `_selectedIndex` updates according to the `onDestinationSelected` callback.
+/// `_selectedIndex` is updated by the `onDestinationSelected` callback.
 ///
 /// ```dart
 /// int _selectedIndex = 0;
@@ -55,6 +55,11 @@ import 'theme_data.dart';
 ///        children: <Widget>[
 ///          NavigationRail(
 ///            selectedIndex: _selectedIndex,
+///            onDestinationSelected: (int index) {
+///              setState(() {
+///                _selectedIndex = index;
+///              });
+///            },
 ///            labelType: NavigationRailLabelType.selected,
 ///            destinations: [
 ///              NavigationRailDestination(
@@ -73,11 +78,6 @@ import 'theme_data.dart';
 ///                label: Text('Third'),
 ///              ),
 ///            ],
-///            onDestinationSelected: (int index) {
-///              setState(() {
-///                _selectedIndex = index;
-///              });
-///            },
 ///          ),
 ///          VerticalDivider(thickness: 1, width: 1),
 ///          // This is the main content.
@@ -99,8 +99,8 @@ import 'theme_data.dart';
 ///    [Scaffold.body] slot.
 ///  * [NavigationRailDestination], which is used as a model to create tappable
 ///    destinations in the navigation rail.
-///  * [BottomNavigationBar], which is used as a horizontal alternative for
-///    the same style of navigation as the navigation rail.
+///  * [BottomNavigationBar], which is a similar navigation widget that's laid
+///     out horizontally.
 ///  * [https://material.io/components/navigation-rail/]
 class NavigationRail extends StatefulWidget {
   /// Creates a material design navigation rail.
@@ -124,14 +124,14 @@ class NavigationRail extends StatefulWidget {
   /// [NavigationRailThemeData] property is null, then the navigation rail
   /// defaults are used. See the individual properties for more information.
   ///
-  /// Typically used within a [Row] of the [Scaffold.body] property.
+  /// Typically used within a [Row] that defines the [Scaffold.body] property.
   const NavigationRail({
     this.backgroundColor,
     this.extended = false,
     this.leading,
     this.trailing,
     @required this.destinations,
-    this.selectedIndex = 0,
+    @required this.selectedIndex,
     this.onDestinationSelected,
     this.elevation,
     this.groupAlignment,
@@ -140,9 +140,10 @@ class NavigationRail extends StatefulWidget {
     this.selectedLabelTextStyle,
     this.unselectedIconTheme,
     this.selectedIconTheme,
-    this.minWidth = _minRailWidth,
-    this.minExtendedWidth = _minExtendedRailWidth,
+    this.minWidth,
+    this.minExtendedWidth,
   }) :  assert(destinations != null && destinations.length >= 2),
+        assert(selectedIndex != null),
         assert(0 <= selectedIndex && selectedIndex < destinations.length),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
@@ -432,6 +433,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
     final Color backgroundColor = widget.backgroundColor ?? navigationRailTheme.backgroundColor ?? theme.colorScheme.surface;
     final double elevation = widget.elevation ?? navigationRailTheme.elevation ?? 0;
+    final double minWidth = widget.minWidth ?? _minRailWidth;
+    final double minExtendedWidth = widget.minExtendedWidth ?? _minExtendedRailWidth;
     final Color baseSelectedColor = theme.colorScheme.primary;
     final Color baseColor = theme.colorScheme.onSurface.withOpacity(0.64);
     final IconThemeData unselectedIconTheme = theme.iconTheme.copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
@@ -455,7 +458,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                 ...<Widget>[
                   ConstrainedBox(
                     constraints: BoxConstraints(
-                      minWidth: lerpDouble(widget.minWidth, widget.minExtendedWidth, _extendedAnimation.value),
+                      minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
                     ),
                     child: widget.leading,
                   ),
@@ -469,8 +472,8 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                     children: <Widget>[
                       for (int i = 0; i < widget.destinations.length; i++)
                         _RailDestination(
-                          minWidth: widget.minWidth,
-                          minExtendedWidth: widget.minExtendedWidth,
+                          minWidth: minWidth,
+                          minExtendedWidth: minExtendedWidth,
                           extendedTransitionAnimation: _extendedAnimation,
                           selected: widget.selectedIndex == i,
                           icon: widget.selectedIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
@@ -490,7 +493,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                       if (widget.trailing != null)
                         ConstrainedBox(
                           constraints: BoxConstraints(
-                            minWidth: lerpDouble(widget.minWidth, widget.minExtendedWidth, _extendedAnimation.value),
+                            minWidth: lerpDouble(minWidth, minExtendedWidth, _extendedAnimation.value),
                           ),
                           child: widget.trailing,
                         ),
