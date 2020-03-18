@@ -402,7 +402,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       barTopY: localBarTopY + globalEditableRegion.top,
       arrowTipX: arrowTipX,
       isArrowPointingDown: isArrowPointingDown,
-      child: _CupertinoTextSelectionToolbarContent(
+      child: items.isEmpty ? null : _CupertinoTextSelectionToolbarContent(
         isArrowPointingDown: isArrowPointingDown,
         children: items,
       ),
@@ -483,6 +483,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     @required this.children,
     @required this.isArrowPointingDown,
   }) : assert(children != null),
+       assert(children.length > 0),
        super(key: key);
 
   final List<Widget> children;
@@ -544,10 +545,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   @override
   Widget build(BuildContext context) {
-    if (widget.children.isEmpty) {
-      return null;
-    }
-
     final EdgeInsets arrowPadding = widget.isArrowPointingDown
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
