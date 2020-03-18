@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/context.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
-
-// TODO(fujino): remove once internal references replaced by `globals.iosWorkflow`
-IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();
