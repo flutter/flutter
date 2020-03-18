@@ -103,9 +103,11 @@ class StackFrame {
   }
 
   static StackFrame _parseWebDebugFrame(String line) {
+    // This RegExp is only partially correct for flutter run/test differences.
+    // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
     final RegExp parser = hasPackage
-        ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
+        ? RegExp(r'^(package.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');

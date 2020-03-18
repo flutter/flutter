@@ -168,6 +168,7 @@ task:
         # 6 CPUs, and needed at least 8G of RAM to not run out of memory.
         CPU: 6
         MEMORY: 8G
+        CHROME_NO_SANDBOX: true
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 

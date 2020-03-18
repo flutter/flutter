@@ -41,11 +41,36 @@ import '../web/chrome.dart';
 /// This is only used in development mode.
 class WebAssetServer implements AssetReader {
   @visibleForTesting
-  WebAssetServer(this._httpServer, this._packages, this.internetAddress);
+  WebAssetServer(
+    this._httpServer,
+    this._packages,
+    this.internetAddress,
+    this._modules,
+    this._digests,
+  );
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
   static const String _kDefaultMimeType = 'application/octet-stream';
+
+  final Map<String, String> _modules;
+
+  final Map<String, String> _digests;
+
+  void performRestart(List<String> modules) {
+    for (final String module in modules) {
+      // We skip computing the digest by using the hashCode of the underlying buffer.
+      // Whenever a file is updated, the corresponding Uint8List.view it corresponds
+      // to will change.
+      final String moduleName = module.startsWith('/')
+        ? module.substring(1)
+        : module;
+      final String name = moduleName.replaceAll('.lib.js', '');
+      final String path = moduleName.replaceAll('.js', '');
+      _modules[name] = path;
+      _digests[name] = _files[moduleName].hashCode.toString();
+    }
+  }
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -70,7 +95,15 @@ class WebAssetServer implements AssetReader {
       // ignore: deprecated_member_use
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
-      final WebAssetServer server = WebAssetServer(httpServer, packages, address);
+      final Map<String, String> digests = <String, String>{};
+      final Map<String, String> modules = <String, String>{};
+      final WebAssetServer server = WebAssetServer(
+        httpServer,
+        packages,
+        address,
+        modules,
+        digests,
+      );
       if (testMode) {
         return server;
       }
@@ -92,7 +125,13 @@ class WebAssetServer implements AssetReader {
         urlEncoder: urlTunneller,
         enableDebugging: true,
         serveDevTools: false,
-        logWriter: (Level logLevel, String message) => globals.printTrace(message)
+        logWriter: (Level logLevel, String message) => globals.printTrace(message),
+        loadStrategy: RequireStrategy(
+          ReloadConfiguration.none,
+          '.lib.js',
+          (String path) async => modules,
+          (String path) async => digests,
+        ),
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
@@ -132,6 +171,7 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    final String requestPath = request.url.path;
     final Map<String, String> headers = <String, String>{};
     // If the response is `/`, then we are requesting the index file.
     if (request.url.path == '/' || request.url.path.isEmpty) {
@@ -149,11 +189,6 @@ class WebAssetServer implements AssetReader {
     // Track etag headers for better caching of resources.
     final String ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
     headers[HttpHeaders.cacheControlHeader] = 'max-age=0, must-revalidate';
-
-    // NOTE: shelf removes leading `/` for some reason.
-    final String requestPath = request.url.path.startsWith('/')
-      ?  request.url.path
-      : '/${request.url.path}';
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
@@ -191,13 +226,13 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve(requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('assets/', ''));
       file = globals.fs.file(potential);
     }
 
     if (!file.existsSync()) {
       final String webPath = globals.fs.path.join(
-        globals.fs.currentDirectory.childDirectory('web').path, requestPath.substring(1));
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath);
       file = globals.fs.file(webPath);
     }
 
@@ -272,7 +307,10 @@ class WebAssetServer implements AssetReader {
         codeStart,
         codeEnd - codeStart,
       );
-      _files[filePath] = byteView;
+      final String fileName = filePath.startsWith('/')
+        ? filePath.substring(1)
+        : filePath;
+      _files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
@@ -285,9 +323,10 @@ class WebAssetServer implements AssetReader {
         sourcemapStart,
         sourcemapEnd - sourcemapStart,
       );
-      _sourcemaps['$filePath.map'] = sourcemapView;
+      final String sourcemapName = '$fileName.map';
+      _sourcemaps[sourcemapName] = sourcemapView;
 
-      modules.add(filePath);
+      modules.add(fileName);
     }
     return modules;
   }
@@ -331,11 +370,11 @@ class WebAssetServer implements AssetReader {
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
-      case '/dart_sdk.js':
+      case 'dart_sdk.js':
         return canvasKitRendering
           ? canvasKitDartSdk
           : dartSdk;
-      case '/dart_sdk.js.map':
+      case 'dart_sdk.js.map':
         return canvasKitRendering
           ? canvasKitDartSdkSourcemap
           : dartSdkSourcemap;
@@ -382,7 +421,13 @@ class WebAssetServer implements AssetReader {
   }
 
   @override
-  Future<String> dartSourceContents(String serverPath) {
+  Future<String> dartSourceContents(String serverPath) async {
+    // TODO(jonahwilliams): ensure devtools can correctly hide this file.
+    final bool isEntrypointRequest = serverPath == null || serverPath.isEmpty;
+    if (isEntrypointRequest) {
+      return '/* no sourcemaps available. */';
+    }
+
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -534,28 +579,24 @@ class WebDevFS implements DevFS {
     if (bundleFirstUpload) {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
-      webAssetServer.writeFile('/require.js', requireJS.readAsStringSync());
-      webAssetServer.writeFile('/dart_stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
-      webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
-      webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
-      webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile(entrypoint, globals.fs.file(mainPath).readAsStringSync());
+      webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
+      webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile('require.js', requireJS.readAsStringSync());
+      webAssetServer.writeFile('stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile(
-        '/main.dart.js',
+        'main.dart.js',
         generateBootstrapScript(
-          requireUrl: '/require.js',
-          mapperUrl: '/dart_stack_trace_mapper.js',
-          entrypoint: '/$entrypoint.lib.js',
+          requireUrl: 'require.js',
+          mapperUrl: 'stack_trace_mapper.js',
         ),
       );
       webAssetServer.writeFile(
-        '/main_module.bootstrap.js',
+        'main_module.bootstrap.js',
         generateMainModule(
-          entrypoint: '/$entrypoint.lib.js',
+          entrypoint: entrypoint,
         ),
       );
-      // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
-      webAssetServer.writeFile('/basic.digests', '{}');
-
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
@@ -602,7 +643,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-
+    webAssetServer.performRestart(modules);
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
