@@ -247,7 +247,7 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
   if (!fileSystem.file(packageFilePath).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);
   }
-  final PackageMap packageConfig = PackageMap(packageFilePath);
+  final PackageMap packageConfig = PackageMap(packageFilePath, fileSystem: fileSystem);
   final Uri imagePackageLibDir = packageConfig.map['flutter_template_images'];
   // Ensure that the template image package is present.
   if (!fileSystem.directory(imagePackageLibDir).existsSync()) {

@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
@@ -44,6 +45,29 @@ void main() {
     final File destinationImage = destination.childFile(imageName);
     expect(destinationImage.existsSync(), true);
     expect(destinationImage.readAsBytesSync(), equals(sourceImage.readAsBytesSync()));
+  }));
+
+  test('Template.fromName runs pub get if .packages is missing', () => testbed.run(() async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem();
+
+    // Attempting to run pub in a test throws.
+    await expectLater(Template.fromName('app', fileSystem: fileSystem),
+      throwsUnsupportedError);
+  }));
+
+  test('Template.fromName runs pub get if flutter_template_images is missing', () => testbed.run(() async {
+    final MemoryFileSystem fileSystem = MemoryFileSystem();
+    Cache.flutterRoot = '/flutter';
+    final File packagesFile = fileSystem.directory(Cache.flutterRoot)
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .childFile('.packages');
+    packagesFile.createSync(recursive: true);
+    packagesFile.writeAsStringSync('flutter_template_images:file:///flutter_template_images');
+
+    // Attempting to run pub in a test throws.
+    await expectLater(Template.fromName('app', fileSystem: fileSystem),
+      throwsUnsupportedError);
   }));
 }
 

@@ -354,7 +354,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        Uri engineUri = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).map[kFlutterEnginePackageName];
         // Skip if sky_engine is the self-contained one.
         if (engineUri != null && globals.fs.identicalSync(globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib'), engineUri.path)) {
           engineUri = null;
@@ -491,7 +491,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (globals.fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = PackageMap(kPackagesFileName);
+      final PackageMap packageMap = PackageMap(kPackagesFileName, fileSystem: globals.fs);
       Uri flutterUri;
       try {
         flutterUri = packageMap.map['flutter'];
