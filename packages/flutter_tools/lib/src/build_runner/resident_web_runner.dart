@@ -706,10 +706,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
   bool get supportsCanvasKit => supportsServiceProtocol;
 
   @override
-  Future<void> toggleCanvaskit() async {
+  Future<bool> toggleCanvaskit() async {
     final WebDevFS webDevFS = device.devFS as WebDevFS;
     webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
     await _wipConnection?.sendCommand('Page.reload');
+    return webDevFS.webAssetServer.canvasKitRendering;
   }
 
   @override
