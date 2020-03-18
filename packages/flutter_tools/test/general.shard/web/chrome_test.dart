@@ -62,33 +62,15 @@ void main() {
     resetChromeForTesting();
   });
 
-  Future<Chrome> _testLaunchChrome(String userDataDir) {
-    processManager.addCommand(FakeCommand(
-      command: <String>[
-        'example_chrome',
-        '--user-data-dir=$userDataDir',
-        '--remote-debugging-port=1234',
-        ..._kChromeArgs,
-        'example_url',
-      ],
-      stderr: kDevtoolsStderr,
-    ));
-
-    return chromeLauncher.launch(
-      'example_url',
-      skipCheck: true,
-    );
-  }
-
   test('can launch chrome and connect to the devtools', () async {
-    await _testLaunchChrome('/.tmp_rand0/flutter_tool.rand0');
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
   });
 
   test('cannot have two concurrent instances of chrome', () async {
-    await _testLaunchChrome('/.tmp_rand0/flutter_tool.rand0');
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
     bool pass = false;
     try {
-      await _testLaunchChrome('/.tmp_rand0/flutter_tool.rand1');
+      await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
     } on ToolExit catch (_) {
       pass = true;
     }
@@ -96,9 +78,9 @@ void main() {
   });
 
   test('can launch new chrome after stopping a previous chrome', () async {
-    final Chrome  chrome = await _testLaunchChrome('/.tmp_rand0/flutter_tool.rand0');
+    final Chrome  chrome = await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
     await chrome.close();
-    await _testLaunchChrome('/.tmp_rand0/flutter_tool.rand1');
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
   });
 
   test('can launch chrome with a custom debug port', () async {
@@ -185,3 +167,21 @@ void main() {
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+Future<Chrome> testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromeLauncher chromeLauncher) {
+  processManager.addCommand(FakeCommand(
+    command: <String>[
+      'example_chrome',
+      '--user-data-dir=$userDataDir',
+      '--remote-debugging-port=1234',
+      ..._kChromeArgs,
+      'example_url',
+    ],
+    stderr: kDevtoolsStderr,
+  ));
+
+  return chromeLauncher.launch(
+    'example_url',
+    skipCheck: true,
+  );
+}
