@@ -354,6 +354,7 @@ class XCDevice {
         sdkVersion: _sdkVersion(deviceProperties),
         artifacts: globals.artifacts,
         fileSystem: globals.fs,
+        logger: globals.logger,
         iosDeploy: globals.iosDeploy,
         platform: globals.platform,
       ));
