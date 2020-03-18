@@ -57,9 +57,9 @@ typedef WillPopCallback = Future<bool> Function();
 
 /// Signature for the [Navigator.onPopPage] callback.
 ///
-/// The callback must call [Route.didPop] or [Route.didComplete] on the
-/// specified route, and must properly update the pages list the next time it
-/// passes into [Navigator.pages] so that it no longer includes the
+/// This callback must call [Route.didPop] or [Route.didComplete] on the
+/// specified route and must properly update the pages list the next time it
+/// is passed into [Navigator.pages] so that it no longer includes the
 /// corresponding [Page]. (Otherwise, the page will be interpreted as a new page
 /// to show when the [Navigator.pages] list is next updated.)
 typedef OnPopPageCallback = bool Function(Route<dynamic> route, dynamic result);
@@ -535,7 +535,7 @@ abstract class Page<T> extends RouteSettings {
 /// The type argument `T` is the corresponding [Route]'s return type, as
 /// used by [Route.currentResult], [Route.popped], and [Route.didPop].
 class CustomBuilderPage<T> extends Page<T> {
-  /// Creates a page that can be inserted into [Navigator.pages].
+  /// Creates a page with a custom route builder.
   ///
   /// Use [routeBuilder] to specify the route that will be created from this
   /// page.
@@ -548,10 +548,10 @@ class CustomBuilderPage<T> extends Page<T> {
        assert(routeBuilder != null),
        super(key: key, name: name, arguments: arguments);
 
-  /// A builder to create a [Route] during [createRoute].
+  /// A builder that will be called during [createRoute] to create a [Route].
   ///
   /// The routes returned from this builder must have their settings equal to
-  /// the input settings.
+  /// the input `settings`.
   final RouteBuilder<T> routeBuilder;
 
   @override
@@ -609,10 +609,14 @@ class NavigatorObserver {
 /// A [Route] wrapper interface that can be staged for [TransitionDelegate] to
 /// decide how its underlying [Route] should transition on or off screen.
 abstract class StageableRoute{
-  /// Retrieves the underlying [Route].
+  /// Retrieves the wrapped [Route].
   Route<dynamic> get route;
 
   /// Whether this route is entering the screen.
+  ///
+  /// If this property is true, this route requires a explicit decision on how to
+  /// transition into the screen. Such a decision should be made in the
+  /// [TransitionDelegate.resolve].
   bool get isEntering;
 
   bool _debugWaitingForExitDecision = false;
@@ -653,7 +657,7 @@ abstract class StageableRoute{
   void markForRemove();
 }
 
-/// The delegate decides how pages added and removed from [Navigator.pages]
+/// The delegate that decides how pages added and removed from [Navigator.pages]
 /// transition in or out of the screen.
 ///
 /// This abstract class implements the API to be called by [Navigator] when it
@@ -684,9 +688,12 @@ abstract class TransitionDelegate<T> {
     // Verifies the integrity after the decisions have been made.
     //
     // Here are the rules:
-    // - All the entering routes in newPageRouteHistory must either be pushed or added.
-    // - All the exiting routes in locationToExitingPageRoute must either be popped, completed or removed.
-    // - All the pageless routes that belong to exiting routes must either be popped, completed or removed.
+    // - All the entering routes in newPageRouteHistory must either be pushed or
+    //   added.
+    // - All the exiting routes in locationToExitingPageRoute must either be
+    //   popped, completed or removed.
+    // - All the pageless routes that belong to exiting routes must either be
+    //   popped, completed or removed.
     // - All the entering routes in the result must preserve the same order as
     //   the entering routes in newPageRouteHistory, and the result must contain
     //   all exiting routes.
@@ -700,12 +707,12 @@ abstract class TransitionDelegate<T> {
     //     results = [D, A, B ,C ,E] is also valid because exiting route can be
     //     inserted in any place
     //
-    //     results = [B, A ,C ,D ,E] is invalid because B must be after A.
-    //     results = [B, A ,C ,E] is invalid because results must include D and E.
+    //     results = [B, A, C ,D ,E] is invalid because B must be after A.
+    //     results = [A, B, C ,E] is invalid because results must include D.
     assert(() {
       final List<StageableRoute> resultsToVerify = results.toList(growable: false);
       final Set<StageableRoute> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
-      // Firstly, verify all exiting routes have been marked.
+      // Firstly, verifies all exiting routes have been marked.
       for (final StageableRoute exitingPageRoute in exitingPageRoutes) {
         assert(!exitingPageRoute._debugWaitingForExitDecision);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
@@ -745,20 +752,21 @@ abstract class TransitionDelegate<T> {
   /// A method that will be called by the [Navigator] to decide how routes
   /// transition in or out of the screen when [Navigator.pages] is updated.
   ///
-  /// The `newPageRouteHistory` list contains all page-based routes in order
+  /// The `newPageRouteHistory` list contains all page-based routes in the order
   /// that will be on the [Navigator]'s history stack after this update
   /// completes. If a route in `newPageRouteHistory` has its
   /// [StageableRoute.isEntering] set to true, this route requires explicit
   /// decision on how it should transition onto the Navigator. To make a
   /// decision, call [StageableRoute.markForPush] or [StageableRoute.markForAdd].
   ///
-  /// The `locationToExitingPageRoute` represents the pages-based routes that
+  /// The `locationToExitingPageRoute` contains the pages-based routes that
   /// are removed from the routes history after page update and require explicit
   /// decision on how to transition off the screen. This map records page-based
   /// routes to be removed with the location of the route in the original route
-  /// history before the update. The key location is the page-based route
-  /// directly below the removed route. The key location is null if the route to
-  /// be removed is the bottom most route. To make a decision for a removed
+  /// history before the update. The keys are the locations represented by the
+  /// page-based routes that are directly below the removed routes, and the value
+  /// are the page-based routes to be removed. The location is null if the route
+  /// to be removed is the bottom most route. To make a decision for a removed
   /// route, call [StageableRoute.markForPop], [StageableRoute.markForComplete]
   /// or [StageableRoute.markForRemove].
   ///
@@ -769,7 +777,7 @@ abstract class TransitionDelegate<T> {
   ///
   /// Once all the decisions have been made, this method must merge the removed
   /// routes and the `newPageRouteHistory` and return the merged result. The
-  /// order in the result will be the order the [Navigator] used for updating
+  /// order in the result will be the order the [Navigator] uses for updating
   /// the route history. The return list must preserve the same order of routes
   /// in `newPageRouteHistory`. The removed routes, however, can be inserted
   /// into the return list freely as long as all of them are included.
@@ -880,7 +888,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// called "screens" or "pages". In Flutter these elements are called
 /// routes and they're managed by a [Navigator] widget. The navigator
 /// manages a stack of [Route] objects and provides two ways for managing
-/// the stack, the declarative api [Navigator.pages] or imperative api
+/// the stack, the declarative API [Navigator.pages] or imperative API
 /// [Navigator.push] and [Navigator.pop].
 ///
 /// When your user interface fits this paradigm of a stack, where the user
@@ -2183,7 +2191,7 @@ enum _RouteLifecycle {
   replace, // we'll want to run install, didReplace, etc; a route added via replace() and friends
   idle, // route is being harmless
   //
-  // routes that are not or not yet present:
+  // routes that are not present:
   //
   // routes that should be included in route announcement and should still listen to transition changes.
   pop, // we'll want to call didPop
