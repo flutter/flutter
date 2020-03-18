@@ -1,4 +1,4 @@
-Signature: f6ee895fc3ce532637a0356908ecb67f
+Signature: 6cf255d0682e28b0f76b46c2e32ad60b
 
 UNUSED LICENSES:
 
@@ -2479,8 +2479,6 @@ FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramBuilder.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramBuilder.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUniformHandler.h
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUtil.cpp
-FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLUtil.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLVarying.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLXferProcessor.h
@@ -5174,6 +5172,7 @@ FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTab.cpp
 FILE: ../../../third_party/skia/docs/examples/ChromeMDRefreshTabs.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_Wheel.cpp
 FILE: ../../../third_party/skia/docs/examples/DCIToXYZD50.cpp
+FILE: ../../../third_party/skia/docs/examples/GradientShader_MakeLinear.cpp
 FILE: ../../../third_party/skia/docs/examples/Octopus_Generator.cpp
 FILE: ../../../third_party/skia/docs/examples/Octopus_Generator_Animated.cpp
 FILE: ../../../third_party/skia/docs/examples/PaintDump.cpp
@@ -5609,6 +5608,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.h
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Scalar.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Vector.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
