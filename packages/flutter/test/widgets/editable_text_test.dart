@@ -4292,12 +4292,12 @@ void main() {
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change does not reformat
     expect(formatter.formatCallCount, 3);
-    expect(formatter.lastOldValue.composing, TextRange(start: -1, end: -1));
-    expect(formatter.lastNewValue.composing, TextRange(start: -1, end: -1));
+    expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
     state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
     expect(formatter.formatCallCount, 4);
-    expect(formatter.lastOldValue.composing, TextRange(start: 1, end: 2));
-    expect(formatter.lastNewValue.composing, TextRange(start: -1, end: -1));
+    expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
@@ -4357,12 +4357,12 @@ void main() {
     expect(state.currentTextEditingValue.text, equals('hello '));
     state.updateEditingValue(const TextEditingValue(text: 'hello ا', composing: TextRange(start: 4, end: 6)));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}ا'));
-    expect(state.currentTextEditingValue.composing, equals(TextRange(start: 4, end: 7)));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 7)));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْ', composing: TextRange(start: 4, end: 7)));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ', composing: TextRange(start: 4, end: 8)));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ ', composing: TextRange(start: 4, end: 9)));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ \u{200F}'));
-    expect(state.currentTextEditingValue.composing, equals(TextRange(start: 4, end: 10)));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 10)));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ'));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ '));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
