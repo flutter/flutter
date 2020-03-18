@@ -37,7 +37,7 @@ void main() {
       equals('Flutter.framework not found at ios_profile/Flutter.framework'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -66,7 +66,7 @@ void main() {
              'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -94,7 +94,7 @@ void main() {
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
 
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -121,7 +121,7 @@ void main() {
 
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -154,7 +154,7 @@ void main() {
              'of Xcode to at least 10.0.1.'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -183,7 +183,7 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -212,7 +212,7 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
