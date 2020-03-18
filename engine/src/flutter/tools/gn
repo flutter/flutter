@@ -44,9 +44,6 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
-    if args.enable_metal and args.target_os == 'ios':
-      target_dir.append('metal')
-
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
@@ -219,16 +216,16 @@ def to_gn_args(args):
       gn_args['use_goma'] = False
       gn_args['goma_dir'] = None
 
-    if args.enable_metal:
-      gn_args['skia_use_metal'] = True
-      gn_args['shell_enable_metal'] = True
-      gn_args['allow_deprecated_api_calls'] = True
-
     if args.enable_vulkan:
       # Enable vulkan in the Flutter shell.
       gn_args['shell_enable_vulkan'] = True
       # Configure Skia for Vulkan support.
       gn_args['skia_use_vulkan'] = True
+
+    # Enable Metal on non-simulator iOS builds.
+    if args.target_os == 'ios':
+      gn_args['skia_use_metal'] = not args.simulator
+      gn_args['shell_enable_metal'] = not args.simulator
 
     # The buildroot currently isn't set up to support Vulkan in the
     # Windows ANGLE build, so disable it regardless of enable_vulkan's value.
