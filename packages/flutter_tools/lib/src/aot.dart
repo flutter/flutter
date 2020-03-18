@@ -42,11 +42,15 @@ class AotBuilder {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.android_x86:
         throwToolExit('$platform is not supported in AOT.');
+        break;
+      case TargetPlatform.fuchsia_x64:
+        throwToolExit(
+          "To build release for fuchsia, use 'flutter build fuchsia --release'"
+        );
         break;
       case TargetPlatform.ios:
         target = buildInfo.isRelease
@@ -98,7 +102,7 @@ class AotBuilder {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError(measurement.exception.toString());
       }
-      throwToolExit(null);
+      throwToolExit('The aot build failed.');
     }
 
     if (expectSo) {
