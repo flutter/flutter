@@ -1665,6 +1665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool textChanged = _value?.text != value?.text;
     final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
     final bool isRepeatSelection = value?.selection == _lastFormattedUnmodifiedTextEditingValue?.selection;
+    final bool isRepeatComposing = value?.composing == _lastFormattedUnmodifiedTextEditingValue?.composing;
     // Only format when the text has changed and there are available formatters.
     if (!isRepeatText && textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (final TextInputFormatter formatter in widget.inputFormatters) {
@@ -1677,7 +1678,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     // If the text has changed or the selection has changed, we should update the
     // locally stored TextEditingValue to the new one.
-    if (!isRepeatText || !isRepeatSelection) {
+    if (!isRepeatText || !isRepeatSelection || !isRepeatComposing) {
       _value = value;
     } else if (textChanged && _lastFormattedValue != null) {
       _value = _lastFormattedValue;
