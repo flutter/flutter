@@ -1676,7 +1676,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       value = _whitespaceFormatter.formatEditUpdate(_value, value);
       _lastFormattedValue = value;
     }
-    // If the text has changed or the selection has changed, we should update the
+    // If the text, selection, or composing region has changed, we should update the
     // locally stored TextEditingValue to the new one.
     if (!isRepeatText || !isRepeatSelection || !isRepeatComposing) {
       _value = value;
