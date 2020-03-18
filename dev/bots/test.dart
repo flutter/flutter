@@ -277,16 +277,12 @@ Future<void> _runToolTests() async {
       // on Windows.
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
-        : '';
-      // Only linux has Chrome installed and is running web integration tests.
-      // See `_pubRunTest` for more information.
-      final bool forceSingleCore = Platform.isLinux && subshard == 'integration';
+        : ''
       await _pubRunTest(
         toolsPath,
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
-        forceSingleCore: forceSingleCore,
       );
     },
   );
