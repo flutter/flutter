@@ -248,7 +248,13 @@ void main() {
       IOSDevicePortForwarder createPortForwarder(
           ForwardedPort forwardedPort,
           IOSDevice device) {
-        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
+        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(
+          dyLdLibEntry: mockCache.dyLdLibEntry,
+          id: device.id,
+          iproxyPath: mockArtifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios),
+          logger: logger,
+          processManager: FakeProcessManager.any(),
+        );
         portForwarder.addForwardedPorts(<ForwardedPort>[forwardedPort]);
         return portForwarder;
       }
@@ -477,54 +483,6 @@ void main() {
         Cache: () => mockCache,
         FileSystem: () => mockFileSystem,
         MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
-        Platform: () => macPlatform,
-        ProcessManager: () => mockProcessManager,
-        Usage: () => mockUsage,
-      });
-
-      // By default, the .forward() method will try every port between 1024
-      // and 65535; this test verifies we are killing iproxy processes when
-      // we timeout on a port
-      testUsingContext('.forward() will kill iproxy processes before invoking a second', () async {
-        const String deviceId = '123';
-        const int devicePort = 456;
-        final IOSDevice device = IOSDevice(
-          deviceId,
-          artifacts: mockArtifacts,
-          fileSystem: mockFileSystem,
-          platform: macPlatform,
-          iosDeploy: iosDeploy,
-          name: 'iPhone 1',
-          sdkVersion: '13.3',
-          cpuArchitecture: DarwinArch.arm64,
-        );
-        final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(device);
-        bool firstRun = true;
-        final MockProcess successProcess = MockProcess(
-          exitCode: Future<int>.value(0),
-          stdout: Stream<List<int>>.fromIterable(<List<int>>['Hello'.codeUnits]),
-        );
-        final MockProcess failProcess = MockProcess(
-          exitCode: Future<int>.value(1),
-          stdout: const Stream<List<int>>.empty(),
-        );
-
-        final ProcessFactory factory = (List<String> command) {
-          if (!firstRun) {
-            return successProcess;
-          }
-          firstRun = false;
-          return failProcess;
-        };
-        mockProcessManager.processFactory = factory;
-        final int hostPort = await portForwarder.forward(devicePort);
-        // First port tried (1024) should fail, then succeed on the next
-        expect(hostPort, 1024 + 1);
-        verifyNever(successProcess.kill());
-        verify(failProcess.kill());
-      }, overrides: <Type, Generator>{
-        Artifacts: () => mockArtifacts,
-        Cache: () => mockCache,
         Platform: () => macPlatform,
         ProcessManager: () => mockProcessManager,
         Usage: () => mockUsage,

@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -365,7 +366,13 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
+    processManager: globals.processManager,
+    logger: globals.logger,
+    dyLdLibEntry: globals.cache.dyLdLibEntry,
+    id: id,
+    iproxyPath: _iproxyPath,
+  );
 
   @visibleForTesting
   set portForwarder(DevicePortForwarder forwarder) {
@@ -583,20 +590,56 @@ class IOSDeviceLogReader extends DeviceLogReader {
   }
 }
 
-@visibleForTesting
+/// A [DevicePortForwarder] specialized for iOS usage with iproxy.
 class IOSDevicePortForwarder extends DevicePortForwarder {
-  IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
 
-  final IOSDevice device;
+  /// Create a new [IOSDevicePortForwarder].
+  IOSDevicePortForwarder({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    @required MapEntry<String, String> dyLdLibEntry,
+    @required String id,
+    @required String iproxyPath,
+  }) : _logger = logger,
+       _dyLdLibEntry = dyLdLibEntry,
+       _id = id,
+       _iproxyPath = iproxyPath,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
-  final List<ForwardedPort> _forwardedPorts;
+  /// Create a [IOSDevicePortForwarder] for testing.
+  ///
+  /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
+  /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
+  ///
+  /// The device id may be provided, but otherwise defaultts to '1234'.
+  factory IOSDevicePortForwarder.test({
+    @required ProcessManager processManager,
+    @required Logger logger,
+    String id,
+  }) {
+    return IOSDevicePortForwarder(
+      processManager: processManager,
+      logger: logger,
+      iproxyPath: 'iproxy',
+      id: id ?? '1234',
+      dyLdLibEntry: const MapEntry<String, String>(
+        'DYLD_LIBRARY_PATH', '/path/to/libs',
+      ),
+    );
+  }
+
+  final ProcessUtils _processUtils;
+  final Logger _logger;
+  final MapEntry<String, String> _dyLdLibEntry;
+  final String _id;
+  final String _iproxyPath;
 
   @override
-  List<ForwardedPort> get forwardedPorts => _forwardedPorts;
+  List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
   @visibleForTesting
-  void addForwardedPorts(List<ForwardedPort> forwardedPorts) {
-    forwardedPorts.forEach(_forwardedPorts.add);
+  void addForwardedPorts(List<ForwardedPort> ports) {
+    ports.forEach(forwardedPorts.add);
   }
 
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
@@ -612,17 +655,17 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
     bool connected = false;
     while (!connected) {
-      globals.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
+      _logger.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await processUtils.start(
+      process = await _processUtils.start(
         <String>[
-          device._iproxyPath,
+          _iproxyPath,
           hostPort.toString(),
           devicePort.toString(),
-          device.id,
+          _id,
         ],
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
+          <MapEntry<String, String>>[_dyLdLibEntry],
         ),
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
@@ -645,25 +688,25 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     final ForwardedPort forwardedPort = ForwardedPort.withContext(
       hostPort, devicePort, process,
     );
-    globals.printTrace('Forwarded port $forwardedPort');
-    _forwardedPorts.add(forwardedPort);
+    _logger.printTrace('Forwarded port $forwardedPort');
+    forwardedPorts.add(forwardedPort);
     return hostPort;
   }
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
-    if (!_forwardedPorts.remove(forwardedPort)) {
+    if (!forwardedPorts.remove(forwardedPort)) {
       // Not in list. Nothing to remove.
       return;
     }
 
-    globals.printTrace('Unforwarding port $forwardedPort');
+    _logger.printTrace('Unforwarding port $forwardedPort');
     forwardedPort.dispose();
   }
 
   @override
   Future<void> dispose() async {
-    for (final ForwardedPort forwardedPort in _forwardedPorts) {
+    for (final ForwardedPort forwardedPort in forwardedPorts) {
       forwardedPort.dispose();
     }
   }
