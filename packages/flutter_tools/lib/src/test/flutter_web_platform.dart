@@ -677,8 +677,7 @@ class BrowserManager {
     String path,
     Uri url,
     SuiteConfiguration suiteConfig,
-    Object message,
-    {
+    Object message, {
       Future<void> Function() onDone,
     }
   ) async {
@@ -719,7 +718,7 @@ class BrowserManager {
 
     try {
       controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
-          suiteConfig, await _environment, suiteChannel, message);
+        suiteConfig, await _environment, suiteChannel, message);
 
       _controllers.add(controller);
       return await controller.suite;

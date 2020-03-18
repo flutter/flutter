@@ -116,6 +116,10 @@ class ChromeLauncher {
   ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
   Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory dataDir }) async {
+    if (_currentCompleter.isCompleted) {
+      throwToolExit('Only one instance of chrome can be started.');
+    }
+
     // This is a JSON file which contains configuration from the
     // browser session, such as window position. It is located
     // under the Chrome data-dir folder.
@@ -203,9 +207,6 @@ class ChromeLauncher {
   }
 
   static Future<Chrome> _connect(Chrome chrome, bool skipCheck) async {
-    if (_currentCompleter.isCompleted) {
-      throwToolExit('Only one instance of chrome can be started.');
-    }
     // The connection is lazy. Try a simple call to make sure the provided
     // connection is valid.
     if (!skipCheck) {
