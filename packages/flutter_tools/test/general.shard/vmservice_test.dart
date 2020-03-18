@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -291,7 +292,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),
@@ -311,7 +312,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),
@@ -332,7 +333,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),

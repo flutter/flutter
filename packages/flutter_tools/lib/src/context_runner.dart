@@ -19,7 +19,6 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
@@ -147,13 +146,13 @@ Future<T> runInContext<T>(
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
