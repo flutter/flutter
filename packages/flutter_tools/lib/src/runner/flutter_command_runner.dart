@@ -281,7 +281,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final String enginePath = _findEnginePath(topLevelResults);
     if (enginePath != null) {
       contextOverrides.addAll(<Type, dynamic>{
-        Artifacts: Artifacts.getLocalEngine(enginePath, _findEngineBuildPath(topLevelResults, enginePath)),
+        Artifacts: Artifacts.getLocalEngine(_findEngineBuildPath(topLevelResults, enginePath)),
       });
     }
 
