@@ -107,7 +107,7 @@ enum RoutePopDisposition {
 /// A route can belong to a page if the [settings] are a subclass of [Page]. A
 /// page-based route, as opposite to pageless route, is created from
 /// [Page.createRoute] during [Navigator.pages] updates. The page associated
-/// with this route may change during the life time of the route. If the
+/// with this route may change during the lifetime of the route. If the
 /// [Navigator] updates the page of this route, it calls [changedInternalState]
 /// to notify the route that the page has been updated.
 ///
