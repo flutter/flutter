@@ -147,6 +147,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  platform_views_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on Android.
+    stage: devicelab_ios
+    required_agent_capabilities: ["linux/android"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -437,6 +443,12 @@ tasks:
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
     stage: devicelab_ios
     # TODO(keyonghan): change with https://github.com/flutter/flutter/issues/50383
+    required_agent_capabilities: ["mac/ios"]
+
+  platform_views_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_ios32__start_up:
