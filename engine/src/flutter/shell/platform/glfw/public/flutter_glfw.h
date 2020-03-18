@@ -38,8 +38,12 @@ typedef struct {
 // Properties for configuring a Flutter engine instance.
 typedef struct {
   // The path to the flutter_assets folder for the application to be run.
+  // This can either be an absolute path, or on Windows or Linux, a path
+  // relative to the directory containing the executable.
   const char* assets_path;
   // The path to the icudtl.dat file for the version of Flutter you are using.
+  // This can either be an absolute path, or on Windows or Linux, a path
+  // relative to the directory containing the executable.
   const char* icu_data_path;
   // The switches to pass to the Flutter engine.
   //
