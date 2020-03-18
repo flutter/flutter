@@ -49,14 +49,15 @@ void main() {
 
   testUsingContext('Selects assumed port if VM service connection is successful', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef.parse(<String, Object>{}),
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Isolate()
-        ..rootLib = (LibraryRef()..uri = 'package:hello/main.dart');
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = (LibraryRef(name: 'main', uri: 'package:hello/main.dart'));
     });
+
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
       deivce: null,
@@ -69,18 +70,18 @@ void main() {
 
   testUsingContext('Selects assumed port when another isolate has no root library', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef()..id = '1',
-        IsolateRef()..id = '2',
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef.parse(<String, Object>{})..id = '1',
+        IsolateRef.parse(<String, Object>{})..id = '2',
       ];
     });
     when(mockVmService.getIsolate('1')).thenAnswer((Invocation invocation) async {
-      return Isolate()
+      return Isolate.parse(<String, Object>{})
         ..rootLib = null;
     });
     when(mockVmService.getIsolate('2')).thenAnswer((Invocation invocation) async {
-      return Isolate()
-        ..rootLib = (LibraryRef()..uri = 'package:hello/main.dart');
+      return Isolate.parse(<String, Object>{})
+        ..rootLib = (LibraryRef.parse(<String, Object>{})..uri = 'package:hello/main.dart');
     });
     expect(await fallbackDiscovery.discover(
       assumedDevicePort: 23,
@@ -94,12 +95,16 @@ void main() {
 
   testUsingContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
     when(mockVmService.getVM()).thenAnswer((Invocation invocation) async {
-      return VM()..isolates = <IsolateRef>[
-        IsolateRef(),
+      return VM.parse(<String, Object>{})..isolates = <IsolateRef>[
+        IsolateRef(
+          id: 'a',
+          name: 'isolate',
+          number: '1',
+        ),
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Sentinel();
+      return Sentinel(kind: 'Something', valueAsString: 'Something');
     });
 
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(

@@ -278,11 +278,15 @@ Future<void> _runToolTests() async {
       final String suffix = Platform.isWindows && subshard == 'commands'
         ? 'permeable'
         : '';
+      // Only linux has Chrome installed and is running web integration tests.
+      // See `_pubRunTest` for more information.
+      final bool forceSingleCore = Platform.isLinux && subshard == 'integration';
       await _pubRunTest(
         toolsPath,
         testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
+        forceSingleCore: forceSingleCore,
       );
     },
   );
@@ -718,6 +722,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   bool useBuildRunner = false,
   String coverage,
   bq.TabledataResourceApi tableData,
+  bool forceSingleCore = false,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -730,6 +735,11 @@ Future<void> _pubRunTest(String workingDirectory, {
     }
   } else {
     cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
+  }
+  // Integration tests that depend on external processes like chrome
+  // can get stuck if there are multiple instances running at once.
+  if (forceSingleCore) {
+    cpus = 1;
   }
 
   final List<String> args = <String>[
