@@ -34,7 +34,7 @@ void main() {
     final Directory destination = fileSystem.directory('target');
     const String imageName = 'some_image.png';
     templateDir.childFile('$imageName.img.tmpl').createSync(recursive: true);
-    final File sourceImage = imageSourceDir.childFile('$imageName');
+    final File sourceImage = imageSourceDir.childFile(imageName);
     sourceImage.createSync(recursive: true);
     sourceImage.writeAsStringSync('Ceci n\'est pas une pipe');
 
