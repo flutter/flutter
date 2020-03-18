@@ -437,9 +437,10 @@ void main() {
     expect(residentWebRunner.supportsCanvasKit, true);
     expect(webAssetServer.canvasKitRendering, false);
 
-    await residentWebRunner.toggleCanvaskit();
+    final bool toggleResult = await residentWebRunner.toggleCanvaskit();
 
     expect(webAssetServer.canvasKitRendering, true);
+    expect(toggleResult, true);
   }));
 
   test('Exits when initial compile fails', () => testbed.run(() async {
