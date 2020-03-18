@@ -2729,12 +2729,20 @@ class InputDecoration {
   /// [errorText], and [counterText].
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
-  /// [border]. If the [border] is [OutlineInputBorder] then `contentPadding` is
-  /// `EdgeInsets.LTRB(12, 24, 12, 16)`. If the [border] is [UnderlineInputBorder]
-  /// or [InputBorder.none] then `contentPadding` is `EdgeInsets.LTRB(0, 12, 0, 12)`.
-  /// If the [border] is [UnderlineInputBorder] or [InputBorder.none] and if
-  /// [filled] is true then `contentPadding` is `EdgeInsets.LTRB(12, 12, 12, 12)`.
+  /// [border].
+  ///
   /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
+  ///
+  /// If [InputBorder.isOutline] is false and [filled] is true then
+  /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// If [InputBorder.isOutline] is false and [filled] is false then
+  /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  ///
+  /// If [InputBorder.isOutline] is true then `contentPadding` is
+  /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
+  /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
