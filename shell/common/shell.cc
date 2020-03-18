@@ -1267,16 +1267,6 @@ bool Shell::OnServiceProtocolRunInView(
     return false;
   }
 
-  // TODO(chinmaygarde): In case of hot-reload from .dill files, the packages
-  // file is ignored. Currently, the tool is passing a junk packages file to
-  // pass this check. Update the service protocol interface and remove this
-  // workaround.
-  if (params.count("packagesFile") == 0) {
-    ServiceProtocolParameterError(response,
-                                  "'packagesFile' parameter is missing.");
-    return false;
-  }
-
   if (params.count("assetDirectory") == 0) {
     ServiceProtocolParameterError(response,
                                   "'assetDirectory' parameter is missing.");
@@ -1285,8 +1275,6 @@ bool Shell::OnServiceProtocolRunInView(
 
   std::string main_script_path =
       fml::paths::FromURI(params.at("mainScript").data());
-  std::string packages_path =
-      fml::paths::FromURI(params.at("packagesFile").data());
   std::string asset_directory_path =
       fml::paths::FromURI(params.at("assetDirectory").data());
 
