@@ -15,7 +15,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -628,7 +627,7 @@ abstract class ResidentRunner {
          logger: globals.logger,
          terminal: globals.terminal,
          platform: globals.platform,
-         outputPreferences: outputPreferences,
+         outputPreferences: globals.outputPreferences,
        ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
