@@ -71,6 +71,7 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
   'test/widgets/shortcuts_test.dart',
+  'test/material/animated_icons_private_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
   'test/cupertino/dialog_test.dart',
@@ -420,8 +421,8 @@ Future<void> _runFrameworkTests() async {
       tests: <String>[ path.join('test', 'widgets') + path.separator ],
     );
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'), options: <String>['--no-track-widget-creation'], tableData: bigqueryApi?.tabledata);
   }
 
   Future<void> runLibraries() async {
@@ -717,6 +718,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   bool useBuildRunner = false,
   String coverage,
   bq.TabledataResourceApi tableData,
+  bool forceSingleCore = false,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -729,6 +731,11 @@ Future<void> _pubRunTest(String workingDirectory, {
     }
   } else {
     cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
+  }
+  // Integration tests that depend on external processes like chrome
+  // can get stuck if there are multiple instances running at once.
+  if (forceSingleCore) {
+    cpus = 1;
   }
 
   final List<String> args = <String>[

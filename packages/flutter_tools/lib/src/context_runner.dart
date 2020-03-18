@@ -135,7 +135,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         processManager: globals.processManager,
       ),
-      IOSSimulatorUtils: () => IOSSimulatorUtils(),
+      IOSSimulatorUtils: () => IOSSimulatorUtils(
+        simControl: globals.simControl,
+        xcode: globals.xcode,
+      ),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       Logger: () => globals.platform.isWindows
@@ -172,7 +175,10 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(),
+      SimControl: () => SimControl(
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
@@ -180,9 +186,19 @@ Future<T> runInContext<T>(
         runningOnBot: runningOnBot,
       ),
       UserMessages: () => UserMessages(),
-      VisualStudio: () => VisualStudio(),
-      VisualStudioValidator: () => const VisualStudioValidator(),
-      WebWorkflow: () => const WebWorkflow(),
+      VisualStudioValidator: () => VisualStudioValidator(
+        userMessages: globals.userMessages,
+        visualStudio: VisualStudio(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          logger: globals.logger,
+          processManager: globals.processManager,
+        )
+      ),
+      WebWorkflow: () => WebWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(
         logger: globals.logger,

@@ -1344,7 +1344,7 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return <String>['192.168.42.172 scare-cable-skip-joy'];
   }
 
@@ -1356,7 +1356,7 @@ class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
 
 class FailingDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return null;
   }
 

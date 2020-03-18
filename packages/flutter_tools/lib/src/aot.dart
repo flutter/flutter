@@ -25,15 +25,11 @@ class AotBuilder {
   Future<void> build({
     @required TargetPlatform platform,
     @required String outputPath,
-    @required BuildMode buildMode,
+    @required BuildInfo buildInfo,
     @required String mainDartFile,
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
-    List<String> extraFrontEndOptions,
-    List<String> extraGenSnapshotOptions,
-    @required List<String> dartDefines,
-    @required bool treeShakeIcons,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -53,7 +49,7 @@ class AotBuilder {
         throwToolExit('$platform is not supported in AOT.');
         break;
       case TargetPlatform.ios:
-        target = buildMode.isRelease
+        target = buildInfo.isRelease
           ? const AotAssemblyRelease()
           : const AotAssemblyProfile();
         break;
@@ -61,16 +57,16 @@ class AotBuilder {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
         expectSo = true;
-        target = buildMode.isRelease
+        target = buildInfo.isRelease
           ? const AotElfRelease()
           : const AotElfProfile();
     }
 
     Status status;
     if (!quiet) {
-      final String typeName = globals.artifacts.getEngineType(platform, buildMode);
+      final String typeName = globals.artifacts.getEngineType(platform, buildInfo.mode);
       status = globals.logger.startProgress(
-        'Building AOT snapshot in ${getFriendlyModeName(buildMode)} mode ($typeName)...',
+        'Building AOT snapshot in ${getFriendlyModeName(buildInfo.mode)} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
     }
@@ -83,14 +79,14 @@ class AotBuilder {
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       defines: <String, String>{
         kTargetFile: mainDartFile ?? globals.fs.path.join('lib', 'main.dart'),
-        kBuildMode: getNameForBuildMode(buildMode),
+        kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetPlatform: getNameForTargetPlatform(platform),
-        kIconTreeShakerFlag: treeShakeIcons.toString(),
-        kDartDefines: jsonEncode(dartDefines),
-        if (extraGenSnapshotOptions.isNotEmpty)
-          kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
-        if (extraFrontEndOptions.isNotEmpty)
-          kExtraFrontEndOptions: extraFrontEndOptions.join(','),
+        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        kDartDefines: jsonEncode(buildInfo.dartDefines),
+        if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
+          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
+        if (buildInfo.extraFrontEndOptions.isNotEmpty)
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
         if (platform == TargetPlatform.ios)
           kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
       }
@@ -104,7 +100,6 @@ class AotBuilder {
       }
       throwToolExit(null);
     }
-
 
     if (expectSo) {
       environment.buildDir.childFile('app.so')

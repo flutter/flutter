@@ -58,10 +58,10 @@ class MDnsObservatoryDiscovery {
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
-          .lookup<PtrResourceRecord>(
-            ResourceRecordQuery.serverPointer(dartObservatoryName),
-          )
-          .toList();
+        .lookup<PtrResourceRecord>(
+          ResourceRecordQuery.serverPointer(dartObservatoryName),
+        )
+        .toList();
       if (pointerRecords.isEmpty) {
         globals.printTrace('No pointer records found.');
         return null;
@@ -69,8 +69,8 @@ class MDnsObservatoryDiscovery {
       // We have no guarantee that we won't get multiple hits from the same
       // service on this.
       final Set<String> uniqueDomainNames = pointerRecords
-          .map<String>((PtrResourceRecord record) => record.domainName)
-          .toSet();
+        .map<String>((PtrResourceRecord record) => record.domainName)
+        .toSet();
 
       String domainName;
       if (applicationId != null) {
@@ -98,10 +98,10 @@ class MDnsObservatoryDiscovery {
       globals.printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
-          .lookup<SrvResourceRecord>(
-            ResourceRecordQuery.service(domainName),
-          )
-          .toList();
+        .lookup<SrvResourceRecord>(
+          ResourceRecordQuery.service(domainName),
+        )
+        .toList();
       if (srv.isEmpty) {
         return null;
       }
@@ -133,6 +133,11 @@ class MDnsObservatoryDiscovery {
         authCode += '/';
       }
       return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
+    } on OSError catch (e) {
+      // OSError is neither an Error nor and Exception, so we wrap it in a
+      // SocketException and rethrow.
+      // See: https://github.com/dart-lang/sdk/issues/40934
+      throw SocketException('mdns query failed', osError: e);
     } finally {
       client.stop();
     }

@@ -713,6 +713,19 @@ void main() {
 
       expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
     });
+
+    test('android chrome', () {
+      final Map<String, dynamic> expected = <String, dynamic>{
+        'browserName': 'chrome',
+        'platformName': 'android',
+        'goog:chromeOptions': <String, dynamic>{
+          'androidPackage': 'com.android.chrome',
+          'args': <String>['--disable-fullscreen']
+        },
+      };
+
+      expect(getDesiredCapabilities(Browser.androidChrome, false), expected);
+    });
   });
 }
 

@@ -21,7 +21,7 @@ Future<String> _runWithMode(String mode, String deviceId) async {
 }
 
 Future<TaskResult> run() async {
-  cd('${flutterDirectory.path}/examples/flutter_gallery');
+  cd('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
   final Device device = await devices.workingDevice;
   await device.unlock();
   final String deviceId = device.deviceId;

@@ -27,7 +27,6 @@ Future<void> buildWeb(
   String target,
   BuildInfo buildInfo,
   bool initializePlatform,
-  List<String> dartDefines,
   bool csp,
 ) async {
   if (!flutterProject.web.existsSync()) {
@@ -50,7 +49,7 @@ Future<void> buildWeb(
         kTargetFile: target,
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: jsonEncode(dartDefines),
+        kDartDefines: jsonEncode(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
       },

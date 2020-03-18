@@ -30,9 +30,7 @@ class FakeCommand {
     this.completer,
   }) : assert(command != null),
        assert(duration != null),
-       assert(exitCode != null),
-       assert(stdout != null),
-       assert(stderr != null);
+       assert(exitCode != null);
 
   /// The exact commands that must be matched for this [FakeCommand] to be
   /// considered correct.
@@ -139,8 +137,12 @@ class _FakeProcess implements Process {
         }
         return _exitCode;
       }),
-      stderr = Stream<List<int>>.value(utf8.encode(_stderr)),
-      stdout = Stream<List<int>>.value(utf8.encode(_stdout));
+      stderr = _stderr == null
+        ? const Stream<List<int>>.empty()
+        : Stream<List<int>>.value(utf8.encode(_stderr)),
+      stdout = _stdout == null
+        ? const Stream<List<int>>.empty()
+        : Stream<List<int>>.value(utf8.encode(_stdout));
 
   final int _exitCode;
 
@@ -165,7 +167,7 @@ class _FakeProcess implements Process {
 
   @override
   bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'Process.kill() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }
@@ -281,7 +283,7 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
-    assert(false, 'ProcessManager.killPid() should not be used directly in flutter_tools.');
+    // Killing a fake process has no effect.
     return false;
   }
 }

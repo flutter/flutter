@@ -33,7 +33,7 @@ import 'vmservice.dart';
 class FlutterDevice {
   FlutterDevice(
     this.device, {
-    @required this.trackWidgetCreation,
+    @required this.buildInfo,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
@@ -41,59 +41,62 @@ class FlutterDevice {
     TargetPlatform targetPlatform,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-    @required BuildMode buildMode,
-    List<String> dartDefines,
-  }) : assert(trackWidgetCreation != null),
+  }) : assert(buildInfo.trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
          globals.artifacts.getArtifactPath(
            Artifact.flutterPatchedSdkPath,
            platform: targetPlatform,
-           mode: buildMode,
+           mode: buildInfo.mode,
          ),
-         buildMode: buildMode,
-         trackWidgetCreation: trackWidgetCreation,
+         buildMode: buildInfo.mode,
+         trackWidgetCreation: buildInfo.trackWidgetCreation,
          fileSystemRoots: fileSystemRoots ?? <String>[],
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
-         dartDefines: dartDefines,
+         dartDefines: buildInfo.dartDefines,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
     @required FlutterProject flutterProject,
-    @required bool trackWidgetCreation,
     @required String target,
-    @required BuildMode buildMode,
+    @required BuildInfo buildInfo,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-    List<String> dartDefines,
   }) async {
     ResidentCompiler generator;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    // For both web and non-web platforms we initialize dill to/from
+    // a shared location for faster bootstrapping. If the compiler fails
+    // due to a kernel target or version mismatch, no error is reported
+    // and the compiler starts up as normal. Unexpected errors will print
+    // a warning message and dump some debug information which can be
+    // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
-        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildMode),
-        buildMode: buildMode,
-        trackWidgetCreation: trackWidgetCreation,
+        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
+        buildMode: buildInfo.mode,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         fileSystemRoots: fileSystemRoots ?? <String>[],
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildMode))
+          .getArtifactPath(Artifact.webPlatformKernelDill, mode: buildInfo.mode))
           .absolute.uri.toString(),
-        dartDefines: dartDefines,
+        dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
       );
@@ -102,15 +105,16 @@ class FlutterDevice {
         globals.artifacts.getArtifactPath(
           Artifact.flutterPatchedSdkPath,
           platform: targetPlatform,
-          mode: buildMode,
+          mode: buildInfo.mode,
         ),
-        buildMode: buildMode,
-        trackWidgetCreation: trackWidgetCreation,
+        buildMode: buildInfo.mode,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
-        dartDefines: dartDefines,
+        dartDefines: buildInfo.dartDefines,
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
     }
 
@@ -123,7 +127,6 @@ class FlutterDevice {
 
     return FlutterDevice(
       device,
-      trackWidgetCreation: trackWidgetCreation,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
@@ -131,13 +134,13 @@ class FlutterDevice {
       targetModel: targetModel,
       targetPlatform: targetPlatform,
       generator: generator,
-      buildMode: buildMode,
-      dartDefines: dartDefines,
+      buildInfo: buildInfo,
     );
   }
 
   final Device device;
   final ResidentCompiler generator;
+  final BuildInfo buildInfo;
   Stream<Uri> observatoryUris;
   VMService vmService;
   DevFS devFS;
@@ -147,7 +150,6 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
   bool _isListeningForObservatoryUri;
   final String viewFilter;
-  final bool trackWidgetCreation;
 
   /// Whether the stream [observatoryUris] is still open.
   bool get isWaitingForObservatory => _isListeningForObservatoryUri ?? false;
@@ -199,7 +201,7 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $observatoryUri');
 
       vmService = service;
-      device.getLogReader(app: package).connectedVMService = vmService;
+      (await device.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -289,8 +291,8 @@ class FlutterDevice {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
-      for (final FlutterView view in views)
-        view.uiIsolate.reloadSources(
+      for (final Isolate isolate in vmService.vm.isolates)
+        isolate.reloadSources(
           pause: pause,
           rootLibUri: deviceEntryUri,
           packagesUri: devicePackagesUri,
@@ -375,11 +377,11 @@ class FlutterDevice {
     return to;
   }
 
-  void startEchoingDeviceLog() {
+  Future<void> startEchoingDeviceLog() async {
     if (_loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = device.getLogReader(app: package).logLines;
+    final Stream<String> logStream = (await device.getLogReader(app: package)).logLines;
     if (logStream == null) {
       globals.printError('Failed to read device log stream');
       return;
@@ -399,8 +401,8 @@ class FlutterDevice {
     _loggingSubscription = null;
   }
 
-  void initLogReader() {
-    device.getLogReader(app: package).appPid = vmService.vm.pid;
+  Future<void> initLogReader() async {
+    (await device.getLogReader(app: package)).appPid = vmService.vm.pid;
   }
 
   Future<int> runHot({
@@ -432,7 +434,7 @@ class FlutterDevice {
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     // Start the application.
     final Future<LaunchResult> futureResult = device.startApp(
@@ -505,7 +507,7 @@ class FlutterDevice {
       platformArgs['trace-startup'] = coldRunner.traceStartup;
     }
 
-    startEchoingDeviceLog();
+    await startEchoingDeviceLog();
 
     final LaunchResult result = await device.startApp(
       package,
@@ -562,7 +564,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
-        trackWidgetCreation: trackWidgetCreation,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
@@ -643,7 +645,6 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
-  @visibleForTesting
   final Directory artifactDirectory;
   final String packagesFilePath;
   final String projectRootPath;
@@ -671,6 +672,7 @@ abstract class ResidentRunner {
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
+  bool get supportsCanvasKit => false;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -728,6 +730,13 @@ abstract class ResidentRunner {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
+  }
+
+  /// Toggle whether canvaskit is being used for rendering.
+  ///
+  /// Only supported on the web.
+  Future<void> toggleCanvaskit() {
+    throw Exception('Canvaskit not supported by this runner.');
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1015,6 +1024,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
+      final File outputDill = artifactDirectory.childFile('app.dill');
+      if (outputDill.existsSync()) {
+        artifactDirectory.childFile('app.dill')
+          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }
@@ -1048,6 +1062,9 @@ abstract class ResidentRunner {
       } else {
         commandHelp.S.print();
         commandHelp.U.print();
+      }
+      if (supportsCanvasKit){
+        commandHelp.k.print();
       }
       // `P` should precede `a`
       commandHelp.P.print();
@@ -1185,6 +1202,12 @@ class TerminalHandler {
       case 'I':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'k':
+        if (residentRunner.supportsCanvasKit) {
+          await residentRunner.toggleCanvaskit();
           return true;
         }
         return false;

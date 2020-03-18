@@ -287,6 +287,43 @@ void main() {
         SystemClock: () => clock,
         Usage: () => usage,
       });
+
+      testUsingContext('command release lock on kill signal', () async {
+        mockTimes = <int>[1000, 2000];
+        final Completer<void> completer = Completer<void>();
+        setExitFunctionForTests((int exitCode) {
+          expect(exitCode, 0);
+          restoreExitFunction();
+          completer.complete();
+        });
+        final Completer<void> checkLockCompleter = Completer<void>();
+        final DummyFlutterCommand flutterCommand =
+            DummyFlutterCommand(commandFunction: () async {
+          await Cache.lock();
+          checkLockCompleter.complete();
+          final Completer<void> c = Completer<void>();
+          await c.future;
+          return null; // unreachable
+        });
+
+        unawaited(flutterCommand.run());
+        await checkLockCompleter.future;
+
+        Cache.checkLockAcquired();
+
+        signalController.add(mockSignal);
+        await completer.future;
+
+        await Cache.lock();
+        Cache.releaseLockEarly();
+      }, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        Signals: () => FakeSignals(
+              subForSigTerm: signalUnderTest,
+              exitSignals: <ProcessSignal>[signalUnderTest],
+            ),
+        Usage: () => usage
+      });
     });
 
     testUsingCommandContext('report execution timing by default', () async {

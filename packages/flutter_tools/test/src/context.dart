@@ -219,6 +219,9 @@ class FakeDeviceManager implements DeviceManager {
   Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
+
+  @override
   Future<List<Device>> getDevicesById(String deviceId) async {
     return devices.where((Device device) => device.id == deviceId).toList();
   }

@@ -77,7 +77,6 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
-          dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
         globals.fs.currentDirectory.childFile('.packages')
@@ -116,6 +115,11 @@ void main() {
     when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onIsolateEvent).thenAnswer((Invocation _) {
+      return Stream<Event>.fromIterable(<Event>[
+        Event(kind: EventKind.kIsolateStart, timestamp: 1),
+      ]);
+    });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
     when(mockWebDevFS.sources).thenReturn(<Uri>[]);
@@ -139,7 +143,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -158,7 +161,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: <String>[],
       urlTunneller: null,
     );
 
@@ -174,7 +176,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     );
 
@@ -234,7 +235,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -271,7 +271,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
@@ -429,6 +428,18 @@ void main() {
 
   test('web resident runner is debuggable', () => testbed.run(() {
     expect(residentWebRunner.debuggingEnabled, true);
+  }));
+
+  test('web resident runner can toggle CanvasKit', () => testbed.run(() async {
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null);
+    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
+
+    expect(residentWebRunner.supportsCanvasKit, true);
+    expect(webAssetServer.canvasKitRendering, false);
+
+    await residentWebRunner.toggleCanvaskit();
+
+    expect(webAssetServer.canvasKitRendering, true);
   }));
 
   test('Exits when initial compile fails', () => testbed.run(() async {
@@ -779,7 +790,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -820,7 +830,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 

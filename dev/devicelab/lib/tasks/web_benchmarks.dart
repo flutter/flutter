@@ -138,10 +138,6 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             throw 'Score key is empty in benchmark "$benchmarkName". '
                 'Received [${scoreKeys.join(', ')}]';
           }
-          if (scoreKey.contains('.')) {
-            throw 'Score key contain dots in benchmark "$benchmarkName". '
-                'Received [${scoreKeys.join(', ')}]';
-          }
           benchmarkScoreKeys.add('$namespace.$scoreKey');
         }
 
