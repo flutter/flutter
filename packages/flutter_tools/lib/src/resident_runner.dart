@@ -284,18 +284,13 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  List<Future<Map<String, dynamic>>> reloadSources(
-    String entryPath, {
+  List<Future<Map<String, dynamic>>> reloadSources({
     bool pause = false,
   }) {
-    final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
-    final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
       for (final Isolate isolate in vmService.vm.isolates)
         isolate.reloadSources(
           pause: pause,
-          rootLibUri: deviceEntryUri,
-          packagesUri: devicePackagesUri,
         ),
     ];
   }

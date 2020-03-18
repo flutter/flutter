@@ -174,13 +174,9 @@ class HotRunner extends ResidentRunner {
       return OperationResult(1, 'Failed to compile');
     }
     try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
-      );
       for (final FlutterDevice device in flutterDevices) {
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: false,
+          pause: false,
         );
         final List<Map<String, dynamic>> reports = await Future.wait(reportFutures);
         final Map<String, dynamic> firstReport = reports.first;
@@ -813,10 +809,6 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = Stopwatch()..start();
     Map<String, dynamic> firstReloadDetails;
     try {
-      final String entryPath = globals.fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
-      );
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (final FlutterDevice device in flutterDevices) {
         if (_shouldResetAssetDirectory) {
@@ -825,9 +817,7 @@ class HotRunner extends ResidentRunner {
           await device.resetAssetDirectory();
           _shouldResetAssetDirectory = false;
         }
-        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: pause,
-        );
+        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(pause: pause);
         allReportsFutures.add(Future.wait(reportFutures).then(
           (List<Map<String, dynamic>> reports) async {
             // TODO(aam): Investigate why we are validating only first reload report,
