@@ -263,8 +263,9 @@ void main() {
         ),
     ));
 
-    // This text should be there while ExpansionTile collapsed
-    expect(find.text('Maintaining State'), findsOneWidget);
+    // This text should be offstage while ExpansionTile collapsed
+    expect(find.text('Maintaining State', skipOffstage: false), findsOneWidget);
+    expect(find.text('Maintaining State'), findsNothing);
     // This text shouldn't be there while ExpansionTile collapsed
     expect(find.text('Discarding State'), findsNothing);
   });
