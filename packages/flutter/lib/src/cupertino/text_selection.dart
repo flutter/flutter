@@ -370,7 +370,9 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       }
 
       if (items.isNotEmpty) {
-        items.add(onePhysicalPixelVerticalDivider);
+        // TODO(justinmc): Reintroduce when you have logic to handle it. Or draw
+        // it some other way?
+        //items.add(onePhysicalPixelVerticalDivider);
       }
 
       items.add(CupertinoButton(
