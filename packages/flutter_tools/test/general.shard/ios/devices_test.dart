@@ -23,9 +23,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:meta/meta.dart';
@@ -787,102 +785,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       IMobileDevice: () => mockIMobileDevice,
     });
   });
-
-  group('isSupportedForProject', () {
-    Artifacts mockArtifacts;
-    MockCache mockCache;
-    Logger logger;
-    IOSDeploy iosDeploy;
-    MemoryFileSystem fileSystem;
-    FakeProcessManager fakeProcessManager;
-
-    setUp(() {
-      fileSystem = MemoryFileSystem();
-      mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
-      fakeProcessManager = FakeProcessManager.any();
-      iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
-        cache: mockCache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
-      );
-    });
-
-    testUsingContext('is true on module project', () async {
-      fileSystem.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
-  name: example
-
-  flutter:
-    module: {}
-  ''');
-      fileSystem.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      final IOSDevice device = IOSDevice(
-        'test',
-        artifacts: mockArtifacts,
-        fileSystem: fileSystem,
-        iosDeploy: iosDeploy,
-        logger: logger,
-        platform: macPlatform,
-        name: 'iPhone 1',
-        sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64
-      );
-      expect(device.isSupportedForProject(flutterProject), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
-    });
-
-    testUsingContext('is true with editable host app', () async {
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.packages').createSync();
-      fileSystem.directory('ios').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
-      final IOSDevice device = IOSDevice(
-        'test',
-        artifacts: mockArtifacts,
-        fileSystem: fileSystem,
-        iosDeploy: iosDeploy,
-        logger: logger,
-        platform: macPlatform,
-        name: 'iPhone 1',
-        sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
-      );
-      expect(device.isSupportedForProject(flutterProject), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => fakeProcessManager,
-    });
-
-    testUsingContext('is false with no host app and no module', () async {
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.packages').createSync();
-      final FlutterProject flutterProject = FlutterProject.current();
-
-      final IOSDevice device = IOSDevice(
-        'test',
-        artifacts: mockArtifacts,
-        fileSystem: fileSystem,
-        iosDeploy: iosDeploy,
-        logger: logger,
-        platform: macPlatform,
-        name: 'iPhone 1',
-        sdkVersion: '13.3',
-        cpuArchitecture: DarwinArch.arm64,
-      );
-      expect(device.isSupportedForProject(flutterProject), false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => fakeProcessManager,
-    });
-  });
 }
 
 class AbsoluteBuildableIOSApp extends BuildableIOSApp {
@@ -918,24 +820,15 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
   }
 }
 
-
 class MockIOSApp extends Mock implements IOSApp {}
-class MockApplicationPackage extends Mock implements ApplicationPackage {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
-class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockDirectory extends Mock implements Directory {}
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
-class MockForwardedPort extends Mock implements ForwardedPort {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockIOSDeploy extends Mock implements IOSDeploy {}
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
-class MockMDnsObservatoryDiscovery extends Mock implements MDnsObservatoryDiscovery {}
-class MockMDnsObservatoryDiscoveryResult extends Mock implements MDnsObservatoryDiscoveryResult {}
 class MockPlatform extends Mock implements Platform {}
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
-class MockStatus extends Mock implements Status {}
-class MockUsage extends Mock implements Usage {}
 class MockXcdevice extends Mock implements XCDevice {}
-class MockXcode extends Mock implements Xcode {}
