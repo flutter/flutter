@@ -12,18 +12,13 @@ import 'package:quiver/testing/async.dart';
 
 void main() {
   test('The frames will only be enabled after runApp has bootstrapped the app', () async {
-    WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized() as WidgetsFlutterBinding;
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     // Framework starts with detached statue. Sends resumed signal to enable frame.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
     await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
 
-    // The runApp will schedule timers to bootstrap the app. Uses FakeAsync
-    // to make sure we flushes all timers before checking the result.
-    FakeAsync().run((FakeAsync async) {
-      runApp(const Placeholder());
-      async.flushTimers();
-    });
+    binding.attachRootWidget(const Placeholder());
     expect(SchedulerBinding.instance.framesEnabled, isTrue);
   });
 }
