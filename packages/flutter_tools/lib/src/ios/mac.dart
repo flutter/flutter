@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
