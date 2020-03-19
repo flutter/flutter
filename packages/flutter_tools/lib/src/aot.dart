@@ -87,6 +87,7 @@ class AotBuilder {
         kTargetPlatform: getNameForTargetPlatform(platform),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
         kDartDefines: jsonEncode(buildInfo.dartDefines),
+        kBitcodeFlag: bitcode.toString(),
         if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
           kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
         if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
