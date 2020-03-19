@@ -138,7 +138,7 @@ class CupertinoScrollbar extends StatefulWidget {
   ///
   /// Defaults to false.
   ///
-  /// {@tool snippet}
+  /// {@tool dartpad --template=stateless_widget_material}
   ///
   /// ```dart
   /// final ScrollController _controllerOne = ScrollController();
