@@ -537,12 +537,13 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) {
     _traceCommand(cli);
+    if (!_processManager.canRun(cli.first)) {
+      _logger.printTrace('$cli either does not exist or is not executable.');
+      return false;
+    }
     try {
       return _processManager.runSync(cli, environment: environment).exitCode == 0;
     } on Exception catch (error) {
-      _logger.printTrace('$cli failed with $error');
-      return false;
-    } on ArgumentError catch (error) {
       _logger.printTrace('$cli failed with $error');
       return false;
     }

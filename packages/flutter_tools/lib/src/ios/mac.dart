@@ -35,18 +35,7 @@ class IMobileDevice {
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
 
-  bool get isInstalled {
-    _isInstalled ??= processUtils.exitsHappySync(
-      <String>[
-        _idevicescreenshotPath,
-        '-h',
-      ],
-      environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-      ),
-    );
-    return _isInstalled;
-  }
+  bool get isInstalled => _isInstalled ??= globals.processManager.canRun(_idevicescreenshotPath);
   bool _isInstalled;
 
   /// Starts `idevicesyslog` and returns the running process.
