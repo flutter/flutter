@@ -424,15 +424,15 @@ class FuchsiaDevice extends Device {
 
   Future<TargetPlatform> _queryTargetPlatform() async {
     const TargetPlatform defaultTargetPlatform = TargetPlatform.fuchsia_arm64;
-    if (!globals.fuchsiaArtifacts.validateSshConfig()) {
-      globals.printError('Could not determine Fuchsia target platform because '
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
+      globals.printTrace('Could not determine Fuchsia target platform because '
                  'Fuchsia ssh configuration is missing.\n'
                  'Defaulting to arm64.');
       return defaultTargetPlatform;
     }
     final RunResult result = await shell('uname -m');
     if (result.exitCode != 0) {
-      globals.printError('Could not determine Fuchsia target platform type:\n$result\n'
+      globals.printTrace('Could not determine Fuchsia target platform type:\n$result\n'
                  'Defaulting to arm64.');
       return defaultTargetPlatform;
     }
@@ -488,7 +488,7 @@ class FuchsiaDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async {
     const String defaultName = 'Fuchsia';
-    if (!globals.fuchsiaArtifacts.validateSshConfig()) {
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
       globals.printError('Could not determine Fuchsia sdk name or version '
                  'because Fuchsia ssh configuration is missing.');
       return defaultName;
