@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:quiver/testing/async.dart';
 
 void main() {
-  test('The frames will only enable after runApp has bootstrapped the app', () async {
+  test('The frames will only be enabled after runApp has bootstrapped the app', () async {
     WidgetsFlutterBinding.ensureInitialized();
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     // Framework starts with detached statue. Sends resumed signal to enable frame.
