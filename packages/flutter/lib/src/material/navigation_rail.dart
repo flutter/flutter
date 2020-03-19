@@ -27,7 +27,7 @@ import 'theme_data.dart';
 /// specified with [NavigationRailTheme]. The default values for null theme
 /// properties are based on the [Theme]'s [ThemeData.textTheme],
 /// [ThemeData.iconTheme], and [ThemeData.colorScheme].
-///
+//
 /// The navigation rail is meant for layouts with wide viewports, such as a
 /// desktop web or tablet landscape layout. For smaller layouts, like mobile
 /// portrait, a [BottomNavigationBar] should be used instead.
@@ -157,13 +157,14 @@ class NavigationRail extends StatefulWidget {
   ///
   /// The default value is [NavigationRailThemeData.backgroundColor]. If
   /// [NavigationRailThemeData.backgroundColor] is null, then the default value
-  /// is [ThemeData.colorScheme.surface].
+  /// is based on [ThemeData.colorScheme.surface].
   final Color backgroundColor;
 
   /// Indicates that the [NavigationRail] should be in the extended state.
   ///
   /// The extended state has a wider rail container, and the labels are
-  /// positioned next to the icons.
+  /// positioned next to the icons. [minExtendedWidth] can be used to set the
+  /// the minimum width of the rail when it is in this state.
   ///
   /// The rail will implicitly animate between the extended and normal state.
   ///
@@ -175,13 +176,13 @@ class NavigationRail extends StatefulWidget {
 
   /// The leading widget in the rail that is placed above the destinations.
   ///
-  /// The leading widget is placed at the top of the rail. It's location is not
-  /// affected by [groupAlignment]
+  /// It is placed at the top of the rail, above the [destinations]. Its
+  /// location is not affected by [groupAlignment].
   ///
   /// This is commonly a [FloatingActionButton], but may also be a non-button,
   /// such as a logo.
   ///
-  /// By default, it is null, and no leading widget is built.
+  /// The default value is null.
   final Widget leading;
 
   /// The trailing widget in the rail that is placed below the destinations.
@@ -192,7 +193,7 @@ class NavigationRail extends StatefulWidget {
   /// This is commonly a list of additional options or destinations that is
   /// usually only rendered when [extended] is true.
   ///
-  /// By default, it is null, and no trailing widget is built.
+  /// The default value is null.
   final Widget trailing;
 
   /// Defines the appearance of the button items that are arrayed within the
@@ -202,7 +203,7 @@ class NavigationRail extends StatefulWidget {
   /// values.
   final List<NavigationRailDestination> destinations;
 
-  /// The index into [destinations] for the current active
+  /// The index into [destinations] for the current selected
   /// [NavigationRailDestination].
   final int selectedIndex;
 
@@ -213,9 +214,7 @@ class NavigationRail extends StatefulWidget {
   /// `setState` to rebuild the navigation rail with the new [selectedIndex].
   final ValueChanged<int> onDestinationSelected;
 
-  /// The elevation for the inner side of the rail.
-  ///
-  /// The shadow only shows on the inner side of the rail.
+  /// The rail's elevation or z-coordinate.
   ///
   /// If [Directionality] is [TextDirection.LTR], the inner side is the right
   /// side, and if [Directionality] is [TextDirection.RTL], it is the left side.
@@ -223,6 +222,8 @@ class NavigationRail extends StatefulWidget {
   /// The default value is 0.
   final double elevation;
 
+  /// The vertical alignment for the group of [destinations] within the rail.
+  ///
   /// The [NavigationRailDestination]s are grouped together with the [trailing]
   /// widget, between the [leading] widget and the bottom of the rail.
   ///
@@ -242,7 +243,7 @@ class NavigationRail extends StatefulWidget {
   /// Defines the layout and behavior of the labels for the default, unextended
   /// [NavigationRail].
   ///
-  /// When a navigation rail is extended, the labels are always shown.
+  /// When a navigation rail is [extended], the labels are always shown.
   ///
   /// The default value is [NavigationRailThemeData.labelType]. If
   /// [NavigationRailThemeData.labelType] is null, then the default value is
@@ -254,25 +255,30 @@ class NavigationRail extends StatefulWidget {
   ///   types.
   final NavigationRailLabelType labelType;
 
-  /// The [TextStyle] of destination's label when it is unselected.
+  /// The [TextStyle] of a destination's label when it is unselected.
   ///
-  /// When a [NavigationRailDestination] is selected, the
-  /// [selectedLabelTextStyle] will be used instead.
+  /// When one of the [destinations] is selected the [selectedLabelTextStyle]
+  /// will be used instead.
   ///
-  /// The default value is Is the [Theme]'s [TextTheme.bodyText1] with a color
-  /// of the [Theme]'s [ColorScheme.onSurface] with an opacity of 0.64.
+  /// The default value is based on the [Theme]'s
+  /// [ThemeData.textTheme.bodyText]. The default color is based on the
+  /// [Theme]'s [ColorScheme.onSurface].
+  ///
   /// Properties from this text style, or
   /// [NavigationRailThemeData.unselectedLabelTextStyle] if this is null, are
   /// merged into the defaults.
   final TextStyle unselectedLabelTextStyle;
 
-  /// The [TextStyle] of the destination's label when it is selected.
+  /// The [TextStyle] of a destination's label when it is selected.
   ///
   /// When a [NavigationRailDestination] is not selected,
   /// [unselectedLabelTextStyle] will be used.
   ///
-  /// The default value is Is the [Theme]'s [TextTheme.bodyText1] with a color
-  /// of the [Theme]'s [ColorScheme.primary]. Properties from this text style,
+  /// The default value is based on the [Theme]'s
+  /// [ThemeData.textTheme.bodyText]. The default color is based on the
+  /// [Theme]'s [ColorScheme.primary].
+  ///
+  /// Properties from this text style,
   /// or [NavigationRailThemeData.selectedLabelTextStyle] if this is null, are
   /// merged into the defaults.
   final TextStyle selectedLabelTextStyle;
@@ -470,7 +476,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      for (int i = 0; i < widget.destinations.length; i++)
+                      for (int i = 0; i < widget.destinations.length; i += 1)
                         _RailDestination(
                           minWidth: minWidth,
                           minExtendedWidth: minExtendedWidth,
