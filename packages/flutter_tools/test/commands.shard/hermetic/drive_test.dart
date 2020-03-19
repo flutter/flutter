@@ -21,6 +21,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
 void main() {
@@ -351,7 +352,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
@@ -481,7 +482,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);

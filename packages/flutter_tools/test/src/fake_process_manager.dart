@@ -82,39 +82,14 @@ class FakeCommand {
   /// resolves.
   final Completer<void> completer;
 
-  static bool _listEquals<T>(List<T> a, List<T> b) {
-    if (a == null) {
-      return b == null;
-    }
-    if (b == null || a.length != b.length) {
-      return false;
-    }
-    for (int index = 0; index < a.length; index += 1) {
-      if (a[index] != b[index]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool _matches(List<String> command, String workingDirectory, Map<String, String> environment) {
-    if (!_listEquals(command, this.command)) {
-      return false;
-    }
-    if (this.workingDirectory != null && workingDirectory != this.workingDirectory) {
-      return false;
+  void _matches(List<String> command, String workingDirectory, Map<String, String> environment) {
+    expect(command, equals(this.command));
+    if (this.workingDirectory != null) {
+      expect(this.workingDirectory, workingDirectory);
     }
     if (this.environment != null) {
-      if (environment == null) {
-        return false;
-      }
-      for (final String key in environment.keys) {
-        if (environment[key] != this.environment[key]) {
-          return false;
-        }
-      }
+      expect(this.environment, environment);
     }
-    return true;
   }
 }
 
@@ -322,12 +297,7 @@ class _SequenceProcessManager extends FakeProcessManager {
       reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
               'but the FakeProcessManager.list expected no more processes.'
     );
-    expect(_commands.first._matches(command, workingDirectory, environment), isTrue,
-      reason: 'ProcessManager was told to execute $command '
-              '(in $workingDirectory, with environment $environment) '
-              'but the next process that was expected was ${_commands.first.command} '
-              '(in ${_commands.first.workingDirectory}, with environment ${_commands.first.environment})}.'
-    );
+    _commands.first._matches(command, workingDirectory, environment);
     return _commands.removeAt(0);
   }
 
