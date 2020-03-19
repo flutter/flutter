@@ -112,15 +112,9 @@ class PaintingContext extends ClipContext {
   /// Typically only called by [PaintingContext.repaintCompositedChild]
   /// and [pushLayer].
   @protected
-  PaintingContext(this._containerLayer, this.estimatedBounds)
+  PaintingContext(this._containerLayer, ContainerAnnotator annotator, this.estimatedBounds)
     : assert(_containerLayer != null),
-      assert(estimatedBounds != null);
-
-  @protected
-  PaintingContext.withAnnotator(this._containerLayer, this.estimatedBounds, ContainerAnnotator annotator)
-    : assert(_containerLayer != null),
-      assert(estimatedBounds != null),
-      assert(annotator != null) {
+      assert(estimatedBounds != null) {
     _currentAnnotator = annotator;
   }
 
@@ -197,7 +191,7 @@ class PaintingContext extends ClipContext {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
-    childContext ??= PaintingContext.withAnnotator(child._layer, child.paintBounds, child._annotator);
+    childContext ??= PaintingContext(child._layer, child._annotator, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
 
     // Double-check that the paint method did not replace the layer (the first
@@ -498,7 +492,7 @@ class PaintingContext extends ClipContext {
   /// The `bounds` are estimated paint bounds for debugging purposes.
   @protected
   PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds, { ContainerAnnotator annotator }) {
-    return PaintingContext.withAnnotator(childLayer, bounds, annotator);
+    return PaintingContext(childLayer, annotator, bounds);
   }
 
   /// Clip further painting using a rectangle.
@@ -2106,7 +2100,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @protected
   ContainerAnnotator get annotator {
-    assert(!isRepaintBoundary || (_annotator == null || _annotator is OffsetAnnotator));
+    assert(isRepaintBoundary ? _annotator is OffsetAnnotator : _annotator == null);
     return _annotator;
   }
   ContainerAnnotator _annotator;
@@ -2114,7 +2108,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ContainerAnnotator get debugAnnotator {
     ContainerAnnotator result;
     assert(() {
-      result = _annotator;
+      result = annotator;
       return true;
     }());
     return result;

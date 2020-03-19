@@ -2830,7 +2830,7 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
-  bool _searchAnnotations(AnnotationResult<MouseTrackerAnnotation> result, Offset localPosition, {@required bool onlyFirst}) {
+  bool _searchAnnotations(AnnotationResult<MouseTrackerAnnotation> result, Offset localPosition) {
     if (size != null && !size.contains(localPosition)) {
       return false;
     }

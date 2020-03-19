@@ -148,7 +148,7 @@ void main() {
     try {
       s.debugPaint(
         PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+          ContainerLayer(), null, const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -181,7 +181,7 @@ void main() {
     try {
       s.debugPaint(
         PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+          ContainerLayer(), null, const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
         const Offset(0.0, 500),
       );
     } catch (e) {

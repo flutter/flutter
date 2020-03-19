@@ -383,7 +383,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     @required Rect estimatedBounds,
     @required _ScreenshotData screenshotData,
   }) : _data = screenshotData,
-       super(containerLayer, estimatedBounds);
+       super(containerLayer, null, estimatedBounds);
 
   final _ScreenshotData _data;
 
