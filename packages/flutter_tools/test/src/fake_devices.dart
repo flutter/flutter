@@ -9,9 +9,9 @@ import 'package:flutter_tools/src/project.dart';
 
 /// A list of fake devices to test JSON serialization
 /// (`Device.toJson()` and `--machine` flag for `devices` command)
-List<MockDeviceJson> mockDevices = <MockDeviceJson>[
-  MockDeviceJson(
-    MockDevice('ephemeral', 'ephemeral', true),
+List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
+  FakeDeviceJsonData(
+    FakeDevice('ephemeral', 'ephemeral', true),
     <String, Object>{
       'name': 'ephemeral',
       'id': 'ephemeral',
@@ -30,8 +30,8 @@ List<MockDeviceJson> mockDevices = <MockDeviceJson>[
       }
     }
   ),
-  MockDeviceJson(
-    MockDevice('webby', 'webby')
+  FakeDeviceJsonData(
+    FakeDevice('webby', 'webby')
       ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
       ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
     <String,Object>{
@@ -55,8 +55,8 @@ List<MockDeviceJson> mockDevices = <MockDeviceJson>[
 ];
 
 /// Fake device to test `devices` command
-class MockDevice extends Device {
-  MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
+class FakeDevice extends Device {
+  FakeDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
       id,
       platformType: PlatformType.web,
       category: Category.mobile,
@@ -88,9 +88,9 @@ class MockDevice extends Device {
 }
 
 /// Combines fake device with its canonical JSON representation
-class MockDeviceJson {
-  MockDeviceJson(this.dev, this.json);
+class FakeDeviceJsonData {
+  FakeDeviceJsonData(this.dev, this.json);
 
-  final MockDevice dev;
+  final FakeDevice dev;
   final Map<String, Object> json;
 }

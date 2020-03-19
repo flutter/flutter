@@ -15,7 +15,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mock_devices.dart';
+import '../../src/fake_devices.dart';
 
 void main() {
   group('devices', () {
@@ -43,10 +43,10 @@ void main() {
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);
       expect(
         json.decode(testLogger.statusText),
-        mockDevices.map((MockDeviceJson d) => d.json)
+        fakeDevices.map((FakeDeviceJsonData d) => d.json)
       );
     }, overrides: <Type, Generator>{
-      DeviceManager: () => _MockDeviceManager(),
+      DeviceManager: () => FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
     });
   });
@@ -80,11 +80,11 @@ class MockProcessManager extends Mock implements ProcessManager {
   }
 }
 
-class _MockDeviceManager extends DeviceManager {
-  _MockDeviceManager();
+class FakeDeviceManager extends DeviceManager {
+  FakeDeviceManager();
 
   @override
   Future<List<Device>> getAllConnectedDevices() {
-    return Future<List<Device>>.value(mockDevices.map((MockDeviceJson d) => d.dev).toList());
+    return Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
   }
 }

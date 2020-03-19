@@ -12,7 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mock_devices.dart';
+import '../src/fake_devices.dart';
 
 void main() {
   group('DeviceManager', () {
@@ -24,9 +24,9 @@ void main() {
     });
 
     testUsingContext('getDeviceById', () async {
-      final MockDevice device1 = MockDevice('Nexus 5', '0553790d0a4e726f');
-      final MockDevice device2 = MockDevice('Nexus 5X', '01abfc49119c410e');
-      final MockDevice device3 = MockDevice('iPod touch', '82564b38861a9a5');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
@@ -43,21 +43,21 @@ void main() {
   });
 
   group('Filter devices', () {
-    MockDevice ephemeral;
-    MockDevice nonEphemeralOne;
-    MockDevice nonEphemeralTwo;
-    MockDevice unsupported;
-    MockDevice webDevice;
-    MockDevice fuchsiaDevice;
+    FakeDevice ephemeral;
+    FakeDevice nonEphemeralOne;
+    FakeDevice nonEphemeralTwo;
+    FakeDevice unsupported;
+    FakeDevice webDevice;
+    FakeDevice fuchsiaDevice;
 
     setUp(() {
-      ephemeral = MockDevice('ephemeral', 'ephemeral', true);
-      nonEphemeralOne = MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonEphemeralTwo = MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-      unsupported = MockDevice('unsupported', 'unsupported', true, false);
-      webDevice = MockDevice('webby', 'webby')
+      ephemeral = FakeDevice('ephemeral', 'ephemeral', true);
+      nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+      webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-      fuchsiaDevice = MockDevice('fuchsiay', 'fuchsiay')
+      fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
@@ -166,8 +166,8 @@ void main() {
   group('JSON encode devices', () {
     testUsingContext('Consistency of JSON representation', () async {
       expect(
-        await Future.wait(mockDevices.map((MockDeviceJson d) => d.dev.toJson())),
-        mockDevices.map((MockDeviceJson d) => d.json)
+        await Future.wait(fakeDevices.map((FakeDeviceJsonData d) => d.dev.toJson())),
+        fakeDevices.map((FakeDeviceJsonData d) => d.json)
       );
     });
   });
