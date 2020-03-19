@@ -64,7 +64,7 @@ void main() {
       final AndroidApk apk = AndroidApk(
         id: 'FlutterApp',
         file: apkFile,
-        launchActivity: 'FLutterActivity',
+        launchActivity: 'FlutterActivity',
         versionCode: 1,
       );
 
@@ -102,7 +102,7 @@ void main() {
           '0x20000000',
           '--ez', 'enable-background-compilation', 'true',
           '--ez', 'enable-dart-profiling', 'true',
-          'FLutterActivity',
+          'FlutterActivity',
         ],
       ));
 
@@ -131,7 +131,7 @@ void main() {
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
       file: apkFile,
-      launchActivity: 'FLutterActivity',
+      launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
 
@@ -168,7 +168,7 @@ void main() {
     final AndroidApk apk = AndroidApk(
       id: 'FlutterApp',
       file: apkFile,
-      launchActivity: 'FLutterActivity',
+      launchActivity: 'FlutterActivity',
       versionCode: 1,
     );
 
@@ -235,7 +235,7 @@ void main() {
         '--es', 'dart-flags', 'foo',
         '--ez', 'use-test-fonts', 'true',
         '--ez', 'verbose-logging', 'true',
-        'FLutterActivity',
+        'FlutterActivity',
       ],
     ));
 
