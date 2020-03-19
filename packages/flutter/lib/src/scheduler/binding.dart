@@ -702,6 +702,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   /// Whether frames are currently being scheduled when [scheduleFrame] is called.
   ///
+  ///
   /// This value depends on the value of the [lifecycleState].
   bool get framesEnabled => _framesEnabled;
 
@@ -774,7 +775,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
-    if (_hasScheduledFrame || !_framesEnabled)
+    if (_hasScheduledFrame || !framesEnabled)
       return;
     assert(() {
       if (debugPrintScheduleFrameStacks)
@@ -808,7 +809,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void scheduleForcedFrame() {
     // TODO(chunhtai): Removes the if case once the issue is fixed
     // https://github.com/flutter/flutter/issues/45131
-    if (!_framesEnabled)
+    if (!framesEnabled)
       return;
 
     if (_hasScheduledFrame)

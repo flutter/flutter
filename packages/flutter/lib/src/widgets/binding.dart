@@ -907,6 +907,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
 
+  bool _appHasBootStapped = false;
+
+  @override
+  bool get framesEnabled => super.framesEnabled && _appHasBootStapped;
+
   /// Schedules a [Timer] for attaching the root widget.
   ///
   /// This is called by [runApp] to configure the widget tree. Consider using
@@ -914,6 +919,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   void scheduleAttachRootWidget(Widget rootWidget) {
     Timer.run(() {
+      _appHasBootStapped = true;
       attachRootWidget(rootWidget);
     });
   }
