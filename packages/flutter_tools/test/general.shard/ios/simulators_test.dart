@@ -586,6 +586,7 @@ void main() {
 2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message again
   and it goes...
   and goes...
+2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message, not the part of the above
 '''
                 .codeUnits]);
             });
@@ -616,6 +617,7 @@ void main() {
         'Multi line message again',
         '  and it goes...',
         '  and goes...',
+        'Single line message, not the part of the above'
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

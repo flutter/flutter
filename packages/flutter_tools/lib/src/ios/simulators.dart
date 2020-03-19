@@ -715,7 +715,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     }
 
     // Starts with space(s) - continuation of the multiline message
-    if (RegExp(r'\s*').matchAsPrefix(string) != null && !_lastLineMatched) {
+    if (RegExp(r'\s+').matchAsPrefix(string) != null && !_lastLineMatched) {
       return null;
     }
 
