@@ -14,7 +14,6 @@ import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
-import 'base/utils.dart';
 import 'build_info.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
@@ -277,28 +276,55 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
-  ItemListNotifier<Device> _items;
+  final Map<String, Device> _activeDevices = <String, Device>{};
+  final StreamController<Device> _addedController = StreamController<Device>.broadcast();
+  final StreamController<Device> _removedController = StreamController<Device>.broadcast();
+
   Timer _timer;
 
   Future<List<Device>> pollingGetDevices({ Duration timeout });
 
   void startPolling() {
-    if (_timer == null) {
-      _items ??= ItemListNotifier<Device>();
-      _timer = _initTimer();
+    _timer ??= _initTimer();
+  }
+
+  @visibleForTesting
+  Future<void> poll() async {
+    try {
+      final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
+      _updateWithNewList(devices);
+    } on TimeoutException {
+      globals.printTrace('Device poll timed out. Will retry.');
     }
   }
 
   Timer _initTimer() {
     return Timer(_pollingInterval, () async {
-      try {
-        final List<Device> devices = await pollingGetDevices(timeout: _pollingTimeout);
-        _items.updateWithNewList(devices);
-      } on TimeoutException {
-        globals.printTrace('Device poll timed out. Will retry.');
-      }
+      await poll();
       _timer = _initTimer();
     });
+  }
+
+  void _updateWithNewList(List<Device> devices) {
+    final Set<String> updatedSet = Set<String>.of(
+      devices.map<String>((Device device) => device.id));
+
+    final Set<String> currentItems = _activeDevices.keys.toSet();
+    final Set<String> addedItems = updatedSet.difference(currentItems);
+    final Set<String> removedItems = currentItems.difference(updatedSet);
+
+    for (final String id in removedItems) {
+      _removedController.add(_activeDevices[id]);
+    }
+
+    _activeDevices.clear();
+    for (final Device device in devices) {
+      _activeDevices[device.id] = device;
+    }
+
+    for (final String id in addedItems) {
+      _addedController.add(_activeDevices[id]);
+    }
   }
 
   void stopPolling() {
@@ -313,26 +339,27 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   Future<List<Device>> discoverDevices({ Duration timeout }) async {
-    _items = null;
+    _activeDevices.clear();
     return _populateDevices(timeout: timeout);
   }
 
   Future<List<Device>> _populateDevices({ Duration timeout }) async {
-    _items ??= ItemListNotifier<Device>.from(await pollingGetDevices(timeout: timeout));
-    return _items.items;
+    final List<Device> devices = await pollingGetDevices(timeout: timeout);
+    for (final Device device in devices) {
+      _activeDevices[device.id] = device;
+    }
+    return _activeDevices.values.toList();
   }
 
-  Stream<Device> get onAdded {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onAdded;
-  }
+  Stream<Device> get onAdded => _addedController.stream;
 
-  Stream<Device> get onRemoved {
-    _items ??= ItemListNotifier<Device>();
-    return _items.onRemoved;
-  }
+  Stream<Device> get onRemoved => _removedController.stream;
 
-  void dispose() => stopPolling();
+  void dispose() {
+    stopPolling();
+    _addedController.close();
+    _removedController.close();
+  }
 
   @override
   String toString() => '$name device discovery';

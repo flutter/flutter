@@ -70,47 +70,6 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
-/// A class to maintain a list of items, fire events when items are added or
-/// removed, and calculate a diff of changes when a new list of items is
-/// available.
-class ItemListNotifier<T> {
-  ItemListNotifier() {
-    _items = <T>{};
-  }
-
-  ItemListNotifier.from(List<T> items) {
-    _items = Set<T>.from(items);
-  }
-
-  Set<T> _items;
-
-  final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController = StreamController<T>.broadcast();
-
-  Stream<T> get onAdded => _addedController.stream;
-  Stream<T> get onRemoved => _removedController.stream;
-
-  List<T> get items => _items.toList();
-
-  void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = Set<T>.from(updatedList);
-
-    final Set<T> addedItems = updatedSet.difference(_items);
-    final Set<T> removedItems = _items.difference(updatedSet);
-
-    _items = updatedSet;
-
-    addedItems.forEach(_addedController.add);
-    removedItems.forEach(_removedController.add);
-  }
-
-  /// Close the streams.
-  void dispose() {
-    _addedController.close();
-    _removedController.close();
-  }
-}
-
 class SettingsFile {
   SettingsFile();
 
