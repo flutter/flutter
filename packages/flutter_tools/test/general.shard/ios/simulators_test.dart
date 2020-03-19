@@ -565,6 +565,64 @@ void main() {
       ProcessManager: () => mockProcessManager,
       FileSystem: () => fileSystem,
     });
+
+    testUsingContext('log reader handles multiline messages', () async {
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+        .thenAnswer((Invocation invocation) {
+          final Process mockProcess = MockProcess();
+          when(mockProcess.stdout)
+            .thenAnswer((Invocation invocation) {
+              // Messages from 2017 should pass through, 2020 message should not
+              return Stream<List<int>>.fromIterable(<List<int>>['''
+2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message
+2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message
+  continues...
+  continues...
+2020-03-11 15:58:28.207175-0700  localhost Runner[72166]: (libnetwork.dylib) [com.apple.network:] [28 www.googleapis.com:443 stream, pid: 72166, tls] cancelled
+	[28.1 64A98447-EABF-4983-A387-7DB9D0C1785F 10.0.1.200.57912<->172.217.6.74:443]
+	Connected Path: satisfied (Path is satisfied), interface: en18
+	Duration: 0.271s, DNS @0.000s took 0.001s, TCP @0.002s took 0.019s, TLS took 0.046s
+	bytes in/out: 4468/1933, packets in/out: 11/10, rtt: 0.016s, retransmitted packets: 0, out-of-order packets: 0
+2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message again
+  and it goes...
+  and goes...
+2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message, not the part of the above
+'''
+                .codeUnits]);
+            });
+          when(mockProcess.stderr)
+              .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+          when(mockProcess.exitCode)
+              .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+          return Future<Process>.value(mockProcess);
+        });
+
+      final IOSSimulator device = IOSSimulator(
+        '123456',
+        simulatorCategory: 'iOS 11.0',
+        simControl: mockSimControl,
+        xcode: mockXcode,
+      );
+      final DeviceLogReader logReader = device.getLogReader(
+        app: await BuildableIOSApp.fromProject(mockIosProject),
+      );
+
+      final List<String> lines = await logReader.logLines.toList();
+      expect(lines, <String>[
+        'Single line message',
+        'Multi line message',
+        '  continues...',
+        '  continues...',
+        'Multi line message again',
+        '  and it goes...',
+        '  and goes...',
+        'Single line message, not the part of the above'
+      ]);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      FileSystem: () => fileSystem,
+    });
   });
 
   group('SimControl', () {
