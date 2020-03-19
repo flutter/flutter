@@ -204,7 +204,9 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = environment.defines[kExtraFrontEndOptions]?.split(',');
+    final List<String> extraFrontEndOptions = <String>[
+      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
+    ];
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -259,14 +261,7 @@ abstract class AotElfBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      xcode: globals.xcode,
-      processManager: globals.processManager,
-      artifacts: globals.artifacts,
-    );
+    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');

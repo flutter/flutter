@@ -697,7 +697,7 @@ abstract class Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required Terminal terminal,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
@@ -877,7 +877,7 @@ class AnsiSpinner extends Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required Terminal terminal,
+    @required AnsiTerminal terminal,
     VoidCallback onFinish,
     this.slowWarningCallback,
     Stdio stdio,
@@ -893,7 +893,7 @@ class AnsiSpinner extends Status {
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
   final Stdio _stdio;
-  final Terminal _terminal;
+  final AnsiTerminal _terminal;
 
   bool timedOut = false;
 
