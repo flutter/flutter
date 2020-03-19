@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package dev.benchmarks.platform_views;
+package dev.benchmarks.platform_views_layout;
 
 import android.content.Context;
 import android.graphics.Color;
