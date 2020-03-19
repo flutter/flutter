@@ -193,6 +193,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.textTheme,
     this.primary = true,
     this.centerTitle,
+    this.excludesTitleSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
@@ -387,6 +388,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// Whether the title should be wrapped with [Semantics].
+  ///
+  /// Defaults to false.
+  final bool excludesTitleSemantics;
+
   /// The spacing around [title] content on the horizontal axis. This spacing is
   /// applied even if there is no [leading] content or [actions]. If you want
   /// [title] to take all the space available, set this value to 0.0.
@@ -526,15 +532,21 @@ class _AppBarState extends State<AppBar> {
         case TargetPlatform.macOS:
           break;
       }
+
+      title = _AppBarTitleBox(child: title);
+      if (!widget.excludesTitleSemantics) {
+        title = Semantics(
+          namesRoute: namesRoute,
+          child: title,
+          header: true,
+        );
+      }
+
       title = DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: Semantics(
-          namesRoute: namesRoute,
-          child: _AppBarTitleBox(child: title),
-          header: true,
-        ),
+        child: title,
       );
     }
 
