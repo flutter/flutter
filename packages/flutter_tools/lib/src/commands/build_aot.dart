@@ -27,11 +27,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: <String>['android-arm', 'android-arm64', 'ios', 'android-x64'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('report-timings',
-        negatable: false,
-        defaultsTo: false,
-        help: 'Report timing information about build steps in machine readable form,',
-      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
         defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
@@ -80,7 +75,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
-      reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
     );
     return FlutterCommandResult.success();
