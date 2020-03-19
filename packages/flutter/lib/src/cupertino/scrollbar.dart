@@ -127,12 +127,16 @@ class CupertinoScrollbar extends StatefulWidget {
   final ScrollController controller;
 
   /// {@template flutter.cupertino.cupertinoScrollbar.displayAlways}
-  /// A [bool] property for showing [Scrollbar] always.
+  /// Indicates whether the [Scrollbar] should always be visible.
   ///
-  /// To show [ScrollBar] always you need to make this property true,
-  /// however the [controller] shouldn't be null.
+  /// When false, the scrollbar will be shown during scrolling and will fade out otherwise.
   ///
-  /// You should pass the [Scrollable]'s [ScrollController] to [controller].
+  /// When true, the scrollbar will always be visible and never fade out.
+  ///
+  /// The [controller] property must be set in this case.
+  /// It should be passed the relevant [Scrollable]'s [ScrollController].
+  ///
+  /// Defaults to false.
   ///
   /// {@tool snippet}
   ///
