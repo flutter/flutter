@@ -193,7 +193,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.textTheme,
     this.primary = true,
     this.centerTitle,
-    this.excludesTitleSemantics = false,
+    this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
@@ -388,10 +388,10 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// Whether the title should be wrapped with [Semantics].
+  /// Whether the title should be wrapped with header [Semantics].
   ///
   /// Defaults to false.
-  final bool excludesTitleSemantics;
+  final bool excludeHeaderSemantics;
 
   /// The spacing around [title] content on the horizontal axis. This spacing is
   /// applied even if there is no [leading] content or [actions]. If you want
@@ -534,7 +534,7 @@ class _AppBarState extends State<AppBar> {
       }
 
       title = _AppBarTitleBox(child: title);
-      if (!widget.excludesTitleSemantics) {
+      if (!widget.excludeHeaderSemantics) {
         title = Semantics(
           namesRoute: namesRoute,
           child: title,
@@ -737,6 +737,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.textTheme,
     @required this.primary,
     @required this.centerTitle,
+    @required this.excludeHeaderSemantics,
     @required this.titleSpacing,
     @required this.expandedHeight,
     @required this.collapsedHeight,
@@ -764,6 +765,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TextTheme textTheme;
   final bool primary;
   final bool centerTitle;
+  final bool excludeHeaderSemantics;
   final double titleSpacing;
   final double expandedHeight;
   final double collapsedHeight;
@@ -815,7 +817,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
-        flexibleSpace: (title == null && flexibleSpace != null)
+        flexibleSpace: (title == null && flexibleSpace != null && !excludeHeaderSemantics)
           ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
@@ -827,6 +829,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
+        excludeHeaderSemantics: excludeHeaderSemantics,
         titleSpacing: titleSpacing,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
@@ -968,6 +971,7 @@ class SliverAppBar extends StatefulWidget {
     this.textTheme,
     this.primary = true,
     this.centerTitle,
+    this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.expandedHeight,
     this.floating = false,
@@ -1131,6 +1135,11 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
+
+  /// Whether the title should be wrapped with header [Semantics].
+  ///
+  /// Defaults to false.
+  final bool excludeHeaderSemantics;
 
   /// The spacing around [title] content on the horizontal axis. This spacing is
   /// applied even if there is no [leading] content or [actions]. If you want
@@ -1321,6 +1330,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           textTheme: widget.textTheme,
           primary: widget.primary,
           centerTitle: widget.centerTitle,
+          excludeHeaderSemantics: widget.excludeHeaderSemantics,
           titleSpacing: widget.titleSpacing,
           expandedHeight: widget.expandedHeight,
           collapsedHeight: collapsedHeight,
