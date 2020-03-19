@@ -90,22 +90,58 @@ class KeySet<T extends KeyboardKey> {
         && setEquals<T>(other._keys, _keys);
   }
 
-  // Cached hash code.
+  // Arrays used to temporarily store hash codes for sorting.
+  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
+  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
+
+  // Cached hash code value. Improves [hashCode] performance by 27%-900%,
+  // depending on key set size and read/write ratio.
   int _hashCode;
 
   @override
   int get hashCode {
-    // Keys are first sorted by hash to make sure the result of hashList is order independent.
-    if (_hashCode == null) {
-      final List<int> sortedHashes = <int>[];
-      for (final T key in _keys) {
-        sortedHashes.add(key.hashCode);
-      }
-      sortedHashes.sort();
-      _hashCode = hashList(sortedHashes);
+    // Return cached hash code if available.
+    if (_hashCode != null) {
+      return _hashCode;
     }
 
-    return _hashCode;
+    // Compute order-independent hash and cache it.
+    final int length = _keys.length;
+    final Iterator<T> iterator = _keys.iterator;
+
+    // There's always at least one key. Just extract it.
+    iterator.moveNext();
+    final int h1 = iterator.current.hashCode;
+
+    if (length == 1) {
+      // Don't do anything fancy if there's exactly one key.
+      return _hashCode = h1;
+    }
+
+    iterator.moveNext();
+    final int h2 = iterator.current.hashCode;
+    if (length == 2) {
+      // No need to sort if there's two keys, just compare them.
+      return _hashCode = h1 < h2
+        ? hashValues(h1, h2)
+        : hashValues(h2, h1);
+    }
+
+    // Sort key hash codes and feed to hashList to ensure the aggregate
+    // hash code does not depend on the key order.
+    final List<int> sortedHashes = length == 3
+      ? _tempHashStore3
+      : _tempHashStore4;
+    sortedHashes[0] = h1;
+    sortedHashes[1] = h2;
+    iterator.moveNext();
+    sortedHashes[2] = iterator.current.hashCode;
+    if (length == 4) {
+      iterator.moveNext();
+      sortedHashes[3] = iterator.current.hashCode;
+    }
+    sortedHashes.sort();
+    return _hashCode = hashList(sortedHashes);
   }
 }
 
