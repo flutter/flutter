@@ -33,7 +33,7 @@ import 'theme_data.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class NavigationRailThemeData extends Diagnosticable {
+class NavigationRailThemeData with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.navigationRailTheme].
   const NavigationRailThemeData({
     this.backgroundColor,

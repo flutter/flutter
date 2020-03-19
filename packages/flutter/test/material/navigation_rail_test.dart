@@ -16,6 +16,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         selectedLabelTextStyle: selectedTextStyle,
@@ -38,6 +39,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         selectedIconTheme: selectedIconTheme,
@@ -57,6 +59,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -67,6 +70,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         backgroundColor: Colors.green,
@@ -80,6 +84,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -90,6 +95,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
         elevation: 7,
@@ -103,6 +109,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -115,6 +122,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         labelType: NavigationRailLabelType.selected,
         destinations: _destinations(),
       ),
@@ -128,6 +136,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         labelType: NavigationRailLabelType.all,
         destinations: _destinations(),
       ),
@@ -141,6 +150,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         labelType: NavigationRailLabelType.all,
         destinations: const <NavigationRailDestination>[
           NavigationRailDestination(
@@ -166,6 +176,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -186,6 +197,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -212,6 +224,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
@@ -233,6 +246,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -301,6 +315,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -369,6 +384,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -434,6 +450,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
@@ -511,6 +528,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
@@ -588,6 +606,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.selected,
       ),
@@ -664,6 +683,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -771,6 +791,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -876,6 +897,7 @@ void main() {
       tester,
       textScaleFactor: 0.75,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         labelType: NavigationRailLabelType.all,
       ),
@@ -983,6 +1005,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         minWidth: 56.0,
         destinations: _destinations(),
       ),
@@ -1050,6 +1073,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         minWidth: 56.0,
         destinations: _destinations(),
       ),
@@ -1119,6 +1143,7 @@ void main() {
       tester,
       textScaleFactor: 3.0,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         minWidth: 56.0,
         destinations: _destinations(),
       ),
@@ -1187,6 +1212,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
       ),
     );
@@ -1249,6 +1275,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         groupAlignment: 0.0,
         destinations: _destinations(),
       ),
@@ -1310,6 +1337,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         groupAlignment: 1.0,
         destinations: _destinations(),
       ),
@@ -1371,6 +1399,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         leading: FloatingActionButton(onPressed: () { }),
         trailing: FloatingActionButton(onPressed: () { }),
         destinations: _destinations(),
@@ -1396,6 +1425,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
+                    selectedIndex: 0,
                     destinations: _destinations(),
                     extended: extended,
                   ),
@@ -1535,6 +1565,7 @@ void main() {
                   textDirection: TextDirection.rtl,
                   children: <Widget>[
                     NavigationRail(
+                      selectedIndex: 0,
                       destinations: _destinations(),
                       extended: extended,
                     ),
@@ -1677,6 +1708,7 @@ void main() {
                   MediaQuery(
                     data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
                     child: NavigationRail(
+                      selectedIndex: 0,
                       destinations: const <NavigationRailDestination>[
                         NavigationRailDestination(
                           icon: Icon(Icons.favorite_border),
@@ -1732,6 +1764,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
+                    selectedIndex: 0,
                     minExtendedWidth: 300,
                     destinations: _destinations(),
                     extended: extended,
@@ -1773,6 +1806,7 @@ void main() {
               body: Row(
                 children: <Widget>[
                   NavigationRail(
+                    selectedIndex: 0,
                     leading: Builder(
                       builder: (BuildContext context) {
                         animation = NavigationRail.extendedAnimation(context);
@@ -1809,6 +1843,7 @@ void main() {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
+        selectedIndex: 0,
         destinations: _destinations(),
         onDestinationSelected: (int index) {
           selectedIndex = index;
@@ -2044,6 +2079,7 @@ Future<void> _pumpLocalizedTestRail(WidgetTester tester, { NavigationRailLabelTy
           body: Row(
             children: <Widget>[
               NavigationRail(
+                selectedIndex: 0,
                 extended: extended,
                 destinations: _destinations(),
                 labelType: labelType,
