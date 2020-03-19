@@ -171,7 +171,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset,
-      { Rect childPaintBounds, ContainerAnnotator annotator }) {
+      { Rect childPaintBounds }) {
     painter(this, offset);
   }
 

@@ -453,7 +453,11 @@ class PaintingContext extends ClipContext {
   ///
   ///  * [addLayer], for pushing a layer without painting further contents
   ///    within it.
-  void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds, ContainerAnnotator annotator }) {
+  void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+    _pushLayerAndAnnotator(childLayer, null, painter, offset, childPaintBounds: childPaintBounds);
+  }
+
+  void _pushLayerAndAnnotator(ContainerLayer childLayer, ContainerAnnotator annotator, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(painter != null);
     // If a layer is being reused, it may already contain children. We remove
     // them so that `painter` can add children that are relevant for this frame.
@@ -465,7 +469,7 @@ class PaintingContext extends ClipContext {
     // ignore: deprecated_member_use_from_same_package, compatibility during deprecation https://flutter.dev/go/annotator-tree
     final ContainerAnnotator effectiveAnnotator = annotator ?? _LayerAdapterAnnotator(childLayer, offset: offset);
     _appendAnnotator(effectiveAnnotator);
-    final PaintingContext childContext = createChildContext(childLayer, childPaintBounds ?? estimatedBounds, annotator: effectiveAnnotator);
+    final PaintingContext childContext = createChildContext(childLayer, effectiveAnnotator, childPaintBounds ?? estimatedBounds);
     painter(childContext, offset);
     childContext.stopRecordingIfNeeded();
   }
@@ -491,7 +495,7 @@ class PaintingContext extends ClipContext {
   ///
   /// The `bounds` are estimated paint bounds for debugging purposes.
   @protected
-  PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds, { ContainerAnnotator annotator }) {
+  PaintingContext createChildContext(ContainerLayer childLayer, ContainerAnnotator annotator, Rect bounds) {
     return PaintingContext(childLayer, annotator, bounds);
   }
 
@@ -540,7 +544,7 @@ class PaintingContext extends ClipContext {
       layer
         ..clipRect = offsetClipRect
         ..clipBehavior = clipBehavior;
-      pushLayer(layer, painter, offset, childPaintBounds: offsetClipRect, annotator: annotator);
+      _pushLayerAndAnnotator(layer, annotator, painter, offset, childPaintBounds: offsetClipRect);
       return layer;
     } else {
       pushAnnotator(annotator, () {
@@ -579,7 +583,7 @@ class PaintingContext extends ClipContext {
       layer
         ..clipRRect = offsetClipRRect
         ..clipBehavior = clipBehavior;
-      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds, annotator: annotator);
+      _pushLayerAndAnnotator(layer, annotator, painter, offset, childPaintBounds: offsetBounds);
       return layer;
     } else {
       pushAnnotator(annotator, () {
