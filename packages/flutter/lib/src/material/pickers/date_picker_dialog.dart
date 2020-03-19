@@ -37,7 +37,7 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 ///
 /// When the date picker is first displayed, it will show the month of
 /// [initialDate], with [initialDate] selected.
-/// 
+///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
 /// allowable date. [initialDate] must either fall between these dates,
 /// or be equal to one of them. For each of these [DateTime] parameters, only
