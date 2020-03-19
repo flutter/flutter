@@ -526,7 +526,7 @@ static FLUTTER_API_SYMBOL(FlutterEngine)
     icu_path = std::filesystem::path(executable_location) / icu_path;
   }
   std::string assets_path_string = assets_path.u8string();
-  std::string icu_path_string = assets_path.u8string();
+  std::string icu_path_string = icu_path.u8string();
 
   FlutterRendererConfig config = {};
   if (window == nullptr) {
