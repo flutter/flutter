@@ -11,6 +11,7 @@ import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/build.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/io.dart';
@@ -124,6 +125,7 @@ Future<T> runInContext<T>(
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
+      GenSnapshot: () => const GenSnapshot(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
