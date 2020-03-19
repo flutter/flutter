@@ -702,7 +702,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   /// Whether frames are currently being scheduled when [scheduleFrame] is called.
   ///
-  ///
   /// This value depends on the value of the [lifecycleState].
   bool get framesEnabled => _framesEnabled;
 
