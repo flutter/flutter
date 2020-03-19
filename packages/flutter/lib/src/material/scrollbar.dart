@@ -157,7 +157,9 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
       }
 
       _materialPainter.update(
-          notification.metrics, notification.metrics.axisDirection);
+        notification.metrics,
+        notification.metrics.axisDirection,
+      );
       if (!widget.displayAlways) {
         _fadeoutTimer?.cancel();
         _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
