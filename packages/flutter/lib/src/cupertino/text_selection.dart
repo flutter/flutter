@@ -484,7 +484,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     @required this.children,
     @required this.isArrowPointingDown,
   }) : assert(children != null),
-       assert(children.length > 0),
+       assert(children.length > 0), // ignore: prefer_is_empty
        super(key: key);
 
   final List<Widget> children;
