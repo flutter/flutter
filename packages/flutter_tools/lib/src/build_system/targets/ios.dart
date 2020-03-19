@@ -28,14 +28,7 @@ abstract class AotAssemblyBase extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      xcode: globals.xcode,
-      artifacts: globals.artifacts,
-      processManager: globals.processManager,
-    );
+    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
     final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
@@ -43,8 +36,6 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
-    final List<String> extraGenSnapshotOptions = environment
-      .defines[kExtraGenSnapshotOptions]?.split(',') ?? const <String>[];
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -74,7 +65,6 @@ abstract class AotAssemblyBase extends Target {
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);

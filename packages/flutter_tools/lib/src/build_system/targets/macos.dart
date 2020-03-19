@@ -202,15 +202,7 @@ class CompileMacOSFramework extends Target {
     }
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
-    final AOTSnapshotter snapshotter = AOTSnapshotter(
-      reportTimings: false,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      xcode: globals.xcode,
-      artifacts: globals.artifacts,
-      processManager: globals.processManager
-    );
-    final int result = await snapshotter.build(
+    final int result = await AOTSnapshotter(reportTimings: false).build(
       bitcode: false,
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,

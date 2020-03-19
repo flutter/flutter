@@ -6,18 +6,15 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/build.dart';
 import 'base/common.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'build_info.dart';
-import 'build_system/build_system.dart';
-import 'build_system/targets/dart.dart';
-import 'build_system/targets/icon_tree_shaker.dart';
-import 'build_system/targets/ios.dart';
-import 'cache.dart';
-import 'convert.dart';
+import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'ios/bitcode.dart';
-import 'project.dart';
 
 /// Builds AOT snapshots given a platform, build mode and a path to a Dart
 /// library.
@@ -29,41 +26,18 @@ class AotBuilder {
     @required String mainDartFile,
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
+    bool reportTimings = false,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
     }
-    Target target;
-    bool expectSo = false;
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.android_x86:
-        throwToolExit('$platform is not supported in AOT.');
-        break;
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        throwToolExit(
-          "To build release for fuchsia, use 'flutter build fuchsia --release'"
-        );
-        break;
-      case TargetPlatform.ios:
-        target = buildInfo.isRelease
-          ? const AotAssemblyRelease()
-          : const AotAssemblyProfile();
-        break;
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-        expectSo = true;
-        target = buildInfo.isRelease
-          ? const AotElfRelease()
-          : const AotElfProfile();
+
+    if (bitcode) {
+      if (platform != TargetPlatform.ios) {
+        throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $platform).');
+      }
+      await validateBitcode(buildInfo.mode, platform);
     }
 
     Status status;
@@ -74,45 +48,102 @@ class AotBuilder {
         timeout: timeoutConfiguration.slowOperation,
       );
     }
+    try {
+      final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
 
-    final Environment environment = Environment(
-      projectDir: globals.fs.currentDirectory,
-      outputDir: globals.fs.directory(outputPath),
-      buildDir: FlutterProject.current().dartTool.childDirectory('flutter_build'),
-      cacheDir: null,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      defines: <String, String>{
-        kTargetFile: mainDartFile ?? globals.fs.path.join('lib', 'main.dart'),
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
-        kTargetPlatform: getNameForTargetPlatform(platform),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        kDartDefines: jsonEncode(buildInfo.dartDefines),
-        if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-        if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-        if (platform == TargetPlatform.ios)
-          kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
+      // Compile to kernel.
+      final String kernelOut = await snapshotter.compileKernel(
+        platform: platform,
+        buildMode: buildInfo.mode,
+        mainPath: mainDartFile,
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: buildInfo.trackWidgetCreation,
+        outputPath: outputPath,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        dartDefines: buildInfo.dartDefines
+      );
+      if (kernelOut == null) {
+        throwToolExit('Compiler terminated unexpectedly.');
+        return;
       }
-    );
-    final BuildResult result = await buildSystem.build(target, environment);
+
+      // Build AOT snapshot.
+      if (platform == TargetPlatform.ios) {
+        // Determine which iOS architectures to build for.
+        final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
+        for (final DarwinArch arch in iosBuildArchs) {
+          iosBuilds[arch] = globals.fs.path.join(outputPath, getNameForDarwinArch(arch));
+        }
+
+        // Generate AOT snapshot and compile to arch-specific App.framework.
+        final Map<DarwinArch, Future<int>> exitCodes = <DarwinArch, Future<int>>{};
+        iosBuilds.forEach((DarwinArch iosArch, String outputPath) {
+          exitCodes[iosArch] = snapshotter.build(
+            platform: platform,
+            darwinArch: iosArch,
+            buildMode: buildInfo.mode,
+            mainPath: kernelOut,
+            packagesPath: PackageMap.globalPackagesPath,
+            outputPath: outputPath,
+            extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+            bitcode: bitcode,
+            quiet: quiet,
+            splitDebugInfo: null,
+            dartObfuscation: false,
+          ).then<int>((int buildExitCode) {
+            return buildExitCode;
+          });
+        });
+
+        // Merge arch-specific App.frameworks into a multi-arch App.framework.
+        if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
+          final Iterable<String> dylibs = iosBuilds.values.map<String>(
+              (String outputDir) => globals.fs.path.join(outputDir, 'App.framework', 'App'));
+          globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework')).createSync();
+          await processUtils.run(
+            <String>[
+              'lipo',
+              ...dylibs,
+              '-create',
+              '-output', globals.fs.path.join(outputPath, 'App.framework', 'App'),
+            ],
+            throwOnError: true,
+          );
+        } else {
+          status?.cancel();
+          exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
+            final int buildExitCode = await exitCodeFuture;
+            globals.printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
+          });
+        }
+      } else {
+        // Android AOT snapshot.
+        final int snapshotExitCode = await snapshotter.build(
+          platform: platform,
+          buildMode: buildInfo.mode,
+          mainPath: kernelOut,
+          packagesPath: PackageMap.globalPackagesPath,
+          outputPath: outputPath,
+          extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+          bitcode: false,
+          splitDebugInfo: null,
+          dartObfuscation: false,
+        );
+        if (snapshotExitCode != 0) {
+          status?.cancel();
+          throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
+        }
+      }
+    } on ProcessException catch (error) {
+      // Catch the String exceptions thrown from the `runSync` methods below.
+      status?.cancel();
+      globals.printError(error.toString());
+      return;
+    }
     status?.stop();
 
-    if (!result.success) {
-      for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(measurement.exception.toString());
-      }
-      throwToolExit('The aot build failed.');
-    }
-
-    if (expectSo) {
-      environment.buildDir.childFile('app.so')
-        .copySync(globals.fs.path.join(outputPath, 'app.so'));
-    } else {
-      globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework'))
-        .createSync(recursive: true);
-      environment.buildDir.childDirectory('App.framework').childFile('App')
-        .copySync(globals.fs.path.join(outputPath, 'App.framework', 'App'));
+    if (outputPath == null) {
+      throwToolExit(null);
     }
 
     final String builtMessage = 'Built to $outputPath${globals.fs.path.separator}.';

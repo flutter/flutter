@@ -249,7 +249,7 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required Terminal terminal,
+    @required AnsiTerminal terminal,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _terminal = terminal,
@@ -259,7 +259,7 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final Terminal _terminal;
+  final AnsiTerminal _terminal;
   final Logger _logger;
 
   static const String _executable = '/usr/bin/xcodebuild';
