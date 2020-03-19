@@ -251,11 +251,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.displayAlways != oldWidget.displayAlways) {
-      assert(widget.controller != null);
-      if (widget.displayAlways == false) {
-        _fadeoutAnimationController.reverse();
-      } else {
+      if (widget.displayAlways == true) {
+        assert(widget.controller != null);
         _fadeoutAnimationController.animateTo(1.0);
+      } else {
+        _fadeoutAnimationController.reverse();
       }
     }
   }
