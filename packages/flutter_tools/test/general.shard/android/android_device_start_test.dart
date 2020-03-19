@@ -16,11 +16,11 @@ import '../../src/context.dart';
 
 const FakeCommand kAdbVersionCommand = FakeCommand(
   command: <String>['adb', 'version'],
-  stdout: 'Android Debug Bridge version 1.0.39'
+  stdout: 'Android Debug Bridge version 1.0.39',
 );
 
 const FakeCommand kStartServer = FakeCommand(
-  command: <String>['adb', 'start-server']
+  command: <String>['adb', 'start-server'],
 );
 
 const FakeCommand kShaCommand = FakeCommand(
@@ -74,7 +74,7 @@ void main() {
       // This configures the target platform of the device.
       processManager.addCommand(FakeCommand(
         command: const <String>['adb', '-s', '1234', 'shell', 'getprop'],
-        stdout: '[ro.product.cpu.abi]: [$arch]'
+        stdout: '[ro.product.cpu.abi]: [$arch]',
       ));
       processManager.addCommand(const FakeCommand(
         command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
@@ -85,7 +85,7 @@ void main() {
       processManager.addCommand(kAdbVersionCommand);
       processManager.addCommand(kStartServer);
       processManager.addCommand(const FakeCommand(
-        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk']
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app.apk'],
       ));
       processManager.addCommand(kShaCommand);
       processManager.addCommand(const FakeCommand(
@@ -141,7 +141,7 @@ void main() {
     // This configures the target platform of the device.
     processManager.addCommand(const FakeCommand(
       command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
-      stdout: '[ro.product.cpu.abi]: [x86]'
+      stdout: '[ro.product.cpu.abi]: [x86]',
     ));
 
     final LaunchResult launchResult = await device.startApp(
@@ -176,7 +176,7 @@ void main() {
     processManager.addCommand(kAdbVersionCommand);
     processManager.addCommand(kStartServer);
     processManager.addCommand(const FakeCommand(
-      command: <String>['adb', '-s', '1234', 'shell', 'getprop']
+      command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
     ));
     processManager.addCommand(const FakeCommand(
       command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
