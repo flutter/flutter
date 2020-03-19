@@ -2733,14 +2733,14 @@ class InputDecoration {
   ///
   /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
   ///
-  /// If [InputBorder.isOutline] is false and [filled] is true then
+  /// If `isOutline` property of [border] is false and if [filled] is true then
   /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
-  /// If [InputBorder.isOutline] is false and [filled] is false then
+  /// If `isOutline` property of [border] is false and if [filled] is false then
   /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
   ///
-  /// If [InputBorder.isOutline] is true then `contentPadding` is
+  /// If `isOutline` property of [border] is true then `contentPaddding` is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
   /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry contentPadding;
