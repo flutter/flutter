@@ -15,7 +15,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -626,7 +625,7 @@ abstract class ResidentRunner {
          logger: globals.logger,
          terminal: globals.terminal,
          platform: globals.platform,
-         outputPreferences: outputPreferences,
+         outputPreferences: globals.outputPreferences,
        ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
@@ -730,10 +729,11 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-  /// Toggle whether canvaskit is being used for rendering.
+  /// Toggle whether canvaskit is being used for rendering, returning the new
+  /// state.
   ///
   /// Only supported on the web.
-  Future<void> toggleCanvaskit() {
+  Future<bool> toggleCanvaskit() {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
@@ -1205,7 +1205,8 @@ class TerminalHandler {
         return false;
       case 'k':
         if (residentRunner.supportsCanvasKit) {
-          await residentRunner.toggleCanvaskit();
+          final bool result = await residentRunner.toggleCanvaskit();
+          globals.printStatus('${result ? 'Enabled' : 'Disabled'} CanvasKit');
           return true;
         }
         return false;

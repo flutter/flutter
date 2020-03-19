@@ -1230,6 +1230,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // _lastFormattedUnmodifiedTextEditingValue tracks the last value
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
+  // _lastFormattedValue tracks the last post-format value, so that it can be
+  // reused without rerunning the formatter when the input value is repeated.
+  TextEditingValue _lastFormattedValue;
   // _receivedRemoteTextEditingValue is the direct value last passed in
   // updateEditingValue. This value does not get updated with the formatted
   // version.
@@ -1660,15 +1663,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Check if the new value is the same as the current local value, or is the same
     // as the post-formatting value of the previous pass.
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in widget.inputFormatters)
+    final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
+    final bool isRepeatSelection = value?.selection == _lastFormattedUnmodifiedTextEditingValue?.selection;
+    final bool isRepeatComposing = value?.composing == _lastFormattedUnmodifiedTextEditingValue?.composing;
+    // Only format when the text has changed and there are available formatters.
+    if (!isRepeatText && textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
-      _value = value;
-      _updateRemoteEditingValueIfNeeded();
-    } else {
-      _value = value;
+      }
+      // Always pass the text through the whitespace directionality formatter to
+      // maintain expected behavior with carets on trailing whitespace.
+      value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      _lastFormattedValue = value;
     }
+    // If the text, selection, or composing region has changed, we should update the
+    // locally stored TextEditingValue to the new one.
+    if (!isRepeatText || !isRepeatSelection || !isRepeatComposing) {
+      _value = value;
+    } else if (textChanged && _lastFormattedValue != null) {
+      _value = _lastFormattedValue;
+    }
+    // Always attempt to send the value. If the value has changed, then it will send,
+    // otherwise, it will short-circuit.
+    _updateRemoteEditingValueIfNeeded();
+
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
@@ -2207,14 +2225,22 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
       // We add/subtract from these as we insert/remove markers.
       int selectionBase = newValue.selection.baseOffset;
       int selectionExtent = newValue.selection.extentOffset;
+      int composingStart = newValue.composing.start;
+      int composingEnd = newValue.composing.end;
 
-      void addToSelection() {
+      void addToLength() {
         selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
         selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
+
+        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
+        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
       }
-      void subtractFromSelection() {
+      void subtractFromLength() {
         selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
         selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
+
+        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
+        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
       }
 
       bool previousWasWhitespace = false;
@@ -2230,11 +2256,11 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           // If we already added directionality for this run of whitespace,
           // "shift" the marker added to the end of the whitespace run.
           if (previousWasWhitespace) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           outputCodepoints.add(codepoint);
-          addToSelection();
+          addToLength();
           outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
 
           previousWasWhitespace = true;
@@ -2243,7 +2269,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           // Handle pre-existing directionality markers. Use pre-existing marker
           // instead of the one we add.
           if (previousWasWhitespace) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           outputCodepoints.add(codepoint);
@@ -2256,7 +2282,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           if (!previousWasDirectionalityMarker &&
               previousWasWhitespace &&
               getDirection(codepoint) == _previousNonWhitespaceDirection) {
-            subtractFromSelection();
+            subtractFromLength();
             outputCodepoints.removeLast();
           }
           // Normal character, track its codepoint add it to the string.
@@ -2276,6 +2302,7 @@ class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
           affinity: newValue.selection.affinity,
           isDirectional: newValue.selection.isDirectional
         ),
+        composing: TextRange(start: composingStart, end: composingEnd),
       );
     }
     return newValue;

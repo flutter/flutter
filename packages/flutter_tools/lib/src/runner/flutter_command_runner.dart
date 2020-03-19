@@ -139,14 +139,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
   @override
   String get usageFooter {
     return wrapText('Run "flutter help -v" for verbose help output, including less commonly used options.',
-      columnWidth: outputPreferences.wrapColumn,
-      shouldWrap: outputPreferences.wrapText,
+      columnWidth: globals.outputPreferences.wrapColumn,
+      shouldWrap: globals.outputPreferences.wrapText,
     );
   }
 
@@ -154,8 +154,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
     final String prefix = wrapText(description,
-      shouldWrap: outputPreferences.wrapText,
-      columnWidth: outputPreferences.wrapColumn,
+      shouldWrap: globals.outputPreferences.wrapText,
+      columnWidth: globals.outputPreferences.wrapColumn,
     );
     return '$prefix\n\n$usageWithoutDescription';
   }

@@ -229,8 +229,8 @@ class Doctor {
       buffer.write(wrapText(
         lineBuffer.toString(),
         hangingIndent: result.leadingBox.length + 1,
-        columnWidth: outputPreferences.wrapColumn,
-        shouldWrap: outputPreferences.wrapText,
+        columnWidth: globals.outputPreferences.wrapColumn,
+        shouldWrap: globals.outputPreferences.wrapText,
       ));
       buffer.writeln();
 
