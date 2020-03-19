@@ -32,6 +32,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
@@ -279,7 +280,7 @@ void main() {
         applyMocksToCommand(command);
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
-        when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
+        when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(FakeDeviceLogReader());
         when(mockDevice.supportsFastStart).thenReturn(true);
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('iOS 13'));
         // App fails to start because we're only interested in usage
@@ -633,7 +634,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
-    return MockDeviceLogReader();
+    return FakeDeviceLogReader();
   }
 
   @override
