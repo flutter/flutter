@@ -26,7 +26,7 @@ const double _inputLandscapeHeight = 108.0;
 ///
 /// [firstDate], [lastDate], and [selectableDayPredicate] provide constraints on
 /// what days are valid. If the input date isn't in the date range or doesn't pass
-/// the given predicate, then the [errorInvalidText] message will be displayed 
+/// the given predicate, then the [errorInvalidText] message will be displayed
 /// under the field.
 ///
 /// See also:

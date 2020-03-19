@@ -73,7 +73,7 @@ class DatePickerHeader extends StatelessWidget {
   /// landscape orientation, in order to account for the keyboard height.
   final bool isShort;
 
-  /// The mode-switching icon that will be displayed in the lower right 
+  /// The mode-switching icon that will be displayed in the lower right
   /// in portrait, and lower left in landscape.
   ///
   /// The available icons are described in [Icons].
