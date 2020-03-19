@@ -336,7 +336,7 @@ void main() {
   });
 
   group('exitsHappySync', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
@@ -368,11 +368,10 @@ void main() {
       expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
     });
 
-    testWithoutContext('catches ArgumentError and returns false', () {
-      when(mockProcessManager.runSync(<String>['nonesuch'])).thenThrow(
-        ArgumentError('Invalid argument(s): Cannot find executable for nonesuch')
-      );
+    testWithoutContext('does not throw Exception and returns false', () {
+      mockProcessManager.canRunSucceeds = false;
       expect(processUtils.exitsHappySync(<String>['nonesuch']), isFalse);
+      verifyNever(mockProcessManager.runSync(any, environment: anyNamed('environment')));
     });
   });
 
