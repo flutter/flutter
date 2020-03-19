@@ -423,11 +423,18 @@ class FuchsiaDevice extends Device {
   TargetPlatform _targetPlatform;
 
   Future<TargetPlatform> _queryTargetPlatform() async {
+    const TargetPlatform defaultTargetPlatform = TargetPlatform.fuchsia_arm64;
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
+      globals.printTrace('Could not determine Fuchsia target platform because '
+                 'Fuchsia ssh configuration is missing.\n'
+                 'Defaulting to arm64.');
+      return defaultTargetPlatform;
+    }
     final RunResult result = await shell('uname -m');
     if (result.exitCode != 0) {
       globals.printError('Could not determine Fuchsia target platform type:\n$result\n'
                  'Defaulting to arm64.');
-      return TargetPlatform.fuchsia_arm64;
+      return defaultTargetPlatform;
     }
     final String machine = result.stdout.trim();
     switch (machine) {
@@ -438,7 +445,7 @@ class FuchsiaDevice extends Device {
       default:
         globals.printError('Unknown Fuchsia target platform "$machine". '
                    'Defaulting to arm64.');
-        return TargetPlatform.fuchsia_arm64;
+        return defaultTargetPlatform;
     }
   }
 
@@ -480,16 +487,22 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
+    const String defaultName = 'Fuchsia';
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
+      globals.printTrace('Could not determine Fuchsia sdk name or version '
+                 'because Fuchsia ssh configuration is missing.');
+      return defaultName;
+    }
     const String versionPath = '/pkgfs/packages/build-info/0/data/version';
     final RunResult catResult = await shell('cat $versionPath');
     if (catResult.exitCode != 0) {
       globals.printTrace('Failed to cat $versionPath: ${catResult.stderr}');
-      return 'Fuchsia';
+      return defaultName;
     }
     final String version = catResult.stdout.trim();
     if (version.isEmpty) {
       globals.printTrace('$versionPath was empty');
-      return 'Fuchsia';
+      return defaultName;
     }
     return 'Fuchsia $version';
   }
