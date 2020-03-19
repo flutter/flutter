@@ -622,7 +622,7 @@ class PaintingContext extends ClipContext {
       layer
         ..clipPath = offsetClipPath
         ..clipBehavior = clipBehavior;
-      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds, annotator: annotator);
+      _pushLayerAndAnnotator(layer, annotator, painter, offset, childPaintBounds: offsetBounds);
       return layer;
     } else {
       pushAnnotator(annotator, () {
@@ -678,12 +678,12 @@ class PaintingContext extends ClipContext {
     if (needsCompositing) {
       final TransformLayer layer = oldLayer ?? TransformLayer();
       layer.transform = effectiveTransform;
-      pushLayer(
+      _pushLayerAndAnnotator(
         layer,
+        annotator,
         painter,
         offset,
         childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
-        annotator: annotator,
       );
       return layer;
     } else {
@@ -2321,7 +2321,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// called on).
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
-  void replaceRootLayer(OffsetLayer rootLayer, ContainerAnnotator rootAnnotator) {
+  void replaceRoot(OffsetLayer rootLayer, ContainerAnnotator rootAnnotator) {
     assert(rootLayer.attached);
     assert(rootAnnotator.attached);
     assert(attached);

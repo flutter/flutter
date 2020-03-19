@@ -82,7 +82,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       return;
     _configuration = value;
     _updateMatrices();
-    replaceRootLayer(_createNewRootLayer(), _createNewRootAnnotator());
+    replaceRoot(_createNewRootLayer(), _createNewRootAnnotator());
     assert(_rootTransform != null);
     markNeedsLayout();
   }
@@ -209,8 +209,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  ///  * [search], which finds all annotations at the given position.
-  ///  * [search], which finds all annotations at the given position.
+  ///  * [searchFirst], which finds the first annotation at the given position.
   AnnotationResult<T> search<T>(Offset position) {
     final AnnotationResult<T> result = AnnotationResult<T>();
     annotator.search<T>(result, position * configuration.devicePixelRatio);

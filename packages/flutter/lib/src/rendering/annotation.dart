@@ -59,15 +59,15 @@ class AnnotationEntry<T> {
 ///
 /// See also:
 ///
-///  * [AnnotationEntry], which is the information for a specific annotation.  
+///  * [AnnotationEntry], which is the information for a specific annotation.
 class AnnotationResult<T> {
   /// Creates and configure an empty annotation result.
-  /// 
+  ///
   /// The `stopsAtFirstResult` defaults to false.
   AnnotationResult({this.stopsAtFirstResult = false});
 
   /// Whether the search should stop at the first qualified result.
-  /// 
+  ///
   /// Set this to true if only the first result is needed, thus being more
   /// efficient. Otherwise, the search will walk the entire tree.
   final bool stopsAtFirstResult;
@@ -98,12 +98,12 @@ class AnnotationResult<T> {
 }
 
 /// A node in the annotator tree.
-/// 
+///
 /// During painting, the render tree generates a tree of annotators that do not
 /// directly affect painting, but associtate specific regions on the screen with
 /// metadata that can be searched between frames. This class is the base class for
 /// all annotators.
-/// 
+///
 /// Some annotators can have their properties mutated, or generate result only at
 /// the time of searching. An annotator will not notify anyone if its property or
 /// the result it will generate has changed.
@@ -129,14 +129,14 @@ abstract class Annotator extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Search this annotator and its subtree for annotations of type `S` at the
   /// location described by `localPosition`.
-  /// 
+  ///
   /// The annotations are searched in post-order, and should result in an order
   /// from visually front to back. Annotations must meet the given restrictions,
   /// such as type and position.
-  /// 
+  ///
   /// The [result] parameter is where the method outputs the resulting
   /// annotations. New annotations found during the walk are added to the tail.
-  /// The [result] also contains configurations of this search, such as 
+  /// The [result] also contains configurations of this search, such as
   /// whether the search should stop at the first result.
   ///
   /// The return value indicates the opacity of the subtree, including this
@@ -283,7 +283,7 @@ abstract class ContainerAnnotator extends Annotator {
 /// annotator.
 class OffsetAnnotator extends ContainerAnnotator {
   /// Create an [OffsetAnnotator].
-  /// 
+  ///
   /// The [offset] defaults to [Offset.zero] and must not be null.
   OffsetAnnotator({Offset offset = Offset.zero})
     : assert(offset != null),
@@ -315,7 +315,7 @@ class OffsetAnnotator extends ContainerAnnotator {
 /// that can be used at the root of a [RenderObject] hierarchy.
 class TransformAnnotator extends OffsetAnnotator {
   /// Create an [TransformAnnotator].
-  /// 
+  ///
   /// All parameters are optional, but [transform] must have an non-null value
   /// before this annotator can be searched. The [offset] defaults to
   /// [Offset.zero] and must not be null.
@@ -415,13 +415,13 @@ class TransformAnnotator extends OffsetAnnotator {
 
 /// The base class for annoators that only accepts positions within the
 /// designated region.
-/// 
-/// Subclasses should override [contains] to define whether a position 
+///
+/// Subclasses should override [contains] to define whether a position
 /// is within the clip.
 abstract class ClipAnnotator extends ContainerAnnotator {
   /// Override this method to define whether a position is within the clip,
   /// thus allowed to proceed with the children.
-  /// 
+  ///
   /// The `localPosition` is the position in the local coordinate of this
   /// annotator, transformed by its ancestors.
   bool contains(Offset localPosition);
@@ -495,19 +495,19 @@ class ClipPathAnnotator extends ClipAnnotator {
 }
 
 /// An annotator that provides a specific type of annotation.
-/// 
+///
 /// When the annotator is searched, it first searches its children, then if the
 /// type matches, calls [onSearchSelf] with the offset specified by
 /// [searchSelfOffset]. The returned opacity is true if either any of its
 /// children or [onSearchSelf] returns true.
-/// 
+///
 /// This annotator is typically used by a render object that want to annotate its
 /// region with a predetermined annotation type.
 class SingleTypeAnnotator<T> extends ContainerAnnotator {
   /// Create a [SingleTypeAnnotator].
-  /// 
+  ///
   /// The `debugOwner` parameter is optional. Other parameters must not be null.
-  /// 
+  ///
   /// When used by a render object, the `onSearchSelf` argument should be a
   /// callback that, assuming the type matches, appends the annotation if other
   /// restrictions are met (i.e. whether its size contains the provided location,
@@ -520,14 +520,14 @@ class SingleTypeAnnotator<T> extends ContainerAnnotator {
 
   /// A callback that is called after searching the children only if the type
   /// matches.
-  /// 
+  ///
   /// The arguments for this callback will be the ones passed to [search], except
   /// that the `localPosition` has been subtracted by [searchSelfOffset].
   final AnnotationSearch<T> onSearchSelf;
 
   /// An offset that will be subtracted from the position when calling
   /// `onSearchSelf`.
-  /// 
+  ///
   /// This offset will not affect how the children annotators are searched.
   final Offset searchSelfOffset;
 
