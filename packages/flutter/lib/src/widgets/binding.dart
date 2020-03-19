@@ -919,7 +919,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   void scheduleAttachRootWidget(Widget rootWidget) {
     Timer.run(() {
-      _appHasBootStapped = true;
       attachRootWidget(rootWidget);
     });
   }
@@ -934,6 +933,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
+    _appHasBootStapped = true;
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
