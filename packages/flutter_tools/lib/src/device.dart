@@ -473,18 +473,6 @@ abstract class Device {
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
-  int get hashCode => id.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    return other is Device
-        && other.id == id;
-  }
-
-  @override
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
