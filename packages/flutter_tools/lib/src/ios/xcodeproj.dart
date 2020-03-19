@@ -364,14 +364,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);
