@@ -3,9 +3,9 @@ gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def
 web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'lib/web_ui/**', 'web_sdk/**') || $CIRRUS_PR == ''"
   environment:
-    # As of October 2019, the Web shards needed more than 6G of RAM.
-    CPU: 2
-    MEMORY: 8G
+        # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
+    CPU: 4
+    MEMORY: 16G
   compile_host_script: |
     cd $ENGINE_PATH/src
     ./flutter/tools/gn --unoptimized --full-dart-sdk
