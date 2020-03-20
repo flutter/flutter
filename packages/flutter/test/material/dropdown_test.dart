@@ -53,6 +53,7 @@ Widget buildFrame({
   FocusNode focusNode,
   bool autofocus = false,
   Color focusColor,
+  Color dropdownColor,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -78,6 +79,7 @@ Widget buildFrame({
             focusNode: focusNode,
             autofocus: autofocus,
             focusColor: focusColor,
+            dropdownColor: dropdownColor,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
