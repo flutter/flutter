@@ -515,17 +515,19 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
       // TODO(justinmc): When ShaderMask is supported on web, remove this
       // conditional and use ShaderMask everywhere.
       // https://github.com/flutter/flutter/issues/52967.
-      child: kIsWeb ? widget.child : ShaderMask(
-        key: _childGlobalKey,
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[color, color],
-          ).createShader(bounds);
-        },
-        child: widget.child,
-      ),
+      child: kIsWeb
+          ? Container(key: _childGlobalKey, child: widget.child)
+          : ShaderMask(
+            key: _childGlobalKey,
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[color, color],
+              ).createShader(bounds);
+            },
+            child: widget.child,
+          ),
     );
   }
 
