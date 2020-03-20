@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -24,6 +23,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
