@@ -155,12 +155,12 @@ void main() {
         destinations: const <NavigationRailDestination>[
           NavigationRailDestination(
             icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
+            selectedIcon: Icon(Icons.favorite),
             label: Text('Abc'),
           ),
           NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
-            activeIcon: Icon(Icons.bookmark),
+            selectedIcon: Icon(Icons.bookmark),
             label: Text('Longer Label'),
           ),
         ],
@@ -1712,12 +1712,12 @@ void main() {
                       destinations: const <NavigationRailDestination>[
                         NavigationRailDestination(
                           icon: Icon(Icons.favorite_border),
-                          activeIcon: Icon(Icons.favorite),
+                          selectedIcon: Icon(Icons.favorite),
                           label: Text('Abc'),
                         ),
                         NavigationRailDestination(
                           icon: Icon(Icons.bookmark_border),
-                          activeIcon: Icon(Icons.bookmark),
+                          selectedIcon: Icon(Icons.bookmark),
                           label: Text('Longer Label'),
                         ),
                       ],
@@ -2017,22 +2017,22 @@ List<NavigationRailDestination> _destinations() {
   return const <NavigationRailDestination>[
     NavigationRailDestination(
       icon: Icon(Icons.favorite_border),
-      activeIcon: Icon(Icons.favorite),
+      selectedIcon: Icon(Icons.favorite),
       label: Text('Abc'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.bookmark_border),
-      activeIcon: Icon(Icons.bookmark),
+      selectedIcon: Icon(Icons.bookmark),
       label: Text('Def'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.star_border),
-      activeIcon: Icon(Icons.star),
+      selectedIcon: Icon(Icons.star),
       label: Text('Ghi'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.hotel),
-      activeIcon: Icon(Icons.home),
+      selectedIcon: Icon(Icons.home),
       label: Text('Jkl'),
     ),
   ];

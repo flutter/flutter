@@ -18,6 +18,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: NavigationRail(
+            selectedIndex: 0,
             destinations: _destinations(),
           ),
         ),
@@ -26,8 +27,12 @@ void main() {
 
     expect(_railMaterial(tester).color, ThemeData().colorScheme.surface);
     expect(_railMaterial(tester).elevation, 0);
-    expect(_selectedIconStyle(tester).color, ThemeData().colorScheme.primary);
-    expect(_unselectedIconStyle(tester).color, ThemeData().colorScheme.onSurface.withOpacity(0.64));
+    expect(_selectedIconTheme(tester).size, 24.0);
+    expect(_selectedIconTheme(tester).color, ThemeData().colorScheme.primary);
+    expect(_selectedIconTheme(tester).opacity, 0.64);
+    expect(_unselectedIconTheme(tester).size, 24.0);
+    expect(_unselectedIconTheme(tester).color, ThemeData().colorScheme.onSurface);
+    expect(_unselectedIconTheme(tester).opacity, 1.0);
     expect(_selectedLabelStyle(tester).fontSize, 14.0);
     expect(_unselectedLabelStyle(tester).fontSize, 14.0);
     expect(_destinationsAlign(tester).alignment, Alignment.topCenter);
@@ -37,8 +42,12 @@ void main() {
   testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
+    const double selectedIconSize = 25.0;
+    const double unselectedIconSize = 23.0;
     const Color selectedIconColor = Color(0x00000002);
     const Color unselectedIconColor = Color(0x00000003);
+    const double selectedIconOpacity = 0.99;
+    const double unselectedIconOpacity = 0.98;
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
@@ -51,14 +60,23 @@ void main() {
             data: const NavigationRailThemeData(
               backgroundColor: backgroundColor,
               elevation: elevation,
-              selectedIconTheme: IconThemeData(color: selectedIconColor),
-              unselectedIconTheme: IconThemeData(color: unselectedIconColor),
+              selectedIconTheme: IconThemeData(
+                size: selectedIconSize,
+                color: selectedIconColor,
+                opacity: selectedIconOpacity,
+              ),
+              unselectedIconTheme: IconThemeData(
+                size: unselectedIconSize,
+                color: unselectedIconColor,
+                opacity: unselectedIconOpacity,
+              ),
               selectedLabelTextStyle: TextStyle(fontSize: selectedLabelFontSize),
               unselectedLabelTextStyle: TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
               labelType: labelType,
             ),
             child: NavigationRail(
+              selectedIndex: 0,
               destinations: _destinations(),
             ),
           ),
@@ -68,8 +86,12 @@ void main() {
 
     expect(_railMaterial(tester).color, backgroundColor);
     expect(_railMaterial(tester).elevation, elevation);
-    expect(_selectedIconStyle(tester).color, selectedIconColor);
-    expect(_unselectedIconStyle(tester).color, unselectedIconColor);
+    expect(_selectedIconTheme(tester).size, selectedIconSize);
+    expect(_selectedIconTheme(tester).color, selectedIconColor);
+    expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
+    expect(_unselectedIconTheme(tester).size, unselectedIconSize);
+    expect(_unselectedIconTheme(tester).color, unselectedIconColor);
+    expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
     expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
@@ -79,8 +101,12 @@ void main() {
   testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
+    const double selectedIconSize = 25.0;
+    const double unselectedIconSize = 23.0;
     const Color selectedIconColor = Color(0x00000002);
     const Color unselectedIconColor = Color(0x00000003);
+    const double selectedIconOpacity = 0.99;
+    const double unselectedIconOpacity = 0.98;
     const double selectedLabelFontSize = 13.0;
     const double unselectedLabelFontSize = 11.0;
     const double groupAlignment = 0.0;
@@ -93,19 +119,36 @@ void main() {
             data: const NavigationRailThemeData(
               backgroundColor: Color(0x00000099),
               elevation: 5,
-              selectedIconTheme: IconThemeData(color: Color(0x00000098)),
-              unselectedIconTheme: IconThemeData(color: Color(0x00000097)),
+              selectedIconTheme: IconThemeData(
+                size: 31.0,
+                color: Color(0x00000098),
+                opacity: 0.81,
+              ),
+              unselectedIconTheme: IconThemeData(
+                size: 37.0,
+                color: Color(0x00000097),
+                opacity: 0.82,
+              ),
               selectedLabelTextStyle: TextStyle(fontSize: 9.0),
               unselectedLabelTextStyle: TextStyle(fontSize: 7.0),
               groupAlignment: 1.0,
               labelType: NavigationRailLabelType.selected,
             ),
             child: NavigationRail(
+              selectedIndex: 0,
               destinations: _destinations(),
               backgroundColor: backgroundColor,
               elevation: elevation,
-              selectedIconTheme: const IconThemeData(color: selectedIconColor),
-              unselectedIconTheme: const IconThemeData(color: unselectedIconColor),
+              selectedIconTheme: const IconThemeData(
+                size: selectedIconSize,
+                color: selectedIconColor,
+                opacity: selectedIconOpacity,
+              ),
+              unselectedIconTheme: const IconThemeData(
+                size: unselectedIconSize,
+                color: unselectedIconColor,
+                opacity: unselectedIconOpacity,
+              ),
               selectedLabelTextStyle: const TextStyle(fontSize: selectedLabelFontSize),
               unselectedLabelTextStyle: const TextStyle(fontSize: unselectedLabelFontSize),
               groupAlignment: groupAlignment,
@@ -118,8 +161,12 @@ void main() {
 
     expect(_railMaterial(tester).color, backgroundColor);
     expect(_railMaterial(tester).elevation, elevation);
-    expect(_selectedIconStyle(tester).color, selectedIconColor);
-    expect(_unselectedIconStyle(tester).color, unselectedIconColor);
+    expect(_selectedIconTheme(tester).size, selectedIconSize);
+    expect(_selectedIconTheme(tester).color, selectedIconColor);
+    expect(_selectedIconTheme(tester).opacity, selectedIconOpacity);
+    expect(_unselectedIconTheme(tester).size, unselectedIconSize);
+    expect(_unselectedIconTheme(tester).color, unselectedIconColor);
+    expect(_unselectedIconTheme(tester).opacity, unselectedIconOpacity);
     expect(_selectedLabelStyle(tester).fontSize, selectedLabelFontSize);
     expect(_unselectedLabelStyle(tester).fontSize, unselectedLabelFontSize);
     expect(_destinationsAlign(tester).alignment, Alignment.center);
@@ -177,12 +224,12 @@ List<NavigationRailDestination> _destinations() {
   return const <NavigationRailDestination>[
     NavigationRailDestination(
       icon: Icon(Icons.favorite_border),
-      activeIcon: Icon(Icons.favorite),
+      selectedIcon: Icon(Icons.favorite),
       label: Text('Abc'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.star_border),
-      activeIcon: Icon(Icons.star),
+      selectedIcon: Icon(Icons.star),
       label: Text('Def'),
     ),
   ];
@@ -197,23 +244,21 @@ Material _railMaterial(WidgetTester tester) {
   );
 }
 
-TextStyle _selectedIconStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-      _iconRichTextFinder(Icons.favorite).first
-  ).text.style;
+IconThemeData _selectedIconTheme(WidgetTester tester) {
+  return _iconTheme(tester, Icons.favorite);
 }
 
-TextStyle _unselectedIconStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    _iconRichTextFinder(Icons.star_border).first
-  ).text.style;
+IconThemeData _unselectedIconTheme(WidgetTester tester) {
+  return _iconTheme(tester, Icons.star_border);
 }
 
-Finder _iconRichTextFinder(IconData icon) {
-  return find.descendant(
-    of: find.byIcon(icon),
-    matching: find.byType(RichText),
-  );
+IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
+  return tester.firstWidget<IconTheme>(
+    find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(IconTheme),
+    ),
+  ).data;
 }
 
 TextStyle _selectedLabelStyle(WidgetTester tester) {

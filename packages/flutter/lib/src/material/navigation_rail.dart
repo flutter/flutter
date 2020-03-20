@@ -64,17 +64,17 @@ import 'theme_data.dart';
 ///            destinations: [
 ///              NavigationRailDestination(
 ///                icon: Icon(Icons.favorite_border),
-///                activeIcon: Icon(Icons.favorite),
+///                selectedIcon: Icon(Icons.favorite),
 ///                label: Text('First'),
 ///              ),
 ///              NavigationRailDestination(
 ///                icon: Icon(Icons.bookmark_border),
-///                activeIcon: Icon(Icons.book),
+///                selectedIcon: Icon(Icons.book),
 ///                label: Text('Second'),
 ///              ),
 ///              NavigationRailDestination(
 ///                icon: Icon(Icons.star_border),
-///                activeIcon: Icon(Icons.star),
+///                selectedIcon: Icon(Icons.star),
 ///                label: Text('Third'),
 ///              ),
 ///            ],
@@ -298,7 +298,7 @@ class NavigationRail extends StatefulWidget {
 
   /// The visual properties of the icon in the selected destination.
   ///
-  /// When the [NavigationRailDestination] is not selected,
+  /// When a [NavigationRailDestination] is not selected,
   /// [unselectedIconTheme] will be used.
   ///
   /// The default value is Is the [Theme]'s [ThemeData.iconTheme] with a color
@@ -443,8 +443,20 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final double minExtendedWidth = widget.minExtendedWidth ?? _minExtendedRailWidth;
     final Color baseSelectedColor = theme.colorScheme.primary;
     final Color baseColor = theme.colorScheme.onSurface.withOpacity(0.64);
-    final IconThemeData unselectedIconTheme = theme.iconTheme.copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
-    final IconThemeData selectedIconTheme = theme.iconTheme.copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
+//    final IconThemeData unselectedIconTheme = theme.iconTheme.copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
+    final IconThemeData defaultUnselectedIconTheme = widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme;
+    final IconThemeData unselectedIconTheme = IconThemeData(
+      size: defaultUnselectedIconTheme?.size ?? 24.0,
+      color: defaultUnselectedIconTheme?.color ?? theme.colorScheme.onSurface,
+      opacity: defaultUnselectedIconTheme?.opacity ?? 1.0,
+    );
+//    final IconThemeData selectedIconTheme = theme.iconTheme.copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
+    final IconThemeData defaultSelectedIconTheme = widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme;
+    final IconThemeData selectedIconTheme = IconThemeData(
+      size: defaultSelectedIconTheme?.size ?? 24.0,
+      color: defaultSelectedIconTheme?.color ?? theme.colorScheme.primary,
+      opacity: defaultSelectedIconTheme?.opacity ?? 0.64,
+    );
     final TextStyle unselectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseColor).merge(widget.unselectedLabelTextStyle ?? navigationRailTheme.unselectedLabelTextStyle);
     final TextStyle selectedLabelTextStyle = theme.textTheme.bodyText1.copyWith(color: baseSelectedColor).merge(widget.selectedLabelTextStyle ?? navigationRailTheme.selectedLabelTextStyle);
     final double groupAlignment = widget.groupAlignment ?? navigationRailTheme.groupAlignment ?? -1.0;
@@ -482,7 +494,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                           minExtendedWidth: minExtendedWidth,
                           extendedTransitionAnimation: _extendedAnimation,
                           selected: widget.selectedIndex == i,
-                          icon: widget.selectedIndex == i ? widget.destinations[i].activeIcon : widget.destinations[i].icon,
+                          icon: widget.selectedIndex == i ? widget.destinations[i].selectedIcon : widget.destinations[i].icon,
                           label: widget.destinations[i].label,
                           destinationAnimation: _destinationAnimations[i],
                           labelType: labelType,
@@ -552,7 +564,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   void _rebuild() {
     setState(() {
       // Rebuilding when any of the controllers tick, i.e. when the items are
-      // animated.
+      // animating.
     });
   }
 }
@@ -560,7 +572,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 class _RailDestination extends StatelessWidget {
   _RailDestination({
     @required this.minWidth,
-    this.minExtendedWidth,
+    @required this.minExtendedWidth,
     @required this.icon,
     @required this.label,
     @required this.destinationAnimation,
@@ -570,8 +582,9 @@ class _RailDestination extends StatelessWidget {
     @required this.iconTheme,
     @required this.labelTextStyle,
     @required this.onTap,
-    this.indexLabel,
+    @required this.indexLabel,
   }) : assert(minWidth != null),
+       assert(minExtendedWidth != null),
        assert(icon != null),
        assert(label != null),
        assert(destinationAnimation != null),
@@ -581,6 +594,7 @@ class _RailDestination extends StatelessWidget {
        assert(iconTheme != null),
        assert(labelTextStyle != null),
        assert(onTap != null),
+       assert(indexLabel != null),
        _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
@@ -619,7 +633,10 @@ class _RailDestination extends StatelessWidget {
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
-          child: themedIcon,
+          child: Align(
+            alignment: Alignment.center,
+            child: themedIcon,
+          ),
         );
         if (extendedTransitionAnimation.value == 0) {
           content = Stack(
@@ -638,14 +655,12 @@ class _RailDestination extends StatelessWidget {
             ]
           );
         } else {
-          final TextDirection textDirection = Directionality.of(context);
           content = ConstrainedBox(
             constraints: BoxConstraints(
               minWidth: lerpDouble(minWidth, minExtendedWidth, extendedTransitionAnimation.value),
             ),
             child: ClipRect(
               child: Row(
-                textDirection: textDirection,
                 children: <Widget>[
                   iconPart,
                   Align(
@@ -773,19 +788,20 @@ class _RailDestination extends StatelessWidget {
 ///
 ///   * [NavigationRail]
 enum NavigationRailLabelType {
-  /// Only the icons of a navigation rail item are shown.
+  /// Only the [NavigationRailDestination]s are shown.
   none,
 
-  /// Only the selected navigation rail item will show its label.
+  /// Only the selected [NavigationRailDestination] will show its label.
   ///
-  /// The label will animate in and out as new items are selected.
+  /// The label will animate in and out as new [NavigationRailDestination]s are
+  /// selected.
   selected,
 
-  /// All navigation rail items will show their label.
+  /// All [NavigationRailDestination]s will show their label.
   all,
 }
 
-/// A description for an interactive button within a [NavigationRail].
+/// Defines a [NavigationRail] button that represents one "destination" view.
 ///
 /// See also:
 ///
@@ -793,13 +809,14 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] should not be null and [label] should not be null when this
-  /// destination is used in the [NavigationRail].
+  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
+  /// is [NavigationRailLabelType.none], the label is still used for semantics,
+  /// and may still be used if [NavigationRail.extended] is true.
   const NavigationRailDestination({
     @required this.icon,
-    Widget activeIcon,
+    Widget selectedIcon,
     this.label,
-  }) : activeIcon = activeIcon ?? icon,
+  }) : selectedIcon = selectedIcon ?? icon,
        assert(icon != null);
 
   /// The icon of the destination.
@@ -808,31 +825,33 @@ class NavigationRailDestination {
   /// of widget is provided then it should configure itself to match the current
   /// [IconTheme] size and color.
   ///
-  /// If [activeIcon] is provided, this will only be displayed when the
+  /// If [selectedIcon] is provided, this will only be displayed when the
   /// destination is not selected.
   ///
   /// To make the [NavigationRail] more accessible, consider choosing an
   /// icon with a stroked and filled version, such as [Icons.cloud] and
-  /// [Icons.cloud_queue]. [icon] should be set to the stroked version and
-  /// [activeIcon] to the filled version.
+  /// [Icons.cloud_queue]. The [icon] should be set to the stroked version and
+  /// [selectedIcon] to the filled version.
   final Widget icon;
 
   /// An alternative icon displayed when this destination is selected.
   ///
   /// If this icon is not provided, the [NavigationRail] will display [icon] in
-  /// either state.
+  /// either state. The size, color, and opacity of the
+  /// [NavigationRail.selectedIconTheme] will still apply.
   ///
   /// See also:
   ///
   ///  * [NavigationRailDestination.icon], for a description of how to pair
   ///    icons.
-  final Widget activeIcon;
+  final Widget selectedIcon;
 
   /// The label for the destination.
   ///
-  /// The label should be provided when used with the [NavigationRail]. When
-  /// the labelType is [NavigationRailLabelType.none] and the rail is not
-  /// extended, then it can be null, but should be used for semantics.
+  /// The label must be provided when used with the [NavigationRail]. When the
+  /// [NavigationRail.labelType] is [NavigationRailLabelType.none], the label is
+  /// still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   final Widget label;
 }
 
