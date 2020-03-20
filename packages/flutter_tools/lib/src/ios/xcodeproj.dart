@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -243,8 +242,6 @@ List<String> _xcodeBuildSettingsLines({
   return xcodeBuildSettings;
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
-
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   XcodeProjectInterpreter({
@@ -252,7 +249,7 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _terminal = terminal,
@@ -262,7 +259,7 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final Logger _logger;
 
   static const String _executable = '/usr/bin/xcodebuild';
@@ -367,14 +364,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);

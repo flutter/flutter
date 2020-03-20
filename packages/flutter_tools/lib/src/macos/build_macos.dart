@@ -52,7 +52,7 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
+  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );

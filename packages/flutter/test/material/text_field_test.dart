@@ -3378,6 +3378,31 @@ void main() {
     expect(textController.text, '0123456789');
   });
 
+  testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/37420.
+    final TextEditingController textController = TextEditingController();
+    const String testValue = '0123456789';
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    // Max out the character limit in the field.
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(textController.text, testValue);
+
+    // Entering more characters at the end does nothing.
+    await tester.enterText(find.byType(TextField), testValue + '9999999');
+    expect(textController.text, testValue);
+
+    // Entering text in the middle of the field also does nothing.
+    await tester.enterText(find.byType(TextField), '0123455555555556789');
+    expect(textController.text, testValue);
+  });
+
   testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 

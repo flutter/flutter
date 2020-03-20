@@ -371,37 +371,62 @@ String generateClassDeclaration(
 class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
-/// Return `s` as a Dart-parseable string.
-///
-/// The result tries to avoid character escaping:
+/// Return the input string as a Dart-parseable string.
 ///
 /// ```
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => r'foo\bar'
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\\\nbar'
 /// ```
 ///
+/// When [shouldEscapeDollar] is set to true, the
+/// result avoids character escaping, with the
+/// exception of the dollar sign:
+///
+/// ```
+/// foo$bar = 'foo\$bar'
+/// ```
+///
+/// When [shouldEscapeDollar] is set to false, the
+/// result tries to avoid character escaping:
+///
+/// ```
+/// foo$bar => 'foo\\\$bar'
+/// ```
+///
+/// [shouldEscapeDollar] is true by default.
+///
 /// Strings with newlines are not supported.
-String generateString(String value) {
-  assert(!value.contains('\n'));
-  final String rawPrefix = value.contains(r'$') || value.contains(r'\') ? 'r' : '';
-  if (!value.contains("'"))
-    return "$rawPrefix'$value'";
-  if (!value.contains('"'))
-    return '$rawPrefix"$value"';
-  if (!value.contains("'''"))
-    return "$rawPrefix'''$value'''";
-  if (!value.contains('"""'))
-    return '$rawPrefix"""$value"""';
+String generateString(String value, { bool escapeDollar = true }) {
+  assert(escapeDollar != null);
+  assert(
+    !value.contains('\n'),
+    'Since it is assumed that the input string comes '
+    'from a json/arb file source, messages cannot '
+    'contain newlines.'
+  );
 
-  return value.split("'''")
-    .map(generateString)
-    // If value contains more than 6 consecutive single quotes some empty strings may be generated.
-    // The following map removes them.
-    .map((String part) => part == "''" ? '' : part)
-    .join(" \"'''\" ");
+  const String backslash = '__BACKSLASH__';
+  assert(
+    !value.contains(backslash),
+    'Input string cannot contain the sequence: '
+    '"__BACKSLASH__", as it is used as part of '
+    'backslash character processing.'
+  );
+  value = value.replaceAll('\\', backslash);
+
+  if (escapeDollar)
+    value = value.replaceAll('\$', '\\\$');
+
+  value = value
+    .replaceAll("'", "\\'")
+    .replaceAll('"', '\\"')
+    .replaceAll(backslash, '\\\\');
+
+  return "'$value'";
 }
 
 /// Only used to generate localization strings for the Kannada locale ('kn') because

@@ -79,7 +79,7 @@ Future<void> main(List<String> args) async {
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),
     ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(),
+    CleanCommand(verbose: verbose),
     ConfigCommand(verboseHelp: verboseHelp),
     CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),

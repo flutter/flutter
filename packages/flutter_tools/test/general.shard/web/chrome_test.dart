@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -62,28 +63,31 @@ void main() {
   });
 
   test('can launch chrome and connect to the devtools', () async {
-    processManager.addCommand(const FakeCommand(
-      command: <String>[
-        'example_chrome',
-        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
-        '--remote-debugging-port=1234',
-        ..._kChromeArgs,
-        'example_url',
-      ],
-      stderr: kDevtoolsStderr,
-    ));
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+  });
 
-    await chromeLauncher.launch(
-      'example_url',
-      skipCheck: true,
-    );
+  test('cannot have two concurrent instances of chrome', () async {
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+    bool pass = false;
+    try {
+      await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
+    } on ToolExit catch (_) {
+      pass = true;
+    }
+    expect(pass, isTrue);
+  });
+
+  test('can launch new chrome after stopping a previous chrome', () async {
+    final Chrome  chrome = await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+    await chrome.close();
+    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
   });
 
   test('can launch chrome with a custom debug port', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+        '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
         '--remote-debugging-port=10000',
         ..._kChromeArgs,
         'example_url',
@@ -102,7 +106,7 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+        '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
         '--remote-debugging-port=1234',
         ..._kChromeArgs,
         '--headless',
@@ -133,7 +137,7 @@ void main() {
 
     processManager.addCommand(FakeCommand(command: const <String>[
       'example_chrome',
-      '--user-data-dir=/.tmp_rand0/flutter_tool.rand0',
+      '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
       '--remote-debugging-port=1234',
       ..._kChromeArgs,
       'example_url',
@@ -146,7 +150,7 @@ void main() {
     );
 
     final File tempFile = fileSystem
-      .directory('.tmp_rand0/flutter_tool.rand0')
+      .directory('.tmp_rand1/flutter_tool.rand1')
       .childDirectory('Default')
       .childFile('preferences');
 
@@ -163,3 +167,21 @@ void main() {
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+
+Future<Chrome> testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromeLauncher chromeLauncher) {
+  processManager.addCommand(FakeCommand(
+    command: <String>[
+      'example_chrome',
+      '--user-data-dir=$userDataDir',
+      '--remote-debugging-port=1234',
+      ..._kChromeArgs,
+      'example_url',
+    ],
+    stderr: kDevtoolsStderr,
+  ));
+
+  return chromeLauncher.launch(
+    'example_url',
+    skipCheck: true,
+  );
+}

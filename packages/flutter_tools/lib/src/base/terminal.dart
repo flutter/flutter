@@ -9,7 +9,6 @@ import 'package:platform/platform.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'context.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 
@@ -32,11 +31,6 @@ String get warningMark {
 String get successMark {
   return globals.terminal.bolden(globals.terminal.color('✓', TerminalColor.green));
 }
-
-OutputPreferences get outputPreferences {
-  return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
-}
-final OutputPreferences _defaultOutputPreferences = OutputPreferences();
 
 /// A class that contains the context settings for command text output to the
 /// console.

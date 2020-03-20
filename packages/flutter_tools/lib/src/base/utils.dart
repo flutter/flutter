@@ -9,8 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
+import '../globals.dart' as globals;
 import 'file_system.dart';
-import 'terminal.dart';
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
@@ -239,7 +239,7 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
     return '';
   }
   indent ??= 0;
-  columnWidth ??= outputPreferences.wrapColumn;
+  columnWidth ??= globals.outputPreferences.wrapColumn;
   columnWidth -= indent;
   assert(columnWidth >= 0);
 
@@ -322,7 +322,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @re
   assert(columnWidth != null);
   assert(columnWidth >= 0);
   assert(start >= 0);
-  shouldWrap ??= outputPreferences.wrapText;
+  shouldWrap ??= globals.outputPreferences.wrapText;
 
   /// Returns true if the code unit at [index] in [text] is a whitespace
   /// character.
