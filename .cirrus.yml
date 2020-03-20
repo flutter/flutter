@@ -542,6 +542,7 @@ task:
     - git clean -xffd --exclude=bin/cache/
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD, so that "git merge-base" works.
+    - ./dev/bots/try_merge_upstream.sh
     - flutter config --no-analytics
     - flutter doctor -v
     - flutter update-packages
