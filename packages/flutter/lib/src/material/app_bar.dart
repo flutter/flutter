@@ -27,18 +27,18 @@ const double _kLeadingWidth = kToolbarHeight; // So the leading button is square
 
 // Bottom justify the toolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
-  const _ToolbarContainerLayout(this.toolbarHeight) : assert(toolbarHeight != null);
+  const _ToolbarContainerLayout(this.toolbarHeight);
 
   final double toolbarHeight;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.tighten(height: toolbarHeight);
+    return constraints.tighten(height: toolbarHeight ?? kToolbarHeight);
   }
 
   @override
   Size getSize(BoxConstraints constraints) {
-    return Size(constraints.maxWidth, toolbarHeight);
+    return Size(constraints.maxWidth, toolbarHeight ?? kToolbarHeight);
   }
 
   @override
@@ -197,17 +197,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
-    this.toolbarHeight = kToolbarHeight,
+    this.toolbarHeight,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation == null || elevation >= 0.0),
        assert(primary != null),
        assert(titleSpacing != null),
-       assert(toolbarHeight != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       preferredSize = Size.fromHeight(toolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
+       preferredSize = Size.fromHeight((toolbarHeight ?? kToolbarHeight) + (bottom?.preferredSize?.height ?? 0.0)),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -216,7 +215,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Becomes the leading component of the [NavigationToolBar] built
   /// by this widget. The [leading] widget's width and height are constrained to
-  /// be no bigger than toolbar's height, which is [kToolbarHeight].
+  /// be no bigger than [kToolbarHeight].
   ///
   /// If this is null and [automaticallyImplyLeading] is set to true, the
   /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
@@ -295,6 +294,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///   ),
   /// )
   /// ```
+  ///
+  /// The [toolbarHeight] mentioned above will be [kToolbarHeight] if [toolbarHeight]
+  /// has a value of null.
   final Widget title;
 
   /// Widgets to display in a row after the [title] widget.
@@ -305,7 +307,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The [actions] become the trailing component of the [NavigationToolBar] built
   /// by this widget. The height of each action is constrained to be no bigger
-  /// than the toolbar's height, which is [toolbarHeight].
+  /// than the toolbar's height, which is [kToolbarHeight], or [toolbarHeight] if given.
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tab bar. It's height will
@@ -406,9 +408,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-  /// The height used for the [title].
+  /// The amount of height to be used for the toolbar.
   ///
-  /// This value must not be null, and defaults to [kToolbarHeight].
+  /// If not provided, then the height defaults to [kToolbarHeight].
   final double toolbarHeight;
 
   /// How opaque the toolbar part of the app bar is.
@@ -429,8 +431,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// bar is scrolled.
   final double bottomOpacity;
 
-  /// A size whose height is the sum of [toolbarHeight] and the [bottom] widget's
-  /// preferred height.
+  /// A size whose height is the sum of [kToolbarHeight] (or [toolbarHeight],
+  /// if given) and the [bottom] widget's preferred height.
   ///
   /// [Scaffold] uses this size to set its app bar's height.
   @override
@@ -592,7 +594,7 @@ class _AppBarState extends State<AppBar> {
       middleSpacing: widget.titleSpacing,
     );
 
-    // If the toolbar is allocated less than toolbarHeight make it
+    // If the toolbar is allocated less than kToolbarHeight (or toolbarHeight, if given) make it
     // appear to scroll upwards within its shrinking container.
     Widget appBar = ClipRect(
       child: CustomSingleChildLayout(
@@ -612,7 +614,7 @@ class _AppBarState extends State<AppBar> {
         children: <Widget>[
           Flexible(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: widget.toolbarHeight),
+              constraints: BoxConstraints(maxHeight: widget.toolbarHeight ?? kToolbarHeight),
               child: appBar,
             ),
           ),
@@ -760,7 +762,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.stretchConfiguration,
     @required this.shape,
   }) : assert(primary || topPadding == 0.0),
-       assert(toolbarHeight != null),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
@@ -791,10 +792,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double _bottomHeight;
 
   @override
-  double get minExtent => collapsedHeight ?? (topPadding + toolbarHeight + _bottomHeight);
+  double get minExtent => collapsedHeight ?? (topPadding + (toolbarHeight ?? kToolbarHeight) + _bottomHeight);
 
   @override
-  double get maxExtent => math.max(topPadding + (expandedHeight ?? toolbarHeight + _bottomHeight), minExtent);
+  double get maxExtent => math.max(topPadding + (expandedHeight ?? (toolbarHeight ?? kToolbarHeight) + _bottomHeight), minExtent);
 
   @override
   final FloatingHeaderSnapConfiguration snapConfiguration;
@@ -818,7 +819,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     //    1   |    1     |        0       ||  1.0
     //    1   |    1     |        1       ||  fade
     final double toolbarOpacity = !pinned || (floating && bottom != null)
-      ? ((visibleMainHeight - _bottomHeight) / toolbarHeight).clamp(0.0, 1.0) as double
+      ? ((visibleMainHeight - _bottomHeight) / (toolbarHeight ?? kToolbarHeight)).clamp(0.0, 1.0) as double
       : 1.0;
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
@@ -989,7 +990,7 @@ class SliverAppBar extends StatefulWidget {
     this.centerTitle,
     this.excludeHeaderSemantics = false,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
-    this.toolbarHeight = kToolbarHeight,
+    this.toolbarHeight,
     this.expandedHeight,
     this.floating = false,
     this.pinned = false,
@@ -1002,7 +1003,6 @@ class SliverAppBar extends StatefulWidget {
        assert(forceElevated != null),
        assert(primary != null),
        assert(titleSpacing != null),
-       assert(toolbarHeight != null),
        assert(floating != null),
        assert(pinned != null),
        assert(snap != null),
@@ -1166,9 +1166,9 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-  /// The height used for the [title].
+  /// The height used for the toolbar.
   ///
-  /// This value must not be null, and defaults to [kToolbarHeight].
+  /// If not provided, the height defaults to [kToolbarHeight].
   final double toolbarHeight;
 
   /// The size of the app bar when it is fully expanded.
