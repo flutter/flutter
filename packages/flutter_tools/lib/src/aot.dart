@@ -107,6 +107,7 @@ class AotBuilder {
       throwToolExit('The aot build failed.');
     }
 
+    // This print output is used by the dart team for build benchmarks.
     if (reportTimings) {
       final PerformanceMeasurement kernel = result.performance['kernel_snapshot'];
       PerformanceMeasurement aot;
