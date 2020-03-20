@@ -267,6 +267,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   bool get enabled => widget.onChanged != null;
 
+  void _didFinishDragging() {
+    // The user has finished dragging the thumb of this switch. Rebuild the switch
+    // to update the animation.
+    setState(() {});
+  }
+
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
@@ -313,7 +319,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
             additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
             hasFocus: _focused,
             hovering: _hovering,
-            vsync: this,
+            state: this,
           );
         },
       ),
@@ -380,11 +386,11 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.inactiveTrackColor,
     this.configuration,
     this.onChanged,
-    this.vsync,
     this.additionalConstraints,
     this.dragStartBehavior,
     this.hasFocus,
     this.hovering,
+    this.state,
   }) : super(key: key);
 
   final bool value;
@@ -398,11 +404,11 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveTrackColor;
   final ImageConfiguration configuration;
   final ValueChanged<bool> onChanged;
-  final TickerProvider vsync;
   final BoxConstraints additionalConstraints;
   final DragStartBehavior dragStartBehavior;
   final bool hasFocus;
   final bool hovering;
+  final _SwitchState state;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
@@ -423,7 +429,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       additionalConstraints: additionalConstraints,
       hasFocus: hasFocus,
       hovering: hovering,
-      vsync: vsync,
+      state: state,
     );
   }
 
@@ -446,7 +452,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..dragStartBehavior = dragStartBehavior
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..vsync = vsync;
+      ..vsync = state;
   }
 }
 
@@ -468,7 +474,7 @@ class _RenderSwitch extends RenderToggleable {
     DragStartBehavior dragStartBehavior,
     bool hasFocus,
     bool hovering,
-    @required TickerProvider vsync,
+    @required this.state,
   }) : assert(textDirection != null),
        _activeThumbImage = activeThumbImage,
        _inactiveThumbImage = inactiveThumbImage,
@@ -487,7 +493,7 @@ class _RenderSwitch extends RenderToggleable {
          additionalConstraints: additionalConstraints,
          hasFocus: hasFocus,
          hovering: hovering,
-         vsync: vsync,
+         vsync: state,
        ) {
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
@@ -562,6 +568,26 @@ class _RenderSwitch extends RenderToggleable {
     _drag.dragStartBehavior = value;
   }
 
+  _SwitchState state;
+
+  @override
+  set value(bool newValue) {
+    assert(value != null);
+    super.value = newValue;
+    // The widget is rebuilt and we have pending position animation to play.
+    if (_needsPositionAnimation) {
+      _needsPositionAnimation = false;
+      position
+        ..curve = null
+        ..reverseCurve = null;
+      if (newValue)
+        positionController.forward();
+      else
+        positionController.reverse();
+    }
+  }
+
+
   @override
   void detach() {
     _cachedThumbPainter?.dispose();
@@ -572,6 +598,8 @@ class _RenderSwitch extends RenderToggleable {
   double get _trackInnerLength => size.width - 2.0 * kRadialReactionRadius;
 
   HorizontalDragGestureRecognizer _drag;
+
+  bool _needsPositionAnimation = false;
 
   void _handleDragStart(DragStartDetails details) {
     if (isInteractive)
@@ -596,11 +624,12 @@ class _RenderSwitch extends RenderToggleable {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (position.value >= 0.5)
-      positionController.forward();
-    else
-      positionController.reverse();
+    _needsPositionAnimation = true;
+
+    if (position.value >= 0.5 != value)
+      onChanged(!value);
     reactionController.reverse();
+    state._didFinishDragging();
   }
 
   @override
