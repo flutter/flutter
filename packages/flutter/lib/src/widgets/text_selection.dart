@@ -91,10 +91,10 @@ typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetail
 /// decide whether or not to paint their buttons after laying them out and
 /// determining where they overflow.
 class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
-  // Whether or not this child is painted.
-  //
-  // Children in the selection toolbar may be laid out for measurement purposes
-  // but not painted. This allows these children to be identified.
+  /// Whether or not this child is painted.
+  ///
+  /// Children in the selection toolbar may be laid out for measurement purposes
+  /// but not painted. This allows these children to be identified.
   bool shouldPaint;
 
   @override

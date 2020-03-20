@@ -341,8 +341,6 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       : endpoints.last.point.dy + _kToolbarContentDistance;
 
     final List<Widget> items = <Widget>[];
-    //final Widget onePhysicalPixelVerticalDivider =
-    //SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final EdgeInsets arrowPadding = isArrowPointingDown
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
@@ -355,12 +353,6 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     ) {
       if (!predicate(delegate)) {
         return;
-      }
-
-      if (items.isNotEmpty) {
-        // TODO(justinmc): Reintroduce when you have logic to handle it. Or draw
-        // it some other way?
-        //items.add(onePhysicalPixelVerticalDivider);
       }
 
       items.add(CupertinoButton(
@@ -539,8 +531,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
-    // TODO(justinmc): You didn't realize that there is a divider between items
-    // in widget.children! That's why there are more than you expect!
     return DecoratedBox(
       decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: FadeTransition(
@@ -548,6 +538,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
           children: <Widget>[
+            SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio),
             CupertinoButton(
               borderRadius: null,
               color: _kToolbarBackgroundColor,
@@ -587,6 +578,12 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
     Key key,
     @required this.page,
+    // TODO(justinmc): Make slots instead of all in one array.
+    // 0: Divider
+    // 1: Back
+    // 2: Forward
+    // 3: Forward disabled
+    // Everything else: Buttons
     @required List<Widget> children,
   }) : assert(children != null),
        assert(page != null),
@@ -712,6 +709,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     RenderBox buttonBack;
     RenderBox buttonForward;
     RenderBox buttonForwardDisabled;
+    //RenderBox divider;
     int currentPage = 0;
     int i = -1;
     visitChildren((RenderObject renderObjectChild) {
@@ -720,7 +718,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
-      if (i > 2) {
+      if (i > 3) {
         if (currentPage == 0) {
           // If this is the last child, it's ok to fit without a forward button.
           buttonWidth = i == childCount - 1 ? 0.0 : buttonForward.size.width;
@@ -742,14 +740,18 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
       // Skip positioning the two page navigation buttons for now.
       if (i == 0) {
-        buttonBack = child;
+        //divider = child;
         return;
       }
       if (i == 1) {
-        buttonForward = child;
+        buttonBack = child;
         return;
       }
       if (i == 2) {
+        buttonForward = child;
+        return;
+      }
+      if (i == 3) {
         buttonForwardDisabled = child;
         return;
       }
@@ -769,6 +771,8 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
           parentUsesSize: true,
         );
       }
+      // TODO(justinmc): Divider needs to be considered in where the children
+      // are placed here.
       childParentData.offset = Offset(pageWidth, 0.0);
       pageWidth += child.size.width;
       childParentData.shouldPaint = currentPage == page;
@@ -819,11 +823,23 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    RenderBox divider;
+    int i = -1;
     visitChildren((RenderObject renderObjectChild) {
+      i++;
       final RenderBox child = renderObjectChild as RenderBox;
+      if (i == 0) {
+        divider = child;
+        return;
+      }
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
-        context.paintChild(child, childParentData.offset + offset);
+        final Offset childOffset = childParentData.offset + offset;
+        context.paintChild(child, childOffset);
+        // TODO(justinmc): Divider doesn't appear now because its width isn't
+        // considered when placing children, and it has not color of its own.
+        final Offset dividerOffset = childOffset + Offset(child.size.width, 0.0);
+        context.paintChild(divider, dividerOffset);
       }
     });
   }
