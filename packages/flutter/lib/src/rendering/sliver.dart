@@ -928,16 +928,13 @@ class SliverLogicalParentData extends ParentData {
   ///
   /// The number of pixels from from the zero scroll offset of the parent sliver
   /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
-  /// side of the child closest to that offset. A [layoutOffset] can be null
-  /// when it cannot be determined. The value will be set after layout.
+  /// side of the child closest to that offset.
   ///
   /// In a typical list, this does not change as the parent is scrolled.
-  ///
-  /// Defaults to null.
-  double layoutOffset;
+  double layoutOffset = 0.0;
 
   @override
-  String toString() => 'layoutOffset=${layoutOffset == null ? 'None': layoutOffset.toStringAsFixed(1)}';
+  String toString() => 'layoutOffset=${layoutOffset.toStringAsFixed(1)}';
 }
 
 /// Parent data for slivers that have multiple children and that position their

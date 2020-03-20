@@ -1069,7 +1069,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(_currentlyUpdatingChildIndex == null);
     try {
       final SplayTreeMap<int, Element> newChildren = SplayTreeMap<int, Element>();
-      final Map<int, double> indexToLayoutOffset = HashMap<int, double>();
 
       void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
@@ -1081,31 +1080,17 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         if (newChild != null) {
           _childElements[index] = newChild;
           final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData as SliverMultiBoxAdaptorParentData;
-          if (index == 0) {
-            parentData.layoutOffset = 0.0;
-          } else if (indexToLayoutOffset.containsKey(index)) {
-            parentData.layoutOffset = indexToLayoutOffset[index];
-          }
           if (!parentData.keptAlive)
             _currentBeforeChild = newChild.renderObject as RenderBox;
         } else {
           _childElements.remove(index);
         }
       }
+
       for (final int index in _childElements.keys.toList()) {
         final Key key = _childElements[index].widget.key;
         final int newIndex = key == null ? null : widget.delegate.findIndexByKey(key);
-        final SliverMultiBoxAdaptorParentData childParentData =
-          _childElements[index].renderObject?.parentData as SliverMultiBoxAdaptorParentData;
-
-        if (childParentData != null && childParentData.layoutOffset != null)
-          indexToLayoutOffset[index] = childParentData.layoutOffset;
-
         if (newIndex != null && newIndex != index) {
-          // The layout offset of the child being moved is no longer accurate.
-          if (childParentData != null)
-            childParentData.layoutOffset = null;
-
           newChildren[newIndex] = _childElements[index];
           // We need to make sure the original index gets processed.
           newChildren.putIfAbsent(index, () => null);
@@ -1324,8 +1309,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           break;
       }
 
-      return parentData.layoutOffset != null &&
-          parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
+      return parentData.layoutOffset < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&
           parentData.layoutOffset + itemExtent > renderObject.constraints.scrollOffset;
     }).forEach(visitor);
   }
