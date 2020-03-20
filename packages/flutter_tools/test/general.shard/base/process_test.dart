@@ -368,15 +368,17 @@ void main() {
       expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
     });
 
-    testWithoutContext('does not throw Exception and returns false', () {
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () {
       mockProcessManager.canRunSucceeds = false;
       expect(processUtils.exitsHappySync(<String>['nonesuch']), isFalse);
-      verifyNever(mockProcessManager.runSync(any, environment: anyNamed('environment')));
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
     });
   });
 
   group('exitsHappy', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
@@ -408,11 +410,12 @@ void main() {
       expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
     });
 
-    testWithoutContext('catches ArgumentError and returns false', () async {
-      when(mockProcessManager.run(<String>['nonesuch'])).thenThrow(
-        ArgumentError('Invalid argument(s): Cannot find executable for nonesuch'),
-      );
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () async {
+      mockProcessManager.canRunSucceeds = false;
       expect(await processUtils.exitsHappy(<String>['nonesuch']), isFalse);
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
     });
   });
 
