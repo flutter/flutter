@@ -27,6 +27,9 @@ abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 
   @override
+  String get analyticsName => 'ios_aot';
+
+  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,

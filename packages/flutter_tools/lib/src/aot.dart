@@ -30,6 +30,7 @@ class AotBuilder {
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
+    bool reportTimings,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -104,6 +105,21 @@ class AotBuilder {
         globals.printError(measurement.exception.toString());
       }
       throwToolExit('The aot build failed.');
+    }
+
+    // This print output is used by the dart team for build benchmarks.
+    if (reportTimings) {
+      final PerformanceMeasurement kernel = result.performance['kernel_snapshot'];
+      PerformanceMeasurement aot;
+      if (expectSo) {
+        aot = result.performance.values.firstWhere(
+          (PerformanceMeasurement measurement) => measurement.analyicsName == 'android_aot');
+      } else {
+        aot = result.performance.values.firstWhere(
+          (PerformanceMeasurement measurement) => measurement.analyicsName == 'ios_aot');
+      }
+      globals.printStatus('frontend(CompileTime): ${kernel.elapsedMilliseconds} ms.');
+      globals.printStatus('snapshot(CompileTime): ${aot.elapsedMilliseconds} ms.');
     }
 
     if (expectSo) {

@@ -258,6 +258,9 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
+  String get analyticsName => 'android_aot';
+
+  @override
   Future<void> build(Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,

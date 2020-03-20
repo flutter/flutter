@@ -45,6 +45,11 @@ void main() {
     });
   });
 
+  test('iOS AOT targets has analyicsName', () {
+    expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
+    expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
+  });
+
   test('DebugUniveralFramework creates expected binary with arm64 only arch', () => testbed.run(() async {
     environment.defines[kIosArchs] = 'arm64';
     processManager = FakeProcessManager.list(<FakeCommand>[
