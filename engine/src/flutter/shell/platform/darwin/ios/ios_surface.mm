@@ -132,18 +132,12 @@ SkCanvas* IOSSurface::CompositeEmbeddedView(int view_id) {
 }
 
 // |ExternalViewEmbedder|
-bool IOSSurface::SubmitFrame(GrContext* context, SkCanvas* background_canvas) {
+bool IOSSurface::SubmitFrame(GrContext* context) {
   TRACE_EVENT0("flutter", "IOSSurface::SubmitFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
-  bool submitted =
-      platform_views_controller_->SubmitFrame(std::move(context), ios_context_, background_canvas);
-  return submitted;
-}
-
-// |ExternalViewEmbedder|
-void IOSSurface::FinishFrame() {
-  TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
+  bool submitted = platform_views_controller_->SubmitFrame(std::move(context), ios_context_);
   [CATransaction commit];
+  return submitted;
 }
 
 }  // namespace flutter
