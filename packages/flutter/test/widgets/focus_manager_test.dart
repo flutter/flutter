@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -828,6 +829,21 @@ void main() {
       // receive it.
       expect(receivedAnEvent, isEmpty);
     });
+    testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+          break;
+      }
+    }, variant: TargetPlatformVariant.all());
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
       int callCount = 0;

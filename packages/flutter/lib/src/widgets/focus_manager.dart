@@ -1368,7 +1368,34 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
 
-  bool _lastInteractionWasTouch = true;
+  bool get _lastInteractionWasTouch {
+    // Assume that if we're on one of these mobile platforms, or if there's no
+    // mouse connected, that the initial interaction will be touch-based, and
+    // that it's traditional mouse and keyboard on all others.
+    //
+    // This only affects the initial value: the ongoing value is updated to a
+    // known correct value as soon as any pointer events are received.
+    if (_lastInteractionWasTouchValue == null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+          _lastInteractionWasTouchValue = true;
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          _lastInteractionWasTouchValue = false;
+          break;
+      }
+    }
+    return _lastInteractionWasTouchValue;
+  }
+  bool _lastInteractionWasTouchValue;
+  set _lastInteractionWasTouch(bool value) {
+    _lastInteractionWasTouchValue = value;
+  }
+
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1418,23 +1445,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    // Assume that if we're on one of these mobile platforms, or if there's no
-    // mouse connected, that the initial interaction will be touch-based, and
-    // that it's traditional mouse and keyboard on all others.
-    //
-    // This only affects the initial value: the ongoing value is updated as soon
-    // as any input events are received.
-    if (_lastInteractionWasTouch == null) {
-      if (Platform.isAndroid || Platform.isIOS) {
-        _lastInteractionWasTouch = true;
-      } else {
-        if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-          _lastInteractionWasTouch = false;
-        } else {
-          _lastInteractionWasTouch = !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
-        }
-      }
-    }
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
