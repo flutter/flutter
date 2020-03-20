@@ -30,6 +30,8 @@ void main() {
 
     setUp(() async {
       mockProcessManager = MockProcessManager();
+      // Assume all binaries exist and are executable
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       mockConfig = MockConfig();
       mockIosProject = MockIosProject();
       when(mockIosProject.buildSettings).thenAnswer((_) {
