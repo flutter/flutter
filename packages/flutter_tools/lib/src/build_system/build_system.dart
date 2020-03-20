@@ -114,6 +114,14 @@ abstract class Target {
   /// argument to build a particular target.
   String get name;
 
+  /// A name that measurements can be categorized under for this [Target].
+  ///
+  /// Unlike [name], this is not expected to be unique, so multiple targets
+  /// that are conceptually the same can share an analytics name.
+  ///
+  /// If not provided, defaults to [name]
+  String get analyticsName => name;
+
   /// The dependencies of this target.
   List<Target> get dependencies;
 
@@ -594,7 +602,12 @@ class _BuildInstance {
       resource.release();
       stopwatch.stop();
       stepTimings[node.target.name] = PerformanceMeasurement(
-          node.target.name, stopwatch.elapsedMilliseconds, skipped, passed);
+        target: node.target.name,
+        elapsedMilliseconds: stopwatch.elapsedMilliseconds,
+        skipped: skipped,
+        passed: passed,
+        analyicsName: node.target.analyticsName,
+      );
     }
     return passed;
   }
@@ -617,11 +630,19 @@ class ExceptionMeasurement {
 
 /// Helper class to collect measurement data.
 class PerformanceMeasurement {
-  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skipped, this.passed);
+  PerformanceMeasurement({
+    @required this.target,
+    @required this.elapsedMilliseconds,
+    @required this.skipped,
+    @required this.passed,
+    @required this.analyicsName,
+  });
+
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool passed;
+  final String analyicsName;
 }
 
 /// Check if there are any dependency cycles in the target.
