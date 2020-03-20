@@ -212,7 +212,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showOnScreen works with pinned app bar and individual slivers, when custom titleHeight given', (WidgetTester tester) async {
+  testWidgets('showOnScreen works with pinned app bar and individual slivers, when custom toolbarHeight given', (WidgetTester tester) async {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
@@ -237,7 +237,7 @@ void main() {
       initialScrollOffset: 2.5 * kItemHeight,
     );
 
-    const double customTitleHeight = 128.0;
+    const double customToolbarHeight = 128.0;
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -256,7 +256,7 @@ void main() {
                 offset: offset,
                 slivers: <Widget>[
                   const SliverAppBar(
-                    titleHeight: customTitleHeight,
+                    toolbarHeight: customToolbarHeight,
                     pinned: true,
                     expandedHeight: kExpandedAppBarHeight,
                     flexibleSpace: FlexibleSpaceBar(
@@ -278,7 +278,7 @@ void main() {
     tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(children[0])).dy, customTitleHeight);
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, customToolbarHeight);
 
     semantics.dispose();
   });
