@@ -222,7 +222,10 @@ def to_gn_args(args):
     if args.enable_metal:
       gn_args['skia_use_metal'] = True
       gn_args['shell_enable_metal'] = True
-      gn_args['allow_deprecated_api_calls'] = True
+      # Bitcode enabled builds using the current version of the toolchain leak
+      # C++ symbols decorated with the availability attribute. Disable these
+      # attributes in release modes till the toolchain is updated.
+      gn_args['skia_enable_api_available_macro'] = args.runtime_mode != "release"
 
     if args.enable_vulkan:
       # Enable vulkan in the Flutter shell.
