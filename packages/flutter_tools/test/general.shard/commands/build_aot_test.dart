@@ -108,10 +108,10 @@ void main() {
     PlistParser: () => mockPlistUtils,
   });
 
-   testUsingContext('build aot outputs timing info', () async {
-     globals.fs.file('.dart_tool/flutter_build/cce09742720db17ffec62331bd7e42d5/app.so')
+  testUsingContext('build aot outputs timing info', () async {
+    globals.fs.file('.dart_tool/flutter_build/cce09742720db17ffec62331bd7e42d5/app.so')
       .createSync(recursive: true);
-     when(buildSystem.build(any, any))
+    when(buildSystem.build(any, any))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
           'kernel_snapshot': PerformanceMeasurement(
@@ -131,18 +131,18 @@ void main() {
         });
       });
 
-     await AotBuilder().build(
-       platform: TargetPlatform.android_arm64,
-       outputPath: '/',
-       buildInfo: BuildInfo.release,
-       mainDartFile: globals.fs.path.join('lib', 'main.dart'),
-       reportTimings: true,
-      );
+    await AotBuilder().build(
+      platform: TargetPlatform.android_arm64,
+      outputPath: '/',
+      buildInfo: BuildInfo.release,
+      mainDartFile: globals.fs.path.join('lib', 'main.dart'),
+      reportTimings: true,
+    );
 
-      expect(testLogger.statusText, allOf(
-        contains('frontend(CompileTime): 1000 ms.'),
-        contains('snapshot(CompileTime): 1000 ms.'),
-      ));
+    expect(testLogger.statusText, allOf(
+      contains('frontend(CompileTime): 1000 ms.'),
+      contains('snapshot(CompileTime): 1000 ms.'),
+    ));
   }, overrides: <Type, Generator>{
     BuildSystem: () => MockBuildSystem(),
     FileSystem: () => MemoryFileSystem.test(),
