@@ -483,7 +483,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 @immutable
-class PageTransitionsTheme extends Diagnosticable {
+class PageTransitionsTheme with Diagnosticable {
   /// Construct a PageTransitionsTheme.
   ///
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]

@@ -26,7 +26,7 @@ class GalleryTransitionTest {
     await device.unlock();
     final String deviceId = device.deviceId;
     final Directory galleryDirectory =
-        dir('${flutterDirectory.path}/examples/flutter_gallery');
+        dir('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
@@ -68,12 +68,10 @@ class GalleryTransitionTest {
       'missed_transition_count',
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',
-      'missed_frame_build_budget_count',
       '90th_percentile_frame_build_time_millis',
       '99th_percentile_frame_build_time_millis',
       'average_frame_rasterizer_time_millis',
       'worst_frame_rasterizer_time_millis',
-      'missed_frame_rasterizer_budget_count',
       '90th_percentile_frame_rasterizer_time_millis',
       '99th_percentile_frame_rasterizer_time_millis',
     ]);

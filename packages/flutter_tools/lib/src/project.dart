@@ -441,11 +441,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// Returns null, if iOS tooling is unavailable.
   Future<Map<String, String>> get buildSettings async {
-    if (!xcode.xcodeProjectInterpreter.isInstalled) {
+    if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     Map<String, String> buildSettings = _buildSettings;
-    buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+    buildSettings ??= await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       _hostAppBundleName,
     );

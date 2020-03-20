@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Vou uit",
   "remainingTextFieldCharacterCountOne": "1 karakter oor",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakters oor",
-  "refreshIndicatorSemanticLabel": "Herlaai"
+  "refreshIndicatorSemanticLabel": "Herlaai",
+  "moreButtonTooltip": "TBD"
 }

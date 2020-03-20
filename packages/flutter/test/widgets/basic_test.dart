@@ -371,6 +371,22 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
+  testWidgets('Inconsequential golden test', (WidgetTester tester) async {
+    // The test validates the Flutter Gold integration. Any changes to the
+    // golden file can be approved at any time.
+    await tester.pumpWidget(RepaintBoundary(
+      child: Container(
+        color: const Color(0xFF42A5F5),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('inconsequential_golden_file.png'),
+    );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
+  }, skip: isBrowser);
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);

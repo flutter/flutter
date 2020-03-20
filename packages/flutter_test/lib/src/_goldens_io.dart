@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;

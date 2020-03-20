@@ -11,7 +11,6 @@ import 'android/gradle_utils.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/build.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/io.dart';
@@ -19,7 +18,6 @@ import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
@@ -126,7 +124,6 @@ Future<T> runInContext<T>(
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
-      GenSnapshot: () => const GenSnapshot(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => IMobileDevice(),
@@ -147,13 +144,13 @@ Future<T> runInContext<T>(
         ? WindowsStdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
@@ -188,16 +185,26 @@ Future<T> runInContext<T>(
         runningOnBot: runningOnBot,
       ),
       UserMessages: () => UserMessages(),
-      VisualStudio: () => VisualStudio(),
-      VisualStudioValidator: () => const VisualStudioValidator(),
-      WebWorkflow: () => const WebWorkflow(),
+      VisualStudioValidator: () => VisualStudioValidator(
+        userMessages: globals.userMessages,
+        visualStudio: VisualStudio(
+          fileSystem: globals.fs,
+          platform: globals.platform,
+          logger: globals.logger,
+          processManager: globals.processManager,
+        )
+      ),
+      WebWorkflow: () => WebWorkflow(
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(
         logger: globals.logger,
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,

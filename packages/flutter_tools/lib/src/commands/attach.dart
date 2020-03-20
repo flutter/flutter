@@ -245,7 +245,7 @@ class AttachCommand extends FlutterCommand {
       if (observatoryUri == null) {
         final ProtocolDiscovery observatoryDiscovery =
           ProtocolDiscovery.observatory(
-            device.getLogReader(),
+            await device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,

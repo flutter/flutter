@@ -986,14 +986,12 @@ class VM extends ServiceObjectOwner {
   Future<ServiceMap> runInView(
     String viewId,
     Uri main,
-    Uri packages,
     Uri assetsDirectory,
   ) {
     return invokeRpc<ServiceMap>('_flutter.runInView',
       params: <String, dynamic>{
         'viewId': viewId,
         'mainScript': main.toString(),
-        'packagesFile': packages.toString(),
         'assetDirectory': assetsDirectory.toString(),
     });
   }
@@ -1202,7 +1200,6 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> reloadSources({
     bool pause = false,
     Uri rootLibUri,
-    Uri packagesUri,
   }) async {
     try {
       final Map<String, dynamic> arguments = <String, dynamic>{
@@ -1210,9 +1207,6 @@ class Isolate extends ServiceObjectOwner {
       };
       if (rootLibUri != null) {
         arguments['rootLibUri'] = rootLibUri.toString();
-      }
-      if (packagesUri != null) {
-        arguments['packagesUri'] = packagesUri.toString();
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
@@ -1438,7 +1432,6 @@ class FlutterView extends ServiceObject {
   // TODO(johnmccutchan): Report errors when running failed.
   Future<void> runFromSource(
     Uri entryUri,
-    Uri packagesUri,
     Uri assetsDirectoryUri,
   ) async {
     final String viewId = id;
@@ -1456,7 +1449,6 @@ class FlutterView extends ServiceObject {
       });
     await owner.vm.runInView(viewId,
                              entryUri,
-                             packagesUri,
                              assetsDirectoryUri);
     await completer.future;
     await owner.vm.refreshViews(waitForViews: true);

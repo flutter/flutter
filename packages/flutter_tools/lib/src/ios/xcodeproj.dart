@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -210,20 +209,9 @@ List<String> _xcodeBuildSettingsLines({
 
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = globals.fs.path.basename(localEngineArtifacts.engineOutPath);
-    String engineBuildMode = 'release';
-    if (engineOutPath.toLowerCase().contains('debug')) {
-      engineBuildMode = 'debug';
-    } else if (engineOutPath.toLowerCase().contains('profile')) {
-      engineBuildMode = 'profile';
-    }
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=$engineOutPath');
-    // Only write this for local engines, where it is supposed to be sticky to
-    // match the engine configuration. Avoid writing it otherwise so that it
-    // does not stick the user with the wrong build mode, particularly for
-    // existing app use cases.
-    xcodeBuildSettings.add('FLUTTER_BUILD_MODE=$engineBuildMode');
+    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -254,8 +242,6 @@ List<String> _xcodeBuildSettingsLines({
   return xcodeBuildSettings;
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
-
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   XcodeProjectInterpreter({
@@ -263,7 +249,7 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _terminal = terminal,
@@ -273,7 +259,7 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final Logger _logger;
 
   static const String _executable = '/usr/bin/xcodebuild';
@@ -378,14 +364,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);

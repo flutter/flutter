@@ -20,7 +20,10 @@ abstract class IOSMigrator {
   bool migrate();
 
   /// Return null if the line should be deleted.
-  String migrateLine(String line);
+  @protected
+  String migrateLine(String line) {
+    return line;
+  }
 
   @protected
   void processFileLines(File file) {

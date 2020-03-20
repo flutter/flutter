@@ -147,6 +147,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  platform_views_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -187,6 +194,12 @@ tasks:
   textfield_perf__timeline_summary:
     description: >
       Measures the runtime performance of textfield on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  color_filter_and_fade_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -433,6 +446,12 @@ tasks:
     # TODO(keyonghan): change with https://github.com/flutter/flutter/issues/50383
     required_agent_capabilities: ["mac/ios"]
 
+  platform_views_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
   flutter_gallery_ios32__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
@@ -563,6 +582,12 @@ tasks:
     #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
     # Remove the flaky flag when we are sure the test is stable.
     flaky: true
+
+  ios_platform_view_tests:
+    description: >
+      Runs end-to-end tests with platform views in the scene.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
 
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
   # system_debug_ios:

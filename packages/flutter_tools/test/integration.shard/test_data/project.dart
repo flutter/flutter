@@ -10,6 +10,17 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../test_utils.dart';
 
+const String _kDefaultHtml  = '''
+<html>
+    <head>
+        <title>Hello, World</title>
+    </head>
+    <body>
+        <script src="main.dart.js"></script>
+    </body>
+</html>
+''';
+
 abstract class Project {
   Directory dir;
 
@@ -24,6 +35,7 @@ abstract class Project {
     if (main != null) {
       writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), main);
     }
+    writeFile(globals.fs.path.join(dir.path, 'web', 'index.html'), _kDefaultHtml);
     await getPackages(dir.path);
   }
 
