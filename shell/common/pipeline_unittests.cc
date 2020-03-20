@@ -89,46 +89,34 @@ TEST(PipelineTest, PushingMultiProcessesInOrder) {
   ASSERT_EQ(consume_result_2, PipelineConsumeResult::Done);
 }
 
-TEST(PipelineTest, PushingToFrontOverridesOrder) {
+TEST(PipelineTest, ProduceIfEmptyDoesNotConsumeWhenQueueIsNotEmpty) {
   const int depth = 2;
   fml::RefPtr<IntPipeline> pipeline = fml::MakeRefCounted<IntPipeline>(depth);
 
   Continuation continuation_1 = pipeline->Produce();
-  Continuation continuation_2 = pipeline->ProduceToFront();
+  Continuation continuation_2 = pipeline->ProduceIfEmpty();
 
   const int test_val_1 = 1, test_val_2 = 2;
   continuation_1.Complete(std::make_unique<int>(test_val_1));
   continuation_2.Complete(std::make_unique<int>(test_val_2));
 
   PipelineConsumeResult consume_result_1 = pipeline->Consume(
-      [&test_val_2](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_2); });
-  ASSERT_EQ(consume_result_1, PipelineConsumeResult::MoreAvailable);
-
-  PipelineConsumeResult consume_result_2 = pipeline->Consume(
       [&test_val_1](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_1); });
-  ASSERT_EQ(consume_result_2, PipelineConsumeResult::Done);
+  ASSERT_EQ(consume_result_1, PipelineConsumeResult::Done);
 }
 
-TEST(PipelineTest, PushingToFrontDropsLastResource) {
-  const int depth = 2;
+TEST(PipelineTest, ProduceIfEmptySuccessfulIfQueueIsEmpty) {
+  const int depth = 1;
   fml::RefPtr<IntPipeline> pipeline = fml::MakeRefCounted<IntPipeline>(depth);
 
-  Continuation continuation_1 = pipeline->Produce();
-  Continuation continuation_2 = pipeline->Produce();
-  Continuation continuation_3 = pipeline->ProduceToFront();
+  Continuation continuation_1 = pipeline->ProduceIfEmpty();
 
-  const int test_val_1 = 1, test_val_2 = 2, test_val_3 = 3;
+  const int test_val_1 = 1;
   continuation_1.Complete(std::make_unique<int>(test_val_1));
-  continuation_2.Complete(std::make_unique<int>(test_val_2));
-  continuation_3.Complete(std::make_unique<int>(test_val_3));
 
   PipelineConsumeResult consume_result_1 = pipeline->Consume(
-      [&test_val_3](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_3); });
-  ASSERT_EQ(consume_result_1, PipelineConsumeResult::MoreAvailable);
-
-  PipelineConsumeResult consume_result_2 = pipeline->Consume(
       [&test_val_1](std::unique_ptr<int> v) { ASSERT_EQ(*v, test_val_1); });
-  ASSERT_EQ(consume_result_2, PipelineConsumeResult::Done);
+  ASSERT_EQ(consume_result_1, PipelineConsumeResult::Done);
 }
 
 }  // namespace testing
