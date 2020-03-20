@@ -13,54 +13,53 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 void main() {
-  FlutterRunTestDriver flutterRun, flutterAttach;
-  final BasicProject project = BasicProject();
+  FlutterRunTestDriver _flutterRun, _flutterAttach;
+  final BasicProject _project = BasicProject();
   Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('attach_test.');
-    await project.setUpIn(tempDir);
-    flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
-    flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH  ');
+    await _project.setUpIn(tempDir);
+    _flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
+    _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH  ');
   });
 
   tearDown(() async {
-    await flutterAttach.detach();
-    await flutterRun.stop();
+    await _flutterAttach.detach();
+    await _flutterRun.stop();
     tryToDelete(tempDir);
   });
 
   test('writes pid-file', () async {
     final File pidFile = tempDir.childFile('test.pid');
-    flutterRun.stdout.listen(print);
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(
-      flutterRun.vmServicePort,
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(
+      _flutterRun.vmServicePort,
       pidFile: pidFile,
     );
     expect(pidFile.existsSync(), isTrue);
   });
 
   test('can hot reload', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 
   test('can detach, reattach, hot reload', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.detach();
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.detach();
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 
   test('killing process behaves the same as detach ', () async {
-    await flutterRun.run(withDebugger: true);
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.quit();
-    flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2');
-    await flutterAttach.attach(flutterRun.vmServicePort);
-    await flutterAttach.hotReload();
+    await _flutterRun.run(withDebugger: true);
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.quit();
+    _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH-2');
+    await _flutterAttach.attach(_flutterRun.vmServicePort);
+    await _flutterAttach.hotReload();
   });
 }
