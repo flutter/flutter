@@ -129,7 +129,8 @@ static FlutterBackingStoreConfig MakeBackingStoreConfig(
 }
 
 // |ExternalViewEmbedder|
-bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
+bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context,
+                                               SkCanvas* background_canvas) {
   auto [matched_render_targets, pending_keys] =
       render_target_cache_.GetExistingTargetsInCache(pending_views_);
 
@@ -264,5 +265,8 @@ bool EmbedderExternalViewEmbedder::SubmitFrame(GrContext* context) {
 
   return true;
 }
+
+// |ExternalViewEmbedder|
+void EmbedderExternalViewEmbedder::FinishFrame() {}
 
 }  // namespace flutter
