@@ -134,6 +134,11 @@ void main() {
   }
 
   group('Evaluate installation', () {
+    setUp(() {
+      // Assume all binaries can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+    });
+
     testUsingContext('detects not installed, if pod exec does not exist', () async {
       pretendPodIsNotInstalled();
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.notInstalled);
@@ -328,6 +333,8 @@ void main() {
   group('Process pods', () {
     setUp(() {
       podsIsInHomeDir();
+      // Assume all binaries can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
     });
 
     testUsingContext('throwsToolExit if CocoaPods is not installed', () async {
@@ -674,6 +681,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     String cocoapodsRepoDir;
     Map<String, String> environment;
     setUp(() {
+      // Assume binaries exist and can run
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       cocoapodsRepoDir = podsIsInCustomDir();
       environment = <String, String>{
         'FLUTTER_FRAMEWORK_DIR': 'engine/path',
