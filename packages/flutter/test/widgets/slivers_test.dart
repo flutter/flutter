@@ -50,8 +50,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
               findChildIndexCallback: (Key key) {
                 final ValueKey<String> valueKey = key as ValueKey<String>;
                 final String data = valueKey.value;
-                final int index = items.indexOf(data);
-                return index == -1 ? null : index;
+                return items.indexOf(data);
               },
             ),
           ),
