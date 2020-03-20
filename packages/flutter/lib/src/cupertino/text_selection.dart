@@ -107,18 +107,6 @@ class CupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
   }
 }
 
-// TODO(justinmc): Share with Material?
-class _ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
-  // Whether or not this child is painted.
-  //
-  // Children in the selection toolbar may be laid out for measurement purposes
-  // but not painted. This allows these children to be identified.
-  bool shouldPaint;
-
-  @override
-  String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
-}
-
 class _ToolbarParentData extends BoxParentData {
   // The x offset from the tip of the arrow to the center of the toolbar.
   // Positive if the tip of the arrow has a larger x-coordinate than the
@@ -628,7 +616,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends MultiChildRenderObjectE
   ) : super(widget);
 
   static bool _shouldPaint(Element child) {
-    return (child.renderObject.parentData as _ToolbarItemsParentData).shouldPaint;
+    return (child.renderObject.parentData as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
@@ -637,7 +625,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends MultiChildRenderObjectE
   }
 }
 
-class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, _ToolbarItemsParentData> {
+class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
     @required int page,
   }) : assert(page != null),
@@ -666,7 +654,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     visitChildren((RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
       if (i > 2) {
@@ -702,7 +690,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   void placeChildren() {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       childParentData.shouldPaint = true;
       childParentData.offset = Offset.zero;
     });
@@ -729,7 +717,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     visitChildren((RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
       if (i > 2) {
@@ -801,9 +789,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
     // Position page nav buttons.
     if (currentPage > 0) {
-      final _ToolbarItemsParentData buttonForwardParentData = buttonForward.parentData as _ToolbarItemsParentData;
-      final _ToolbarItemsParentData buttonForwardDisabledParentData = buttonForwardDisabled.parentData as _ToolbarItemsParentData;
-      final _ToolbarItemsParentData buttonBackParentData = buttonBack.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData buttonForwardParentData = buttonForward.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData buttonForwardDisabledParentData = buttonForwardDisabled.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData buttonBackParentData = buttonBack.parentData as ToolbarItemsParentData;
       // The forward button always shows if there is more than one page, even on
       // the last page (it's just disabled).
       if (page == currentPage) {
@@ -833,7 +821,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         context.paintChild(child, childParentData.offset + offset);
       }
@@ -842,8 +830,8 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ToolbarItemsParentData) {
-      child.parentData = _ToolbarItemsParentData();
+    if (child.parentData is! ToolbarItemsParentData) {
+      child.parentData = ToolbarItemsParentData();
     }
   }
 
@@ -852,7 +840,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox child = lastChild;
     while (child != null) {
-      final _ToolbarItemsParentData childParentData = child.parentData as _ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       // Don't hit test children that aren't shown.
       if (!childParentData.shouldPaint) {
