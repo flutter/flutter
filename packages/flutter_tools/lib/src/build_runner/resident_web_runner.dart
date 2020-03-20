@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -20,6 +21,7 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../devfs.dart';
@@ -403,6 +405,14 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     try {
       return await asyncGuard(() async {
+        // Ensure dwds resources are cached. If the .packages file is missing then
+        // the client.js script cannot be located by the injected handler in dwds.
+        // This will result in a NoSuchMethodError thrown by injected_handler.darts
+        await pub.get(
+          context: PubContext.pubGet,
+          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools')
+        );
+
         device.devFS = WebDevFS(
           hostname: effectiveHostname,
           port: hostPort,
