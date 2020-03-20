@@ -22,6 +22,10 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: const <String, String>{}),
   });
 
+  test('Android AOT targets has analyicsName', () {
+    expect(androidArmProfile.analyticsName, 'android_aot');
+  });
+
   testbed.test('debug bundle contains expected resources', () async {
     final Environment environment = Environment.test(
       globals.fs.currentDirectory,

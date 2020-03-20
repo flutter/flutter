@@ -45,7 +45,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
-      );
+      )
+      ..addFlag('report-timings', hide: true);
   }
 
   AotBuilder aotBuilder;
@@ -76,6 +77,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
+      reportTimings: boolArg('report-timings'),
     );
     return FlutterCommandResult.success();
   }
