@@ -2,9 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This value will be inherited in the toolchain below.
-concurrent_links = exec_script("get_concurrent_links.py", [], "value")
-
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/clang_static_analyzer.gni")
 
