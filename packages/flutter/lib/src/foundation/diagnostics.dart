@@ -3002,9 +3002,10 @@ class DiagnosticPropertiesBuilder {
 
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    if (!kReleaseMode) {
+    assert(() {
       properties.add(property);
-    }
+      return true;
+    }());
   }
 
   /// List of properties accumulated so far.
@@ -3115,11 +3116,16 @@ mixin Diagnosticable {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableNode<Diagnosticable>(
-      name: name,
-      value: this,
-      style: style,
-    );
+    DiagnosticsNode node;
+    assert(() {
+      node = DiagnosticableNode<Diagnosticable>(
+        name: name,
+        value: this,
+        style: style,
+      );
+      return true;
+    }());
+    return node;
   }
 
   /// Add additional properties associated with the node.
@@ -3376,15 +3382,21 @@ abstract class DiagnosticableTree with Diagnosticable {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toString());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toString());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3410,7 +3422,12 @@ abstract class DiagnosticableTree with Diagnosticable {
     String prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    String deepString;
+    assert(() {
+      deepString = toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+      return true;
+    }());
+    return deepString;
   }
 
   @override
@@ -3418,11 +3435,16 @@ abstract class DiagnosticableTree with Diagnosticable {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableTreeNode(
-      name: name,
-      value: this,
-      style: style,
-    );
+    DiagnosticableTreeNode node;
+    assert(() {
+      node = DiagnosticableTreeNode(
+        name: name,
+        value: this,
+        style: style,
+      );
+      return true;
+    }());
+    return node;
   }
 
   /// Returns a list of [DiagnosticsNode] objects describing this node's
@@ -3452,7 +3474,14 @@ abstract class DiagnosticableTree with Diagnosticable {
 mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    String result;
+    assert(() {
+      result =
+          toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(
+              minLevel: minLevel);
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -3463,15 +3492,21 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toStringShort());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toStringShort());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   @override
@@ -3480,7 +3515,14 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     String prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
+    String result;
+    assert(() {
+      result = toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne,
+          prefixOtherLines: prefixOtherLines,
+          minLevel: minLevel);
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -3488,11 +3530,16 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return DiagnosticableTreeNode(
-      name: name,
-      value: this,
-      style: style,
-    );
+    DiagnosticsNode node;
+    assert(() {
+      node = DiagnosticableTreeNode(
+        name: name,
+        value: this,
+        style: style,
+      );
+      return true;
+    }());
+    return node;
   }
 
   @override

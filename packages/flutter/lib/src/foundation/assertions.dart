@@ -503,11 +503,14 @@ class FlutterErrorDetails with Diagnosticable {
     }
     final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
-    if (diagnosticable != null) {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-      debugFillProperties(builder);
-      summary = builder.properties.firstWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.summary, orElse: () => null);
-    }
+    assert(() {
+      if (diagnosticable != null) {
+        final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+        debugFillProperties(builder);
+        summary = builder.properties.firstWhere((DiagnosticsNode node) => node
+            .level == DiagnosticLevel.summary, orElse: () => null);
+      }
+    }());
     return summary ?? ErrorSummary(formatException());
   }
 

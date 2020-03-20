@@ -206,18 +206,23 @@ class ChangeNotifier implements Listenable {
           if (_listeners.contains(listener))
             listener();
         } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'foundation library',
-            context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: () sync* {
+          InformationCollector collector;
+          assert(() {
+            collector = () sync* {
               yield DiagnosticsProperty<ChangeNotifier>(
                 'The $runtimeType sending notification was',
                 this,
                 style: DiagnosticsTreeStyle.errorProperty,
               );
-            },
+            };
+            return true;
+          }());
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'foundation library',
+            context: ErrorDescription('while dispatching notifications for $runtimeType'),
+            informationCollector: collector
           ));
         }
       }

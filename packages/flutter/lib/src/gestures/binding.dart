@@ -179,6 +179,13 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       try {
         pointerRouter.route(event);
       } catch (exception, stack) {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+          };
+          return true;
+        }());
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
           stack: stack,
@@ -186,9 +193,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
           hitTestEntry: null,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-          },
+          informationCollector: collector
         ));
       }
       return;
@@ -197,6 +202,14 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       try {
         entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+            yield DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty);
+          };
+          return true;
+        }());
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
           stack: stack,
@@ -204,10 +217,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           context: ErrorDescription('while dispatching a pointer event'),
           event: event,
           hitTestEntry: entry,
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-            yield DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty);
-          },
+          informationCollector: collector
         ));
       }
     }
