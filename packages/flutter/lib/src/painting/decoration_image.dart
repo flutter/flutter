@@ -376,6 +376,7 @@ void paintImage({
   bool flipHorizontally = false,
   bool invertColors = false,
   FilterQuality filterQuality = FilterQuality.low,
+  bool isAntiAlias = false,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -412,9 +413,7 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  // There might be a transform (e.g., rotation) so the `isAntiAlias` flag is
-  // necessary.
-  final Paint paint = Paint()..isAntiAlias = true;
+  final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -1620,6 +1621,75 @@ void main() {
 
     expect(tester.takeException(), 'threw');
   });
+
+  Future<void> _testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
+    // Construct a PNG of 100x100 blue pixels as Image widget doesn't support raw RGBA.
+    Uint8List bytes;
+    await tester.runAsync(() async {
+      const int imageWidth = 100;
+      const int imageHeight = 100;
+      final Uint8List pixels = Uint8List.fromList(List<int>.generate(
+        imageWidth * imageHeight * 4,
+            (int i) => i % 4 < 2 ? 0x00 : 0xFF, // opaque blue
+      ));
+      final Completer<void> completer = Completer<void>();
+      ui.decodeImageFromPixels(
+        pixels, imageWidth, imageHeight, ui.PixelFormat.rgba8888,
+            (ui.Image image) async {
+          final ByteData byteData = await image.toByteData(
+              format: ui.ImageByteFormat.png);
+          bytes = byteData.buffer.asUint8List();
+          completer.complete();
+        },
+      );
+      await completer.future;
+    });
+
+    final Key key = UniqueKey();
+    await tester.pumpWidget(RepaintBoundary(
+      key: key,
+      child: Transform.rotate(
+        angle: math.pi / 180,
+        child: Image.memory(bytes, isAntiAlias: isAntiAlias),
+      ),
+    ));
+
+    // precacheImage is needed, or the image in the golden file will be empty.
+    final Finder allImages = find.byType(Image);
+    for (final Element e in allImages.evaluate()) {
+      await tester.runAsync(() async {
+        final Image image = e.widget as Image;
+        await precacheImage(image.image, e);
+      });
+    }
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('rotated_image_${isAntiAlias ? 'aa' : 'noaa'}.png'),
+    );
+  }
+
+  testWidgets('Rotated images', (WidgetTester tester) async {
+    await _testRotatedImage(tester, true);
+    await _testRotatedImage(tester, false);
+  });
+}
+
+class ImagePainter extends CustomPainter {
+  ImagePainter(this.image);
+
+  @override
+  void paint(ui.Canvas canvas, ui.Size size) {
+    canvas.drawImage(image, Offset.zero, Paint());
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+
+  final ui.Image image;
 }
 
 class ConfigurationAwareKey {
