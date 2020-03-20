@@ -461,6 +461,7 @@ class RunCommand extends RunCommandBase {
             );
           }
         }
+
         if (!isEmulatorBuildMode(getBuildMode())) {
           throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
         }
