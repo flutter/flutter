@@ -127,9 +127,8 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   // if the raster status is to resubmit the frame, we push the frame to the
   // front of the queue and also change the consume status to more available.
   if (raster_status == RasterStatus::kResubmit) {
-    auto front_continuation = pipeline->ProduceToFront();
+    auto front_continuation = pipeline->ProduceIfEmpty();
     front_continuation.Complete(std::move(resubmitted_layer_tree_));
-    consume_result = PipelineConsumeResult::MoreAvailable;
   } else if (raster_status == RasterStatus::kEnqueuePipeline) {
     consume_result = PipelineConsumeResult::MoreAvailable;
   }
