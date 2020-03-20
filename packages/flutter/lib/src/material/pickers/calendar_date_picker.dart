@@ -489,6 +489,12 @@ class _MonthPickerState extends State<_MonthPicker> {
     _textDirection = Directionality.of(context);
   }
 
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
+  }
+
   void _handleMonthPageChanged(int monthPage) {
     final DateTime monthDate = utils.addMonthsToMonthDate(widget.firstDate, monthPage);
     if (_currentMonth.year != monthDate.year || _currentMonth.month != monthDate.month) {
