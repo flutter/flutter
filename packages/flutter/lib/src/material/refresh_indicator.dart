@@ -422,13 +422,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         child: widget.child,
       ),
     );
-    if (_mode == null) {
-      assert(_dragOffset == null);
-      assert(_isIndicatorAtTop == null);
-    } else {
-      assert(_dragOffset != null);
-      assert(_isIndicatorAtTop != null);
-    }
+    assert(() {
+      if (_mode == null) {
+        assert(_dragOffset == null);
+        assert(_isIndicatorAtTop == null);
+      } else {
+        assert(_dragOffset != null);
+        assert(_isIndicatorAtTop != null);
+      }
+    }());
 
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
