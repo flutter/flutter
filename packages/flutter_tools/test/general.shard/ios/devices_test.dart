@@ -250,7 +250,11 @@ void main() {
           IOSDevice device,
           IOSApp appPackage,
           Process process) {
-        final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
+        final IOSDeviceLogReader logReader = IOSDeviceLogReader.create(
+          device: device,
+          app: appPackage,
+          iMobileDevice: null, // not used by this test.
+        );
         logReader.idevicesyslogProcess = process;
         return logReader;
       }
@@ -667,122 +671,6 @@ void main() {
       final List<String> diagnostics = await iosDevices.getDiagnostics();
       expect(diagnostics, hasLength(1));
       expect(diagnostics.first, 'Generic pairing error');
-    });
-  });
-
-  group('decodeSyslog', () {
-    testWithoutContext('decodes a syslog-encoded line', () {
-      final String decoded = decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
-      expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
-    });
-
-    testWithoutContext('passes through un-decodeable lines as-is', () {
-      final String decoded = decodeSyslog(r'I \M-b\M^O syslog!');
-      expect(decoded, r'I \M-b\M^O syslog!');
-    });
-  });
-
-  group('logging', () {
-    MockIMobileDevice mockIMobileDevice;
-    MockIosProject mockIosProject;
-    MockArtifacts mockArtifacts;
-    MockCache mockCache;
-    MockFileSystem mockFileSystem;
-    FakeProcessManager fakeProcessManager;
-    Logger logger;
-    IOSDeploy iosDeploy;
-
-    setUp(() {
-      mockIMobileDevice = MockIMobileDevice();
-      mockIosProject = MockIosProject();
-      mockArtifacts = MockArtifacts();
-      mockCache = MockCache();
-      logger = BufferLogger.test();
-      mockFileSystem = MockFileSystem();
-      fakeProcessManager = FakeProcessManager.any();
-      iosDeploy = IOSDeploy(
-        artifacts: mockArtifacts,
-        cache: mockCache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
-      );
-    });
-
-    testUsingContext('suppresses non-Flutter lines from output', () async {
-      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
-        final Process mockProcess = MockProcess(
-          stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: A is for ari
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
-Runner(Flutter)[297] <Notice>: I is for ichigo
-Runner(UIKit)[297] <Notice>: E is for enpitsu"
-'''.codeUnits])
-        );
-        return Future<Process>.value(mockProcess);
-      });
-
-      final IOSDevice device = IOSDevice(
-        '123456',
-        name: 'iPhone 1',
-        sdkVersion: '10.3',
-        cpuArchitecture: DarwinArch.arm64,
-        artifacts: mockArtifacts,
-        iosDeploy: iosDeploy,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: mockFileSystem,
-      );
-      final DeviceLogReader logReader = device.getLogReader(
-        app: await BuildableIOSApp.fromProject(mockIosProject),
-      );
-
-      final List<String> lines = await logReader.logLines.toList();
-      expect(lines, <String>['A is for ari', 'I is for ichigo']);
-    }, overrides: <Type, Generator>{
-      IMobileDevice: () => mockIMobileDevice,
-    });
-
-    testUsingContext('includes multi-line Flutter logs in the output', () async {
-      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
-        final Process mockProcess = MockProcess(
-          stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
-  with another Flutter message following it.
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
-  with a non-Flutter log message following it.
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
-'''.codeUnits]),
-        );
-        return Future<Process>.value(mockProcess);
-      });
-
-      final IOSDevice device = IOSDevice(
-        '123456',
-        name: 'iPhone 1',
-        sdkVersion: '10.3',
-        cpuArchitecture: DarwinArch.arm64,
-        artifacts: mockArtifacts,
-        iosDeploy: iosDeploy,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: mockFileSystem,
-      );
-      final DeviceLogReader logReader = device.getLogReader(
-        app: await BuildableIOSApp.fromProject(mockIosProject),
-      );
-
-      final List<String> lines = await logReader.logLines.toList();
-      expect(lines, <String>[
-        'This is a multi-line message,',
-        '  with another Flutter message following it.',
-        'This is a multi-line message,',
-        '  with a non-Flutter log message following it.',
-      ]);
-      expect(device.category, Category.mobile);
-    }, overrides: <Type, Generator>{
-      IMobileDevice: () => mockIMobileDevice,
     });
   });
 }
