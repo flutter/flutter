@@ -30,7 +30,7 @@ class AotBuilder {
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
-    bool reportTimings,
+    bool reportTimings = false,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
