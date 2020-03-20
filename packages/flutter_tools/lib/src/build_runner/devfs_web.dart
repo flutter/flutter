@@ -131,6 +131,22 @@ class WebAssetServer implements AssetReader {
           '.lib.js',
           (String path) async => modules,
           (String path) async => digests,
+          (String serverPath) {
+            if (serverPath.endsWith('.lib.js')) {
+              serverPath = serverPath.startsWith('/')
+                ? serverPath.substring(1)
+                : serverPath;
+              return serverPath.replaceAll('.lib.js', '');
+            }
+            return null;
+          },
+          (String module) => '$module.lib.js',
+          (String appUri) {
+            if (appUri.startsWith('org-dartlang-app:')) {
+              return Uri.parse(appUri).path.substring(1);
+            }
+            return null;
+          }
         ),
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
@@ -161,6 +177,7 @@ class WebAssetServer implements AssetReader {
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
+  Directory entrypointCacheDirectory;
 
   @visibleForTesting
   Uint8List getFile(String path) => _files[path];
@@ -379,6 +396,11 @@ class WebAssetServer implements AssetReader {
           ? canvasKitDartSdkSourcemap
           : dartSdkSourcemap;
     }
+    // This is the special generated entrypoint.
+    if (path == 'web_entrypoint.dart') {
+      return entrypointCacheDirectory.childFile('web_entrypoint.dart');
+    }
+
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
     // consider the case of Dart files as assets.
@@ -422,12 +444,6 @@ class WebAssetServer implements AssetReader {
 
   @override
   Future<String> dartSourceContents(String serverPath) async {
-    // TODO(jonahwilliams): ensure devtools can correctly hide this file.
-    final bool isEntrypointRequest = serverPath == null || serverPath.isEmpty;
-    if (isEntrypointRequest) {
-      return '/* no sourcemaps available. */';
-    }
-
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -577,6 +593,7 @@ class WebDevFS implements DevFS {
     final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
 
     if (bundleFirstUpload) {
+      webAssetServer.entrypointCacheDirectory = globals.fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
       webAssetServer.writeFile(entrypoint, globals.fs.file(mainPath).readAsStringSync());

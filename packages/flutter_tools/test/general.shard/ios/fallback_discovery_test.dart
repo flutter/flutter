@@ -104,7 +104,7 @@ void main() {
       ];
     });
     when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Sentinel(kind: 'Something', valueAsString: 'Something');
+      return Sentinel(kind: 'Something', valueAsString: 'Something') as Isolate;
     });
 
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
