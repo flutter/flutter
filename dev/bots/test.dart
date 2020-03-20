@@ -59,13 +59,13 @@ const int kWebShardCount = 8;
 const List<String> kWebTestFileBlacklist = <String>[
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
+  // This test relies on widget tracking capability in the VM.
+  'test/widgets/widget_inspector_test.dart',
+
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
-  'test/widgets/widget_inspector_test.dart',
-  'test/widgets/shortcuts_test.dart',
   'test/material/animated_icons_private_test.dart',
   'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
