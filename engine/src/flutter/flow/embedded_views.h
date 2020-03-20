@@ -248,10 +248,7 @@ class ExternalViewEmbedder {
   // Must be called on the UI thread.
   virtual SkCanvas* CompositeEmbeddedView(int view_id) = 0;
 
-  virtual bool SubmitFrame(GrContext* context, SkCanvas* background_canvas);
-
-  // This is called after submitting the embedder frame and the surface frame.
-  virtual void FinishFrame();
+  virtual bool SubmitFrame(GrContext* context);
 
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 

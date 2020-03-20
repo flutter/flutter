@@ -59,7 +59,7 @@ void PictureLayer::Paint(PaintContext& context) const {
       return;
     }
   }
-  picture()->playback(context.leaf_nodes_canvas);
+  context.leaf_nodes_canvas->drawPicture(picture());
 }
 
 }  // namespace flutter
