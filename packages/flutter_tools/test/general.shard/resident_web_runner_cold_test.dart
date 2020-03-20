@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -54,7 +55,9 @@ void main() {
           stayResident: true,
           urlTunneller: null,
         ) as ResidentWebRunner;
-      },
+      }, overrides: <Type, Generator>{
+        Pub: () => MockPub(),
+      }
     );
   });
 
@@ -166,3 +169,4 @@ class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockBuildSystem extends Mock implements BuildSystem {}
+class MockPub extends Mock implements Pub {}
