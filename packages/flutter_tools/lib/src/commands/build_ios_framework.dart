@@ -436,7 +436,6 @@ end
         mainDartFile: globals.fs.path.absolute(targetFile),
         quiet: true,
         bitcode: true,
-        reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
       );
     } finally {

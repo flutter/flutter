@@ -612,40 +612,6 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
-class MockDeviceLogReader extends DeviceLogReader {
-  @override
-  String get name => 'MockLogReader';
-
-  StreamController<String> _cachedLinesController;
-
-  final List<String> _lineQueue = <String>[];
-  StreamController<String> get _linesController {
-    _cachedLinesController ??= StreamController<String>
-      .broadcast(onListen: () {
-        _lineQueue.forEach(_linesController.add);
-        _lineQueue.clear();
-     });
-    return _cachedLinesController;
-  }
-
-  @override
-  Stream<String> get logLines => _linesController.stream;
-
-  void addLine(String line) {
-    if (_linesController.hasListener) {
-      _linesController.add(line);
-    } else {
-      _lineQueue.add(line);
-    }
-  }
-
-  @override
-  Future<void> dispose() async {
-    _lineQueue.clear();
-    await _linesController.close();
-  }
-}
-
 void applyMocksToCommand(FlutterCommand command) {
   command.applicationPackages = MockApplicationPackageStore();
 }

@@ -72,7 +72,18 @@ void main() {
         expect(projectUnderTest.macos.ephemeralDirectory.existsSync(), isFalse);
         expect(projectUnderTest.windows.ephemeralDirectory.existsSync(), isFalse);
 
-        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
+        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: false)).called(2);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Xcode: () => mockXcode,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      });
+
+      testUsingContext('$CleanCommand cleans Xcode verbosely', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+        await CleanCommand(verbose: true).runCommand();
+        verify(mockXcodeProjectInterpreter.cleanWorkspace(any, 'Runner', verbose: true)).called(2);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

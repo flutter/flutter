@@ -383,7 +383,7 @@ class IOSDevice extends Device {
   @override
   DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
     processManager: globals.processManager,
-    logger: globals.logger,
+    logger: _logger,
     dyLdLibEntry: globals.cache.dyLdLibEntry,
     id: id,
     iproxyPath: _iproxyPath,
