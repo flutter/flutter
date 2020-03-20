@@ -427,6 +427,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         assert(_dragOffset != null);
         assert(_isIndicatorAtTop != null);
       }
+      return true;
     }());
 
     final bool showIndeterminateIndicator =
