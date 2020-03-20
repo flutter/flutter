@@ -149,12 +149,10 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   AnimationController _reactionController;
   Animation<double> _reaction;
 
-  TextDirection textDirection;
-
   bool get isInteractive => widget.onChanged != null;
 
-  // A non-null boolean value that indicates whether the user has stopped dragging
-  // the switch and the thumb of the switch needs animated position change.
+  // A non-null boolean value that changes to true at the end of a drag if the
+  // switch must be animated to the position indicated by the widget's value.
   bool needsPositionAnimation = false;
 
   @override
@@ -189,12 +187,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       parent: _reactionController,
       curve: Curves.ease,
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    textDirection = Directionality.of(context);
   }
 
   @override
@@ -262,7 +254,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ..curve = null
         ..reverseCurve = null;
       final double delta = details.primaryDelta / _kTrackInnerLength;
-      switch (textDirection) {
+      switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
           break;
@@ -310,7 +302,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
         ),
         trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
         onChanged: widget.onChanged,
-        textDirection: textDirection,
+        textDirection: Directionality.of(context),
         state: this,
       ),
     );
