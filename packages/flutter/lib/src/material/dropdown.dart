@@ -1058,6 +1058,8 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The color of the dropdown's background color. If not provided the theme's
+  /// canvas color will be used instead.
   final Color dropdownColor;
 
   @override
