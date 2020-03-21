@@ -582,11 +582,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 360));
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, closeTo(-0.0, 1.0));
   }
-  
+
   testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
-  
+
   testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
