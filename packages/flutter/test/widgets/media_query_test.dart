@@ -564,4 +564,102 @@ void main() {
     expect(outsideBoldTextOverride, false);
     expect(insideBoldTextOverride, true);
   });
+
+  testWidgets('MediaQueryData can not be initialized with null values', (WidgetTester tester) async {
+
+    String generateErrorMessage(String parameterName){
+      return '\'$parameterName != null\': is not true';
+    }
+
+    try{
+      MediaQueryData(size: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('size')));
+    }
+
+    try{
+      MediaQueryData(devicePixelRatio: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('devicePixelRatio')));
+    }
+
+    try{
+      MediaQueryData(textScaleFactor: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('textScaleFactor')));
+    }
+
+    try{
+      MediaQueryData(platformBrightness: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('platformBrightness')));
+    }
+
+    try{
+      MediaQueryData(padding: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('padding')));
+    }
+
+    try{
+      MediaQueryData(viewInsets: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('viewInsets')));
+    }
+
+    try{
+      MediaQueryData(systemGestureInsets: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('systemGestureInsets')));
+    }
+
+    try{
+      MediaQueryData(viewPadding: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('viewPadding')));
+    }
+
+    try{
+      MediaQueryData(physicalDepth: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('physicalDepth')));
+    }
+
+    try{
+      MediaQueryData(alwaysUse24HourFormat: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('alwaysUse24HourFormat')));
+    }
+
+    try{
+      MediaQueryData(accessibleNavigation: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('accessibleNavigation')));
+    }
+
+    try{
+      MediaQueryData(invertColors: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('invertColors')));
+    }
+
+    try{
+      MediaQueryData(highContrast: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('highContrast')));
+    }
+
+    try{
+      MediaQueryData(disableAnimations: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('disableAnimations')));
+    }
+
+    try{
+      MediaQueryData(boldText: null);
+    }on AssertionError catch(error){
+      expect(error.toString(), contains(generateErrorMessage('boldText')));
+    }
+
+  });
 }
