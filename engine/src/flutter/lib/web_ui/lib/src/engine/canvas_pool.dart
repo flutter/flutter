@@ -613,7 +613,12 @@ class _CanvasPool extends _SaveStackTracking {
         context.save();
         context.filter = 'none';
         context.strokeStyle = '';
-        context.fillStyle = colorToCssString(color);
+        final int red = color.red;
+        final int green = color.green;
+        final int blue = color.blue;
+        // Multiply by 0.4 to make shadows less aggressive (https://github.com/flutter/flutter/issues/52734)
+        final int alpha = (0.4 * color.alpha).round();
+        context.fillStyle = colorComponentsToCssString(red, green, blue, alpha);
         context.shadowBlur = shadow.blurWidth;
         context.shadowColor = colorToCssString(color.withAlpha(0xff));
         context.shadowOffsetX = shadow.offset.dx;

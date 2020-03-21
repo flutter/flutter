@@ -133,7 +133,9 @@ void applyCssShadow(
   if (shadow == null) {
     element.style.boxShadow = 'none';
   } else {
+    // Multiply by 0.4 to make shadows less aggressive (https://github.com/flutter/flutter/issues/52734)
+    final double alpha = 0.4 * color.alpha / 255;
     element.style.boxShadow = '${shadow.offset.dx}px ${shadow.offset.dy}px '
-        '${shadow.blurWidth}px 0px rgb(${color.red}, ${color.green}, ${color.blue})';
+        '${shadow.blurWidth}px 0px rgba(${color.red}, ${color.green}, ${color.blue}, $alpha)';
   }
 }
