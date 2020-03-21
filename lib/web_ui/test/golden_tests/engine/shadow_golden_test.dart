@@ -12,7 +12,7 @@ import 'package:web_engine_tester/golden_tester.dart';
 
 import 'scuba.dart';
 
-const Color _kShadowColor = Color.fromARGB(255, 255, 0, 0);
+const Color _kShadowColor = Color.fromARGB(255, 0, 0, 0);
 
 void main() async {
   final Rect region = Rect.fromLTWH(0, 0, 550, 300);
