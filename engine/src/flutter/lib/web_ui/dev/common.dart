@@ -27,6 +27,15 @@ class BrowserInstallerException implements Exception {
   String toString() => message;
 }
 
+class DriverException implements Exception {
+  DriverException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 abstract class PlatformBinding {
   static PlatformBinding get instance {
     if (_instance == null) {
@@ -77,11 +86,10 @@ class _WindowsBinding implements PlatformBinding {
   @override
   String getFirefoxDownloadUrl(String version) =>
       'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/win64/en-US/'
-          '${getFirefoxDownloadFilename(version)}';
+      '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) =>
-      'firefox-${version}.exe';
+  String getFirefoxDownloadFilename(String version) => 'firefox-${version}.exe';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
@@ -117,7 +125,7 @@ class _LinuxBinding implements PlatformBinding {
   @override
   String getFirefoxDownloadUrl(String version) =>
       'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/linux-x86_64/en-US/'
-          '${getFirefoxDownloadFilename(version)}';
+      '${getFirefoxDownloadFilename(version)}';
 
   @override
   String getFirefoxDownloadFilename(String version) =>
@@ -161,16 +169,15 @@ class _MacBinding implements PlatformBinding {
 
   @override
   String getFirefoxDownloadUrl(String version) =>
-    'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/mac/en-US/'
-        '${getFirefoxDownloadFilename(version)}';
+      'https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/mac/en-US/'
+      '${getFirefoxDownloadFilename(version)}';
 
   @override
-  String getFirefoxDownloadFilename(String version) =>
-      'Firefox ${version}.dmg';
+  String getFirefoxDownloadFilename(String version) => 'Firefox ${version}.dmg';
 
   @override
   String getFirefoxExecutablePath(io.Directory versionDir) =>
-    path.join(versionDir.path, 'Firefox.app','Contents','MacOS', 'firefox');
+      path.join(versionDir.path, 'Firefox.app', 'Contents', 'MacOS', 'firefox');
 
   @override
   String getFirefoxLatestVersionUrl() =>
@@ -243,3 +250,14 @@ class DevNull implements StringSink {
 }
 
 bool get isCirrus => io.Platform.environment['CIRRUS_CI'] == 'true';
+
+/// There might be proccesses started during the tests.
+///
+/// Use this list to store those Processes, for cleaning up before shutdown.
+final List<io.Process> processesToCleanUp = List<io.Process>();
+
+/// There might be temporary directories created during the tests.
+///
+/// Use this list to store those directories and for deleteing them before
+/// shutdown.
+final List<io.Directory> temporaryDirectories = List<io.Directory>();

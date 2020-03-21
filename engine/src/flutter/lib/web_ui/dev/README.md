@@ -31,10 +31,22 @@ felt build [-w] -j 100
 If you are a Google employee, you can use an internal instance of Goma to parallelize your builds. Because Goma compiles code on remote servers, this option is effective even on low-powered laptops.
 
 ## Running web engine tests
-To run all tests on Chrome:
+To run all tests on Chrome. This will run both integration tests and the unit tests:
 
 ```
 felt test
+```
+
+To run unit tests only:
+
+```
+felt test --unit-tests-only
+```
+
+To run integration tests only. For now these tests are only available on Chrome Desktop browsers.
+
+```
+felt test --integration-tests-only
 ```
 
 To run tests on Firefox (this will work only on a Linux device):
@@ -55,7 +67,7 @@ To run tests on Safari use the following command. It works on MacOS devices and 
 felt test --browser=safari
 ```
 
-To run tests on Windows Edge use the following command. It works on Windows devices and it uses the Edge installed on the OS. 
+To run tests on Windows Edge use the following command. It works on Windows devices and it uses the Edge installed on the OS.
 
 ```
 felt_windows.bat test --browser=edge
