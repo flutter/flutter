@@ -33,10 +33,10 @@ class Window;
 /// normal operation, a single instance of this object is owned by the engine
 /// per shell. This object may only be created, used, and collected on the UI
 /// task runner. Window state queried by the root isolate is stored by this
-/// object. In cold-restart scenarios, the engine may collect this collect
-/// before installing a new runtime controller in its place. The Clone method
-/// may be used by the engine to copy the currently accumulated window state so
-/// it can be referenced by the new runtime controller.
+/// object. In cold-restart scenarios, the engine may collect this before
+/// installing a new runtime controller in its place. The Clone method may be
+/// used by the engine to copy the currently accumulated window state so it can
+/// be referenced by the new runtime controller.
 ///
 class RuntimeController final : public WindowClient {
  public:
@@ -225,7 +225,7 @@ class RuntimeController final : public WindowClient {
   ///
   /// @param[in]  frame_time  The point at which the current frame interval
   ///                         began. May be used by animation interpolators,
-  ///                         physics simulations, etc..
+  ///                         physics simulations, etc.
   ///
   /// @return     If notification to begin frame rendering was delivered to the
   ///             running isolate.
@@ -267,12 +267,9 @@ class RuntimeController final : public WindowClient {
   ///             manner that interferes as little as possible with frame
   ///             rendering.
   ///
-  /// NotifyIdle is advisory and not making the same or making it with
-  /// insufficient deadlines does not mean that the VM will keep consuming
-  /// memory indefinitely. Even if the engine made absolutely no calls to
-  /// NotifyIdle, the VM would still perform garbage collection. The only issue
-  /// in such a world would be that the GC pause would happen in the middle of a
-  /// frame workload.
+  /// NotifyIdle is advisory. The VM may or may not run a garbage collection
+  /// when this is called, and will eventually perform garbage collections even
+  /// if it is not called or it is called with insufficient deadlines.
   ///
   /// The garbage collection mechanism and its thresholds are internal
   /// implementation details and absolutely no guarantees are made about the
@@ -409,7 +406,7 @@ class RuntimeController final : public WindowClient {
   /// @brief      Returns if the root isolate has any live receive ports.
   ///
   /// @return     True if there are live receive ports, False otherwise. Return
-  ///             False is the root isolate is not running as well.
+  ///             False if the root isolate is not running as well.
   ///
   bool HasLivePorts();
 
