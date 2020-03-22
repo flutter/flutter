@@ -125,15 +125,24 @@ void main() {
     );
   });
 
-  test('can seed chrome temp directory with existing preferences', () async {
+  test('can seed chrome temp directory with existing session data', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory dataDir = fileSystem.directory('chrome-stuff');
+
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
     preferencesFile
       ..createSync(recursive: true)
       ..writeAsStringSync('example');
+
+    final Directory localStorageContentsDirectory = dataDir
+        .childDirectory('Default')
+        .childDirectory('Local Storage')
+        .childDirectory('leveldb');
+    localStorageContentsDirectory.createSync(recursive: true);
+    localStorageContentsDirectory.childFile('LOCK').writeAsBytesSync(<int>[]);
+    localStorageContentsDirectory.childFile('LOG').writeAsStringSync('contents');
 
     processManager.addCommand(FakeCommand(command: const <String>[
       'example_chrome',
@@ -146,9 +155,10 @@ void main() {
     await chromeLauncher.launch(
       'example_url',
       skipCheck: true,
-      dataDir: dataDir,
+      cacheDir: dataDir,
     );
 
+    // validate preferences
     final File tempFile = fileSystem
       .directory('.tmp_rand1/flutter_tool.rand1')
       .childDirectory('Default')
@@ -163,6 +173,21 @@ void main() {
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
+
+    // validate local storage
+    final Directory storageDir = fileSystem
+        .directory('.tmp_rand1/flutter_tool.rand1')
+        .childDirectory('Default')
+        .childDirectory('Local Storage')
+        .childDirectory('leveldb');
+
+    expect(storageDir.existsSync(), true);
+
+    expect(storageDir.childFile('LOCK').existsSync(), true);
+    expect(storageDir.childFile('LOCK').readAsBytesSync(), hasLength(0));
+
+    expect(storageDir.childFile('LOG').existsSync(), true);
+    expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
   });
 }
 
