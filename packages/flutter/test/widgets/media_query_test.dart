@@ -577,7 +577,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('size')));
-        return;
       }
     });
 
@@ -587,7 +586,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('devicePixelRatio')));
-        return;
       }
     });
 
@@ -597,7 +595,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('textScaleFactor')));
-        return;
       }
     });
 
@@ -607,7 +604,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('platformBrightness')));
-        return;
       }
     });
 
@@ -617,7 +613,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('padding')));
-        return;
       }
     });
 
@@ -627,7 +622,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('viewInsets')));
-        return;
       }
     });
 
@@ -637,7 +631,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('systemGestureInsets')));
-        return;
       }
     });
 
@@ -647,7 +640,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('viewPadding')));
-        return;
       }
     });
 
@@ -657,7 +649,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('physicalDepth')));
-        return;
       }
     });
 
@@ -667,7 +658,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('alwaysUse24HourFormat')));
-        return;
       }
     });
 
@@ -677,7 +667,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('accessibleNavigation')));
-        return;
       }
     });
 
@@ -687,7 +676,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('invertColors')));
-        return;
       }
     });
 
@@ -697,7 +685,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('highContrast')));
-        return;
       }
     });
 
@@ -707,7 +694,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('disableAnimations')));
-        return;
       }
     });
 
@@ -717,7 +703,6 @@ void main() {
         fail('The assert was never called when it should have been');
       } on AssertionError catch (error) {
         expect(error.toString(), contains(generateErrorMessage('boldText')));
-        return;
       }
     });
   });
