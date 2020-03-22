@@ -565,101 +565,160 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQueryData can not be initialized with null values', (WidgetTester tester) async {
+  group('MediaQueryData parameters cannot be null', () {
 
-    String generateErrorMessage(String parameterName){
+    String generateErrorMessage(String parameterName) {
       return '\'$parameterName != null\': is not true';
     }
 
-    try{
-      MediaQueryData(size: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('size')));
-    }
+    test('size parameter', () {
+      try {
+        MediaQueryData(size: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('size')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(devicePixelRatio: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('devicePixelRatio')));
-    }
+    test('devicePixelRatio parameter', () {
+      try {
+        MediaQueryData(devicePixelRatio: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('devicePixelRatio')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(textScaleFactor: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('textScaleFactor')));
-    }
+    test('textScaleFactor parameter', () {
+      try {
+        MediaQueryData(textScaleFactor: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('textScaleFactor')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(platformBrightness: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('platformBrightness')));
-    }
+    test('platformBrightness parameter', () {
+      try {
+        MediaQueryData(platformBrightness: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('platformBrightness')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(padding: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('padding')));
-    }
+    test('padding parameter', () {
+      try {
+        MediaQueryData(padding: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('padding')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(viewInsets: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('viewInsets')));
-    }
+    test('viewInsets parameter', () {
+      try {
+        MediaQueryData(viewInsets: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('viewInsets')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(systemGestureInsets: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('systemGestureInsets')));
-    }
+    test('systemGestureInsets parameter', () {
+      try {
+        MediaQueryData(systemGestureInsets: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('systemGestureInsets')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(viewPadding: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('viewPadding')));
-    }
+    test('viewPadding parameter', () {
+      try {
+        MediaQueryData(viewPadding: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('viewPadding')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(physicalDepth: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('physicalDepth')));
-    }
+    test('physicalDepth parameter', () {
+      try {
+        MediaQueryData(physicalDepth: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('physicalDepth')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(alwaysUse24HourFormat: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('alwaysUse24HourFormat')));
-    }
+    test('alwaysUse24HourFormat parameter', () {
+      try {
+        MediaQueryData(alwaysUse24HourFormat: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('alwaysUse24HourFormat')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(accessibleNavigation: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('accessibleNavigation')));
-    }
+    test('accessibleNavigation parameter', () {
+      try {
+        MediaQueryData(accessibleNavigation: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('accessibleNavigation')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(invertColors: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('invertColors')));
-    }
+    test('invertColors parameter', () {
+      try {
+        MediaQueryData(invertColors: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('invertColors')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(highContrast: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('highContrast')));
-    }
+    test('highContrast parameter', () {
+      try {
+        MediaQueryData(highContrast: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('highContrast')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(disableAnimations: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('disableAnimations')));
-    }
+    test('disableAnimations parameter', () {
+      try {
+        MediaQueryData(disableAnimations: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('disableAnimations')));
+        return;
+      }
+    });
 
-    try{
-      MediaQueryData(boldText: null);
-    }on AssertionError catch(error){
-      expect(error.toString(), contains(generateErrorMessage('boldText')));
-    }
-
+    test('boldText parameter', () {
+      try {
+        MediaQueryData(boldText: null);
+        fail('The assert was never called when it should have been');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains(generateErrorMessage('boldText')));
+        return;
+      }
+    });
   });
 }
