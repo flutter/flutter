@@ -22,14 +22,11 @@ String cwd = Directory.current.path;
 String get localEngine {
   // Use two distinct `defaultValue`s to determine whether a 'localEngine'
   // declaration exists in the environment.
-  const isDefined =
-      String.fromEnvironment('localEngine', defaultValue: 'a') ==
+  const isDefined = String.fromEnvironment('localEngine', defaultValue: 'a') ==
       String.fromEnvironment('localEngine', defaultValue: 'b');
-  return isDefined
-      ? const String.fromEnvironment('localEngine')
-      : null;
+  return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
-      
+
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
 String get localEngineSrcPath {
@@ -37,12 +34,10 @@ String get localEngineSrcPath {
   // 'localEngineSrcPath' declaration exists in the environment.
   const isDefined =
       String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
-      String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
-  return isDefined
-      ? const String.fromEnvironment('localEngineSrcPath')
-      : null;
+          String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
+  return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
-    
+
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
