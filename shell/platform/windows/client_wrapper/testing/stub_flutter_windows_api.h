@@ -29,14 +29,11 @@ class StubFlutterWindowsApi {
 
   virtual ~StubFlutterWindowsApi() {}
 
-  // Called for FlutterDesktopCreateView.
+  // Called for FlutterDesktopCreateViewController.
   virtual FlutterDesktopViewControllerRef CreateViewController(
-      int initial_width,
-      int initial_height,
-      const char* assets_path,
-      const char* icu_data_path,
-      const char** arguments,
-      size_t argument_count) {
+      int width,
+      int height,
+      const FlutterDesktopEngineProperties& engine_properties) {
     return nullptr;
   }
 
@@ -50,10 +47,8 @@ class StubFlutterWindowsApi {
   virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
 
   // Called for FlutterDesktopRunEngine.
-  virtual FlutterDesktopEngineRef RunEngine(const char* assets_path,
-                                            const char* icu_data_path,
-                                            const char** arguments,
-                                            size_t argument_count) {
+  virtual FlutterDesktopEngineRef RunEngine(
+      const FlutterDesktopEngineProperties& engine_properties) {
     return nullptr;
   }
 

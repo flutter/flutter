@@ -36,7 +36,7 @@ FLUTTER_EXPORT
  * guarantee, and are subject to change without notice.
  *
  * Note: This property WILL BE REMOVED in the future. If you use this property, please see
- * https://github.com/flutter/flutter/issue/38569.
+ * https://github.com/flutter/flutter/issues/38569.
  */
 @property(nullable) NSArray<NSString*>* engineSwitches;
 

@@ -28,24 +28,48 @@ typedef struct FlutterDesktopView* FlutterDesktopViewRef;
 // Opaque reference to a Flutter engine instance.
 typedef struct FlutterDesktopEngineState* FlutterDesktopEngineRef;
 
-// Creates a View running a Flutter Application.
+// Properties for configuring a Flutter engine instance.
+typedef struct {
+  // The path to the flutter_assets folder for the application to be run.
+  // This can either be an absolute path or a path relative to the directory
+  // containing the executable.
+  const wchar_t* assets_path;
+
+  // The path to the icudtl.dat file for the version of Flutter you are using.
+  // This can either be an absolute path or a path relative to the directory
+  // containing the executable.
+  const wchar_t* icu_data_path;
+
+  // The switches to pass to the Flutter engine.
+  //
+  // See: https://github.com/flutter/engine/blob/master/shell/common/switches.h
+  // for details. Not all arguments will apply to desktop.
+  const char** switches;
+
+  // The number of elements in |switches|.
+  size_t switches_count;
+} FlutterDesktopEngineProperties;
+
+// Creates a View with the given dimensions running a Flutter Application.
 //
-// The |assets_path| is the path to the flutter_assets folder for the Flutter
-// application to be run. |icu_data_path| is the path to the icudtl.dat file
-// for the version of Flutter you are using.
-//
-// The |arguments| are passed to the Flutter engine. See:
-// https://github.com/flutter/engine/blob/master/shell/common/switches.h for
-// for details. Not all arguments will apply to desktop.
+// This will set up and run an associated Flutter engine using the settings in
+// |engine_properties|.
 //
 // Returns a null pointer in the event of an error.
 FLUTTER_EXPORT FlutterDesktopViewControllerRef
-FlutterDesktopCreateViewController(int initial_width,
-                                   int initial_height,
-                                   const char* assets_path,
-                                   const char* icu_data_path,
-                                   const char** arguments,
-                                   size_t argument_count);
+FlutterDesktopCreateViewController(
+    int width,
+    int height,
+    const FlutterDesktopEngineProperties& engine_properties);
+
+// DEPRECATED. Will be removed soon; switch to the version above.
+FLUTTER_EXPORT FlutterDesktopViewControllerRef
+FlutterDesktopCreateViewControllerLegacy(int initial_width,
+                                         int initial_height,
+                                         const char* assets_path,
+                                         const char* icu_data_path,
+                                         const char** arguments,
+                                         size_t argument_count);
 
 // Shuts down the engine instance associated with |controller|, and cleans up
 // associated state.
@@ -88,20 +112,9 @@ FLUTTER_EXPORT UINT FlutterDesktopGetDpiForMonitor(HMONITOR monitor);
 
 // Runs an instance of a headless Flutter engine.
 //
-// The |assets_path| is the path to the flutter_assets folder for the Flutter
-// application to be run. |icu_data_path| is the path to the icudtl.dat file
-// for the version of Flutter you are using.
-//
-// The |arguments| are passed to the Flutter engine. See:
-// https://github.com/flutter/engine/blob/master/shell/common/switches.h for
-// for details. Not all arguments will apply to desktop.
-//
 // Returns a null pointer in the event of an error.
-FLUTTER_EXPORT FlutterDesktopEngineRef
-FlutterDesktopRunEngine(const char* assets_path,
-                        const char* icu_data_path,
-                        const char** arguments,
-                        size_t argument_count);
+FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopRunEngine(
+    const FlutterDesktopEngineProperties& engine_properties);
 
 // Shuts down the given engine instance. Returns true if the shutdown was
 // successful. |engine_ref| is no longer valid after this call.
