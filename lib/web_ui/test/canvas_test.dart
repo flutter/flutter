@@ -11,6 +11,10 @@ import 'package:test/test.dart';
 import 'mock_engine_canvas.dart';
 
 void main() {
+  setUpAll(() {
+    WebExperiments.ensureInitialized();
+  });
+
   group('EngineCanvas', () {
     MockEngineCanvas mockCanvas;
     ui.Paragraph paragraph;

@@ -187,13 +187,6 @@ abstract class TextMeasurementService {
   static TextMeasurementService get canvasInstance =>
       CanvasTextMeasurementService.instance;
 
-  /// Whether the new experimental implementation of canvas-based text
-  /// measurement is enabled or not.
-  ///
-  /// This is only used for testing at the moment. Once the implementation is
-  /// complete and production-ready, we'll get rid of this flag.
-  static bool enableExperimentalCanvasImplementation = const bool.fromEnvironment('FLUTTER_WEB_USE_EXPERIMENTAL_CANVAS_TEXT', defaultValue: false);
-
   /// Gets the appropriate [TextMeasurementService] instance for the given
   /// [paragraph].
   static TextMeasurementService forParagraph(ui.Paragraph paragraph) {
@@ -206,7 +199,7 @@ abstract class TextMeasurementService {
     // Skip using canvas measurements until the iframe becomes visible.
     // see: https://github.com/flutter/flutter/issues/36341
     if (!window.physicalSize.isEmpty &&
-        enableExperimentalCanvasImplementation &&
+        WebExperiments.instance.useCanvasText &&
         _canUseCanvasMeasurement(paragraph)) {
       return canvasInstance;
     }
