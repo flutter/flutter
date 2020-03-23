@@ -131,6 +131,8 @@ shared_library("create_flutter_framework_dylib") {
     sources += [
       "ios_context_metal.h",
       "ios_context_metal.mm",
+      "ios_external_texture_metal.h",
+      "ios_external_texture_metal.mm",
       "ios_surface_metal.h",
       "ios_surface_metal.mm",
     ]

@@ -18,6 +18,21 @@ class CFRef {
 
   CFRef(T instance) : instance_(instance) {}
 
+  CFRef(const CFRef& other) : instance_(other.instance_) {
+    if (instance_) {
+      CFRetain(instance_);
+    }
+  }
+
+  CFRef(CFRef&& other) : instance_(other.instance_) {
+    other.instance_ = nullptr;
+  }
+
+  CFRef& operator=(CFRef&& other) {
+    Reset(other.Release());
+    return *this;
+  }
+
   ~CFRef() {
     if (instance_ != nullptr) {
       CFRelease(instance_);
@@ -25,7 +40,7 @@ class CFRef {
     instance_ = nullptr;
   }
 
-  void Reset(T instance) {
+  void Reset(T instance = nullptr) {
     if (instance_ == instance) {
       return;
     }
@@ -36,6 +51,12 @@ class CFRef {
     instance_ = instance;
   }
 
+  [[nodiscard]] T Release() {
+    auto instance = instance_;
+    instance_ = nullptr;
+    return instance;
+  }
+
   operator T() const { return instance_; }
 
   operator bool() const { return instance_ != nullptr; }
@@ -43,7 +64,7 @@ class CFRef {
  private:
   T instance_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(CFRef);
+  CFRef& operator=(const CFRef&) = delete;
 };
 
 }  // namespace fml
