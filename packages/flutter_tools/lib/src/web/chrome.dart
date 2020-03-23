@@ -122,7 +122,7 @@ class ChromeLauncher {
     }
 
     final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
-    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tool.');
+    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
@@ -198,6 +198,9 @@ class ChromeLauncher {
 
   /// Copy Chrome user information from a Chrome session into a per-project
   /// cache.
+  ///
+  /// Note: more detailed docs of the Chrome user preferences store exists here:
+  /// https://www.chromium.org/developers/design-documents/preferences.
   void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
     final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
     final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
