@@ -51,7 +51,13 @@ void main() {
     linux = FakePlatform(operatingSystem: 'linux', environment: <String, String>{});
     windows = FakePlatform(operatingSystem: 'windows', environment: <String, String>{});
     testbed = Testbed(setup: () {
-      webAssetServer = WebAssetServer(mockHttpServer, packages, InternetAddress.loopbackIPv4);
+      webAssetServer = WebAssetServer(
+        mockHttpServer,
+        packages,
+        InternetAddress.loopbackIPv4,
+        null,
+        null,
+      );
     });
   });
 
@@ -103,7 +109,7 @@ void main() {
   }));
 
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
-    webAssetServer.writeFile('/foo.js', 'main() {}');
+    webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
@@ -118,7 +124,7 @@ void main() {
   }));
 
   test('Returns notModified when the ifNoneMatch header matches the etag', () => testbed.run(() async {
-    webAssetServer.writeFile('/foo.js', 'main() {}');
+    webAssetServer.writeFile('foo.js', 'main() {}');
 
     final Response response = await webAssetServer
       .handleRequest(Request('GET', Uri.parse('http://foobar/foo.js')));
@@ -376,24 +382,28 @@ void main() {
       invalidatedFiles: <Uri>[],
     );
 
-    expect(webDevFS.webAssetServer.getFile('/require.js'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/dart_stack_trace_mapper.js'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/main.dart'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/manifest.json'), isNotNull);
-    expect(webDevFS.webAssetServer.getFile('/flutter_service_worker.js'), isNotNull);
-    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'HELLO');
-    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js.map'), 'THERE');
+    expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('stack_trace_mapper.js'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('main.dart'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('manifest.json'), isNotNull);
+    expect(webDevFS.webAssetServer.getFile('flutter_service_worker.js'), isNotNull);
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'HELLO');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'THERE');
 
     // Update to the SDK.
     webDevFS.webAssetServer.dartSdk.writeAsStringSync('BELLOW');
 
     // New SDK should be visible..
-    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'BELLOW');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'BELLOW');
 
     // Toggle CanvasKit
     webDevFS.webAssetServer.canvasKitRendering = true;
-    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js'), 'OL');
-    expect(await webDevFS.webAssetServer.dartSourceContents('/dart_sdk.js.map'), 'CHUM');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js'), 'OL');
+    expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
+
+    // Generated entrypoint.
+    expect(await webDevFS.webAssetServer.dartSourceContents(null),
+      contains('/* no sourcemaps available. */'));
 
     await webDevFS.destroy();
   }));

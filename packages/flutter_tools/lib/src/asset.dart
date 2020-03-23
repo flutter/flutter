@@ -148,7 +148,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
     final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
 
-    final PackageMap packageMap = PackageMap(packagesPath);
+    final PackageMap packageMap = PackageMap(packagesPath, fileSystem: globals.fs);
     final List<Uri> wildcardDirectories = <Uri>[];
 
     // The _assetVariants map contains an entry for each asset listed

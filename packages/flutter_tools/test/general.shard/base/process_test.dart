@@ -336,7 +336,7 @@ void main() {
   });
 
   group('exitsHappySync', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
@@ -360,10 +360,35 @@ void main() {
       );
       expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
     });
+
+    testWithoutContext('catches Exception and returns false', () {
+      when(mockProcessManager.runSync(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(processUtils.exitsHappySync(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () {
+      mockProcessManager.canRunSucceeds = false;
+      expect(processUtils.exitsHappySync(<String>['nonesuch']), isFalse);
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
+    });
+
+    testWithoutContext('does not catch ArgumentError', () async {
+      when(mockProcessManager.runSync(<String>['invalid'])).thenThrow(
+        ArgumentError('Bad input'),
+      );
+      expect(
+        () => processUtils.exitsHappySync(<String>['invalid']),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('exitsHappy', () {
-    ProcessManager mockProcessManager;
+    MockProcessManager mockProcessManager;
     ProcessUtils processUtils;
 
     setUp(() {
@@ -374,18 +399,43 @@ void main() {
       );
     });
 
-    testWithoutContext(' succeeds on success', () async {
+    testWithoutContext('succeeds on success', () async {
       when(mockProcessManager.run(<String>['whoohoo'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
       });
       expect(await processUtils.exitsHappy(<String>['whoohoo']), isTrue);
     });
 
-    testWithoutContext(' fails on failure', () async {
+    testWithoutContext('fails on failure', () async {
       when(mockProcessManager.run(<String>['boohoo'])).thenAnswer((_) {
         return Future<ProcessResult>.value(ProcessResult(0, 1, '', ''));
       });
       expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('catches Exception and returns false', () async {
+      when(mockProcessManager.run(<String>['boohoo'])).thenThrow(
+        const ProcessException('Process failed', <String>[]),
+      );
+      expect(await processUtils.exitsHappy(<String>['boohoo']), isFalse);
+    });
+
+    testWithoutContext('does not throw Exception and returns false if binary cannot run', () async {
+      mockProcessManager.canRunSucceeds = false;
+      expect(await processUtils.exitsHappy(<String>['nonesuch']), isFalse);
+      verifyNever(
+        mockProcessManager.runSync(any, environment: anyNamed('environment')),
+      );
+    });
+
+    testWithoutContext('does not catch ArgumentError', () async {
+      when(mockProcessManager.run(<String>['invalid'])).thenThrow(
+        ArgumentError('Bad input'),
+      );
+      expect(
+        () async => await processUtils.exitsHappy(<String>['invalid']),
+        throwsArgumentError,
+      );
     });
   });
 

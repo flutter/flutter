@@ -7,7 +7,8 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import 'android/android_device.dart';
+import 'android/android_device_discovery.dart';
+import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
@@ -69,8 +70,17 @@ class DeviceManager {
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(),
-    IOSDevices(),
+    AndroidDevices(
+      logger: globals.logger,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: globals.processManager,
+    ),
+    IOSDevices(
+      platform: globals.platform,
+      xcdevice: globals.xcdevice,
+      iosWorkflow: globals.iosWorkflow,
+    ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),
@@ -550,6 +560,7 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
+    this.traceWhitelist,
     this.traceSystrace = false,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
@@ -576,6 +587,7 @@ class DebuggingOptions {
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
+      this.traceWhitelist,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -602,6 +614,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final String traceWhitelist;
   final bool traceSystrace;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;

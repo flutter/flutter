@@ -351,9 +351,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
-      if (isBrowser) {
-        return;
-      }
       dispatchLocalesChanged(<Locale>[locale]);
     });
   }

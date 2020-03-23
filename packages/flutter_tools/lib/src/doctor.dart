@@ -229,8 +229,8 @@ class Doctor {
       buffer.write(wrapText(
         lineBuffer.toString(),
         hangingIndent: result.leadingBox.length + 1,
-        columnWidth: outputPreferences.wrapColumn,
-        shouldWrap: outputPreferences.wrapText,
+        columnWidth: globals.outputPreferences.wrapColumn,
+        shouldWrap: globals.outputPreferences.wrapText,
       ));
       buffer.writeln();
 
@@ -640,7 +640,8 @@ class FlutterValidator extends DoctorValidator {
       globals.artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
-    if (!_genSnapshotRuns(genSnapshotPath)) {
+    if (globals.fs.file(genSnapshotPath).existsSync()
+        && !_genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buf = StringBuffer();
       buf.writeln(userMessages.flutterBinariesDoNotRun);
       if (globals.platform.isLinux) {

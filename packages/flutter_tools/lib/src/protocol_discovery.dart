@@ -117,7 +117,7 @@ class ProtocolDiscovery {
     Uri uri;
     try {
       uri = _getObservatoryUri(line);
-    } on FormatException catch(error, stackTrace) {
+    } on FormatException catch (error, stackTrace) {
       _uriStreamController.addError(error, stackTrace);
     }
     if (uri == null) {

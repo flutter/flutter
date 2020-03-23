@@ -53,39 +53,25 @@ const int kDeviceLabShardCount = 4;
 /// The last shard also runs the Web plugin tests.
 const int kWebShardCount = 8;
 
-/// Maximum number of Web tests to run in a single `flutter test`. We found that
-/// large batches can get flaky, possibly because we reuse a single instance of
-/// the browser, and after many tests the browser's state gets corrupted.
-const int kWebBatchSize = 20;
-
 /// Tests that we don't run on Web for various reasons.
 //
 // TODO(yjbanov): we're getting rid of this blacklist as part of https://github.com/flutter/flutter/projects/60
 const List<String> kWebTestFileBlacklist = <String>[
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
+  // This test relies on widget tracking capability in the VM.
+  'test/widgets/widget_inspector_test.dart',
+
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
-  'test/widgets/widget_inspector_test.dart',
-  'test/widgets/shortcuts_test.dart',
   'test/material/animated_icons_private_test.dart',
-  'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
-  'test/cupertino/dialog_test.dart',
-  'test/cupertino/nav_bar_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
   'test/cupertino/refresh_test.dart',
-  'test/cupertino/switch_test.dart',
   'test/cupertino/text_field_test.dart',
-  'test/cupertino/date_picker_test.dart',
-  'test/cupertino/slider_test.dart',
-  'test/cupertino/text_field_test.dart',
-  'test/cupertino/segmented_control_test.dart',
   'test/cupertino/route_test.dart',
-  'test/cupertino/activity_indicator_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -685,31 +671,23 @@ Future<void> _runWebDebugTest(String target) async {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) async {
-  final List<String> batch = <String>[];
-  for (int i = 0; i < tests.length; i += 1) {
-    final String testFilePath = tests[i];
-    batch.add(testFilePath);
-    if (batch.length == kWebBatchSize || i == tests.length - 1) {
-      await runCommand(
-        flutter,
-        <String>[
-          'test',
-          if (ciProvider == CiProviders.cirrus)
-            '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
-          '-v',
-          '--platform=chrome',
-          ...?flutterTestArgs,
-          ...batch,
-        ],
-        workingDirectory: workingDirectory,
-        environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-          'FLUTTER_LOW_RESOURCE_MODE': 'true',
-        },
-      );
-      batch.clear();
-    }
-  }
+  await runCommand(
+    flutter,
+    <String>[
+      'test',
+      if (ciProvider == CiProviders.cirrus)
+        '--concurrency=1',  // do not parallelize on Cirrus, to reduce flakiness
+      '-v',
+      '--platform=chrome',
+      ...?flutterTestArgs,
+      ...tests,
+    ],
+    workingDirectory: workingDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+      'FLUTTER_LOW_RESOURCE_MODE': 'true',
+    },
+  );
 }
 
 Future<void> _pubRunTest(String workingDirectory, {
@@ -718,6 +696,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   bool useBuildRunner = false,
   String coverage,
   bq.TabledataResourceApi tableData,
+  bool forceSingleCore = false,
 }) async {
   int cpus;
   final String cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
@@ -730,6 +709,11 @@ Future<void> _pubRunTest(String workingDirectory, {
     }
   } else {
     cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
+  }
+  // Integration tests that depend on external processes like chrome
+  // can get stuck if there are multiple instances running at once.
+  if (forceSingleCore) {
+    cpus = 1;
   }
 
   final List<String> args = <String>[

@@ -6,10 +6,8 @@ import 'dart:collection' show LinkedHashSet;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-
-import 'events.dart';
-import 'pointer_router.dart';
 
 /// Signature for listening to [PointerEnterEvent] events.
 ///

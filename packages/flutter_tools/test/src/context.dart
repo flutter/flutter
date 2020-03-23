@@ -120,7 +120,7 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(
             terminal: globals.terminal,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
           ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
@@ -401,7 +401,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
     return null;
   }
 

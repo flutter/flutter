@@ -4290,6 +4290,14 @@ void main() {
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
     expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change does not reformat
+    expect(formatter.formatCallCount, 3);
+    expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
+    expect(formatter.formatCallCount, 4);
+    expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
@@ -4298,6 +4306,8 @@ void main() {
       '[2]: normal aaaa',
       '[3]: aaaa, 0123',
       '[3]: normal aaaaaa',
+      '[4]: 0123, 01234',
+      '[4]: normal aaaaaaaa'
     ];
 
     expect(formatter.log, referenceLog);
@@ -4343,14 +4353,16 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'hell'));
     state.updateEditingValue(const TextEditingValue(text: 'hello'));
     expect(state.currentTextEditingValue.text, equals('hello'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello '));
+    state.updateEditingValue(const TextEditingValue(text: 'hello ', composing: TextRange(start: 4, end: 5)));
     expect(state.currentTextEditingValue.text, equals('hello '));
-    state.updateEditingValue(const TextEditingValue(text: 'hello ا'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello ا', composing: TextRange(start: 4, end: 6)));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}ا'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْ'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ'));
-    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ '));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 7)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْ', composing: TextRange(start: 4, end: 7)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ', composing: TextRange(start: 4, end: 8)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ ', composing: TextRange(start: 4, end: 9)));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ \u{200F}'));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 10)));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ'));
     state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ '));
     expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
@@ -4532,12 +4544,16 @@ class MockTextFormatter extends TextInputFormatter {
 
   int formatCallCount;
   List<String> log;
+  TextEditingValue lastOldValue;
+  TextEditingValue lastNewValue;
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    lastOldValue = oldValue;
+    lastNewValue = newValue;
     formatCallCount++;
     log.add('[$formatCallCount]: ${oldValue.text}, ${newValue.text}');
     TextEditingValue finalValue;

@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
 
@@ -54,7 +55,7 @@ void main() {
       const int devicePort = 499;
       const int hostPort = 42;
 
-      MockDeviceLogReader mockLogReader;
+      FakeDeviceLogReader mockLogReader;
       MockPortForwarder portForwarder;
       MockAndroidDevice device;
       MockProcessManager mockProcessManager;
@@ -63,7 +64,7 @@ void main() {
 
       setUp(() {
         mockProcessManager = MockProcessManager();
-        mockLogReader = MockDeviceLogReader();
+        mockLogReader = FakeDeviceLogReader();
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
         vmServiceDoneCompleter = Completer<void>();
@@ -374,7 +375,7 @@ void main() {
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockAndroidDevice device = MockAndroidDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
@@ -434,7 +435,7 @@ void main() {
     testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final FakeDeviceLogReader mockLogReader = FakeDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockIOSDevice device = MockIOSDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
