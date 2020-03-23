@@ -198,12 +198,18 @@ String generateBaseClassFile(
   String fileName,
   String header,
   AppResourceBundle bundle,
+  AppResourceBundle templateBundle,
   Iterable<Message> messages,
 ) {
   final LocaleInfo locale = bundle.locale;
+
   final Iterable<String> methods = messages
-    .where((Message message) => bundle.translationFor(message) != null)
-    .map((Message message) => generateMethod(message, bundle));
+    .map((Message message) {
+      return generateMethod(
+        message,
+        bundle.translationFor(message) == null ? templateBundle : bundle,
+      );
+    });
 
   return classFileTemplate
     .replaceAll('@(header)', header)
@@ -279,6 +285,7 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
+  LocaleInfo _templateArbLocale;
 
   /// The reference to the project's l10n directory.
   ///
@@ -513,6 +520,7 @@ class LocalizationsGenerator {
   // files in l10nDirectory. Also initialized: supportedLocales.
   void loadResources() {
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
+    _templateArbLocale = templateBundle.locale;
     _allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
     for (final String resourceId in templateBundle.resourceIds)
       if (!_isValidGetterAndMethodName(resourceId)) {
@@ -591,6 +599,7 @@ class LocalizationsGenerator {
           outputFileName,
           header,
           _allBundles.bundleFor(locale),
+          _allBundles.bundleFor(_templateArbLocale),
           _allMessages,
         );
 
@@ -599,6 +608,7 @@ class LocalizationsGenerator {
 
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
+          // TODO(shihaohong): add unimplemented handling here
           return generateSubclass(
             className: className,
             bundle: _allBundles.bundleFor(locale),
