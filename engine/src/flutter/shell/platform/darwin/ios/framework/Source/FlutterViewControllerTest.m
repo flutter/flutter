@@ -27,6 +27,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @end
 
 @implementation MockEngine
+- (FlutterViewController*)viewController {
+  return nil;
+}
 - (void)setViewController:(FlutterViewController*)viewController {
   // noop
 }
