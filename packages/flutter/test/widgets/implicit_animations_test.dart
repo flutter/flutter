@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-class MockOnEndFunction implements Function {
+class MockOnEndFunction {
   int called = 0;
 
   void call() {
