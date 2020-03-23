@@ -1,4 +1,4 @@
-Signature: e1dd415a23c0d320e1c9a93bebaa9540
+Signature: 5ae073fe9ba4767aae57b5f1ca3988b7
 
 UNUSED LICENSES:
 
@@ -3906,6 +3906,8 @@ FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3D12.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
