@@ -19,11 +19,20 @@ import 'framework.dart';
 String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
-String get localEngine => const String.fromEnvironment('localEngine');
+String get localEngine =>
+    (const String.fromEnvironment('localEngine', defaultValue: 'a') ==
+            const String.fromEnvironment('localEngine', defaultValue: 'b'))
+        ? const String.fromEnvironment('localEngine')
+        : null;
 
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
-String get localEngineSrcPath => const String.fromEnvironment('localEngineSrcPath');
+String get localEngineSrcPath =>
+    (const String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
+            const String.fromEnvironment('localEngineSrcPath',
+                defaultValue: 'b'))
+        ? const String.fromEnvironment('localEngineSrcPath')
+        : null;
 
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();

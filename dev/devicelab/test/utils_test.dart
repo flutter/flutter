@@ -33,4 +33,9 @@ void main() {
       expect(parseServicePort(badOutput), null);
     });
   });
+
+  group('engine environment declarations', () {
+      expect(localEngine, null);
+      expect(localEngineSrcPath, null);
+  });
 }
