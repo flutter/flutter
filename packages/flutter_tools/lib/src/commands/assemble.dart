@@ -151,6 +151,10 @@ class AssembleCommand extends FlutterCommand {
       defines: _parseDefines(stringsArg('define')),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     );
     return result;
   }

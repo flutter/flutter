@@ -4,10 +4,12 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
@@ -23,6 +25,8 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
+      processManager: FakeProcessManager.any(),
+      artifacts: MockArtifacts(),
     );
     fileSystem.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
     fileSystem.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
@@ -91,3 +95,5 @@ flutter:
     Platform: () => platform,
   });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}

@@ -43,6 +43,8 @@ void main() {
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
         },
+        artifacts: artifacts,
+        processManager: processManager,
       );
       androidEnvironment.buildDir.createSync(recursive: true);
       iosEnvironment = Environment.test(
@@ -51,6 +53,8 @@ void main() {
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
         },
+        artifacts: artifacts,
+         processManager: processManager,
       );
       iosEnvironment.buildDir.createSync(recursive: true);
       artifacts = CachedArtifacts(
@@ -199,6 +203,8 @@ void main() {
         kBuildMode: getNameForBuildMode(BuildMode.debug),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
+      processManager: processManager,
+      artifacts: artifacts,
     );
     final String build = testEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[

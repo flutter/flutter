@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -17,6 +18,7 @@ import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
 import '../../../src/common.dart';
+import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
 const String _kInputPrefix = 'bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework';
@@ -71,8 +73,10 @@ void main() {
       defines: <String, String>{
           kBuildMode: 'debug',
           kTargetPlatform: 'darwin-x64',
-        },
-      );
+      },
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+    );
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Platform: () => mockPlatform,
@@ -197,6 +201,7 @@ class MockCocoaPods extends Mock implements CocoaPods {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}
+class MockArtifacts extends Mock implements Artifacts {}
 class FakeProcessResult implements ProcessResult {
   @override
   int exitCode;

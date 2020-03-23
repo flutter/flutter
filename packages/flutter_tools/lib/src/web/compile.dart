@@ -53,6 +53,10 @@ Future<void> buildWeb(
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
       },
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     ));
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
