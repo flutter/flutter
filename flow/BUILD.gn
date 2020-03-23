@@ -88,6 +88,7 @@ source_set("flow") {
 
     if (using_fuchsia_sdk) {
       public_deps += [
+        "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
         "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
         "$fuchsia_sdk_root/pkg:scenic_cpp",
       ]
@@ -159,6 +160,10 @@ executable("flow_unittests") {
     "texture_unittests.cc",
   ]
 
+  if (is_fuchsia) {
+    sources += [ "layers/fuchsia_layer_unittests.cc" ]
+  }
+
   deps = [
     ":flow",
     ":flow_fixtures",
@@ -170,6 +175,10 @@ executable("flow_unittests") {
     "//third_party/googletest:gtest",
     "//third_party/skia",
   ]
+
+  if (is_fuchsia) {
+    deps += [ "//build/fuchsia/pkg:sys_cpp_testing" ]
+  }
 }
 
 if (is_fuchsia) {

@@ -43,8 +43,7 @@ class VulkanSurfacePool final {
     return retained_surfaces_.find(key) != retained_surfaces_.end();
   }
   // For |VulkanSurfaceProducer::GetRetainedNode|.
-  const scenic::EntityNode& GetRetainedNode(
-      const flutter::LayerRasterCacheKey& key) {
+  scenic::EntityNode* GetRetainedNode(const flutter::LayerRasterCacheKey& key) {
     FML_DCHECK(HasRetainedNode(key));
     return retained_surfaces_[key].vk_surface->GetRetainedNode();
   }
