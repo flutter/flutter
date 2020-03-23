@@ -295,14 +295,14 @@ class UserMessages {
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 
   String get _androidSdkInstallUrl {
-      if (Platform.isMacOS) {
-        return 'https://flutter.dev/docs/get-started/install/macos#android-setup';
-      } else if (Platform.isLinux) {
-        return 'https://flutter.dev/docs/get-started/install/linux#android-setup';
-      } else  if (Platform.isWindows) {
-        return 'https://flutter.dev/docs/get-started/install/windows#android-setup';
-      } else {
-        return 'https://flutter.dev/docs/get-started/install';
-      }
+    if (Platform.isMacOS) {
+      return 'https://flutter.dev/docs/get-started/install/macos#android-setup';
+    } else if (Platform.isLinux) {
+      return 'https://flutter.dev/docs/get-started/install/linux#android-setup';
+    } else  if (Platform.isWindows) {
+      return 'https://flutter.dev/docs/get-started/install/windows#android-setup';
+    } else {
+      return 'https://flutter.dev/docs/get-started/install';
+    }
   }
 }
