@@ -209,8 +209,9 @@ class WebAssetServer implements AssetReader {
 
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
-    if (_files.containsKey(requestPath)) {
-      final List<int> bytes = getFile(requestPath);
+    final String webServerPath = requestPath.replaceFirst('.dart.js', '.dart.lib.js');
+    if (_files.containsKey(requestPath) || _files.containsKey(webServerPath)) {
+      final List<int> bytes = getFile(requestPath)  ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.

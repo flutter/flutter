@@ -159,14 +159,10 @@ class FallbackDiscovery {
         );
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
-          final dynamic isolateResponse = await vmService.getIsolate(
+          final Isolate isolateResponse = await vmService.getIsolate(
             isolateRefs.id,
           );
-          if (isolateResponse is Sentinel) {
-            // Might have been a Sentinel. Try again later.
-            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
-          }
-          final LibraryRef library = (isolateResponse as Isolate).rootLib;
+          final LibraryRef library = isolateResponse.rootLib;
           if (library != null && library.uri.startsWith('package:$packageName')) {
             UsageEvent(
               _kEventName,
@@ -180,6 +176,10 @@ class FallbackDiscovery {
         // No action, we might have failed to connect.
         firstException ??= err;
         _logger.printTrace(err.toString());
+      } on Sentinel {
+        const String message = 'Expected Isolate but found Sentinel';
+        firstException ??= Exception(message);
+        _logger.printTrace(message);
       }
 
       // No exponential backoff is used here to keep the amount of time the
