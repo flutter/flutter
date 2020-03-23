@@ -43,7 +43,6 @@ class OpacityLayer : public ContainerLayer {
   SkAlpha alpha_;
   SkPoint offset_;
   SkRRect frameRRect_;
-  float total_elevation_ = 0.0f;
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };

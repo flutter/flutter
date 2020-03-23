@@ -49,7 +49,7 @@ class VulkanSurfaceProducer final
   }
 
   // |flutter::SceneUpdateContext::GetRetainedNode|
-  const scenic::EntityNode& GetRetainedNode(
+  scenic::EntityNode* GetRetainedNode(
       const flutter::LayerRasterCacheKey& key) override {
     return surface_pool_->GetRetainedNode(key);
   }
