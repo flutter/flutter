@@ -13,12 +13,19 @@ Texture::~Texture() = default;
 TextureRegistry::TextureRegistry() = default;
 
 void TextureRegistry::RegisterTexture(std::shared_ptr<Texture> texture) {
+  if (!texture) {
+    return;
+  }
   mapping_[texture->Id()] = texture;
 }
 
 void TextureRegistry::UnregisterTexture(int64_t id) {
-  mapping_[id]->OnTextureUnregistered();
-  mapping_.erase(id);
+  auto found = mapping_.find(id);
+  if (found == mapping_.end()) {
+    return;
+  }
+  found->second->OnTextureUnregistered();
+  mapping_.erase(found);
 }
 
 void TextureRegistry::OnGrContextCreated() {

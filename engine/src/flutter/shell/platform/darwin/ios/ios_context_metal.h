@@ -8,6 +8,7 @@
 #include <Metal/Metal.h>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "third_party/skia/include/gpu/GrContext.h"
@@ -35,6 +36,7 @@ class IOSContextMetal final : public IOSContext {
   fml::scoped_nsprotocol<id<MTLCommandQueue>> main_queue_;
   sk_sp<GrContext> main_context_;
   sk_sp<GrContext> resource_context_;
+  fml::CFRef<CVMetalTextureCacheRef> texture_cache_;
   bool is_valid_ = false;
 
   // |IOSContext|
@@ -48,6 +50,11 @@ class IOSContextMetal final : public IOSContext {
 
   // |IOSContext|
   bool ClearCurrent() override;
+
+  // |IOSContext|
+  std::unique_ptr<Texture> CreateExternalTexture(
+      int64_t texture_id,
+      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextMetal);
 };

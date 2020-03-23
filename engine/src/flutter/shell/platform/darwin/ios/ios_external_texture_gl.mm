@@ -56,7 +56,7 @@ void IOSExternalTextureGL::CreateTextureFromPixelBuffer() {
 
 bool IOSExternalTextureGL::NeedUpdateTexture(bool freeze) {
   // Update texture if `texture_ref_` is reset to `nullptr` when GrContext
-  // is destroied or new frame is ready.
+  // is destroyed or new frame is ready.
   return (!freeze && new_frame_ready_) || !texture_ref_;
 }
 

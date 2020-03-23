@@ -8,6 +8,7 @@
 
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 
 namespace flutter {
 
@@ -56,6 +57,13 @@ bool IOSContextGL::ResourceMakeCurrent() {
 // |IOSContext|
 bool IOSContextGL::ClearCurrent() {
   return [EAGLContext setCurrentContext:nil];
+}
+
+// |IOSContext|
+std::unique_ptr<Texture> IOSContextGL::CreateExternalTexture(
+    int64_t texture_id,
+    fml::scoped_nsobject<NSObject<FlutterTexture>> texture) {
+  return std::make_unique<IOSExternalTextureGL>(texture_id, std::move(texture));
 }
 
 }  // namespace flutter
