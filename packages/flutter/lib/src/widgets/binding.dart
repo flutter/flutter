@@ -907,6 +907,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
 
+  bool _readyToProduceFrames = false;
+
+  @override
+  bool get framesEnabled => super.framesEnabled && _readyToProduceFrames;
+
   /// Schedules a [Timer] for attaching the root widget.
   ///
   /// This is called by [runApp] to configure the widget tree. Consider using
@@ -928,6 +933,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
+    _readyToProduceFrames = true;
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
