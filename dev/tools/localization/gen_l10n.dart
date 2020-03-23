@@ -204,6 +204,8 @@ String generateBaseClassFile(
   final LocaleInfo locale = bundle.locale;
 
   final Iterable<String> methods = messages.map((Message message) {
+    // TODO(shihaohong): Change this function to add a list of translations
+    // that do not exist to a list.
     return generateMethod(
       message,
       bundle.translationFor(message) == null ? templateBundle : bundle,
@@ -220,21 +222,19 @@ String generateBaseClassFile(
     .replaceAll('@(methods)', methods.join('\n\n'));
 }
 
-String generateSubclass({
+String generateSubclass(
   String className,
   AppResourceBundle bundle,
-  AppResourceBundle templateBundle,
   Iterable<Message> messages,
-}) {
+) {
   final LocaleInfo locale = bundle.locale;
   final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
-  final Iterable<String> methods = messages.map((Message message) {
-    return generateMethod(
-      message,
-      bundle.translationFor(message) == null ? templateBundle : bundle,
-    );
-  });
+  // TODO(shihaohong): Change this function to add a list of translations
+  // that do not exist to a list.
+  final Iterable<String> methods = messages
+    .where((Message message) => bundle.translationFor(message) != null)
+    .map((Message message) => generateMethod(message, bundle));
 
   return subclassTemplate
     .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -612,10 +612,9 @@ class LocalizationsGenerator {
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
           return generateSubclass(
-            className: className,
-            bundle: _allBundles.bundleFor(locale),
-            templateBundle: _allBundles.bundleFor(_templateArbLocale),
-            messages: _allMessages,
+            className,
+            _allBundles.bundleFor(locale),
+            _allMessages,
           );
         });
 
