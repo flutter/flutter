@@ -2895,10 +2895,12 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   DiagnosticPropertiesBuilder get builder {
     if (kReleaseMode)
       return null;
-    if (_cachedBuilder == null) {
-      _cachedBuilder = DiagnosticPropertiesBuilder();
-      value?.debugFillProperties(_cachedBuilder);
-    }
+    assert(() {
+      if (_cachedBuilder == null) {
+        _cachedBuilder = DiagnosticPropertiesBuilder();
+        value?.debugFillProperties(_cachedBuilder);
+      }
+    }());
     return _cachedBuilder;
   }
 
