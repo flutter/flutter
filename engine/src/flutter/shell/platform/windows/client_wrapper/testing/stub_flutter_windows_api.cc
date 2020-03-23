@@ -36,6 +36,17 @@ ScopedStubFlutterWindowsApi::~ScopedStubFlutterWindowsApi() {
 // Forwarding dummy implementations of the C API.
 
 FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
+    int width,
+    int height,
+    const FlutterDesktopEngineProperties& engine_properties) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->CreateViewController(width, height,
+                                                       engine_properties);
+  }
+  return nullptr;
+}
+
+FlutterDesktopViewControllerRef FlutterDesktopCreateViewControllerLegacy(
     int initial_width,
     int initial_height,
     const char* assets_path,
@@ -43,9 +54,11 @@ FlutterDesktopViewControllerRef FlutterDesktopCreateViewController(
     const char** arguments,
     size_t argument_count) {
   if (s_stub_implementation) {
+    // This stub will be removed shortly, and the current tests don't need the
+    // arguments, so there's no need to translate them to engine_properties.
+    FlutterDesktopEngineProperties engine_properties;
     return s_stub_implementation->CreateViewController(
-        initial_width, initial_height, assets_path, icu_data_path, arguments,
-        argument_count);
+        initial_width, initial_height, engine_properties);
   }
   return nullptr;
 }
@@ -78,13 +91,10 @@ HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef controller) {
   return reinterpret_cast<HWND>(-1);
 }
 
-FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
-                                                const char* icu_data_path,
-                                                const char** arguments,
-                                                size_t argument_count) {
+FlutterDesktopEngineRef FlutterDesktopRunEngine(
+    const FlutterDesktopEngineProperties& engine_properties) {
   if (s_stub_implementation) {
-    return s_stub_implementation->RunEngine(assets_path, icu_data_path,
-                                            arguments, argument_count);
+    return s_stub_implementation->RunEngine(engine_properties);
   }
   return nullptr;
 }
