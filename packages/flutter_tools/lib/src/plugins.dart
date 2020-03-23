@@ -307,7 +307,7 @@ List<Plugin> findPlugins(FlutterProject project) {
       project.directory.path,
       PackageMap.globalPackagesPath,
     );
-    packages = PackageMap(packagesFile).map;
+    packages = PackageMap(packagesFile, fileSystem: globals.fs).map;
   } on FormatException catch (e) {
     globals.printTrace('Invalid .packages file: $e');
     return plugins;
