@@ -40,6 +40,11 @@ class IOSContextGL final : public IOSContext {
   // |IOSContext|
   bool ResourceMakeCurrent() override;
 
+  // |IOSContext|
+  std::unique_ptr<Texture> CreateExternalTexture(
+      int64_t texture_id,
+      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContextGL);
 };
 

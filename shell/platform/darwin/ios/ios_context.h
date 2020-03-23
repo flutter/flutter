@@ -7,8 +7,10 @@
 
 #include <memory>
 
+#include "flutter/flow/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
@@ -118,6 +120,20 @@ class IOSContext {
   /// @return     `true` is the current context bound to the thread is cleared.
   ///
   virtual bool ClearCurrent() = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates an external texture proxy of the appropriate client
+  ///             rendering API.
+  ///
+  /// @param[in]  texture_id  The texture identifier
+  /// @param[in]  texture     The texture
+  ///
+  /// @return     The texture proxy if the rendering backend supports embedder
+  ///             provided external textures.
+  ///
+  virtual std::unique_ptr<Texture> CreateExternalTexture(
+      int64_t texture_id,
+      fml::scoped_nsobject<NSObject<FlutterTexture>> texture) = 0;
 
  protected:
   IOSContext();
