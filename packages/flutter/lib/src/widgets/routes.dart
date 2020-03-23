@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -606,8 +607,18 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory.isEmpty)
-      changedInternalState();
+    if (_localHistory.isEmpty) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+        // The local history might be removed as a result of disposing inactive
+        // elements during finalizeTree. The state is locked at this moment, and
+        // we can only notify state has changed in the next frame.
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+          changedInternalState();
+        });
+      } else {
+        changedInternalState();
+      }
+    }
   }
 
   @override
