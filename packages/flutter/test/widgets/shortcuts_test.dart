@@ -132,8 +132,8 @@ void main() {
       final Map<LogicalKeySet, String> map = <LogicalKeySet, String>{set1: 'one'};
       expect(set2 == set3, isTrue);
       expect(set2 == set4, isTrue);
-      expect(set2.hashCode == set3.hashCode, isTrue);
-      expect(set2.hashCode == set4.hashCode, isTrue);
+      expect(set2.hashCode, set3.hashCode);
+      expect(set2.hashCode, set4.hashCode);
       expect(map.containsKey(set1), isTrue);
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
@@ -146,6 +146,40 @@ void main() {
           })),
       );
     });
+
+    test('LogicalKeySet.hashCode is stable', () {
+      final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
+      expect(set1.hashCode, set1.hashCode);
+
+      final LogicalKeySet set2 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB);
+      expect(set2.hashCode, set2.hashCode);
+
+      final LogicalKeySet set3 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC);
+      expect(set3.hashCode, set3.hashCode);
+
+      final LogicalKeySet set4 = LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD);
+      expect(set4.hashCode, set4.hashCode);
+    });
+
+    test('LogicalKeySet.hashCode is order-independent', () {
+      expect(
+        LogicalKeySet(LogicalKeyboardKey.keyA).hashCode,
+        LogicalKeySet(LogicalKeyboardKey.keyA).hashCode,
+      );
+      expect(
+        LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB).hashCode,
+        LogicalKeySet(LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
+      );
+      expect(
+        LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC).hashCode,
+        LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
+      );
+      expect(
+        LogicalKeySet(LogicalKeyboardKey.keyA, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyD).hashCode,
+        LogicalKeySet(LogicalKeyboardKey.keyD, LogicalKeyboardKey.keyC, LogicalKeyboardKey.keyB, LogicalKeyboardKey.keyA).hashCode,
+      );
+    });
+
     test('LogicalKeySet diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 

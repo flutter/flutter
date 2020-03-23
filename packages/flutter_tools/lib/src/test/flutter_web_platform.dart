@@ -111,7 +111,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     'packages',
     'flutter_tools',
     '.packages',
-  ));
+  ), fileSystem: globals.fs);
 
   /// Uri of the test package.
   Uri get testUri => _flutterToolsPackageMap.map['test'];

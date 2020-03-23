@@ -578,6 +578,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(child != null);
     assert(child.parent == this);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    assert(childParentData.layoutOffset != null);
     return childParentData.layoutOffset;
   }
 

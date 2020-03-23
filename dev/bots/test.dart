@@ -59,28 +59,19 @@ const int kWebShardCount = 8;
 const List<String> kWebTestFileBlacklist = <String>[
   // This test doesn't compile because it depends on code outside the flutter package.
   'test/examples/sector_layout_test.dart',
+  // This test relies on widget tracking capability in the VM.
+  'test/widgets/widget_inspector_test.dart',
+
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
-  'test/widgets/widget_inspector_test.dart',
-  'test/widgets/shortcuts_test.dart',
   'test/material/animated_icons_private_test.dart',
-  'test/material/text_form_field_test.dart',
   'test/material/data_table_test.dart',
-  'test/cupertino/dialog_test.dart',
-  'test/cupertino/nav_bar_test.dart',
   'test/cupertino/nav_bar_transition_test.dart',
   'test/cupertino/refresh_test.dart',
-  'test/cupertino/switch_test.dart',
   'test/cupertino/text_field_test.dart',
-  'test/cupertino/date_picker_test.dart',
-  'test/cupertino/slider_test.dart',
-  'test/cupertino/text_field_test.dart',
-  'test/cupertino/segmented_control_test.dart',
   'test/cupertino/route_test.dart',
-  'test/cupertino/activity_indicator_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom

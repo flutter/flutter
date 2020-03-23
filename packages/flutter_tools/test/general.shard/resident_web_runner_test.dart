@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -82,6 +83,9 @@ void main() {
         globals.fs.currentDirectory.childFile('.packages')
           .writeAsStringSync('\n');
       },
+      overrides: <Type, Generator>{
+        Pub: () => MockPub(),
+      }
     );
   });
 
@@ -214,6 +218,10 @@ void main() {
     verify(mockAppConnection.runMain()).called(1);
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     verify(status.stop()).called(1);
+    verify(pub.get(
+      context: PubContext.pubGet,
+      directory: globals.fs.path.join('packages', 'flutter_tools')
+    )).called(1);
 
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
@@ -978,3 +986,4 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
+class MockPub extends Mock implements Pub {}

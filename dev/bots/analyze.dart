@@ -603,6 +603,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.snapshot')
     .where((File file) => path.extension(file.path) != '.png')
     .where((File file) => path.extension(file.path) != '.jpg')
+    .where((File file) => path.extension(file.path) != '.ico')
     .where((File file) => path.extension(file.path) != '.jar')
     .toList();
   final List<String> problems = <String>[];
@@ -685,7 +686,9 @@ class Hash256 {
 
 // DO NOT ADD ANY ENTRIES TO THIS LIST.
 // We have a policy of not checking in binaries into this repository.
-// If you have binaries to add, please consult Hixie for advice.
+// If you are adding/changing template images, use the flutter_template_images
+// package and a .img.tmpl placeholder instead.
+// If you have other binaries to add, please consult Hixie for advice.
 final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   // DEFAULT ICON IMAGES
 
@@ -1044,7 +1047,9 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
 Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfatheredBinaries }) async {
   // Please do not add anything to the _grandfatheredBinaries set above.
   // We have a policy of not checking in binaries into this repository.
-  // If you have binaries to add, please consult Hixie for advice.
+  // If you are adding/changing template images, use the flutter_template_images
+  // package and a .img.tmpl placeholder instead.
+  // If you have other binaries to add, please consult Hixie for advice.
   assert(
     _grandfatheredBinaries
       .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])

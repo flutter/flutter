@@ -854,7 +854,7 @@ void main() {
     // We must explicitly cause an "up" gesture to avoid a crash.
     // todo(mattcarroll) remove this call when #19540 is fixed
     await gesture.up();
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52960
 
   testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
     await tester.pumpWidget(

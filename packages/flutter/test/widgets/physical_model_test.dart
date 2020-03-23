@@ -277,7 +277,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    }, skip: isBrowser);
+    }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/52855
 
     // Tests:
     //
@@ -484,7 +484,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    }, skip: isBrowser);
+    }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/52855
 
     // Tests:
     //
