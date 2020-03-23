@@ -1,9 +1,14 @@
 #include "{{projectName}}_plugin.h"
 
+// This must be included before many other Windows headers.
+#include <windows.h>
+
+// For getPlatformVersion; remove unless needed for your plugin implementation.
+#include <VersionHelpers.h>
+
 #include <flutter/method_channel.h>
-#include <flutter/plugin_registrar_glfw.h>
+#include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
-#include <sys/utsname.h>
 
 #include <map>
 #include <memory>
@@ -13,7 +18,7 @@ namespace {
 
 class {{pluginClass}} : public flutter::Plugin {
  public:
-  static void RegisterWithRegistrar(flutter::PluginRegistrarGlfw *registrar);
+  static void RegisterWithRegistrar(flutter::PluginRegistrarWindows *registrar);
 
   {{pluginClass}}();
 
@@ -28,11 +33,12 @@ class {{pluginClass}} : public flutter::Plugin {
 
 // static
 void {{pluginClass}}::RegisterWithRegistrar(
-    flutter::PluginRegistrarGlfw *registrar) {
+    flutter::PluginRegistrarWindows *registrar) {
   auto channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           registrar->messenger(), "{{projectName}}",
           &flutter::StandardMethodCodec::GetInstance());
+
   auto plugin = std::make_unique<{{pluginClass}}>();
 
   channel->SetMethodCallHandler(
@@ -57,10 +63,15 @@ void {{pluginClass}}::HandleMethodCall(
   // https://github.com/flutter/engine/tree/master/shell/platform/glfw/client_wrapper/include/flutter
   // for the relevant Flutter APIs.
   if (method_call.method_name().compare("getPlatformVersion") == 0) {
-    struct utsname uname_data = {};
-    uname(&uname_data);
     std::ostringstream version_stream;
-    version_stream << "Linux " << uname_data.version;
+    version_stream << "Windows ";
+    if (IsWindows10OrGreater()) {
+      version_stream << "10+";
+    } else if (IsWindows8OrGreater()) {
+      version_stream << "8";
+    } else if (IsWindows7OrGreater()) {
+      version_stream << "7";
+    }
     flutter::EncodableValue response(version_stream.str());
     result->Success(&response);
   } else {
@@ -76,9 +87,9 @@ void {{pluginClass}}RegisterWithRegistrar(
   // so must remain valid for the life of the application.
   static auto *plugin_registrars =
       new std::map<FlutterDesktopPluginRegistrarRef,
-                   std::unique_ptr<flutter::PluginRegistrarGlfw>>;
+                   std::unique_ptr<flutter::PluginRegistrarWindows>>;
   auto insert_result = plugin_registrars->emplace(
-      registrar, std::make_unique<flutter::PluginRegistrarGlfw>(registrar));
+      registrar, std::make_unique<flutter::PluginRegistrarWindows>(registrar));
 
   {{pluginClass}}::RegisterWithRegistrar(insert_result.first->second.get());
 }
