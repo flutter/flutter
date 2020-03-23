@@ -104,7 +104,7 @@ void main() {
       ];
     });
     when(mockVmService.getIsolate(any))
-      .thenThrow(Sentinel(kind: 'Something', valueAsString: 'Something'));
+      .thenThrow(SentinelException.parse('Something', <String, dynamic>{}));
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
       null, // Device
