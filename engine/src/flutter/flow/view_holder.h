@@ -57,12 +57,14 @@ class ViewHolder {
   void UpdateScene(SceneUpdateContext& context,
                    const SkPoint& offset,
                    const SkSize& size,
+                   SkAlpha opacity,
                    bool hit_testable);
 
  private:
   fml::RefPtr<fml::TaskRunner> ui_task_runner_;
 
   std::unique_ptr<scenic::EntityNode> entity_node_;
+  std::unique_ptr<scenic::OpacityNodeHACK> opacity_node_;
   std::unique_ptr<scenic::ViewHolder> view_holder_;
 
   fuchsia::ui::views::ViewHolderToken pending_view_holder_token_;
