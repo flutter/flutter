@@ -203,13 +203,12 @@ String generateBaseClassFile(
 ) {
   final LocaleInfo locale = bundle.locale;
 
-  final Iterable<String> methods = messages
-    .map((Message message) {
-      return generateMethod(
-        message,
-        bundle.translationFor(message) == null ? templateBundle : bundle,
-      );
-    });
+  final Iterable<String> methods = messages.map((Message message) {
+    return generateMethod(
+      message,
+      bundle.translationFor(message) == null ? templateBundle : bundle,
+    );
+  });
 
   return classFileTemplate
     .replaceAll('@(header)', header)
@@ -224,14 +223,18 @@ String generateBaseClassFile(
 String generateSubclass({
   String className,
   AppResourceBundle bundle,
+  AppResourceBundle templateBundle,
   Iterable<Message> messages,
 }) {
   final LocaleInfo locale = bundle.locale;
   final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
-  final Iterable<String> methods = messages
-    .where((Message message) => bundle.translationFor(message) != null)
-    .map((Message message) => generateMethod(message, bundle));
+  final Iterable<String> methods = messages.map((Message message) {
+    return generateMethod(
+      message,
+      bundle.translationFor(message) == null ? templateBundle : bundle,
+    );
+  });
 
   return subclassTemplate
     .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -608,10 +611,10 @@ class LocalizationsGenerator {
 
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
-          // TODO(shihaohong): add unimplemented handling here
           return generateSubclass(
             className: className,
             bundle: _allBundles.bundleFor(locale),
+            templateBundle: _allBundles.bundleFor(_templateArbLocale),
             messages: _allMessages,
           );
         });
