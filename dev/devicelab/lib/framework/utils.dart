@@ -19,21 +19,30 @@ import 'framework.dart';
 String cwd = Directory.current.path;
 
 /// The local engine to use for [flutter] and [evalFlutter], if any.
-String get localEngine =>
-    (const String.fromEnvironment('localEngine', defaultValue: 'a') ==
-            const String.fromEnvironment('localEngine', defaultValue: 'b'))
-        ? const String.fromEnvironment('localEngine')
-        : null;
-
+String get localEngine {
+  // Use two distinct `defaultValue`s to determine whether a 'localEngine'
+  // declaration exists in the environment.
+  const isDefined =
+      String.fromEnvironment('localEngine', defaultValue: 'a') ==
+      String.fromEnvironment('localEngine', defaultValue: 'b');
+  return isDefined
+      ? const String.fromEnvironment('localEngine')
+      : null;
+}
+      
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
-String get localEngineSrcPath =>
-    (const String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
-            const String.fromEnvironment('localEngineSrcPath',
-                defaultValue: 'b'))
-        ? const String.fromEnvironment('localEngineSrcPath')
-        : null;
-
+String get localEngineSrcPath {
+  // Use two distinct `defaultValue`s to determine whether a
+  // 'localEngineSrcPath' declaration exists in the environment.
+  const isDefined =
+      String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
+      String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
+  return isDefined
+      ? const String.fromEnvironment('localEngineSrcPath')
+      : null;
+}
+    
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
