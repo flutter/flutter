@@ -176,10 +176,6 @@ class FallbackDiscovery {
         // No action, we might have failed to connect.
         firstException ??= err;
         _logger.printTrace(err.toString());
-      } on Sentinel {
-        const String message = 'Expected Isolate but found Sentinel';
-        firstException ??= Exception(message);
-        _logger.printTrace(message);
       }
 
       // No exponential backoff is used here to keep the amount of time the
