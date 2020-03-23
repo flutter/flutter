@@ -144,6 +144,14 @@ typedef enum UIAccessibilityContrast : NSInteger {
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;
+    if (engine.viewController) {
+      FML_LOG(ERROR) << "The supplied FlutterEngine " << [[engine description] UTF8String]
+                     << " is already used with FlutterViewController instance "
+                     << [[engine.viewController description] UTF8String]
+                     << ". One instance of the FlutterEngine can only be attached to one "
+                        "FlutterViewController at a time. Set FlutterEngine.viewController "
+                        "to nil before attaching it to another FlutterViewController.";
+    }
     _engine.reset([engine retain]);
     _engineNeedsLaunch = NO;
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
