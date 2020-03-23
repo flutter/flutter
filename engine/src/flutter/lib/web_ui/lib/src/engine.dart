@@ -117,6 +117,7 @@ part 'engine/text_editing/text_editing.dart';
 part 'engine/util.dart';
 part 'engine/validators.dart';
 part 'engine/vector_math.dart';
+part 'engine/web_experiments.dart';
 part 'engine/window.dart';
 
 bool _engineInitialized = false;
@@ -160,6 +161,8 @@ void webOnlyInitializeEngine() {
   // Calling this getter to force the DOM renderer to initialize before we
   // initialize framework bindings.
   domRenderer;
+
+  WebExperiments.ensureInitialized();
 
   bool waitingForAnimation = false;
   ui.webOnlyScheduleFrameCallback = () {
