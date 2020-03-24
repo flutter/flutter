@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
@@ -196,12 +197,15 @@ class XCDevice {
     @required ProcessManager processManager,
     @required Logger logger,
     @required Xcode xcode,
+    @required IMobileDevice iMobileDevice,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger,
+      _iMobileDevice = iMobileDevice,
        _xcode = xcode;
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final IMobileDevice _iMobileDevice;
   final Xcode _xcode;
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
@@ -356,6 +360,7 @@ class XCDevice {
         fileSystem: globals.fs,
         logger: globals.logger,
         iosDeploy: globals.iosDeploy,
+        iMobileDevice: _iMobileDevice,
         platform: globals.platform,
       ));
     }

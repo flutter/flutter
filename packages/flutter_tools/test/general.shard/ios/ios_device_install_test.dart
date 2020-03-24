@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -171,6 +172,12 @@ IOSDevice setUpIOSDevice({
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     platform: platform,
+    iMobileDevice: IMobileDevice(
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      artifacts: artifacts,
+      cache: cache,
+    ),
     iosDeploy: IOSDeploy(
       logger: BufferLogger.test(),
       platform: platform,
