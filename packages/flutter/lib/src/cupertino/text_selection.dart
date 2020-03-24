@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -10,6 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'icons.dart';
 import 'localizations.dart';
 import 'theme.dart';
 
@@ -537,58 +539,64 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
         opacity: _controller,
         child: _CupertinoTextSelectionToolbarItems(
           page: _page,
-          children: <Widget>[
-            SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio),
-            CupertinoButton(
-              borderRadius: null,
-              color: _kToolbarBackgroundColor,
-              minSize: _kToolbarHeight,
-              onPressed: _handlePreviousPage,
-              padding: arrowPadding,
-              pressedOpacity: 0.7,
-              child: const Text('◀', style: _kToolbarButtonFontStyle),
-            ),
-            CupertinoButton(
-              borderRadius: null,
-              color: _kToolbarBackgroundColor,
-              minSize: _kToolbarHeight,
-              onPressed: _handleNextPage,
-              padding: arrowPadding,
-              pressedOpacity: 0.7,
-              child: const Text('▶', style: _kToolbarButtonFontStyle),
-            ),
-            CupertinoButton(
-              borderRadius: null,
-              color: _kToolbarBackgroundColor,
-              minSize: _kToolbarHeight,
-              onPressed: () {},
-              padding: arrowPadding,
-              pressedOpacity: 1.0,
-              child: const Text('▶', style: _kToolbarButtonDisabledFontStyle),
-            ),
-            ...widget.children,
-          ],
+          backButton: CupertinoButton(
+            borderRadius: null,
+            color: _kToolbarBackgroundColor,
+            minSize: _kToolbarHeight,
+            onPressed: _handlePreviousPage,
+            padding: arrowPadding,
+            pressedOpacity: 0.7,
+            child: const Text('◀', style: _kToolbarButtonFontStyle),
+          ),
+          divider: SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio),
+          nextButton: CupertinoButton(
+            borderRadius: null,
+            color: _kToolbarBackgroundColor,
+            minSize: _kToolbarHeight,
+            onPressed: _handleNextPage,
+            padding: arrowPadding,
+            pressedOpacity: 0.7,
+            child: const Text('▶', style: _kToolbarButtonFontStyle),
+          ),
+          nextButtonDisabled: CupertinoButton(
+            borderRadius: null,
+            color: _kToolbarBackgroundColor,
+            minSize: _kToolbarHeight,
+            onPressed: () {},
+            padding: arrowPadding,
+            pressedOpacity: 1.0,
+            child: const Text('▶', style: _kToolbarButtonDisabledFontStyle),
+          ),
+          children: widget.children,
         ),
       ),
     );
   }
 }
 
-class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
+class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
     Key key,
     @required this.page,
-    // TODO(justinmc): Make slots instead of all in one array.
-    // 0: Divider
-    // 1: Back
-    // 2: Forward
-    // 3: Forward disabled
-    // Everything else: Buttons
-    @required List<Widget> children,
+    @required this.children,
+    @required this.backButton,
+    @required this.divider,
+    @required this.nextButton,
+    @required this.nextButtonDisabled,
   }) : assert(children != null),
+       assert(children.isNotEmpty),
+       assert(backButton != null),
+       assert(divider != null),
+       assert(nextButton != null),
+       assert(nextButtonDisabled != null),
        assert(page != null),
-       super(key: key, children: children);
+       super(key: key);
 
+  final Widget backButton;
+  final List<Widget> children;
+  final Widget divider;
+  final Widget nextButton;
+  final Widget nextButtonDisabled;
   final int page;
 
   @override
@@ -607,18 +615,187 @@ class _CupertinoTextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _CupertinoTextSelectionToolbarItemsElement createElement() => _CupertinoTextSelectionToolbarItemsElement(this);
 }
 
-class _CupertinoTextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
+class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   _CupertinoTextSelectionToolbarItemsElement(
-    MultiChildRenderObjectWidget widget,
+    _CupertinoTextSelectionToolbarItems widget,
   ) : super(widget);
+
+  List<Element> _children;
+  final Map<_DestinationSlot, Element> slotToChild = <_DestinationSlot, Element>{};
+  final Map<Element, _DestinationSlot> childToSlot = <Element, _DestinationSlot>{};
+
+  // We keep a set of forgotten children to avoid O(n^2) work walking _children
+  // repeatedly to remove children.
+  final Set<Element> _forgottenChildren = HashSet<Element>();
+
+  @override
+  _CupertinoTextSelectionToolbarItems get widget => super.widget as _CupertinoTextSelectionToolbarItems;
+
+  @override
+  _CupertinoTextSelectionToolbarItemsRenderBox get renderObject => super.renderObject as _CupertinoTextSelectionToolbarItemsRenderBox;
+
+  void _updateRenderObject(RenderBox child, _DestinationSlot slot) {
+    switch (slot) {
+      case _DestinationSlot.backButton:
+        renderObject.backButton = child;
+        break;
+      case _DestinationSlot.divider:
+        renderObject.divider = child;
+        break;
+      case _DestinationSlot.nextButton:
+        renderObject.nextButton = child;
+        break;
+      case _DestinationSlot.nextButtonDisabled:
+        renderObject.nextButtonDisabled = child;
+        break;
+    }
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, dynamic slot) {
+    if (slot is _DestinationSlot) {
+      assert(child is RenderBox);
+      assert(slot is _DestinationSlot);
+      final _DestinationSlot slottedSlot = slot as _DestinationSlot;
+      _updateRenderObject(child as RenderBox, slottedSlot);
+      assert(renderObject.childToSlot.keys.contains(child));
+      assert(renderObject.slotToChild.keys.contains(slottedSlot));
+      return;
+    }
+    if (slot is IndexedSlot) {
+      final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
+        this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+      assert(renderObject.debugValidateChild(child));
+      renderObject.insert(child, after: slot?.value?.renderObject);
+      assert(renderObject == this.renderObject);
+      return;
+    }
+    assert(false, 'slot must be _DestinationSlot or IndexedSlot');
+  }
+
+  // This is not reachable for slotted children.
+  @override
+  void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
+      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    assert(child.parent == renderObject);
+    renderObject.move(child, after: slot?.value?.renderObject);
+    assert(renderObject == this.renderObject);
+  }
 
   static bool _shouldPaint(Element child) {
     return (child.renderObject.parentData as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
+  void removeChildRenderObject(RenderObject child) {
+    // Check if the child is in a slot.
+    if (renderObject.childToSlot.containsKey(child)) {
+      assert(child is RenderBox);
+      assert(renderObject.childToSlot.keys.contains(child));
+      _updateRenderObject(null, renderObject.childToSlot[child]);
+      assert(!renderObject.childToSlot.keys.contains(child));
+      assert(!renderObject.slotToChild.keys.contains(slot));
+    }
+
+    // Otherwise look for it in the list of children.
+    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObjectList =
+      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
+    assert(child.parent == renderObjectList);
+    renderObjectList.remove(child);
+    assert(renderObjectList == this.renderObject);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    slotToChild.values.forEach(visitor);
+    for (final Element child in _children) {
+      if (!_forgottenChildren.contains(child))
+        visitor(child);
+    }
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(slotToChild.values.contains(child) || _children.contains(child));
+    assert(!_forgottenChildren.contains(child));
+    // Handle forgetting a child in children or in a slot.
+    if (childToSlot.keys.contains(child)) {
+      final _DestinationSlot slot = childToSlot[child];
+      childToSlot.remove(child);
+      slotToChild.remove(slot);
+    } else {
+      _forgottenChildren.add(child);
+    }
+    super.forgetChild(child);
+  }
+
+  // Mount slotted child.
+  void _mountChild(Widget widget, _DestinationSlot slot) {
+    final Element oldChild = slotToChild[slot];
+    final Element newChild = updateChild(oldChild, widget, slot);
+    if (oldChild != null) {
+      slotToChild.remove(slot);
+      childToSlot.remove(oldChild);
+    }
+    if (newChild != null) {
+      slotToChild[slot] = newChild;
+      childToSlot[newChild] = slot;
+    }
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    // Mount slotted children.
+    _mountChild(widget.backButton, _DestinationSlot.backButton);
+    _mountChild(widget.divider, _DestinationSlot.divider);
+    _mountChild(widget.nextButton, _DestinationSlot.nextButton);
+    _mountChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
+
+    // Mount list children.
+    _children = List<Element>(widget.children.length);
+    Element previousChild;
+    for (int i = 0; i < _children.length; i += 1) {
+      final Element newChild = inflateWidget(widget.children[i], IndexedSlot<Element>(i, previousChild));
+      _children[i] = newChild;
+      previousChild = newChild;
+    }
+  }
+
+  @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    children.where(_shouldPaint).forEach(visitor);
+    _children.where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child)).forEach(visitor);
+  }
+
+  // Update slotted child.
+  void _updateChild(Widget widget, _DestinationSlot slot) {
+    final Element oldChild = slotToChild[slot];
+    final Element newChild = updateChild(oldChild, widget, slot);
+    if (oldChild != null) {
+      childToSlot.remove(oldChild);
+      slotToChild.remove(slot);
+    }
+    if (newChild != null) {
+      slotToChild[slot] = newChild;
+      childToSlot[newChild] = slot;
+    }
+  }
+
+  @override
+  void update(MultiChildRenderObjectWidget newWidget) {
+    super.update(newWidget);
+    assert(widget == newWidget);
+
+    // Update slotted children.
+    _updateChild(widget.backButton, _DestinationSlot.backButton);
+    _updateChild(widget.divider, _DestinationSlot.divider);
+    _updateChild(widget.nextButton, _DestinationSlot.nextButton);
+    _updateChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
+
+    // Update list children.
+    _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
+    _forgottenChildren.clear();
   }
 }
 
@@ -629,6 +806,23 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
        _page = page,
        super();
 
+  final Map<_DestinationSlot, RenderBox> slotToChild = <_DestinationSlot, RenderBox>{};
+  final Map<RenderBox, _DestinationSlot> childToSlot = <RenderBox, _DestinationSlot>{};
+
+  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _DestinationSlot slot) {
+    if (oldChild != null) {
+      dropChild(oldChild);
+      childToSlot.remove(oldChild);
+      slotToChild.remove(slot);
+    }
+    if (newChild != null) {
+      childToSlot[newChild] = slot;
+      slotToChild[slot] = newChild;
+      adoptChild(newChild);
+    }
+    return newChild;
+  }
+
   int _page;
   int get page => _page;
   set page(int value) {
@@ -637,6 +831,30 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     }
     _page = value;
     markNeedsLayout();
+  }
+
+  RenderBox _backButton;
+  RenderBox get backButton => _backButton;
+  set backButton(RenderBox value) {
+    _backButton = _updateChild(_backButton, value, _DestinationSlot.backButton);
+  }
+
+  RenderBox _divider;
+  RenderBox get divider => _divider;
+  set divider(RenderBox value) {
+    _divider = _updateChild(_divider, value, _DestinationSlot.divider);
+  }
+
+  RenderBox _nextButton;
+  RenderBox get nextButton => _nextButton;
+  set nextButton(RenderBox value) {
+    _nextButton = _updateChild(_nextButton, value, _DestinationSlot.nextButton);
+  }
+
+  RenderBox _nextButtonDisabled;
+  RenderBox get nextButtonDisabled => _nextButtonDisabled;
+  set nextButtonDisabled(RenderBox value) {
+    _nextButtonDisabled = _updateChild(_nextButtonDisabled, value, _DestinationSlot.nextButtonDisabled);
   }
 
   /*
@@ -878,6 +1096,14 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     }
     return false;
   }
+}
+
+enum _DestinationSlot {
+  backButton,
+  children,
+  divider,
+  nextButton,
+  nextButtonDisabled,
 }
 
 /// Text selection controls that follows iOS design conventions.
