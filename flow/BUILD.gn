@@ -86,20 +86,11 @@ source_set("flow") {
       "view_holder.h",
     ]
 
-    if (using_fuchsia_sdk) {
-      public_deps += [
-        "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-        "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
-        "$fuchsia_sdk_root/pkg:scenic_cpp",
-      ]
-    } else {
-      public_deps += [
-        "//garnet/public/lib/ui/scenic/cpp",
-        "//sdk/fidl/fuchsia.ui.scenic",
-        "//topaz/public/dart-pkg/zircon",
-        "//zircon/public/lib/zx",
-      ]
-    }
+    public_deps += [
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+      "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+      "$fuchsia_sdk_root/pkg:scenic_cpp",
+    ]
   }
 }
 

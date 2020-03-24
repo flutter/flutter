@@ -27,11 +27,9 @@ group("platform") {
       "windows",
     ]
   } else if (is_fuchsia) {
-    if (using_fuchsia_sdk) {
-      deps = [
-        "fuchsia",
-      ]
-    }
+    deps = [
+      "fuchsia",
+    ]
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }

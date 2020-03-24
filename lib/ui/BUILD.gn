@@ -135,15 +135,11 @@ source_set("ui") {
       "compositing/scene_host.h",
     ]
 
-    if (using_fuchsia_sdk) {
-      deps += [
-        "$fuchsia_sdk_root/pkg:async-cpp",
-        "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
-        "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
-      ]
-    } else {
-      deps += [ "//topaz/public/dart-pkg/zircon" ]
-    }
+    deps += [
+      "$fuchsia_sdk_root/pkg:async-cpp",
+      "//flutter/shell/platform/fuchsia/dart-pkg/fuchsia",
+      "//flutter/shell/platform/fuchsia/dart-pkg/zircon",
+    ]
   }
 }
 
