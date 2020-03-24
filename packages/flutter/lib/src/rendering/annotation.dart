@@ -124,7 +124,7 @@ abstract class Annotator extends AbstractNode with DiagnosticableTreeMixin {
   /// This has no effect if the annotator's parent is already null.
   @mustCallSuper
   void remove() {
-    parent?._removeChild(this);
+    parent?.removeChild(this);
   }
 
   /// Search this annotator and its subtree for annotations of type `S` at the
@@ -206,7 +206,8 @@ abstract class ContainerAnnotator extends Annotator {
   }
 
   // Implementation of [Annotator.remove].
-  void _removeChild(Annotator child) {
+  @protected
+  void removeChild(Annotator child) {
     assert(child.parent == this);
     assert(child.attached == attached);
     // assert(_debugUltimatePreviousSiblingOf(child, equals: firstChild));
@@ -555,4 +556,19 @@ class SingleTypeAnnotator<T> extends ContainerAnnotator {
     properties.add(DiagnosticsProperty<Offset>('searchSelfOffset', searchSelfOffset));
     properties.add(DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
   }
+}
+
+class AlwaysEmptyContainerAnnotator extends ContainerAnnotator {
+  @override
+  Annotator get firstChild => null;
+
+  @override
+  Annotator get lastChild => null;
+
+  @override
+  void append(Annotator child) {}
+
+  @override
+  @protected
+  void removeChild(Annotator child) {}
 }

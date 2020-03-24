@@ -114,6 +114,7 @@ class PaintingContext extends ClipContext {
   @protected
   PaintingContext(this._containerLayer, ContainerAnnotator annotator, this.estimatedBounds)
     : assert(_containerLayer != null),
+      assert(annotator != null),
       assert(estimatedBounds != null) {
     _currentAnnotator = annotator;
   }
