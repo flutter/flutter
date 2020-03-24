@@ -63,7 +63,11 @@ abstract class DesktopDevice extends Device {
   Future<String> get sdkNameAndVersion async => globals.os.name;
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
   }
 

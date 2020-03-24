@@ -673,9 +673,16 @@ class AndroidDevice extends Device {
   }
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ AndroidApk app }) async {
+  FutureOr<DeviceLogReader> getLogReader({
+    AndroidApk app,
+    bool includePastLogs = false,
+  }) async {
     // The Android log reader isn't app-specific.
-    return _logReader ??= await AdbLogReader.createLogReader(this, globals.processManager);
+    return _logReader ??= await AdbLogReader.createLogReader(
+      this,
+      globals.processManager,
+      includePastLogs: includePastLogs,
+    );
   }
 
   @override
@@ -901,6 +908,9 @@ class AdbLogReader extends DeviceLogReader {
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
     ProcessManager processManager,
+    {
+      bool includePastLogs = false,
+    }
   ) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
@@ -915,7 +925,12 @@ class AdbLogReader extends DeviceLogReader {
       'logcat',
       '-v',
       'time',
-      if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
+      // If we include logs from the past, filter for 'flutter' logs only.
+      if (includePastLogs) ...<String>[
+        '-s',
+        'flutter',
+      ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
+        // Otherwise, filter for logs appearing past the present.
         // Empty `-T` means the timestamp of the logcat command invocation.
         '-T',
         device.lastLogcatTimestamp ?? '',
