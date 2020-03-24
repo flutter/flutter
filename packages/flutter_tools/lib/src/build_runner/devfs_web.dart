@@ -114,6 +114,41 @@ class WebAssetServer implements AssetReader {
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
+      // Return the set of all active modules. This is populated by the
+      // frontend_server update logic.
+      Future<Map<String, String>> moduleProvider(String path) async {
+        return modules;
+      }
+      // Return a version string for all active modules. This is populated
+      // along with the `moduleProvider` update logic.
+      Future<Map<String, String>> digestProvider(String path) async {
+        return digests;
+      }
+      // Return the module name for a given server path. These are the names
+      // used by the browser to request JavaScript files.
+      String moduleForServerPath(String path) {
+        if (serverPath.endsWith('.lib.js')) {
+          serverPath = serverPath.startsWith('/')
+            ? serverPath.substring(1)
+            : serverPath;
+          return serverPath.replaceAll('.lib.js', '');
+        }
+        return null;
+      }
+      // Return the server path for modules. These are the JavaScript file names
+      // output by the frontend_server.
+      String serverPathForModule(String module) {
+        return '$module.lib.js';
+      }
+      // Return the server path for modules that have an org-dartlang-app
+      // scheme.
+      String serverPathForAppUri(String appUri) {
+        if (appUri.startsWith('org-dartlang-app:')) {
+          return Uri.parse(appUri).path.substring(1);
+        }
+        return null;
+      }
+
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await Dwds.start(
         assetReader: server,
@@ -129,24 +164,11 @@ class WebAssetServer implements AssetReader {
         loadStrategy: RequireStrategy(
           ReloadConfiguration.none,
           '.lib.js',
-          (String path) async => modules,
-          (String path) async => digests,
-          (String serverPath) {
-            if (serverPath.endsWith('.lib.js')) {
-              serverPath = serverPath.startsWith('/')
-                ? serverPath.substring(1)
-                : serverPath;
-              return serverPath.replaceAll('.lib.js', '');
-            }
-            return null;
-          },
-          (String module) => '$module.lib.js',
-          (String appUri) {
-            if (appUri.startsWith('org-dartlang-app:')) {
-              return Uri.parse(appUri).path.substring(1);
-            }
-            return null;
-          }
+          moduleProvider,
+          digestProvider,
+          moduleForServerPath,
+          serverPathForModule,
+          serverPathForAppUri,
         ),
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
