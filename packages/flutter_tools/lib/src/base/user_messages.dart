@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
+import '../globals.dart' as globals;
 import 'context.dart';
 
 UserMessages get userMessages => context.get<UserMessages>();
@@ -295,11 +295,11 @@ class UserMessages {
       'https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html\n';
 
   String get _androidSdkInstallUrl {
-    if (Platform.isMacOS) {
+    if (globals.platform.isMacOS) {
       return 'https://flutter.dev/docs/get-started/install/macos#android-setup';
-    } else if (Platform.isLinux) {
+    } else if (globals.platform.isLinux) {
       return 'https://flutter.dev/docs/get-started/install/linux#android-setup';
-    } else  if (Platform.isWindows) {
+    } else  if (globals.platform.isWindows) {
       return 'https://flutter.dev/docs/get-started/install/windows#android-setup';
     } else {
       return 'https://flutter.dev/docs/get-started/install';
