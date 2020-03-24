@@ -52,6 +52,8 @@ Future<void> buildWeb(
         kDartDefines: jsonEncode(buildInfo.dartDefines),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        if (buildInfo.extraFrontEndOptions.isNotEmpty ?? false)
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(',')
       },
     ));
     if (!result.success) {
