@@ -22,8 +22,9 @@ String cwd = Directory.current.path;
 String get localEngine {
   // Use two distinct `defaultValue`s to determine whether a 'localEngine'
   // declaration exists in the environment.
-  const isDefined = String.fromEnvironment('localEngine', defaultValue: 'a') ==
-      String.fromEnvironment('localEngine', defaultValue: 'b');
+  const bool isDefined =
+      String.fromEnvironment('localEngine', defaultValue: 'a') ==
+          String.fromEnvironment('localEngine', defaultValue: 'b');
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
@@ -32,7 +33,7 @@ String get localEngine {
 String get localEngineSrcPath {
   // Use two distinct `defaultValue`s to determine whether a
   // 'localEngineSrcPath' declaration exists in the environment.
-  const isDefined =
+  const bool isDefined =
       String.fromEnvironment('localEngineSrcPath', defaultValue: 'a') ==
           String.fromEnvironment('localEngineSrcPath', defaultValue: 'b');
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
