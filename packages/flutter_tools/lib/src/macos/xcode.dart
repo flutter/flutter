@@ -233,7 +233,7 @@ class XCDevice {
 
   Future<List<dynamic>> _getAllDevices({
     bool useCache = false,
-    @required Duration timeout
+    Duration timeout
   }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -271,7 +271,6 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// [timeout] defaults to 1 second.
   Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout);
 
