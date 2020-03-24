@@ -5,17 +5,13 @@
 import("//build/fuchsia/sdk.gni")
 
 config("vulkan_config") {
-  if (using_fuchsia_sdk) {
-    include_dirs = [ "$fuchsia_sdk_root/vulkan/include" ]
-  } else if (is_fuchsia) {
-    include_dirs =
-        [ "//third_party/vulkan_loader_and_validation_layers/include" ]
-  } else {
-    include_dirs = [ "//third_party/vulkan/src" ]
-  }
-
+  include_dirs = []
+  defines = []
   if (is_fuchsia) {
-    defines = [ "VK_USE_PLATFORM_FUCHSIA=1" ]
+    include_dirs += [ "$fuchsia_sdk_root/vulkan/include" ]
+    defines += [ "VK_USE_PLATFORM_FUCHSIA=1" ]
+  } else {
+    include_dirs += [ "//third_party/vulkan/src" ]
   }
 }
 

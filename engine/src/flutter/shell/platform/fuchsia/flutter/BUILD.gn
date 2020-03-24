@@ -25,17 +25,6 @@ shell_gpu_configuration("fuchsia_gpu_configuration") {
 # 1. Kernel snapshot framework mode.
 # 2. Profiler symbols.
 
-# Dependencies for flutter tooling
-#
-# While not required to run a flutter mod, these allow interacting
-# with flutter via the fx tool and need to be built.
-#
-# This is only for builds in topaz tree.
-flutter_tool_deps = []
-if (!using_fuchsia_sdk) {
-  flutter_tool_deps += [ "//third_party/dart-pkg/git/flutter/packages/flutter_tools:fuchsia_attach($host_toolchain)" ]
-}
-
 flutter_runner("jit") {
   output_name = "flutter_jit_runner"
   product = false
@@ -50,9 +39,9 @@ flutter_runner("jit") {
   }
 
   extra_deps = [
-                 "//third_party/dart/runtime:libdart_jit",
-                 "//third_party/dart/runtime/platform:libdart_platform_jit",
-               ] + flutter_tool_deps
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
+  ]
 }
 
 flutter_runner("jit_product") {

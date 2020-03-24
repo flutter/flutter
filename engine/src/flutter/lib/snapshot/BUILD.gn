@@ -30,12 +30,7 @@ compiled_action("generate_snapshot_bin") {
     tool = "//third_party/dart/runtime/bin:gen_snapshot"
   }
 
-  if ((is_fuchsia || is_fuchsia_host) && !using_fuchsia_sdk) {
-    platform_kernel =
-        "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
-  } else {
-    platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
-  }
+  platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
 
   inputs = [
     platform_kernel,
@@ -217,11 +212,7 @@ bin_to_linkable("platform_strong_dill_linkable") {
   deps = [
     ":kernel_platform_files",
   ]
-  if ((is_fuchsia || is_fuchsia_host) && !using_fuchsia_sdk) {
-    input = "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
-  } else {
-    input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
-  }
+  input = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   symbol = "kPlatformStrongDill"
   size_symbol = "kPlatformStrongDillSize"
   executable = false
@@ -283,16 +274,8 @@ compile_platform("strong_platform") {
 }
 
 # Fuchsia's snapshot requires a different platform with extra dart: libraries.
-if ((is_fuchsia || is_fuchsia_host) && !using_fuchsia_sdk) {
-  group("kernel_platform_files") {
-    public_deps = [
-      "//topaz/runtime/flutter_runner/kernel:kernel_platform_files",
-    ]
-  }
-} else {
-  group("kernel_platform_files") {
-    public_deps = [
-      ":strong_platform",
-    ]
-  }
+group("kernel_platform_files") {
+  public_deps = [
+    ":strong_platform",
+  ]
 }
