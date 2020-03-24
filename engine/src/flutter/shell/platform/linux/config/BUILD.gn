@@ -3,7 +3,17 @@
 # found in the LICENSE file.
 
 import("//build/config/linux/pkg_config.gni")
+import("//flutter/shell/platform/linux/config.gni")
 
 pkg_config("x11") {
   packages = [ "x11" ]
+}
+
+if (build_linux_shell) {
+  pkg_config("gtk") {
+    packages = [ "gtk+-3.0" ]
+  }
+  pkg_config("egl") {
+    packages = [ "egl" ]
+  }
 }
