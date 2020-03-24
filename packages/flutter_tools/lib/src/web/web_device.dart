@@ -138,7 +138,7 @@ class ChromeDevice extends Device {
     if (launchChrome) {
       _chrome = await globals.chromeLauncher.launch(
         url,
-        dataDir: globals.fs.currentDirectory
+        cacheDir: globals.fs.currentDirectory
             .childDirectory('.dart_tool')
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
