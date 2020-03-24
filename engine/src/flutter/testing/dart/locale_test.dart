@@ -53,4 +53,10 @@ void main() {
     expect(const Locale.fromSubtags(languageCode: 'en').hashCode,
            isNot(const Locale.fromSubtags(languageCode: 'en', scriptCode: 'Latn').hashCode));
   });
+
+  test('Locale toString does not include separator for \'\'', () {
+    expect(const Locale('en').toString(), 'en');
+    expect(const Locale('en', '').toString(), 'en');
+    expect(const Locale('en', 'US').toString(), 'en_US');
+  });
 }
