@@ -60,11 +60,11 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   await eventOrExit(ready.future).timeout(const Duration(seconds: 5), onTimeout: () {
     // If it can't attach in 5 seconds, it's not capable of finding the
     // observatory URL in the logs.
-    throw 'Failed to attach to running Flutter process';
+    throw TaskResult.failure('Failed to attach to running Flutter process');
   });
 
   if (exitCode != null)
-    throw 'Failed to attach to test app; command unexpected exited, with exit code $exitCode.';
+    throw TaskResult.failure('Failed to attach to test app; command unexpected exited, with exit code $exitCode.');
 
   process.stdin.write('r');
   process.stdin.flush();
@@ -79,10 +79,10 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   await process.exitCode;
 
   if (stderr.isNotEmpty)
-    throw 'flutter attach had output on standard error.';
+    throw TaskResult.failure('flutter attach had output on standard error.');
 
   if (exitCode != 0)
-    throw 'exit code was not 0';
+    throw TaskResult.failure('exit code was not 0');
 }
 
 void main() {

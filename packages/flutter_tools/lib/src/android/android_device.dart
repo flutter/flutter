@@ -213,6 +213,7 @@ class AndroidDevice extends Device {
   Future<String> get apiVersion => _getProperty('ro.build.version.sdk');
 
   AdbLogReader _logReader;
+  AdbLogReader _pastLogReader;
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
@@ -677,12 +678,19 @@ class AndroidDevice extends Device {
     AndroidApk app,
     bool includePastLogs = false,
   }) async {
-    // The Android log reader isn't app-specific.
-    return _logReader ??= await AdbLogReader.createLogReader(
-      this,
-      globals.processManager,
-      includePastLogs: includePastLogs,
-    );
+    // The Android log reader isn't app-specific. The `app` parameter isn't used.
+    if (includePastLogs) {
+      return _pastLogReader ??= await AdbLogReader.createLogReader(
+        this,
+        globals.processManager,
+        includePastLogs: true,
+      );
+    } else {
+      return _logReader ??= await AdbLogReader.createLogReader(
+        this,
+        globals.processManager,
+      );
+    }
   }
 
   @override
@@ -731,6 +739,7 @@ class AndroidDevice extends Device {
   @override
   Future<void> dispose() async {
     _logReader?._stop();
+    _pastLogReader?._stop();
     await _portForwarder?.dispose();
   }
 }
