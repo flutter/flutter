@@ -189,6 +189,7 @@ void main() {
             logger: logger,
             fileSystem: fileSystem,
             terminal: Terminal.test(),
+            usage: null,
           ),
         ),
         artifacts: mockArtifacts,

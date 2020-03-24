@@ -48,6 +48,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: null,
     );
   });
 
@@ -130,6 +131,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: null,
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -261,6 +263,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: null,
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -282,6 +285,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: null,
     );
 
     expect(
