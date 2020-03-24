@@ -126,7 +126,12 @@ Future<T> runInContext<T>(
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IMobileDevice: () => IMobileDevice(),
+      IMobileDevice: () => IMobileDevice(
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        logger: globals.logger,
+        processManager: globals.processManager,
+      ),
       IOSDeploy: () => IOSDeploy(
         artifacts: globals.artifacts,
         cache: globals.cache,

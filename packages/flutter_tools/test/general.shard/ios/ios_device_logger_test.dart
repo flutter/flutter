@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -11,14 +12,19 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   FakeProcessManager processManager;
   MockArtifacts artifacts;
+  FakeCache fakeCache;
+  BufferLogger logger;
 
   setUp(() {
     processManager = FakeProcessManager.list(<FakeCommand>[]);
+    fakeCache = FakeCache();
     artifacts = MockArtifacts();
+    logger = BufferLogger.test();
     when(artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios))
       .thenReturn('idevice-syslog');
   });
@@ -37,8 +43,7 @@ void main() {
     expect(decoded, r'I \M-b\M^O syslog!');
   });
 
-  // IMobileDevice uses context.
-  testUsingContext('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
+  testWithoutContext('IOSDeviceLogReader suppresses non-Flutter lines from output with syslog', () async {
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
@@ -54,18 +59,19 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
       ),
     );
     final DeviceLogReader logReader = IOSDeviceLogReader.test(
-      iMobileDevice: IMobileDevice(),
+      iMobileDevice: IMobileDevice(
+        artifacts: artifacts,
+        processManager: processManager,
+        cache: fakeCache,
+        logger: logger,
+      ),
     );
     final List<String> lines = await logReader.logLines.toList();
 
     expect(lines, <String>['A is for ari', 'I is for ichigo']);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => processManager,
-    Artifacts: () => artifacts,
   });
 
-  // IMobileDevice uses context.
-  testUsingContext('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
+  testWithoutContext('IOSDeviceLogReader includes multi-line Flutter logs in the output with syslog', () async {
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
@@ -81,7 +87,12 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       ),
     );
     final DeviceLogReader logReader = IOSDeviceLogReader.test(
-      iMobileDevice: IMobileDevice()
+      iMobileDevice: IMobileDevice(
+        artifacts: artifacts,
+        processManager: processManager,
+        cache: fakeCache,
+        logger: logger,
+      ),
     );
     final List<String> lines = await logReader.logLines.toList();
 
@@ -91,13 +102,9 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       'This is a multi-line message,',
       '  with a non-Flutter log message following it.',
     ]);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => processManager,
-    Artifacts: () => artifacts,
   });
 
-  // IMobileDevice uses context.
-  testUsingContext('includes multi-line Flutter logs in the output', () async {
+  testWithoutContext('includes multi-line Flutter logs in the output', () async {
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
@@ -114,7 +121,12 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     );
 
     final DeviceLogReader logReader = IOSDeviceLogReader.test(
-      iMobileDevice: IMobileDevice()
+      iMobileDevice: IMobileDevice(
+        artifacts: artifacts,
+        processManager: processManager,
+        cache: fakeCache,
+        logger: logger,
+      ),
     );
     final List<String> lines = await logReader.logLines.toList();
 
@@ -124,9 +136,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       'This is a multi-line message,',
       '  with a non-Flutter log message following it.',
     ]);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => processManager,
-    Artifacts: () => artifacts,
   });
 }
 
