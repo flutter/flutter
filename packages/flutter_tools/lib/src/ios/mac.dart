@@ -160,7 +160,11 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice) {
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      iosApp: app,
+      processUtils: processUtils,
+      logger: globals.logger
+    );
   }
 
   final FlutterProject project = FlutterProject.current();
