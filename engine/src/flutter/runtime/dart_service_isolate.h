@@ -11,16 +11,54 @@
 #include <string>
 
 #include "flutter/fml/compiler_specific.h"
-
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
 
+//------------------------------------------------------------------------------
+/// @brief      Utility methods for interacting with the DartVM managed service
+///             isolate present in debug and profile runtime modes.
+///
 class DartServiceIsolate {
  public:
-  using ObservatoryServerStateCallback =
-      std::function<void(const std::string&)>;
+  //----------------------------------------------------------------------------
+  /// The handle used to refer to callbacks registered with the service isolate.
+  ///
+  using CallbackHandle = ptrdiff_t;
 
+  //----------------------------------------------------------------------------
+  /// A callback made by the Dart VM when the observatory is ready. The argument
+  /// indicates the observatory URI.
+  ///
+  using ObservatoryServerStateCallback =
+      std::function<void(const std::string& observatory_uri)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Start the service isolate. This call may only be made in the
+  ///             Dart VM initiated isolate creation callback. It is only valid
+  ///             to make this call when the VM explicitly requests the creation
+  ///             of the service isolate. The VM does this by specifying the
+  ///             script URI to be `DART_VM_SERVICE_ISOLATE_NAME`. The isolate
+  ///             to be designated as the service isolate must already be
+  ///             created (but not running) when this call is made.
+  ///
+  /// @param[in]  server_ip                     The service protocol IP address.
+  /// @param[in]  server_port                   The service protocol port.
+  /// @param[in]  embedder_tag_handler          The library tag handler.
+  /// @param[in]  disable_origin_check          If websocket origin checks must
+  ///                                           be enabled.
+  /// @param[in]  disable_service_auth_codes    If service auth codes must be
+  ///                                           enabled.
+  /// @param[in]  enable_service_port_fallback  If fallback to port 0 must be
+  ///                                           enabled when the bind fails.
+  /// @param      error                         The error when this method
+  ///                                           returns false. This string must
+  ///                                           be freed by the caller using
+  ///                                           `free`.
+  ///
+  /// @return     If the startup was successful. Refer to the `error` for
+  ///             details on failure.
+  ///
   static bool Startup(std::string server_ip,
                       intptr_t server_port,
                       Dart_LibraryTagHandler embedder_tag_handler,
@@ -29,14 +67,32 @@ class DartServiceIsolate {
                       bool enable_service_port_fallback,
                       char** error);
 
-  using CallbackHandle = ptrdiff_t;
-
-  // Returns a handle for the callback that can be used in
-  // RemoveServerStatusCallback
+  //----------------------------------------------------------------------------
+  /// @brief      Add a callback that will get invoked when the observatory
+  ///             starts up. If the observatory has already started before this
+  ///             call is made, the callback is invoked immediately.
+  ///
+  ///             This method is thread safe.
+  ///
+  /// @param[in]  callback  The callback with information about the observatory.
+  ///
+  /// @return     A handle for the callback that can be used later in
+  ///             `RemoveServerStatusCallback`.
+  ///
   [[nodiscard]] static CallbackHandle AddServerStatusCallback(
       const ObservatoryServerStateCallback& callback);
 
-  // Accepts the handle returned by AddServerStatusCallback
+  //----------------------------------------------------------------------------
+  /// @brief      Removed a callback previously registered via
+  ///             `AddServiceStatusCallback`.
+  ///
+  ///             This method is thread safe.
+  ///
+  /// @param[in]  handle  The handle
+  ///
+  /// @return     If the callback was unregistered. This may fail if there was
+  ///             no such callback with that handle.
+  ///
   static bool RemoveServerStatusCallback(CallbackHandle handle);
 
  private:
