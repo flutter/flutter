@@ -35,8 +35,8 @@ if($?) {
   Write-Host "Merge Successful!"
 }
 else {
-  git diff
   git merge --abort
+  git diff HEAD $remoteRevision
   Write-Host "Attempting to merge upstream master failed!"
   Write-Host "The merge has been aborted and tests will continue on the branch as"
   Write-Host "is. You will still need to resolve the conflict before merging this"

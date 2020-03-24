@@ -26,8 +26,8 @@ git config user.name 'Flutter CI'
 
 # -X renormalize will ignore EOL whitespace diffs in the merge
 git merge "$REMOTE/master" --no-edit --stat --no-verify -X renormalize || {
-  git diff # log the merge conflict
   git merge --abort || true
+  git diff HEAD $REMOTE_REVISION # log the merge conflict
   echo 'Attempting to merge upstream master failed!'
   echo 'The merge has been aborted and tests will continue on the branch as'
   echo 'is. You will still need to resolve the conflict before merging this'
