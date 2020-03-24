@@ -129,13 +129,6 @@ Future<T> runInContext<T>(
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IOSDeploy: () => IOSDeploy(
-        artifacts: globals.artifacts,
-        cache: globals.cache,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         simControl: globals.simControl,
         xcode: globals.xcode,
@@ -215,6 +208,13 @@ Future<T> runInContext<T>(
           artifacts: globals.artifacts,
           cache: globals.cache,
           logger: globals.logger,
+          processManager: globals.processManager,
+        ),
+        iosDeploy: IOSDeploy(
+          artifacts: globals.artifacts,
+          cache: globals.cache,
+          logger: globals.logger,
+          platform: globals.platform,
           processManager: globals.processManager,
         ),
         xcode: globals.xcode,
