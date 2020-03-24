@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -36,14 +37,14 @@ class MockIosProject extends Mock implements IosProject {}
 
 void main() {
   group('IMobileDevice', () {
-    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
-      ..operatingSystem = 'macos';
     final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
+    Logger logger;
 
     setUp(() {
+      logger = BufferLogger.test();
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
@@ -63,7 +64,7 @@ void main() {
         when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
-      testUsingContext('error if idevicescreenshot is not installed', () async {
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
 
         // Let `idevicescreenshot` fail with exit code 1.
@@ -72,11 +73,14 @@ void main() {
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
-        expect(() async => await globals.iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-        Cache: () => mockCache,
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       });
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
@@ -84,15 +88,20 @@ void main() {
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
-        await globals.iMobileDevice.takeScreenshot(mockOutputFile);
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
-        Cache: () => mockCache,
-        Artifacts: () => mockArtifacts,
       });
     });
   });
