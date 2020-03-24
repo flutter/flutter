@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -86,6 +85,9 @@ void main() {
     });
 
     testUsingContext('No valid code signing certificates shows instructions', () async {
+      when(mockIosProject.buildSettings).thenAnswer((_) {
+        return Future<Map<String, String>>.value(<String, String>{});
+      });
       when(mockProcessManager.run(
         <String>['which', 'security'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -102,19 +104,11 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((_) => Future<ProcessResult>.value(exitsHappy));
 
-
-      Map<String, String> signingConfigs;
-      try {
-        signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
-          iosApp: app,
-          processManager: mockProcessManager,
-          logger: logger,
-        );
-        fail('No identity should throw tool error');
-      } on ToolExit {
-        expect(signingConfigs, isNull);
-        expect(logger.errorText, contains('No valid code signing certificates were found'));
-      }
+      expect(() async => await getCodeSigningIdentityDevelopmentTeam(
+        iosApp: app,
+        processManager: mockProcessManager,
+        logger: logger,
+      ), throwsToolExit(message: 'No development certificates available to code sign app for device deployment'));
     },
     overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(wrapText: false),
