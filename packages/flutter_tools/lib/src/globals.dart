@@ -19,7 +19,6 @@ import 'base/net.dart';
 import 'base/os.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
-import 'base/user_messages.dart';
 import 'cache.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_deploy.dart';
@@ -77,7 +76,6 @@ IOSDeploy get iosDeploy => context.get<IOSDeploy>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 SimControl get simControl => context.get<SimControl>();
-UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 

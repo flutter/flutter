@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputPreferences;
-import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/user_messages.dart' as user_messages;
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/doctor.dart';
 
@@ -33,7 +33,6 @@ void main() {
   MemoryFileSystem fs;
   MockProcessManager processManager;
   MockStdio stdio;
-  UserMessages userMessages;
 
   setUp(() {
     sdk = MockAndroidSdk();
@@ -48,7 +47,6 @@ void main() {
     );
     processManager = MockProcessManager();
     stdio = MockStdio();
-    userMessages = UserMessages();
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
@@ -205,12 +203,11 @@ void main() {
       logger: logger,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-      userMessages: userMessages,
     ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
       validationResult.messages.last.message,
-      userMessages.androidSdkLicenseOnly(kAndroidHome),
+      user_messages.androidSdkLicenseOnly(kAndroidHome),
     );
   });
 
@@ -226,7 +223,7 @@ void main() {
     when(sdk.latestVersion).thenReturn(mockSdkVersion);
     when(sdk.validateSdkWellFormed()).thenReturn(<String>[]);
     when(processManager.runSync(<String>['which', 'java'])).thenReturn(ProcessResult(123, 1, '', ''));
-    final String errorMessage = userMessages.androidSdkBuildToolsOutdated(
+    final String errorMessage = user_messages.androidSdkBuildToolsOutdated(
       sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
@@ -239,7 +236,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
-      userMessages: userMessages,
     );
 
     ValidationResult validationResult = await androidValidator.validate();
@@ -289,7 +285,7 @@ void main() {
     const String javaVersionText = 'openjdk version "1.7.0_212"';
     when(processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
       Future<ProcessResult>.value(ProcessResult(0, 0, null, javaVersionText)));
-    final String errorMessage = userMessages.androidJavaMinimumVersion(javaVersionText);
+    final String errorMessage = user_messages.androidJavaMinimumVersion(javaVersionText);
 
     final ValidationResult validationResult = await AndroidValidator(
       androidSdk: sdk,
@@ -298,7 +294,6 @@ void main() {
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
-      userMessages: userMessages,
     ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
@@ -315,7 +310,6 @@ void main() {
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
       processManager: processManager,
-      userMessages: userMessages,
     ).validate();
     expect(
       validationResult.messages.any(

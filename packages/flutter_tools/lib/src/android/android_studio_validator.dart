@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' as user_messages;
 import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart' as globals;
@@ -35,9 +35,9 @@ class AndroidStudioValidator extends DoctorValidator {
 
     final String studioVersionText = _studio.version == Version.unknown
       ? null
-      : userMessages.androidStudioVersion(_studio.version.toString());
+      : user_messages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(
-      userMessages.androidStudioLocation(_studio.directory),
+      user_messages.androidStudioLocation(_studio.directory),
     ));
 
     final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
@@ -61,9 +61,9 @@ class AndroidStudioValidator extends DoctorValidator {
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
         (String m) => ValidationMessage.error(m),
       ));
-      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
+      messages.add(ValidationMessage(user_messages.androidStudioNeedsUpdate));
       if (_studio.configured != null) {
-        messages.add(ValidationMessage(userMessages.androidStudioResetDir));
+        messages.add(ValidationMessage(user_messages.androidStudioResetDir));
       }
     }
 
@@ -87,10 +87,10 @@ class NoAndroidStudioValidator extends DoctorValidator {
     ) as String;
     if (cfgAndroidStudio != null) {
       messages.add(ValidationMessage.error(
-        userMessages.androidStudioMissing(cfgAndroidStudio),
+        user_messages.androidStudioMissing(cfgAndroidStudio),
       ));
     }
-    messages.add(ValidationMessage(userMessages.androidStudioInstallation));
+    messages.add(ValidationMessage(user_messages.androidStudioInstallation));
 
     return ValidationResult(
       ValidationType.notAvailable,

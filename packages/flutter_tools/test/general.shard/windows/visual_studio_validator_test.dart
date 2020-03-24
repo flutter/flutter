@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/user_messages.dart' hide userMessages;
+import 'package:flutter_tools/src/base/user_messages.dart' as user_messages;
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-
-final UserMessages userMessages = UserMessages();
 
 void main() {
   group('Visual Studio validation', () {
@@ -63,28 +61,26 @@ void main() {
 
     testWithoutContext('Emits a message when Visual Studio is a pre-release version', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isPrerelease).thenReturn(true);
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage(userMessages.visualStudioIsPrerelease);
+      final ValidationMessage expectedMessage = ValidationMessage(user_messages.visualStudioIsPrerelease);
 
       expect(result.messages.contains(expectedMessage), true);
     });
 
     testWithoutContext('Emits a partial status when Visual Studio installation is incomplete', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isComplete).thenReturn(false);
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioIsIncomplete);
+      final ValidationMessage expectedMessage = ValidationMessage.error(user_messages.visualStudioIsIncomplete);
 
       expect(result.messages.contains(expectedMessage), true);
       expect(result.type, ValidationType.partial);
@@ -92,14 +88,13 @@ void main() {
 
     testWithoutContext('Emits a partial status when Visual Studio installation needs rebooting', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isRebootRequired).thenReturn(true);
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioRebootRequired);
+      final ValidationMessage expectedMessage = ValidationMessage.error(user_messages.visualStudioRebootRequired);
 
       expect(result.messages.contains(expectedMessage), true);
       expect(result.type, ValidationType.partial);
@@ -107,14 +102,13 @@ void main() {
 
     testWithoutContext('Emits a partial status when Visual Studio installation is not launchable', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
       when(mockVisualStudio.isLaunchable).thenReturn(false);
 
       final ValidationResult result = await validator.validate();
-      final ValidationMessage expectedMessage = ValidationMessage.error(userMessages.visualStudioNotLaunchable);
+      final ValidationMessage expectedMessage = ValidationMessage.error(user_messages.visualStudioNotLaunchable);
 
       expect(result.messages.contains(expectedMessage), true);
       expect(result.type, ValidationType.partial);
@@ -122,14 +116,13 @@ void main() {
 
     testWithoutContext('Emits partial status when Visual Studio is installed but too old', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsTooOld();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedMessage = ValidationMessage.error(
-        userMessages.visualStudioTooOld(
+        user_messages.visualStudioTooOld(
           mockVisualStudio.minimumVersionDescription,
           mockVisualStudio.workloadDescription,
           mockVisualStudio.necessaryComponentDescriptions(),
@@ -142,7 +135,6 @@ void main() {
 
     testWithoutContext('Emits partial status when Visual Studio is installed without necessary components', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
@@ -154,14 +146,13 @@ void main() {
 
     testWithoutContext('Emits installed status when Visual Studio is installed with necessary components', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsInstalled();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedDisplayNameMessage = ValidationMessage(
-        userMessages.visualStudioVersion(mockVisualStudio.displayName, mockVisualStudio.fullVersion));
+        user_messages.visualStudioVersion(mockVisualStudio.displayName, mockVisualStudio.fullVersion));
 
       expect(result.messages.contains(expectedDisplayNameMessage), true);
       expect(result.type, ValidationType.installed);
@@ -169,14 +160,13 @@ void main() {
 
     testWithoutContext('Emits missing status when Visual Studio is not installed', () async {
       final VisualStudioValidator validator = VisualStudioValidator(
-        userMessages: userMessages,
         visualStudio: mockVisualStudio,
       );
       _configureMockVisualStudioAsNotInstalled();
 
       final ValidationResult result = await validator.validate();
       final ValidationMessage expectedMessage = ValidationMessage.error(
-        userMessages.visualStudioMissing(
+        user_messages.visualStudioMissing(
           mockVisualStudio.workloadDescription,
           mockVisualStudio.necessaryComponentDescriptions(),
         ),

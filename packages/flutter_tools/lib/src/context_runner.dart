@@ -19,7 +19,6 @@ import 'base/os.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/time.dart';
-import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -82,7 +81,6 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
-        userMessages: globals.userMessages,
       ),
       AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
@@ -184,9 +182,7 @@ Future<T> runInContext<T>(
       Usage: () => Usage(
         runningOnBot: runningOnBot,
       ),
-      UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
-        userMessages: globals.userMessages,
         visualStudio: VisualStudio(
           fileSystem: globals.fs,
           platform: globals.platform,

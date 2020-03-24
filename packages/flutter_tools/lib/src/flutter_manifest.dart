@@ -7,7 +7,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
-import 'base/user_messages.dart';
+import 'base/user_messages.dart' as user_messages;
 import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
@@ -91,7 +91,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        globals.printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        globals.printStatus(user_messages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' as user_messages;
 import '../doctor.dart';
 import '../globals.dart' as globals;
 import 'xcode.dart';
@@ -22,7 +22,7 @@ class XcodeValidator extends DoctorValidator {
     if (globals.xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage(userMessages.xcodeLocation(globals.xcode.xcodeSelectPath)));
+      messages.add(ValidationMessage(user_messages.xcodeLocation(globals.xcode.xcodeSelectPath)));
 
       xcodeVersionInfo = globals.xcode.versionText;
       if (xcodeVersionInfo.contains(',')) {
@@ -33,25 +33,25 @@ class XcodeValidator extends DoctorValidator {
       if (!globals.xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
         messages.add(ValidationMessage.error(
-            userMessages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
+            user_messages.xcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
         ));
       }
 
       if (!globals.xcode.eulaSigned) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.xcodeEula));
+        messages.add(ValidationMessage.error(user_messages.xcodeEula));
       }
       if (!globals.xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.xcodeMissingSimct));
+        messages.add(ValidationMessage.error(user_messages.xcodeMissingSimct));
       }
 
     } else {
       xcodeStatus = ValidationType.missing;
       if (globals.xcode.xcodeSelectPath == null || globals.xcode.xcodeSelectPath.isEmpty) {
-        messages.add(ValidationMessage.error(userMessages.xcodeMissing));
+        messages.add(ValidationMessage.error(user_messages.xcodeMissing));
       } else {
-        messages.add(ValidationMessage.error(userMessages.xcodeIncomplete));
+        messages.add(ValidationMessage.error(user_messages.xcodeIncomplete));
       }
     }
 

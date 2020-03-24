@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/user_messages.dart' as user_messages;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -515,11 +515,11 @@ void main() {
 
       expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
       final List<String> statusLines = testLogger.statusText.split('\n');
-      for (final String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+      for (final String msg in user_messages.flutterBinariesDoNotRun.split('\n')) {
         expect(statusLines, contains(contains(msg)));
       }
       if (globals.platform.isLinux) {
-        for (final String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+        for (final String msg in user_messages.flutterBinariesLinuxRepairCommands.split('\n')) {
           expect(statusLines, contains(contains(msg)));
         }
       }

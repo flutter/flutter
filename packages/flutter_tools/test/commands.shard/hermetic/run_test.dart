@@ -14,7 +14,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/user_messages.dart' as user_messages;
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -225,7 +225,7 @@ void main() {
           expect(e.message, null);
         }
 
-        expect(testLogger.statusText, contains(userMessages.flutterNoSupportedDevices));
+        expect(testLogger.statusText, contains(user_messages.flutterNoSupportedDevices));
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,

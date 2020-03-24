@@ -15,7 +15,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
-import 'base/user_messages.dart';
+import 'base/user_messages.dart' as user_messages;
 import 'build_info.dart';
 import 'fuchsia/application_package.dart';
 import 'globals.dart' as globals;
@@ -111,7 +111,7 @@ class AndroidApk extends ApplicationPackage {
   factory AndroidApk.fromApk(File apk) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
-      globals.printError(userMessages.aaptNotFound);
+      globals.printError(user_messages.aaptNotFound);
       return null;
     }
 

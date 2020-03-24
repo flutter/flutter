@@ -16,7 +16,7 @@ import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
 import '../base/time.dart';
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' as user_messages;
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/icon_tree_shaker.dart' show kIconTreeShakerEnabledDefault;
@@ -612,7 +612,7 @@ abstract class FlutterCommand extends Command<void> {
           commandResult = await verifyThenRunCommand(commandPath);
         } finally {
           final DateTime endTime = systemClock.now();
-          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+          globals.printTrace(user_messages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },
@@ -732,26 +732,26 @@ abstract class FlutterCommand extends Command<void> {
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
-      globals.printError(userMessages.flutterNoDevelopmentDevice);
+      globals.printError(user_messages.flutterNoDevelopmentDevice);
       return null;
     }
 
     List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
+      globals.printStatus(user_messages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
       return null;
     } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      globals.printStatus(userMessages.flutterNoDevicesFound);
+      globals.printStatus(user_messages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      globals.printStatus(userMessages.flutterNoSupportedDevices);
+      globals.printStatus(user_messages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
-       globals.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
+       globals.printStatus(user_messages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
       } else {
-        globals.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
+        globals.printStatus(user_messages.flutterSpecifyDeviceWithAllOption);
         devices = await deviceManager.getAllConnectedDevices();
       }
       globals.printStatus('');
@@ -771,7 +771,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     if (deviceList.length > 1) {
-      globals.printStatus(userMessages.flutterSpecifyDevice);
+      globals.printStatus(user_messages.flutterSpecifyDevice);
       deviceList = await deviceManager.getAllConnectedDevices();
       globals.printStatus('');
       await Device.printDevices(deviceList);
@@ -792,7 +792,7 @@ abstract class FlutterCommand extends Command<void> {
       while (!globals.fs.isFileSync('pubspec.yaml')) {
         final Directory nextCurrent = globals.fs.currentDirectory.parent;
         if (nextCurrent == null || nextCurrent.path == globals.fs.currentDirectory.path) {
-          throw ToolExit(userMessages.flutterNoPubspec);
+          throw ToolExit(user_messages.flutterNoPubspec);
         }
         globals.fs.currentDirectory = nextCurrent;
         changedDirectory = true;
@@ -813,7 +813,7 @@ abstract class FlutterCommand extends Command<void> {
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!globals.fs.isFileSync(targetPath)) {
-        throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
+        throw ToolExit(user_messages.flutterTargetFileMissing(targetPath));
       }
     }
   }

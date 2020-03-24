@@ -16,7 +16,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
+import '../base/user_messages.dart' as user_messages;
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -192,7 +192,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     } on Exception catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot('$error'));
+      print(user_messages.runnerNoRoot('$error'));
     }
     return '.';
   }
@@ -249,10 +249,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
         if (wrapColumn < 0) {
-          throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
+          throwToolExit(user_messages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
         }
       } on FormatException {
-        throwToolExit(userMessages.runnerWrapColumnParseError(topLevelResults['wrap-column']));
+        throwToolExit(user_messages.runnerWrapColumnParseError(topLevelResults['wrap-column']));
       }
     }
 
@@ -365,7 +365,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           engineSourcePath = globals.fs.directory(engineUri.path)?.parent?.parent?.parent?.parent?.parent?.parent?.path;
           if (engineSourcePath != null && (engineSourcePath == globals.fs.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
             engineSourcePath = null;
-            throwToolExit(userMessages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
+            throwToolExit(user_messages.runnerNoEngineSrcDir(kFlutterEnginePackageName, kFlutterEngineEnvironmentVariableName),
               exitCode: 2);
           }
         }
@@ -379,7 +379,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      throwToolExit(userMessages.runnerNoEngineBuildDirInPath(engineSourcePath),
+      throwToolExit(user_messages.runnerNoEngineBuildDirInPath(engineSourcePath),
         exitCode: 2);
     }
 
@@ -404,19 +404,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (globalResults['local-engine'] != null) {
       localEngine = globalResults['local-engine'] as String;
     } else {
-      throwToolExit(userMessages.runnerLocalEngineRequired, exitCode: 2);
+      throwToolExit(user_messages.runnerLocalEngineRequired, exitCode: 2);
     }
 
     final String engineBuildPath = globals.fs.path.normalize(globals.fs.path.join(enginePath, 'out', localEngine));
     if (!globals.fs.isDirectorySync(engineBuildPath)) {
-      throwToolExit(userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
+      throwToolExit(user_messages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
     }
 
     final String basename = globals.fs.path.basename(engineBuildPath);
     final String hostBasename = _getHostEngineBasename(basename);
     final String engineHostBuildPath = globals.fs.path.normalize(globals.fs.path.join(globals.fs.path.dirname(engineBuildPath), hostBasename));
     if (!globals.fs.isDirectorySync(engineHostBuildPath)) {
-      throwToolExit(userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+      throwToolExit(user_messages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
     }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
@@ -476,7 +476,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     while (directory.isNotEmpty) {
       if (_isDirectoryFlutterRepo(directory)) {
         if (!_compareResolvedPaths(directory, Cache.flutterRoot)) {
-          globals.printError(userMessages.runnerWrongFlutterInstance(Cache.flutterRoot, directory));
+          globals.printError(user_messages.runnerWrongFlutterInstance(Cache.flutterRoot, directory));
         }
 
         break;
@@ -509,9 +509,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final String flutterPath = globals.fs.path.normalize(globals.fs.file(rootUri).absolute.path);
 
         if (!globals.fs.isDirectorySync(flutterPath)) {
-          globals.printError(userMessages.runnerRemovedFlutterRepo(Cache.flutterRoot, flutterPath));
+          globals.printError(user_messages.runnerRemovedFlutterRepo(Cache.flutterRoot, flutterPath));
         } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
-          globals.printError(userMessages.runnerChangedFlutterRepo(Cache.flutterRoot, flutterPath));
+          globals.printError(user_messages.runnerChangedFlutterRepo(Cache.flutterRoot, flutterPath));
         }
       }
     }

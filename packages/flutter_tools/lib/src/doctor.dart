@@ -15,7 +15,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'base/terminal.dart';
-import 'base/user_messages.dart';
+import 'base/user_messages.dart' as user_messages;
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
@@ -620,17 +620,17 @@ class FlutterValidator extends DoctorValidator {
       final FlutterVersion version = globals.flutterVersion;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(userMessages.flutterVersion(
+      messages.add(ValidationMessage(user_messages.flutterVersion(
         frameworkVersion,
         Cache.flutterRoot,
       )));
-      messages.add(ValidationMessage(userMessages.flutterRevision(
+      messages.add(ValidationMessage(user_messages.flutterRevision(
         version.frameworkRevisionShort,
         version.frameworkAge,
         version.frameworkDate,
       )));
-      messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
-      messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
+      messages.add(ValidationMessage(user_messages.engineRevision(version.engineRevisionShort)));
+      messages.add(ValidationMessage(user_messages.dartRevision(version.dartSdkVersion)));
     } on VersionCheckError catch (e) {
       messages.add(ValidationMessage.error(e.message));
       valid = ValidationType.partial;
@@ -643,9 +643,9 @@ class FlutterValidator extends DoctorValidator {
     if (globals.fs.file(genSnapshotPath).existsSync()
         && !_genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buf = StringBuffer();
-      buf.writeln(userMessages.flutterBinariesDoNotRun);
+      buf.writeln(user_messages.flutterBinariesDoNotRun);
       if (globals.platform.isLinux) {
-        buf.writeln(userMessages.flutterBinariesLinuxRepairCommands);
+        buf.writeln(user_messages.flutterBinariesLinuxRepairCommands);
       }
       messages.add(ValidationMessage.error(buf.toString()));
       valid = ValidationType.partial;
@@ -654,7 +654,7 @@ class FlutterValidator extends DoctorValidator {
     return ValidationResult(
       valid,
       messages,
-      statusInfo: userMessages.flutterStatusInfo(
+      statusInfo: user_messages.flutterStatusInfo(
         versionChannel,
         frameworkVersion,
         globals.os.name,
@@ -679,8 +679,8 @@ class NoIdeValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     return ValidationResult(ValidationType.missing, <ValidationMessage>[
-      ValidationMessage(userMessages.noIdeInstallationInfo),
-    ], statusInfo: userMessages.noIdeStatusInfo);
+      ValidationMessage(user_messages.noIdeInstallationInfo),
+    ], statusInfo: user_messages.noIdeStatusInfo);
   }
 }
 
@@ -716,7 +716,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     if (pluginsPath == null) {
       messages.add(ValidationMessage.error('Invalid IntelliJ version number.'));
     } else {
-      messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
+      messages.add(ValidationMessage(user_messages.intellijLocation(installPath)));
 
       final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
       plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
@@ -724,7 +724,7 @@ abstract class IntelliJValidator extends DoctorValidator {
       plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
       if (_hasIssues(messages)) {
-        messages.add(ValidationMessage(userMessages.intellijPluginInfo));
+        messages.add(ValidationMessage(user_messages.intellijPluginInfo));
       }
 
       _validateIntelliJVersion(messages, kMinIdeaVersion);
@@ -733,7 +733,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     return ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
       messages,
-      statusInfo: userMessages.intellijStatusInfo(version));
+      statusInfo: user_messages.intellijStatusInfo(version));
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
@@ -752,7 +752,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     }
 
     if (installedVersion < minVersion) {
-      messages.add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
+      messages.add(ValidationMessage.error(user_messages.intellijMinimumVersion(minVersion.toString())));
     }
   }
 }
@@ -856,7 +856,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
     } on FileSystemException catch (e) {
       validators.add(ValidatorWithResult(
-          userMessages.intellijMacUnknownResult,
+          user_messages.intellijMacUnknownResult,
           ValidationResult(ValidationType.missing, <ValidationMessage>[
             ValidationMessage.error(e.message),
           ]),
@@ -930,7 +930,7 @@ class DeviceValidator extends DoctorValidator {
       if (diagnostics.isNotEmpty) {
         messages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage(message)).toList();
       } else {
-        messages = <ValidationMessage>[ValidationMessage.hint(userMessages.devicesMissing)];
+        messages = <ValidationMessage>[ValidationMessage.hint(user_messages.devicesMissing)];
       }
     } else {
       messages = await Device.descriptions(devices)
@@ -940,7 +940,7 @@ class DeviceValidator extends DoctorValidator {
     if (devices.isEmpty) {
       return ValidationResult(ValidationType.notAvailable, messages);
     } else {
-      return ValidationResult(ValidationType.installed, messages, statusInfo: userMessages.devicesAvailable(devices.length));
+      return ValidationResult(ValidationType.installed, messages, statusInfo: user_messages.devicesAvailable(devices.length));
     }
   }
 }
