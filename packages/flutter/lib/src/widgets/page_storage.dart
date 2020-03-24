@@ -119,8 +119,8 @@ class PageStorageBucket {
 /// [PageStorage] is used to save and restore values that can outlive the widget.
 /// For example, when multiple pages are grouped in tabs, when a page is
 /// switched out, its widget is destroyed and its state is lost. By adding a
-/// [PageStorage] at the root and adding a [PageStorageKey] to each page, most of the
-/// page's state will be stored in its closest ancestor [PageStorage], and
+/// [PageStorage] at the root and adding a [PageStorageKey] to each page, few
+/// page's state, like Scrollable Widgets, will be stored automatically in its closest ancestor [PageStorage], and
 /// restored when it's switched back. Only the state knowing how to use [PageStorage] is persisted.
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
@@ -144,7 +144,7 @@ class PageStorageBucket {
 /// void main() => runApp(MyApp());
 /// ```
 ///
-///```dart
+/// ```dart
 /// class MyApp extends StatelessWidget {
 ///  @override
 ///   Widget build(BuildContext context) {
