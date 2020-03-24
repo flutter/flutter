@@ -409,26 +409,26 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return _pendingRefreshFuture;
   }
 
+  final GlobalKey _key = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final Widget child = NotificationListener<ScrollNotification>(
+      key: _key,
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
         child: widget.child,
       ),
     );
-    assert(() {
-      if (_mode == null) {
-        assert(_dragOffset == null);
-        assert(_isIndicatorAtTop == null);
-      } else {
-        assert(_dragOffset != null);
-        assert(_isIndicatorAtTop != null);
-      }
-      return true;
-    }());
+    if (_mode == null) {
+      assert(_dragOffset == null);
+      assert(_isIndicatorAtTop == null);
+      return child;
+    }
+    assert(_dragOffset != null);
+    assert(_isIndicatorAtTop != null);
 
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
@@ -436,7 +436,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return Stack(
       children: <Widget>[
         child,
-        if (_mode != null) Positioned(
+        Positioned(
           top: _isIndicatorAtTop ? 0.0 : null,
           bottom: !_isIndicatorAtTop ? 0.0 : null,
           left: 0.0,
