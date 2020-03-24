@@ -7361,6 +7361,7 @@ void main() {
   });
 
   testWidgets('when scrolled offscreen and unfocused, doesn\'t lose value', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/17385.
     final ScrollController scrollController = ScrollController();
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
