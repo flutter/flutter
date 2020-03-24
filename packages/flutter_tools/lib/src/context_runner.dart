@@ -106,7 +106,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       CocoaPods: () => CocoaPods(),
-      CocoaPodsValidator: () => const CocoaPodsValidator(),
+      CocoaPodsValidator: () => CocoaPodsValidator(
+        globals.cocoaPods,
+        globals.userMessages,
+      ),
       Config: () => Config(
         Config.kFlutterSettings,
         fileSystem: globals.fs,

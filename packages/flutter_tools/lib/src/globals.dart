@@ -28,6 +28,7 @@ import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
@@ -70,6 +71,7 @@ Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
+CocoaPods get cocoaPods => context.get<CocoaPods>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
