@@ -7,7 +7,7 @@ import("//flutter/common/config.gni")
 import("//flutter/tools/fuchsia/dart.gni")
 import("//flutter/tools/fuchsia/fuchsia_host_bundle.gni")
 
-if (using_fuchsia_sdk) {
+if (is_fuchsia) {
   product_suffix = ""
   is_product = false
 

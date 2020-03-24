@@ -29,10 +29,6 @@ executable("testing") {
   ]
 
   if (is_fuchsia) {
-    if (!using_fuchsia_sdk) {
-      deps += [ "//garnet/public/lib/ui/scenic:client" ]
-    } else {
-      deps += [ "$fuchsia_sdk_root/pkg:scenic_cpp" ]
-    }
+    deps += [ "$fuchsia_sdk_root/pkg:scenic_cpp" ]
   }
 }
