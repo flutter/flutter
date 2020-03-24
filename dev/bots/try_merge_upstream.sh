@@ -24,7 +24,8 @@ echo "Attempting to merge $REMOTE_REVISION into $HEAD_REVISION..."
 git config user.email 'flutter@example.com'
 git config user.name 'Flutter CI'
 
-git merge "$REMOTE/master" --no-edit --stat --no-verify || {
+# -X renormalize will ignore EOL whitespace diffs in the merge
+git merge "$REMOTE/master" --no-edit --stat --no-verify -X renormalize || {
   git diff # log the merge conflict
   git merge --abort || true
   echo 'Attempting to merge upstream master failed!'

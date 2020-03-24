@@ -28,7 +28,8 @@ Write-Host "Attempting to merge $remoteRevision into $headRevision..."
 git config user.email "flutter@example.com"
 git config user.name "Flutter CI"
 
-git merge "$remote/master" --no-edit --stat --no-verify
+# -X renormalize will ignore EOL whitespace diffs in the merge
+git merge "$remote/master" --no-edit --stat --no-verify -X renormalize
 
 if($?) {
   Write-Host "Merge Successful!"
