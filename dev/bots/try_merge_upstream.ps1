@@ -10,8 +10,8 @@
 #
 # -------------------------------------------------------------------------- #
 
-if ($Env:CIRRUS_BASE_BRANCH -ne "masterzzzzzzz") {
-  Write-Host "\$CIRRUS_BASE_BRANCH is $CIRRUS_BASE_BRANCH, no merge necessary."
+if ($Env:CIRRUS_BASE_BRANCH -ne "master") {
+  Write-Host "`$CIRRUS_BASE_BRANCH is `"$Env:CIRRUS_BASE_BRANCH`", no merge necessary."
   return
 }
 
@@ -22,7 +22,28 @@ git fetch $remote
 $remoteRevision=git rev-parse $remote/master | Out-String
 $headRevision=git rev-parse HEAD | Out-String
 
-Write-Host "Attempting to merge $REMOTE_REVISION into $HEAD_REVISION..."
+Write-Host "Attempting to merge $remoteRevision into $headRevision..."
 
+# To allow writing a local merge commit
 git config user.email "flutter@example.com"
 git config user.name "Flutter CI"
+
+git merge "$remote/master" --no-edit --stat --no-verify
+
+if($?) {
+  Write-Host "Merge Successful!"
+}
+else {
+  git diff
+  git merge --abort
+  Write-Host "Attempting to merge upstream master failed!"
+  Write-Host "The merge has been aborted and tests will continue on the branch as"
+  Write-Host "is. You will still need to resolve the conflict before merging this"
+  Write-Host "PR to master:\n"
+  Write-Host "> git fetch upstream"
+  Write-Host "> git merge upstream/master"
+  Write-Host "# resolve conflicts"
+  Write-Host "> git add /path/to/resolved/file"
+  Write-Host "> git commit"
+  Write-Host "> git push\n"
+}

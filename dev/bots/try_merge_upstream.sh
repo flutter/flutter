@@ -20,6 +20,7 @@ HEAD_REVISION=$(git rev-parse HEAD)
 
 echo "Attempting to merge $REMOTE_REVISION into $HEAD_REVISION..."
 
+# To allow writing a local merge commit
 git config user.email 'flutter@example.com'
 git config user.name 'Flutter CI'
 
