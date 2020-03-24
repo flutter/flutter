@@ -565,15 +565,12 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  String generateErrorMessage(String parameterName) {
-    return '\'$parameterName != null\': is not true';
-  }
-
   test('size parameter in MediaQueryData cannot be null', () {
     try {
       MediaQueryData(size: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('size')));
+      expect(error.toString(), contains('\'size != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -583,7 +580,8 @@ void main() {
     try {
       MediaQueryData(devicePixelRatio: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('devicePixelRatio')));
+      expect(error.toString(), contains('\'devicePixelRatio != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -593,7 +591,8 @@ void main() {
     try {
       MediaQueryData(textScaleFactor: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('textScaleFactor')));
+      expect(error.toString(), contains('\'textScaleFactor != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -603,7 +602,8 @@ void main() {
     try {
       MediaQueryData(platformBrightness: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('platformBrightness')));
+      expect(error.toString(), contains('\'platformBrightness != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -613,7 +613,8 @@ void main() {
     try {
       MediaQueryData(padding: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('padding')));
+      expect(error.toString(), contains('\'padding != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -623,7 +624,8 @@ void main() {
     try {
       MediaQueryData(viewInsets: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('viewInsets')));
+      expect(error.toString(), contains('\'viewInsets != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -633,7 +635,8 @@ void main() {
     try {
       MediaQueryData(systemGestureInsets: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('systemGestureInsets')));
+      expect(error.toString(), contains('\'systemGestureInsets != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -643,7 +646,8 @@ void main() {
     try {
       MediaQueryData(viewPadding: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('viewPadding')));
+      expect(error.toString(), contains('\'viewPadding != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -653,7 +657,8 @@ void main() {
     try {
       MediaQueryData(physicalDepth: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('physicalDepth')));
+      expect(error.toString(), contains('\'physicalDepth != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -663,7 +668,8 @@ void main() {
     try {
       MediaQueryData(alwaysUse24HourFormat: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('alwaysUse24HourFormat')));
+      expect(error.toString(), contains('\'alwaysUse24HourFormat != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -673,7 +679,8 @@ void main() {
     try {
       MediaQueryData(accessibleNavigation: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('accessibleNavigation')));
+      expect(error.toString(), contains('\'accessibleNavigation != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -683,7 +690,8 @@ void main() {
     try {
       MediaQueryData(invertColors: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('invertColors')));
+      expect(error.toString(), contains('\'invertColors != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -693,7 +701,8 @@ void main() {
     try {
       MediaQueryData(highContrast: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('highContrast')));
+      expect(error.toString(), contains('\'highContrast != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -703,7 +712,8 @@ void main() {
     try {
       MediaQueryData(disableAnimations: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('disableAnimations')));
+      expect(error.toString(), contains('\'disableAnimations != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
@@ -713,7 +723,8 @@ void main() {
     try {
       MediaQueryData(boldText: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains(generateErrorMessage('boldText')));
+      expect(error.toString(), contains('\'boldText != null\''));
+      expect(error.toString(), contains('is not true'));
       return;
     }
     fail('The assert was never called when it should have been');
