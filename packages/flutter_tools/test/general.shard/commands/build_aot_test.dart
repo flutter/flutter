@@ -111,7 +111,7 @@ void main() {
   testUsingContext('build aot outputs timing info', () async {
     globals.fs.file('.dart_tool/flutter_build/cce09742720db17ffec62331bd7e42d5/app.so')
       .createSync(recursive: true);
-    when(buildSystem.build(any, any))
+    when(globals.buildSystem.build(any, any))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
           'kernel_snapshot': PerformanceMeasurement(

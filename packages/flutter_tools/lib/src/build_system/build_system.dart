@@ -10,7 +10,6 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
@@ -21,9 +20,6 @@ import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// A reasonable amount of files to open at the same time.
 ///
