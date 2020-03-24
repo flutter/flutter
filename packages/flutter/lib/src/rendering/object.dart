@@ -2322,7 +2322,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// called on).
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
-  void replaceRoot(OffsetLayer rootLayer, ContainerAnnotator rootAnnotator) {
+  void replaceRoot(OffsetLayer rootLayer, OffsetAnnotator rootAnnotator) {
     assert(rootLayer.attached);
     assert(rootAnnotator.attached);
     assert(attached);
