@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -28,26 +30,36 @@ import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
-  IMobileDevice()
-      : _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-        _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+  IMobileDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+      _dyLdLibEntry = cache.dyLdLibEntry,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _processManager = processManager;
 
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
+  final MapEntry<String, String> _dyLdLibEntry;
+  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
 
-  bool get isInstalled => _isInstalled ??= globals.processManager.canRun(_idevicescreenshotPath);
+  bool get isInstalled => _isInstalled ??= _processManager.canRun(_idevicescreenshotPath);
   bool _isInstalled;
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return processUtils.start(
+    return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
       ],
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_dyLdLibEntry]
       ),
     );
   }
@@ -61,7 +73,7 @@ class IMobileDevice {
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_dyLdLibEntry]
       ),
     );
   }

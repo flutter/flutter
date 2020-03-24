@@ -51,6 +51,7 @@ void main() {
     MockCache mockCache;
     Logger logger;
     IOSDeploy iosDeploy;
+    IMobileDevice iMobileDevice;
     FileSystem mockFileSystem;
 
     setUp(() {
@@ -67,6 +68,12 @@ void main() {
         platform: macPlatform,
         processManager: FakeProcessManager.any(),
       );
+      iMobileDevice = IMobileDevice(
+        artifacts: mockArtifacts,
+        cache: mockCache,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () {
@@ -77,6 +84,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         sdkVersion: '13.3',
         cpuArchitecture: DarwinArch.arm64
@@ -91,6 +99,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '1.0.0'
@@ -102,6 +111,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '13.1.1'
@@ -113,6 +123,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '10'
@@ -124,6 +135,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: '0'
@@ -135,6 +147,7 @@ void main() {
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         name: 'iPhone 1',
         cpuArchitecture: DarwinArch.arm64,
         sdkVersion: 'bogus'
@@ -152,6 +165,7 @@ void main() {
               logger: logger,
               platform: platform,
               iosDeploy: iosDeploy,
+              iMobileDevice: iMobileDevice,
               name: 'iPhone 1',
               sdkVersion: '13.3',
               cpuArchitecture: DarwinArch.arm64,
@@ -205,6 +219,7 @@ void main() {
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
+          iMobileDevice: iMobileDevice,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
@@ -288,6 +303,7 @@ void main() {
           logger: logger,
           platform: macPlatform,
           iosDeploy: iosDeploy,
+          iMobileDevice: iMobileDevice,
           name: 'iPhone 1',
           sdkVersion: '13.3',
           cpuArchitecture: DarwinArch.arm64,
@@ -488,6 +504,7 @@ void main() {
             logger: testLogger,
             platform: macPlatform,
             iosDeploy: mockIosDeploy,
+            iMobileDevice: iMobileDevice,
             cpuArchitecture: DarwinArch.arm64,
           );
 
@@ -573,6 +590,7 @@ void main() {
     FakeProcessManager fakeProcessManager;
     Logger logger;
     IOSDeploy iosDeploy;
+    IMobileDevice iMobileDevice;
     IOSWorkflow mockIosWorkflow;
 
     setUp(() {
@@ -589,6 +607,12 @@ void main() {
         logger: logger,
         platform: macPlatform,
         processManager: fakeProcessManager,
+      );
+      iMobileDevice = IMobileDevice(
+        artifacts: mockArtifacts,
+        cache: mockCache,
+        processManager: fakeProcessManager,
+        logger: logger,
       );
     });
 
@@ -623,6 +647,7 @@ void main() {
         cpuArchitecture: DarwinArch.arm64,
         artifacts: mockArtifacts,
         iosDeploy: iosDeploy,
+        iMobileDevice: iMobileDevice,
         logger: logger,
         platform: macPlatform,
         fileSystem: mockFileSystem,

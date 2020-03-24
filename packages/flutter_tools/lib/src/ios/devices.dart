@@ -83,13 +83,15 @@ class IOSDevice extends Device {
     @required Platform platform,
     @required Artifacts artifacts,
     @required IOSDeploy iosDeploy,
+    @required IMobileDevice iMobileDevice,
     @required Logger logger,
   })
-      : _sdkVersion = sdkVersion,
-        _iosDeploy = iosDeploy,
-        _fileSystem = fileSystem,
-        _logger = logger,
-        _platform = platform,
+    : _sdkVersion = sdkVersion,
+      _iosDeploy = iosDeploy,
+      _iMobileDevice = iMobileDevice,
+      _fileSystem = fileSystem,
+      _logger = logger,
+      _platform = platform,
         super(
           id,
           category: Category.mobile,
@@ -113,6 +115,7 @@ class IOSDevice extends Device {
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
+  final IMobileDevice _iMobileDevice;
 
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
@@ -374,7 +377,7 @@ class IOSDevice extends Device {
     return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader.create(
       device: this,
       app: app,
-      iMobileDevice: globals.iMobileDevice,
+      iMobileDevice: _iMobileDevice,
     ));
   }
 
@@ -402,11 +405,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => globals.iMobileDevice.isInstalled;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await globals.iMobileDevice.takeScreenshot(outputFile);
+    await _iMobileDevice.takeScreenshot(outputFile);
   }
 
   @override
