@@ -19,7 +19,8 @@ const String chars = '1234567890'
 String _randomize(String text) {
   return text.replaceAllMapped(
     '*',
-    (_) => chars[Random().nextInt(chars.length)],
+    // Passing a seed so the results are reproducible.
+    (_) => chars[Random(0).nextInt(chars.length)],
   );
 }
 
