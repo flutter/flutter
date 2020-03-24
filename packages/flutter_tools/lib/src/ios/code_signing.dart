@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
@@ -98,7 +99,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   @required BuildableIOSApp iosApp,
-  @required ProcessUtils processUtils,
+  @required ProcessManager processManager,
   @required Logger logger,
 }) async {
   final Map<String, String> buildSettings = await iosApp.project.buildSettings;
@@ -122,6 +123,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   // If the user's environment is missing the tools needed to find and read
   // certificates, abandon. Tools should be pre-equipped on macOS.
+  final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: logger);
   if (!await processUtils.exitsHappy(const <String>['which', 'security']) ||
       !await processUtils.exitsHappy(const <String>['which', 'openssl'])) {
     return null;

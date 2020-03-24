@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -52,7 +51,7 @@ void main() {
       when(mockIosProject.buildSettings).thenReturn(null);
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
       expect(signingConfigs, isNull);
@@ -66,7 +65,7 @@ void main() {
       });
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
       expect(signingConfigs, isNull);
@@ -80,7 +79,7 @@ void main() {
           .thenAnswer((_) => Future<ProcessResult>.value(exitsFail));
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
       expect(signingConfigs, isNull);
@@ -108,7 +107,7 @@ void main() {
       try {
         signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
           iosApp: app,
-          processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+          processManager: mockProcessManager,
           logger: logger,
         );
         fail('No identity should throw tool error');
@@ -177,7 +176,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
 
@@ -245,7 +244,7 @@ void main() {
       try {
         signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
           iosApp: app,
-          processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+          processManager: mockProcessManager,
           logger: logger,
         );
       } on Exception catch (e) {
@@ -319,7 +318,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
 
@@ -404,7 +403,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
 
@@ -481,7 +480,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
 
@@ -564,7 +563,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
 
@@ -605,7 +604,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
       expect(signingConfigs, isNull);
@@ -648,7 +647,7 @@ void main() {
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(
         iosApp: app,
-        processUtils: ProcessUtils(processManager: mockProcessManager, logger: logger),
+        processManager: mockProcessManager,
         logger: logger,
       );
       expect(signingConfigs, isNull);

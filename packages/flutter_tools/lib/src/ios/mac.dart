@@ -162,7 +162,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (codesign && buildForDevice) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
       iosApp: app,
-      processUtils: processUtils,
+      processManager: globals.processManager,
       logger: globals.logger
     );
   }
