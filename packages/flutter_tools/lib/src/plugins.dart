@@ -15,7 +15,6 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
-import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
 import 'windows/property_sheet.dart';
@@ -1058,12 +1057,12 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   if (changed || legacyChanged) {
     createPluginSymlinks(project, force: true);
     if (!checkProjects || project.ios.existsSync()) {
-      cocoaPods.invalidatePodInstallOutput(project.ios);
+      globals.cocoaPods.invalidatePodInstallOutput(project.ios);
     }
     // TODO(stuartmorgan): Potentially add checkProjects once a decision has
     // made about how to handle macOS in existing projects.
     if (project.macos.existsSync()) {
-      cocoaPods.invalidatePodInstallOutput(project.macos);
+      globals.cocoaPods.invalidatePodInstallOutput(project.macos);
     }
   }
 }
@@ -1097,14 +1096,13 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {
-      final CocoaPods cocoaPods = CocoaPods();
       if (plugins.isNotEmpty) {
-        await cocoaPods.setupPodfile(subproject);
+        await globals.cocoaPods.setupPodfile(subproject);
       }
       /// The user may have a custom maintained Podfile that they're running `pod install`
       /// on themselves.
       else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-        cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
+        globals.cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
       }
     }
   }
