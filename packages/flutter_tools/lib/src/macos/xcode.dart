@@ -249,8 +249,8 @@ class XCDevice {
           'xcrun',
           'xcdevice',
           'list',
-          '--timeout',
-          timeout.inSeconds.toString(),
+          if (timeout != null)
+            ...<String>['--timeout', timeout.inSeconds.toString()]
         ],
         throwOnError: true,
       );
@@ -273,7 +273,7 @@ class XCDevice {
 
   /// [timeout] defaults to 1 second.
   Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 1));
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout);
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -358,7 +358,7 @@ class XCDevice {
         sdkVersion: _sdkVersion(deviceProperties),
         artifacts: globals.artifacts,
         fileSystem: globals.fs,
-        logger: globals.logger,
+        logger: _logger,
         iosDeploy: globals.iosDeploy,
         iMobileDevice: _iMobileDevice,
         platform: globals.platform,
@@ -511,7 +511,6 @@ class XCDevice {
   Future<List<String>> getDiagnostics() async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(
       useCache: true,
-      timeout: const Duration(seconds: 1)
     );
 
     if (allAvailableDevices == null) {
