@@ -1121,8 +1121,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController _floatingCursorResetController;
 
+  // True iff the text has ever changed since instantiation.
+  bool _textChanged = false;
+
   @override
-  bool get wantKeepAlive => widget.focusNode.hasFocus;
+  bool get wantKeepAlive => widget.focusNode.hasFocus || _textChanged;
 
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
@@ -1783,6 +1786,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     _textChangedSinceLastCaretUpdate = true;
+    _textChanged = true;
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });

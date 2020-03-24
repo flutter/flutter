@@ -7360,6 +7360,51 @@ void main() {
     expect(scrollController.offset, 48.0);
   });
 
+  testWidgets('when scrolled offscreen and unfocused, doesn\'t lose value', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              TextField(key: key1),
+              Container(height: 1000), // Push first field off screen.
+              TextField(key: key2),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Focus the first TextField and enter some text.
+    expect(scrollController.offset, 0.0);
+    await tester.tapAt(tester.getTopLeft(find.byKey(key1)));
+    await tester.pumpAndSettle();
+    const String testValue = 'aaa';
+    await tester.enterText(find.byKey(key1), testValue);
+    await tester.pumpAndSettle();
+    expect(find.text(testValue), findsOneWidget);
+
+    // Scroll to second TextField, so the first is out of view.
+    scrollController.jumpTo(500.0);
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getTopLeft(find.byKey(key2)));
+    await tester.enterText(find.byKey(key2), 'bbb');
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, greaterThan(0.0));
+
+    // Scroll back to the top and make sure the first TextField still has its
+    // text.
+    scrollController.jumpTo(0.0);
+    await tester.pumpAndSettle();
+    expect(find.text(testValue), findsOneWidget);
+  });
+
   group('height', () {
     testWidgets('By default, TextField is at least kMinInteractiveDimension high', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
