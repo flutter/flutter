@@ -126,7 +126,7 @@ class WebAssetServer implements AssetReader {
       }
       // Return the module name for a given server path. These are the names
       // used by the browser to request JavaScript files.
-      String moduleForServerPath(String path) {
+      String moduleForServerPath(String serverPath) {
         if (serverPath.endsWith('.lib.js')) {
           serverPath = serverPath.startsWith('/')
             ? serverPath.substring(1)
@@ -140,8 +140,8 @@ class WebAssetServer implements AssetReader {
       String serverPathForModule(String module) {
         return '$module.lib.js';
       }
-      // Return the server path for modules that have an org-dartlang-app
-      // scheme.
+      // Return the server path for modules or resources that have an
+      // org-dartlang-app scheme.
       String serverPathForAppUri(String appUri) {
         if (appUri.startsWith('org-dartlang-app:')) {
           return Uri.parse(appUri).path.substring(1);
