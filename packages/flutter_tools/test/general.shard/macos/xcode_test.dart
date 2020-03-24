@@ -217,6 +217,7 @@ void main() {
         logger: logger,
         xcode: mockXcode,
         iMobileDevice: null,
+        iosDeploy: null,
       );
     });
 
