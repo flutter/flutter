@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1380,7 +1379,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.iOS:
-          _lastInteractionWasTouchValue = true;
+          _lastInteractionWasTouchValue = !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
           break;
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
