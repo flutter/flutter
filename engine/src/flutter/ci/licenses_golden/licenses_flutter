@@ -1145,6 +1145,11 @@ FILE: ../../../flutter/shell/platform/glfw/platform_handler.h
 FILE: ../../../flutter/shell/platform/glfw/public/flutter_glfw.h
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.h
+FILE: ../../../flutter/shell/platform/linux/fl_dart_project.cc
+FILE: ../../../flutter/shell/platform/linux/fl_view.cc
+FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h
+FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/fl_view.h
+FILE: ../../../flutter/shell/platform/linux/public/flutter_linux/flutter_linux.h
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.cc
 FILE: ../../../flutter/shell/platform/windows/angle_surface_manager.h
 FILE: ../../../flutter/shell/platform/windows/client_wrapper/dart_project_unittests.cc
