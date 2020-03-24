@@ -158,7 +158,7 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (dynamic error, StackTrace stackTrace) {
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
             io.stdout.writeln(error);
             io.stdout.writeln(stackTrace);
             _printBufferedErrors(context);

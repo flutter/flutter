@@ -55,7 +55,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
@@ -103,7 +103,7 @@ void main() {
         ));
         return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
