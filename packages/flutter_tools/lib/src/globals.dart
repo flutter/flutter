@@ -20,6 +20,7 @@ import 'base/os.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'fuchsia/fuchsia_sdk.dart';
 import 'ios/ios_deploy.dart';
@@ -34,6 +35,7 @@ import 'version.dart';
 import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
+BuildSystem get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
 Logger get logger => context.get<Logger>();

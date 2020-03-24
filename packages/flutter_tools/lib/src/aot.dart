@@ -97,7 +97,7 @@ class AotBuilder {
           kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
       }
     );
-    final BuildResult result = await buildSystem.build(target, environment);
+    final BuildResult result = await globals.buildSystem.build(target, environment);
     status?.stop();
 
     if (!result.success) {
