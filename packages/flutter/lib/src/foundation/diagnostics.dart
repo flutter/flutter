@@ -2937,6 +2937,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
         _cachedBuilder = DiagnosticPropertiesBuilder();
         value?.debugFillProperties(_cachedBuilder);
       }
+      return true;
     }());
     return _cachedBuilder;
   }
