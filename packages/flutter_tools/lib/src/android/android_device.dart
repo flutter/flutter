@@ -225,7 +225,7 @@ class AndroidDevice extends Device {
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
   }) {
-    return globals.processUtils.runSync(
+    return processUtils.runSync(
       adbCommandForDevice(params),
       throwOnError: true,
       workingDirectory: workingDirectory,
@@ -240,7 +240,7 @@ class AndroidDevice extends Device {
     String workingDirectory,
     bool allowReentrantFlutter = false,
   }) async {
-    return globals.processUtils.run(
+    return processUtils.run(
       adbCommandForDevice(params),
       throwOnError: true,
       workingDirectory: workingDirectory,
@@ -278,7 +278,7 @@ class AndroidDevice extends Device {
     }
 
     try {
-      final RunResult adbVersion = await globals.processUtils.run(
+      final RunResult adbVersion = await processUtils.run(
         <String>[getAdbPath(androidSdk), 'version'],
         throwOnError: true,
       );
@@ -299,7 +299,7 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      await globals.processUtils.run(
+      await processUtils.run(
         <String>[getAdbPath(androidSdk), 'start-server'],
         throwOnError: true,
       );
@@ -336,7 +336,7 @@ class AndroidDevice extends Device {
   }
 
   Future<String> _getDeviceApkSha1(AndroidApk apk) async {
-    final RunResult result = await globals.processUtils.run(
+    final RunResult result = await processUtils.run(
       adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(apk)]));
     return result.stdout;
   }
@@ -380,7 +380,7 @@ class AndroidDevice extends Device {
     }
 
     final Status status = globals.logger.startProgress('Installing ${globals.fs.path.relative(app.file.path)}...', timeout: timeoutConfiguration.slowOperation);
-    final RunResult installResult = await globals.processUtils.run(
+    final RunResult installResult = await processUtils.run(
       adbCommandForDevice(<String>['install', '-t', '-r', app.file.path]));
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
@@ -416,7 +416,7 @@ class AndroidDevice extends Device {
 
     String uninstallOut;
     try {
-      final RunResult uninstallResult = await globals.processUtils.run(
+      final RunResult uninstallResult = await processUtils.run(
         adbCommandForDevice(<String>['uninstall', app.id]),
         throwOnError: true,
       );
@@ -647,13 +647,13 @@ class AndroidDevice extends Device {
   @override
   Future<bool> stopApp(AndroidApk app) {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
-    return globals.processUtils.stream(command).then<bool>(
+    return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));
   }
 
   @override
   Future<MemoryInfo> queryMemoryInfo() async {
-    final RunResult runResult = await globals.processUtils.run(adbCommandForDevice(<String>[
+    final RunResult runResult = await processUtils.run(adbCommandForDevice(<String>[
       'shell',
       'dumpsys',
       'meminfo',
@@ -669,7 +669,7 @@ class AndroidDevice extends Device {
 
   @override
   void clearLogs() {
-    globals.processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
+    processUtils.runSync(adbCommandForDevice(<String>['logcat', '-c']));
   }
 
   @override
@@ -709,7 +709,7 @@ class AndroidDevice extends Device {
   Future<void> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
     await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
-    await globals.processUtils.run(
+    await processUtils.run(
       adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
       throwOnError: true,
     );
@@ -1074,7 +1074,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
 
     String stdout;
     try {
-      stdout = globals.processUtils.runSync(
+      stdout = processUtils.runSync(
         device.adbCommandForDevice(<String>['forward', '--list']),
         throwOnError: true,
       ).stdout.trim();
@@ -1118,7 +1118,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       'tcp:$hostPort',
       'tcp:$devicePort',
     ];
-    final RunResult process = await globals.processUtils.run(
+    final RunResult process = await processUtils.run(
       device.adbCommandForDevice(forwardCommand),
       throwOnError: true,
     );
@@ -1171,7 +1171,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       '--remove',
       'tcp:${forwardedPort.hostPort}',
     ];
-    await globals.processUtils.run(
+    await processUtils.run(
       device.adbCommandForDevice(unforwardCommand),
       throwOnError: true,
     );
