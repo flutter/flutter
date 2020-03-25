@@ -81,7 +81,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         WebValidator(
           chromeLauncher: globals.chromeLauncher,
