@@ -152,7 +152,6 @@ tasks:
       Measures the runtime performance of platform views in the Complex Layout sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   home_scroll_perf__timeline_summary:
     description: >
@@ -340,7 +339,6 @@ tasks:
     description: >
       Builds an APK with a --dart-define and verifies it can be used as a constant
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   android_obfuscate_test:
@@ -424,7 +422,6 @@ tasks:
     description: >
       Builds a Framework with a --dart-define and verifies it can be used as a constant
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   ios_content_validation_test:
@@ -579,9 +576,6 @@ tasks:
       The test makes sure that there is no regression while renderring an image with gl on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
-    #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
-    # Remove the flaky flag when we are sure the test is stable.
-    flaky: true
 
   ios_platform_view_tests:
     description: >
