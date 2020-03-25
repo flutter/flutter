@@ -36,15 +36,19 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
+  BufferLogger logger;
+
+  setUp(() {
+    logger = BufferLogger.test();
+  });
+
   group('IMobileDevice', () {
     final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
-    Logger logger;
 
     setUp(() {
-      logger = BufferLogger.test();
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
@@ -83,7 +87,7 @@ void main() {
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       });
 
-      testUsingContext('idevicescreenshot captures and returns screenshot', () async {
+      testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
@@ -100,8 +104,6 @@ void main() {
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
       });
     });
   });
@@ -389,7 +391,7 @@ Exited (sigterm)''',
       'another line',
     ];
 
-    testUsingContext('upgradePbxProjWithFlutterAssets', () async {
+    testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final MockIosProject project = MockIosProject();
       final MockFile pbxprojFile = MockFile();
 
@@ -400,30 +402,30 @@ Exited (sigterm)''',
       when(pbxprojFile.existsSync())
           .thenAnswer((_) => true);
 
-      bool result = upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to flutter_assets'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => appFlxPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to app.flx'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => cleanPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         isEmpty,
       );
     });
