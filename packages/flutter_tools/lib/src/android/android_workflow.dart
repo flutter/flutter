@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -322,7 +323,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await globals.processUtils.start(
+      final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );
@@ -359,7 +360,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await globals.processUtils.start(
+      final Process process = await processUtils.start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );
