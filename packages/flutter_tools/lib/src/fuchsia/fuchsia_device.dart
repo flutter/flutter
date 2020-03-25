@@ -575,7 +575,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await processUtils.run(<String>[
+    return await globals.processUtils.run(<String>[
       'ssh',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -590,7 +590,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await processUtils.run(<String>[
+    return await globals.processUtils.run(<String>[
       'scp',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
