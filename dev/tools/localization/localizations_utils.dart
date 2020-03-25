@@ -297,9 +297,9 @@ const String kParentheticalPrefix = ' (';
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
-Future<void> precacheLanguageAndRegionTags() async {
-  final String body = languageSubtagRegistry;
-  final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+void precacheLanguageAndRegionTags() {
+  final List<Map<String, List<String>>> sections =
+      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type'].single;
