@@ -20,7 +20,7 @@ Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) 
       onGenerateTitle: onGenerateTitle,
       onGenerateRoute: (RouteSettings settings) {
         return PageRouteBuilder<void>(
-          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
             return Container();
           }
         );

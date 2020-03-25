@@ -564,7 +564,7 @@ void main() {
 
     PageRoute<void> pageRouteBuilder() {
       return PageRouteBuilder<void>(
-        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+        bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return Scaffold(appBar: AppBar(), body: const Text('Page 2'));
         },
         fullscreenDialog: true,

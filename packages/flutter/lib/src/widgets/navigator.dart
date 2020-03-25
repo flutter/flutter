@@ -672,7 +672,7 @@ class NavigatorObserver {
 /// ```dart
 /// Navigator.push(context, PageRouteBuilder(
 ///   opaque: false,
-///   pageBuilder: (BuildContext context, _, __) {
+///   bodyBuilder: (BuildContext context, _, __) {
 ///     return Center(child: Text('My PageRoute'));
 ///   },
 ///   transitionsBuilder: (___, Animation<double> animation, ____, Widget child) {
@@ -687,9 +687,9 @@ class NavigatorObserver {
 /// ));
 /// ```
 ///
-/// The page route is built in two parts, the "page" and the
+/// The page route is built in two parts, the "body" and the
 /// "transitions". The page becomes a descendant of the child passed to
-/// the `transitionsBuilder` function. Typically the page is only built once,
+/// the `transitionsBuilder` function. Typically the body is only built once,
 /// because it doesn't depend on its animation parameters (elided with `_`
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.

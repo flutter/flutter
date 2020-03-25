@@ -97,7 +97,7 @@ class OnTapPage extends StatelessWidget {
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({WidgetBuilder bodyBuilder, RouteSettings settings}) : super(
     settings: settings,
-    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
+    bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
     transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
         return SlideTransition(
           position: Tween<Offset>(
@@ -695,7 +695,7 @@ void main() {
       onGenerateRoute: (RouteSettings settings) {
         return PageRouteBuilder<String>(
           settings: settings,
-          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+          bodyBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
             return routes[settings.name](context);
           },
         );
@@ -732,7 +732,7 @@ void main() {
   });
 
   testWidgets('removeRoute', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+    final Map<String, WidgetBuilder> bodyBuilders = <String, WidgetBuilder>{
       '/' : (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
       '/B': (BuildContext context) => const OnTapPage(id: 'B'),
@@ -753,8 +753,8 @@ void main() {
       onGenerateRoute: (RouteSettings settings) {
         routes[settings.name] = PageRouteBuilder<String>(
           settings: settings,
-          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-            return pageBuilders[settings.name](context);
+          bodyBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return bodyBuilders[settings.name](context);
           },
         );
         return routes[settings.name];
@@ -819,7 +819,7 @@ void main() {
 
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
     Future<String> pageValue;
-    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+    final Map<String, WidgetBuilder> bodyBuilders = <String, WidgetBuilder>{
       '/':  (BuildContext context) => OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context, 'A'); }),
     };
@@ -829,8 +829,8 @@ void main() {
       onGenerateRoute: (RouteSettings settings) {
         routes[settings.name] = PageRouteBuilder<String>(
           settings: settings,
-          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-            return pageBuilders[settings.name](context);
+          bodyBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return bodyBuilders[settings.name](context);
           },
         );
         return routes[settings.name];
@@ -1411,7 +1411,7 @@ void main() {
         initialRoute: '/',
         onGenerateRoute: (RouteSettings settings) {
           return NoAnimationPageRoute(
-            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+            bodyBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
           );
         },
       ),
@@ -1438,7 +1438,7 @@ void main() {
         initialRoute: '/A/B',
         onGenerateRoute: (RouteSettings settings) {
           return NoAnimationPageRoute(
-            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+            bodyBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
           );
         },
       ),
@@ -1451,7 +1451,7 @@ void main() {
       tester.element(find.byKey(const ValueKey<String>('/A'), skipOffstage: false)),
     );
     final Route<void> newRoute = NoAnimationPageRoute(
-      pageBuilder: (_) => Container(key: const ValueKey<String>('/C')),
+      bodyBuilder: (_) => Container(key: const ValueKey<String>('/C')),
     );
 
     navigator.currentState.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
@@ -1743,9 +1743,9 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
-  NoAnimationPageRoute({WidgetBuilder pageBuilder})
-      : super(pageBuilder: (BuildContext context, __, ___) {
-          return pageBuilder(context);
+  NoAnimationPageRoute({WidgetBuilder bodyBuilder})
+      : super(bodyBuilder: (BuildContext context, __, ___) {
+          return bodyBuilder(context);
         });
 
   @override

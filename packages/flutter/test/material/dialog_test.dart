@@ -692,7 +692,7 @@ void main() {
         child: Navigator(
           onGenerateRoute: (_) {
             return PageRouteBuilder<void>(
-              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+              bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 outerContext = context;
                 return Container();
               },

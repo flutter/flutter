@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 final RouteFactory generateRoute = (RouteSettings settings) => PageRouteBuilder<void>(
   settings: settings,
-  pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+  bodyBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
     return const Placeholder();
   },
 );

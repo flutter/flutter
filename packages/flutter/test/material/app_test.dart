@@ -402,7 +402,7 @@ void main() {
     await tester.pumpWidget(WidgetsApp(
       color: const Color.fromARGB(255, 255, 255, 255),
       onGenerateRoute: (_) {
-        return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
+        return PageRouteBuilder<void>(bodyBuilder: (_, __, ___) {
           routeBuildCount++;
           return Builder(
             builder: (BuildContext context) {
@@ -798,7 +798,7 @@ void main() {
           expect(initialRoute, '/abc');
           return <Route<void>>[
             PageRouteBuilder<void>(
-              pageBuilder: (
+              bodyBuilder: (
                 BuildContext context,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {
@@ -806,7 +806,7 @@ void main() {
               }
             ),
             PageRouteBuilder<void>(
-              pageBuilder: (
+              bodyBuilder: (
                 BuildContext context,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {

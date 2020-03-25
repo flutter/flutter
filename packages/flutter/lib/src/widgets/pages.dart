@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(chunhtai): remove ignoring deprecated member use analysis
+// when PageRouteBuilder.pageBuilder parameter is removed. See
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
@@ -42,16 +46,21 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 
 /// A utility class for defining one-off page routes in terms of callbacks.
 ///
-/// Callers must define the [pageBuilder] function which creates the route's
+/// Callers must define the [bodyBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
-  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
+  /// The [bodyBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// [maintainState], and [fullscreenDialog] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings,
-    @required this.pageBuilder,
+    @Deprecated(
+      'Use bodyBuilder instead.'
+      'This feature was deprecated after v1.12.13'
+    )
+    RoutePageBuilder pageBuilder,
+    RoutePageBuilder bodyBuilder,
     this.transitionsBuilder = _defaultTransitionsBuilder,
     this.transitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
@@ -60,18 +69,19 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierLabel,
     this.maintainState = true,
     bool fullscreenDialog = false,
-  }) : assert(pageBuilder != null),
+  }) : assert((bodyBuilder ?? pageBuilder) != null),
        assert(transitionsBuilder != null),
        assert(opaque != null),
        assert(barrierDismissible != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
+       bodyBuilder = bodyBuilder ?? pageBuilder,
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Used build the route's primary contents.
   ///
   /// See [ModalRoute.buildPage] for complete definition of the parameters.
-  final RoutePageBuilder pageBuilder;
+  final RoutePageBuilder bodyBuilder;
 
   /// Used to build the route's transitions.
   ///
@@ -98,7 +108,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return pageBuilder(context, animation, secondaryAnimation);
+    return bodyBuilder(context, animation, secondaryAnimation);
   }
 
   @override

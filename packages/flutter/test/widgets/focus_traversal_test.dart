@@ -1937,7 +1937,7 @@ void main() {
           color: Colors.white,
           onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
+            bodyBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
               return const Placeholder();
             },
           ),
@@ -1968,7 +1968,7 @@ void main() {
 class TestRoute extends PageRouteBuilder<void> {
   TestRoute({Widget child})
       : super(
-          pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
+          bodyBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {
             return child;
           },
         );

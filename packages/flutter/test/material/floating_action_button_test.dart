@@ -485,7 +485,7 @@ void main() {
       ),
     );
     Navigator.push(theContext, PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
     ));
@@ -508,7 +508,7 @@ void main() {
       ),
     );
     Navigator.push(theContext, PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
     ));
@@ -532,7 +532,7 @@ void main() {
       ),
     );
     Navigator.push(theContext, PageRouteBuilder<void>(
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      bodyBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
     ));

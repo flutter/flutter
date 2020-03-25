@@ -514,7 +514,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<void>(
               settings: settings,
-              pageBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
+              bodyBuilder: (BuildContext context, Animation<double> input, Animation<double> out) {
                 return Focus(
                   child: TextField(
                     autofocus: true,
@@ -548,7 +548,7 @@ void main() {
       ProxyAnimation animationPageOne;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
             animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
@@ -567,7 +567,7 @@ void main() {
       ProxyAnimation animationPageTwo;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
             animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
@@ -606,7 +606,7 @@ void main() {
       ProxyAnimation animationPageOne;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
             animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
@@ -626,7 +626,7 @@ void main() {
       Route<void> secondRoute;
       navigator.currentState.push(
         secondRoute = PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
             animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
@@ -661,7 +661,7 @@ void main() {
       ProxyAnimation animationPageOne;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
             animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
@@ -679,7 +679,7 @@ void main() {
       ProxyAnimation animationPageTwo;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
@@ -694,7 +694,7 @@ void main() {
       ProxyAnimation animationPageThree;
       navigator.currentState.pushReplacement(
         TestPageRouteBuilder(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageThree = animation as ProxyAnimation;
             return const Text('Page Three');
           },
@@ -733,7 +733,7 @@ void main() {
       ProxyAnimation animationPageOne;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
             animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
@@ -751,7 +751,7 @@ void main() {
       ProxyAnimation animationPageTwo;
       navigator.currentState.push(
         PageRouteBuilder<void>(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
@@ -765,7 +765,7 @@ void main() {
       // TrainHopping.
       navigator.currentState.pushReplacement(
         TestPageRouteBuilder(
-          pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+          bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
             return const Text('Page Three');
           },
         ),
@@ -798,7 +798,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<void>(
               settings: settings,
-              pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
+              bodyBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
                 if (settings.name == '/')
                   secondaryAnimationOfRouteOne = secondaryAnimation;
                 else
@@ -1353,7 +1353,7 @@ class MockRoute extends Mock implements Route<dynamic> { }
 class MockRouteAware extends Mock implements RouteAware { }
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
-  TestPageRouteBuilder({RoutePageBuilder pageBuilder}) : super(pageBuilder: pageBuilder);
+  TestPageRouteBuilder({RoutePageBuilder bodyBuilder}) : super(bodyBuilder: bodyBuilder);
 
   @override
   Animation<double> createAnimation() {

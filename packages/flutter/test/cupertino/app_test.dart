@@ -94,7 +94,7 @@ void main() {
           expect(initialRoute, '/abc');
           return <Route<void>>[
             PageRouteBuilder<void>(
-              pageBuilder: (
+              bodyBuilder: (
                 BuildContext context,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {
@@ -102,7 +102,7 @@ void main() {
               }
             ),
             PageRouteBuilder<void>(
-              pageBuilder: (
+              bodyBuilder: (
                 BuildContext context,
                 Animation<double> animation,
                 Animation<double> secondaryAnimation) {

@@ -523,7 +523,7 @@ Future<void> main() async {
                   child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, PageRouteBuilder<void>(
-                      pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+                      bodyBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
                         return const Text('fail');
                       },
                     ));
