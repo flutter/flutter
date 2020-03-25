@@ -60,10 +60,7 @@ class ChromeDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage app,
-    bool includePastLogs = false,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
@@ -224,10 +221,7 @@ class WebServerDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage app,
-    bool includePastLogs = false,
-  }) {
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
