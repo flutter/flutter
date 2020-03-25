@@ -244,7 +244,7 @@ void main() {
     await buildSystem.build(testTarget2, environment);
 
     expect(environment.buildDir.childFile('bar.out'), exists);
-    expect(environment.buildDir.childFile('foo.out'), exists);
+    expect(environment.buildDir.childFile('foo.out'), isNot(exists));
   });
 
   testWithoutContext('Does not crash when filesytem and cache are out of sync', () async {
@@ -401,7 +401,7 @@ void main() {
     await buildSystem.build(target, environment);
 
     expect(fileSystem.file('a.txt'), exists);
-    expect(fileSystem.file('c.txt'), exists);
+    expect(fileSystem.file('c.txt'), isNot(exists));
     expect(called, 2);
   });
 }
