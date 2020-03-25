@@ -90,7 +90,7 @@ void main() {
           '-v',
           'time',
           '-s',
-          'flutter'
+          'flutter',
         ],
       )
     ]);
