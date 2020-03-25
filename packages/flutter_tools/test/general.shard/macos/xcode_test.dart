@@ -262,8 +262,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
       });
@@ -367,7 +367,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(3));
@@ -429,7 +429,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(1));
@@ -456,8 +456,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
@@ -489,7 +489,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         await xcdevice.getAvailableTetheredIOSDevices();
         final List<String> errors = await xcdevice.getDiagnostics();
@@ -591,7 +591,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
         expect(errors, hasLength(4));

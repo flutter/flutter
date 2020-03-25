@@ -66,7 +66,7 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
@@ -87,7 +87,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch activeArch,
   bool codesign = true,
 }) async {
-  if (!upgradePbxProjWithFlutterAssets(app.project)) {
+  if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
   }
 
@@ -329,7 +329,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   const Duration showBuildSettingsTimeout = Duration(minutes: 1);
   Map<String, String> buildSettings;
   try {
-    final RunResult showBuildSettingsResult = await processUtils.run(
+    final RunResult showBuildSettingsResult = await globals.processUtils.run(
       showBuildSettingsCommand,
       throwOnError: true,
       workingDirectory: app.project.hostAppRoot.path,
@@ -413,7 +413,7 @@ Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSA
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
-    buildResult = await processUtils.run(
+    buildResult = await globals.processUtils.run(
       buildCommands,
       workingDirectory: app.project.hostAppRoot.path,
       allowReentrantFlutter: true,
@@ -562,7 +562,7 @@ bool _checkXcodeVersion() {
 }
 
 // TODO(jmagman): Refactor to IOSMigrator.
-bool upgradePbxProjWithFlutterAssets(IosProject project) {
+bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(xcodeProjectFile.existsSync());
   final List<String> lines = xcodeProjectFile.readAsLinesSync();
@@ -575,7 +575,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1))) {
-        globals.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+        logger.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
       }
     } else {
       buffer.writeln(line);

@@ -79,12 +79,7 @@ class FlutterTesterDevice extends Device {
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({
-    ApplicationPackage app,
-    bool includePastLogs = false,
-  }) {
-    return _logReader;
-  }
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;

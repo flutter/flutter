@@ -12,7 +12,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -108,7 +107,7 @@ Future<void> _genSnapshot(
     timeout: null,
   );
   try {
-    result = await processUtils.stream(command, trace: true);
+    result = await globals.processUtils.stream(command, trace: true);
   } finally {
     status.cancel();
   }

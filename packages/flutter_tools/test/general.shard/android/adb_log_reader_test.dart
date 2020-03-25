@@ -79,30 +79,6 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('AdbLogReader calls adb logcat with expected flags when requesting past logs', () async {
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'adb',
-          '-s',
-          '1234',
-          'logcat',
-          '-v',
-          'time',
-          '-s',
-          'flutter',
-        ],
-      )
-    ]);
-    await AdbLogReader.createLogReader(
-      createMockDevice(null),
-      processManager,
-      includePastLogs: true,
-    );
-
-    expect(processManager.hasRemainingExpectations, false);
-  });
-
   testWithoutContext('AdbLogReader handles process early exit', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(

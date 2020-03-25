@@ -120,7 +120,7 @@ class EmulatorManager {
       '-k', sdkId,
       '-d', device,
     ];
-    final RunResult runResult = processUtils.runSync(args,
+    final RunResult runResult = globals.processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
     return CreateEmulatorResult(
       name,
@@ -141,7 +141,7 @@ class EmulatorManager {
       'device',
       '-c',
     ];
-    final RunResult runResult = processUtils.runSync(args,
+    final RunResult runResult = globals.processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
     if (runResult.exitCode != 0) {
       return null;
@@ -168,7 +168,7 @@ class EmulatorManager {
       'avd',
       '-n', 'temp',
     ];
-    final RunResult runResult = processUtils.runSync(args,
+    final RunResult runResult = globals.processUtils.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
