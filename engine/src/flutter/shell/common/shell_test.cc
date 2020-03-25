@@ -202,6 +202,20 @@ bool ShellTest::GetNeedsReportTimings(Shell* shell) {
   return shell->needs_report_timings_;
 }
 
+void ShellTest::OnServiceProtocolGetSkSLs(
+    Shell* shell,
+    const ServiceProtocol::Handler::ServiceProtocolMap& params,
+    rapidjson::Document& response) {
+  std::promise<bool> finished;
+  fml::TaskRunner::RunNowOrPostTask(shell->GetTaskRunners().GetIOTaskRunner(),
+                                    [shell, params, &response, &finished]() {
+                                      shell->OnServiceProtocolGetSkSLs(
+                                          params, response);
+                                      finished.set_value(true);
+                                    });
+  finished.get_future().wait();
+}
+
 std::shared_ptr<txt::FontCollection> ShellTest::GetFontCollection(
     Shell* shell) {
   return shell->weak_engine_->GetFontCollection().GetFontCollection();

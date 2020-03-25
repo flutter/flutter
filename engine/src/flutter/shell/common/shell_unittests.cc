@@ -19,6 +19,7 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
@@ -26,7 +27,9 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter_fallback.h"
+#include "flutter/shell/version/version.h"
 #include "flutter/testing/testing.h"
+#include "rapidjson/writer.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -1127,6 +1130,58 @@ TEST_F(ShellTest, CanDecompressImageFromAsset) {
   RunEngine(shell.get(), std::move(configuration));
   latch.Wait();
   DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
+  // Create 2 dummpy SkSL cache file IE (base32 encoding of A), II (base32
+  // encoding of B) with content x and y.
+  fml::ScopedTemporaryDirectory temp_dir;
+  PersistentCache::SetCacheDirectoryPath(temp_dir.path());
+  PersistentCache::ResetCacheForProcess();
+  std::vector<std::string> components = {"flutter_engine",
+                                         GetFlutterEngineVersion(), "skia",
+                                         GetSkiaVersion(), "sksl"};
+  auto sksl_dir = fml::CreateDirectory(temp_dir.fd(), components,
+                                       fml::FilePermission::kReadWrite);
+  const std::string x = "x";
+  const std::string y = "y";
+  auto x_data = std::make_unique<fml::DataMapping>(
+      std::vector<uint8_t>{x.begin(), x.end()});
+  auto y_data = std::make_unique<fml::DataMapping>(
+      std::vector<uint8_t>{y.begin(), y.end()});
+  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "IE", *x_data));
+  ASSERT_TRUE(fml::WriteAtomically(sksl_dir, "II", *y_data));
+
+  Settings settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  ServiceProtocol::Handler::ServiceProtocolMap empty_params;
+  rapidjson::Document document;
+  OnServiceProtocolGetSkSLs(shell.get(), empty_params, document);
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+  DestroyShell(std::move(shell));
+
+  // Base64 encoding of x, y are eQ, eA.
+  ASSERT_STREQ(
+      buffer.GetString(),
+      "{\"type\":\"GetSkSLs\",\"SkSLs\":{\"II\":\"eQ==\",\"IE\":\"eA==\"}}");
+
+  // Cleanup files
+  fml::FileVisitor recursive_cleanup = [&recursive_cleanup](
+                                           const fml::UniqueFD& directory,
+                                           const std::string& filename) {
+    if (fml::IsDirectory(directory, filename.c_str())) {
+      fml::UniqueFD sub_dir =
+          OpenDirectoryReadOnly(directory, filename.c_str());
+      VisitFiles(sub_dir, recursive_cleanup);
+      fml::UnlinkDirectory(directory, filename.c_str());
+    } else {
+      fml::UnlinkFile(directory, filename.c_str());
+    }
+    return true;
+  };
+  VisitFiles(temp_dir.fd(), recursive_cleanup);
 }
 
 }  // namespace testing

@@ -30,6 +30,7 @@
 #include "rapidjson/writer.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
+#include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/tonic/common/log.h"
 
 namespace flutter {
@@ -373,6 +374,10 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
           task_runners_.GetUITaskRunner(),
           std::bind(&Shell::OnServiceProtocolGetDisplayRefreshRate, this,
                     std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_[ServiceProtocol::kGetSkSLsExtensionName] = {
+      task_runners_.GetIOTaskRunner(),
+      std::bind(&Shell::OnServiceProtocolGetSkSLs, this, std::placeholders::_1,
+                std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -1338,6 +1343,32 @@ bool Shell::OnServiceProtocolGetDisplayRefreshRate(
   response.AddMember("type", "DisplayRefreshRate", response.GetAllocator());
   response.AddMember("fps", engine_->GetDisplayRefreshRate(),
                      response.GetAllocator());
+  return true;
+}
+
+bool Shell::OnServiceProtocolGetSkSLs(
+    const ServiceProtocol::Handler::ServiceProtocolMap& params,
+    rapidjson::Document& response) {
+  FML_DCHECK(task_runners_.GetIOTaskRunner()->RunsTasksOnCurrentThread());
+  response.SetObject();
+  response.AddMember("type", "GetSkSLs", response.GetAllocator());
+
+  rapidjson::Value shaders_json(rapidjson::kObjectType);
+  PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
+  std::vector<PersistentCache::SkSLCache> sksls = persistent_cache->LoadSkSLs();
+  for (const auto& sksl : sksls) {
+    size_t b64_size =
+        SkBase64::Encode(sksl.second->data(), sksl.second->size(), nullptr);
+    sk_sp<SkData> b64_data = SkData::MakeUninitialized(b64_size + 1);
+    char* b64_char = static_cast<char*>(b64_data->writable_data());
+    SkBase64::Encode(sksl.second->data(), sksl.second->size(), b64_char);
+    b64_char[b64_size] = 0;  // make it null terminated for printing
+    rapidjson::Value shader_value(b64_char, response.GetAllocator());
+    rapidjson::Value shader_key(PersistentCache::SkKeyToFilePath(*sksl.first),
+                                response.GetAllocator());
+    shaders_json.AddMember(shader_key, shader_value, response.GetAllocator());
+  }
+  response.AddMember("SkSLs", shaders_json, response.GetAllocator());
   return true;
 }
 
