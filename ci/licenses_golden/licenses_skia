@@ -1,4 +1,4 @@
-Signature: 433a244e2b9998e72d36a3da459c7236
+Signature: 9590eced250fca00e288000c0c9e18e8
 
 UNUSED LICENSES:
 
@@ -2878,7 +2878,7 @@ FILE: ../../../third_party/skia/include/effects/SkRuntimeEffect.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
-FILE: ../../../third_party/skia/modules/canvaskit/WasmCommon.h
+FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
@@ -3912,11 +3912,13 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResource.cpp
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResource.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceState.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSurfaceResource.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSurfaceResource.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
@@ -6129,7 +6131,6 @@ FILE: ../../../third_party/skia/src/core/SkImageInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
-FILE: ../../../third_party/skia/src/gpu/GrAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.h
 FILE: ../../../third_party/skia/src/gpu/GrClip.h
@@ -6137,6 +6138,7 @@ FILE: ../../../third_party/skia/src/gpu/GrColor.h
 FILE: ../../../third_party/skia/src/gpu/GrFixedClip.cpp
 FILE: ../../../third_party/skia/src/gpu/GrGlyph.h
 FILE: ../../../third_party/skia/src/gpu/GrGpu.cpp
+FILE: ../../../third_party/skia/src/gpu/GrTAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrVertexWriter.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
