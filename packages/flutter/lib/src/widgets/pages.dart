@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(chunhtai): remove ignoring deprecated member use analysis
-// when PageRouteBuilder.pageBuilder parameter is removed. See
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
@@ -56,8 +52,8 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   PageRouteBuilder({
     RouteSettings settings,
     @Deprecated(
-      'Use bodyBuilder instead.'
-      'This feature was deprecated after v1.12.13'
+      'Use bodyBuilder instead. '
+      'This feature was deprecated after v1.12.13.'
     )
     RoutePageBuilder pageBuilder,
     RoutePageBuilder bodyBuilder,
@@ -69,13 +65,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierLabel,
     this.maintainState = true,
     bool fullscreenDialog = false,
-  }) : assert((bodyBuilder ?? pageBuilder) != null),
+  }) : assert((bodyBuilder == null) != (pageBuilder == null)), // ignore: deprecated_member_use_from_same_package
        assert(transitionsBuilder != null),
        assert(opaque != null),
        assert(barrierDismissible != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       bodyBuilder = bodyBuilder ?? pageBuilder,
+       bodyBuilder = bodyBuilder ?? pageBuilder, // ignore: deprecated_member_use_from_same_package
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Used build the route's primary contents.
