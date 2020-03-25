@@ -544,7 +544,7 @@ Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, boo
 /// Returns desired capabilities for given [browser], [headless] and
 /// [chromeBinary].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, String chromeBinary) {
+Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [String chromeBinary]) {
   switch (browser) {
     case Browser.chrome:
       final Map<String, dynamic> chromeOptions = <String, dynamic>{

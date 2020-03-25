@@ -612,11 +612,13 @@ void main() {
     });
 
     test('Chrome with headless off', () {
+      const String chromeBinary = 'random-binary';
       final Map<String, dynamic> expected = <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          'binary': chromeBinary,
           'w3c': false,
           'args': <String>[
             '--bwsi',
@@ -638,7 +640,7 @@ void main() {
         }
       };
 
-      expect(getDesiredCapabilities(Browser.chrome, false), expected);
+      expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
 
     });
 
