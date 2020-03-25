@@ -16,3 +16,7 @@ dev_dependencies:
   e2e: 0.2.4+4
   http: 0.12.0+2
   test: any
+
+flutter:
+  assets:
+    - assets/images/
