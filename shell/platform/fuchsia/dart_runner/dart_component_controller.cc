@@ -201,12 +201,12 @@ bool DartComponentController::SetupFromKernel() {
   }
 
   if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "pkg/data/isolate_core_snapshot_data.bin",
+          nullptr, "/pkg/data/isolate_core_snapshot_data.bin",
           isolate_snapshot_data_)) {
     return false;
   }
   if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "pkg/data/isolate_core_snapshot_instructions.bin",
+          nullptr, "/pkg/data/isolate_core_snapshot_instructions.bin",
           isolate_snapshot_instructions_, true /* executable */)) {
     return false;
   }
