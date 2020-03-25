@@ -22,7 +22,7 @@ git fetch $remote
 $remoteRevision=git rev-parse $remote/master | Out-String
 $headRevision=git rev-parse HEAD | Out-String
 
-Write-Host "Attempting to merge $remoteRevision into $headRevision..."
+Write-Host "Attempting to merge `"$remoteRevision`" into `"$headRevision`"..."
 
 # To allow writing a local merge commit
 git config user.email "flutter@example.com"

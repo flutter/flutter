@@ -18,7 +18,7 @@ git fetch "$REMOTE"
 REMOTE_REVISION=$(git rev-parse "$REMOTE"/master)
 HEAD_REVISION=$(git rev-parse HEAD)
 
-echo "Attempting to merge $REMOTE_REVISION into $HEAD_REVISION..."
+echo "Attempting to merge \"$REMOTE_REVISION\" into \"$HEAD_REVISION\"..."
 
 # To allow writing a local merge commit
 git config user.email 'flutter@example.com'
