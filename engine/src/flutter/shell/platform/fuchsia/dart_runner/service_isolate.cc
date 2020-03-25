@@ -82,7 +82,7 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
 
 #if defined(AOT_RUNTIME)
   // The VM service was compiled as a separate app.
-  const char* snapshot_path = "pkg/data/vmservice_snapshot.so";
+  const char* snapshot_path = "/pkg/data/vmservice_snapshot.so";
   if (elf_snapshot.Load(nullptr, snapshot_path)) {
     vmservice_data = elf_snapshot.IsolateData();
     vmservice_instructions = elf_snapshot.IsolateInstrs();
@@ -92,14 +92,14 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
   } else {
     // The VM service was compiled as a separate app.
     const char* snapshot_data_path =
-        "pkg/data/vmservice_isolate_snapshot_data.bin";
+        "/pkg/data/vmservice_isolate_snapshot_data.bin";
     const char* snapshot_instructions_path =
-        "pkg/data/vmservice_isolate_snapshot_instructions.bin";
+        "/pkg/data/vmservice_isolate_snapshot_instructions.bin";
 #else
   // The VM service is embedded in the core snapshot.
-  const char* snapshot_data_path = "pkg/data/isolate_core_snapshot_data.bin";
+  const char* snapshot_data_path = "/pkg/data/isolate_core_snapshot_data.bin";
   const char* snapshot_instructions_path =
-      "pkg/data/isolate_core_snapshot_instructions.bin";
+      "/pkg/data/isolate_core_snapshot_instructions.bin";
 #endif
 
     if (!dart_utils::MappedResource::LoadFromNamespace(
@@ -196,7 +196,7 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
   dart_utils::MappedResource observatory_tar;
   if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "pkg/data/observatory.tar", observatory_tar)) {
+          nullptr, "/pkg/data/observatory.tar", observatory_tar)) {
     FX_LOG(ERROR, LOG_TAG, "Failed to load Observatory assets");
     return nullptr;
   }

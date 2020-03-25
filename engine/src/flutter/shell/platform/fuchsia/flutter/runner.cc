@@ -87,7 +87,7 @@ bool InitializeICU() {
   const char* data_path = kIcuDataPath;
 
   fuchsia::mem::Buffer icu_data;
-  if (!dart_utils::VmoFromFilename(data_path, &icu_data)) {
+  if (!dart_utils::VmoFromFilename(data_path, false, &icu_data)) {
     return false;
   }
 
