@@ -11,7 +11,6 @@ import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -54,7 +53,7 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final Process process = await processUtils.start(
+    final Process process = await globals.processUtils.start(
       <String>[getEmulatorPath(androidSdk), '-avd', id],
     );
 
@@ -117,7 +116,7 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = processUtils.runSync(
+  final String listAvdsOutput = globals.processUtils.runSync(
     <String>[emulatorPath, '-list-avds']).stdout.trim();
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];

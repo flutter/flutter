@@ -117,7 +117,7 @@ class AndroidApk extends ApplicationPackage {
 
     String apptStdout;
     try {
-      apptStdout = processUtils.runSync(
+      apptStdout = globals.processUtils.runSync(
         <String>[
           aaptPath,
           'dump',

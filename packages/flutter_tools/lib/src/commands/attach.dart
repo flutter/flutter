@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../android/android_device.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -246,9 +245,7 @@ class AttachCommand extends FlutterCommand {
       if (observatoryUri == null) {
         final ProtocolDiscovery observatoryDiscovery =
           ProtocolDiscovery.observatory(
-            // If it's an Android device, attaching relies on past log searching
-            // to find the service protocol.
-            await device.getLogReader(includePastLogs: device is AndroidDevice),
+            await device.getLogReader(),
             portForwarder: device.portForwarder,
             ipv6: ipv6,
             devicePort: deviceVmservicePort,

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';
@@ -130,6 +133,19 @@ void main() {
       });
 
       expect(await azureDetector.isRunningOnAzure, isFalse);
+    });
+
+    testWithoutContext('isRunningOnAzure returns false when the http request times out', () {
+      FakeAsync().run((FakeAsync time) async {
+        when(mockHttpClient.getUrl(any)).thenAnswer((_) {
+          final Completer<HttpClientRequest> completer = Completer<HttpClientRequest>();
+          return completer.future;  // Never completed to test timeout behavior.
+        });
+        final Future<bool> onBot = azureDetector.isRunningOnAzure;
+        time.elapse(const Duration(seconds: 2));
+
+        expect(await onBot, isFalse);
+      });
     });
 
     testWithoutContext('isRunningOnAzure returns true when azure metadata is reachable', () async {

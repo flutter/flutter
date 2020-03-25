@@ -61,7 +61,7 @@ class UpgradeCommand extends FlutterCommand {
       force: boolArg('force'),
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(processUtils),
+      gitTagVersion: GitTagVersion.determine(globals.processUtils),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
@@ -152,7 +152,7 @@ class UpgradeCommandRunner {
   }
 
   Future<void> flutterUpgradeContinue() async {
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
@@ -182,7 +182,7 @@ class UpgradeCommandRunner {
 
   Future<bool> hasUncomittedChanges() async {
     try {
-      final RunResult result = await processUtils.run(
+      final RunResult result = await globals.processUtils.run(
         <String>['git', 'status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -205,7 +205,7 @@ class UpgradeCommandRunner {
   /// Exits tool if there is no upstream.
   Future<void> verifyUpstreamConfigured() async {
     try {
-      await processUtils.run(
+      await globals.processUtils.run(
         <String>[ 'git', 'rev-parse', '@{u}'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -232,7 +232,7 @@ class UpgradeCommandRunner {
       tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     }
     try {
-      await processUtils.run(
+      await globals.processUtils.run(
         <String>['git', 'reset', '--hard', tag],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -264,7 +264,7 @@ class UpgradeCommandRunner {
   /// If the fast forward lands us on the same channel and revision, then
   /// returns true, otherwise returns false.
   Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: workingDirectory,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
@@ -293,7 +293,7 @@ class UpgradeCommandRunner {
   Future<void> precacheArtifacts() async {
     globals.printStatus('');
     globals.printStatus('Upgrading engine...');
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
@@ -321,7 +321,7 @@ class UpgradeCommandRunner {
   Future<void> runDoctor() async {
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
-    await processUtils.stream(
+    await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],

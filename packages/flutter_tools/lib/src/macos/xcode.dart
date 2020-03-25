@@ -275,9 +275,9 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// [timeout] defaults to 1 second.
+  /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 1));
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -515,7 +515,7 @@ class XCDevice {
   Future<List<String>> getDiagnostics() async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(
       useCache: true,
-      timeout: const Duration(seconds: 1)
+      timeout: const Duration(seconds: 2)
     );
 
     if (allAvailableDevices == null) {

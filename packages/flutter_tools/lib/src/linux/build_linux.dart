@@ -6,7 +6,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
@@ -73,7 +72,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
+    result = await globals.processUtils.stream(<String>[
       'make',
       '-C',
       linuxProject.makeFile.parent.path,
