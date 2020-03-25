@@ -48,10 +48,11 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
-    @required SimControl simControl,
     @required Xcode xcode,
-  }) : _simControl = simControl,
-       _xcode = xcode;
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _simControl = SimControl(logger: logger, processManager: processManager),
+      _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;

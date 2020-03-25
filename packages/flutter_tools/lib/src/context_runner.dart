@@ -136,7 +136,8 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
-        simControl: globals.simControl,
+        logger: globals.logger,
+        processManager: globals.processManager,
         xcode: globals.xcode,
       ),
       IOSWorkflow: () => const IOSWorkflow(),
@@ -175,10 +176,6 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(
-        logger: globals.logger,
-        processManager: globals.processManager,
-      ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
