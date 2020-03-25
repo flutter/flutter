@@ -1712,7 +1712,7 @@ void main() {
   group('Page api', (){
     Widget buildNavigator(
       List<Page<dynamic>> pages,
-      OnPopPageCallback onPopPage, [
+      PopPageCallback onPopPage, [
         GlobalKey<NavigatorState> key,
         TransitionDelegate<dynamic> transitionDelegate
       ]) {
@@ -2405,25 +2405,25 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   @override
   @override
-  Iterable<StageableRoute> resolve({
-    List<StageableRoute> newPageRouteHistory,
-    Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
-    Map<StageableRoute, List<StageableRoute>> pageRouteToPagelessRoutes,
+  Iterable<RouteTransitionRecord> resolve({
+    List<RouteTransitionRecord> newPageRouteHistory,
+    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
+    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
-    final List<StageableRoute> results = <StageableRoute>[];
-    void handleExitingRoute(StageableRoute location) {
+    final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
+    void handleExitingRoute(RouteTransitionRecord location) {
       if (!locationToExitingPageRoute.containsKey(location))
         return;
 
-      final StageableRoute exitingPageRoute = locationToExitingPageRoute[location];
+      final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
       final bool hasPagelessRoute = pageRouteToPagelessRoutes.containsKey(exitingPageRoute);
 
       exitingPageRoute.markForRemove();
       results.add(exitingPageRoute);
 
       if (hasPagelessRoute) {
-        final List<StageableRoute> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        for (final StageableRoute pagelessRoute in pagelessRoutes) {
+        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+        for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
           pagelessRoute.markForRemove();
         }
       }
@@ -2431,7 +2431,7 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
     }
     handleExitingRoute(null);
 
-    for (final StageableRoute pageRoute in newPageRouteHistory) {
+    for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
       if (pageRoute.isEntering) {
         pageRoute.markForAdd();
       }

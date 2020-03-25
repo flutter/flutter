@@ -62,7 +62,7 @@ typedef WillPopCallback = Future<bool> Function();
 /// is passed into [Navigator.pages] so that it no longer includes the
 /// corresponding [Page]. (Otherwise, the page will be interpreted as a new page
 /// to show when the [Navigator.pages] list is next updated.)
-typedef OnPopPageCallback = bool Function(Route<dynamic> route, dynamic result);
+typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 
 /// Indicates whether the current route should be popped.
 ///
@@ -518,7 +518,7 @@ abstract class Page<T> extends RouteSettings {
   /// [key].
   bool canUpdate(Page<dynamic> other) {
     return other.runtimeType == runtimeType &&
-      other.key == key;
+           other.key == key;
   }
 
   /// Creates the [Route] that corresponds to this page.
@@ -608,7 +608,7 @@ class NavigatorObserver {
 
 /// A [Route] wrapper interface that can be staged for [TransitionDelegate] to
 /// decide how its underlying [Route] should transition on or off screen.
-abstract class StageableRoute{
+abstract class RouteTransitionRecord {
   /// Retrieves the wrapped [Route].
   Route<dynamic> get route;
 
@@ -624,14 +624,14 @@ abstract class StageableRoute{
   /// Marks the [route] to be pushed with transition.
   ///
   /// During [TransitionDelegate.resolve], this can be called on an entering
-  /// route (where [StageableRoute.isEntering] is true) in indicate that the
+  /// route (where [RouteTransitionRecord.isEntering] is true) in indicate that the
   /// route should be pushed onto the [Navigator] with an animated transition.
   void markForPush();
 
   /// Marks the [route] to be added without transition.
   ///
   /// During [TransitionDelegate.resolve], this can be called on an entering
-  /// route (where [StageableRoute.isEntering] is true) in indicate that the
+  /// route (where [RouteTransitionRecord.isEntering] is true) in indicate that the
   /// route should be added onto the [Navigator] without an animated transition.
   void markForAdd();
 
@@ -675,12 +675,12 @@ abstract class TransitionDelegate<T> {
   /// Creates a delegate and enables subclass to create a constant class.
   const TransitionDelegate();
 
-  Iterable<StageableRoute> _transition({
-    List<StageableRoute> newPageRouteHistory,
-    Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
-    Map<StageableRoute, List<StageableRoute>> pageRouteToPagelessRoutes,
+  Iterable<RouteTransitionRecord> _transition({
+    List<RouteTransitionRecord> newPageRouteHistory,
+    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
+    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
-    final Iterable<StageableRoute> results = resolve(
+    final Iterable<RouteTransitionRecord> results = resolve(
       newPageRouteHistory: newPageRouteHistory,
       locationToExitingPageRoute: locationToExitingPageRoute,
       pageRouteToPagelessRoutes: pageRouteToPagelessRoutes,
@@ -710,13 +710,13 @@ abstract class TransitionDelegate<T> {
     //     results = [B, A, C ,D ,E] is invalid because B must be after A.
     //     results = [A, B, C ,E] is invalid because results must include D.
     assert(() {
-      final List<StageableRoute> resultsToVerify = results.toList(growable: false);
-      final Set<StageableRoute> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
+      final List<RouteTransitionRecord> resultsToVerify = results.toList(growable: false);
+      final Set<RouteTransitionRecord> exitingPageRoutes = locationToExitingPageRoute.values.toSet();
       // Firstly, verifies all exiting routes have been marked.
-      for (final StageableRoute exitingPageRoute in exitingPageRoutes) {
+      for (final RouteTransitionRecord exitingPageRoute in exitingPageRoutes) {
         assert(!exitingPageRoute._debugWaitingForExitDecision);
         if (pageRouteToPagelessRoutes.containsKey(exitingPageRoute)) {
-          for (final StageableRoute pagelessRoute in pageRouteToPagelessRoutes[exitingPageRoute]) {
+          for (final RouteTransitionRecord pagelessRoute in pageRouteToPagelessRoutes[exitingPageRoute]) {
             assert(!pagelessRoute._debugWaitingForExitDecision);
           }
         }
@@ -740,8 +740,8 @@ abstract class TransitionDelegate<T> {
       }
 
       assert(
-       indexOfNextRouteInNewHistory == newPageRouteHistory.length &&
-       exitingPageRoutes.isEmpty
+        indexOfNextRouteInNewHistory == newPageRouteHistory.length &&
+        exitingPageRoutes.isEmpty
       );
       return true;
     }());
@@ -755,9 +755,10 @@ abstract class TransitionDelegate<T> {
   /// The `newPageRouteHistory` list contains all page-based routes in the order
   /// that will be on the [Navigator]'s history stack after this update
   /// completes. If a route in `newPageRouteHistory` has its
-  /// [StageableRoute.isEntering] set to true, this route requires explicit
+  /// [RouteTransitionRecord.isEntering] set to true, this route requires explicit
   /// decision on how it should transition onto the Navigator. To make a
-  /// decision, call [StageableRoute.markForPush] or [StageableRoute.markForAdd].
+  /// decision, call [RouteTransitionRecord.markForPush] or
+  /// [RouteTransitionRecord.markForAdd].
   ///
   /// The `locationToExitingPageRoute` contains the pages-based routes that
   /// are removed from the routes history after page update and require explicit
@@ -767,8 +768,9 @@ abstract class TransitionDelegate<T> {
   /// page-based routes that are directly below the removed routes, and the value
   /// are the page-based routes to be removed. The location is null if the route
   /// to be removed is the bottom most route. To make a decision for a removed
-  /// route, call [StageableRoute.markForPop], [StageableRoute.markForComplete]
-  /// or [StageableRoute.markForRemove].
+  /// route, call [RouteTransitionRecord.markForPop],
+  /// [RouteTransitionRecord.markForComplete] or
+  /// [RouteTransitionRecord.markForRemove].
   ///
   /// The `pageRouteToPagelessRoutes` records the page-based routes and their
   /// associated pageless routes. If a page-based route is to be removed, its
@@ -782,24 +784,41 @@ abstract class TransitionDelegate<T> {
   /// in `newPageRouteHistory`. The removed routes, however, can be inserted
   /// into the return list freely as long as all of them are included.
   ///
+  /// For example, consider the following case.
+  ///
+  ///    newPageRouteHistory = [A, B, C]
+  ///
+  ///    locationToExitingPageRoute = {A -> D, C -> E}
+  ///
+  /// The following outputs are valid.
+  ///
+  ///    result = [A, B ,C ,D ,E] is valid
+  ///    result = [D, A, B ,C ,E] is also valid because exiting route can be
+  ///    inserted in any place
+  ///
+  /// The following outputs are invalid.
+  ///
+  ///    result = [B, A, C ,D ,E] is invalid because B must be after A.
+  ///    result = [A, B, C ,E] is invalid because results must include D.
+  ///
   /// See also:
   ///
-  ///  * [StageableRoute.markForPush], which makes route enter the screen with
-  ///    an animated transition.
-  ///  * [StageableRoute.markForAdd], which makes route enter the screen without
-  ///    an animated transition.
-  ///  * [StageableRoute.markForPop], which makes route exit the screen with
-  ///    an animated transition.
-  ///  * [StageableRoute.markForRemove], which does not complete the route and
+  ///  * [RouteTransitionRecord.markForPush], which makes route enter the screen
+  ///    with an animated transition.
+  ///  * [RouteTransitionRecord.markForAdd], which makes route enter the screen
+  ///    without an animated transition.
+  ///  * [RouteTransitionRecord.markForPop], which makes route exit the screen
+  ///    with an animated transition.
+  ///  * [RouteTransitionRecord.markForRemove], which does not complete the
+  ///    route and makes it exit the screen without an animated transition.
+  ///  * [RouteTransitionRecord.markForComplete], which completes the route and
   ///    makes it exit the screen without an animated transition.
-  ///  * [StageableRoute.markForComplete], which completes the route and makes
-  ///    it exit the screen without an animated transition.
   ///  * [DefaultTransitionDelegate.resolve], which implements the default way
   ///    to decide how routes transition in or out of the screen.
-  Iterable<StageableRoute> resolve({
-    List<StageableRoute> newPageRouteHistory,
-    Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
-    Map<StageableRoute, List<StageableRoute>> pageRouteToPagelessRoutes,
+  Iterable<RouteTransitionRecord> resolve({
+    List<RouteTransitionRecord> newPageRouteHistory,
+    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
+    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   });
 }
 
@@ -816,17 +835,17 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   const DefaultTransitionDelegate() : super();
 
   @override
-  Iterable<StageableRoute> resolve({
-    List<StageableRoute> newPageRouteHistory,
-    Map<StageableRoute, StageableRoute> locationToExitingPageRoute,
-    Map<StageableRoute, List<StageableRoute>> pageRouteToPagelessRoutes,
+  Iterable<RouteTransitionRecord> resolve({
+    List<RouteTransitionRecord> newPageRouteHistory,
+    Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
+    Map<RouteTransitionRecord, List<RouteTransitionRecord>> pageRouteToPagelessRoutes,
   }) {
-    final List<StageableRoute> results = <StageableRoute>[];
+    final List<RouteTransitionRecord> results = <RouteTransitionRecord>[];
     // This method will handle the exiting route and its corresponding pageless
     // route at this location. It will also recursively check if there is any
     // other exiting routes above it and handle them accordingly.
-    void handleExitingRoute(StageableRoute location, bool isLast) {
-      final StageableRoute exitingPageRoute = locationToExitingPageRoute[location];
+    void handleExitingRoute(RouteTransitionRecord location, bool isLast) {
+      final RouteTransitionRecord exitingPageRoute = locationToExitingPageRoute[location];
       if (exitingPageRoute == null)
         return;
       assert(exitingPageRoute._debugWaitingForExitDecision);
@@ -840,8 +859,8 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
       results.add(exitingPageRoute);
 
       if (hasPagelessRoute) {
-        final List<StageableRoute> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
-        for (final StageableRoute pagelessRoute in pagelessRoutes) {
+        final List<RouteTransitionRecord> pagelessRoutes = pageRouteToPagelessRoutes[exitingPageRoute];
+        for (final RouteTransitionRecord pagelessRoute in pagelessRoutes) {
           assert(pagelessRoute._debugWaitingForExitDecision);
           if (isLastExitingPageRoute && pagelessRoute == pagelessRoutes.last) {
             pagelessRoute.markForPop(pagelessRoute.route.currentResult);
@@ -857,7 +876,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
     // Handles exiting route in the beginning of list.
     handleExitingRoute(null, newPageRouteHistory.isEmpty);
 
-    for (final StageableRoute pageRoute in newPageRouteHistory) {
+    for (final RouteTransitionRecord pageRoute in newPageRouteHistory) {
       final bool isLastIteration = newPageRouteHistory.last == pageRoute;
       if (pageRoute.isEntering) {
         if (!locationToExitingPageRoute.containsKey(pageRoute) && isLastIteration) {
@@ -1085,12 +1104,12 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// ));
 /// ```
 ///
-/// The route is built in two parts, the "page widget" and the "transitions". The
-/// page widget becomes a descendant of the child passed to the
-/// `transitionsBuilder` function. Typically the page widget is only built once,
-/// because it doesn't depend on its animation parameters (elided with `_` and
-/// `__` in this example). The transition is built on every frame for its
-/// duration.
+/// The page route is built in two parts, the "page" and the
+/// "transitions". The page becomes a descendant of the child passed to
+/// the `transitionsBuilder` function. Typically the page is only built once,
+/// because it doesn't depend on its animation parameters (elided with `_`
+/// and `__` in this example). The transition is built on every frame
+/// for its duration.
 ///
 /// ### Nesting Navigators
 ///
@@ -1318,7 +1337,7 @@ class Navigator extends StatefulWidget {
   /// contain the [Page] for the given [Route]. The next time the [pages] list
   /// is updated, if the [Page] corresponding to this [Route] is still present,
   /// it will be interpreted as a new route to display.
-  final OnPopPageCallback onPopPage;
+  final PopPageCallback onPopPage;
 
   /// The delegate used for deciding how routes transition in or off the screen
   /// during the [pages] updates.
@@ -2206,7 +2225,7 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-class _RouteEntry extends StageableRoute {
+class _RouteEntry extends RouteTransitionRecord {
   _RouteEntry(
     this.route, {
       @required _RouteLifecycle initialState,
@@ -2742,7 +2761,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
 
     // Any remaining old routes that do not have a match will need to be removed.
-    final Map<StageableRoute, StageableRoute> locationToExitingPageRoute = <StageableRoute, StageableRoute>{};
+    final Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute = <RouteTransitionRecord, RouteTransitionRecord>{};
     while (oldEntriesBottom <= oldEntriesTop) {
       final _RouteEntry potentialEntryToRemove = _history[oldEntriesBottom];
       oldEntriesBottom += 1;
