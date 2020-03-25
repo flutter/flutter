@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -209,15 +211,20 @@ void main() {
   group('xcdevice', () {
     XCDevice xcdevice;
     MockXcode mockXcode;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
 
     setUp(() {
       mockXcode = MockXcode();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
       xcdevice = XCDevice(
         processManager: processManager,
         logger: logger,
         xcode: mockXcode,
-        iMobileDevice: null,
-        iosDeploy: null,
+        platform: null,
+        artifacts: mockArtifacts,
+        cache: mockCache,
       );
     });
 
@@ -610,3 +617,5 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}
