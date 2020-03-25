@@ -54,7 +54,7 @@ void main() {
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
         },
         artifacts: artifacts,
-         processManager: processManager,
+        processManager: processManager,
       );
       iosEnvironment.buildDir.createSync(recursive: true);
       artifacts = CachedArtifacts(
