@@ -430,7 +430,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesExtraFrontendOptions() {
-    argParser.addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
       splitCommas: true,
       hide: true,
     );

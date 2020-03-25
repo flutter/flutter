@@ -11,7 +11,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -49,10 +49,6 @@ class BuildBundleCommand extends BuildSubCommand {
           'linux-x64',
           'windows-x64',
         ],
-      )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
