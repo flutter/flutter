@@ -75,7 +75,7 @@ bool InitializeTZData() {
                   << strerror(errno);
     return false;
   }
-  if (!close(fd)) {
+  if (close(fd)) {
     FML_LOG(WARNING) << "Could not close: " << tzdata_dir << ": "
                      << strerror(errno);
   }
