@@ -178,6 +178,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.backgroundColor,
     this.iconSize = 24.0,
     Color selectedItemColor,
+    this.activeBackgroundColor = Colors.transparent,
     this.unselectedItemColor,
     this.selectedIconTheme = const IconThemeData(),
     this.unselectedIconTheme = const IconThemeData(),
@@ -247,6 +248,11 @@ class BottomNavigationBar extends StatefulWidget {
   /// [items]s, have [BottomNavigationBarItem.backgroundColor] set, the [item]'s
   /// backgroundColor will splash and overwrite this color.
   final Color backgroundColor;
+
+  /// The color of the active [BottomNavigationBar] item.
+  ///
+  /// defaults to transparent when null
+  final Color activeBackgroundColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
@@ -363,6 +369,7 @@ class _BottomNavigationTile extends StatelessWidget {
     this.colorTween,
     this.flex,
     this.selected = false,
+    this.activeBackgroundColor,
     @required this.selectedLabelStyle,
     @required this.unselectedLabelStyle,
     @required this.selectedIconTheme,
@@ -392,6 +399,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
+  final Color activeBackgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -471,52 +479,55 @@ class _BottomNavigationTile extends StatelessWidget {
 
     return Expanded(
       flex: size,
-      child: Semantics(
-        container: true,
-        selected: selected,
-        child: Stack(
-          children: <Widget>[
-            InkResponse(
-              onTap: onTap,
-              child: Padding(
-                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _TileIcon(
-                      colorTween: colorTween,
-                      animation: animation,
-                      iconSize: iconSize,
-                      selected: selected,
-                      item: item,
-                      selectedIconTheme: selectedIconTheme,
-                      unselectedIconTheme: unselectedIconTheme,
-                    ),
-                    _Label(
-                      colorTween: colorTween,
-                      animation: animation,
-                      item: item,
-                      selectedLabelStyle: selectedLabelStyle,
-                      unselectedLabelStyle: unselectedLabelStyle,
-                      showSelectedLabels: showSelectedLabels,
-                      showUnselectedLabels: showUnselectedLabels,
-                    ),
-                  ],
+      child: Container(
+        color: selected ? activeBackgroundColor : Colors.transparent,
+        child: Semantics(
+          container: true,
+          selected: selected,
+          child: Stack(
+            children: <Widget>[
+              InkResponse(
+                onTap: onTap,
+                child: Padding(
+                  padding:
+                      EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _TileIcon(
+                        colorTween: colorTween,
+                        animation: animation,
+                        iconSize: iconSize,
+                        selected: selected,
+                        item: item,
+                        selectedIconTheme: selectedIconTheme,
+                        unselectedIconTheme: unselectedIconTheme,
+                      ),
+                      _Label(
+                        colorTween: colorTween,
+                        animation: animation,
+                        item: item,
+                        selectedLabelStyle: selectedLabelStyle,
+                        unselectedLabelStyle: unselectedLabelStyle,
+                        showSelectedLabels: showSelectedLabels,
+                        showUnselectedLabels: showUnselectedLabels,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Semantics(
-              label: indexLabel,
-            ),
-          ],
+              Semantics(
+                label: indexLabel,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 
 class _TileIcon extends StatelessWidget {
   const _TileIcon({
@@ -825,6 +836,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         _animations[i],
         widget.iconSize,
         selectedIconTheme: widget.selectedIconTheme,
+        activeBackgroundColor: widget.activeBackgroundColor,
         unselectedIconTheme: widget.unselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
         unselectedLabelStyle: effectiveUnselectedLabelStyle,

@@ -56,6 +56,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.currentIndex = 0,
     this.backgroundColor,
     this.activeColor,
+    this.activeBackgroundColor = const Color(0x00000000),
     this.inactiveColor = _kDefaultTabBarInactiveColor,
     this.iconSize = 30.0,
     this.border = const Border(
@@ -100,6 +101,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Defaults to [CupertinoTheme]'s `barBackgroundColor` when null.
   final Color backgroundColor;
+
+  /// The background color of the active tab bar item.
+  ///
+  /// Defaults to transparent when null.
+  final Color activeBackgroundColor;
 
   /// The foreground color of the icon and title for the [BottomNavigationBarItem]
   /// of the selected tab.
@@ -176,13 +182,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           data: IconThemeData(color: inactive, size: iconSize),
           child: DefaultTextStyle( // Default with the inactive state.
             style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle.copyWith(color: inactive),
-            child: Padding(
-              padding: EdgeInsets.only(bottom: bottomPadding),
-              child: Row(
-                // Align bottom since we want the labels to be aligned.
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildTabItems(context),
-              ),
+            child: Row(
+              // Align bottom since we want the labels to be aligned.
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: _buildTabItems(context),
             ),
           ),
         ),
@@ -204,6 +207,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
     for (int index = 0; index < items.length; index += 1) {
       final bool active = index == currentIndex;
@@ -218,11 +222,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onTap == null ? null : () { onTap(index); },
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: _buildSingleTabItem(items[index], active),
+                child: Container(
+                  color: active ? activeBackgroundColor : null,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: bottomPadding + 4, top: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _buildSingleTabItem(items[index], active),
+                    ),
                   ),
                 ),
               ),
@@ -269,6 +276,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Key key,
     List<BottomNavigationBarItem> items,
     Color backgroundColor,
+    Color activeBackgroundColor,
     Color activeColor,
     Color inactiveColor,
     double iconSize,
@@ -280,6 +288,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       key: key ?? this.key,
       items: items ?? this.items,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      activeBackgroundColor: activeBackgroundColor ?? this.activeBackgroundColor,
       activeColor: activeColor ?? this.activeColor,
       inactiveColor: inactiveColor ?? this.inactiveColor,
       iconSize: iconSize ?? this.iconSize,
