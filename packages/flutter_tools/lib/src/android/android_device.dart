@@ -213,7 +213,6 @@ class AndroidDevice extends Device {
   Future<String> get apiVersion => _getProperty('ro.build.version.sdk');
 
   AdbLogReader _logReader;
-  AdbLogReader _pastLogReader;
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
@@ -674,23 +673,9 @@ class AndroidDevice extends Device {
   }
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({
-    AndroidApk app,
-    bool includePastLogs = false,
-  }) async {
-    // The Android log reader isn't app-specific. The `app` parameter isn't used.
-    if (includePastLogs) {
-      return _pastLogReader ??= await AdbLogReader.createLogReader(
-        this,
-        globals.processManager,
-        includePastLogs: true,
-      );
-    } else {
-      return _logReader ??= await AdbLogReader.createLogReader(
-        this,
-        globals.processManager,
-      );
-    }
+  FutureOr<DeviceLogReader> getLogReader({ AndroidApk app }) async {
+    // The Android log reader isn't app-specific.
+    return _logReader ??= await AdbLogReader.createLogReader(this, globals.processManager);
   }
 
   @override
@@ -739,7 +724,6 @@ class AndroidDevice extends Device {
   @override
   Future<void> dispose() async {
     _logReader?._stop();
-    _pastLogReader?._stop();
     await _portForwarder?.dispose();
   }
 }
@@ -917,9 +901,6 @@ class AdbLogReader extends DeviceLogReader {
   static Future<AdbLogReader> createLogReader(
     AndroidDevice device,
     ProcessManager processManager,
-    {
-      bool includePastLogs = false,
-    }
   ) async {
     // logcat -T is not supported on Android releases before Lollipop.
     const int kLollipopVersionCode = 21;
@@ -934,12 +915,7 @@ class AdbLogReader extends DeviceLogReader {
       'logcat',
       '-v',
       'time',
-      // If we include logs from the past, filter for 'flutter' logs only.
-      if (includePastLogs) ...<String>[
-        '-s',
-        'flutter',
-      ] else if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
-        // Otherwise, filter for logs appearing past the present.
+      if (apiVersion != null && apiVersion >= kLollipopVersionCode) ...<String>[
         // Empty `-T` means the timestamp of the logcat command invocation.
         '-T',
         device.lastLogcatTimestamp ?? '',
