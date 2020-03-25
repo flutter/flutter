@@ -17,7 +17,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
-import 'base/process.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -65,7 +64,6 @@ const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.
 ProcessManager get processManager => context.get<ProcessManager>() ?? _kLocalProcessManager;
-ProcessUtils get processUtils => context.get<ProcessUtils>();
 
 const Platform _kLocalPlatform = LocalPlatform();
 

@@ -579,12 +579,12 @@ class IOSSimulator extends Device {
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return globals.processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+    return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
   }
 
   // For iOS 11 and above, use /usr/bin/log to tail process logs.
   // Run in interactive mode (via script), otherwise /usr/bin/log buffers in 4k chunks. (radar: 34420207)
-  return globals.processUtils.start(<String>[
+  return processUtils.start(<String>[
     'script', '/dev/null', '/usr/bin/log', 'stream', '--style', 'syslog', '--predicate', 'processImagePath CONTAINS "${device.id}"',
   ]);
 }
@@ -592,7 +592,7 @@ Future<Process> launchDeviceLogTool(IOSSimulator device) async {
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return globals.processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+    return processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
   }
 
   // For iOS 11 and later, all relevant detail is in the device log.
