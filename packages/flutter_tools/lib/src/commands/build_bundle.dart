@@ -51,6 +51,10 @@ class BuildBundleCommand extends BuildSubCommand {
         ],
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
+      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,	
+        splitCommas: true,	
+        hide: true,	
+      )
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               "in the application's LICENSE file.",
