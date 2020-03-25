@@ -104,7 +104,14 @@ Future<T> runInContext<T>(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
       ),
-      CocoaPods: () => CocoaPods(),
+      CocoaPods: () => CocoaPods(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        platform: globals.platform,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        timeoutConfiguration: timeoutConfiguration,
+      ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
         globals.userMessages,
