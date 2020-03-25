@@ -66,7 +66,7 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
@@ -329,7 +329,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   const Duration showBuildSettingsTimeout = Duration(minutes: 1);
   Map<String, String> buildSettings;
   try {
-    final RunResult showBuildSettingsResult = await processUtils.run(
+    final RunResult showBuildSettingsResult = await globals.processUtils.run(
       showBuildSettingsCommand,
       throwOnError: true,
       workingDirectory: app.project.hostAppRoot.path,
@@ -413,7 +413,7 @@ Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSA
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
-    buildResult = await processUtils.run(
+    buildResult = await globals.processUtils.run(
       buildCommands,
       workingDirectory: app.project.hostAppRoot.path,
       allowReentrantFlutter: true,

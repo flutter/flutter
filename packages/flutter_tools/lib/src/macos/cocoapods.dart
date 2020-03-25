@@ -68,10 +68,10 @@ class CocoaPods {
   String get cocoaPodsRecommendedVersion => '1.8.0';
 
   Future<bool> get isInstalled =>
-      processUtils.exitsHappy(<String>['which', 'pod']);
+    globals.processUtils.exitsHappy(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
-    _versionText ??= processUtils.run(
+    _versionText ??= globals.processUtils.run(
       <String>['pod', '--version'],
       environment: <String, String>{
         'LANG': 'en_US.UTF-8',
