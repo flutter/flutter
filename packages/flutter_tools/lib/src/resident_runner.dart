@@ -670,6 +670,7 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
+  bool get supportsDumpSksl => supportsServiceProtocol;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -735,6 +736,15 @@ abstract class ResidentRunner {
   /// Only supported on the web.
   Future<bool> toggleCanvaskit() {
     throw Exception('Canvaskit not supported by this runner.');
+  }
+
+  /// Dump the sksl shaders to a file in the project directory.
+  Future<void> dumpSksl() async {
+    if (!supportsDumpSksl) {
+      throw Exception('dumpSksl is not supported by this runner.');
+    }
+    final Map<String, Object> result = await invokeFlutterExtensionRpcRawOnFirstIsolate('_flutter.getSkSLs');
+    print(result);
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1064,6 +1074,9 @@ abstract class ResidentRunner {
       if (supportsCanvasKit){
         commandHelp.k.print();
       }
+      if (supportsDumpSksl) {
+        commandHelp.M.print();
+      }
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1221,6 +1234,12 @@ class TerminalHandler {
       case 'L':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpLayerTree();
+          return true;
+        }
+        return false;
+      case 'M':
+        if (residentRunner.supportsDumpSksl) {
+          await residentRunner.dumpSksl();
           return true;
         }
         return false;
