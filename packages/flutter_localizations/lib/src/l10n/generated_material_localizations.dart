@@ -29,17 +29,23 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   const MaterialLocalizationAf({
     String localeName = 'af',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -236,17 +242,23 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   const MaterialLocalizationAm({
     String localeName = 'am',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -443,17 +455,23 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   const MaterialLocalizationAr({
     String localeName = 'ar',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -650,17 +668,23 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   const MaterialLocalizationAs({
     String localeName = 'as',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -857,17 +881,23 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   const MaterialLocalizationAz({
     String localeName = 'az',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -1064,17 +1094,23 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   const MaterialLocalizationBe({
     String localeName = 'be',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -1271,17 +1307,23 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   const MaterialLocalizationBg({
     String localeName = 'bg',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -1478,17 +1520,23 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   const MaterialLocalizationBn({
     String localeName = 'bn',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -1685,17 +1733,23 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   const MaterialLocalizationBs({
     String localeName = 'bs',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -1892,17 +1946,23 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   const MaterialLocalizationCa({
     String localeName = 'ca',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2099,17 +2159,23 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   const MaterialLocalizationCs({
     String localeName = 'cs',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2306,17 +2372,23 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   const MaterialLocalizationDa({
     String localeName = 'da',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2513,17 +2585,23 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   const MaterialLocalizationDe({
     String localeName = 'de',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2720,17 +2798,23 @@ class MaterialLocalizationDeCh extends MaterialLocalizationDe {
   const MaterialLocalizationDeCh({
     String localeName = 'de_CH',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2750,17 +2834,23 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   const MaterialLocalizationEl({
     String localeName = 'el',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -2957,17 +3047,23 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   const MaterialLocalizationEn({
     String localeName = 'en',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3164,17 +3260,23 @@ class MaterialLocalizationEnAu extends MaterialLocalizationEn {
   const MaterialLocalizationEnAu({
     String localeName = 'en_AU',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3206,17 +3308,23 @@ class MaterialLocalizationEnCa extends MaterialLocalizationEn {
   const MaterialLocalizationEnCa({
     String localeName = 'en_CA',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3248,17 +3356,23 @@ class MaterialLocalizationEnGb extends MaterialLocalizationEn {
   const MaterialLocalizationEnGb({
     String localeName = 'en_GB',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3293,17 +3407,23 @@ class MaterialLocalizationEnIe extends MaterialLocalizationEn {
   const MaterialLocalizationEnIe({
     String localeName = 'en_IE',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3338,17 +3458,23 @@ class MaterialLocalizationEnIn extends MaterialLocalizationEn {
   const MaterialLocalizationEnIn({
     String localeName = 'en_IN',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3380,17 +3506,23 @@ class MaterialLocalizationEnNz extends MaterialLocalizationEn {
   const MaterialLocalizationEnNz({
     String localeName = 'en_NZ',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3422,17 +3554,23 @@ class MaterialLocalizationEnSg extends MaterialLocalizationEn {
   const MaterialLocalizationEnSg({
     String localeName = 'en_SG',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3464,17 +3602,23 @@ class MaterialLocalizationEnZa extends MaterialLocalizationEn {
   const MaterialLocalizationEnZa({
     String localeName = 'en_ZA',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3509,17 +3653,23 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   const MaterialLocalizationEs({
     String localeName = 'es',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3716,17 +3866,23 @@ class MaterialLocalizationEs419 extends MaterialLocalizationEs {
   const MaterialLocalizationEs419({
     String localeName = 'es_419',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3797,17 +3953,23 @@ class MaterialLocalizationEsAr extends MaterialLocalizationEs {
   const MaterialLocalizationEsAr({
     String localeName = 'es_AR',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3878,17 +4040,23 @@ class MaterialLocalizationEsBo extends MaterialLocalizationEs {
   const MaterialLocalizationEsBo({
     String localeName = 'es_BO',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -3959,17 +4127,23 @@ class MaterialLocalizationEsCl extends MaterialLocalizationEs {
   const MaterialLocalizationEsCl({
     String localeName = 'es_CL',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4040,17 +4214,23 @@ class MaterialLocalizationEsCo extends MaterialLocalizationEs {
   const MaterialLocalizationEsCo({
     String localeName = 'es_CO',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4121,17 +4301,23 @@ class MaterialLocalizationEsCr extends MaterialLocalizationEs {
   const MaterialLocalizationEsCr({
     String localeName = 'es_CR',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4202,17 +4388,23 @@ class MaterialLocalizationEsDo extends MaterialLocalizationEs {
   const MaterialLocalizationEsDo({
     String localeName = 'es_DO',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4283,17 +4475,23 @@ class MaterialLocalizationEsEc extends MaterialLocalizationEs {
   const MaterialLocalizationEsEc({
     String localeName = 'es_EC',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4364,17 +4562,23 @@ class MaterialLocalizationEsGt extends MaterialLocalizationEs {
   const MaterialLocalizationEsGt({
     String localeName = 'es_GT',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4445,17 +4649,23 @@ class MaterialLocalizationEsHn extends MaterialLocalizationEs {
   const MaterialLocalizationEsHn({
     String localeName = 'es_HN',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4526,17 +4736,23 @@ class MaterialLocalizationEsMx extends MaterialLocalizationEs {
   const MaterialLocalizationEsMx({
     String localeName = 'es_MX',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4607,17 +4823,23 @@ class MaterialLocalizationEsNi extends MaterialLocalizationEs {
   const MaterialLocalizationEsNi({
     String localeName = 'es_NI',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4688,17 +4910,23 @@ class MaterialLocalizationEsPa extends MaterialLocalizationEs {
   const MaterialLocalizationEsPa({
     String localeName = 'es_PA',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4769,17 +4997,23 @@ class MaterialLocalizationEsPe extends MaterialLocalizationEs {
   const MaterialLocalizationEsPe({
     String localeName = 'es_PE',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4850,17 +5084,23 @@ class MaterialLocalizationEsPr extends MaterialLocalizationEs {
   const MaterialLocalizationEsPr({
     String localeName = 'es_PR',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -4931,17 +5171,23 @@ class MaterialLocalizationEsPy extends MaterialLocalizationEs {
   const MaterialLocalizationEsPy({
     String localeName = 'es_PY',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5012,17 +5258,23 @@ class MaterialLocalizationEsSv extends MaterialLocalizationEs {
   const MaterialLocalizationEsSv({
     String localeName = 'es_SV',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5093,17 +5345,23 @@ class MaterialLocalizationEsUs extends MaterialLocalizationEs {
   const MaterialLocalizationEsUs({
     String localeName = 'es_US',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5177,17 +5435,23 @@ class MaterialLocalizationEsUy extends MaterialLocalizationEs {
   const MaterialLocalizationEsUy({
     String localeName = 'es_UY',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5258,17 +5522,23 @@ class MaterialLocalizationEsVe extends MaterialLocalizationEs {
   const MaterialLocalizationEsVe({
     String localeName = 'es_VE',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5339,17 +5609,23 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   const MaterialLocalizationEt({
     String localeName = 'et',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5546,17 +5822,23 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   const MaterialLocalizationEu({
     String localeName = 'eu',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5753,17 +6035,23 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   const MaterialLocalizationFa({
     String localeName = 'fa',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -5960,17 +6248,23 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   const MaterialLocalizationFi({
     String localeName = 'fi',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -6167,17 +6461,23 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   const MaterialLocalizationFil({
     String localeName = 'fil',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -6374,17 +6674,23 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   const MaterialLocalizationFr({
     String localeName = 'fr',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -6581,17 +6887,23 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   const MaterialLocalizationFrCa({
     String localeName = 'fr_CA',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -6635,17 +6947,23 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   const MaterialLocalizationGl({
     String localeName = 'gl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -6842,17 +7160,23 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   const MaterialLocalizationGsw({
     String localeName = 'gsw',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -7049,17 +7373,23 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   const MaterialLocalizationGu({
     String localeName = 'gu',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -7256,17 +7586,23 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   const MaterialLocalizationHe({
     String localeName = 'he',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -7463,17 +7799,23 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   const MaterialLocalizationHi({
     String localeName = 'hi',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -7670,17 +8012,23 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   const MaterialLocalizationHr({
     String localeName = 'hr',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -7877,17 +8225,23 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   const MaterialLocalizationHu({
     String localeName = 'hu',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -8084,17 +8438,23 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   const MaterialLocalizationHy({
     String localeName = 'hy',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -8291,17 +8651,23 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   const MaterialLocalizationId({
     String localeName = 'id',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -8498,17 +8864,23 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   const MaterialLocalizationIs({
     String localeName = 'is',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -8705,17 +9077,23 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   const MaterialLocalizationIt({
     String localeName = 'it',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -8912,17 +9290,23 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   const MaterialLocalizationJa({
     String localeName = 'ja',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -9119,17 +9503,23 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   const MaterialLocalizationKa({
     String localeName = 'ka',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -9326,17 +9716,23 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   const MaterialLocalizationKk({
     String localeName = 'kk',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -9533,17 +9929,23 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   const MaterialLocalizationKm({
     String localeName = 'km',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -9740,17 +10142,23 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   const MaterialLocalizationKn({
     String localeName = 'kn',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -9947,17 +10355,23 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   const MaterialLocalizationKo({
     String localeName = 'ko',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -10154,17 +10568,23 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   const MaterialLocalizationKy({
     String localeName = 'ky',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -10361,17 +10781,23 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   const MaterialLocalizationLo({
     String localeName = 'lo',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -10568,17 +10994,23 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   const MaterialLocalizationLt({
     String localeName = 'lt',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -10775,17 +11207,23 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   const MaterialLocalizationLv({
     String localeName = 'lv',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -10982,17 +11420,23 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   const MaterialLocalizationMk({
     String localeName = 'mk',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -11189,17 +11633,23 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   const MaterialLocalizationMl({
     String localeName = 'ml',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -11396,17 +11846,23 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   const MaterialLocalizationMn({
     String localeName = 'mn',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -11603,17 +12059,23 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   const MaterialLocalizationMr({
     String localeName = 'mr',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -11810,17 +12272,23 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   const MaterialLocalizationMs({
     String localeName = 'ms',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -12017,17 +12485,23 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   const MaterialLocalizationMy({
     String localeName = 'my',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -12224,17 +12698,23 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   const MaterialLocalizationNb({
     String localeName = 'nb',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -12431,17 +12911,23 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   const MaterialLocalizationNe({
     String localeName = 'ne',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -12638,17 +13124,23 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   const MaterialLocalizationNl({
     String localeName = 'nl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -12845,17 +13337,23 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   const MaterialLocalizationOr({
     String localeName = 'or',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13052,17 +13550,23 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   const MaterialLocalizationPa({
     String localeName = 'pa',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13259,17 +13763,23 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   const MaterialLocalizationPl({
     String localeName = 'pl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13466,17 +13976,23 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   const MaterialLocalizationPs({
     String localeName = 'ps',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13673,17 +14189,23 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   const MaterialLocalizationPt({
     String localeName = 'pt',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13880,17 +14402,23 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   const MaterialLocalizationPtPt({
     String localeName = 'pt_PT',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -13958,17 +14486,23 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   const MaterialLocalizationRo({
     String localeName = 'ro',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -14165,17 +14699,23 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   const MaterialLocalizationRu({
     String localeName = 'ru',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -14372,17 +14912,23 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   const MaterialLocalizationSi({
     String localeName = 'si',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -14579,17 +15125,23 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   const MaterialLocalizationSk({
     String localeName = 'sk',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -14786,17 +15338,23 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   const MaterialLocalizationSl({
     String localeName = 'sl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -14993,17 +15551,23 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   const MaterialLocalizationSq({
     String localeName = 'sq',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -15200,17 +15764,23 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   const MaterialLocalizationSr({
     String localeName = 'sr',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -15407,17 +15977,23 @@ class MaterialLocalizationSrCyrl extends MaterialLocalizationSr {
   const MaterialLocalizationSrCyrl({
     String localeName = 'sr_Cyrl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -15431,17 +16007,23 @@ class MaterialLocalizationSrLatn extends MaterialLocalizationSr {
   const MaterialLocalizationSrLatn({
     String localeName = 'sr_Latn',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -15611,17 +16193,23 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   const MaterialLocalizationSv({
     String localeName = 'sv',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -15818,17 +16406,23 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   const MaterialLocalizationSw({
     String localeName = 'sw',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -16025,17 +16619,23 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   const MaterialLocalizationTa({
     String localeName = 'ta',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -16232,17 +16832,23 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   const MaterialLocalizationTe({
     String localeName = 'te',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -16439,17 +17045,23 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   const MaterialLocalizationTh({
     String localeName = 'th',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -16646,17 +17258,23 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   const MaterialLocalizationTl({
     String localeName = 'tl',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -16853,17 +17471,23 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   const MaterialLocalizationTr({
     String localeName = 'tr',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -17060,17 +17684,23 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   const MaterialLocalizationUk({
     String localeName = 'uk',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -17267,17 +17897,23 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   const MaterialLocalizationUr({
     String localeName = 'ur',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -17474,17 +18110,23 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   const MaterialLocalizationUz({
     String localeName = 'uz',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -17681,17 +18323,23 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   const MaterialLocalizationVi({
     String localeName = 'vi',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -17888,17 +18536,23 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   const MaterialLocalizationZh({
     String localeName = 'zh',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18095,17 +18749,23 @@ class MaterialLocalizationZhHans extends MaterialLocalizationZh {
   const MaterialLocalizationZhHans({
     String localeName = 'zh_Hans',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18119,17 +18779,23 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   const MaterialLocalizationZhHant({
     String localeName = 'zh_Hant',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18281,17 +18947,23 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
   const MaterialLocalizationZhHantHk({
     String localeName = 'zh_Hant_HK',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18305,17 +18977,23 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
   const MaterialLocalizationZhHantTw({
     String localeName = 'zh_Hant_TW',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18368,17 +19046,23 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   const MaterialLocalizationZu({
     String localeName = 'zu',
     @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
     @required intl.DateFormat mediumDateFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : super(
     localeName: localeName,
     fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
     mediumDateFormat: mediumDateFormat,
     longDateFormat: longDateFormat,
     yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
@@ -18752,274 +19436,277 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 GlobalMaterialLocalizations getMaterialTranslation(
   Locale locale,
   intl.DateFormat fullYearFormat,
+  intl.DateFormat compactDateFormat,
+  intl.DateFormat shortDateFormat,
   intl.DateFormat mediumDateFormat,
   intl.DateFormat longDateFormat,
   intl.DateFormat yearMonthFormat,
+  intl.DateFormat shortMonthDayFormat,
   intl.NumberFormat decimalFormat,
   intl.NumberFormat twoDigitZeroPaddedFormat,
 ) {
   switch (locale.languageCode) {
     case 'af':
-      return MaterialLocalizationAf(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAf(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'am':
-      return MaterialLocalizationAm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ar':
-      return MaterialLocalizationAr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'as':
-      return MaterialLocalizationAs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'az':
-      return MaterialLocalizationAz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationAz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'be':
-      return MaterialLocalizationBe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bg':
-      return MaterialLocalizationBg(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bn':
-      return MaterialLocalizationBn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bs':
-      return MaterialLocalizationBs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationBs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
-      return MaterialLocalizationCa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'cs':
-      return MaterialLocalizationCs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationCs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'da':
-      return MaterialLocalizationDa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationDa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'de': {
       switch (locale.countryCode) {
         case 'CH':
-          return MaterialLocalizationDeCh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationDeCh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationDe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationDe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'el':
-      return MaterialLocalizationEl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'en': {
       switch (locale.countryCode) {
         case 'AU':
-          return MaterialLocalizationEnAu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnAu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'CA':
-          return MaterialLocalizationEnCa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'GB':
-          return MaterialLocalizationEnGb(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnGb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'IE':
-          return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnIe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'IN':
-          return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnIn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'NZ':
-          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnNz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'SG':
-          return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnSg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'ZA':
-          return MaterialLocalizationEnZa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEnZa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'es': {
       switch (locale.countryCode) {
         case '419':
-          return MaterialLocalizationEs419(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEs419(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'AR':
-          return MaterialLocalizationEsAr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsAr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'BO':
-          return MaterialLocalizationEsBo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsBo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'CL':
-          return MaterialLocalizationEsCl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsCl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'CO':
-          return MaterialLocalizationEsCo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsCo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'CR':
-          return MaterialLocalizationEsCr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsCr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'DO':
-          return MaterialLocalizationEsDo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsDo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'EC':
-          return MaterialLocalizationEsEc(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsEc(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'GT':
-          return MaterialLocalizationEsGt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsGt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'HN':
-          return MaterialLocalizationEsHn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsHn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'MX':
-          return MaterialLocalizationEsMx(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsMx(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'NI':
-          return MaterialLocalizationEsNi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsNi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'PA':
-          return MaterialLocalizationEsPa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'PE':
-          return MaterialLocalizationEsPe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsPe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'PR':
-          return MaterialLocalizationEsPr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsPr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'PY':
-          return MaterialLocalizationEsPy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsPy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'SV':
-          return MaterialLocalizationEsSv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'US':
-          return MaterialLocalizationEsUs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsUs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'UY':
-          return MaterialLocalizationEsUy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsUy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'VE':
-          return MaterialLocalizationEsVe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationEsVe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationEs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'et':
-      return MaterialLocalizationEt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'eu':
-      return MaterialLocalizationEu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationEu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fa':
-      return MaterialLocalizationFa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fi':
-      return MaterialLocalizationFi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fil':
-      return MaterialLocalizationFil(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFil(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'fr': {
       switch (locale.countryCode) {
         case 'CA':
-          return MaterialLocalizationFrCa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationFrCa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationFr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationFr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'gl':
-      return MaterialLocalizationGl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
-      return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGsw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gu':
-      return MaterialLocalizationGu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationGu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'he':
-      return MaterialLocalizationHe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hi':
-      return MaterialLocalizationHi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hr':
-      return MaterialLocalizationHr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hu':
-      return MaterialLocalizationHu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'hy':
-      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationHy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'id':
-      return MaterialLocalizationId(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationId(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'is':
-      return MaterialLocalizationIs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'it':
-      return MaterialLocalizationIt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationIt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
-      return MaterialLocalizationJa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationJa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ka':
-      return MaterialLocalizationKa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kk':
-      return MaterialLocalizationKk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
-      return MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKm(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'kn':
-      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
-      return MaterialLocalizationKo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ky':
-      return MaterialLocalizationKy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationKy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lo':
-      return MaterialLocalizationLo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':
-      return MaterialLocalizationLt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lv':
-      return MaterialLocalizationLv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationLv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mk':
-      return MaterialLocalizationMk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ml':
-      return MaterialLocalizationMl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mn':
-      return MaterialLocalizationMn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'mr':
-      return MaterialLocalizationMr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ms':
-      return MaterialLocalizationMs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'my':
-      return MaterialLocalizationMy(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationMy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nb':
-      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ne':
-      return MaterialLocalizationNe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nl':
-      return MaterialLocalizationNl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationNl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'or':
-      return MaterialLocalizationOr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationOr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pa':
-      return MaterialLocalizationPa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pl':
-      return MaterialLocalizationPl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ps':
-      return MaterialLocalizationPs(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pt': {
       switch (locale.countryCode) {
         case 'PT':
-          return MaterialLocalizationPtPt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationPtPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationPt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationPt(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'ro':
-      return MaterialLocalizationRo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ru':
-      return MaterialLocalizationRu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationRu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'si':
-      return MaterialLocalizationSi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sk':
-      return MaterialLocalizationSk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sl':
-      return MaterialLocalizationSl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sq':
-      return MaterialLocalizationSq(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSq(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sr': {
       switch (locale.scriptCode) {
         case 'Cyrl': {
-          return MaterialLocalizationSrCyrl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationSrCyrl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
         case 'Latn': {
-          return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationSrLatn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
       }
-      return MaterialLocalizationSr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'sv':
-      return MaterialLocalizationSv(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSv(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'sw':
-      return MaterialLocalizationSw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationSw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ta':
-      return MaterialLocalizationTa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'te':
-      return MaterialLocalizationTe(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'th':
-      return MaterialLocalizationTh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tl':
-      return MaterialLocalizationTl(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tr':
-      return MaterialLocalizationTr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationTr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uk':
-      return MaterialLocalizationUk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ur':
-      return MaterialLocalizationUr(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uz':
-      return MaterialLocalizationUz(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationUz(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'vi':
-      return MaterialLocalizationVi(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationVi(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'zh': {
       switch (locale.scriptCode) {
         case 'Hans': {
-          return MaterialLocalizationZhHans(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHans(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
         case 'Hant': {
           switch (locale.countryCode) {
             case 'HK':
-              return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+              return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
             case 'TW':
-              return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+              return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
           }
-          return MaterialLocalizationZhHant(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHant(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         }
       }
       switch (locale.countryCode) {
         case 'HK':
-          return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHantHk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
         case 'TW':
-          return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+          return MaterialLocalizationZhHantTw(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
       }
-      return MaterialLocalizationZh(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationZh(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
     case 'zu':
-      return MaterialLocalizationZu(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+      return MaterialLocalizationZu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
   assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;
