@@ -25,7 +25,7 @@ const bool kIconTreeShakerEnabledDefault = false;
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on TypeError catch (_) {
+  } on CastError catch (_) {
     throw IconTreeShakerException._(errorMessage);
   }
 }
