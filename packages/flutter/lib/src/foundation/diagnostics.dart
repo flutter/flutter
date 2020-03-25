@@ -3004,10 +3004,7 @@ class DiagnosticPropertiesBuilder {
 
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    assert(() {
-      properties.add(property);
-      return true;
-    }());
+    properties.add(property);
   }
 
   /// List of properties accumulated so far.
@@ -3118,16 +3115,11 @@ mixin Diagnosticable {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    DiagnosticsNode node;
-    assert(() {
-      node = DiagnosticableNode<Diagnosticable>(
-        name: name,
-        value: this,
-        style: style,
-      );
-      return true;
-    }());
-    return node;
+    return DiagnosticableNode<Diagnosticable>(
+      name: name,
+      value: this,
+      style: style,
+    );
   }
 
   /// Add additional properties associated with the node.
@@ -3424,12 +3416,7 @@ abstract class DiagnosticableTree with Diagnosticable {
     String prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    String deepString;
-    assert(() {
-      deepString = toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
-      return true;
-    }());
-    return deepString;
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
   }
 
   @override
@@ -3437,16 +3424,11 @@ abstract class DiagnosticableTree with Diagnosticable {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    DiagnosticableTreeNode node;
-    assert(() {
-      node = DiagnosticableTreeNode(
-        name: name,
-        value: this,
-        style: style,
-      );
-      return true;
-    }());
-    return node;
+    return DiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style,
+    );
   }
 
   /// Returns a list of [DiagnosticsNode] objects describing this node's
@@ -3476,14 +3458,7 @@ abstract class DiagnosticableTree with Diagnosticable {
 mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    String result;
-    assert(() {
-      result =
-          toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(
-              minLevel: minLevel);
-      return true;
-    }());
-    return result;
+    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
   }
 
   @override
@@ -3517,14 +3492,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     String prefixOtherLines,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    String result;
-    assert(() {
-      result = toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne,
-          prefixOtherLines: prefixOtherLines,
-          minLevel: minLevel);
-      return true;
-    }());
-    return result;
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
   }
 
   @override
@@ -3532,16 +3500,11 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    DiagnosticsNode node;
-    assert(() {
-      node = DiagnosticableTreeNode(
-        name: name,
-        value: this,
-        style: style,
-      );
-      return true;
-    }());
-    return node;
+    return DiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style,
+    );
   }
 
   @override
