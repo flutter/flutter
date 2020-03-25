@@ -33,8 +33,10 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
 
   // Benchmarks that we don't want to run using CanvasKit.
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextDomLayout.benchmarkName: () => BenchTextDomLayout(),
-    BenchTextDomCachedLayout.benchmarkName: () => BenchTextDomCachedLayout(),
+    BenchTextLayout.domBenchmarkName: () => BenchTextLayout(useCanvas: false),
+    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
+    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
+    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
   }
 };
 
