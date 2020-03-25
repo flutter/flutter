@@ -419,12 +419,6 @@ flt-glass-pane * {
     // DOM tree.
     setElementAttribute(_sceneHostElement, 'aria-hidden', 'true');
 
-    // We treat browser pixels as device pixels because pointer events,
-    // position, and sizes all use browser pixel as the unit (i.e. "px" in CSS).
-    // Therefore, as far as the framework is concerned the device pixel ratio
-    // is 1.0.
-    window.debugOverrideDevicePixelRatio(1.0);
-
     if (html.window.visualViewport == null && isWebKit) {
       // Safari sometimes gives us bogus innerWidth/innerHeight values when the
       // page loads. When it changes the values to correct ones it does not

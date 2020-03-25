@@ -15,19 +15,11 @@ class EngineWindow extends ui.Window {
   }
 
   @override
-  double get devicePixelRatio {
-    if (_debugDevicePixelRatio != null) {
-      return _debugDevicePixelRatio;
-    }
+  double get devicePixelRatio => _debugDevicePixelRatio != null
+      ? _debugDevicePixelRatio
+      : browserDevicePixelRatio;
 
-    if (experimentalUseSkia) {
-      return browserDevicePixelRatio;
-    } else {
-      return 1.0;
-    }
-  }
-
-  /// Returns device pixel ratio returns by browser.
+  /// Returns device pixel ratio returned by browser.
   static double get browserDevicePixelRatio {
     double ratio = html.window.devicePixelRatio;
     // Guard against WebOS returning 0.
@@ -38,10 +30,7 @@ class EngineWindow extends ui.Window {
   ///
   /// This is useful in tests to emulate screens of different dimensions.
   void debugOverrideDevicePixelRatio(double value) {
-    assert(() {
-      _debugDevicePixelRatio = value;
-      return true;
-    }());
+    _debugDevicePixelRatio = value;
   }
 
   double _debugDevicePixelRatio;
@@ -160,26 +149,38 @@ class EngineWindow extends ui.Window {
           case 'HapticFeedback.vibrate':
             final String type = decoded.arguments;
             domRenderer.vibrate(_getHapticFeedbackDuration(type));
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemChrome.setApplicationSwitcherDescription':
             final Map<String, dynamic> arguments = decoded.arguments;
             domRenderer.setTitle(arguments['label']);
             domRenderer.setThemeColor(ui.Color(arguments['primaryColor']));
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'SystemSound.play':
             // There are no default system sounds on web.
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.setData':
             ClipboardMessageHandler().setDataMethodCall(decoded, callback);
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'Clipboard.getData':
             ClipboardMessageHandler().getDataMethodCall(callback);
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
         }
         break;
 
       case 'flutter/textinput':
-        textEditing.channel.handleTextInput(data);
+        textEditing.channel.handleTextInput(data, callback);
+        return;
+
+      case 'flutter/web_test_e2e':
+        const MethodCodec codec = JSONMethodCodec();
+        _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(
+          _handleWebTestEnd2EndMessage(codec, data)
+        ));
         return;
 
       case 'flutter/platform_views':
@@ -192,7 +193,9 @@ class EngineWindow extends ui.Window {
 
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
-        accessibilityAnnouncements.handleMessage(data);
+        final StandardMessageCodec codec = StandardMessageCodec();
+        accessibilityAnnouncements.handleMessage(codec, data);
+        _replyToPlatformMessage(callback, codec.encodeMessage(true));
         return;
 
       case 'flutter/navigation':
@@ -204,9 +207,11 @@ class EngineWindow extends ui.Window {
           case 'routePushed':
           case 'routeReplaced':
             _browserHistory.setRouteName(message['routeName']);
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             break;
           case 'routePopped':
             _browserHistory.setRouteName(message['previousRouteName']);
+            _replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             break;
         }
         return;
@@ -250,7 +255,9 @@ class EngineWindow extends ui.Window {
     ByteData data,
   ) {
     Future<void>.delayed(Duration.zero).then((_) {
-      callback(data);
+      if (callback != null) {
+        callback(data);
+      }
     });
   }
 
@@ -313,6 +320,20 @@ class EngineWindow extends ui.Window {
 
   @visibleForTesting
   Rasterizer rasterizer = experimentalUseSkia ? Rasterizer(Surface()) : null;
+}
+
+bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
+  final MethodCall decoded = codec.decodeMethodCall(data);
+  final Map<String, dynamic> message = decoded.arguments;
+  double ratio = double.parse(decoded.arguments);
+  bool result = false;
+  switch(decoded.method) {
+    case 'setDevicePixelRatio':
+      window.debugOverrideDevicePixelRatio(ratio);
+      window.onMetricsChanged();
+      return true;
+  }
+  return false;
 }
 
 /// The window singleton.

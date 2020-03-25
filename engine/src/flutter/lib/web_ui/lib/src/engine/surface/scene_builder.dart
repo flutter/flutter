@@ -10,7 +10,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _surfaceStack.add(PersistedScene(_lastFrameScene));
   }
 
-  final List<PersistedContainerSurface> _surfaceStack = <PersistedContainerSurface>[];
+  final List<PersistedContainerSurface> _surfaceStack =
+      <PersistedContainerSurface>[];
 
   /// The scene built by this scene builder.
   ///
@@ -19,7 +20,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     assert(() {
       if (_surfaceStack.length != 1) {
         final String surfacePrintout = _surfaceStack
-            .map<Type>((PersistedContainerSurface surface) => surface.runtimeType)
+            .map<Type>(
+                (PersistedContainerSurface surface) => surface.runtimeType)
             .toList()
             .join(', ');
         throw Exception('Incorrect sequence of push/pop operations while '
@@ -42,7 +44,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     // the live tree.
     if (surface.oldLayer != null) {
       assert(surface.oldLayer.runtimeType == surface.runtimeType);
-      assert(debugAssertSurfaceState(surface.oldLayer, PersistedSurfaceState.active));
+      assert(debugAssertSurfaceState(
+          surface.oldLayer, PersistedSurfaceState.active));
       surface.oldLayer.state = PersistedSurfaceState.pendingUpdate;
     }
     _adoptSurface(surface);
@@ -96,6 +99,16 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     }
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
+    }
+    if (_surfaceStack.length == 1) {
+      // Top level transform contains view configuration to scale
+      // scene to devicepixelratio. Use identity instead since CSS uses
+      // logical device pixels.
+      if (!ui.debugEmulateFlutterTesterEnvironment) {
+        assert(matrix4[0] == window.devicePixelRatio &&
+           matrix4[5] == window.devicePixelRatio);
+      }
+      matrix4 = Matrix4.identity().storage;
     }
     return _pushSurface(PersistedTransform(oldLayer, matrix4));
   }
@@ -276,7 +289,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   void addRetained(ui.EngineLayer retainedLayer) {
     final PersistedContainerSurface retainedSurface = retainedLayer;
     if (assertionsEnabled) {
-      assert(debugAssertSurfaceState(retainedSurface, PersistedSurfaceState.active, PersistedSurfaceState.released));
+      assert(debugAssertSurfaceState(retainedSurface,
+          PersistedSurfaceState.active, PersistedSurfaceState.released));
     }
     retainedSurface.tryRetain();
     _adoptSurface(retainedSurface);
@@ -319,7 +333,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// for more details.
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
-    _addPerformanceOverlay(enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
+    _addPerformanceOverlay(
+        enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
   }
 
   /// Whether we've already warned the user about the lack of the performance
@@ -337,7 +352,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ) {
     if (!_webOnlyDidWarnAboutPerformanceOverlay) {
       _webOnlyDidWarnAboutPerformanceOverlay = true;
-      html.window.console.warn('The performance overlay isn\'t supported on the web');
+      html.window.console
+          .warn('The performance overlay isn\'t supported on the web');
     }
   }
 
@@ -377,7 +393,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _addTexture(offset.dx, offset.dy, width, height, textureId);
   }
 
-  void _addTexture(double dx, double dy, double width, double height, int textureId) {
+  void _addTexture(
+      double dx, double dy, double width, double height, int textureId) {
     // In test mode, allow this to be a no-op.
     if (!ui.debugEmulateFlutterTesterEnvironment) {
       throw UnimplementedError('Textures are not supported in Flutter Web');

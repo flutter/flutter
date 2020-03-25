@@ -560,7 +560,7 @@ void main() {
 
     /// Emulates sending of a message by the framework to the engine.
     void sendFrameworkMessage(dynamic message) {
-      textEditing.channel.handleTextInput(message);
+      textEditing.channel.handleTextInput(message, (ByteData data) {});
     }
 
     /// Sends the necessary platform messages to activate a text field and show
