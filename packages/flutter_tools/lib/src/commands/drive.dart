@@ -248,7 +248,7 @@ class DriveCommand extends RunCommandBase {
           driverPort,
           browser,
           argResults['headless'].toString() == 'true',
-          argResults['chrome-binary'] as String,
+          stringArg('chrome-binary'),
         );
       } on Exception catch (ex) {
         throwToolExit(
