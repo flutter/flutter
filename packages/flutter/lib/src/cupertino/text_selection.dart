@@ -708,7 +708,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    slotToChild.values.forEach(visitor);
+    // TODO(justinmc): Do I have to visit slotted children too? I'd prefer not
+    // to for my own usage.
+    //slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
@@ -921,13 +923,15 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       return;
     }
 
+    // Layout slotted children.
+    _backButton.layout(constraints.loosen(), parentUsesSize: true);
+    _divider.layout(constraints.loosen(), parentUsesSize: true);
+    _nextButton.layout(constraints.loosen(), parentUsesSize: true);
+    _nextButtonDisabled.layout(constraints.loosen(), parentUsesSize: true);
+
     double pageWidth = 0.0;
     double parentWidth = constraints.maxWidth; // The width of the whole widget.
     double firstPageWidth;
-    RenderBox buttonBack;
-    RenderBox buttonForward;
-    RenderBox buttonForwardDisabled;
-    //RenderBox divider;
     int currentPage = 0;
     int i = -1;
     visitChildren((RenderObject renderObjectChild) {
@@ -936,13 +940,11 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       double buttonWidth = 0.0;
-      if (i > 3) {
-        if (currentPage == 0) {
-          // If this is the last child, it's ok to fit without a forward button.
-          buttonWidth = i == childCount - 1 ? 0.0 : buttonForward.size.width;
-        } else {
-          buttonWidth = buttonBack.size.width + buttonForward.size.width;
-        }
+      if (currentPage == 0) {
+        // If this is the last child, it's ok to fit without a forward button.
+        buttonWidth = i == childCount - 1 ? 0.0 : _nextButton.size.width;
+      } else {
+        buttonWidth = _backButton.size.width + _nextButton.size.width;
       }
 
       // The width of the menu is set by the first page.
@@ -956,31 +958,13 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       );
       childParentData.shouldPaint = false;
 
-      // Skip positioning the two page navigation buttons for now.
-      if (i == 0) {
-        //divider = child;
-        return;
-      }
-      if (i == 1) {
-        buttonBack = child;
-        return;
-      }
-      if (i == 2) {
-        buttonForward = child;
-        return;
-      }
-      if (i == 3) {
-        buttonForwardDisabled = child;
-        return;
-      }
-
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
       if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
         currentPage++;
-        pageWidth = buttonBack.size.width;
-        final double nextPageButtonWidth = buttonBack.size.width
-            + buttonForward.size.width;
+        pageWidth = _backButton.size.width;
+        final double nextPageButtonWidth = _backButton.size.width
+            + _nextButton.size.width;
         child.layout(
           BoxConstraints.loose(Size(
             math.max(firstPageWidth - nextPageButtonWidth, _kToolbarButtonMinimumWidth),
@@ -1010,26 +994,30 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     assert(page <= currentPage);
 
     // Position page nav buttons.
+    final ToolbarItemsParentData nextButtonParentData = _nextButton.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData nextButtonDisabledParentData = _nextButtonDisabled.parentData as ToolbarItemsParentData;
+    final ToolbarItemsParentData backButtonParentData = _backButton.parentData as ToolbarItemsParentData;
+    // TODO(justinmc): Clean up this shouldPaint setting and resetting.
+    backButtonParentData.shouldPaint = false;
+    nextButtonParentData.shouldPaint = false;
+    nextButtonDisabledParentData.shouldPaint = false;
     if (currentPage > 0) {
-      final ToolbarItemsParentData buttonForwardParentData = buttonForward.parentData as ToolbarItemsParentData;
-      final ToolbarItemsParentData buttonForwardDisabledParentData = buttonForwardDisabled.parentData as ToolbarItemsParentData;
-      final ToolbarItemsParentData buttonBackParentData = buttonBack.parentData as ToolbarItemsParentData;
       // The forward button always shows if there is more than one page, even on
       // the last page (it's just disabled).
       if (page == currentPage) {
-        buttonForwardParentData.shouldPaint = false;
-        buttonForwardDisabledParentData.offset = Offset(parentWidth, 0.0);
-        buttonForwardDisabledParentData.shouldPaint = true;
-        parentWidth += buttonForwardDisabled.size.width;
+        nextButtonParentData.shouldPaint = false;
+        nextButtonDisabledParentData.offset = Offset(parentWidth, 0.0);
+        nextButtonDisabledParentData.shouldPaint = true;
+        parentWidth += nextButtonDisabled.size.width;
       } else {
-        buttonForwardDisabledParentData.shouldPaint = false;
-        buttonForwardParentData.offset = Offset(parentWidth, 0.0);
-        buttonForwardParentData.shouldPaint = true;
-        parentWidth += buttonForward.size.width;
+        nextButtonDisabledParentData.shouldPaint = false;
+        nextButtonParentData.offset = Offset(parentWidth, 0.0);
+        nextButtonParentData.shouldPaint = true;
+        parentWidth += nextButton.size.width;
       }
       if (page > 0) {
-        buttonBackParentData.offset = Offset.zero;
-        buttonBackParentData.shouldPaint = true;
+        backButtonParentData.offset = Offset.zero;
+        backButtonParentData.shouldPaint = true;
         // No need to add the width of the back button to parentWidth here. It's
         // already been taken care of when laying out the children to
         // accommodate the back button.
@@ -1039,17 +1027,27 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     size = Size(parentWidth, _kToolbarHeight);
   }
 
+  static void _paintSlottedChild(PaintingContext context, Offset offset, RenderBox child) {
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+    if (!childParentData.shouldPaint) {
+      return;
+    }
+    context.paintChild(child, offset + childParentData.offset);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderBox divider;
+    // Paint needed slotted children, except for divider, which is painted
+    // between list children.
+    _paintSlottedChild(context, offset, backButton);
+    _paintSlottedChild(context, offset, nextButton);
+    _paintSlottedChild(context, offset, nextButtonDisabled);
+
+    // Paint needed list children and dividers.
     int i = -1;
     visitChildren((RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      if (i == 0) {
-        divider = child;
-        return;
-      }
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
         final Offset childOffset = childParentData.offset + offset;
@@ -1057,7 +1055,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         // TODO(justinmc): Divider doesn't appear now because its width isn't
         // considered when placing children, and it has not color of its own.
         final Offset dividerOffset = childOffset + Offset(child.size.width, 0.0);
-        context.paintChild(divider, dividerOffset);
+        context.paintChild(_divider, dividerOffset);
       }
     });
   }
