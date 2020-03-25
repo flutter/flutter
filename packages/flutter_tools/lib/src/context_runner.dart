@@ -42,7 +42,6 @@ import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
-import 'macos/xcode_validator.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
@@ -226,7 +225,6 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         terminal: globals.terminal,
       ),
-      XcodeValidator: () => const XcodeValidator(),
     },
   );
 }
