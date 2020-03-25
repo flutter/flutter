@@ -5,187 +5,35 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
-import 'colors.dart';
-import 'debug.dart';
-import 'dialog.dart';
-import 'feedback.dart';
-import 'flat_button.dart';
-import 'icon_button.dart';
-import 'icons.dart';
-import 'ink_well.dart';
-import 'material.dart';
-import 'material_localizations.dart';
-import 'text_theme.dart';
-import 'theme.dart';
+import '../debug.dart';
+import '../icon_button.dart';
+import '../icons.dart';
+import '../ink_well.dart';
+import '../material.dart';
+import '../material_localizations.dart';
+import '../theme.dart';
+
+import 'date_picker_common.dart';
+
+// NOTE: this is the original implementation for the Material Date Picker.
+// These classes are deprecated and the whole file can be removed after
+// this has been on stable for long enough for people to migrate to the new
+// CalendarDatePicker (if needed, as showDatePicker has already been migrated
+// and it is what most apps would have used).
+
 
 // Examples can assume:
 // BuildContext context;
-
-/// Initial display mode of the date picker dialog.
-///
-/// Date picker UI mode for either showing a list of available years or a
-/// monthly calendar initially in the dialog shown by calling [showDatePicker].
-///
-/// See also:
-///
-///  * [showDatePicker], which shows a dialog that contains a material design
-///    date picker.
-enum DatePickerMode {
-  /// Show a date picker UI for choosing a month and day.
-  day,
-
-  /// Show a date picker UI for choosing a year.
-  year,
-}
 
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
-
-// Shows the selected date in large font and toggles between year and day mode
-class _DatePickerHeader extends StatelessWidget {
-  const _DatePickerHeader({
-    Key key,
-    @required this.selectedDate,
-    @required this.mode,
-    @required this.onModeChanged,
-    @required this.orientation,
-  }) : assert(selectedDate != null),
-       assert(mode != null),
-       assert(orientation != null),
-       super(key: key);
-
-  final DateTime selectedDate;
-  final DatePickerMode mode;
-  final ValueChanged<DatePickerMode> onModeChanged;
-  final Orientation orientation;
-
-  void _handleChangeMode(DatePickerMode value) {
-    if (value != mode)
-      onModeChanged(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData themeData = Theme.of(context);
-    final TextTheme headerTextTheme = themeData.primaryTextTheme;
-    Color dayColor;
-    Color yearColor;
-    switch (themeData.primaryColorBrightness) {
-      case Brightness.light:
-        dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
-        yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
-        break;
-      case Brightness.dark:
-        dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
-        yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
-        break;
-    }
-    final TextStyle dayStyle = headerTextTheme.headline4.copyWith(color: dayColor);
-    final TextStyle yearStyle = headerTextTheme.subtitle1.copyWith(color: yearColor);
-
-    Color backgroundColor;
-    switch (themeData.brightness) {
-      case Brightness.light:
-        backgroundColor = themeData.primaryColor;
-        break;
-      case Brightness.dark:
-        backgroundColor = themeData.backgroundColor;
-        break;
-    }
-
-    EdgeInsets padding;
-    MainAxisAlignment mainAxisAlignment;
-    switch (orientation) {
-      case Orientation.portrait:
-        padding = const EdgeInsets.all(16.0);
-        mainAxisAlignment = MainAxisAlignment.center;
-        break;
-      case Orientation.landscape:
-        padding = const EdgeInsets.all(8.0);
-        mainAxisAlignment = MainAxisAlignment.start;
-        break;
-    }
-
-    final Widget yearButton = IgnorePointer(
-      ignoring: mode != DatePickerMode.day,
-      ignoringSemantics: false,
-      child: _DateHeaderButton(
-        color: backgroundColor,
-        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-        child: Semantics(
-          selected: mode == DatePickerMode.year,
-          child: Text(localizations.formatYear(selectedDate), style: yearStyle),
-        ),
-      ),
-    );
-
-    final Widget dayButton = IgnorePointer(
-      ignoring: mode == DatePickerMode.day,
-      ignoringSemantics: false,
-      child: _DateHeaderButton(
-        color: backgroundColor,
-        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
-        child: Semantics(
-          selected: mode == DatePickerMode.day,
-          child: Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
-        ),
-      ),
-    );
-
-    return Container(
-      padding: padding,
-      color: backgroundColor,
-      child: Column(
-        mainAxisAlignment: mainAxisAlignment,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[yearButton, dayButton],
-      ),
-    );
-  }
-}
-
-class _DateHeaderButton extends StatelessWidget {
-  const _DateHeaderButton({
-    Key key,
-    this.onTap,
-    this.color,
-    this.child,
-  }) : super(key: key);
-
-  final VoidCallback onTap;
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return Material(
-      type: MaterialType.button,
-      color: color,
-      child: InkWell(
-        borderRadius: kMaterialEdges[MaterialType.button],
-        highlightColor: theme.highlightColor,
-        splashColor: theme.splashColor,
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
 
 class _DayPickerGridDelegate extends SliverGridDelegate {
   const _DayPickerGridDelegate();
@@ -226,6 +74,11 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = _DayPickerGridDelegate();
 ///    date picker.
 ///  * [showTimePicker], which shows a dialog that contains a material design
 ///    time picker.
+///
+@Deprecated(
+  'Use CalendarDatePicker instead. '
+  'This feature was deprecated after v1.15.3.'
+)
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
@@ -503,6 +356,11 @@ class DayPicker extends StatelessWidget {
 ///    date picker.
 ///  * [showTimePicker], which shows a dialog that contains a material design
 ///    time picker.
+///
+@Deprecated(
+  'Use CalendarDatePicker instead. '
+  'This feature was deprecated after v1.15.3.'
+)
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
@@ -546,6 +404,7 @@ class MonthPicker extends StatefulWidget {
   _MonthPickerState createState() => _MonthPickerState();
 }
 
+// ignore: deprecated_member_use_from_same_package
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
   static final Animatable<double> _chevronOpacityTween = Tween<double>(begin: 1.0, end: 0.0)
     .chain(CurveTween(curve: Curves.easeInOut));
@@ -567,6 +426,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   }
 
   @override
+  // ignore: deprecated_member_use_from_same_package
   void didUpdateWidget(MonthPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
@@ -617,6 +477,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
   Widget _buildItems(BuildContext context, int index) {
     final DateTime month = _addMonthsToMonthDate(widget.firstDate, index);
+    // ignore: deprecated_member_use_from_same_package
     return DayPicker(
       key: ValueKey<DateTime>(month),
       selectedDate: widget.selectedDate,
@@ -766,6 +627,11 @@ class _MonthPickerSortKey extends OrdinalSortKey {
 ///    date picker.
 ///  * [showTimePicker], which shows a dialog that contains a material design
 ///    time picker.
+///
+@Deprecated(
+  'Use CalendarDatePicker instead. '
+  'This feature was deprecated after v1.15.3.'
+)
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
@@ -807,6 +673,7 @@ class YearPicker extends StatefulWidget {
   _YearPickerState createState() => _YearPickerState();
 }
 
+// ignore: deprecated_member_use_from_same_package
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
   ScrollController scrollController;
@@ -851,340 +718,4 @@ class _YearPickerState extends State<YearPicker> {
       },
     );
   }
-}
-
-class _DatePickerDialog extends StatefulWidget {
-  const _DatePickerDialog({
-    Key key,
-    this.initialDate,
-    this.firstDate,
-    this.lastDate,
-    this.selectableDayPredicate,
-    this.initialDatePickerMode,
-  }) : super(key: key);
-
-  final DateTime initialDate;
-  final DateTime firstDate;
-  final DateTime lastDate;
-  final SelectableDayPredicate selectableDayPredicate;
-  final DatePickerMode initialDatePickerMode;
-
-  @override
-  _DatePickerDialogState createState() => _DatePickerDialogState();
-}
-
-class _DatePickerDialogState extends State<_DatePickerDialog> {
-  @override
-  void initState() {
-    super.initState();
-    _selectedDate = widget.initialDate;
-    _mode = widget.initialDatePickerMode;
-  }
-
-  bool _announcedInitialDate = false;
-
-  MaterialLocalizations localizations;
-  TextDirection textDirection;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    localizations = MaterialLocalizations.of(context);
-    textDirection = Directionality.of(context);
-    if (!_announcedInitialDate) {
-      _announcedInitialDate = true;
-      SemanticsService.announce(
-        localizations.formatFullDate(_selectedDate),
-        textDirection,
-      );
-    }
-  }
-
-  DateTime _selectedDate;
-  DatePickerMode _mode;
-  final GlobalKey _pickerKey = GlobalKey();
-
-  void _vibrate() {
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        HapticFeedback.vibrate();
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        break;
-    }
-  }
-
-  void _handleModeChanged(DatePickerMode mode) {
-    _vibrate();
-    setState(() {
-      _mode = mode;
-      if (_mode == DatePickerMode.day) {
-        SemanticsService.announce(localizations.formatMonthYear(_selectedDate), textDirection);
-      } else {
-        SemanticsService.announce(localizations.formatYear(_selectedDate), textDirection);
-      }
-    });
-  }
-
-  void _handleYearChanged(DateTime value) {
-    if (value.isBefore(widget.firstDate))
-      value = widget.firstDate;
-    else if (value.isAfter(widget.lastDate))
-      value = widget.lastDate;
-    if (value == _selectedDate)
-      return;
-
-    _vibrate();
-    setState(() {
-      _mode = DatePickerMode.day;
-      _selectedDate = value;
-    });
-  }
-
-  void _handleDayChanged(DateTime value) {
-    _vibrate();
-    setState(() {
-      _selectedDate = value;
-    });
-  }
-
-  void _handleCancel() {
-    Navigator.pop(context);
-  }
-
-  void _handleOk() {
-    Navigator.pop(context, _selectedDate);
-  }
-
-  Widget _buildPicker() {
-    assert(_mode != null);
-    switch (_mode) {
-      case DatePickerMode.day:
-        return MonthPicker(
-          key: _pickerKey,
-          selectedDate: _selectedDate,
-          onChanged: _handleDayChanged,
-          firstDate: widget.firstDate,
-          lastDate: widget.lastDate,
-          selectableDayPredicate: widget.selectableDayPredicate,
-        );
-      case DatePickerMode.year:
-        return YearPicker(
-          key: _pickerKey,
-          selectedDate: _selectedDate,
-          onChanged: _handleYearChanged,
-          firstDate: widget.firstDate,
-          lastDate: widget.lastDate,
-        );
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final Widget picker = _buildPicker();
-    final Widget actions = ButtonBar(
-      children: <Widget>[
-        FlatButton(
-          child: Text(localizations.cancelButtonLabel),
-          onPressed: _handleCancel,
-        ),
-        FlatButton(
-          child: Text(localizations.okButtonLabel),
-          onPressed: _handleOk,
-        ),
-      ],
-    );
-
-    final Dialog dialog = Dialog(
-      child: OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          assert(orientation != null);
-          final Widget header = _DatePickerHeader(
-            selectedDate: _selectedDate,
-            mode: _mode,
-            onModeChanged: _handleModeChanged,
-            orientation: orientation,
-          );
-          switch (orientation) {
-            case Orientation.portrait:
-              return Container(
-                color: theme.dialogBackgroundColor,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    header,
-                    Flexible(child: picker),
-                    actions,
-                  ],
-                ),
-              );
-            case Orientation.landscape:
-              return Container(
-                color: theme.dialogBackgroundColor,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Flexible(child: header),
-                    Flexible(
-                      flex: 2, // have the picker take up 2/3 of the dialog width
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Flexible(child: picker),
-                          actions,
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-          }
-          return null;
-        }
-      ),
-    );
-
-    return Theme(
-      data: theme.copyWith(
-        dialogBackgroundColor: Colors.transparent,
-      ),
-      child: dialog,
-    );
-  }
-}
-
-/// Signature for predicating dates for enabled date selections.
-///
-/// See [showDatePicker].
-typedef SelectableDayPredicate = bool Function(DateTime day);
-
-/// Shows a dialog containing a material design date picker.
-///
-/// The returned [Future] resolves to the date selected by the user when the
-/// user closes the dialog. If the user cancels the dialog, null is returned.
-///
-/// An optional [selectableDayPredicate] function can be passed in to customize
-/// the days to enable for selection. If provided, only the days that
-/// [selectableDayPredicate] returned true for will be selectable.
-///
-/// An optional [initialDatePickerMode] argument can be used to display the
-/// date picker initially in the year or month+day picker mode. It defaults
-/// to month+day, and must not be null.
-///
-/// An optional [locale] argument can be used to set the locale for the date
-/// picker. It defaults to the ambient locale provided by [Localizations].
-///
-/// An optional [textDirection] argument can be used to set the text direction
-/// (RTL or LTR) for the date picker. It defaults to the ambient text direction
-/// provided by [Directionality]. If both [locale] and [textDirection] are not
-/// null, [textDirection] overrides the direction chosen for the [locale].
-///
-/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
-/// [showDialog], the documentation for which discusses how it is used.
-///
-/// The [builder] parameter can be used to wrap the dialog widget
-/// to add inherited widgets like [Theme].
-///
-/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_date_picker.mp4}
-///
-/// {@tool snippet}
-/// Show a date picker with the dark theme.
-///
-/// ```dart
-/// Future<DateTime> selectedDate = showDatePicker(
-///   context: context,
-///   initialDate: DateTime.now(),
-///   firstDate: DateTime(2018),
-///   lastDate: DateTime(2030),
-///   builder: (BuildContext context, Widget child) {
-///     return Theme(
-///       data: ThemeData.dark(),
-///       child: child,
-///     );
-///   },
-/// );
-/// ```
-/// {@end-tool}
-///
-/// The [context], [initialDate], [firstDate], and [lastDate] parameters must
-/// not be null.
-///
-/// See also:
-///
-///  * [showTimePicker], which shows a dialog that contains a material design
-///    time picker.
-///  * [DayPicker], which displays the days of a given month and allows
-///    choosing a day.
-///  * [MonthPicker], which displays a scrollable list of months to allow
-///    picking a month.
-///  * [YearPicker], which displays a scrollable list of years to allow picking
-///    a year.
-Future<DateTime> showDatePicker({
-  @required BuildContext context,
-  @required DateTime initialDate,
-  @required DateTime firstDate,
-  @required DateTime lastDate,
-  SelectableDayPredicate selectableDayPredicate,
-  DatePickerMode initialDatePickerMode = DatePickerMode.day,
-  Locale locale,
-  TextDirection textDirection,
-  TransitionBuilder builder,
-  bool useRootNavigator = true,
-  RouteSettings routeSettings,
-}) async {
-  assert(initialDate != null);
-  assert(firstDate != null);
-  assert(lastDate != null);
-  assert(useRootNavigator != null);
-  assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
-  assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
-  assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');
-  assert(
-    selectableDayPredicate == null || selectableDayPredicate(initialDate),
-    'Provided initialDate must satisfy provided selectableDayPredicate'
-  );
-  assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
-  assert(context != null);
-  assert(debugCheckHasMaterialLocalizations(context));
-
-  Widget child = _DatePickerDialog(
-    initialDate: initialDate,
-    firstDate: firstDate,
-    lastDate: lastDate,
-    selectableDayPredicate: selectableDayPredicate,
-    initialDatePickerMode: initialDatePickerMode,
-  );
-
-  if (textDirection != null) {
-    child = Directionality(
-      textDirection: textDirection,
-      child: child,
-    );
-  }
-
-  if (locale != null) {
-    child = Localizations.override(
-      context: context,
-      locale: locale,
-      child: child,
-    );
-  }
-
-  return await showDialog<DateTime>(
-    context: context,
-    useRootNavigator: useRootNavigator,
-    builder: (BuildContext context) {
-      return builder == null ? child : builder(context, child);
-    },
-    routeSettings: routeSettings,
-  );
 }
