@@ -92,7 +92,8 @@ enum TraversalDirection {
 /// [FocusTraversalGroup] widget.
 ///
 /// The focus traversal policy is what determines which widget is "next",
-/// "previous", or in a direction from the currently focused [FocusNode].
+/// "previous", or in a direction from the widget associated with the currently
+/// focused [FocusNode] (usually a [Focus] widget).
 ///
 /// One of the pre-defined subclasses may be used, or define a custom policy to
 /// create a unique focus order.
@@ -1739,15 +1740,16 @@ class RequestFocusIntent extends Intent {
 ///
 /// The difference between requesting focus in this way versus calling
 /// [FocusNode.requestFocus] directly is that it will use the [Action]
-/// registered in the nearest [Actions] widget associated with [key] to make the
-/// request, rather than just requesting focus directly. This allows the action
-/// to have additional side effects, like logging, or undo and redo
-/// functionality.
+/// registered in the nearest [Actions] widget associated with
+/// [RequestFocusIntent] to make the request, rather than just requesting focus
+/// directly. This allows the action to have additional side effects, like
+/// logging, or undo and redo functionality.
 ///
 /// This [RequestFocusAction] class is the default action associated with the
-/// [RequestFocusAction.key] in the [WidgetsApp], and it simply requests focus
-/// and has no side effects. You can redefine the associated action with your
-/// own [Actions] widget.
+/// [RequestFocusIntent] in the [WidgetsApp], and it simply requests focus. You
+/// can redefine the associated action with your own [Actions] widget.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class RequestFocusAction extends Action<RequestFocusIntent> {
   @override
   void invoke(RequestFocusIntent intent) {
@@ -1756,7 +1758,9 @@ class RequestFocusAction extends Action<RequestFocusIntent> {
 }
 
 /// An [Intent] bound to [NextFocusAction], which moves the focus to the next
-/// focusable node in the focus order.
+/// focusable node in the focus traversal order.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class NextFocusIntent extends Intent {
   /// Creates a const [NextFocusIntent] so subclasses can be const.
   const NextFocusIntent();
@@ -1765,8 +1769,10 @@ class NextFocusIntent extends Intent {
 /// An [Action] that moves the focus to the next focusable node in the focus
 /// order.
 ///
-/// This action is the default action registered for the [key], and by default
-/// is bound to the [LogicalKeyboardKey.tab] key in the [WidgetsApp].
+/// This action is the default action registered for the [NextFocusIntent], and
+/// by default is bound to the [LogicalKeyboardKey.tab] key in the [WidgetsApp].
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class NextFocusAction extends Action<NextFocusIntent> {
   @override
   void invoke(NextFocusIntent intent) {
@@ -1775,7 +1781,9 @@ class NextFocusAction extends Action<NextFocusIntent> {
 }
 
 /// An [Intent] bound to [PreviousFocusAction], which moves the focus to the next
-/// focusable node in the focus order.
+/// focusable node in the focus traversal order.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class PreviousFocusIntent extends Intent {
   /// Creates a const [PreviousFocusIntent] so subclasses can be const.
   const PreviousFocusIntent();
@@ -1784,9 +1792,11 @@ class PreviousFocusIntent extends Intent {
 /// An [Action] that moves the focus to the previous focusable node in the focus
 /// order.
 ///
-/// This action is the default action registered for the [key], and by default
-/// is bound to a combination of the [LogicalKeyboardKey.tab] key and the
-/// [LogicalKeyboardKey.shift] key in the [WidgetsApp].
+/// This action is the default action registered for the [PreviousFocusIntent],
+/// and by default is bound to a combination of the [LogicalKeyboardKey.tab] key
+/// and the [LogicalKeyboardKey.shift] key in the [WidgetsApp].
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class PreviousFocusAction extends Action<PreviousFocusIntent> {
   @override
   void invoke(PreviousFocusIntent intent) {
@@ -1801,9 +1811,11 @@ class PreviousFocusAction extends Action<PreviousFocusIntent> {
 /// [LogicalKeyboardKey.arrowDown], [LogicalKeyboardKey.arrowLeft], and
 /// [LogicalKeyboardKey.arrowRight] keys in the [WidgetsApp], with the
 /// appropriate associated directions.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class DirectionalFocusIntent extends Intent {
-  /// Creates a [DirectionalFocusIntent] with a fixed [key], and the given
-  /// [direction].
+  /// Creates a [DirectionalFocusIntent] intending to move the focus in the
+  /// given [direction].
   const DirectionalFocusIntent(this.direction, {this.ignoreTextFields = true})
       : assert(ignoreTextFields != null);
 
@@ -1822,8 +1834,8 @@ class DirectionalFocusIntent extends Intent {
 /// An [Action] that moves the focus to the focusable node in the direction
 /// configured by the associated [DirectionalFocusIntent.direction].
 ///
-/// This is the [Action] associated with the [key] and bound by default to the
-/// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
+/// This is the [Action] associated with [DirectionalFocusIntent] and bound by
+/// default to the [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
 /// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
 /// the [WidgetsApp], with the appropriate associated directions.
 class DirectionalFocusAction extends Action<DirectionalFocusIntent> {
