@@ -57,8 +57,8 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   }
 
   await eventOrExit(listening.future);
-  await eventOrExit(ready.future).timeout(const Duration(seconds: 5), onTimeout: () {
-    // If it can't attach in 5 seconds, it's not capable of finding the
+  await eventOrExit(ready.future).timeout(const Duration(seconds: 15), onTimeout: () {
+    // If it can't attach in 15 seconds, it's not capable of finding the
     // observatory URL in the logs.
     throw TaskResult.failure('Failed to attach to running Flutter process');
   });
