@@ -10,7 +10,6 @@ import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../project.dart';
-import 'cocoapods.dart';
 
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
@@ -33,7 +32,7 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
     properties: <String, String>{},
   );
 
-  final bool didPodInstall = await cocoaPods.processPods(
+  final bool didPodInstall = await globals.cocoaPods.processPods(
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),

@@ -513,54 +513,61 @@ void main() {
     Usage: () => MockFlutterUsage(),
   }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
-  //     return Response.parse(<String, Object>{'type': 'Failed'});
-  //   });
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+  test('Fails non-fatally on vmservice response error for hot restart', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenAnswer((Invocation _) async {
+      return Response.parse(<String, Object>{'type': 'Failed'});
+    });
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Failed'));
-  // }));
+    expect(result.code, 0);
+  }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
-  //     return Response.parse(<String, Object>{'type': 'Failed'});
-  //   });
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  test('Fails fatally on vmservice RpcError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(RPCError('Something went wrong', 2, '123'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Failed'));
-  // }));
+    expect(result.code, 1);
+    expect(result.message, contains('Something went wrong'));
+  }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice RpcError', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  test('Fails fatally on vmservice WipError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(WipError(<String, String>{}));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Page requires refresh'));
-  // }));
+    expect(result.code, 1);
+  }));
+
+  test('Fails fatally on vmservice Exception', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(Exception('Something went wrong'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Something went wrong'));
+  }));
 
   test('printHelp without details has web warning', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);

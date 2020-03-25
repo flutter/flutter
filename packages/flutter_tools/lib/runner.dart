@@ -68,7 +68,7 @@ Future<int> run(
         return await _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
-    }, onError: (Object error, StackTrace stackTrace) async {
+    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.

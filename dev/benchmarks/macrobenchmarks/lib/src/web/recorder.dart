@@ -518,7 +518,7 @@ class Profile {
       }
 
       buffer.writeln(
-        'SUCCESS: Benchmark converged below ${_ratioToPercent(_kNoiseThreshold)}. '
+        'SUCCESS: Benchmark "$name.$key" converged below ${_ratioToPercent(_kNoiseThreshold)}. '
         'Noise level is ${_ratioToPercent(timeseries.noise)}.',
       );
       return false;

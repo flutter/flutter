@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -44,8 +43,6 @@ const String cocoaPodsUpgradeInstructions = '''
 
 const String podfileMigrationInstructions = '''
   rm ios/Podfile''';
-
-CocoaPods get cocoaPods => context.get<CocoaPods>();
 
 /// Result of evaluating the CocoaPods installation.
 enum CocoaPodsStatus {

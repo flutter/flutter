@@ -106,7 +106,10 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       CocoaPods: () => CocoaPods(),
-      CocoaPodsValidator: () => const CocoaPodsValidator(),
+      CocoaPodsValidator: () => CocoaPodsValidator(
+        globals.cocoaPods,
+        globals.userMessages,
+      ),
       Config: () => Config(
         Config.kFlutterSettings,
         fileSystem: globals.fs,
@@ -126,14 +129,6 @@ Future<T> runInContext<T>(
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IMobileDevice: () => IMobileDevice(),
-      IOSDeploy: () => IOSDeploy(
-        artifacts: globals.artifacts,
-        cache: globals.cache,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-      ),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         simControl: globals.simControl,
         xcode: globals.xcode,
@@ -209,6 +204,19 @@ Future<T> runInContext<T>(
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
         logger: globals.logger,
+        iMobileDevice: IMobileDevice(
+          artifacts: globals.artifacts,
+          cache: globals.cache,
+          logger: globals.logger,
+          processManager: globals.processManager,
+        ),
+        iosDeploy: IOSDeploy(
+          artifacts: globals.artifacts,
+          cache: globals.cache,
+          logger: globals.logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+        ),
         xcode: globals.xcode,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(

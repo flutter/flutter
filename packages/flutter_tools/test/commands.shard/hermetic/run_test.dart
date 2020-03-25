@@ -633,7 +633,10 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value('');
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return FakeDeviceLogReader();
   }
 

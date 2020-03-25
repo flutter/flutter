@@ -216,6 +216,8 @@ void main() {
         processManager: processManager,
         logger: logger,
         xcode: mockXcode,
+        iMobileDevice: null,
+        iosDeploy: null,
       );
     });
 
