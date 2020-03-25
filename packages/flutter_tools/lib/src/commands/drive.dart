@@ -547,35 +547,33 @@ Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, boo
 Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [String chromeBinary]) {
   switch (browser) {
     case Browser.chrome:
-      final Map<String, dynamic> chromeOptions = <String, dynamic>{
-        'w3c': false,
-        'args': <String>[
-          '--bwsi',
-          '--disable-background-timer-throttling',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-popup-blocking',
-          '--disable-translate',
-          '--no-default-browser-check',
-          '--no-sandbox',
-          '--no-first-run',
-          if (headless) '--headless'
-        ],
-        'perfLoggingPrefs': <String, String>{
-          'traceCategories':
-          'devtools.timeline,'
-              'v8,blink.console,benchmark,blink,'
-              'blink.user_timing'
-        }
-      };
-      if (chromeBinary != null) {
-        chromeOptions['binary'] = chromeBinary;
-      }
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ async_io.LogType.performance: 'ALL'},
-        'chromeOptions': chromeOptions,
+        'chromeOptions': <String, dynamic>{
+          if (chromeBinary != null)
+            'binary': chromeBinary,
+          'w3c': false,
+          'args': <String>[
+            '--bwsi',
+            '--disable-background-timer-throttling',
+            '--disable-default-apps',
+            '--disable-extensions',
+            '--disable-popup-blocking',
+            '--disable-translate',
+            '--no-default-browser-check',
+            '--no-sandbox',
+            '--no-first-run',
+            if (headless) '--headless'
+          ],
+          'perfLoggingPrefs': <String, String>{
+            'traceCategories':
+            'devtools.timeline,'
+                'v8,blink.console,benchmark,blink,'
+                'blink.user_timing'
+          }
+        },
       };
       break;
     case Browser.firefox:
