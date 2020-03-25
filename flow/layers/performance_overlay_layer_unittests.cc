@@ -163,7 +163,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
 
   layer->Paint(paint_context());
   auto overlay_text = PerformanceOverlayLayer::MakeStatisticsText(
-      paint_context().raster_time, "GPU", "");
+      paint_context().raster_time, "Raster", "");
   auto overlay_text_data = overlay_text->serialize(SkSerialProcs{});
   SkPaint text_paint;
   text_paint.setColor(SK_ColorGRAY);
