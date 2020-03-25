@@ -76,7 +76,6 @@ FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
-SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
