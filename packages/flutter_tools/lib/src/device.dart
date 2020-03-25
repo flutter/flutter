@@ -415,9 +415,17 @@ abstract class Device {
   Future<String> get sdkNameAndVersion;
 
   /// Get a log reader for this device.
-  /// If [app] is specified, this will return a log reader specific to that
+  ///
+  /// If `app` is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  FutureOr<DeviceLogReader> getLogReader({ covariant ApplicationPackage app });
+  ///
+  /// If `includePastLogs` is true and the device type supports it, the log
+  /// reader will also include log messages from before the invocation time.
+  /// Defaults to false.
+  FutureOr<DeviceLogReader> getLogReader({
+    covariant ApplicationPackage app,
+    bool includePastLogs = false,
+  });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;

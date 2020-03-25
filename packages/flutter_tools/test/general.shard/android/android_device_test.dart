@@ -468,14 +468,45 @@ flutter:
     });
   });
 
-  group('lastLogcatTimestamp', () {
+  group('logcat', () {
     final ProcessManager mockProcessManager = MockProcessManager();
     final AndroidDevice device = AndroidDevice('1234');
 
-    testUsingContext('returns null if shell command failed', () async {
+    testUsingContext('lastLogcatTimestamp returns null if shell command failed', () async {
       when(mockProcessManager.runSync(argThat(contains('logcat'))))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(device.lastLogcatTimestamp, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('AdbLogReaders for past+future and future logs are not the same', () async {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.build.version.sdk]: [23]');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+      when(mockProcessManager.run(
+        argThat(contains('shell')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('11-27 15:39:04.506');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+      final DeviceLogReader pastLogReader = await device.getLogReader(includePastLogs: true);
+      final DeviceLogReader defaultLogReader = await device.getLogReader();
+      expect(pastLogReader, isNot(equals(defaultLogReader)));
+      // Getting again is cached.
+      expect(pastLogReader, equals(await device.getLogReader(includePastLogs: true)));
+      expect(defaultLogReader, equals(await device.getLogReader()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
