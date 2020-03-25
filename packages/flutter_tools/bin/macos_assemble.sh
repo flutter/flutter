@@ -84,6 +84,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dDartObfuscation="${dart_obfuscation_flag}"                            \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     -dDartDefines="${DART_DEFINES}"                                         \
+    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

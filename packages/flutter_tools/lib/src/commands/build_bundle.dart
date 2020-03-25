@@ -21,6 +21,7 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
+    usesExtraFrontendOptions();
     argParser
       ..addFlag(
         'precompiled',
@@ -48,10 +49,6 @@ class BuildBundleCommand extends BuildSubCommand {
           'linux-x64',
           'windows-x64',
         ],
-      )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
