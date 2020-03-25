@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
@@ -95,12 +97,14 @@ class AzureDetector {
     if (_isRunningOnAzure != null) {
       return _isRunningOnAzure;
     }
+    const Duration connectionTimeout = Duration(milliseconds: 250);
+    const Duration requestTimeout = Duration(seconds: 1);
     final HttpClient client = _httpClientFactory()
-      ..connectionTimeout = const Duration(milliseconds: 250);
+      ..connectionTimeout = connectionTimeout;
     try {
       final HttpClientRequest request = await client.getUrl(
         Uri.parse(_serviceUrl),
-      );
+      ).timeout(requestTimeout);
       request.headers.add('Metadata', true);
       await request.close();
     } on SocketException {
@@ -111,6 +115,10 @@ class AzureDetector {
       // If the connection gets set up, but encounters an error condition, it
       // still means we're on Azure.
       return _isRunningOnAzure = true;
+    } on TimeoutException {
+      // The HttpClient connected to a host, but it did not respond in a timely
+      // fashion. Assume we are not on a bot.
+      return _isRunningOnAzure = false;
     }
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;
