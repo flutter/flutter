@@ -13,7 +13,6 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -667,7 +666,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return globals.processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } on Exception {
     return false;
   }

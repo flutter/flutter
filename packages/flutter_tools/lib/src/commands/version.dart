@@ -44,7 +44,7 @@ class VersionCommand extends FlutterCommand {
     globals.flutterVersion.fetchTagsAndUpdate();
     RunResult runResult;
     try {
-      runResult = await processUtils.run(
+      runResult = await globals.processUtils.run(
         <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
@@ -112,7 +112,7 @@ class VersionCommand extends FlutterCommand {
     }
 
     try {
-      await processUtils.run(
+      await globals.processUtils.run(
         <String>['git', 'checkout', 'v$version'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
@@ -131,7 +131,7 @@ class VersionCommand extends FlutterCommand {
     // if necessary.
     globals.printStatus('');
     globals.printStatus('Downloading engine...');
-    int code = await processUtils.stream(<String>[
+    int code = await globals.processUtils.stream(<String>[
       globals.fs.path.join('bin', 'flutter'),
       '--no-color',
       'precache',
@@ -158,7 +158,7 @@ class VersionCommand extends FlutterCommand {
     // Run a doctor check in case system requirements have changed.
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
-    code = await processUtils.stream(
+    code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'doctor',
