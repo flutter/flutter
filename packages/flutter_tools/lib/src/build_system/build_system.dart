@@ -8,15 +8,15 @@ import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
