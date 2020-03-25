@@ -383,6 +383,7 @@ void paintImage({
   assert(alignment != null);
   assert(repeat != null);
   assert(flipHorizontally != null);
+  assert(isAntiAlias != null);
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;

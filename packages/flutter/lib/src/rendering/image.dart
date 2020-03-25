@@ -45,6 +45,7 @@ class RenderImage extends RenderBox {
        assert(alignment != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        _image = image,
        _width = width,
        _height = height,
@@ -298,6 +299,7 @@ class RenderImage extends RenderBox {
     if (_isAntiAlias == value) {
       return;
     }
+    assert(value != null);
     _isAntiAlias = value;
     markNeedsPaint();
   }

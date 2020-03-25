@@ -5234,6 +5234,7 @@ class RawImage extends LeafRenderObjectWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// The image to display.
