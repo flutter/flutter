@@ -778,8 +778,11 @@ class TextEditingChannel {
   final HybridTextEditing implementation;
 
   /// Handles "flutter/textinput" platform messages received from the framework.
-  void handleTextInput(ByteData data) {
-    final MethodCall call = const JSONMethodCodec().decodeMethodCall(data);
+  void handleTextInput(
+      ByteData data,
+      ui.PlatformMessageResponseCallback callback) {
+    const JSONMethodCodec codec = JSONMethodCodec();
+    final MethodCall call = codec.decodeMethodCall(data);
     switch (call.method) {
       case 'TextInput.setClient':
         implementation.setClient(
@@ -815,6 +818,7 @@ class TextEditingChannel {
       default:
         throw StateError('Unsupported method call on the flutter/textinput channel: ${call.method}');
     }
+    window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
   }
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.

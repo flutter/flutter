@@ -405,6 +405,11 @@ void _testCullRectComputation() {
   // enough to fit the rotated clip.
   test('clips correctly when using 3d transforms', () async {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+
+    builder.pushTransform(Matrix4.diagonal3Values(
+        EngineWindow.browserDevicePixelRatio,
+        EngineWindow.browserDevicePixelRatio, 1.0).storage);
+
     // TODO(yjbanov): see the TODO below.
     // final double screenWidth = html.window.innerWidth.toDouble();
     // final double screenHeight = html.window.innerHeight.toDouble();
@@ -499,6 +504,7 @@ void _testCullRectComputation() {
     builder.pop(); // pushClipRect
     builder.pop(); // pushOffset
     builder.pop(); // pushTransform scale
+    builder.pop(); // pushTransform scale devicepixelratio
     html.document.body.append(builder.build().webOnlyRootElement);
 
     await matchGoldenFile('compositing_3d_rotate1.png', region: region);

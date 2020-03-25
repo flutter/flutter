@@ -52,9 +52,9 @@ class AccessibilityAnnouncements {
   html.HtmlElement get _domElement => _element ??= _createElement();
 
   /// Decodes the message coming from the 'flutter/accessibility' channel.
-  void handleMessage(ByteData data) {
+  void handleMessage(StandardMessageCodec codec, ByteData data) {
     final Map<dynamic, dynamic> inputMap =
-        const StandardMessageCodec().decodeMessage(data);
+        codec.decodeMessage(data);
     final Map<dynamic, dynamic> dataMap = inputMap['data'];
     final String message = dataMap['message'];
     if (message != null && message.isNotEmpty) {
