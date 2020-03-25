@@ -20,8 +20,7 @@ FlutterPlatformViewLayer::FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> 
 
 FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
-FlutterPlatformViewsController::FlutterPlatformViewsController()
-    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()){};
+FlutterPlatformViewsController::FlutterPlatformViewsController() = default;
 
 FlutterPlatformViewsController::~FlutterPlatformViewsController() = default;
 
