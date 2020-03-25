@@ -32,7 +32,15 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static PersistentCache* GetCacheForProcess();
   static void ResetCacheForProcess();
 
+  // This must be called before |GetCacheForProcess|. Otherwise, it won't
+  // affect the cache directory returned by |GetCacheForProcess|.
   static void SetCacheDirectoryPath(std::string path);
+
+  // Convert a binary SkData key into a Base32 encoded string.
+  //
+  // This is used to specify persistent cache filenames and service protocol
+  // json keys.
+  static std::string SkKeyToFilePath(const SkData& data);
 
   ~PersistentCache() override;
 

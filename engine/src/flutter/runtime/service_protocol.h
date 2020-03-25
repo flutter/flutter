@@ -27,6 +27,7 @@ class ServiceProtocol {
   static const std::string_view kFlushUIThreadTasksExtensionName;
   static const std::string_view kSetAssetBundlePathExtensionName;
   static const std::string_view kGetDisplayRefreshRateExtensionName;
+  static const std::string_view kGetSkSLsExtensionName;
 
   class Handler {
    public:

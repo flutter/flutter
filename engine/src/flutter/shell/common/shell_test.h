@@ -72,6 +72,14 @@ class ShellTest : public ThreadTest {
   static bool GetNeedsReportTimings(Shell* shell);
   static void SetNeedsReportTimings(Shell* shell, bool value);
 
+  // Helper method to test private method Shell::OnServiceProtocolGetSkSLs.
+  // (ShellTest is a friend class of Shell.) We'll also make sure that it is
+  // running on the UI thread.
+  static void OnServiceProtocolGetSkSLs(
+      Shell* shell,
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document& response);
+
   std::shared_ptr<txt::FontCollection> GetFontCollection(Shell* shell);
 
   // Do not assert |UnreportedTimingsCount| to be positive in any tests.

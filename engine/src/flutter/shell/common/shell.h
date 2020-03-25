@@ -561,6 +561,13 @@ class Shell final : public PlatformView::Delegate,
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
+  // Service protocol handler
+  //
+  // The returned SkSLs are base64 encoded. Decode before storing them to files.
+  bool OnServiceProtocolGetSkSLs(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document& response);
+
   fml::WeakPtrFactory<Shell> weak_factory_;
 
   // For accessing the Shell via the GPU thread, necessary for various
