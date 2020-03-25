@@ -451,6 +451,9 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  SkCanvas* background_canvas) {
   DisposeViews();
+
+  // Resolve all pending GPU operations before allocating a new surface.
+  background_canvas->flush();
   // Clipping the background canvas before drawing the picture recorders requires to
   // save and restore the clip context.
   SkAutoCanvasRestore save(background_canvas, /*doSave=*/true);
