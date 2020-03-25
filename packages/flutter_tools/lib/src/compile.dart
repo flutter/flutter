@@ -431,6 +431,31 @@ class _CompileExpressionRequest extends _CompilationRequest {
       compiler._compileExpression(this);
 }
 
+class _CompileExpressionToJsRequest extends _CompilationRequest {
+  _CompileExpressionToJsRequest(
+    Completer<CompilerOutput> completer,
+    this.libraryUri,
+    this.line,
+    this.column,
+    this.jsModules,
+    this.jsFrameValues,
+    this.moduleName,
+    this.expression
+  ) : super(completer);
+
+  String libraryUri;
+  int line;
+  int column;
+  Map<String, String> jsModules;
+  Map<String, String> jsFrameValues;
+  String moduleName;
+  String expression;
+
+  @override
+  Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
+      compiler._compileExpressionToJs(this);
+}
+
 class _RejectRequest extends _CompilationRequest {
   _RejectRequest(Completer<CompilerOutput> completer) : super(completer);
 
@@ -487,6 +512,16 @@ abstract class ResidentCompiler {
     String libraryUri,
     String klass,
     bool isStatic,
+  );
+
+  Future<CompilerOutput> compileExpressionToJs(
+      String libraryUri,
+      int line,
+      int column,
+      Map<String, String> jsModules,
+      Map<String, String> jsFrameValues,
+      String moduleName,
+      String expression,
   );
 
   /// Should be invoked when results of compilation are accepted by the client.
@@ -774,6 +809,53 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _server.stdin.writeln(request.libraryUri ?? '');
     _server.stdin.writeln(request.klass ?? '');
     _server.stdin.writeln(request.isStatic ?? false);
+
+    return _stdoutHandler.compilerOutput.future;
+  }
+
+  @override
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression) {
+
+    if (!_controller.hasListener) {
+      _controller.stream.listen(_handleCompilationRequest);
+    }
+
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
+    _controller.add(
+        _CompileExpressionToJsRequest(
+            completer, libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression)
+    );
+    return completer.future;
+  }
+
+  Future<CompilerOutput> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
+
+    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
+
+    // 'compile-expression-to-js' should be invoked after compiler has been started,
+    // program was compiled.
+    if (_server == null) {
+      return null;
+    }
+
+    final String inputKey = Uuid().generateV4();
+    _server.stdin.writeln('compile-expression-to-js $inputKey');
+    _server.stdin.writeln(request.libraryUri ?? '');
+    _server.stdin.writeln(request.line);
+    _server.stdin.writeln(request.column);
+    request.jsModules?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
+    _server.stdin.writeln(inputKey);
+    request.jsFrameValues?.forEach((String k, String v) { _server.stdin.writeln('$k:$v'); });
+    _server.stdin.writeln(inputKey);
+    _server.stdin.writeln(request.moduleName ?? '');
+    _server.stdin.writeln(request.expression ?? '');
 
     return _stdoutHandler.compilerOutput.future;
   }
