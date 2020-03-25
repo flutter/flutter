@@ -33,6 +33,8 @@ const std::string_view ServiceProtocol::kSetAssetBundlePathExtensionName =
     "_flutter.setAssetBundlePath";
 const std::string_view ServiceProtocol::kGetDisplayRefreshRateExtensionName =
     "_flutter.getDisplayRefreshRate";
+const std::string_view ServiceProtocol::kGetSkSLsExtensionName =
+    "_flutter.getSkSLs";
 
 static constexpr std::string_view kViewIdPrefx = "_flutterView/";
 static constexpr std::string_view kListViewsExtensionName =
@@ -50,6 +52,7 @@ ServiceProtocol::ServiceProtocol()
           kFlushUIThreadTasksExtensionName,
           kSetAssetBundlePathExtensionName,
           kGetDisplayRefreshRateExtensionName,
+          kGetSkSLsExtensionName,
       }),
       handlers_mutex_(fml::SharedMutex::Create()) {}
 
