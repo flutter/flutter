@@ -1,4 +1,4 @@
-Signature: b39e6f199638d78c07e950bfaf5d74a7
+Signature: d038349d8e5836ab069607729c429932
 
 UNUSED LICENSES:
 
@@ -3898,6 +3898,7 @@ FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/d3d/GrD3DTypes.h
 FILE: ../../../third_party/skia/include/private/GrD3DTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
+FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
@@ -6370,6 +6371,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/viewer.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
 FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
