@@ -89,7 +89,7 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   VisualizeStopWatch(
       *context.leaf_nodes_canvas, context.raster_time, x, y, width,
       height - padding, options_ & kVisualizeRasterizerStatistics,
-      options_ & kDisplayRasterizerStatistics, "GPU", font_path_);
+      options_ & kDisplayRasterizerStatistics, "Raster", font_path_);
 
   VisualizeStopWatch(*context.leaf_nodes_canvas, context.ui_time, x, y + height,
                      width, height - padding,
