@@ -122,5 +122,37 @@ TEST(RasterCache, SweepsRemoveUnusedFrames) {
   ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
 }
 
+// Construct a cache result whose device target rectangle rounds out to be one
+// pixel wider than the cached image.  Verify that it can be drawn without
+// triggering any assertions.
+TEST(RasterCache, DeviceRectRoundOut) {
+  size_t threshold = 1;
+  flutter::RasterCache cache(threshold);
+
+  SkPictureRecorder recorder;
+  SkRect logical_rect = SkRect::MakeLTRB(28, 0, 354.56731, 310.288);
+  recorder.beginRecording(logical_rect);
+  SkPaint paint;
+  paint.setColor(SK_ColorRED);
+  recorder.getRecordingCanvas()->drawRect(logical_rect, paint);
+  sk_sp<SkPicture> picture = recorder.finishRecordingAsPicture();
+
+  SkMatrix ctm = SkMatrix::MakeAll(1.3312, 0, 233, 0, 1.3312, 206, 0, 0, 1);
+
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
+  ASSERT_FALSE(
+      cache.Prepare(NULL, picture.get(), ctm, srgb.get(), true, false));
+  ASSERT_FALSE(cache.Get(*picture, ctm).is_valid());
+  cache.SweepAfterFrame();
+  ASSERT_TRUE(cache.Prepare(NULL, picture.get(), ctm, srgb.get(), true, false));
+  ASSERT_TRUE(cache.Get(*picture, ctm).is_valid());
+
+  SkCanvas canvas(100, 100, nullptr);
+  canvas.setMatrix(ctm);
+  canvas.translate(248, 0);
+
+  cache.Get(*picture, ctm).draw(canvas);
+}
+
 }  // namespace testing
 }  // namespace flutter
