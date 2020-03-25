@@ -54,10 +54,11 @@ class LayerTree {
   float frame_physical_depth() const { return frame_physical_depth_; }
   float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
-  void RecordBuildTime(fml::TimePoint begin_start);
+  void RecordBuildTime(fml::TimePoint build_start, fml::TimePoint target_time);
   fml::TimePoint build_start() const { return build_start_; }
   fml::TimePoint build_finish() const { return build_finish_; }
   fml::TimeDelta build_time() const { return build_finish_ - build_start_; }
+  fml::TimePoint target_time() const { return target_time_; }
 
   // The number of frame intervals missed after which the compositor must
   // trace the rasterized picture to a trace file. Specify 0 to disable all
@@ -84,6 +85,7 @@ class LayerTree {
   std::shared_ptr<Layer> root_layer_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
+  fml::TimePoint target_time_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
   float frame_physical_depth_;
   float frame_device_pixel_ratio_ = 1.0f;  // Logical / Physical pixels ratio.
