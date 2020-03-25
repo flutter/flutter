@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
@@ -670,7 +671,7 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
-  bool get supportsDumpSksl => supportsServiceProtocol;
+  bool get supportsWriteSkSl => supportsServiceProtocol;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -739,12 +740,28 @@ abstract class ResidentRunner {
   }
 
   /// Dump the sksl shaders to a file in the project directory.
-  Future<void> dumpSksl() async {
-    if (!supportsDumpSksl) {
-      throw Exception('dumpSksl is not supported by this runner.');
+  Future<void> writeSkSl() async {
+    if (!supportsWriteSkSl) {
+      throw Exception('writeSkSl is not supported by this runner.');
     }
-    final Map<String, Object> result = await invokeFlutterExtensionRpcRawOnFirstIsolate('_flutter.getSkSLs');
-    print(result);
+    final Map<String, Uint8List> data = await flutterDevices.first.views.first.getSkSls();
+    if (data.isEmpty) {
+      globals.logger.printStatus(
+        'No data was receieved. To ensure SkSl data can be generated: \n'
+        '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
+        '  2. Interact with the application to force shaders to be compiled.\n'
+      );
+      return;
+    }
+    final Directory outputDirectory = globals.fs.currentDirectory
+      .childDirectory('shaders')
+      ..createSync();
+    for (final String key in data.keys) {
+      outputDirectory.childFile(key).writeAsBytesSync(data[key]);
+    }
+    globals.logger.printStatus('Wrote SkSl data to ${outputDirectory.path}. '
+      'These will be autmatically packaged into your app to speed up the '
+      'initial rendering.');
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1074,7 +1091,7 @@ abstract class ResidentRunner {
       if (supportsCanvasKit){
         commandHelp.k.print();
       }
-      if (supportsDumpSksl) {
+      if (supportsWriteSkSl) {
         commandHelp.M.print();
       }
       // `P` should precede `a`
@@ -1238,8 +1255,8 @@ class TerminalHandler {
         }
         return false;
       case 'M':
-        if (residentRunner.supportsDumpSksl) {
-          await residentRunner.dumpSksl();
+        if (residentRunner.supportsWriteSkSl) {
+          await residentRunner.writeSkSl();
           return true;
         }
         return false;

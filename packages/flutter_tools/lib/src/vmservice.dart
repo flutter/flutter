@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -1518,6 +1519,23 @@ class FlutterView extends ServiceObject {
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false),
         });
+  }
+
+  Future<Map<String, Uint8List>> getSkSls() async {
+    final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
+      '_flutter.getSkSLs',
+      params: <String, dynamic>{
+        'viewId': id,
+      },
+    );
+    final Map<String, Object> sksls = response['SkSLs'] as Map<String, Object>;
+    final Map<String, Uint8List> result = <String, Uint8List>{};
+    for (final String key in sksls.keys) {
+      final String name = key;
+      final Uint8List data = base64.decode(sksls[key] as String);
+      result[name] = data;
+    }
+    return result;
   }
 
   Future<void> setSemanticsEnabled(bool enabled) async {
