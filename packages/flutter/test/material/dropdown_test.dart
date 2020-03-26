@@ -2320,49 +2320,45 @@ void main() {
   testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String value = 'one';
-    void didChangeValue(String newValue) {
-      value = newValue;
-    }
+
+    void onChanged(String newValue) { value = newValue; }
+    void onTap() { dropdownButtonTapCounter += 1; }
 
     Widget build() => buildFrame(
       value: value,
-      onChanged: didChangeValue,
-      onTap: () { dropdownButtonTapCounter += 1; },
+      onChanged: onChanged,
+      onTap: onTap,
     );
     await tester.pumpWidget(build());
 
-    expect(dropdownButtonTapCounter, equals(0));
+    expect(dropdownButtonTapCounter, 0);
 
     // Tap dropdown button.
     await tester.tap(find.text('one'));
-    await tester.pump();
     await tester.pumpAndSettle();
 
     expect(value, equals('one'));
-    expect(dropdownButtonTapCounter, equals(1)); // Should update counter.
+    expect(dropdownButtonTapCounter, 1); // Should update counter.
 
     // Tap dropdown menu item.
     await tester.tap(find.text('three').last);
-    await tester.pump();
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
-    expect(dropdownButtonTapCounter, equals(1)); // Should not change.
+    expect(dropdownButtonTapCounter, 1); // Should not change.
 
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
-    await tester.pump();
     await tester.pumpAndSettle();
 
     expect(value, equals('three'));
-    expect(dropdownButtonTapCounter, equals(2)); // Should update counter.
+    expect(dropdownButtonTapCounter, 2); // Should update counter.
 
     // Tap dropdown menu item.
     await tester.tap(find.text('two').last);
-    await tester.pump();
     await tester.pumpAndSettle();
 
     expect(value, equals('two'));
-    expect(dropdownButtonTapCounter, equals(2)); // Should not change.
+    expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 }
