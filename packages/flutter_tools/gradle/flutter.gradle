@@ -721,9 +721,9 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             // Flutter module included as a subproject in add to app.
-            String mainAppModuleName = project.rootProject.hasProperty('app_module_name') ? project.rootProject.property('app_module_name')  : "app"
-            Project appProject = project.rootProject.findProject(":${mainAppModuleName}")
-            assert appProject != null : "Project with name :${mainAppModuleName} isn't existing, custom app project name you can define in gradle.properties app_module_name"
+            String hostAppProjectName = project.rootProject.hasProperty('flutter_host_app_project_name') ? project.rootProject.property('flutter_host_app_project_name')  : "app"
+            Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
+            assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter_host_app_project_name=<project-name>` in gradle.properties."
             appProject.afterEvaluate {
                 assert appProject.android != null
                 appProject.android.applicationVariants.all { appProjectVariant ->
@@ -751,7 +751,7 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                     Task mergeAssets = project
                         .tasks
-                        .findByPath(":${mainAppModuleName}:merge${appProjectVariant.name.capitalize()}Assets")
+                        .findByPath(":${hostAppProjectName}:merge${appProjectVariant.name.capitalize()}Assets")
                     assert mergeAssets
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }
