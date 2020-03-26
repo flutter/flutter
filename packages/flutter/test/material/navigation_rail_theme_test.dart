@@ -236,6 +236,7 @@ List<NavigationRailDestination> _destinations() {
 }
 
 Material _railMaterial(WidgetTester tester) {
+  // The first material is for the rail, and the rest are for the destinations.
   return tester.firstWidget<Material>(
     find.descendant(
       of: find.byType(NavigationRail),
@@ -253,6 +254,7 @@ IconThemeData _unselectedIconTheme(WidgetTester tester) {
 }
 
 IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
+  // The first IconTheme is the one added by the navigation rail.
   return tester.firstWidget<IconTheme>(
     find.ancestor(
       of: find.byIcon(icon),
@@ -280,6 +282,8 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
 }
 
 Align _destinationsAlign(WidgetTester tester) {
+  // The first Expanded widget is the one within the main Column for the rail
+  // content.
   return tester.firstWidget<Align>(
     find.descendant(
       of: find.byType(Expanded),
@@ -305,7 +309,7 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.firstWidget<Opacity>(
+  final Opacity opacityWidget = tester.widget<Opacity>(
     find.ancestor(
       of: find.text(text),
       matching: find.byType(Opacity),

@@ -2131,7 +2131,7 @@ Finder _opacityAboveLabel(String text) {
 
 // Only valid when labelType != all.
 double _labelOpacity(WidgetTester tester, String text) {
-  final Opacity opacityWidget = tester.firstWidget<Opacity>(
+  final Opacity opacityWidget = tester.widget<Opacity>(
     find.ancestor(
       of: find.text(text),
       matching: find.byType(Opacity),
@@ -2141,6 +2141,7 @@ double _labelOpacity(WidgetTester tester, String text) {
 }
 
 Material _railMaterial(WidgetTester tester) {
+  // The first material is for the rail, and the rest are for the destinations.
   return tester.firstWidget<Material>(
     find.descendant(
       of: find.byType(NavigationRail),

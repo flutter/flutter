@@ -343,20 +343,24 @@ class NavigationRail extends StatefulWidget {
   /// ```dart
   /// import 'dart:ui';
   ///
-  /// class NavigationRailExtendableFab extends StatelessWidget {
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     final animation = NavigationRail.extendedAnimation(context);
-  ///     return AnimatedBuilder(
-  ///       animation: animation,
-  ///       builder: (context, child) {
-  ///         return Container(
-  ///           height: 56,
-  ///           padding: EdgeInsets.symmetric(
-  ///             vertical: lerpDouble(0, 6, animation.value),
-  ///           ),
-  ///           child: animation.value > 0 ?
-  ///             Align(
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   final Animation<double> animation = NavigationRail.extendedAnimation(context);
+  ///   return AnimatedBuilder(
+  ///     animation: animation,
+  ///     builder: (BuildContext context, Widget child) {
+  ///       // The extended fab has a shorter height than the regular fab.
+  ///       return Container(
+  ///         height: 56,
+  ///         padding: EdgeInsets.symmetric(
+  ///           vertical: lerpDouble(0, 6, animation.value),
+  ///         ),
+  ///         child: animation.value == 0
+  ///           ? FloatingActionButton(
+  ///               child: Icon(Icons.add),
+  ///               onPressed: () {},
+  ///             )
+  ///           : Align(
   ///               alignment: AlignmentDirectional.centerStart,
   ///               widthFactor: animation.value,
   ///               child: Padding(
@@ -367,15 +371,10 @@ class NavigationRail extends StatefulWidget {
   ///                   onPressed: () {},
   ///                 ),
   ///               ),
-  ///             ) :
-  ///             FloatingActionButton(
-  ///               child: Icon(Icons.add),
-  ///               onPressed: () {},
   ///             ),
-  ///         );
-  ///       },
-  ///     );
-  ///   }
+  ///       );
+  ///     },
+  ///   );
   /// }
   /// ```
   ///
@@ -443,14 +442,12 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final double minExtendedWidth = widget.minExtendedWidth ?? _minExtendedRailWidth;
     final Color baseSelectedColor = theme.colorScheme.primary;
     final Color baseColor = theme.colorScheme.onSurface.withOpacity(0.64);
-//    final IconThemeData unselectedIconTheme = theme.iconTheme.copyWith(color: baseColor).merge(widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme);
     final IconThemeData defaultUnselectedIconTheme = widget.unselectedIconTheme ?? navigationRailTheme.unselectedIconTheme;
     final IconThemeData unselectedIconTheme = IconThemeData(
       size: defaultUnselectedIconTheme?.size ?? 24.0,
       color: defaultUnselectedIconTheme?.color ?? theme.colorScheme.onSurface,
       opacity: defaultUnselectedIconTheme?.opacity ?? 1.0,
     );
-//    final IconThemeData selectedIconTheme = theme.iconTheme.copyWith(color: baseSelectedColor).merge(widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme);
     final IconThemeData defaultSelectedIconTheme = widget.selectedIconTheme ?? navigationRailTheme.selectedIconTheme;
     final IconThemeData selectedIconTheme = IconThemeData(
       size: defaultSelectedIconTheme?.size ?? 24.0,
@@ -622,14 +619,13 @@ class _RailDestination extends StatelessWidget {
       data: iconTheme,
       child: icon,
     );
-    final Widget styledLabel = DefaultTextStyle.merge(
+    final Widget styledLabel = DefaultTextStyle(
       style: labelTextStyle,
       child: label,
     );
     Widget content;
     switch (labelType) {
       case NavigationRailLabelType.none:
-        // The icon parts of destinations with no labels are always square.
         final Widget iconPart = SizedBox(
           width: minWidth,
           height: minWidth,
