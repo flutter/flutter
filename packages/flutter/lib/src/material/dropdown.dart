@@ -145,10 +145,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   void _handleOnTap() {
+    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item;
     Navigator.pop(
       context,
-      _DropdownRouteResult<T>(widget.route.items[widget.itemIndex].item.value),
+      _DropdownRouteResult<T>(dropdownMenuItem.value),
     );
+
+    if (dropdownMenuItem.onTap != null) {
+      dropdownMenuItem.onTap();
+    }
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
@@ -656,10 +661,14 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   /// The [child] argument is required.
   const DropdownMenuItem({
     Key key,
+    this.onTap,
     this.value,
     @required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
+
+  /// Called when the dropdown menu item is tapped.
+  final VoidCallback onTap;
 
   /// The value to return if the user selects this menu item.
   ///
