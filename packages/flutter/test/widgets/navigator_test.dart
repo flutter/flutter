@@ -2404,7 +2404,6 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
 
 class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   @override
-  @override
   Iterable<RouteTransitionRecord> resolve({
     List<RouteTransitionRecord> newPageRouteHistory,
     Map<RouteTransitionRecord, RouteTransitionRecord> locationToExitingPageRoute,
