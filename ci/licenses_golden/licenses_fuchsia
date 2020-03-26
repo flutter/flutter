@@ -1,4 +1,4 @@
-Signature: 617bc193a64c9a737e35dd89a3c62975
+Signature: 9cd367155310be6c188125ba3d3e842d
 
 UNUSED LICENSES:
 
@@ -464,6 +464,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castremotecontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
@@ -1378,6 +1379,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/cast_setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/cast_system_info.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
@@ -2202,6 +2204,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castconfig/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castremotecontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsysteminfo/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
@@ -3265,6 +3268,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device_watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/stream.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castremotecontrol/remote_control.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castsetup/server.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.castwindow/window.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/error.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/types.fidl
