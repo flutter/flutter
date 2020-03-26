@@ -13,6 +13,7 @@ import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -81,7 +82,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         WebValidator(
           chromeLauncher: globals.chromeLauncher,
@@ -666,7 +667,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return globals.processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } on Exception {
     return false;
   }

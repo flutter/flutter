@@ -33,16 +33,13 @@ import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'globals.dart' as globals;
-import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
-import 'macos/xcode_validator.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
@@ -105,7 +102,14 @@ Future<T> runInContext<T>(
         operatingSystemUtils: globals.os,
         platform: globals.platform,
       ),
-      CocoaPods: () => CocoaPods(),
+      CocoaPods: () => CocoaPods(
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+        logger: globals.logger,
+        platform: globals.platform,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        timeoutConfiguration: timeoutConfiguration,
+      ),
       CocoaPodsValidator: () => CocoaPodsValidator(
         globals.cocoaPods,
         globals.userMessages,
@@ -130,7 +134,8 @@ Future<T> runInContext<T>(
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
-        simControl: globals.simControl,
+        logger: globals.logger,
+        processManager: globals.processManager,
         xcode: globals.xcode,
       ),
       IOSWorkflow: () => const IOSWorkflow(),
@@ -169,10 +174,6 @@ Future<T> runInContext<T>(
       Pub: () => const Pub(),
       ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
-      SimControl: () => SimControl(
-        logger: globals.logger,
-        processManager: globals.processManager,
-      ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
@@ -204,19 +205,9 @@ Future<T> runInContext<T>(
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
         logger: globals.logger,
-        iMobileDevice: IMobileDevice(
-          artifacts: globals.artifacts,
-          cache: globals.cache,
-          logger: globals.logger,
-          processManager: globals.processManager,
-        ),
-        iosDeploy: IOSDeploy(
-          artifacts: globals.artifacts,
-          cache: globals.cache,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        ),
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        platform: globals.platform,
         xcode: globals.xcode,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
@@ -226,7 +217,6 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         terminal: globals.terminal,
       ),
-      XcodeValidator: () => const XcodeValidator(),
     },
   );
 }

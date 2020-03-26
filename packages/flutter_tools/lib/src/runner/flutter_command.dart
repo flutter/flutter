@@ -429,6 +429,13 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
+  void usesExtraFrontendOptions() {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      splitCommas: true,
+      hide: true,
+    );
+  }
+
   void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',

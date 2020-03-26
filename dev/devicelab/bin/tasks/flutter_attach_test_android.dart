@@ -57,10 +57,14 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   }
 
   await eventOrExit(listening.future);
-  await eventOrExit(ready.future);
+  await eventOrExit(ready.future).timeout(const Duration(seconds: 15), onTimeout: () {
+    // If it can't attach in 15 seconds, it's not capable of finding the
+    // observatory URL in the logs.
+    throw TaskResult.failure('Failed to attach to running Flutter process');
+  });
 
   if (exitCode != null)
-    throw 'Failed to attach to test app; command unexpected exited, with exit code $exitCode.';
+    throw TaskResult.failure('Failed to attach to test app; command unexpected exited, with exit code $exitCode.');
 
   process.stdin.write('r');
   process.stdin.flush();
@@ -75,10 +79,10 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   await process.exitCode;
 
   if (stderr.isNotEmpty)
-    throw 'flutter attach had output on standard error.';
+    throw TaskResult.failure('flutter attach had output on standard error.');
 
   if (exitCode != 0)
-    throw 'exit code was not 0';
+    throw TaskResult.failure('exit code was not 0');
 }
 
 void main() {
@@ -120,7 +124,7 @@ void main() {
         // After the delay, force-stopping it shouldn't do anything, but doesn't hurt.
         await device.shellExec('am', <String>['force-stop', kAppId]);
 
-        final String currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
+        String currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
         print('Start time on device: $currentTime');
         section('Relaunching application');
         await device.shellExec('am', <String>['start', '-n', kActivityId]);
@@ -140,6 +144,26 @@ void main() {
         );
         await testReload(attachProcess);
 
+        // Give the device the time to really shut down the app.
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        // After the delay, force-stopping it shouldn't do anything, but doesn't hurt.
+        await device.shellExec('am', <String>['force-stop', kAppId]);
+
+        section('Attaching after relaunching application');
+        await device.shellExec('am', <String>['start', '-n', kActivityId]);
+
+        // Let the application launch. Sync to the next time an observatory is ready.
+        currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
+        await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
+
+        // Attach again now that the VM is already running.
+        attachProcess = await startProcess(
+          path.join(flutterDirectory.path, 'bin', 'flutter'),
+          <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
+          isBot: false, // we just want to test the output, not have any debugging info
+        );
+        // Verify that it can discover the observatory port from past logs.
+        await testReload(attachProcess);
       } finally {
         section('Uninstalling');
         await device.adb(<String>['uninstall', kAppId]);

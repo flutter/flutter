@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -94,7 +95,7 @@ class FuchsiaKernelCompiler {
     );
     int result;
     try {
-      result = await globals.processUtils.stream(command, trace: true);
+      result = await processUtils.stream(command, trace: true);
     } finally {
       status.cancel();
     }
