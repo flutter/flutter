@@ -32,6 +32,44 @@ import 'ticker_provider.dart';
 /// (e.g., Android) that commonly use this type of overscroll indication.
 ///
 /// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
+///
+/// When building a [CustomScrollView] with a [GlowingOverscrollIndicator], the
+/// indicator will apply to the entire scrollable area, regardless of what
+/// slivers the CustomScrollView contains, like a [SliverAppBar]. When building
+/// a CustomScrollView with a SliverAppBar, the GlowingOverscrollIndicator
+/// can be better manipulated through the use of a [NestedScrollView].
+///
+/// {@tool dartpad --template=stateless_widget_scaffold}
+///
+/// This example demonstrates how to use a [NestedScrollView] to manipulate the
+/// the placement of a [GlowingOverscrollIndicator] when building a
+/// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
+/// indicator.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return NestedScrollView(
+///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+///       return <Widget>[
+///         SliverAppBar(title: Text('Custom NestedScrollViews')),
+///       ];
+///     },
+///     body: CustomScrollView(
+///       slivers: <Widget>[
+///         SliverToBoxAdapter(
+///           child: Container(
+///             color: Colors.amberAccent,
+///             height: 100,
+///             child: Center(child: Text('Glow all day!')),
+///           ),
+///         ),
+///         SliverFillRemaining(child: FlutterLogo()),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
