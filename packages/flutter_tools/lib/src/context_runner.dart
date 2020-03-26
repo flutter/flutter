@@ -33,9 +33,7 @@ import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'globals.dart' as globals;
-import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
@@ -207,19 +205,9 @@ Future<T> runInContext<T>(
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
         logger: globals.logger,
-        iMobileDevice: IMobileDevice(
-          artifacts: globals.artifacts,
-          cache: globals.cache,
-          logger: globals.logger,
-          processManager: globals.processManager,
-        ),
-        iosDeploy: IOSDeploy(
-          artifacts: globals.artifacts,
-          cache: globals.cache,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-        ),
+        artifacts: globals.artifacts,
+        cache: globals.cache,
+        platform: globals.platform,
         xcode: globals.xcode,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
