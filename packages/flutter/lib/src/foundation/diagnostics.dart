@@ -1550,10 +1550,7 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    if (kReleaseMode) {
-      return <String, Object>{};
-    }
-    Map<String, Object> result;
+    Map<String, Object> result = <String, Object>{};
     assert(() {
       final bool hasChildren = getChildren().isNotEmpty;
       result = <String, Object>{
@@ -1641,10 +1638,7 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
-    if (kReleaseMode) {
-      return super.toString();
-    }
-    String result;
+    String result = super.toString();
     assert(style != null);
     assert(minLevel != null);
     assert(() {
@@ -1727,10 +1721,7 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    String result;
+    String result = '';
     assert(() {
       result = TextTreeRenderer(
         minLevel: minLevel,
@@ -2926,16 +2917,18 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   ///
   /// It will cache the result to prevent duplicate operation.
   DiagnosticPropertiesBuilder get builder {
-    if (kReleaseMode)
+    if (kReleaseMode) {
       return null;
-    assert(() {
-      if (_cachedBuilder == null) {
-        _cachedBuilder = DiagnosticPropertiesBuilder();
-        value?.debugFillProperties(_cachedBuilder);
-      }
-      return true;
-    }());
-    return _cachedBuilder;
+    } else {
+      assert(() {
+        if (_cachedBuilder == null) {
+          _cachedBuilder = DiagnosticPropertiesBuilder();
+          value?.debugFillProperties(_cachedBuilder);
+        }
+        return true;
+      }());
+      return _cachedBuilder;
+    }
   }
 
   @override
@@ -2956,10 +2949,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   String toDescription({ TextTreeConfiguration parentConfiguration }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    String result;
+    String result = '';
     assert(() {
       result = value.toStringShort();
       return true;
