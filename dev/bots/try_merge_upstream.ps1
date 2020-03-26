@@ -19,8 +19,8 @@ if ($Env:CIRRUS_BASE_BRANCH -ne "master") {
 $remote = "origin"
 git fetch $remote
 
-$remoteRevision=git rev-parse $remote/master | Out-String
-$headRevision=git rev-parse HEAD | Out-String
+$remoteRevision=git rev-parse $remote/master
+$headRevision=git rev-parse HEAD
 
 Write-Host "Attempting to merge `"$remoteRevision`" into `"$headRevision`"..."
 
@@ -29,7 +29,7 @@ git config user.email "flutter@example.com"
 git config user.name "Flutter CI"
 
 # -X renormalize will ignore EOL whitespace diffs in the merge
-git merge "$remote/master" --no-edit --stat --no-verify -X renormalize
+git merge "$remote/master" --no-edit --stat --no-verify -s recursive -Xignore-space-at-eol
 
 if($?) {
   Write-Host "Merge Successful!"
