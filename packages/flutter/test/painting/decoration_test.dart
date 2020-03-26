@@ -47,7 +47,7 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<int>(1);
+    throw throwable;
   }
 
   @override
