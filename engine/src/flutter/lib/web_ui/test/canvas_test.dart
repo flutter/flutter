@@ -13,6 +13,7 @@ import 'mock_engine_canvas.dart';
 void main() {
   setUpAll(() {
     WebExperiments.ensureInitialized();
+    Profiler.ensureInitialized();
   });
 
   group('EngineCanvas', () {

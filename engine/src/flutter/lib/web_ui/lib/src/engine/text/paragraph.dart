@@ -255,7 +255,16 @@ class EngineParagraph implements ui.Paragraph {
       return;
     }
 
+    Stopwatch stopwatch;
+    if (Profiler.isBenchmarkMode) {
+      stopwatch = Stopwatch()..start();
+    }
     _measurementResult = _measurementService.measure(this, constraints);
+    if (Profiler.isBenchmarkMode) {
+      stopwatch.stop();
+      Profiler.instance.benchmark('text_layout', stopwatch.elapsedMicroseconds);
+    }
+
     _lastUsedConstraints = constraints;
 
     if (_geometricStyle.maxLines != null) {
