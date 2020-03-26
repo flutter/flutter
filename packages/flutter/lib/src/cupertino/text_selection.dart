@@ -708,9 +708,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    // TODO(justinmc): Do I have to visit slotted children too? I'd prefer not
-    // to for my own usage.
-    //slotToChild.values.forEach(visitor);
+    slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
@@ -939,6 +937,11 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
+      // Skip slotted children.
+      if (childToSlot.containsKey(child)) {
+        return;
+      }
+
       double buttonWidth = 0.0;
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
@@ -1049,11 +1052,19 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+
+      // TODO(justinmc): Actually can I just paint everything here? Watch out
+      // for divider.
+      // Skip slotted children.
+      if (childToSlot.containsKey(child)) {
+        return;
+      }
+
       if (childParentData.shouldPaint) {
         final Offset childOffset = childParentData.offset + offset;
         context.paintChild(child, childOffset);
         // TODO(justinmc): Divider doesn't appear now because its width isn't
-        // considered when placing children, and it has not color of its own.
+        // considered when placing children, and it has no color of its own.
         final Offset dividerOffset = childOffset + Offset(child.size.width, 0.0);
         context.paintChild(_divider, dividerOffset);
       }
@@ -1094,6 +1105,66 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     }
     return false;
   }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      child.attach(owner);
+    });
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      child.detach();
+    });
+  }
+
+  @override
+  void redepthChildren() {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      redepthChild(child);
+    });
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    // Visit the slotted children.
+    if (_backButton != null) {
+      visitor(_backButton);
+    }
+    if (_divider != null) {
+    visitor(_divider);
+    }
+    if (_nextButton != null) {
+    visitor(_nextButton);
+    }
+    if (_nextButtonDisabled != null) {
+    visitor(_nextButtonDisabled);
+    }
+    // Visit the list children.
+    super.visitChildren(visitor);
+  }
+
+  // TODO(justinmc)
+  /*
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    void add(RenderBox child, String name) {
+      if (child != null)
+        value.add(child.toDiagnosticsNode(name: name));
+    }
+    add(icon, 'icon');
+    add(label, 'label');
+    return value;
+  }
+  */
 }
 
 enum _DestinationSlot {
