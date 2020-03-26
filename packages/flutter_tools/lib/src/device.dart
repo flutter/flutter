@@ -513,7 +513,7 @@ abstract class Device {
         'screenshot': supportsScreenshot,
         'fastStart': supportsFastStart,
         'flutterExit': supportsFlutterExit,
-        'hwRendering': await supportsHardwareRendering,
+        'hardwareRendering': await supportsHardwareRendering,
         'startPaused': supportsStartPaused,
       }
     };
