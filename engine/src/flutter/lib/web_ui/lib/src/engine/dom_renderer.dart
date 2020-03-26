@@ -467,8 +467,8 @@ flt-glass-pane * {
   /// Called immediately after browser window metrics change.
   void _metricsDidChange(html.Event event) {
     window._computePhysicalSize();
-    if (ui.window.onMetricsChanged != null) {
-      ui.window.onMetricsChanged();
+    if (window._onMetricsChanged != null) {
+      window.invokeOnMetricsChanged();
     }
   }
 

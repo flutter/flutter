@@ -1590,22 +1590,11 @@ abstract class ParagraphBuilder {
 Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
   if (engine.experimentalUseSkia) {
     return engine.skiaFontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
-        (_) => _sendFontChangeMessage()
+        (_) => engine.sendFontChangeMessage()
     );
   } else {
     return _fontCollection.loadFontFromList(list, fontFamily: fontFamily).then(
-      (_) => _sendFontChangeMessage()
+      (_) => engine.sendFontChangeMessage()
     );
   }
-}
-
-final ByteData _fontChangeMessage = engine.JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});
-
-FutureOr<void> _sendFontChangeMessage() async {
-  if (window.onPlatformMessage != null)
-    window.onPlatformMessage(
-      'flutter/system',
-      _fontChangeMessage,
-      (_) {},
-    );
 }

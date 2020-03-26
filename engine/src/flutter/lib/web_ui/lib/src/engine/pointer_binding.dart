@@ -125,9 +125,8 @@ class PointerBinding {
 
   void _onPointerData(Iterable<ui.PointerData> data) {
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data.toList());
-    final ui.PointerDataPacketCallback callback = ui.window.onPointerDataPacket;
-    if (callback != null) {
-      callback(packet);
+    if (window._onPointerDataPacket != null) {
+      window.invokeOnPointerDataPacket(packet);
     }
   }
 }

@@ -621,11 +621,8 @@ abstract class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
-  VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
-  VoidCallback _onTextScaleFactorChanged;
-  set onTextScaleFactorChanged(VoidCallback callback) {
-    _onTextScaleFactorChanged = callback;
-  }
+  VoidCallback get onTextScaleFactorChanged;
+  set onTextScaleFactorChanged(VoidCallback callback);
 
   /// The setting indicating the current brightness mode of the host platform.
   Brightness get platformBrightness;
@@ -639,11 +636,8 @@ abstract class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
-  VoidCallback get onPlatformBrightnessChanged => _onPlatformBrightnessChanged;
-  VoidCallback _onPlatformBrightnessChanged;
-  set onPlatformBrightnessChanged(VoidCallback callback) {
-    _onPlatformBrightnessChanged = callback;
-  }
+  VoidCallback get onPlatformBrightnessChanged;
+  set onPlatformBrightnessChanged(VoidCallback callback);
 
   /// A callback that is invoked whenever the [devicePixelRatio],
   /// [physicalSize], [padding], or [viewInsets] values change, for example
@@ -661,11 +655,8 @@ abstract class Window {
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    register for notifications when this is called.
   ///  * [MediaQuery.of], a simpler mechanism for the same.
-  VoidCallback get onMetricsChanged => _onMetricsChanged;
-  VoidCallback _onMetricsChanged;
-  set onMetricsChanged(VoidCallback callback) {
-    _onMetricsChanged = callback;
-  }
+  VoidCallback get onMetricsChanged;
+  set onMetricsChanged(VoidCallback callback);
 
   static const _enUS = const Locale('en', 'US');
 
@@ -713,11 +704,8 @@ abstract class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
-  VoidCallback get onLocaleChanged => _onLocaleChanged;
-  VoidCallback _onLocaleChanged;
-  set onLocaleChanged(VoidCallback callback) {
-    _onLocaleChanged = callback;
-  }
+  VoidCallback get onLocaleChanged;
+  set onLocaleChanged(VoidCallback callback);
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// and [onDrawFrame] callbacks be invoked.
@@ -753,11 +741,8 @@ abstract class Window {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  FrameCallback get onBeginFrame => _onBeginFrame;
-  FrameCallback _onBeginFrame;
-  set onBeginFrame(FrameCallback callback) {
-    _onBeginFrame = callback;
-  }
+  FrameCallback get onBeginFrame;
+  set onBeginFrame(FrameCallback callback);
 
   /// A callback that is invoked to report the [FrameTiming] of recently
   /// rasterized frames.
@@ -775,12 +760,8 @@ abstract class Window {
   /// decrease the overhead (as this is available in the release mode). The
   /// timing of any frame will be sent within about 1 second even if there are
   /// no later frames to batch.
-  TimingsCallback get onReportTimings => _onReportTimings;
-  TimingsCallback _onReportTimings;
-  Zone _onReportTimingsZone; // ignore: unused_field
-  set onReportTimings(TimingsCallback callback) {
-    _onReportTimings = callback;
-  }
+  TimingsCallback get onReportTimings;
+  set onReportTimings(TimingsCallback callback);
 
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained. This can be
@@ -796,11 +777,8 @@ abstract class Window {
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  VoidCallback get onDrawFrame => _onDrawFrame;
-  VoidCallback _onDrawFrame;
-  set onDrawFrame(VoidCallback callback) {
-    _onDrawFrame = callback;
-  }
+  VoidCallback get onDrawFrame;
+  set onDrawFrame(VoidCallback callback);
 
   /// A callback that is invoked when pointer data is available.
   ///
@@ -811,11 +789,8 @@ abstract class Window {
   ///
   ///  * [GestureBinding], the Flutter framework class which manages pointer
   ///    events.
-  PointerDataPacketCallback get onPointerDataPacket => _onPointerDataPacket;
-  PointerDataPacketCallback _onPointerDataPacket;
-  set onPointerDataPacket(PointerDataPacketCallback callback) {
-    _onPointerDataPacket = callback;
-  }
+  PointerDataPacketCallback get onPointerDataPacket;
+  set onPointerDataPacket(PointerDataPacketCallback callback);
 
   /// The route or path that the embedder requested when the application was
   /// launched.
@@ -864,11 +839,8 @@ abstract class Window {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  VoidCallback get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
-  VoidCallback _onSemanticsEnabledChanged;
-  set onSemanticsEnabledChanged(VoidCallback callback) {
-    _onSemanticsEnabledChanged = callback;
-  }
+  VoidCallback get onSemanticsEnabledChanged;
+  set onSemanticsEnabledChanged(VoidCallback callback);
 
   /// A callback that is invoked whenever the user requests an action to be
   /// performed.
@@ -878,22 +850,15 @@ abstract class Window {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  SemanticsActionCallback get onSemanticsAction => _onSemanticsAction;
-  SemanticsActionCallback _onSemanticsAction;
-  set onSemanticsAction(SemanticsActionCallback callback) {
-    _onSemanticsAction = callback;
-  }
+  SemanticsActionCallback get onSemanticsAction;
+  set onSemanticsAction(SemanticsActionCallback callback);
 
   /// A callback that is invoked when the value of [accessibilityFlags] changes.
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  VoidCallback get onAccessibilityFeaturesChanged =>
-      _onAccessibilityFeaturesChanged;
-  VoidCallback _onAccessibilityFeaturesChanged;
-  set onAccessibilityFeaturesChanged(VoidCallback callback) {
-    _onAccessibilityFeaturesChanged = callback;
-  }
+  VoidCallback get onAccessibilityFeaturesChanged;
+  set onAccessibilityFeaturesChanged(VoidCallback callback);
 
   /// Called whenever this window receives a message from a platform-specific
   /// plugin.
@@ -908,11 +873,8 @@ abstract class Window {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  PlatformMessageCallback get onPlatformMessage => _onPlatformMessage;
-  PlatformMessageCallback _onPlatformMessage;
-  set onPlatformMessage(PlatformMessageCallback callback) {
-    _onPlatformMessage = callback;
-  }
+  PlatformMessageCallback get onPlatformMessage;
+  set onPlatformMessage(PlatformMessageCallback callback);
 
   /// Change the retained semantics data about this window.
   ///

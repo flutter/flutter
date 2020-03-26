@@ -823,8 +823,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.updateEditingState' message to the framework.
   void updateEditingState(int clientId, EditingState editingState) {
-    if (ui.window.onPlatformMessage != null) {
-      ui.window.onPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall('TextInputClient.updateEditingState', <dynamic>[
@@ -839,8 +839,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.performAction' message to the framework.
   void performAction(int clientId, String inputAction) {
-    if (ui.window.onPlatformMessage != null) {
-      ui.window.onPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall(
@@ -855,8 +855,8 @@ class TextEditingChannel {
 
   /// Sends the 'TextInputClient.onConnectionClosed' message to the framework.
   void onConnectionClosed(int clientId) {
-    if (ui.window.onPlatformMessage != null) {
-      ui.window.onPlatformMessage(
+    if (window._onPlatformMessage != null) {
+      window.invokeOnPlatformMessage(
         'flutter/textinput',
         const JSONMethodCodec().encodeMethodCall(
           MethodCall(

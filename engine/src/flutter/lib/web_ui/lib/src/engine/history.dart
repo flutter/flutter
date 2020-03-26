@@ -94,8 +94,8 @@ class BrowserHistory {
       _setupFlutterEntry(_locationStrategy);
 
       // 2. Send a 'popRoute' platform message so the app can handle it accordingly.
-      if (ui.window.onPlatformMessage != null) {
-        ui.window.onPlatformMessage(
+      if (window._onPlatformMessage != null) {
+        window.invokeOnPlatformMessage(
           'flutter/navigation',
           const JSONMethodCodec().encodeMethodCall(_popRouteMethodCall),
           (_) {},
@@ -113,8 +113,8 @@ class BrowserHistory {
       _userProvidedRouteName = null;
 
       // Send a 'pushRoute' platform message so the app handles it accordingly.
-      if (ui.window.onPlatformMessage != null) {
-        ui.window.onPlatformMessage(
+      if (window._onPlatformMessage != null) {
+        window.invokeOnPlatformMessage(
           'flutter/navigation',
           const JSONMethodCodec().encodeMethodCall(
             MethodCall('pushRoute', newRouteName),
