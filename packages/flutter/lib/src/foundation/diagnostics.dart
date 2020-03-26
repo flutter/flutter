@@ -1112,17 +1112,13 @@ class TextTreeRenderer {
   }) {
     if (kReleaseMode) {
       return '';
-    }
-    String result;
-    assert(() {
-      result = _debugRender(
+    } else {
+      return _debugRender(
           node,
           prefixLineOne: prefixLineOne,
           prefixOtherLines: prefixOtherLines,
           parentConfiguration: parentConfiguration);
-      return true;
-    }());
-    return result;
+    }
   }
 
   String _debugRender(
