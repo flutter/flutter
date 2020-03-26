@@ -180,7 +180,7 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderToken,
   }
 
   // This callback will be posted as a task  when the |scenic::ViewHolder|
-  // resource is created and given an id by the GPU thread.
+  // resource is created and given an id by the raster thread.
   auto bind_callback = [scene_host = this,
                         isolate_service_id =
                             isolate_service_id_](scenic::ResourceId id) {

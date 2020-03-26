@@ -154,7 +154,7 @@ Engine::Engine(Delegate& delegate,
             );
           });
 
-  // Session can be terminated on the GPU thread, but we must terminate
+  // Session can be terminated on the raster thread, but we must terminate
   // ourselves on the platform thread.
   //
   // This handles the fidl error callback when the Session connection is
@@ -175,7 +175,7 @@ Engine::Engine(Delegate& delegate,
   const flutter::TaskRunners task_runners(
       thread_label_,  // Dart thread labels
       CreateFMLTaskRunner(async_get_default_dispatcher()),  // platform
-      CreateFMLTaskRunner(threads_[0]->dispatcher()),       // gpu
+      CreateFMLTaskRunner(threads_[0]->dispatcher()),       // raster
       CreateFMLTaskRunner(threads_[1]->dispatcher()),       // ui
       CreateFMLTaskRunner(threads_[2]->dispatcher())        // io
   );

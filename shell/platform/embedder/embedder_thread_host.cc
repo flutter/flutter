@@ -173,7 +173,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
       platform_task_runner,                    // platform
-      render_task_runner,                      // gpu
+      render_task_runner,                      // raster
       thread_host.ui_thread->GetTaskRunner(),  // ui (always engine managed)
       thread_host.io_thread->GetTaskRunner()   // io (always engine managed)
   );
@@ -220,7 +220,7 @@ EmbedderThreadHost::CreateEngineManagedThreadHost() {
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
       platform_task_runner,                     // platform
-      thread_host.gpu_thread->GetTaskRunner(),  // gpu
+      thread_host.gpu_thread->GetTaskRunner(),  // raster
       thread_host.ui_thread->GetTaskRunner(),   // ui
       thread_host.io_thread->GetTaskRunner()    // io
   );

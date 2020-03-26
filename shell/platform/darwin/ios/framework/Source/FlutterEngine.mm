@@ -462,7 +462,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 
     flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
                                       fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // gpu
+                                      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // raster
                                       _threadHost.ui_thread->GetTaskRunner(),          // ui
                                       _threadHost.io_thread->GetTaskRunner()           // io
     );
@@ -476,7 +476,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   } else {
     flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
                                       fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                      _threadHost.gpu_thread->GetTaskRunner(),         // gpu
+                                      _threadHost.gpu_thread->GetTaskRunner(),         // raster
                                       _threadHost.ui_thread->GetTaskRunner(),          // ui
                                       _threadHost.io_thread->GetTaskRunner()           // io
     );
