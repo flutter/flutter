@@ -444,3 +444,14 @@ void applyWebkitClipFix(html.Element containerElement) {
     containerElement.style.zIndex = '0';
   }
 }
+
+final ByteData _fontChangeMessage = JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'fontsChange'});
+
+FutureOr<void> sendFontChangeMessage() async {
+  if (window._onPlatformMessage != null)
+    window.invokeOnPlatformMessage(
+      'flutter/system',
+      _fontChangeMessage,
+      (_) {},
+    );
+}

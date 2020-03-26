@@ -68,7 +68,7 @@ class Keyboard {
   static const JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
-    if (ui.window.onPlatformMessage == null) {
+    if (window._onPlatformMessage == null) {
       return;
     }
 
@@ -88,7 +88,7 @@ class Keyboard {
       'metaState': _getMetaState(event),
     };
 
-    ui.window.onPlatformMessage('flutter/keyevent',
+    window.invokeOnPlatformMessage('flutter/keyevent',
         _messageCodec.encodeMessage(eventData), _noopCallback);
   }
 

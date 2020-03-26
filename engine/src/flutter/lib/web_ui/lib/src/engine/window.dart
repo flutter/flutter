@@ -111,7 +111,228 @@ class EngineWindow extends ui.Window {
   }
 
   @override
+  ui.VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
+  ui.VoidCallback _onTextScaleFactorChanged;
+  Zone _onTextScaleFactorChangedZone;
+  @override
+  set onTextScaleFactorChanged(ui.VoidCallback callback) {
+    _onTextScaleFactorChanged = callback;
+    _onTextScaleFactorChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnTextScaleFactorChanged() {
+    _invoke(_onTextScaleFactorChanged, _onTextScaleFactorChangedZone);
+  }
+
+  @override
+  ui.VoidCallback get onPlatformBrightnessChanged => _onPlatformBrightnessChanged;
+  ui.VoidCallback _onPlatformBrightnessChanged;
+  Zone _onPlatformBrightnessChangedZone;
+  @override
+  set onPlatformBrightnessChanged(ui.VoidCallback callback) {
+    _onPlatformBrightnessChanged = callback;
+    _onPlatformBrightnessChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnPlatformBrightnessChanged() {
+    _invoke(_onPlatformBrightnessChanged, _onPlatformBrightnessChangedZone);
+  }
+
+  @override
+  ui.VoidCallback get onMetricsChanged => _onMetricsChanged;
+  ui.VoidCallback _onMetricsChanged;
+  Zone _onMetricsChangedZone;
+  @override
+  set onMetricsChanged(ui.VoidCallback callback) {
+    _onMetricsChanged = callback;
+    _onMetricsChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnMetricsChanged() {
+    _invoke(_onMetricsChanged, _onMetricsChangedZone);
+  }
+
+  @override
+  ui.VoidCallback get onLocaleChanged => _onLocaleChanged;
+  ui.VoidCallback _onLocaleChanged;
+  Zone _onLocaleChangedZone;
+  @override
+  set onLocaleChanged(ui.VoidCallback callback) {
+    _onLocaleChanged = callback;
+    _onLocaleChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnLocaleChanged() {
+    _invoke(_onLocaleChanged, _onLocaleChangedZone);
+  }
+
+  @override
+  ui.FrameCallback get onBeginFrame => _onBeginFrame;
+  ui.FrameCallback _onBeginFrame;
+  Zone _onBeginFrameZone;
+  @override
+  set onBeginFrame(ui.FrameCallback callback) {
+    _onBeginFrame = callback;
+    _onBeginFrameZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnBeginFrame(Duration duration) {
+    _invoke1<Duration>(_onBeginFrame, _onBeginFrameZone, duration);
+  }
+
+  @override
+  ui.TimingsCallback get onReportTimings => _onReportTimings;
+  ui.TimingsCallback _onReportTimings;
+  Zone _onReportTimingsZone;
+  @override
+  set onReportTimings(ui.TimingsCallback callback) {
+    _onReportTimings = callback;
+    _onReportTimingsZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnReportTimings(List<ui.FrameTiming> timings) {
+    _invoke1<List<ui.FrameTiming>>(_onReportTimings, _onReportTimingsZone, timings);
+  }
+
+  @override
+  ui.VoidCallback get onDrawFrame => _onDrawFrame;
+  ui.VoidCallback _onDrawFrame;
+  Zone _onDrawFrameZone;
+  @override
+  set onDrawFrame(ui.VoidCallback callback) {
+    _onDrawFrame = callback;
+    _onDrawFrameZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnDrawFrame() {
+    _invoke(_onDrawFrame, _onDrawFrameZone);
+  }
+
+  @override
+  ui.PointerDataPacketCallback get onPointerDataPacket => _onPointerDataPacket;
+  ui.PointerDataPacketCallback _onPointerDataPacket;
+  Zone _onPointerDataPacketZone;
+  @override
+  set onPointerDataPacket(ui.PointerDataPacketCallback callback) {
+    _onPointerDataPacket = callback;
+    _onPointerDataPacketZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnPointerDataPacket(ui.PointerDataPacket packet) {
+    _invoke1<ui.PointerDataPacket>(_onPointerDataPacket, _onPointerDataPacketZone, packet);
+  }
+
+  @override
+  ui.VoidCallback get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
+  ui.VoidCallback _onSemanticsEnabledChanged;
+  Zone _onSemanticsEnabledChangedZone;
+  @override
+  set onSemanticsEnabledChanged(ui.VoidCallback callback) {
+    _onSemanticsEnabledChanged = callback;
+    _onSemanticsEnabledChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnSemanticsEnabledChanged() {
+    _invoke(_onSemanticsEnabledChanged, _onSemanticsEnabledChangedZone);
+  }
+
+  @override
+  ui.SemanticsActionCallback get onSemanticsAction => _onSemanticsAction;
+  ui.SemanticsActionCallback _onSemanticsAction;
+  Zone _onSemanticsActionZone;
+  @override
+  set onSemanticsAction(ui.SemanticsActionCallback callback) {
+    _onSemanticsAction = callback;
+    _onSemanticsActionZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnSemanticsAction(int id, ui.SemanticsAction action, ByteData args) {
+    _invoke3<int, ui.SemanticsAction, ByteData>(_onSemanticsAction,
+        _onSemanticsActionZone, id, action, args);
+  }
+
+  @override
+  ui.VoidCallback get onAccessibilityFeaturesChanged => _onAccessibilityFeaturesChanged;
+  ui.VoidCallback _onAccessibilityFeaturesChanged;
+  Zone _onAccessibilityFeaturesChangedZone;
+  @override
+  set onAccessibilityFeaturesChanged(ui.VoidCallback callback) {
+    _onAccessibilityFeaturesChanged = callback;
+    _onAccessibilityFeaturesChangedZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnAccessibilityFeaturesChanged() {
+    _invoke(_onAccessibilityFeaturesChanged, _onAccessibilityFeaturesChangedZone);
+  }
+
+  @override
+  ui.PlatformMessageCallback get onPlatformMessage => _onPlatformMessage;
+  ui.PlatformMessageCallback _onPlatformMessage;
+  Zone _onPlatformMessageZone;
+  @override
+  set onPlatformMessage(ui.PlatformMessageCallback callback) {
+    _onPlatformMessage = callback;
+    _onPlatformMessageZone = Zone.current;
+  }
+
+  /// Engine code should use this method instead of the callback directly.
+  /// Otherwise zones won't work properly.
+  void invokeOnPlatformMessage(String name, ByteData data, ui.PlatformMessageResponseCallback callback) {
+    _invoke3<String, ByteData, ui.PlatformMessageResponseCallback>(
+      _onPlatformMessage,
+      _onPlatformMessageZone,
+      name,
+      data,
+      callback,
+    );
+  }
+
+  @override
   void sendPlatformMessage(
+    String name,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) {
+    _sendPlatformMessage(name, data, _zonedPlatformMessageResponseCallback(callback));
+  }
+
+  /// Wraps the given [callback] in another callback that ensures that the
+  /// original callback is called in the zone it was registered in.
+  static ui.PlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(ui.PlatformMessageResponseCallback callback) {
+    if (callback == null)
+      return null;
+
+    // Store the zone in which the callback is being registered.
+    final Zone registrationZone = Zone.current;
+
+    return (ByteData data) {
+      registrationZone.runUnaryGuarded(callback, data);
+    };
+  }
+
+  void _sendPlatformMessage(
     String name,
     ByteData data,
     ui.PlatformMessageResponseCallback callback,
@@ -120,9 +341,17 @@ class EngineWindow extends ui.Window {
     if (assertionsEnabled && ui.debugEmulateFlutterTesterEnvironment) {
       return;
     }
+
     if (_debugPrintPlatformMessages) {
       print('Sent platform message on channel: "$name"');
     }
+
+    if (assertionsEnabled && name == 'flutter/debug-echo') {
+      // Echoes back the data unchanged. Used for testing purpopses.
+      _replyToPlatformMessage(callback, data);
+      return;
+    }
+
     switch (name) {
       case 'flutter/assets':
         assert(ui.webOnlyAssetManager != null);
@@ -272,7 +501,9 @@ class EngineWindow extends ui.Window {
     _platformBrightness = newPlatformBrightness;
 
     if (previousPlatformBrightness != _platformBrightness &&
-        onPlatformBrightnessChanged != null) onPlatformBrightnessChanged();
+        onPlatformBrightnessChanged != null) {
+      invokeOnPlatformBrightnessChanged();
+    }
   }
 
   /// Reference to css media query that indicates the user theme preference on the web.
@@ -334,6 +565,50 @@ bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
       return true;
   }
   return false;
+}
+
+/// Invokes [callback] inside the given [zone].
+void _invoke(void callback(), Zone zone) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback();
+  } else {
+    zone.runGuarded(callback);
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg].
+void _invoke1<A>(void callback(A a), Zone zone, A arg) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback(arg);
+  } else {
+    zone.runUnaryGuarded<A>(callback, arg);
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg1], [arg2], and [arg3].
+void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback(arg1, arg2, arg3);
+  } else {
+    zone.runGuarded(() {
+      callback(arg1, arg2, arg3);
+    });
+  }
 }
 
 /// The window singleton.
