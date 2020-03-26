@@ -373,6 +373,7 @@ tasks:
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    timeout_in_minutes: 20
 
   named_isolates_test:
     description: >
