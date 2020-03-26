@@ -25,6 +25,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_sdk.dart';
+import 'apk_locator.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
@@ -87,22 +88,6 @@ String getBundleTaskFor(BuildInfo buildInfo) {
 @visibleForTesting
 String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
-}
-
-/// Returns the output APK file names for a given [AndroidBuildInfo].
-///
-/// For example, when [splitPerAbi] is true, multiple APKs are created.
-Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
-  final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
-  final String productFlavor = androidBuildInfo.buildInfo.flavor ?? '';
-  final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
-  if (androidBuildInfo.splitPerAbi) {
-    return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = getNameForAndroidArch(arch);
-      return 'app$flavorString-$abi-$buildType.apk';
-    });
-  }
-  return <String>['app$flavorString-$buildType.apk'];
 }
 
 /// Returns true if the current version of the Gradle plugin is supported.
@@ -471,23 +456,50 @@ Future<void> buildGradleApp({
   // Gradle produced an APK.
   final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
+
+  // If there is more than one produced APK, ask the user which one to run
+  // if there is a terminal attached. Otherwise automatically run the first.
+  File apkFile;
+  if (apkFiles.length == 1) {
+    apkFile = apkFiles.first;
+  } else if (!globals.logger.hasTerminal) {
+    globals.logger.printStatus(
+      'Automatically selected apk at ${apkFiles.first.path}. To select a '
+      'different file, use "flutter run --use-application=binary=path/to/app.apk".'
+    );
+    apkFile = apkFiles.first;
+  } else {
+    // We can only accept single characters, so display a maximum of 10 apks.
+    final List<File> possibleFiles = apkFiles.take(10).toList();
+    final StringBuffer prompt = StringBuffer('Select the APK to run: \n');
+    for (int i = 0; i < possibleFiles.length; i+= 1) {
+      final String relativePath = globals.fs.path.relative(possibleFiles[i].path, from: apkDirectory.path);
+      prompt.writeln('  $i : $relativePath');
+    }
+    globals.terminal.usesTerminalUi = true;
+    final String result = await globals.terminal.promptForCharInput(
+      List<String>.generate(possibleFiles.length, (int index) => index.toString()),
+      logger: globals.logger,
+      prompt: prompt.toString(),
+    );
+    apkFile = possibleFiles[int.tryParse(result) ?? 0];
+  }
+
   // Copy the first APK to app.apk, so `flutter run` can find it.
   // TODO(egarciad): Handle multiple APKs.
-  apkFiles.first.copySync(apkDirectory.childFile('app.apk').path);
+  apkFile.copySync(apkDirectory.childFile('app.apk').path);
   globals.printTrace('calculateSha: $apkDirectory/app.apk');
 
   final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
   apkShaFile.writeAsStringSync(_calculateSha(apkFiles.first));
 
-  for (final File apkFile in apkFiles) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-      ? '' // Don't display the size when building a debug variant.
-      : ' (${getSizeAsMB(apkFile.lengthSync())})';
-    globals.printStatus(
-      '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-  }
+  final String appSize = (buildInfo.mode == BuildMode.debug)
+    ? '' // Don't display the size when building a debug variant.
+    : ' (${getSizeAsMB(apkFile.lengthSync())})';
+  globals.printStatus(
+    '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
+    color: TerminalColor.green,
+  );
 }
 
 /// Builds AAR and POM files.
@@ -782,40 +794,20 @@ Iterable<File> findApkFiles(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
 ) {
-  final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
-  final Directory apkDirectory = getApkDirectory(project);
-  final Iterable<File> apks = apkFileNames.expand<File>((String apkFileName) {
-    File apkFile = apkDirectory.childFile(apkFileName);
-    if (apkFile.existsSync()) {
-      return <File>[apkFile];
-    }
-    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
-    final String modeName = camelCase(buildInfo.modeName);
-    apkFile = apkDirectory
-      .childDirectory(modeName)
-      .childFile(apkFileName);
-    if (apkFile.existsSync()) {
-      return <File>[apkFile];
-    }
-    if (buildInfo.flavor != null) {
-      // Android Studio Gradle plugin v3 adds flavor to path.
-      apkFile = apkDirectory
-        .childDirectory(buildInfo.flavor)
-        .childDirectory(modeName)
-        .childFile(apkFileName);
-      if (apkFile.existsSync()) {
-        return <File>[apkFile];
-      }
-    }
-    return const <File>[];
-  });
-  if (apks.isEmpty) {
+  final ApkLocator apkLocator = ApkLocator(fileSystem: globals.fs);
+  final List<File> results = apkLocator.locate(
+    getApkDirectory(project),
+    androidBuildInfo: androidBuildInfo,
+    // The result APK is copied to this path after being located.
+    excludePaths: <String>{ 'app.apk' },
+  );
+  if (results.isEmpty) {
     _exitWithExpectedFileNotFound(
       project: project,
       fileExtension: '.apk',
     );
   }
-  return apks;
+  return results;
 }
 
 @visibleForTesting
