@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -145,6 +146,8 @@ class IOSDeploy {
       '--id',
       deviceId,
       '--exists',
+      '--timeout', // If the device is not connected, ios-deploy will wait forever.
+      '10',
       '--bundle_id',
       bundleId,
     ];
@@ -152,10 +155,16 @@ class IOSDeploy {
       launchCommand,
       environment: iosDeployEnv,
     );
-    if (result.exitCode != 0) {
+    // Device successfully connected, but app not installed.
+    if (result.exitCode == 255) {
+      _logger.printTrace('$bundleId not installed on $deviceId');
       return false;
     }
-    return result.stdout.contains(bundleId);
+    if (result.exitCode != 0) {
+      _logger.printTrace('App install check failed: ${result.stderr}');
+      return false;
+    }
+    return true;
   }
 
   // Maps stdout line stream. Must return original line.

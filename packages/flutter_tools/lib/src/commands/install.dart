@@ -15,6 +15,11 @@ import '../runner/flutter_command.dart';
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
+    argParser.addFlag('uninstall-only',
+      negatable: true,
+      defaultsTo: false,
+      help: 'Uninstall the app if already on the device. Skip install.',
+    );
   }
 
   @override
@@ -24,6 +29,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   final String description = 'Install a Flutter app on an attached device.';
 
   Device device;
+
+  bool get uninstallOnly => boolArg('uninstall-only');
 
   @override
   Future<void> validateCommand() async {
@@ -40,13 +47,31 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
     Cache.releaseLockEarly();
 
+    if (uninstallOnly) {
+      await _uninstallApp(package);
+    } else {
+      await _installApp(package);
+    }
+    return FlutterCommandResult.success();
+  }
+
+  Future<void> _uninstallApp(ApplicationPackage package) async {
+    if (await device.isAppInstalled(package)) {
+      globals.printStatus('Uninstalling $package from $device...');
+      if (!await device.uninstallApp(package)) {
+        globals.printError('Uninstalling old version failed');
+      }
+    } else {
+      globals.printStatus('$package not found on $device, skipping uninstall');
+    }
+  }
+
+  Future<void> _installApp(ApplicationPackage package) async {
     globals.printStatus('Installing $package to $device...');
 
     if (!await installApp(device, package)) {
       throwToolExit('Install failed');
     }
-
-    return FlutterCommandResult.success();
   }
 }
 
