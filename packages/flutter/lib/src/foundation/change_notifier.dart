@@ -213,9 +213,9 @@ class ChangeNotifier implements Listenable {
             context: ErrorDescription('while dispatching notifications for $runtimeType'),
             informationCollector: () sync* {
               yield DiagnosticsProperty<ChangeNotifier>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
+                'The $runtimeType sending notification was',
+                this,
+                style: DiagnosticsTreeStyle.errorProperty,
               );
             },
           ));
