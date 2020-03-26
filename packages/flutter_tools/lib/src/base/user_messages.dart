@@ -297,13 +297,13 @@ class UserMessages {
 
   String _androidSdkInstallUrl(Platform platform) {
     const String baseUrl = 'https://flutter.dev/docs/get-started/install';
-    const String anchor = '#android-setup';
+    const String fragment = '#android-setup';
     if (platform.isMacOS) {
-      return '$baseUrl/macos$anchor';
+      return '$baseUrl/macos$fragment';
     } else if (platform.isLinux) {
-      return '$baseUrl/linux$anchor';
+      return '$baseUrl/linux$fragment';
     } else if (platform.isWindows) {
-      return '$baseUrl/windows$anchor';
+      return '$baseUrl/windows$fragment';
     } else {
       return baseUrl;
     }
