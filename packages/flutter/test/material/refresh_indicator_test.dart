@@ -456,7 +456,7 @@ void main() {
     expect(layoutCount, 1);
   });
 
-  testWidgets('strokeWidth cannot be in RefreshIndicator', (WidgetTester tester) async {
+  testWidgets('strokeWidth cannot be null in RefreshIndicator', (WidgetTester tester) async {
     try {
       await tester.pumpWidget(
           MaterialApp(
