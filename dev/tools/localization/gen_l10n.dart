@@ -193,57 +193,6 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateBaseClassFile(
-  String className,
-  String fileName,
-  String header,
-  AppResourceBundle bundle,
-  AppResourceBundle templateBundle,
-  Iterable<Message> messages,
-) {
-  final LocaleInfo locale = bundle.locale;
-
-  final Iterable<String> methods = messages.map((Message message) {
-    // TODO(shihaohong): Change this function to add a list of translations
-    // that do not exist to a list.
-    return generateMethod(
-      message,
-      bundle.translationFor(message) == null ? templateBundle : bundle,
-    );
-  });
-
-  return classFileTemplate
-    .replaceAll('@(header)', header)
-    .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', className)
-    .replaceAll('@(fileName)', fileName)
-    .replaceAll('@(class)', '$className${locale.camelCase()}')
-    .replaceAll('@(localeName)', locale.toString())
-    .replaceAll('@(methods)', methods.join('\n\n'));
-}
-
-String generateSubclass(
-  String className,
-  AppResourceBundle bundle,
-  Iterable<Message> messages,
-) {
-  final LocaleInfo locale = bundle.locale;
-  final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
-
-  // TODO(shihaohong): Change this function to add a list of translations
-  // that do not exist to a list.
-  final Iterable<String> methods = messages
-    .where((Message message) => bundle.translationFor(message) != null)
-    .map((Message message) => generateMethod(message, bundle));
-
-  return subclassTemplate
-    .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseLanguageClassName)', baseClassName)
-    .replaceAll('@(class)', '$className${locale.camelCase()}')
-    .replaceAll('@(localeName)', locale.toString())
-    .replaceAll('@(methods)', methods.join('\n\n'));
-}
-
 String generateBaseClassMethod(Message message) {
   final String comment = message.description ?? 'No description provided in @${message.resourceId}';
   if (message.placeholders.isNotEmpty) {
@@ -351,6 +300,8 @@ class LocalizationsGenerator {
 
   /// The header to be prepended to the generated Dart localization file.
   String header = '';
+
+  final Map<LocaleInfo, List<String>> _unimplementedMessages = <LocaleInfo, List<String>>{};
 
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
@@ -554,6 +505,71 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
+  void _addUnimplementedMessage(LocaleInfo locale, String message) {
+    if (_unimplementedMessages.containsKey(locale)) {
+      _unimplementedMessages[locale].add(message);
+    } else {
+      _unimplementedMessages.putIfAbsent(locale, () => <String>[message]);
+    }
+  }
+
+  String _generateBaseClassFile(
+    String className,
+    String fileName,
+    String header,
+    AppResourceBundle bundle,
+    AppResourceBundle templateBundle,
+    Iterable<Message> messages,
+  ) {
+    final LocaleInfo locale = bundle.locale;
+
+    final Iterable<String> methods = messages.map((Message message) {
+      if (bundle.translationFor(message) == null) {
+        _addUnimplementedMessage(locale, message.resourceId);
+      }
+
+      return generateMethod(
+        message,
+        bundle.translationFor(message) == null ? templateBundle : bundle,
+      );
+    });
+
+    return classFileTemplate
+      .replaceAll('@(header)', header)
+      .replaceAll('@(language)', describeLocale(locale.toString()))
+      .replaceAll('@(baseClass)', className)
+      .replaceAll('@(fileName)', fileName)
+      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(localeName)', locale.toString())
+      .replaceAll('@(methods)', methods.join('\n\n'));
+  }
+
+  String _generateSubclass(
+    String className,
+    AppResourceBundle bundle,
+    Iterable<Message> messages,
+  ) {
+    final LocaleInfo locale = bundle.locale;
+    final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+
+    messages
+      .where((Message message) => bundle.translationFor(message) == null)
+      .forEach((Message message) {
+        _addUnimplementedMessage(locale, message.resourceId);
+      });
+
+    final Iterable<String> methods = messages
+      .where((Message message) => bundle.translationFor(message) != null)
+      .map((Message message) => generateMethod(message, bundle));
+
+    return subclassTemplate
+      .replaceAll('@(language)', describeLocale(locale.toString()))
+      .replaceAll('@(baseLanguageClassName)', baseClassName)
+      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(localeName)', locale.toString())
+      .replaceAll('@(methods)', methods.join('\n\n'));
+  }
+
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
   // and all AppLocalizations subclasses for every locale.
   String generateCode() {
@@ -597,7 +613,7 @@ class LocalizationsGenerator {
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
         // subclasses that extend the base class.
-        final String languageBaseClassFile = generateBaseClassFile(
+        final String languageBaseClassFile = _generateBaseClassFile(
           className,
           outputFileName,
           header,
@@ -611,7 +627,7 @@ class LocalizationsGenerator {
 
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
-          return generateSubclass(
+          return _generateSubclass(
             className,
             _allBundles.bundleFor(locale),
             _allMessages,
@@ -646,5 +662,24 @@ class LocalizationsGenerator {
 
   void writeOutputFile() {
     outputFile.writeAsStringSync(generateCode());
+  }
+
+  void writeUnimplementedMessagesFile() {
+    if (_unimplementedMessages.isEmpty) {
+      return;
+    }
+
+    final File unimplementedMessageTranslationsFile = _fs.file(
+      path.join(l10nDirectory.path, 'unimplemented_message_translations.txt'),
+    );
+
+    String resultingFile = 'Locales with missing message translations: \n';
+    _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+      resultingFile += '$locale: \n';
+      resultingFile += messages.join(', \n');
+      resultingFile += '\n\n';
+    });
+
+    unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
   }
 }

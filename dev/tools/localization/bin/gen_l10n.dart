@@ -105,7 +105,8 @@ Future<void> main(List<String> arguments) async {
         headerFile: headerFile,
       )
       ..loadResources()
-      ..writeOutputFile();
+      ..writeOutputFile()
+      ..writeUnimplementedMessagesFile();
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {
