@@ -1098,10 +1098,10 @@ class Window {
   /// callback was set.
   VoidCallback get onAccessibilityFeaturesChanged => _onAccessibilityFeaturesChanged;
   VoidCallback _onAccessibilityFeaturesChanged;
-  Zone _onAccessibilityFlagsChangedZone;
+  Zone _onAccessibilityFeaturesChangedZone;
   set onAccessibilityFeaturesChanged(VoidCallback callback) {
     _onAccessibilityFeaturesChanged = callback;
-    _onAccessibilityFlagsChangedZone = Zone.current;
+    _onAccessibilityFeaturesChangedZone = Zone.current;
   }
 
   /// Change the retained semantics data about this window.

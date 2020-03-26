@@ -1236,8 +1236,8 @@ class EngineSemanticsOwner {
       _gestureModeClock?.datetime = null;
     }
 
-    if (ui.window.onSemanticsEnabledChanged != null) {
-      ui.window.onSemanticsEnabledChanged();
+    if (window._onSemanticsEnabledChanged != null) {
+      window.invokeOnSemanticsEnabledChanged();
     }
   }
 

@@ -181,17 +181,17 @@ void webOnlyInitializeEngine() {
         // microsecond precision, and only then convert to `int`.
         final int highResTimeMicroseconds = (1000 * highResTime).toInt();
 
-        if (ui.window.onBeginFrame != null) {
-          ui.window
-              .onBeginFrame(Duration(microseconds: highResTimeMicroseconds));
+        if (window._onBeginFrame != null) {
+          window
+              .invokeOnBeginFrame(Duration(microseconds: highResTimeMicroseconds));
         }
 
-        if (ui.window.onDrawFrame != null) {
+        if (window._onDrawFrame != null) {
           // TODO(yjbanov): technically Flutter flushes microtasks between
           //                onBeginFrame and onDrawFrame. We don't, which hasn't
           //                been an issue yet, but eventually we'll have to
           //                implement it properly.
-          ui.window.onDrawFrame();
+          window.invokeOnDrawFrame();
         }
       });
     }
