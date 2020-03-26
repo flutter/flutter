@@ -177,7 +177,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = this.targets;
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
+    final BuildResult result = await globals.buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults.wasParsed('resource-pool-size')
         ? int.tryParse(stringArg('resource-pool-size'))
         : null,

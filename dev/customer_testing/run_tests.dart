@@ -94,6 +94,7 @@ Future<bool> run(List<String> arguments) async {
   if (verbose)
     print('Starting run_tests.dart...');
 
+  int testCount = 0;
   int failures = 0;
 
   if (verbose) {
@@ -154,6 +155,7 @@ Future<bool> run(List<String> arguments) async {
           if (verbose && repeat > 1)
             print('Round ${iteration + 1} of $repeat.');
           for (final String testCommand in instructions.tests) {
+            testCount += 1;
             success = await shell(testCommand, tests, verbose: verbose);
             if (!success) {
               print('ERROR: One or more tests from ${path.basenameWithoutExtension(file.path)} failed.');
@@ -187,9 +189,7 @@ Future<bool> run(List<String> arguments) async {
     print('$failures failure$s.');
     return false;
   }
-  if (verbose) {
-    print('All tests passed!');
-  }
+  print('$testCount tests all passed!');
   return true;
 }
 
@@ -201,6 +201,7 @@ class TestFile {
     final List<String> fetch = <String>[];
     final List<Directory> update = <Directory>[];
     final List<String> test = <String>[];
+    bool hasTests = false;
     for (final String line in file.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty) {
         // blank line
@@ -213,17 +214,22 @@ class TestFile {
       } else if (line.startsWith('update=')) {
         update.add(Directory(line.substring(7)));
       } else if (line.startsWith('test=')) {
+        hasTests = true;
         test.add(line.substring(5));
       } else if (line.startsWith('test.windows=')) {
+        hasTests = true;
         if (Platform.isWindows)
           test.add(line.substring(13));
       } else if (line.startsWith('test.macos=')) {
+        hasTests = true;
         if (Platform.isMacOS)
           test.add(line.substring(11));
       } else if (line.startsWith('test.linux=')) {
+        hasTests = true;
         if (Platform.isLinux)
           test.add(line.substring(11));
       } else if (line.startsWith('test.posix=')) {
+        hasTests = true;
         if (Platform.isLinux || Platform.isMacOS)
           test.add(line.substring(11));
       } else {
@@ -246,8 +252,8 @@ class TestFile {
       throw FormatException('${errorPrefix}Second "fetch" directive does not match expected pattern (expected "git -C tests checkout HASH").');
     if (update.isEmpty)
       throw FormatException('${errorPrefix}No "update" directives specified. At least one directory must be specified. (It can be "." to just upgrade the root of the repository.)');
-    if (test.isEmpty)
-      throw FormatException('${errorPrefix}No "test" directives specified for this platform. At least one command must be specified to run tests on each of Windows, MacOS, and Linux.');
+    if (!hasTests)
+      throw FormatException('${errorPrefix}No "test" directives specified. At least one command must be specified to run tests.');
     return TestFile._(
       List<String>.unmodifiable(contacts),
       List<String>.unmodifiable(fetch),

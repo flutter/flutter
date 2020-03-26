@@ -15,7 +15,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -75,6 +74,12 @@ class FlutterDevice {
     if (device.platformType == PlatformType.fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
+    // For both web and non-web platforms we initialize dill to/from
+    // a shared location for faster bootstrapping. If the compiler fails
+    // due to a kernel target or version mismatch, no error is reported
+    // and the compiler starts up as normal. Unexpected errors will print
+    // a warning message and dump some debug information which can be
+    // used to file a bug, but the compiler will still start up correctly.
     if (targetPlatform == TargetPlatform.web_javascript) {
       generator = ResidentCompiler(
         globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: buildInfo.mode),
@@ -84,6 +89,7 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
         platformDill: globals.fs.file(globals.artifacts
@@ -107,6 +113,7 @@ class FlutterDevice {
         targetModel: targetModel,
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
+        initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
       );
     }
 
@@ -281,13 +288,11 @@ class FlutterDevice {
     bool pause = false,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
-    final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
       for (final Isolate isolate in vmService.vm.isolates)
         isolate.reloadSources(
           pause: pause,
           rootLibUri: deviceEntryUri,
-          packagesUri: devicePackagesUri,
         ),
     ];
   }
@@ -620,7 +625,7 @@ abstract class ResidentRunner {
          logger: globals.logger,
          terminal: globals.terminal,
          platform: globals.platform,
-         outputPreferences: outputPreferences,
+         outputPreferences: globals.outputPreferences,
        ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
@@ -637,7 +642,6 @@ abstract class ResidentRunner {
   final bool ipv6;
   final String _dillOutputPath;
   /// The parent location of the incremental artifacts.
-  @visibleForTesting
   final Directory artifactDirectory;
   final String packagesFilePath;
   final String projectRootPath;
@@ -725,10 +729,11 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-  /// Toggle whether canvaskit is being used for rendering.
+  /// Toggle whether canvaskit is being used for rendering, returning the new
+  /// state.
   ///
   /// Only supported on the web.
-  Future<void> toggleCanvaskit() {
+  Future<bool> toggleCanvaskit() {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
@@ -1017,6 +1022,11 @@ abstract class ResidentRunner {
   Future<void> preExit() async {
     // If _dillOutputPath is null, we created a temporary directory for the dill.
     if (_dillOutputPath == null && artifactDirectory.existsSync()) {
+      final File outputDill = artifactDirectory.childFile('app.dill');
+      if (outputDill.existsSync()) {
+        artifactDirectory.childFile('app.dill')
+          .copySync(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+      }
       artifactDirectory.deleteSync(recursive: true);
     }
   }
@@ -1195,7 +1205,8 @@ class TerminalHandler {
         return false;
       case 'k':
         if (residentRunner.supportsCanvasKit) {
-          await residentRunner.toggleCanvaskit();
+          final bool result = await residentRunner.toggleCanvaskit();
+          globals.printStatus('${result ? 'Enabled' : 'Disabled'} CanvasKit');
           return true;
         }
         return false;

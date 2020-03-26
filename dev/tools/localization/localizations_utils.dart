@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
+
+import 'language_subtag_registry.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
@@ -264,8 +265,6 @@ class GeneratorOptions {
   final bool cupertinoOnly;
 }
 
-const String registry = 'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';
-
 // See also //master/tools/gen_locale.dart in the engine repo.
 Map<String, List<String>> _parseSection(String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
@@ -297,13 +296,9 @@ const String kParentheticalPrefix = ' (';
 /// Prepares the data for the [describeLocale] method below.
 ///
 /// The data is obtained from the official IANA registry.
-Future<void> precacheLanguageAndRegionTags() async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
-  final HttpClientResponse response = await request.close();
-  final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
-  client.close(force: true);
-  final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
+void precacheLanguageAndRegionTags() {
+  final List<Map<String, List<String>>> sections =
+      languageSubtagRegistry.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (final Map<String, List<String>> section in sections) {
     assert(section.containsKey('Type'), section.toString());
     final String type = section['Type'].single;

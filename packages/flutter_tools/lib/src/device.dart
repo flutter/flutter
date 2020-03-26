@@ -7,7 +7,8 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 
-import 'android/android_device.dart';
+import 'android/android_device_discovery.dart';
+import 'android/android_workflow.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
@@ -69,8 +70,17 @@ class DeviceManager {
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
   final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(),
-    IOSDevices(),
+    AndroidDevices(
+      logger: globals.logger,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: androidWorkflow,
+      processManager: globals.processManager,
+    ),
+    IOSDevices(
+      platform: globals.platform,
+      xcdevice: globals.xcdevice,
+      iosWorkflow: globals.iosWorkflow,
+    ),
     IOSSimulators(iosSimulatorUtils: globals.iosSimulatorUtils),
     FuchsiaDevices(),
     FlutterTesterDevices(),
@@ -405,9 +415,17 @@ abstract class Device {
   Future<String> get sdkNameAndVersion;
 
   /// Get a log reader for this device.
-  /// If [app] is specified, this will return a log reader specific to that
+  ///
+  /// If `app` is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  FutureOr<DeviceLogReader> getLogReader({ covariant ApplicationPackage app });
+  ///
+  /// If `includePastLogs` is true and the device type supports it, the log
+  /// reader will also include log messages from before the invocation time.
+  /// Defaults to false.
+  FutureOr<DeviceLogReader> getLogReader({
+    covariant ApplicationPackage app,
+    bool includePastLogs = false,
+  });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -550,6 +568,7 @@ class DebuggingOptions {
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
+    this.traceWhitelist,
     this.traceSystrace = false,
     this.endlessTraceBuffer = false,
     this.dumpSkpOnShaderCompilation = false,
@@ -576,6 +595,7 @@ class DebuggingOptions {
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
+      this.traceWhitelist,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -602,6 +622,7 @@ class DebuggingOptions {
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
+  final String traceWhitelist;
   final bool traceSystrace;
   final bool endlessTraceBuffer;
   final bool dumpSkpOnShaderCompilation;

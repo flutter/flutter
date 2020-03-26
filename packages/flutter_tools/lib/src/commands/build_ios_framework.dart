@@ -51,6 +51,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesDartDefineOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesExtraFrontendOptions();
     argParser
       ..addFlag('debug',
         negatable: true,
@@ -436,7 +437,6 @@ end
         mainDartFile: globals.fs.path.absolute(targetFile),
         quiet: true,
         bitcode: true,
-        reportTimings: false,
         iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
       );
     } finally {

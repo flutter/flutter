@@ -291,7 +291,7 @@ class FakeFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    preferences = outputPreferences;
+    preferences = globals.outputPreferences;
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
 

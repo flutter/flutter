@@ -12,42 +12,51 @@ import 'cocoapods.dart';
 CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class CocoaPodsValidator extends DoctorValidator {
-  const CocoaPodsValidator() : super('CocoaPods subvalidator');
+  CocoaPodsValidator(
+    CocoaPods cocoaPods,
+    UserMessages userMessages,
+  ) : _cocoaPods = cocoaPods,
+      _userMessages = userMessages,
+      super('CocoaPods subvalidator');
+
+  final CocoaPods _cocoaPods;
+  final UserMessages _userMessages;
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    final CocoaPodsStatus cocoaPodsStatus = await cocoaPods
-        .evaluateCocoaPodsInstallation;
+    final CocoaPodsStatus cocoaPodsStatus = await _cocoaPods
+      .evaluateCocoaPodsInstallation;
 
     ValidationType status = ValidationType.installed;
     if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-      if (await cocoaPods.isCocoaPodsInitialized) {
-        messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
+      if (await _cocoaPods.isCocoaPodsInitialized) {
+        messages.add(ValidationMessage(_userMessages.cocoaPodsVersion(await _cocoaPods.cocoaPodsVersionText)));
       } else {
         status = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
+        messages.add(ValidationMessage.error(_userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
       }
     } else {
       if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
         status = ValidationType.missing;
         messages.add(ValidationMessage.error(
-            userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+          _userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+
       } else if (cocoaPodsStatus == CocoaPodsStatus.brokenInstall) {
         status = ValidationType.missing;
         messages.add(ValidationMessage.error(
-            userMessages.cocoaPodsBrokenInstall(brokenCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+          _userMessages.cocoaPodsBrokenInstall(brokenCocoaPodsConsequence, cocoaPodsInstallInstructions)));
 
       } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
         status = ValidationType.partial;
         messages.add(ValidationMessage.hint(
-            userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       } else {
         status = ValidationType.partial;
-        final String currentVersionText = await cocoaPods.cocoaPodsVersionText;
+        final String currentVersionText = await _cocoaPods.cocoaPodsVersionText;
         messages.add(ValidationMessage.hint(
-            userMessages.cocoaPodsOutdated(currentVersionText, cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          _userMessages.cocoaPodsOutdated(currentVersionText, _cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       }
     }
 

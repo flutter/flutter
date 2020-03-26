@@ -212,7 +212,7 @@ void main() {
 
     await tester.pumpWidget(_StatefulListView((int i) => i % 3 == 0));
     await checkAndScroll('0:true');
-  }, skip: isBrowser);
+  });
 
   testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
     await tester.pumpWidget(

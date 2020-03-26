@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -95,7 +96,7 @@ void main() {
     final MockVM mockVM = MockVM();
     when(mockVMService.vm).thenReturn(mockVM);
     when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
-    when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
+    when(mockFlutterView.runFromSource(any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(
@@ -354,6 +355,22 @@ void main() {
       dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
+  }));
+
+  test('ResidentRunner copies output dill to cache location during preExit', () => testbed.run(() async {
+    residentRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('hello');
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, exists);
+    expect(cacheDill.readAsStringSync(), 'hello');
+  }));
+
+  test('ResidentRunner handles output dill missing during preExit', () => testbed.run(() async {
+    await residentRunner.preExit();
+    final File cacheDill = globals.fs.file(globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
+
+    expect(cacheDill, isNot(exists));
   }));
 
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
@@ -697,6 +714,8 @@ void main() {
       target: null,
     )).generator as DefaultResidentCompiler;
 
+    expect(residentCompiler.initializeFromDill,
+      globals.fs.path.join(getBuildDirectory(), 'cache.dill'));
     expect(residentCompiler.librariesSpec,
       globals.fs.file(globals.artifacts.getArtifactPath(Artifact.flutterWebLibrariesJson))
         .uri.toString());

@@ -18,7 +18,7 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 
 const String kEventsFileName = 'touchEvents';
 
-class MotionEventsPage extends Page {
+class MotionEventsPage extends PageWidget {
   const MotionEventsPage()
       : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
 
