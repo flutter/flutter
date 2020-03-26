@@ -48,6 +48,11 @@ database is locked
 Possibly there are two concurrent builds running in the same filesystem location.
 ''';
 
+final FakePlatform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{},
+);
+
 void main() {
   FileSystem fileSystem;
   FakeProcessManager processManager;
@@ -102,6 +107,7 @@ void main() {
     ProcessManager: () => processManager,
     FileSystem: () => fileSystem,
     Logger: () => logger,
+    Platform: () => macPlatform,
   });
 
   testUsingContext('IOSDevice.startApp succeeds in release mode with buildable '
@@ -174,6 +180,7 @@ void main() {
     ProcessManager: () => processManager,
     FileSystem: () => fileSystem,
     Logger: () => logger,
+    Platform: () => macPlatform,
   });
 
   testUsingContext('IOSDevice.startApp succeeds in release mode with buildable '
@@ -234,6 +241,7 @@ void main() {
     ProcessManager: () => processManager,
     FileSystem: () => fileSystem,
     Logger: () => logger,
+    Platform: () => macPlatform,
   });
 }
 
@@ -260,10 +268,6 @@ IOSDevice setUpIOSDevice({
   );
   final MockCache cache = MockCache();
   final MockArtifacts artifacts = MockArtifacts();
-  final FakePlatform macPlatform = FakePlatform(
-    operatingSystem: 'macos',
-    environment: <String, String>{},
-  );
   logger ??= BufferLogger.test();
   when(cache.dyLdLibEntry).thenReturn(dyldLibraryEntry);
   when(artifacts.getArtifactPath(Artifact.iosDeploy, platform: anyNamed('platform')))
