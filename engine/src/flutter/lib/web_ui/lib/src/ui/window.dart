@@ -1106,12 +1106,12 @@ enum FramePhase {
   /// See also [FrameTiming.buildDuration].
   buildFinish,
 
-  /// When the GPU thread starts rasterizing a frame.
+  /// When the raster thread starts rasterizing a frame.
   ///
   /// See also [FrameTiming.rasterDuration].
   rasterStart,
 
-  /// When the GPU thread finishes rasterizing a frame.
+  /// When the raster thread finishes rasterizing a frame.
   ///
   /// See also [FrameTiming.rasterDuration].
   rasterFinish,
@@ -1163,7 +1163,7 @@ class FrameTiming {
       _rawDuration(FramePhase.buildFinish) -
       _rawDuration(FramePhase.buildStart);
 
-  /// The duration to rasterize the frame on the GPU thread.
+  /// The duration to rasterize the frame on the raster thread.
   ///
   /// {@macro dart.ui.FrameTiming.fps_smoothness_milliseconds}
   /// {@macro dart.ui.FrameTiming.fps_milliseconds}

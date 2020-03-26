@@ -172,7 +172,7 @@ class PlatformView {
     ///             Flutter layer tree. All textures must have a unique
     ///             identifier. When the rasterizer encounters an external
     ///             texture within its hierarchy, it gives the embedder a chance
-    ///             to update that texture on the GPU thread before it
+    ///             to update that texture on the raster thread before it
     ///             composites the same on-screen.
     ///
     /// @param[in]  texture  The texture that is being updated by the embedder
@@ -352,10 +352,11 @@ class PlatformView {
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to specify the updated viewport metrics. In
-  ///             response to this call, on the GPU thread, the rasterizer may
-  ///             need to be reconfigured to the updated viewport dimensions. On
-  ///             the UI thread, the framework may need to start generating a
-  ///             new frame for the updated viewport metrics as well.
+  ///             response to this call, on the raster thread, the rasterizer
+  ///             may need to be reconfigured to the updated viewport
+  ///             dimensions. On the UI thread, the framework may need to start
+  ///             generating a new frame for the updated viewport metrics as
+  ///             well.
   ///
   /// @param[in]  metrics  The updated viewport metrics.
   ///
@@ -488,7 +489,7 @@ class PlatformView {
   ///             textures must have a unique identifier. When the
   ///             rasterizer encounters an external texture within its
   ///             hierarchy, it gives the embedder a chance to update that
-  ///             texture on the GPU thread before it composites the same
+  ///             texture on the raster thread before it composites the same
   ///             on-screen.
   ///
   /// @attention  This method must only be called once per texture. When the

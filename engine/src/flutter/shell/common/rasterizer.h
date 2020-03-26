@@ -220,8 +220,8 @@ class Rasterizer final : public SnapshotDelegate {
 
   //----------------------------------------------------------------------------
   /// @brief      Takes the next item from the layer tree pipeline and executes
-  ///             the GPU thread frame workload for that pipeline item to render
-  ///             a frame on the on-screen surface.
+  ///             the raster thread frame workload for that pipeline item to
+  ///             render a frame on the on-screen surface.
   ///
   ///             Why does the draw call take a layer tree pipeline and not the
   ///             layer tree directly?

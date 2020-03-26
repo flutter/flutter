@@ -52,8 +52,8 @@ void ViewHolder::Create(zx_koid_t id,
                         fml::RefPtr<fml::TaskRunner> ui_task_runner,
                         fuchsia::ui::views::ViewHolderToken view_holder_token,
                         const BindCallback& on_bind_callback) {
-  // This GPU thread contains at least 1 ViewHolder.  Initialize the per-thread
-  // bindings.
+  // This raster thread contains at least 1 ViewHolder.  Initialize the
+  // per-thread bindings.
   if (tls_view_holder_bindings.get() == nullptr) {
     tls_view_holder_bindings.reset(new ViewHolderBindings());
   }

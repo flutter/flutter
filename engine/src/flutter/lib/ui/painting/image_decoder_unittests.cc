@@ -125,7 +125,7 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
   auto thread_task_runner = CreateNewThread();
   TaskRunners runners(GetCurrentTestName(),  // label
                       thread_task_runner,    // platform
-                      thread_task_runner,    // gpu
+                      thread_task_runner,    // raster
                       thread_task_runner,    // ui
                       thread_task_runner     // io
 
@@ -146,7 +146,7 @@ TEST_F(ImageDecoderFixtureTest, InvalidImageResultsError) {
   auto thread_task_runner = CreateNewThread();
   TaskRunners runners(GetCurrentTestName(),  // label
                       thread_task_runner,    // platform
-                      thread_task_runner,    // gpu
+                      thread_task_runner,    // raster
                       thread_task_runner,    // ui
                       thread_task_runner     // io
   );
@@ -176,7 +176,7 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );
@@ -223,7 +223,7 @@ TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );
@@ -275,7 +275,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );
@@ -331,7 +331,7 @@ TEST_F(ImageDecoderFixtureTest, CanDecodeWithResizes) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );
@@ -430,7 +430,7 @@ TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );
@@ -590,7 +590,7 @@ TEST_F(ImageDecoderFixtureTest,
 
   TaskRunners runners(GetCurrentTestName(),         // label
                       CreateNewThread("platform"),  // platform
-                      CreateNewThread("gpu"),       // gpu
+                      CreateNewThread("raster"),    // raster
                       CreateNewThread("ui"),        // ui
                       CreateNewThread("io")         // io
   );

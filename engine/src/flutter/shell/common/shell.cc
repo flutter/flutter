@@ -56,7 +56,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto shell =
       std::unique_ptr<Shell>(new Shell(std::move(vm), task_runners, settings));
 
-  // Create the rasterizer on the GPU thread.
+  // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
   auto rasterizer_future = rasterizer_promise.get_future();
   std::promise<fml::WeakPtr<SnapshotDelegate>> snapshot_delegate_promise;
@@ -336,9 +336,9 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  // Generate a WeakPtrFactory for use with the GPU thread. This does not need
-  // to wait on a latch because it can only ever be used from the GPU thread
-  // from this class, so we have ordering guarantees.
+  // Generate a WeakPtrFactory for use with the raster thread. This does not
+  // need to wait on a latch because it can only ever be used from the raster
+  // thread from this class, so we have ordering guarantees.
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetGPUTaskRunner(), fml::MakeCopyable([this]() mutable {
         this->weak_factory_gpu_ =
@@ -623,13 +623,13 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
 
   // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
-  // gpu_task to the GPU thread which signals the latch. If the GPU the and
+  // gpu_task to the raster thread which signals the latch. If the GPU the and
   // platform threads are the same this results in a deadlock as the gpu_task
-  // will never be posted to the plaform/gpu thread that is blocked on a latch.
-  // To avoid the described deadlock, if the gpu and the platform threads are
-  // the same, should_post_gpu_task will be false, and then instead of posting a
-  // task to the gpu thread, the ui thread just signals the latch and the
-  // platform/gpu thread follows with executing gpu_task.
+  // will never be posted to the plaform/raster thread that is blocked on a
+  // latch. To avoid the described deadlock, if the gpu and the platform threads
+  // are the same, should_post_gpu_task will be false, and then instead of
+  // posting a task to the raster thread, the ui thread just signals the latch
+  // and the platform/raster thread follows with executing gpu_task.
   bool should_post_gpu_task =
       task_runners_.GetGPUTaskRunner() != task_runners_.GetPlatformTaskRunner();
 
@@ -641,8 +641,8 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     if (engine) {
       engine->OnOutputSurfaceCreated();
     }
-    // Step 2: Next, tell the GPU thread that it should create a surface for its
-    // rasterizer.
+    // Step 2: Next, tell the raster thread that it should create a surface for
+    // its rasterizer.
     if (should_post_gpu_task) {
       fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
     } else {
@@ -677,7 +677,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   if (!should_post_gpu_task) {
     // See comment on should_post_gpu_task, in this case the gpu_task
     // wasn't executed, and we just run it here as the platform thread
-    // is the GPU thread.
+    // is the raster thread.
     gpu_task();
   }
 }
@@ -718,13 +718,14 @@ void Shell::OnPlatformViewDestroyed() {
 
   // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
-  // gpu_task to the GPU thread triggers signaling the latch(on the IO thread).
-  // If the GPU the and platform threads are the same this results in a deadlock
-  // as the gpu_task will never be posted to the plaform/gpu thread that is
-  // blocked on a latch.  To avoid the described deadlock, if the gpu and the
-  // platform threads are the same, should_post_gpu_task will be false, and then
-  // instead of posting a task to the gpu thread, the ui thread just signals the
-  // latch and the platform/gpu thread follows with executing gpu_task.
+  // gpu_task to the raster thread triggers signaling the latch(on the IO
+  // thread). If the GPU the and platform threads are the same this results in a
+  // deadlock as the gpu_task will never be posted to the plaform/raster thread
+  // that is blocked on a latch.  To avoid the described deadlock, if the gpu
+  // and the platform threads are the same, should_post_gpu_task will be false,
+  // and then instead of posting a task to the raster thread, the ui thread just
+  // signals the latch and the platform/raster thread follows with executing
+  // gpu_task.
   bool should_post_gpu_task =
       task_runners_.GetGPUTaskRunner() != task_runners_.GetPlatformTaskRunner();
 
@@ -734,7 +735,7 @@ void Shell::OnPlatformViewDestroyed() {
     if (engine) {
       engine->OnOutputSurfaceDestroyed();
     }
-    // Step 1: Next, tell the GPU thread that its rasterizer should suspend
+    // Step 1: Next, tell the raster thread that its rasterizer should suspend
     // access to the underlying surface.
     if (should_post_gpu_task) {
       fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
@@ -752,7 +753,7 @@ void Shell::OnPlatformViewDestroyed() {
   if (!should_post_gpu_task) {
     // See comment on should_post_gpu_task, in this case the gpu_task
     // wasn't executed, and we just run it here as the platform thread
-    // is the GPU thread.
+    // is the raster thread.
     gpu_task();
     latch.Wait();
   }
@@ -1090,7 +1091,7 @@ void Shell::ReportTimings() {
 }
 
 size_t Shell::UnreportedFramesCount() const {
-  // Check that this is running on the GPU thread to avoid race conditions.
+  // Check that this is running on the raster thread to avoid race conditions.
   FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
   FML_DCHECK(unreported_timings_.size() % FrameTiming::kCount == 0);
   return unreported_timings_.size() / FrameTiming::kCount;
