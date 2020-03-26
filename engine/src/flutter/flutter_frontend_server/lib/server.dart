@@ -224,6 +224,7 @@ class ToStringVisitor extends RecursiveVisitor<void> {
       node.enclosingLibrary != null       &&
       !node.isStatic                      &&
       !node.isAbstract                    &&
+      !node.enclosingClass.isEnum         &&
       _isInTargetPackage(node)            &&
       !_hasKeepAnnotation(node)
     ) {
