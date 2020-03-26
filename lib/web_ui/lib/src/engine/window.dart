@@ -555,9 +555,7 @@ class EngineWindow extends ui.Window {
 
 bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData data) {
   final MethodCall decoded = codec.decodeMethodCall(data);
-  final Map<String, dynamic> message = decoded.arguments;
   double ratio = double.parse(decoded.arguments);
-  bool result = false;
   switch(decoded.method) {
     case 'setDevicePixelRatio':
       window.debugOverrideDevicePixelRatio(ratio);
