@@ -190,6 +190,10 @@ void main() {
     }
 
     await tester.pumpWidget(viewWithScroll());
+    // The scrollbar measures its size on the first frame
+    // and renders starting in the second,
+    //
+    // so pumpAndSettle a frame to allow it to appear.
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });

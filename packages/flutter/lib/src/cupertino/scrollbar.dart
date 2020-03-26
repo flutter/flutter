@@ -129,7 +129,8 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@template flutter.cupertino.cupertinoScrollbar.displayAlways}
   /// Indicates whether the [Scrollbar] should always be visible.
   ///
-  /// When false, the scrollbar will be shown during scrolling and will fade out otherwise.
+  /// When false, the scrollbar will be shown during scrolling
+  /// and will fade out otherwise.
   ///
   /// When true, the scrollbar will always be visible and never fade out.
   ///
@@ -155,7 +156,8 @@ class CupertinoScrollbar extends StatefulWidget {
   ///          child: ListView.builder(
   ///            controller: _controllerOne,
   ///            itemCount: 120,
-  ///            itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///            itemBuilder: (BuildContext context, int index)
+  ///                => Text('item $index'),
   ///          ),
   ///        ),
   ///      ),
