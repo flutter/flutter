@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 void main() {
   setUpAll(() {
     WebExperiments.ensureInitialized();
+    Profiler.ensureInitialized();
   });
 
   test('Should be able to build and layout a paragraph', () {
