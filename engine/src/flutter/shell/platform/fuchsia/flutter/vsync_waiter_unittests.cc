@@ -62,7 +62,7 @@ TEST_F(VsyncWaiterTest, AwaitVsync) {
       "VsyncWaiterTests",  // Dart thread labels
       flutter_runner::CreateFMLTaskRunner(
           async_get_default_dispatcher()),  // platform
-      flutter_runner::CreateFMLTaskRunner(threads[0]->dispatcher()),  // gpu
+      flutter_runner::CreateFMLTaskRunner(threads[0]->dispatcher()),  // raster
       flutter_runner::CreateFMLTaskRunner(threads[1]->dispatcher()),  // ui
       flutter_runner::CreateFMLTaskRunner(threads[2]->dispatcher())   // io
   );

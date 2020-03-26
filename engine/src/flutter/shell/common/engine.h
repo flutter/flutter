@@ -210,7 +210,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             is not possible for the application to determine the total
     ///             time it took to render a specific frame. While the
     ///             layer-tree is constructed on the UI thread, it needs to be
-    ///             rendering on the GPU thread. Dart code cannot execute on
+    ///             rendering on the raster thread. Dart code cannot execute on
     ///             this thread. So any instrumentation about the frame times
     ///             gathered on this thread needs to be aggregated and sent back
     ///             to the UI thread for processing in Dart.
@@ -412,7 +412,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///               by layer tree in the engine is 2. If both the UI and GPU
   ///               task runner tasks finish within one frame interval, the
   ///               pipeline depth is one. If the UI thread happens to be
-  ///               working on a frame when the GPU thread is still not done
+  ///               working on a frame when the raster thread is still not done
   ///               with the previous frame, the pipeline depth is 2. When the
   ///               pipeline depth changes from 1 to 2, animations and UI
   ///               interactions that cause the generation of the new layer tree

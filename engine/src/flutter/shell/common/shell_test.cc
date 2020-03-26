@@ -244,7 +244,7 @@ TaskRunners ShellTest::GetTaskRunnersForFixture() {
   return {
       "test",
       thread_host_.platform_thread->GetTaskRunner(),  // platform
-      thread_host_.gpu_thread->GetTaskRunner(),       // gpu
+      thread_host_.gpu_thread->GetTaskRunner(),       // raster
       thread_host_.ui_thread->GetTaskRunner(),        // ui
       thread_host_.io_thread->GetTaskRunner()         // io
   };

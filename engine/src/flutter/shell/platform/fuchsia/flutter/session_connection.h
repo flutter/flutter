@@ -27,7 +27,7 @@ namespace flutter_runner {
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
-// The component residing on the GPU thread that is responsible for
+// The component residing on the raster thread that is responsible for
 // maintaining the Scenic session connection and presenting node updates.
 class SessionConnection final {
  public:

@@ -453,7 +453,7 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
                                           platformTaskRunner = [_engine.get() platformTaskRunner],
                                           gpuTaskRunner = [_engine.get() GPUTaskRunner]]() {
     FML_DCHECK(gpuTaskRunner->RunsTasksOnCurrentThread());
-    // Get callback on GPU thread and jump back to platform thread.
+    // Get callback on raster thread and jump back to platform thread.
     platformTaskRunner->PostTask([weakSelf]() {
       fml::scoped_nsobject<FlutterViewController> flutterViewController(
           [(FlutterViewController*)weakSelf.get() retain]);
@@ -544,7 +544,8 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
-  // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
+  // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and raster
+  // thread.
   if (appeared) {
     [self installFirstFrameCallback];
     [_engine.get() platformViewsController] -> SetFlutterView(_flutterView.get());

@@ -17,7 +17,7 @@ enum class GpuThreadStatus { kRemainsMerged, kRemainsUnmerged, kUnmergedNow };
 
 class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
  public:
-  // Merges the GPU thread into platform thread for the duration of
+  // Merges the raster thread into platform thread for the duration of
   // the lease term. Lease is managed by the caller by either calling
   // |ExtendLeaseTo| or |DecrementLease|.
   // When the caller merges with a lease term of say 2. The threads
@@ -38,7 +38,7 @@ class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
 
   // Returns true if the current thread owns rasterizing.
   // When the threads are merged, platform thread owns rasterizing.
-  // When un-merged, gpu thread owns rasterizing.
+  // When un-merged, raster thread owns rasterizing.
   bool IsOnRasterizingThread();
 
  private:

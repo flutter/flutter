@@ -116,8 +116,8 @@ void ConvertImageToRaster(sk_sp<SkImage> image,
   }
 
   // Cross-context images do not support makeRasterImage. Convert these images
-  // by drawing them into a surface.  This must be done on the GPU thread
-  // to prevent concurrent usage of the image on both the IO and GPU threads.
+  // by drawing them into a surface.  This must be done on the raster thread
+  // to prevent concurrent usage of the image on both the IO and raster threads.
   gpu_task_runner->PostTask([image, encode_task = std::move(encode_task),
                              resource_context, snapshot_delegate,
                              io_task_runner]() {

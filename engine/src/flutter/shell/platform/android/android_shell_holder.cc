@@ -45,7 +45,7 @@ AndroidShellHolder::AndroidShellHolder(
                                       ThreadHost::Type::IO};
   }
 
-  // Detach from JNI when the UI and GPU threads exit.
+  // Detach from JNI when the UI and raster threads exit.
   auto jni_exit_task([key = thread_destruct_key_]() {
     FML_CHECK(pthread_setspecific(key, reinterpret_cast<void*>(1)) == 0);
   });
@@ -102,7 +102,7 @@ AndroidShellHolder::AndroidShellHolder(
   }
   flutter::TaskRunners task_runners(thread_label,     // label
                                     platform_runner,  // platform
-                                    gpu_runner,       // gpu
+                                    gpu_runner,       // raster
                                     ui_runner,        // ui
                                     io_runner         // io
   );
@@ -124,7 +124,7 @@ AndroidShellHolder::AndroidShellHolder(
     task_runners.GetGPUTaskRunner()->PostTask([]() {
       // Android describes -8 as "most important display threads, for
       // compositing the screen and retrieving input events". Conservatively
-      // set the GPU thread to slightly lower priority than it.
+      // set the raster thread to slightly lower priority than it.
       if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
         // Defensive fallback. Depending on the OEM, it may not be possible
         // to set priority to -5.

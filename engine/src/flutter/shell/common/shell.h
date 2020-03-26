@@ -275,7 +275,7 @@ class Shell final : public PlatformView::Delegate,
   // Embedders should call this under low memory conditions to free up
   // internal caches used.
   //
-  // This method posts a task to the GPU threads to signal the Rasterizer to
+  // This method posts a task to the raster threads to signal the Rasterizer to
   // free resources.
 
   //----------------------------------------------------------------------------
@@ -393,7 +393,7 @@ class Shell final : public PlatformView::Delegate,
   std::mutex waiting_for_first_frame_mutex_;
   std::condition_variable waiting_for_first_frame_condition_;
 
-  // Written in the UI thread and read from the GPU thread. Hence make it
+  // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.
   std::atomic<bool> needs_report_timings_{false};
 
@@ -407,10 +407,10 @@ class Shell final : public PlatformView::Delegate,
   std::vector<int64_t> unreported_timings_;
 
   // A cache of `Engine::GetDisplayRefreshRate` (only callable in the UI thread)
-  // so we can access it from `Rasterizer` (in the GPU thread).
+  // so we can access it from `Rasterizer` (in the raster thread).
   //
   // The atomic is for extra thread safety as this is written in the UI thread
-  // and read from the GPU thread.
+  // and read from the raster thread.
   std::atomic<float> display_refresh_rate_ = 0.0f;
 
   // How many frames have been timed since last report.
@@ -570,7 +570,7 @@ class Shell final : public PlatformView::Delegate,
 
   fml::WeakPtrFactory<Shell> weak_factory_;
 
-  // For accessing the Shell via the GPU thread, necessary for various
+  // For accessing the Shell via the raster thread, necessary for various
   // rasterizer callbacks.
   std::unique_ptr<fml::WeakPtrFactory<Shell>> weak_factory_gpu_;
 

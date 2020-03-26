@@ -128,7 +128,7 @@ int RunTester(const flutter::Settings& settings,
 
   const flutter::TaskRunners task_runners(thread_label,  // dart thread label
                                           platform_task_runner,  // platform
-                                          gpu_task_runner,       // gpu
+                                          gpu_task_runner,       // raster
                                           ui_task_runner,        // ui
                                           io_task_runner         // io
   );
