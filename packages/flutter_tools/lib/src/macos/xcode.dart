@@ -8,12 +8,14 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -195,15 +197,27 @@ class Xcode {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
     @required Xcode xcode,
-    @required IMobileDevice iMobileDevice,
-    @required IOSDeploy iosDeploy,
+    @required Platform platform,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
-      _iMobileDevice = iMobileDevice,
-      _iosDeploy = iosDeploy,
+      _iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        processManager: processManager,
+      ),
+      _iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
       _xcode = xcode;
 
   final ProcessUtils _processUtils;
