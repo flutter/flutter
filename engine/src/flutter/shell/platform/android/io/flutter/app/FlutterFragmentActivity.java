@@ -125,9 +125,10 @@ public class FlutterFragmentActivity extends FragmentActivity
     eventDelegate.onPostResume();
   }
 
-  // @Override - added in API level 23
+  @Override
   public void onRequestPermissionsResult(
       int requestCode, String[] permissions, int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     eventDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
