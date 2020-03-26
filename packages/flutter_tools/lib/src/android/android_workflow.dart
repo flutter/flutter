@@ -178,7 +178,7 @@ class AndroidValidator extends DoctorValidator {
             _androidSdk.sdkManagerPath,
             kAndroidSdkMinVersion,
             kAndroidSdkBuildToolsMinVersion.toString(),
-            _platform
+            _platform,
           )),
         );
         return ValidationResult(ValidationType.missing, messages);
