@@ -35,6 +35,7 @@ void main(List<String> args) async {
     final bool result = await runner.run(args);
     if (result == false) {
       print('Sub-command returned false: `${args.join(' ')}`');
+      _cleanup();
       io.exit(1);
     }
   } on UsageException catch (e) {

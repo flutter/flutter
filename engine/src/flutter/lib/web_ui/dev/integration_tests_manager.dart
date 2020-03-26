@@ -5,7 +5,6 @@
 import 'dart:io' as io;
 import 'package:path/path.dart' as pathlib;
 import 'package:web_driver_installer/chrome_driver_installer.dart';
-import 'package:yaml/yaml.dart';
 
 import 'chrome_installer.dart';
 import 'common.dart';
@@ -21,8 +20,7 @@ class IntegrationTestsManager {
   /// It usually changes with each the browser version changes.
   /// A better solution would be installing the browser and the driver at the
   /// same time.
-  // TODO(nurhan): change the web installers to install driver and the browser
-  // at the same time.
+  // TODO(nurhan): https://github.com/flutter/flutter/issues/53179.
   final io.Directory _browserDriverDir;
 
   /// This is the parent directory for all drivers.
@@ -32,10 +30,10 @@ class IntegrationTestsManager {
   final io.Directory _drivers;
 
   IntegrationTestsManager(this._browser)
-      : this._browserDriverDir = io.Directory(
-            pathlib.join(environment.webUiRootDir.path, 'drivers', _browser)),
+      : this._browserDriverDir = io.Directory(pathlib.join(
+            environment.webUiDartToolDir.path, 'drivers', _browser)),
         this._drivers = io.Directory(
-            pathlib.join(environment.webUiRootDir.path, 'drivers'));
+            pathlib.join(environment.webUiDartToolDir.path, 'drivers'));
 
   Future<bool> runTests() async {
     if (_browser != 'chrome') {
@@ -77,6 +75,7 @@ class IntegrationTestsManager {
     startProcess(
       './chromedriver/chromedriver',
       ['--port=4444'],
+      workingDirectory: io.Directory.current.path
     );
     print('INFO: Driver started');
   }
@@ -89,12 +88,16 @@ class IntegrationTestsManager {
     _browserDriverDir.createSync(recursive: true);
     temporaryDirectories.add(_drivers);
 
+    io.Directory temp = io.Directory.current;
+    io.Directory.current = _browserDriverDir;
+
     // TODO(nurhan): https://github.com/flutter/flutter/issues/53179
     final String chromeDriverVersion = await queryChromeDriverVersion();
     ChromeDriverInstaller chromeDriverInstaller =
         ChromeDriverInstaller.withVersion(chromeDriverVersion);
     await chromeDriverInstaller.install(alwaysInstall: true);
     await _runDriver();
+    io.Directory.current = temp;
   }
 
   /// Runs all the web tests under e2e_tests/web.

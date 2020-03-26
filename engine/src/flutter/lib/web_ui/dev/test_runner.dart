@@ -115,13 +115,18 @@ class TestCommand extends Command<bool> {
       case TestTypesRequested.integration:
         return runIntegrationTests();
       case TestTypesRequested.all:
-        bool integrationTestResult = await runIntegrationTests();
-        bool unitTestResult = await runUnitTests();
-        if (integrationTestResult != unitTestResult) {
-          print('Tests run. Integration tests passed: $integrationTestResult '
-              'unit tests passed: $unitTestResult');
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
+        if (runAllTests) {
+          bool integrationTestResult = await runIntegrationTests();
+          bool unitTestResult = await runUnitTests();
+          if (integrationTestResult != unitTestResult) {
+            print('Tests run. Integration tests passed: $integrationTestResult '
+                'unit tests passed: $unitTestResult');
+          }
+          return integrationTestResult && unitTestResult;
+        } else {
+          return await runUnitTests();
         }
-        return integrationTestResult && unitTestResult;
     }
     return false;
   }
@@ -145,13 +150,11 @@ class TestCommand extends Command<bool> {
       await _runPubGet();
     }
 
-    final List<FilePath> targets =
-        this.targets.map((t) => FilePath.fromCwd(t)).toList();
-    await _buildTests(targets: targets);
-    if (targets.isEmpty) {
+    await _buildTests(targets: targetFiles);
+    if (runAllTests) {
       await _runAllTests();
     } else {
-      await _runTargetTests(targets);
+      await _runTargetTests(targetFiles);
     }
     return true;
   }
@@ -164,6 +167,16 @@ class TestCommand extends Command<bool> {
 
   /// Paths to targets to run, e.g. a single test.
   List<String> get targets => argResults.rest;
+
+  /// The target test files to run.
+  ///
+  /// The value can be null if the developer prefers to run all the tests.
+  List<FilePath> get targetFiles => (targets.isEmpty)
+      ? null
+      : targets.map((t) => FilePath.fromCwd(t)).toList();
+
+  /// Whether all tests should run.
+  bool get runAllTests => targets.isEmpty;
 
   String get browser => argResults['browser'];
 
