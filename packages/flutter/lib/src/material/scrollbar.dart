@@ -37,7 +37,7 @@ class Scrollbar extends StatefulWidget {
     Key key,
     @required this.child,
     this.controller,
-    this.displayAlways = false,
+    this.isAlwaysShown = false,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -51,8 +51,8 @@ class Scrollbar extends StatefulWidget {
   /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
   final ScrollController controller;
 
-  /// {@macro flutter.cupertino.cupertinoScrollbar.displayAlways}
-  final bool displayAlways;
+  /// {@macro flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
+  final bool isAlwaysShown;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -105,10 +105,10 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         _materialPainter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
         WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-          if (widget.displayAlways) {
+          if (widget.isAlwaysShown) {
             assert(widget.controller != null);
             // Wait one frame and cause an empty scroll event.  This allows the
-            // thumb to show immediately when displayAlways is true.  A scroll
+            // thumb to show immediately when isAlwaysShown is true.  A scroll
             // event is required in order to paint the thumb.
             widget.controller.position.didUpdateScrollPositionBy(0);
           }
@@ -121,9 +121,9 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Scrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.displayAlways != oldWidget.displayAlways) {
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
       assert(widget.controller != null);
-      if (widget.displayAlways == false) {
+      if (widget.isAlwaysShown == false) {
         _fadeoutAnimationController.reverse();
       } else {
         _fadeoutAnimationController.animateTo(1.0);
@@ -160,7 +160,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         notification.metrics,
         notification.metrics.axisDirection,
       );
-      if (!widget.displayAlways) {
+      if (!widget.isAlwaysShown) {
         _fadeoutTimer?.cancel();
         _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
           _fadeoutAnimationController.reverse();
@@ -184,7 +184,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
-        displayAlways: widget.displayAlways,
+        isAlwaysShown: widget.isAlwaysShown,
         controller: widget.controller,
       );
     }

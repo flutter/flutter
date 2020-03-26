@@ -60,7 +60,7 @@ class CupertinoScrollbar extends StatefulWidget {
   const CupertinoScrollbar({
     Key key,
     this.controller,
-    this.displayAlways = false,
+    this.isAlwaysShown = false,
     @required this.child,
   }) : super(key: key);
 
@@ -126,7 +126,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final ScrollController controller;
 
-  /// {@template flutter.cupertino.cupertinoScrollbar.displayAlways}
+  /// {@template flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
   /// Indicates whether the [Scrollbar] should always be visible.
   ///
   /// When false, the scrollbar will be shown during scrolling
@@ -151,7 +151,7 @@ class CupertinoScrollbar extends StatefulWidget {
   ///     Container(
   ///        height: 200,
   ///        child: Scrollbar(
-  ///          displayAlways: true,
+  ///          isAlwaysShown: true,
   ///          controller: _controllerOne,
   ///          child: ListView.builder(
   ///            controller: _controllerOne,
@@ -164,7 +164,7 @@ class CupertinoScrollbar extends StatefulWidget {
   ///      Container(
   ///        height: 200,
   ///        child: CupertinoScrollbar(
-  ///          displayAlways: true,
+  ///          isAlwaysShown: true,
   ///          controller: _controllerTwo,
   ///          child: SingleChildScrollView(
   ///            controller: _controllerTwo,
@@ -178,7 +178,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// ```
   /// {@end-tool}
   /// {@endtemplate}
-  final bool displayAlways;
+  final bool isAlwaysShown;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -239,10 +239,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         ..padding = MediaQuery.of(context).padding;
     }
     WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
-      if (widget.displayAlways) {
+      if (widget.isAlwaysShown) {
         assert(widget.controller != null);
         // Wait one frame and cause an empty scroll event.  This allows the
-        // thumb to show immediately when displayAlways is true.  A scroll
+        // thumb to show immediately when isAlwaysShown is true.  A scroll
         // event is required in order to paint the thumb.
         widget.controller.position.didUpdateScrollPositionBy(0);
       }
@@ -252,8 +252,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void didUpdateWidget(CupertinoScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.displayAlways != oldWidget.displayAlways) {
-      if (widget.displayAlways == true) {
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+      if (widget.isAlwaysShown == true) {
         assert(widget.controller != null);
         _fadeoutAnimationController.animateTo(1.0);
       } else {
@@ -305,7 +305,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _startFadeoutTimer() {
-    if (!widget.displayAlways) {
+    if (!widget.isAlwaysShown) {
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
         _fadeoutAnimationController.reverse();
