@@ -1069,8 +1069,6 @@ abstract class Shader {
 /// There are several types of gradients, represented by the various
 /// constructors on this class.
 abstract class Gradient extends Shader {
-  Gradient._() : super._();
-
   /// Creates a linear gradient from `from` to `to`.
   ///
   /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
