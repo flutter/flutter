@@ -60,7 +60,9 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
   }
 
   // Create the application instance.
-  std::vector<std::string> extensions = {};
+  std::vector<std::string> extensions = {
+      VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
+  };
 
   application_ = std::make_unique<vulkan::VulkanApplication>(
       *vk_, "FlutterTest", std::move(extensions));
