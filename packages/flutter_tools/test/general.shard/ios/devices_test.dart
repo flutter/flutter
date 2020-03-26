@@ -176,60 +176,6 @@ void main() {
       });
     }
 
-    group('ios-deploy wrappers', () {
-      const String appId = '789';
-      const String deviceId = 'device-123';
-      IOSDevice device;
-      IOSDeploy iosDeploy;
-      FakeProcessManager fakeProcessManager;
-      const String iosDeployPath = '/path/to/ios-deploy';
-
-      setUp(() {
-        when(mockArtifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios))
-          .thenReturn(iosDeployPath);
-      });
-
-      testWithoutContext('isAppInstalled() catches ProcessException from ios-deploy', () async {
-        final MockIOSApp mockApp = MockIOSApp();
-        when(mockApp.id).thenReturn(appId);
-        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-          FakeCommand(
-            command: const <String>[
-              iosDeployPath,
-              '--id',
-              deviceId,
-              '--exists',
-              '--bundle_id',
-              appId,
-            ],
-            onRun: () => throw const ProcessException('ios-deploy', <String>[]),
-          )
-        ]);
-        iosDeploy = IOSDeploy(
-          artifacts: mockArtifacts,
-          cache: mockCache,
-          logger: logger,
-          platform: macPlatform,
-          processManager: fakeProcessManager,
-        );
-        device = IOSDevice(
-          deviceId,
-          artifacts: mockArtifacts,
-          fileSystem: mockFileSystem,
-          logger: logger,
-          platform: macPlatform,
-          iosDeploy: iosDeploy,
-          iMobileDevice: iMobileDevice,
-          name: 'iPhone 1',
-          sdkVersion: '13.3',
-          cpuArchitecture: DarwinArch.arm64,
-        );
-
-        final bool result = await device.isAppInstalled(mockApp);
-        expect(result, false);
-      });
-    });
-
     group('.dispose()', () {
       IOSDevice device;
       MockIOSApp appPackage1;
