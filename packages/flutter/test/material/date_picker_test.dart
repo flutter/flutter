@@ -136,6 +136,30 @@ void main() {
       });
     });
 
+    testWidgets('Switching to input mode resets input error state', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        // Enter text input mode and type an invalid date to get error.
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsOneWidget);
+
+        // Toggle to calender mode and then back to input mode
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsNothing);
+
+        // Edit the text, the error should not be showing until ok is tapped
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsNothing);
+      });
+    });
+
     testWidgets('builder parameter', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
