@@ -25,6 +25,18 @@ Future<bool> run(List<String> arguments) async {
       help: 'How many times to run each test. Set to a high value to look for flakes.',
       valueHelp: 'count',
     )
+    ..addOption(
+      'shards',
+      defaultsTo: '1',
+      help: 'How many shards to split the tests into. Used in continuous integration.',
+      valueHelp: 'count',
+    )
+    ..addOption(
+      'shard-index',
+      defaultsTo: '0',
+      help: 'The current shard to run the tests as. Used in continuous integration.',
+      valueHelp: 'count',
+    )
     ..addFlag(
       'skip-on-fetch-failure',
       defaultsTo: false,
@@ -70,6 +82,8 @@ Future<bool> run(List<String> arguments) async {
   final bool skipTemplate = parsedArguments['skip-template'] as bool;
   final bool verbose = parsedArguments['verbose'] as bool;
   final bool help = parsedArguments['help'] as bool;
+  final int numberShards = int.tryParse(parsedArguments['shards'] as String);
+  final int shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments
     .rest
     .expand((String path) => Glob(path).listSync())
@@ -91,6 +105,21 @@ Future<bool> run(List<String> arguments) async {
     return help;
   }
 
+  if (files.length < shardIndex)
+    print('Warning: There are more shards than tests. Some shards will not run any tests.');
+
+  // Best attempt at evenly splitting tests among the shards
+  final List<File> shardedFiles = <File>[];
+  for (int i = shardIndex; i < files.length; i += numberShards) {
+    shardedFiles.add(files[i]);
+  }
+
+  if (verbose) {
+    print('Tests in this shard:');
+    for (final File file in shardedFiles)
+      print(file.path);
+  }
+
   if (verbose)
     print('Starting run_tests.dart...');
 
@@ -99,11 +128,12 @@ Future<bool> run(List<String> arguments) async {
 
   if (verbose) {
     final String s = files.length == 1 ? '' : 's';
-    print('${files.length} file$s specified.');
+    final String ss = shardedFiles.length == 1 ? '' : 's';
+    print('${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex');
     print('');
   }
 
-  for (final File file in files) {
+  for (final File file in shardedFiles) {
     if (verbose)
       print('Processing ${file.path}...');
     TestFile instructions;
