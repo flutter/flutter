@@ -72,7 +72,7 @@ abstract class Browser {
       _processCompleter.complete(process);
 
       var output = Uint8Buffer();
-      drainOutput(Stream<List<int>> stream) {
+      void drainOutput(Stream<List<int>> stream) {
         try {
           _ioSubscriptions
               .add(stream.listen(output.addAll, cancelOnError: true));

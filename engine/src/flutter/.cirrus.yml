@@ -126,6 +126,16 @@ task:
     - name: web_tests-7_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
+    # - name: web_engine_analysis
+    #   compile_host_script: |
+    #     cd $ENGINE_PATH/src
+    #     ./flutter/tools/gn --unoptimized --full-dart-sdk
+    #     ninja -C out/host_debug_unopt
+    #   script:
+    #     - cd $ENGINE_PATH/src/flutter/lib/web_ui
+    #     - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
+    #     - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dartanalyzer --fatal-warnings --fatal-hints dev/ lib/ test/ tool/
+
     - name: web_engine_integration_test_linux
       compile_host_script: |
         cd $ENGINE_PATH/src

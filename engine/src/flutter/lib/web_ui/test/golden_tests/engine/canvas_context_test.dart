@@ -4,7 +4,6 @@
 
 // @dart = 2.6
 import 'dart:html' as html;
-import 'dart:js_util' as js_util;
 
 import 'package:ui/ui.dart' hide TextStyle;
 import 'package:ui/src/engine.dart' as engine;

@@ -78,7 +78,7 @@ class BenchmarkDatapoint {
   int get hashCode => hashValues(name, value);
 
   @override
-  operator ==(dynamic other) {
+  bool operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;
     }
