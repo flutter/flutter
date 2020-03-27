@@ -2,37 +2,12 @@
 #include <windows.h>
 
 #include <chrono>
-#include <codecvt>
 #include <iostream>
-#include <string>
 #include <vector>
 
 #include "flutter/generated_plugin_registrant.h"
 #include "win32_window.h"
 #include "window_configuration.h"
-
-namespace {
-
-// Returns the path of the directory containing this executable, or an empty
-// string if the directory cannot be found.
-std::string GetExecutableDirectory() {
-  wchar_t buffer[MAX_PATH];
-  if (GetModuleFileName(nullptr, buffer, MAX_PATH) == 0) {
-    std::cerr << "Couldn't locate executable" << std::endl;
-    return "";
-  }
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> wide_to_utf8;
-  std::string executable_path = wide_to_utf8.to_bytes(buffer);
-  size_t last_separator_position = executable_path.find_last_of('\\');
-  if (last_separator_position == std::string::npos) {
-    std::cerr << "Unabled to find parent directory of " << executable_path
-              << std::endl;
-    return "";
-  }
-  return executable_path.substr(0, last_separator_position);
-}
-
-}  // namespace
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
@@ -42,24 +17,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     ::AllocConsole();
   }
 
-  // Resources are located relative to the executable.
-  std::string base_directory = GetExecutableDirectory();
-  if (base_directory.empty()) {
-    base_directory = ".";
-  }
-  std::string data_directory = base_directory + "\\data";
-  std::string assets_path = data_directory + "\\flutter_assets";
-  std::string icu_data_path = data_directory + "\\icudtl.dat";
-
-  // Arguments for the Flutter Engine.
-  std::vector<std::string> arguments;
+  flutter::DartProject project(L"data");
 
   // Top-level window frame.
   Win32Window::Point origin(kFlutterWindowOriginX, kFlutterWindowOriginY);
   Win32Window::Size size(kFlutterWindowWidth, kFlutterWindowHeight);
 
-  flutter::FlutterViewController flutter_controller(
-      icu_data_path, size.width, size.height, assets_path, arguments);
+  flutter::FlutterViewController flutter_controller(size.width, size.height,
+                                                    project);
   RegisterPlugins(&flutter_controller);
 
   // Create a top-level win32 window to host the Flutter view.
