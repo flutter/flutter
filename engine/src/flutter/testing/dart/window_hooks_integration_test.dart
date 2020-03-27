@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:test/test.dart';
 
 // HACK: these parts are to get access to private functions tested here.
+part '../../lib/ui/annotations.dart';
 part '../../lib/ui/channel_buffers.dart';
 part '../../lib/ui/compositing.dart';
 part '../../lib/ui/geometry.dart';
