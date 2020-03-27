@@ -72,7 +72,7 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
         expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
   }
 
-  // ignore: annotate_overrides
+  @override
   Future<Null> compileExpressionToJs(
       String libraryUri,
       int line,
@@ -81,7 +81,8 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
       Map<String, String> jsFrameValues,
       String moduleName,
       String expression) {
-    throw UnimplementedError('Compile expression to JS is not supported');
+    return _compiler.compileExpressionToJs(libraryUri, line, column, jsModules,
+        jsFrameValues, moduleName, expression);
   }
 
   @override
