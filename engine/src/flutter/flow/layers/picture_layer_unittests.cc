@@ -94,9 +94,6 @@ TEST_F(PictureLayerTest, SimplePicture) {
            1, MockCanvas::SetMatrixData{RasterCache::GetIntegralTransCTM(
                   layer_offset_matrix)}},
 #endif
-       MockCanvas::DrawCall{
-           1, MockCanvas::DrawPictureData{mock_picture->serialize(), SkPaint(),
-                                          SkMatrix()}},
        MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }

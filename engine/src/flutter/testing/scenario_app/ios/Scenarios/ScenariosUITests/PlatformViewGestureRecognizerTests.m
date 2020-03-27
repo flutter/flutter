@@ -25,7 +25,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
       [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject,
                                             NSDictionary<NSString*, id>* _Nullable bindings) {
         XCUIElement* element = evaluatedObject;
-        return [element.identifier isEqualToString:@"platform_view"];
+        return [element.identifier hasPrefix:@"platform_view"];
       }];
   XCUIElement* platformView = [app.textViews elementMatchingPredicate:predicateToFindPlatformView];
   if (![platformView waitForExistenceWithTimeout:kSecondsToWaitForPlatformView]) {
@@ -56,7 +56,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
       [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject,
                                             NSDictionary<NSString*, id>* _Nullable bindings) {
         XCUIElement* element = evaluatedObject;
-        return [element.identifier isEqualToString:@"platform_view"];
+        return [element.identifier hasPrefix:@"platform_view"];
       }];
   XCUIElement* platformView = [app.textViews elementMatchingPredicate:predicateToFindPlatformView];
   if (![platformView waitForExistenceWithTimeout:kSecondsToWaitForPlatformView]) {
@@ -91,7 +91,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
       [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject,
                                             NSDictionary<NSString*, id>* _Nullable bindings) {
         XCUIElement* element = evaluatedObject;
-        return [element.identifier isEqualToString:@"platform_view"];
+        return [element.identifier hasPrefix:@"platform_view"];
       }];
   XCUIElement* platformView = [app.textViews elementMatchingPredicate:predicateToFindPlatformView];
   if (![platformView waitForExistenceWithTimeout:kSecondsToWaitForPlatformView]) {
