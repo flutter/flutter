@@ -113,23 +113,22 @@ void batch2() {
 
   Future<void> breakInMethod(FlutterTestDriver flutter) async {
     await _flutter.breakAt(
-      _project.breakpointUri,
+      _project.breakpointAppUri,
       _project.breakpointLine,
     );
   }
 
   test('flutter test expression evaluation - can evaluate trivial expressions in a test', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
     await breakInMethod(_flutter);
-    await _flutter.waitForPause();
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
   });
 
   test('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
@@ -137,7 +136,7 @@ void batch2() {
 
   test('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
     await initProject();
-    await _flutter.run(withDebugger: true, chrome: true);
+    await _flutter.run(withDebugger: true, chrome: true, script: _project.testFilePath);
     await breakInMethod(_flutter);
     await evaluateComplexReturningExpressions(_flutter);
     await cleanProject();
