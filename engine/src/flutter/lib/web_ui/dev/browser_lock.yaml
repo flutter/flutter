@@ -1,7 +1,7 @@
 chrome:
   # It seems Chrome can't always release from the same build for all operating
   # systems, so we specify per-OS build number.
-  Linux: 735129
+  Linux: 753189
   Mac: 735116
   Win: 735105
 firefox:
