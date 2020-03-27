@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "เหลือ 1 อักขระ",
   "remainingTextFieldCharacterCountOther": "เหลือ $remainingCount อักขระ",
   "refreshIndicatorSemanticLabel": "รีเฟรช",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "เพิ่มเติม"
 }

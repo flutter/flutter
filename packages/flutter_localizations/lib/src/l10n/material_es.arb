@@ -26,10 +26,10 @@
   "cutButtonLabel": "CORTAR",
   "okButtonLabel": "ACEPTAR",
   "pasteButtonLabel": "PEGAR",
-  "selectAllButtonLabel": "SELECCIONAR TODO",
+  "selectAllButtonLabel": "SELECCIONAR TODOS",
   "viewLicensesButtonLabel": "VER LICENCIAS",
-  "anteMeridiemAbbreviation": "A.M.",
-  "postMeridiemAbbreviation": "P.M.",
+  "anteMeridiemAbbreviation": "a. m.",
+  "postMeridiemAbbreviation": "p. m.",
   "timePickerHourModeAnnouncement": "Seleccionar horas",
   "timePickerMinuteModeAnnouncement": "Seleccionar minutos",
   "signedInLabel": "Sesión iniciada",
@@ -50,8 +50,8 @@
   "expandedIconTapHint": "Ocultar",
   "collapsedIconTapHint": "Mostrar",
   "remainingTextFieldCharacterCountZero": "TBD",
-  "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
-  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
+  "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
+  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres",
   "refreshIndicatorSemanticLabel": "Actualizar",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Más"
 }

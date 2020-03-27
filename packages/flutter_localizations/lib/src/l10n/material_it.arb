@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 carattere rimanente",
   "remainingTextFieldCharacterCountOther": "$remainingCount caratteri rimanenti",
   "refreshIndicatorSemanticLabel": "Aggiorna",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Altro"
 }

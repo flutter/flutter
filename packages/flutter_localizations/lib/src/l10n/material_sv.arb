@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 tecken kvar",
   "remainingTextFieldCharacterCountOther": "$remainingCount tecken kvar",
   "refreshIndicatorSemanticLabel": "Uppdatera",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Mer"
 }
