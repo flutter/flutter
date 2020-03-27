@@ -29,6 +29,13 @@
   // the launchArgsMap should match the one in the `PlatformVieGoldenTestManager`.
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
     @"--platform-view" : @"platform_view",
+    @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
+    @"--platform-view-two-intersecting-overlays" : @"platform_view_two_intersecting_overlays",
+    @"--platform-view-partial-intersection" : @"platform_view_partial_intersection",
+    @"--platform-view-one-overlay-two-intersecting-overlays" :
+        @"platform_view_one_overlay_two_intersecting_overlays",
+    @"--platform-view-multiple-without-overlays" : @"platform_view_multiple_without_overlays",
+    @"--platform-view-max-overlays" : @"platform_view_max_overlays",
     @"--platform-view-multiple" : @"platform_view_multiple",
     @"--platform-view-multiple-background-foreground" :
         @"platform_view_multiple_background_foreground",

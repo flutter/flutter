@@ -39,6 +39,7 @@
   if (self) {
     self.layer.opaque = NO;
     self.userInteractionEnabled = NO;
+    self.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
   }
 
   return self;
