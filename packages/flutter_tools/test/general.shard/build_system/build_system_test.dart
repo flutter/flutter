@@ -89,6 +89,7 @@ void main() {
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
+      logger: BufferLogger.test(),
     );
     fileSystem.file('foo.dart')
       ..createSync(recursive: true)
@@ -359,12 +360,16 @@ void main() {
       outputDir: fileSystem.directory('a'),
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
     );
     final Environment environmentB = Environment.test(
       fileSystem.currentDirectory,
       outputDir: fileSystem.directory('b'),
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
     );
 
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));

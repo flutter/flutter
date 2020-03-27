@@ -59,6 +59,8 @@ void main() {
         },
         artifacts: MockArtifacts(),
         processManager: FakeProcessManager.any(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
       depfileService = DepfileService(
       fileSystem: globals.fs,

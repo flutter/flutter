@@ -7,14 +7,12 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
@@ -25,9 +23,6 @@ import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// A reasonable amount of files to open at the same time.
 ///
@@ -343,12 +338,11 @@ class Environment {
     Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
-    FileSystem fileSystem,
-    Logger logger,
+    @required FileSystem fileSystem,
+    @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
   }) {
-    fileSystem ??= MemoryFileSystem.test();
     return Environment(
       projectDir: projectDir ?? testDirectory,
       outputDir: outputDir ?? testDirectory,
@@ -357,7 +351,7 @@ class Environment {
       buildDir: buildDir,
       defines: defines,
       fileSystem: fileSystem,
-      logger: logger ?? BufferLogger.test(),
+      logger: logger,
       artifacts: artifacts,
       processManager: processManager,
     );
@@ -492,12 +486,12 @@ class BuildSystem {
 
     final Node node = target._toNode(environment);
     final _BuildInstance buildInstance = _BuildInstance(
-      environment,
-      fileCache,
-      buildSystemConfig,
-      _logger,
-      _fileSystem,
-      _platform,
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: buildSystemConfig,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
     );
     bool passed = true;
     try {
@@ -540,18 +534,18 @@ class BuildSystem {
 
 /// An active instance of a build.
 class _BuildInstance {
-  _BuildInstance(
+  _BuildInstance({
     this.environment,
     this.fileCache,
     this.buildSystemConfig,
-    this._logger,
-    this._fileSystem,
+    this.logger,
+    this.fileSystem,
     Platform platform,
-  )
+  })
     : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
-  final Logger _logger;
-  final FileSystem _fileSystem;
+  final Logger logger;
+  final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
@@ -608,17 +602,17 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache, _fileSystem, _logger);
+        await node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
-        _logger.printTrace('Skipping target: ${node.target.name}');
+        logger.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
         return passed;
       }
-      _logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
-      _logger.printTrace('${node.target.name}: Complete');
+      logger.printTrace('${node.target.name}: Complete');
 
       node.inputs
         ..clear()
@@ -644,7 +638,7 @@ class _BuildInstance {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
-        final File previousFile = _fileSystem.file(previousOutput);
+        final File previousFile = fileSystem.file(previousOutput);
         if (previousFile.existsSync()) {
           previousFile.deleteSync();
         }

@@ -1153,7 +1153,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// change in a function that you pass to [setState]:
   ///
   /// ```dart
-  /// setState(() { _myState = newValue });
+  /// setState(() { _myState = newValue; });
   /// ```
   ///
   /// The provided callback is immediately called synchronously. It must not

@@ -46,6 +46,8 @@ void main() {
         },
         processManager: processManager,
         artifacts: MockArtifacts(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
     });
   });

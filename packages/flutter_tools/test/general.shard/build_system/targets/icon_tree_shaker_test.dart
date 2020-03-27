@@ -115,6 +115,8 @@ void main() {
       defines: defines,
       artifacts: mockArtifacts,
       processManager: FakeProcessManager.any(),
+      fileSystem: fs,
+      logger: BufferLogger.test(),
     );
   }
 

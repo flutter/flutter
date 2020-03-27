@@ -33,6 +33,8 @@ void main() {
       fileSystem.currentDirectory,
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
+      logger: logger,
+      fileSystem: fileSystem,
     );
     environment.buildDir.createSync(recursive: true);
   });

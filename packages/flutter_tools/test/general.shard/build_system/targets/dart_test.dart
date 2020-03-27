@@ -45,6 +45,8 @@ void main() {
         },
         artifacts: artifacts,
         processManager: processManager,
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       androidEnvironment.buildDir.createSync(recursive: true);
       iosEnvironment = Environment.test(
@@ -55,6 +57,8 @@ void main() {
         },
         artifacts: artifacts,
         processManager: processManager,
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       iosEnvironment.buildDir.createSync(recursive: true);
       artifacts = CachedArtifacts(
@@ -134,6 +138,68 @@ void main() {
     expect(processManager.hasRemainingExpectations, false);
   }));
 
+  test('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final String build = androidEnvironment.buildDir.path;
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        '--sdk-root',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
+        '--target=flutter',
+        '-Ddart.developer.causal_async_stacks=false',
+        ...buildModeOptions(BuildMode.profile),
+        '--aot',
+        '--tfa',
+        '--packages',
+        '/.packages',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        '/lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+    ]);
+
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
+
+    expect(processManager.hasRemainingExpectations, false);
+  }));
+
+  test('KernelSnapshot correctly forwards ExtraFrontEndOptions', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final String build = androidEnvironment.buildDir.path;
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        '--sdk-root',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
+        '--target=flutter',
+        '-Ddart.developer.causal_async_stacks=false',
+        ...buildModeOptions(BuildMode.profile),
+        '--aot',
+        '--tfa',
+        '--packages',
+        '/.packages',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        'foo',
+        'bar',
+        '/lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+    ]);
+
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
+
+    expect(processManager.hasRemainingExpectations, false);
+  }));
+
   test('KernelSnapshot can disable track-widget-creation on debug builds', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final String build = androidEnvironment.buildDir.path;
@@ -205,6 +271,8 @@ void main() {
       },
       processManager: processManager,
       artifacts: artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     final String build = testEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[

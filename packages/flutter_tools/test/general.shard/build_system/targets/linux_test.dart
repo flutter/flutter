@@ -48,6 +48,7 @@ void main() {
         artifacts: MockArtifacts(),
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
+        logger: globals.logger,
       );
       globals.fs.file('bin/cache/artifacts/engine/linux-x64/unrelated-stuff').createSync(recursive: true);
       globals.fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').createSync(recursive: true);

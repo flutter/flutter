@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
@@ -76,6 +75,8 @@ void main() {
       },
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.any(),
+      logger: globals.logger,
+      fileSystem: globals.fs,
     );
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
@@ -197,7 +198,6 @@ void main() {
 }
 
 class MockPlatform extends Mock implements Platform {}
-class MockCocoaPods extends Mock implements CocoaPods {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}

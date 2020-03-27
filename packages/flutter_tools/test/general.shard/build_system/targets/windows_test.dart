@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -49,6 +50,7 @@ void main() {
       artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
+      logger: BufferLogger.test(),
     );
     for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);

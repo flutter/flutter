@@ -36,6 +36,7 @@ void main() {
         artifacts: globals.artifacts, // using real artifacts
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
+        logger: globals.logger,
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);

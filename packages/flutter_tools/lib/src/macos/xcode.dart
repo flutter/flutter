@@ -8,15 +8,19 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/ios_deploy.dart';
+import '../ios/mac.dart';
 import '../ios/xcodeproj.dart';
 import '../reporting/reporting.dart';
 
@@ -193,15 +197,33 @@ class Xcode {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
     @required ProcessManager processManager,
     @required Logger logger,
     @required Xcode xcode,
+    @required Platform platform,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
-       _xcode = xcode;
+      _logger = logger,
+      _iMobileDevice = IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        processManager: processManager,
+      ),
+      _iosDeploy = IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      _xcode = xcode;
 
   final ProcessUtils _processUtils;
   final Logger _logger;
+  final IMobileDevice _iMobileDevice;
+  final IOSDeploy _iosDeploy;
   final Xcode _xcode;
 
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck && xcdevicePath != null;
@@ -267,9 +289,9 @@ class XCDevice {
 
   List<dynamic> _cachedListResults;
 
-  /// [timeout] defaults to 1 second.
+  /// [timeout] defaults to 2 seconds.
   Future<List<IOSDevice>> getAvailableTetheredIOSDevices({ Duration timeout }) async {
-    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 1));
+    final List<dynamic> allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
       return const <IOSDevice>[];
@@ -355,7 +377,8 @@ class XCDevice {
         artifacts: globals.artifacts,
         fileSystem: globals.fs,
         logger: globals.logger,
-        iosDeploy: globals.iosDeploy,
+        iosDeploy: _iosDeploy,
+        iMobileDevice: _iMobileDevice,
         platform: globals.platform,
       ));
     }
@@ -506,7 +529,7 @@ class XCDevice {
   Future<List<String>> getDiagnostics() async {
     final List<dynamic> allAvailableDevices = await _getAllDevices(
       useCache: true,
-      timeout: const Duration(seconds: 1)
+      timeout: const Duration(seconds: 2)
     );
 
     if (allAvailableDevices == null) {

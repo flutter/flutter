@@ -51,6 +51,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     usesDartDefineOption();
     addSplitDebugInfoOption();
     addDartObfuscationOption();
+    usesExtraFrontendOptions();
     argParser
       ..addFlag('debug',
         negatable: true,

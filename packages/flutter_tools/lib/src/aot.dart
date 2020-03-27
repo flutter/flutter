@@ -1,3 +1,4 @@
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -30,7 +31,7 @@ class AotBuilder {
     bool bitcode = kBitcodeEnabledDefault,
     bool quiet = true,
     Iterable<DarwinArch> iosBuildArchs = defaultIOSArchs,
-    bool reportTimings,
+    bool reportTimings = false,
   }) async {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
@@ -101,7 +102,7 @@ class AotBuilder {
       logger: globals.logger,
       processManager: globals.processManager,
     );
-    final BuildResult result = await buildSystem.build(target, environment);
+    final BuildResult result = await globals.buildSystem.build(target, environment);
     status?.stop();
 
     if (!result.success) {

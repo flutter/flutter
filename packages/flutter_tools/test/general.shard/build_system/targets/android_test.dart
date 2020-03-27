@@ -37,6 +37,8 @@ void main() {
       },
       processManager: fakeProcessManager,
       artifacts: MockArtifacts(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     environment.buildDir.createSync(recursive: true);
 
@@ -65,6 +67,8 @@ void main() {
       },
       artifacts: MockArtifacts(),
       processManager: fakeProcessManager,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     environment.buildDir.createSync(recursive: true);
 
@@ -86,6 +90,8 @@ void main() {
       },
       artifacts: MockArtifacts(),
       processManager: fakeProcessManager,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     environment.buildDir.createSync(recursive: true);
 
@@ -108,6 +114,8 @@ void main() {
       },
       artifacts: MockArtifacts(),
       processManager: FakeProcessManager.list(<FakeCommand>[]),
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     fakeProcessManager.addCommand(FakeCommand(command: <String>[
         globals.fs.path.absolute(globals.fs.path.join('android-arm64-release', 'linux-x64', 'gen_snapshot')),
@@ -145,6 +153,8 @@ void main() {
       },
       processManager: fakeProcessManager,
       artifacts: MockArtifacts(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     fakeProcessManager.addCommand(
       FakeCommand(command: <String>[
@@ -179,6 +189,8 @@ void main() {
       },
       processManager: fakeProcessManager,
       artifacts: MockArtifacts(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     environment.buildDir.createSync(recursive: true);
     const AndroidAot androidAot = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
