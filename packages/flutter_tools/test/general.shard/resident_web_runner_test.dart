@@ -497,7 +497,7 @@ void main() {
       kind: 'Stdout',
       bytes: base64.encode(utf8.encode('    This is a message with 4 leading and trailing spaces    '))),
     );
-    // Wait one event look for the stream listener to fire.
+    // Wait one event loop for the stream listener to fire.
     await null;
 
     expect(testLogger.statusText,
