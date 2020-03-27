@@ -77,11 +77,6 @@ void main() {
   });
 
   group('isAppInstalled', () {
-    BufferLogger logger;
-    setUp(() {
-      logger = BufferLogger.test();
-    });
-
     testWithoutContext('catches ProcessException from ios-deploy', () async {
       final IOSApp iosApp = PrebuiltIOSApp(projectBundleId: 'app');
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -149,6 +144,7 @@ void main() {
           ...kDyLdLibEntry,
         }, exitCode: 255)
       ]);
+      final BufferLogger logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
@@ -176,6 +172,7 @@ void main() {
         }, stderr: stderr,
           exitCode: 253)
       ]);
+      final BufferLogger logger = BufferLogger.test();
       final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger);
       final bool isAppInstalled = await device.isAppInstalled(iosApp);
 
@@ -241,7 +238,7 @@ IOSDevice setUpIOSDevice({
   FileSystem fileSystem,
   Logger logger,
 }) {
-  logger = logger ?? BufferLogger.test();
+  logger ??= BufferLogger.test();
   final FakePlatform platform = FakePlatform(
     operatingSystem: 'macos',
     environment: <String, String>{},
