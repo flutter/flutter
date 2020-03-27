@@ -30,6 +30,7 @@ import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
 import 'web/chrome.dart';
@@ -42,6 +43,7 @@ Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Usage get flutterUsage => context.get<Usage>();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
 
 const FileSystem _kLocalFs = LocalFileSystem();
 

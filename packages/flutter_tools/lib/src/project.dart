@@ -11,7 +11,6 @@ import 'package:yaml/yaml.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
@@ -23,8 +22,6 @@ import 'ios/xcodeproj.dart' as xcode;
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'template.dart';
-
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
 
 class FlutterProjectFactory {
   FlutterProjectFactory();
@@ -69,7 +66,7 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromDirectory(Directory directory) => projectFactory.fromDirectory(directory);
+  static FlutterProject fromDirectory(Directory directory) => globals.projectFactory.fromDirectory(directory);
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -144,6 +141,9 @@ class FlutterProject {
 
   /// The `.packages` file of this project.
   File get packagesFile => directory.childFile('.packages');
+
+  /// The `.metadata` file of this project.
+  File get metadataFile => directory.childFile('.metadata');
 
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
