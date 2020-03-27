@@ -2339,10 +2339,9 @@ void main() {
               items: menuItems.map<DropdownMenuItem<String>>((String item) {
                 currentIndex += 1;
                 return DropdownMenuItem<String>(
-                  key: ValueKey<String>(item),
                   value: item,
                   onTap: onTapCallbacks[currentIndex],
-                  child: Text(item, key: ValueKey<String>(item + 'Text')),
+                  child: Text(item),
                 );
               }).toList(),
             ),
@@ -2351,20 +2350,13 @@ void main() {
       ),
     );
 
-    // Counters should initialize to zero.
-    menuItemTapCounters.map((int counter) {
-      expect(counter, 0);
-    });
-
     // Tap dropdown button.
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
 
     expect(value, equals('one'));
     // Counters should still be zero.
-    menuItemTapCounters.map((int counter) {
-      expect(counter, 0);
-    });
+    expect(menuItemTapCounters, <int>[0, 0, 0, 0]);
 
     // Tap dropdown menu item.
     await tester.tap(find.text('three').last);
@@ -2372,10 +2364,7 @@ void main() {
 
     // Should update the counter for the third item (second index).
     expect(value, equals('three'));
-    expect(menuItemTapCounters[0], 0);
-    expect(menuItemTapCounters[1], 0);
-    expect(menuItemTapCounters[2], 1);
-    expect(menuItemTapCounters[3], 0);
+    expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown button again.
     await tester.tap(find.text('three'));
@@ -2383,10 +2372,7 @@ void main() {
 
     // Should not change.
     expect(value, equals('three'));
-    expect(menuItemTapCounters[0], 0);
-    expect(menuItemTapCounters[1], 0);
-    expect(menuItemTapCounters[2], 1);
-    expect(menuItemTapCounters[3], 0);
+    expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
 
     // Tap dropdown menu item.
     await tester.tap(find.text('two').last);
@@ -2394,10 +2380,7 @@ void main() {
 
     // Should update the counter for the second item (first index).
     expect(value, equals('two'));
-    expect(menuItemTapCounters[0], 0);
-    expect(menuItemTapCounters[1], 1);
-    expect(menuItemTapCounters[2], 1);
-    expect(menuItemTapCounters[3], 0);
+    expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap dropdown button again.
     await tester.tap(find.text('two'));
@@ -2405,10 +2388,7 @@ void main() {
 
     // Should not change.
     expect(value, equals('two'));
-    expect(menuItemTapCounters[0], 0);
-    expect(menuItemTapCounters[1], 1);
-    expect(menuItemTapCounters[2], 1);
-    expect(menuItemTapCounters[3], 0);
+    expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
 
     // Tap the already selected menu item
     await tester.tap(find.text('two').last);
@@ -2417,9 +2397,6 @@ void main() {
     // Should update the counter for the second item (first index), even
     // though it was already selected.
     expect(value, equals('two'));
-    expect(menuItemTapCounters[0], 0);
-    expect(menuItemTapCounters[1], 2);
-    expect(menuItemTapCounters[2], 1);
-    expect(menuItemTapCounters[3], 0);
+    expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
   });
 }
