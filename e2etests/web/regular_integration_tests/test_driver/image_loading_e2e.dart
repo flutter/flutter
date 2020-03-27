@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:regular_integration_tests/image_loading_main.dart' as app;
 

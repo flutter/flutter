@@ -13,7 +13,7 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  e2e: 0.2.4+4
+  e2e: 0.4.0
   http: 0.12.0+2
   test: any
 
