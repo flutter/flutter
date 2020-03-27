@@ -616,6 +616,7 @@ class SurfacePathMetricIterator implements Iterator<ui.PathMetric> {
 
   SurfacePathMetric _pathMetric;
   _SurfacePathMeasure _pathMeasure;
+  bool _firstTime = true;
 
   @override
   SurfacePathMetric get current => _pathMetric;

@@ -22,7 +22,7 @@ Future<void> main() async {
             chunkCallback: (int loaded, int total) {
         buffer.write('$loaded/$total,');
       });
-      await codec.getNextFrame();
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
       expect(buffer.toString(), '0/100,100/100,');
     });
   });

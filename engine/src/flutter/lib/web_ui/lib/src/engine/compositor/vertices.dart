@@ -116,7 +116,7 @@ class SkVertices implements ui.Vertices {
     }
   }
 
-  static js.JsArray<js.JsArray<double>> _encodePoints(List<double> points) {
+  static _encodePoints(List<double> points) {
     if (points == null) return null;
 
     js.JsArray<js.JsArray<double>> encodedPoints =

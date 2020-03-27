@@ -866,6 +866,14 @@ class TextBox {
     this.direction,
   );
 
+  TextBox._(
+    this.left,
+    this.top,
+    this.right,
+    this.bottom,
+    int directionIndex,
+  ) : direction = TextDirection.values[directionIndex];
+
   /// The left edge of the text box, irrespective of direction.
   ///
   /// To get the leading edge (which may depend on the [direction]), consider [start].
