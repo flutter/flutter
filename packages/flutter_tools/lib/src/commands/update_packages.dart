@@ -277,7 +277,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First, we create a synthetic flutter SDK so that transitive flutter SDK
-        // constraints are not effected by this upgrade.
+        // constraints are not affected by this upgrade.
         final Directory temporaryFlutterSdk = createTemporaryFlutterSdk(
           globals.fs,
           globals.fs.directory(Cache.flutterRoot),
