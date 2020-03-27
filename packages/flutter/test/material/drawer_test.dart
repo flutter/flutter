@@ -166,4 +166,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Drawer), findsNothing);
   });
+
+  testWidgets('Open/close drawers by flinging', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(
+            child: Container(
+              child: const Text('start drawer'),
+            ),
+          ),
+          endDrawer: Drawer(
+            child: Container(
+              child: const Text('end drawer'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // In the beginning, drawers are closed
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
+    final Size size = tester.getSize(find.byType(Scaffold));
+
+    // A fling from the left opens the start drawer
+    await tester.flingFrom(Offset(0, size.height / 2), const Offset(80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(true));
+    expect(state.isEndDrawerOpen, equals(false));
+
+    // Now, a fling from the right closes the drawer
+    await tester.flingFrom(Offset(size.width - 1, size.height / 2), const Offset(-80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
+
+    // Another fling from the right opens the end drawer
+    await tester.flingFrom(Offset(size.width - 1, size.height / 2), const Offset(-80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(true));
+
+    // And a fling from the left closes it
+    await tester.flingFrom( Offset(0, size.height / 2), const Offset(80, 0), 500);
+    await tester.pumpAndSettle();
+    expect(state.isDrawerOpen, equals(false));
+    expect(state.isEndDrawerOpen, equals(false));
+  });
 }

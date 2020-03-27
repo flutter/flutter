@@ -63,7 +63,11 @@ abstract class DesktopDevice extends Device {
   Future<String> get sdkNameAndVersion async => globals.os.name;
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
   }
 
@@ -114,14 +118,20 @@ abstract class DesktopDevice extends Device {
     );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      onAttached(package, buildMode, process);
-      return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      if (observatoryUri != null) {
+        onAttached(package, buildMode, process);
+        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      }
+      globals.printError(
+        'Error waiting for a debug connection: '
+        'The log reader stopped unexpectedly.',
+      );
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
-      return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();
     }
+    return LaunchResult.failed();
   }
 
   @override

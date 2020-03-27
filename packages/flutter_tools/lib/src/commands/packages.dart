@@ -26,6 +26,7 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
     addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
+    addSubcommand(PackagesForwardCommand('outdated', 'Analyze dependencies to find which ones can be upgraded', requiresPubspec: true));
     addSubcommand(PackagesPassthroughCommand());
   }
 

@@ -8,14 +8,29 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'media_query.dart';
+import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';
+
+/// A representation of how a [ScrollView] should dismiss the on-screen
+/// keyboard.
+enum ScrollViewKeyboardDismissBehavior {
+  /// `manual` means there is no automatic dimissal of the on-screen keyboard.
+  /// It is up to the client to dismiss the keyboard.
+  manual,
+  /// `onDrag` means that the [ScrollView] will dismiss an on-screen keyboard
+  /// when a drag begins.
+  onDrag,
+}
 
 /// A widget that scrolls.
 ///
@@ -70,6 +85,7 @@ abstract class ScrollView extends StatelessWidget {
     this.cacheExtent,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(shrinkWrap != null),
@@ -232,6 +248,10 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// [ScrollViewKeyboardDismissBehavior] the defines how this [ScrollView] will
+  /// dismiss the keyboard automatically.
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -297,9 +317,8 @@ abstract class ScrollView extends StatelessWidget {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
-    final ScrollController scrollController = primary
-      ? PrimaryScrollController.of(context)
-      : controller;
+    final ScrollController scrollController =
+        primary ? PrimaryScrollController.of(context) : controller;
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
       axisDirection: axisDirection,
@@ -310,9 +329,24 @@ abstract class ScrollView extends StatelessWidget {
         return buildViewport(context, offset, axisDirection, slivers);
       },
     );
-    return primary && scrollController != null
-      ? PrimaryScrollController.none(child: scrollable)
-      : scrollable;
+    final Widget scrollableResult = primary && scrollController != null
+        ? PrimaryScrollController.none(child: scrollable)
+        : scrollable;
+
+    if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
+      return NotificationListener<ScrollUpdateNotification>(
+        child: scrollableResult,
+        onNotification: (ScrollUpdateNotification notification) {
+          final FocusScopeNode focusScope = FocusScope.of(context);
+          if (notification.dragDetails != null && focusScope.hasFocus) {
+            focusScope.unfocus();
+          }
+          return false;
+        },
+      );
+    } else {
+      return scrollableResult;
+    }
   }
 
   @override
@@ -504,6 +538,7 @@ abstract class BoxScrollView extends ScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -515,6 +550,7 @@ abstract class BoxScrollView extends ScrollView {
     cacheExtent: cacheExtent,
     semanticChildCount: semanticChildCount,
     dragStartBehavior: dragStartBehavior,
+    keyboardDismissBehavior: keyboardDismissBehavior,
   );
 
   /// The amount of space by which to inset the children.
@@ -877,6 +913,7 @@ class ListView extends BoxScrollView {
     List<Widget> children = const <Widget>[],
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -895,6 +932,7 @@ class ListView extends BoxScrollView {
          cacheExtent: cacheExtent,
          semanticChildCount: semanticChildCount ?? children.length,
          dragStartBehavior: dragStartBehavior,
+         keyboardDismissBehavior: keyboardDismissBehavior,
        );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.
@@ -1031,6 +1069,7 @@ class ListView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
     double cacheExtent,
+    ScrollViewKeyboardDismissBehavior keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(itemBuilder != null),
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
@@ -1071,6 +1110,7 @@ class ListView extends BoxScrollView {
          padding: padding,
          cacheExtent: cacheExtent,
          semanticChildCount: itemCount,
+         keyboardDismissBehavior: keyboardDismissBehavior,
        );
 
   /// Creates a scrollable, linear array of widgets with a custom child model.

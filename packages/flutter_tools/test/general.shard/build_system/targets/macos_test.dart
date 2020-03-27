@@ -5,12 +5,10 @@
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
@@ -49,7 +47,6 @@ void main() {
   Testbed testbed;
   Environment environment;
   MockPlatform mockPlatform;
-  MockXcode mockXcode;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -57,7 +54,6 @@ void main() {
   });
 
   setUp(() {
-    mockXcode = MockXcode();
     mockPlatform = MockPlatform();
     when(mockPlatform.isWindows).thenReturn(false);
     when(mockPlatform.isMacOS).thenReturn(true);
@@ -193,39 +189,9 @@ void main() {
 
     expect(outputFramework.readAsStringSync(), 'DEF');
   }));
-
-  test('release/profile macOS compilation uses correct gen_snapshot', () => testbed.run(() async {
-    when(genSnapshot.run(
-      snapshotType: anyNamed('snapshotType'),
-      additionalArgs: anyNamed('additionalArgs'),
-      darwinArch: anyNamed('darwinArch'),
-    )).thenAnswer((Invocation invocation) {
-      environment.buildDir.childFile('snapshot_assembly.o').createSync();
-      environment.buildDir.childFile('snapshot_assembly.S').createSync();
-      return Future<int>.value(0);
-    });
-    when(mockXcode.cc(any)).thenAnswer((Invocation invocation) {
-      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
-    });
-    when(mockXcode.clang(any)).thenAnswer((Invocation invocation) {
-      return Future<RunResult>.value(RunResult(FakeProcessResult()..exitCode = 0, <String>['test']));
-    });
-    environment.buildDir.childFile('app.dill').createSync(recursive: true);
-    globals.fs.file('.packages')
-      ..createSync()
-      ..writeAsStringSync('''
-# Generated
-sky_engine:file:///bin/cache/pkg/sky_engine/lib/
-flutter_tools:lib/''');
-    await const CompileMacOSFramework().build(environment..defines[kBuildMode] = 'release');
-  }, overrides: <Type, Generator>{
-    GenSnapshot: () => MockGenSnapshot(),
-    Xcode: () => mockXcode,
-  }));
 }
 
 class MockPlatform extends Mock implements Platform {}
-class MockCocoaPods extends Mock implements CocoaPods {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}

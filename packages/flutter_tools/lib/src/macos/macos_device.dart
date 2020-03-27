@@ -78,7 +78,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

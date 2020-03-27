@@ -9,6 +9,51 @@ import 'package:flutter/material.dart';
 
 import 'states.dart';
 
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+}
+
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+}
+
+Widget textFieldBoilerplate({ Widget child }) {
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -50,6 +95,68 @@ void main() {
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
+  });
+
+  testWidgets('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: ListView(
+      padding: const EdgeInsets.all(0),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      children: focusNodes.map((FocusNode focusNode) {
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )),
+        );
+      }).toList(),
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+
+    await tester.pumpWidget(textFieldBoilerplate(
+        child: ListView(
+      padding: const EdgeInsets.all(0),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+      children: focusNodes.map((FocusNode focusNode) {
+        return Container(
+          height: 50,
+          color: Colors.green,
+          child: TextField(
+              focusNode: focusNode,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              )),
+        );
+      }).toList(),
+    )));
+
+    final Finder finder = find.byType(TextField).first;
+    final TextField textField = tester.widget(finder);
+    await tester.showKeyboard(finder);
+    expect(textField.focusNode.hasFocus, isTrue);
+
+    await tester.drag(finder, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+    expect(textField.focusNode.hasFocus, isTrue);
   });
 
   testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {

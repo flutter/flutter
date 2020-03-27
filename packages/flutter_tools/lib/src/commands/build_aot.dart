@@ -14,12 +14,13 @@ import 'build.dart';
 
 /// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
+  BuildAotCommand({this.aotBuilder}) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
     usesDartDefineOption();
+    usesExtraFrontendOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -27,20 +28,11 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: <String>['android-arm', 'android-arm64', 'ios', 'android-x64'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('report-timings',
-        negatable: false,
-        defaultsTo: false,
-        help: 'Report timing information about build steps in machine readable form,',
-      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
         defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
-      )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
@@ -50,11 +42,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
-      );
-    // --track-widget-creation is exposed as a flag here to deal with build
-    // invalidation issues, but it is ignored -- there are no plans to support
-    // it for AOT mode.
-    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
+      )
+      ..addFlag('report-timings', hide: true);
   }
 
   AotBuilder aotBuilder;
@@ -84,8 +73,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       mainDartFile: findMainDartFile(targetFile),
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
-      reportTimings: boolArg('report-timings'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
+      reportTimings: boolArg('report-timings'),
     );
     return FlutterCommandResult.success();
   }

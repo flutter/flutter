@@ -64,6 +64,15 @@ void main() {
       expect(device, isA<FlutterTesterDevice>());
       expect(device.id, 'flutter-tester');
     });
+
+    testUsingContext('discoverDevices', () async {
+      FlutterTesterDevices.showFlutterTesterDevice = true;
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
+
+      // Timeout ignored.
+      final List<Device> devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
+      expect(devices, hasLength(1));
+    });
   });
 
   group('FlutterTesterDevice', () {

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -169,7 +170,7 @@ class UrlLauncherPlugin {}
 
     // Process calls. We're not testing that these invocations are correct because
     // that is covered in targets/web_test.dart.
-    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       return BuildResult(success: true);
     });
     await runner.run(<String>['build', 'web']);

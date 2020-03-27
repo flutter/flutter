@@ -139,14 +139,14 @@ class FlutterCommandRunner extends CommandRunner<void> {
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
   @override
   String get usageFooter {
     return wrapText('Run "flutter help -v" for verbose help output, including less commonly used options.',
-      columnWidth: outputPreferences.wrapColumn,
-      shouldWrap: outputPreferences.wrapText,
+      columnWidth: globals.outputPreferences.wrapColumn,
+      shouldWrap: globals.outputPreferences.wrapText,
     );
   }
 
@@ -154,8 +154,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
     final String prefix = wrapText(description,
-      shouldWrap: outputPreferences.wrapText,
-      columnWidth: outputPreferences.wrapColumn,
+      shouldWrap: globals.outputPreferences.wrapText,
+      columnWidth: globals.outputPreferences.wrapColumn,
     );
     return '$prefix\n\n$usageWithoutDescription';
   }
@@ -281,7 +281,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final String enginePath = _findEnginePath(topLevelResults);
     if (enginePath != null) {
       contextOverrides.addAll(<Type, dynamic>{
-        Artifacts: Artifacts.getLocalEngine(enginePath, _findEngineBuildPath(topLevelResults, enginePath)),
+        Artifacts: Artifacts.getLocalEngine(_findEngineBuildPath(topLevelResults, enginePath)),
       });
     }
 
@@ -354,7 +354,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        Uri engineUri = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).map[kFlutterEnginePackageName];
         // Skip if sky_engine is the self-contained one.
         if (engineUri != null && globals.fs.identicalSync(globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib'), engineUri.path)) {
           engineUri = null;
@@ -491,7 +491,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (globals.fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = PackageMap(kPackagesFileName);
+      final PackageMap packageMap = PackageMap(kPackagesFileName, fileSystem: globals.fs);
       Uri flutterUri;
       try {
         flutterUri = packageMap.map['flutter'];

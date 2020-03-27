@@ -40,7 +40,6 @@
 // dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 // ```
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -480,7 +479,7 @@ String generateGetter(String key, String value, Map<String, dynamic> attributes,
   $type get $key => $value;''';
 }
 
-Future<void> main(List<String> rawArgs) async {
+void main(List<String> rawArgs) {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
 
@@ -499,7 +498,7 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  await precacheLanguageAndRegionTags();
+  precacheLanguageAndRegionTags();
 
   // Maps of locales to resource key/value pairs for Material ARBs.
   final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};

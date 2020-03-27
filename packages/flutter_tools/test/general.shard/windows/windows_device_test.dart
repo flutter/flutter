@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
@@ -15,14 +16,18 @@ import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   group(WindowsDevice, () {
     final WindowsDevice device = WindowsDevice();
-    final MockPlatform notWindows = MockPlatform();
 
+    final MockPlatform notWindows = MockPlatform();
     when(notWindows.isWindows).thenReturn(false);
     when(notWindows.environment).thenReturn(const <String, String>{});
+
+    final MockPlatform mockWindowsPlatform = MockPlatform();
+    when(mockWindowsPlatform.isWindows).thenReturn(true);
 
     testUsingContext('defaults', () async {
       final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
@@ -39,6 +44,22 @@ void main() {
       expect(await WindowsDevices().devices, <Device>[]);
     }, overrides: <Type, Generator>{
       Platform: () => notWindows,
+    });
+
+    testUsingContext('WindowsDevices: devices', () async {
+      expect(await WindowsDevices().devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockWindowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    });
+
+    testUsingContext('WindowsDevices: discoverDevices', () async {
+      // Timeout ignored.
+      final List<Device> devices = await WindowsDevices().discoverDevices(timeout: const Duration(seconds: 10));
+      expect(devices, hasLength(1));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockWindowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     });
 
     testUsingContext('isSupportedForProject is true with editable host app', () async {

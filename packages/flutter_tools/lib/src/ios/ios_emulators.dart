@@ -8,7 +8,6 @@ import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
-import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
@@ -16,7 +15,7 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => iosWorkflow.canListEmulators;
+  bool get canListAnything => globals.iosWorkflow.canListEmulators;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();

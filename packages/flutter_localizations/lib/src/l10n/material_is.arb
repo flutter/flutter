@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Stækka",
   "remainingTextFieldCharacterCountOne": "1 stafur eftir",
   "remainingTextFieldCharacterCountOther": "$remainingCount stafir eftir",
-  "refreshIndicatorSemanticLabel": "Endurnýja"
+  "refreshIndicatorSemanticLabel": "Endurnýja",
+  "moreButtonTooltip": "TBD"
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -917,5 +918,120 @@ void main() {
     tableRow = table.children.first;
     boxDecoration = tableRow.decoration as BoxDecoration;
     expect(boxDecoration.border.bottom.width, thickness);
+  });
+
+  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
+    Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Expanded(child: Center(child: Text('Name'))),
+            tooltip: 'Name',
+            onSort: sortEnabled ? (_, __) {} : null,
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('A long desert name')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    // Start with without sorting
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+
+    // Turn on sorting
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: true,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsOneWidget);
+    }
+
+    // Turn off sorting again
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+  });
+
+  testWidgets('DataTable correctly renders with a mouse', (WidgetTester tester) async {
+    // Regression test for a bug described in
+    // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
+    // Filed at https://github.com/flutter/flutter/issues/51152
+    Widget buildTable({ int sortColumnIndex }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Expanded(child: Center(child: Text('column1'))),
+            tooltip: 'Column1',
+          ),
+          DataColumn(
+            label: const Expanded(child: Center(child: Text('column2'))),
+            tooltip: 'Column2',
+            onSort: (_, __) {},
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Content1')),
+              DataCell(Text('Content2')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    expect(tester.renderObject(find.text('column1')).attached, true);
+    expect(tester.renderObject(find.text('column2')).attached, true);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpAndSettle();
+    expect(tester.renderObject(find.text('column1')).attached, true);
+    expect(tester.renderObject(find.text('column2')).attached, true);
+
+    // Wait for the tooltip timer to expire to prevent it scheduling a new frame
+    // after the view is destroyed, which causes exceptions.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 }

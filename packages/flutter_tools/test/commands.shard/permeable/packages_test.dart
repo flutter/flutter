@@ -520,5 +520,18 @@ void main() {
       BotDetector: () => const AlwaysTrueBotDetector(),
       Pub: () => const Pub(),
     });
+
+    testUsingContext('outdated', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'outdated']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'outdated');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
+    });
   });
 }

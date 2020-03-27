@@ -59,7 +59,7 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
-  }, skip: isBrowser);
+  });
 
   test('ShapeDecoration with BorderDirectional', () {
     const ShapeDecoration decoration = ShapeDecoration(

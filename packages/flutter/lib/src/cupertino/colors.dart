@@ -675,7 +675,7 @@ class CupertinoColors {
 ///  * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
 ///    and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
-class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Diagnosticable {
+class CupertinoDynamicColor extends Color with Diagnosticable {
   /// Creates an adaptive [Color] that changes its effective color based on the
   /// [BuildContext] given. The default effective color is [color].
   ///

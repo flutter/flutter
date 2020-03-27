@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:html' as html;
 
+import 'package:macrobenchmarks/src/web/bench_text_layout.dart';
 import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 
 import 'src/web/bench_build_material_checkbox.dart';
@@ -17,6 +18,8 @@ import 'src/web/recorder.dart';
 
 typedef RecorderFactory = Recorder Function();
 
+const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
+
 /// List of all benchmarks that run in the devicelab.
 ///
 /// When adding a new benchmark, add it to this map. Make sure that the name
@@ -27,6 +30,14 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
+
+  // Benchmarks that we don't want to run using CanvasKit.
+  if (!isCanvasKit) ...<String, RecorderFactory>{
+    BenchTextLayout.domBenchmarkName: () => BenchTextLayout(useCanvas: false),
+    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
+    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
+    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
+  }
 };
 
 /// Whether we fell back to manual mode.

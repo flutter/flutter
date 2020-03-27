@@ -261,7 +261,7 @@ void main() {
       'foo': Uri.parse('file:///foo/lib/'),
       'bar': Uri.parse('file:///bar/lib/'),
       'fizz': Uri.parse('file:///fizz/lib/'),
-    });
+    }, fileSystem: fileSystem);
 
     final LicenseResult result = licenseCollector.obtainLicenses(packageMap);
 

@@ -636,6 +636,15 @@ void testInMemory(String description, Future<void> testMethod()) {
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);
+  // Set up enough of the packages to satisfy the templating code.
+  final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childFile('.packages');
+  final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
+  dummyTemplateImagesDirectory.createSync(recursive: true);
+  packagesFile.createSync(recursive: true);
+  packagesFile.writeAsStringSync('flutter_template_images:${dummyTemplateImagesDirectory.uri}');
 
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
 

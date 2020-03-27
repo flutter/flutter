@@ -459,7 +459,7 @@ class AppDomain extends Domain {
     String isolateFilter,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
-      throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
+      throw Exception('${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.');
     }
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = globals.fs.currentDirectory;
@@ -587,7 +587,9 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        globals.fs.currentDirectory = cwd;
+        // If the full directory is used instead of the path then this causes
+        // a TypeError with the ErrorHandlingFileSystem.
+        globals.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
