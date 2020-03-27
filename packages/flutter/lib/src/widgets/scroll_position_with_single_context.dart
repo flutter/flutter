@@ -197,7 +197,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
-      forcePixels(value);
+      correctPixels(value);
       notifyListeners();
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
@@ -212,7 +212,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
-      forcePixels(value);
+      correctPixels(value);
       notifyListeners();
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
