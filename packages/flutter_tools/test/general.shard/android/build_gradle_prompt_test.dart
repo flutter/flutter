@@ -19,7 +19,7 @@ import 'package:mockito/mockito.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform linuxPlatform = FakePlatform(
+const Platform kLinuxPlatform = FakePlatform(
   operatingSystem: 'linux',
   environment: <String, String>{},
 );
@@ -136,7 +136,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.2-all.zip
     ProcessManager: () => FakeProcessManager.any(),
     AndroidSdk: () => MockAndroidSdk(),
     Cache: () => cache,
-    Platform: () => linuxPlatform,
+    Platform: () => kLinuxPlatform,
   });
 }
 
