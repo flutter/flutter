@@ -49,11 +49,13 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
   XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
   XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
+  attachment.name = @"new_golden";
   attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
   [self addAttachment:attachment];
 
   if (golden.image) {
     XCTAttachment* goldenAttachment = [XCTAttachment attachmentWithImage:golden.image];
+    attachment.name = @"current_golden";
     goldenAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
     [self addAttachment:goldenAttachment];
   } else {
