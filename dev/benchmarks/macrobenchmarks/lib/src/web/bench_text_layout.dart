@@ -5,8 +5,9 @@
 import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:math';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'recorder.dart';
@@ -29,18 +30,18 @@ class ParagraphGenerator {
 
   /// Randomizes the given [text] and creates a paragraph with a unique
   /// font-size so that the engine doesn't reuse a cached ruler.
-  Paragraph generate(
+  ui.Paragraph generate(
     String text, {
     int maxLines,
     bool hasEllipsis = false,
   }) {
-    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
       fontFamily: 'sans-serif',
       maxLines: maxLines,
       ellipsis: hasEllipsis ? '...' : null,
     ))
       // Start from a font-size of 8.0 and go up by 0.01 each time.
-      ..pushStyle(TextStyle(fontSize: 8.0 + _counter * 0.01))
+      ..pushStyle(ui.TextStyle(fontSize: 8.0 + _counter * 0.01))
       ..addText(_randomize(text));
     _counter++;
     return builder.build();
@@ -55,6 +56,11 @@ void _useCanvasText(bool useCanvasText) {
     '_flutter_internal_update_experiment',
     <dynamic>['useCanvasText', useCanvasText],
   );
+}
+
+typedef OnBenchmark = void Function(String name, num value);
+void _onBenchmark(OnBenchmark listener) {
+  js_util.setProperty(html.window, '_flutter_internal_on_benchmark', listener);
 }
 
 /// Repeatedly lays out a paragraph using the DOM measurement approach.
@@ -119,13 +125,13 @@ class BenchTextLayout extends RawRecorder {
 
   void recordParagraphOperations({
     @required Profile profile,
-    @required Paragraph paragraph,
+    @required ui.Paragraph paragraph,
     @required String text,
     @required String keyPrefix,
     @required double maxWidth,
   }) {
     profile.record('$keyPrefix.layout', () {
-      paragraph.layout(ParagraphConstraints(width: maxWidth));
+      paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     });
     profile.record('$keyPrefix.getBoxesForRange', () {
       for (int start = 0; start < text.length; start += 3) {
@@ -159,9 +165,9 @@ class BenchTextCachedLayout extends RawRecorder {
   /// Whether to use the new canvas-based text measurement implementation.
   final bool useCanvas;
 
-  final ParagraphBuilder builder =
-      ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
-        ..pushStyle(TextStyle(fontSize: 12.0))
+  final ui.ParagraphBuilder builder =
+      ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
+        ..pushStyle(ui.TextStyle(fontSize: 12.0))
         ..addText(
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
           'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
@@ -170,10 +176,292 @@ class BenchTextCachedLayout extends RawRecorder {
   @override
   void body(Profile profile) {
     _useCanvasText(useCanvas);
-    final Paragraph paragraph = builder.build();
+    final ui.Paragraph paragraph = builder.build();
     profile.record('layout', () {
-      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+      paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     });
     _useCanvasText(null);
+  }
+}
+
+/// Global counter incremented every time the benchmark is asked to
+/// [createWidget].
+///
+/// The purpose of this counter is to make sure the rendered paragraphs on each
+/// build are unique.
+int _counter = 0;
+
+/// Measures how expensive it is to construct material checkboxes.
+///
+/// Creates a 10x10 grid of tristate checkboxes.
+class BenchBuildColorsGrid extends WidgetBuildRecorder {
+  BenchBuildColorsGrid({@required this.useCanvas})
+      : super(name: useCanvas ? canvasBenchmarkName : domBenchmarkName);
+
+  static const String domBenchmarkName = 'text_dom_color_grid';
+  static const String canvasBenchmarkName = 'text_canvas_color_grid';
+
+  /// Whether to use the new canvas-based text measurement implementation.
+  final bool useCanvas;
+
+  num _textLayoutMicros = 0;
+
+  @override
+  void setUpAll() {
+    _useCanvasText(useCanvas);
+    _onBenchmark((String name, num value) {
+      _textLayoutMicros += value;
+    });
+  }
+
+  @override
+  void tearDownAll() {
+    _useCanvasText(null);
+    _onBenchmark(null);
+  }
+
+  @override
+  void frameWillDraw() {
+    super.frameWillDraw();
+    _textLayoutMicros = 0;
+  }
+
+  @override
+  void frameDidDraw() {
+    // We need to do this before calling [super.frameDidDraw] because the latter
+    // updates the value of [showWidget] in preparation for the next frame.
+    if (showWidget) {
+      profile.addDataPoint(
+        'text_layout',
+        Duration(microseconds: _textLayoutMicros.toInt()),
+      );
+    }
+    super.frameDidDraw();
+  }
+
+  @override
+  Widget createWidget() {
+    _counter++;
+    return MaterialApp(home: ColorsDemo());
+  }
+}
+
+// The code below was copied from `colors_demo.dart` in the `flutter_gallery`
+// example.
+
+const double kColorItemHeight = 48.0;
+
+class Palette {
+  Palette({this.name, this.primary, this.accent, this.threshold = 900});
+
+  final String name;
+  final MaterialColor primary;
+  final MaterialAccentColor accent;
+  final int
+      threshold; // titles for indices > threshold are white, otherwise black
+
+  bool get isValid => name != null && primary != null && threshold != null;
+}
+
+final List<Palette> allPalettes = <Palette>[
+  Palette(
+      name: 'RED',
+      primary: Colors.red,
+      accent: Colors.redAccent,
+      threshold: 300),
+  Palette(
+      name: 'PINK',
+      primary: Colors.pink,
+      accent: Colors.pinkAccent,
+      threshold: 200),
+  Palette(
+      name: 'PURPLE',
+      primary: Colors.purple,
+      accent: Colors.purpleAccent,
+      threshold: 200),
+  Palette(
+      name: 'DEEP PURPLE',
+      primary: Colors.deepPurple,
+      accent: Colors.deepPurpleAccent,
+      threshold: 200),
+  Palette(
+      name: 'INDIGO',
+      primary: Colors.indigo,
+      accent: Colors.indigoAccent,
+      threshold: 200),
+  Palette(
+      name: 'BLUE',
+      primary: Colors.blue,
+      accent: Colors.blueAccent,
+      threshold: 400),
+  Palette(
+      name: 'LIGHT BLUE',
+      primary: Colors.lightBlue,
+      accent: Colors.lightBlueAccent,
+      threshold: 500),
+  Palette(
+      name: 'CYAN',
+      primary: Colors.cyan,
+      accent: Colors.cyanAccent,
+      threshold: 600),
+  Palette(
+      name: 'TEAL',
+      primary: Colors.teal,
+      accent: Colors.tealAccent,
+      threshold: 400),
+  Palette(
+      name: 'GREEN',
+      primary: Colors.green,
+      accent: Colors.greenAccent,
+      threshold: 500),
+  Palette(
+      name: 'LIGHT GREEN',
+      primary: Colors.lightGreen,
+      accent: Colors.lightGreenAccent,
+      threshold: 600),
+  Palette(
+      name: 'LIME',
+      primary: Colors.lime,
+      accent: Colors.limeAccent,
+      threshold: 800),
+  Palette(name: 'YELLOW', primary: Colors.yellow, accent: Colors.yellowAccent),
+  Palette(name: 'AMBER', primary: Colors.amber, accent: Colors.amberAccent),
+  Palette(
+      name: 'ORANGE',
+      primary: Colors.orange,
+      accent: Colors.orangeAccent,
+      threshold: 700),
+  Palette(
+      name: 'DEEP ORANGE',
+      primary: Colors.deepOrange,
+      accent: Colors.deepOrangeAccent,
+      threshold: 400),
+  Palette(name: 'BROWN', primary: Colors.brown, threshold: 200),
+  Palette(name: 'GREY', primary: Colors.grey, threshold: 500),
+  Palette(name: 'BLUE GREY', primary: Colors.blueGrey, threshold: 500),
+];
+
+class ColorItem extends StatelessWidget {
+  const ColorItem({
+    Key key,
+    @required this.index,
+    @required this.color,
+    this.prefix = '',
+  })  : assert(index != null),
+        assert(color != null),
+        assert(prefix != null),
+        super(key: key);
+
+  final int index;
+  final Color color;
+  final String prefix;
+
+  String colorString() =>
+      "$_counter:#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}";
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      child: Container(
+        height: kColorItemHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        color: color,
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text('$_counter:$prefix$index'),
+              Text(colorString()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PaletteTabView extends StatelessWidget {
+  PaletteTabView({
+    Key key,
+    @required this.colors,
+  })  : assert(colors != null && colors.isValid),
+        super(key: key);
+
+  final Palette colors;
+
+  static const List<int> primaryKeys = <int>[
+    50,
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700,
+    800,
+    900
+  ];
+  static const List<int> accentKeys = <int>[100, 200, 400, 700];
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final TextStyle whiteTextStyle =
+        textTheme.bodyText2.copyWith(color: Colors.white);
+    final TextStyle blackTextStyle =
+        textTheme.bodyText2.copyWith(color: Colors.black);
+    return Scrollbar(
+      child: ListView(
+        itemExtent: kColorItemHeight,
+        children: <Widget>[
+          ...primaryKeys.map<Widget>((int index) {
+            return DefaultTextStyle(
+              style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+              child: ColorItem(index: index, color: colors.primary[index]),
+            );
+          }),
+          if (colors.accent != null)
+            ...accentKeys.map<Widget>((int index) {
+              return DefaultTextStyle(
+                style:
+                    index > colors.threshold ? whiteTextStyle : blackTextStyle,
+                child: ColorItem(
+                    index: index, color: colors.accent[index], prefix: 'A'),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+}
+
+class ColorsDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: allPalettes.length,
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0.0,
+          title: const Text('Colors'),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: allPalettes
+                .map<Widget>(
+                    (Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
+                .toList(),
+          ),
+        ),
+        body: TabBarView(
+          children: allPalettes.map<Widget>((Palette colors) {
+            return PaletteTabView(colors: colors);
+          }).toList(),
+        ),
+      ),
+    );
   }
 }
