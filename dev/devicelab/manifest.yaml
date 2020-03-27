@@ -456,6 +456,13 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
+  flutter_gallery_ios32__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      32-bit iOS (iPhone 4S).
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios32"]
+
   flavors_test_ios:
     description: >
       Checks that flavored builds work on iPhone 6.
