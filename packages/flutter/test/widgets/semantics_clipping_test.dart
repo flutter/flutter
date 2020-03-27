@@ -63,7 +63,7 @@ void main() {
     ));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -124,5 +124,5 @@ void main() {
     ));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 }

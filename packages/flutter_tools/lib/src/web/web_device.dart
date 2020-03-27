@@ -60,7 +60,10 @@ class ChromeDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
@@ -80,7 +83,7 @@ class ChromeDevice extends Device {
   Future<String> get emulatorId async => null;
 
   @override
-  bool isSupported() =>  featureFlags.isWebEnabled && chromeLauncher.canFindChrome();
+  bool isSupported() =>  featureFlags.isWebEnabled && globals.chromeLauncher.canFindChrome();
 
   @override
   String get name => 'Chrome';
@@ -109,7 +112,7 @@ class ChromeDevice extends Device {
         }
       }
     } else {
-      final String chrome = findChromeExecutable();
+      final String chrome = findChromeExecutable(globals.platform, globals.fs);
       final ProcessResult result = await globals.processManager.run(<String>[
         chrome,
         '--version',
@@ -134,14 +137,20 @@ class ChromeDevice extends Device {
     // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
     // for the web initialization and server logic.
     final String url = platformArgs['uri'] as String;
-    _chrome = await chromeLauncher.launch(url,
-      dataDir: globals.fs.currentDirectory
-        .childDirectory('.dart_tool')
-        .childDirectory('chrome-device'));
+    final bool launchChrome = platformArgs['no-launch-chrome'] != true;
+    if (launchChrome) {
+      _chrome = await globals.chromeLauncher.launch(
+        url,
+        cacheDir: globals.fs.currentDirectory
+            .childDirectory('.dart_tool')
+            .childDirectory('chrome-device'),
+        headless: debuggingOptions.webRunHeadless,
+        debugPort: debuggingOptions.webBrowserDebugPort,
+      );
+    }
 
-    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
-
-    return LaunchResult.succeeded(observatoryUri: null);
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': launchChrome});
+    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
   @override
@@ -171,7 +180,7 @@ class ChromeDevice extends Device {
 class WebDevices extends PollingDeviceDiscovery {
   WebDevices() : super('chrome');
 
-  final bool _chromeIsAvailable = chromeLauncher.canFindChrome();
+  final bool _chromeIsAvailable = globals.chromeLauncher.canFindChrome();
   final ChromeDevice _webDevice = ChromeDevice();
   final WebServerDevice _webServerDevice = WebServerDevice();
 
@@ -179,7 +188,7 @@ class WebDevices extends PollingDeviceDiscovery {
   bool get canListAnything => featureFlags.isWebEnabled;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return <Device>[
       if (_chromeIsAvailable)
         _webDevice,
@@ -215,7 +224,10 @@ class WebServerDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
@@ -264,7 +276,7 @@ class WebServerDevice extends Device {
       globals.printStatus('$mainPath is being served at $url', emphasis: true);
     }
     globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
-    return LaunchResult.succeeded(observatoryUri: null);
+    return LaunchResult.succeeded(observatoryUri: url != null ? Uri.parse(url): null);
   }
 
   @override

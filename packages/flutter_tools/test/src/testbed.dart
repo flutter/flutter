@@ -648,6 +648,9 @@ class FakeHttpHeaders extends HttpHeaders {
 
 class FakeFlutterVersion implements FlutterVersion {
   @override
+  void fetchTagsAndUpdate() {  }
+
+  @override
   String get channel => 'master';
 
   @override
@@ -841,7 +844,7 @@ class FakeCache implements Cache {
   String get storageBaseUrl => null;
 
   @override
-  MapEntry<String, String> get dyLdLibEntry => null;
+  MapEntry<String, String> get dyLdLibEntry => const MapEntry<String, String>('DYLD_LIBRARY_PATH', '');
 
   @override
   String get engineRevision => null;

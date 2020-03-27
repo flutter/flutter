@@ -965,6 +965,36 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
+  testWidgets('AppBar in body excludes bottom SafeArea padding', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/26163
+    await tester.pumpWidget(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.symmetric(vertical: 100.0)),
+          child: Scaffold(
+            primary: true,
+            body: Column(
+              children: <Widget>[
+                AppBar(
+                  title: const Text('title'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+  });
+
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1383,6 +1413,120 @@ void main() {
                           TestSemantics(
                             label: 'Bottom',
                             textDirection: TextDirection.rtl,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('AppBar excludes header semantics correctly', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            leading: const Text('Leading'),
+            title: const ExcludeSemantics(child: Text('Title')),
+            excludeHeaderSemantics: true,
+            actions: const <Widget>[
+              Text('Action 1'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        label: 'Leading',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      TestSemantics(
+                        label: 'Action 1',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverAppBar excludes header semantics correctly', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: Text('Leading'),
+              flexibleSpace: ExcludeSemantics(child: Text('Title')),
+              actions: <Widget>[Text('Action 1')],
+              excludeHeaderSemantics: true,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    children: <TestSemantics>[
+                      TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                label: 'Leading',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                label: 'Action 1',
+                                textDirection: TextDirection.ltr,
+                              ),
+                            ],
                           ),
                         ],
                       ),

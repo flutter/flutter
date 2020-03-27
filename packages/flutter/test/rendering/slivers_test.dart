@@ -921,6 +921,36 @@ void main() {
       mainAxisPositions.clear();
       crossAxisPositions.clear();
     });
+
+    test('addWithAxisOffset with non zero paintOffset', () {
+      final SliverHitTestResult result = SliverHitTestResult();
+      double recordedMainAxisPosition;
+      double recordedCrossAxisPosition;
+      final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
+      const Offset paintOffset = Offset(7, 11);
+
+      final bool isHit = result.addWithAxisOffset(
+        paintOffset: paintOffset,
+        mainAxisOffset: 5.0,
+        crossAxisOffset: 6.0,
+        mainAxisPosition: 10.0,
+        crossAxisPosition: 20.0,
+        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
+          expect(result, isNotNull);
+          recordedMainAxisPosition = mainAxisPosition;
+          recordedCrossAxisPosition = crossAxisPosition;
+          result.add(entry);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(recordedMainAxisPosition, 10.0 - 5.0);
+      expect(recordedCrossAxisPosition, 20.0 - 6.0);
+      expect(
+        entry.transform..translate(paintOffset.dx, paintOffset.dy),
+        Matrix4.identity(),
+      );
+    });
   });
 
   test('SliverConstraints check for NaN on all double properties', () {

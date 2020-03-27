@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,8 +15,10 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/build_runner/mustache_template.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -35,6 +38,7 @@ import 'package:mockito/mockito.dart';
 
 import 'common.dart';
 import 'fake_process_manager.dart';
+import 'mocks.dart';
 import 'throwing_pub.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
@@ -116,7 +120,7 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(
             terminal: globals.terminal,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
           ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
@@ -129,6 +133,7 @@ void testUsingContext(
           Signals: () => FakeSignals(),
           Pub: () => ThrowingPub(), // prevent accidentally using pub.
           GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
+          TemplateRenderer: () => const MustacheTemplateRenderer(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -148,11 +153,12 @@ void testUsingContext(
                   return await testMethod();
                 },
               );
-            } catch (error) {
+            // This catch rethrows, so doesn't need to catch only Exception.
+            } catch (error) { // ignore: avoid_catches_without_on_clauses
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (dynamic error, StackTrace stackTrace) {
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
             io.stdout.writeln(error);
             io.stdout.writeln(stackTrace);
             _printBufferedErrors(context);
@@ -160,6 +166,15 @@ void testUsingContext(
           });
         },
       );
+    }, overrides: <Type, Generator>{
+      // This has to go here so that runInContext will pick it up when it tries
+      // to do bot detection before running the closure.  This is important
+      // because the test may be giving us a fake HttpClientFactory, which may
+      // throw in unexpected/abnormal ways.
+      // If a test needs a BotDetector that does not always return true, it
+      // can provide the AlwaysFalseBotDetector in the overrides, or its own
+      // BotDetector implementation in the overrides.
+      BotDetector: overrides[BotDetector] ?? () => const AlwaysTrueBotDetector(),
     });
   }, testOn: testOn, skip: skip);
 }
@@ -201,16 +216,18 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
+  Future<List<Device>> getAllConnectedDevices() async => devices;
 
   @override
-  Stream<Device> getDevicesById(String deviceId) {
-    return Stream<Device>.fromIterable(
-        devices.where((Device device) => device.id == deviceId));
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
+
+  @override
+  Future<List<Device>> getDevicesById(String deviceId) async {
+    return devices.where((Device device) => device.id == deviceId).toList();
   }
 
   @override
-  Stream<Device> getDevices() {
+  Future<List<Device>> getDevices() {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId)
         : getAllConnectedDevices();
@@ -384,7 +401,8 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  void cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
+    return null;
   }
 
   @override

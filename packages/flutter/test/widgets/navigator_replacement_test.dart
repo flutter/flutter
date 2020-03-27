@@ -187,6 +187,13 @@ void main() {
     testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            },
+          ),
+        ),
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) => const Material(child: Hero(

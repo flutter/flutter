@@ -87,53 +87,48 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// progress indicator and the image will be fading out while a new progress
 /// indicator is fading in.)
 ///
-/// {@tool snippet}
+/// The type of transition can be changed from a cross-fade to a custom
+/// transition by setting the [transitionBuilder].
+///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This sample shows a counter that animates the scale of a text widget
+/// whenever the value changes.
 ///
 /// ```dart
-/// class ClickCounter extends StatefulWidget {
-///   const ClickCounter({Key key}) : super(key: key);
+/// int _count = 0;
 ///
-///   @override
-///   _ClickCounterState createState() => _ClickCounterState();
-/// }
-///
-/// class _ClickCounterState extends State<ClickCounter> {
-///   int _count = 0;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp(
-///       home: Material(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             AnimatedSwitcher(
-///               duration: const Duration(milliseconds: 500),
-///               transitionBuilder: (Widget child, Animation<double> animation) {
-///                 return ScaleTransition(child: child, scale: animation);
-///               },
-///               child: Text(
-///                 '$_count',
-///                 // This key causes the AnimatedSwitcher to interpret this as a "new"
-///                 // child each time the count changes, so that it will begin its animation
-///                 // when the count changes.
-///                 key: ValueKey<int>(_count),
-///                 style: Theme.of(context).textTheme.headline4,
-///               ),
-///             ),
-///             RaisedButton(
-///               child: const Text('Increment'),
-///               onPressed: () {
-///                 setState(() {
-///                   _count += 1;
-///                 });
-///               },
-///             ),
-///           ],
+/// @override
+/// Widget build(BuildContext context) {
+///   return Container(
+///     color: Colors.white,
+///     child: Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         AnimatedSwitcher(
+///           duration: const Duration(milliseconds: 500),
+///           transitionBuilder: (Widget child, Animation<double> animation) {
+///             return ScaleTransition(child: child, scale: animation);
+///           },
+///           child: Text(
+///             '$_count',
+///             // This key causes the AnimatedSwitcher to interpret this as a "new"
+///             // child each time the count changes, so that it will begin its animation
+///             // when the count changes.
+///             key: ValueKey<int>(_count),
+///             style: Theme.of(context).textTheme.headline4,
+///           ),
 ///         ),
-///       ),
-///     );
-///   }
+///         RaisedButton(
+///           child: const Text('Increment'),
+///           onPressed: () {
+///             setState(() {
+///               _count += 1;
+///             });
+///           },
+///         ),
+///       ],
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}

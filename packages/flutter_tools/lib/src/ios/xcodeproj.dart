@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -19,6 +18,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -172,11 +172,21 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
   }
 
+  // This is an optional path to obfuscate and output a mapping.
+  if (buildInfo.dartObfuscation) {
+    xcodeBuildSettings.add('DART_OBFUSCATION=true');
+  }
+
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
 
   if (setSymroot) {
     xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+  }
+
+  // iOS does not link on Flutter in any build phase. Add the linker flag.
+  if (!useMacOSConfig) {
+    xcodeBuildSettings.add('OTHER_LDFLAGS=\$(inherited) -framework Flutter');
   }
 
   if (!project.isModule) {
@@ -225,10 +235,16 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
   }
 
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
+  }
+
+  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('EXTRA_FRONT_END_OPTIONS=${buildInfo.extraFrontEndOptions.join(',')}');
+  }
+
   return xcodeBuildSettings;
 }
-
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -237,7 +253,7 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _terminal = terminal,
@@ -247,7 +263,7 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final Logger _logger;
 
   static const String _executable = '/usr/bin/xcodebuild';
@@ -339,7 +355,7 @@ class XcodeProjectInterpreter {
       );
       final String out = result.stdout.trim();
       return parseXcodeBuildSettings(out);
-    } catch(error) {
+    } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),
@@ -352,14 +368,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  void cleanWorkspace(String workspacePath, String scheme) {
-    _processUtils.runSync(<String>[
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
+    await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);

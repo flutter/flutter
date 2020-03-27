@@ -548,7 +548,9 @@ class _MaterialScrollBehavior extends ScrollBehavior {
     // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:

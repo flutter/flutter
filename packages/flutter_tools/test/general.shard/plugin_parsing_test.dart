@@ -158,6 +158,16 @@ void main() {
       expect(plugin.platforms, <String, PluginPlatform> {});
     });
 
+    test('error on empty plugin', () {
+      const String pluginYamlRaw = '';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+            () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: 'Invalid "plugin" specification.'),
+      );
+    });
+
     test('error on empty platforms', () {
       const String pluginYamlRaw = 'platforms:\n';
 

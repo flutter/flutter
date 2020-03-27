@@ -498,9 +498,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'usbmuxd',
       'libplist',
       'openssl',
-      'ideviceinstaller',
       'ios-deploy',
-      'libzip',
     ].map((String packageName) => path.join(getArtifactPath(), packageName)).join(':');
     return <String, String>{'DYLD_LIBRARY_PATH': libPath};
   }

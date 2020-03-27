@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -35,9 +36,13 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockIosProject extends Mock implements IosProject {}
 
 void main() {
+  BufferLogger logger;
+
+  setUp(() {
+    logger = BufferLogger.test();
+  });
+
   group('IMobileDevice', () {
-    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
-      ..operatingSystem = 'macos';
     final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
@@ -63,7 +68,7 @@ void main() {
         when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
-      testUsingContext('error if idevicescreenshot is not installed', () async {
+      testWithoutContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
 
         // Let `idevicescreenshot` fail with exit code 1.
@@ -72,27 +77,33 @@ void main() {
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
-        expect(() async => await globals.iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-        Cache: () => mockCache,
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       });
 
-      testUsingContext('idevicescreenshot captures and returns screenshot', () async {
+      testWithoutContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
-        await globals.iMobileDevice.takeScreenshot(mockOutputFile);
+        final IMobileDevice iMobileDevice = IMobileDevice(
+          artifacts: mockArtifacts,
+          cache: mockCache,
+          processManager: mockProcessManager,
+          logger: logger,
+        );
+
+        await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Cache: () => mockCache,
-        Artifacts: () => mockArtifacts,
       });
     });
   });
@@ -286,6 +297,80 @@ Could not build the precompiled application for the device.''',
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('embedded and linked framework iOS simulator mismatch shows message', () async {
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '''
+Launching lib/main.dart on iPhone in debug mode...
+Automatically signing iOS for device deployment using specified development team in Xcode project: blah
+Xcode build done. 5.7s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+** BUILD FAILED **
+Xcode's output:
+↳
+note: Using new build system
+note: Building targets in parallel
+note: Planning build
+note: Constructing build description
+error: Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator. (in target 'Runner' from project 'Runner')
+Could not build the precompiled application for the device.
+
+Error launching application on iPhone.
+Exited (sigterm)''',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      expect(
+        testLogger.errorText,
+        contains('Your Xcode project requires migration.'),
+      );
+    }, overrides: noColorTerminalOverride);
   });
 
   group('Upgrades project.pbxproj for old asset usage', () {
@@ -306,7 +391,7 @@ Could not build the precompiled application for the device.''',
       'another line',
     ];
 
-    testUsingContext('upgradePbxProjWithFlutterAssets', () async {
+    testWithoutContext('upgradePbxProjWithFlutterAssets', () async {
       final MockIosProject project = MockIosProject();
       final MockFile pbxprojFile = MockFile();
 
@@ -317,30 +402,30 @@ Could not build the precompiled application for the device.''',
       when(pbxprojFile.existsSync())
           .thenAnswer((_) => true);
 
-      bool result = upgradePbxProjWithFlutterAssets(project);
+      bool result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to flutter_assets'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => appFlxPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('Removing obsolete reference to app.flx'),
       );
-      testLogger.clear();
+      logger.clear();
 
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => cleanPbxProjLines);
-      result = upgradePbxProjWithFlutterAssets(project);
+      result = upgradePbxProjWithFlutterAssets(project, logger);
       expect(result, true);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         isEmpty,
       );
     });

@@ -136,6 +136,7 @@ Future<void> main(List<String> arguments) async {
     '--link-to-source-root', '../..',
     '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
     '--inject-html',
+    '--use-base-href',
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',
@@ -274,7 +275,8 @@ void createFooter(String footerPath, String version) {
   File('${footerPath}footer.html').writeAsStringSync('<script src="footer.js"></script>');
   File('$kPublishRoot/api/footer.js')
     ..createSync(recursive: true)
-    ..writeAsStringSync('''(function() {
+    ..writeAsStringSync('''
+(function() {
   var span = document.querySelector('footer>span');
   if (span) {
     span.innerText = 'Flutter $version • $timestamp • ${gitRevision()} $gitBranchOut';

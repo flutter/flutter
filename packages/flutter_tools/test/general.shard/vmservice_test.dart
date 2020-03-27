@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -33,13 +34,11 @@ class MockPeer implements rpc.Peer {
   }
 
   @override
-  bool get isClosed {
-    throw 'unexpected call to isClosed';
-  }
+  bool get isClosed => _isClosed;
 
   @override
   Future<dynamic> close() async {
-    throw 'unexpected call to close()';
+    _isClosed = true;
   }
 
   @override
@@ -70,6 +69,7 @@ class MockPeer implements rpc.Peer {
   List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
+  bool _isClosed = false;
 
   Future<void> _getVMLatch;
   Completer<void> _currentGetVMLatchCompleter;
@@ -213,6 +213,14 @@ void main() {
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
+    testUsingContext('closing VMService closes Peer', () async {
+      final MockPeer mockPeer = MockPeer();
+      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+      expect(mockPeer.isClosed, equals(false));
+      await vmService.close();
+      expect(mockPeer.isClosed, equals(true));
+    });
+
     testUsingContext('refreshViews', () {
       FakeAsync().run((FakeAsync time) {
         bool done = false;
@@ -284,7 +292,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),
@@ -304,7 +312,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),
@@ -325,7 +333,7 @@ void main() {
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(
-        outputPreferences: outputPreferences,
+        outputPreferences: globals.outputPreferences,
         terminal: AnsiTerminal(
           stdio: mockStdio,
           platform: const LocalPlatform(),

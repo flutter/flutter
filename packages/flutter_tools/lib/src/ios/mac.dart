@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -22,54 +24,56 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
+import 'migrations/ios_migrator.dart';
+import 'migrations/remove_framework_link_and_embedding_migration.dart';
+import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
 
 class IMobileDevice {
-  IMobileDevice()
-      : _idevicesyslogPath = globals.artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
-        _idevicescreenshotPath = globals.artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios);
+  IMobileDevice({
+    @required Artifacts artifacts,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Logger logger,
+  }) : _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios),
+      _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios),
+      _dyLdLibEntry = cache.dyLdLibEntry,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _processManager = processManager;
 
   final String _idevicesyslogPath;
   final String _idevicescreenshotPath;
+  final MapEntry<String, String> _dyLdLibEntry;
+  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
 
-  bool get isInstalled {
-    _isInstalled ??= processUtils.exitsHappySync(
-      <String>[
-        _idevicescreenshotPath,
-        '-h',
-      ],
-      environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
-      ),
-    );
-    return _isInstalled;
-  }
+  bool get isInstalled => _isInstalled ??= _processManager.canRun(_idevicescreenshotPath);
   bool _isInstalled;
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return processUtils.start(
+    return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
       ],
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_dyLdLibEntry]
       ),
     );
   }
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return processUtils.run(
+    return _processUtils.run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
       ],
       throwOnError: true,
       environment: Map<String, String>.fromEntries(
-        <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
+        <MapEntry<String, String>>[_dyLdLibEntry]
       ),
     );
   }
@@ -83,7 +87,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch activeArch,
   bool codesign = true,
 }) async {
-  if (!upgradePbxProjWithFlutterAssets(app.project)) {
+  if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
+    return XcodeBuildResult(success: false);
+  }
+
+  final List<IOSMigrator> migrators = <IOSMigrator>[
+    RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
+    XcodeBuildSystemMigration(app.project, globals.logger),
+  ];
+
+  final IOSMigration migration = IOSMigration(migrators);
+  if (!migration.run()) {
     return XcodeBuildResult(success: false);
   }
 
@@ -91,8 +105,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-
-  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     globals.printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     globals.printError('Open Xcode to fix the problem:');
@@ -159,7 +172,11 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice) {
-    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(
+      iosApp: app,
+      processManager: globals.processManager,
+      logger: globals.logger
+    );
   }
 
   final FlutterProject project = FlutterProject.current();
@@ -291,7 +308,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + getElapsedAsSeconds(sw.elapsed).padLeft(5),
   );
-  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the
   // build. showBuildSettings is reported to ocassionally timeout. Here, we give
@@ -430,16 +447,6 @@ return result.exitCode != 0 &&
     result.stdout.contains('there are two concurrent builds running');
 }
 
-String readGeneratedXcconfig(String appPath) {
-  final String generatedXcconfigPath =
-      globals.fs.path.join(globals.fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
-  final File generatedXcconfigFile = globals.fs.file(generatedXcconfigPath);
-  if (!generatedXcconfigFile.existsSync()) {
-    return null;
-  }
-  return generatedXcconfigFile.readAsStringSync();
-}
-
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
@@ -448,6 +455,20 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
     ).send();
+  }
+
+  // Building for iOS Simulator, but the linked and embedded framework 'App.framework' was built for iOS.
+  // or
+  // Building for iOS, but the linked and embedded framework 'App.framework' was built for iOS Simulator.
+  if (result.stdout?.contains('Building for iOS') == true
+      && result.stdout?.contains('but the linked and embedded framework') == true
+      && result.stdout?.contains('was built for iOS') == true) {
+    globals.printError('');
+    globals.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+    globals.printError('');
+    globals.printError('You can temporarily work around this issue by running:');
+    globals.printError('  rm -rf ios/Flutter/App.framework');
+    return;
   }
 
   if (result.xcodeBuildExecution != null &&
@@ -529,18 +550,19 @@ bool _checkXcodeVersion() {
   if (!globals.platform.isMacOS) {
     return false;
   }
-  if (!xcodeProjectInterpreter.isInstalled) {
+  if (!globals.xcodeProjectInterpreter.isInstalled) {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   if (!globals.xcode.isVersionSatisfactory) {
-    globals.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
+    globals.printError('Found "${globals.xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }
   return true;
 }
 
-bool upgradePbxProjWithFlutterAssets(IosProject project) {
+// TODO(jmagman): Refactor to IOSMigrator.
+bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(xcodeProjectFile.existsSync());
   final List<String> lines = xcodeProjectFile.readAsLinesSync();
@@ -553,7 +575,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1))) {
-        globals.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+        logger.printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
       }
     } else {
       buffer.writeln(line);

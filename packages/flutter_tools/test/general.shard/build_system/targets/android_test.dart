@@ -22,6 +22,10 @@ void main() {
     Platform: () => FakePlatform(operatingSystem: 'linux', environment: const <String, String>{}),
   });
 
+  test('Android AOT targets has analyicsName', () {
+    expect(androidArmProfile.analyticsName, 'android_aot');
+  });
+
   testbed.test('debug bundle contains expected resources', () async {
     final Environment environment = Environment.test(
       globals.fs.currentDirectory,
@@ -34,7 +38,7 @@ void main() {
 
     // create pre-requisites.
     environment.buildDir.childFile('app.dill')
-      ..writeAsStringSync('abcd');
+      .writeAsStringSync('abcd');
     final Directory hostDirectory = globals.fs.currentDirectory
       .childDirectory(getNameForHostPlatform(getCurrentHostPlatform()))
       ..createSync(recursive: true);
@@ -61,7 +65,7 @@ void main() {
 
     // create pre-requisites.
     environment.buildDir.childFile('app.so')
-      ..writeAsStringSync('abcd');
+      .writeAsStringSync('abcd');
 
     await const ProfileAndroidApplication().build(environment);
 
@@ -80,7 +84,7 @@ void main() {
 
     // create pre-requisites.
     environment.buildDir.childFile('app.so')
-      ..writeAsStringSync('abcd');
+      .writeAsStringSync('abcd');
 
     await const ReleaseAndroidApplication().build(environment);
 

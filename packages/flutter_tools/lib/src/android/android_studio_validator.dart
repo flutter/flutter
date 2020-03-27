@@ -90,7 +90,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
         userMessages.androidStudioMissing(cfgAndroidStudio),
       ));
     }
-    messages.add(ValidationMessage(userMessages.androidStudioInstallation));
+    messages.add(ValidationMessage(userMessages.androidStudioInstallation(globals.platform)));
 
     return ValidationResult(
       ValidationType.notAvailable,

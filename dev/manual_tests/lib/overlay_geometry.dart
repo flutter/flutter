@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -206,17 +204,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   }
 }
 
-// Sets a platform override for desktop to avoid exceptions. See
-// https://flutter.dev/desktop#target-platform-override for more info.
-// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
-void _enablePlatformOverrideForDesktop() {
-  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
-}
-
 void main() {
-  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     theme: ThemeData(
       brightness: Brightness.light,

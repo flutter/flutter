@@ -25,7 +25,7 @@ typedef ActionFactory = Action Function();
 ///
 /// If this intent returns false from [isEnabled], then its associated action will
 /// not be invoked if requested.
-class Intent extends Diagnosticable {
+class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
   ///
   /// The [key] argument must not be null.
@@ -73,7 +73,7 @@ class Intent extends Diagnosticable {
 ///    and allows redefining of actions for its descendants.
 ///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
-abstract class Action extends Diagnosticable {
+abstract class Action with Diagnosticable {
   /// A const constructor for an [Action].
   ///
   /// The [intentKey] parameter must not be null.
@@ -140,7 +140,7 @@ class CallbackAction extends Action {
 }
 
 /// An action manager that simply invokes the actions given to it.
-class ActionDispatcher extends Diagnosticable {
+class ActionDispatcher with Diagnosticable {
   /// Const constructor so that subclasses can be const.
   const ActionDispatcher();
 
@@ -374,12 +374,14 @@ class Actions extends InheritedWidget {
 /// {@tool dartpad --template=stateful_widget_material}
 /// This example shows how keyboard interaction can be added to a custom control
 /// that changes color when hovered and focused, and can toggle a light when
-/// activated, either by touch or by hitting the `X` key on the keyboard.
+/// activated, either by touch or by hitting the `X` key on the keyboard when
+/// the "And Me" button has the keyboard focus (be sure to use TAB to move the
+/// focus to the "And Me" button before trying it out).
 ///
 /// This example defines its own key binding for the `X` key, but in this case,
 /// there is also a default key binding for [ActivateAction] in the default key
 /// bindings created by [WidgetsApp] (the parent for [MaterialApp], and
-/// [CupertinoApp]), so the `ENTER` key will also activate the control.
+/// [CupertinoApp]), so the `ENTER` key will also activate the buttons.
 ///
 /// ```dart imports
 /// import 'package:flutter/services.dart';

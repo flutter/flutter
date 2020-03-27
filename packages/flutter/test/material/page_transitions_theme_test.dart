@@ -47,7 +47,7 @@ void main() {
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Default PageTranstionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
+  testWidgets('Default PageTransitionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(

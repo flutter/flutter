@@ -15,11 +15,11 @@ statement in front of the call to the first\.
 
 When the first method was called, this was the stack:
 <<skip until matching line>>
-(elided [0-9]+ frames from .+)
+(elided ([0-9]+|one) frames? from .+)
 
 When the exception was thrown, this was the stack:
 <<skip until matching line>>
-(elided [0-9]+ frames from .+)
+(elided ([0-9]+|one) frames? from .+)
 
 The test description was:
 TestAsyncUtils - handling unguarded async helper functions

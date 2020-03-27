@@ -525,7 +525,7 @@ class SliverConstraints extends Constraints {
 /// A sliver can occupy space in several different ways, which is why this class
 /// contains multiple values.
 @immutable
-class SliverGeometry extends Diagnosticable {
+class SliverGeometry with Diagnosticable {
   /// Creates an object that describes the amount of space occupied by a sliver.
   ///
   /// If the [layoutExtent] argument is null, [layoutExtent] defaults to the
@@ -859,7 +859,7 @@ class SliverHitTestResult extends HitTestResult {
     assert(crossAxisPosition != null);
     assert(hitTest != null);
     if (paintOffset != null) {
-      pushTransform(Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0));
+      pushTransform(Matrix4.translationValues(-paintOffset.dx, -paintOffset.dy, 0));
     }
     final bool isHit = hitTest(
       this,
@@ -928,13 +928,16 @@ class SliverLogicalParentData extends ParentData {
   ///
   /// The number of pixels from from the zero scroll offset of the parent sliver
   /// (the line at which its [SliverConstraints.scrollOffset] is zero) to the
-  /// side of the child closest to that offset.
+  /// side of the child closest to that offset. A [layoutOffset] can be null
+  /// when it cannot be determined. The value will be set after layout.
   ///
   /// In a typical list, this does not change as the parent is scrolled.
-  double layoutOffset = 0.0;
+  ///
+  /// Defaults to null.
+  double layoutOffset;
 
   @override
-  String toString() => 'layoutOffset=${layoutOffset.toStringAsFixed(1)}';
+  String toString() => 'layoutOffset=${layoutOffset == null ? 'None': layoutOffset.toStringAsFixed(1)}';
 }
 
 /// Parent data for slivers that have multiple children and that position their
@@ -1813,6 +1816,7 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
       geometry = SliverGeometry.zero;
       return;
     }
+    final SliverConstraints constraints = this.constraints;
     child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
     double childExtent;
     switch (constraints.axis) {

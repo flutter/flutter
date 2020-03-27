@@ -2,16 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/context.dart';
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+
+import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
-
-VisualStudio get visualStudio => context.get<VisualStudio>();
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
+  VisualStudio({
+    @required FileSystem fileSystem,
+    @required ProcessManager processManager,
+    @required Platform platform,
+    @required Logger logger,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final ProcessUtils _processUtils;
+
   /// True if Visual Studio installation was found.
   ///
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
@@ -107,7 +122,7 @@ class VisualStudio {
     if (details.isEmpty) {
       return null;
     }
-    return globals.fs.path.join(
+    return _fileSystem.path.join(
       _usableVisualStudioDetails[_installationPathKey] as String,
       'VC',
       'Auxiliary',
@@ -125,8 +140,8 @@ class VisualStudio {
   /// present then there isn't a new enough installation of VS. This path is
   /// not user-controllable, unlike the install location of Visual Studio
   /// itself.
-  final String _vswherePath = globals.fs.path.join(
-    globals.platform.environment['PROGRAMFILES(X86)'],
+  String get _vswherePath => _fileSystem.path.join(
+    _platform.environment['PROGRAMFILES(X86)'],
     'Microsoft Visual Studio',
     'Installer',
     'vswhere.exe',
@@ -215,7 +230,7 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
-      final RunResult whereResult = processUtils.runSync(<String>[
+      final RunResult whereResult = _processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,

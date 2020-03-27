@@ -27,8 +27,18 @@ abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 
   @override
+  String get analyticsName => 'ios_aot';
+
+  @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      xcode: globals.xcode,
+      artifacts: globals.artifacts,
+      processManager: globals.processManager,
+    );
     final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
@@ -36,10 +46,13 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
+    final List<String> extraGenSnapshotOptions = environment
+      .defines[kExtraGenSnapshotOptions]?.split(',') ?? const <String>[];
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
+    final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final List<DarwinArch> iosArchs = environment.defines[kIosArchs]
       ?.split(' ')
       ?.map(getIOSArchForName)
@@ -63,6 +76,8 @@ abstract class AotAssemblyBase extends Target {
         bitcode: bitcode,
         quiet: true,
         splitDebugInfo: splitDebugInfo,
+        dartObfuscation: dartObfuscation,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -284,7 +299,15 @@ abstract class IosAssetBundle extends Target {
 
     // Copy the assets.
     final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      assetDepfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
 
 
     // Copy the plist from either the project or module.
@@ -366,8 +389,8 @@ class ReleaseIosApplicationBundle extends IosAssetBundle {
 Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool include32Bit = true }) async {
   try {
     outputFile.createSync(recursive: true);
-  } catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+  } on Exception catch (e) {
+    throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
   }
 
   final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
@@ -410,8 +433,8 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk, { bool in
       tempDir.deleteSync(recursive: true);
     } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
-    } catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+    } on Exception catch (e) {
+      throwToolExit('Failed to create App.framework stub at ${outputFile.path}: $e');
     }
   }
 }

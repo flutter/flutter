@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show MouseTrackerAnnotation;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -15,6 +14,7 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'mouse_tracking.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
@@ -255,7 +255,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
+      case TargetPlatform.linux:
       case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.

@@ -402,7 +402,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = PlistParser.instance.getValueFromFile(
+        fromPlist = globals.plistParser.getValueFromFile(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -441,11 +441,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   ///
   /// Returns null, if iOS tooling is unavailable.
   Future<Map<String, String>> get buildSettings async {
-    if (!xcode.xcodeProjectInterpreter.isInstalled) {
+    if (!globals.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
     Map<String, String> buildSettings = _buildSettings;
-    buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+    buildSettings ??= await globals.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       _hostAppBundleName,
     );
@@ -460,7 +460,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   Map<String, String> _buildSettings;
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    _regenerateFromTemplateIfNeeded();
+    await _regenerateFromTemplateIfNeeded();
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
@@ -477,7 +477,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     }
   }
 
-  void _regenerateFromTemplateIfNeeded() {
+  Future<void> _regenerateFromTemplateIfNeeded() async {
     if (!isModule) {
       return;
     }
@@ -491,18 +491,18 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     }
 
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(
+    await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
       ephemeralDirectory,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(
+      await _overwriteFromTemplate(
         globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
         ephemeralDirectory,
       );
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(
+        await _overwriteFromTemplate(
           globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
           ephemeralDirectory,
         );
@@ -542,19 +542,19 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     }
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(
+    await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'library'),
       ephemeralDirectory,
     );
-    _overwriteFromTemplate(
+    await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
       _editableDirectory,
     );
-    _overwriteFromTemplate(
+    await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
       _editableDirectory,
     );
-    _overwriteFromTemplate(
+    await _overwriteFromTemplate(
       globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'),
       _editableDirectory,
     );
@@ -567,6 +567,10 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     .childDirectory('Flutter')
     .childFile('Generated.xcconfig');
 
+  Directory get compiledDartFramework => _flutterLibRoot
+      .childDirectory('Flutter')
+      .childDirectory('App.framework');
+
   Directory get pluginRegistrantHost {
     return isModule
         ? _flutterLibRoot
@@ -575,8 +579,8 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
         : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
-  void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
+  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+    final Template template = await Template.fromName(path, fileSystem: globals.fs);
     template.render(
       target,
       <String, dynamic>{
@@ -675,11 +679,11 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
-      _regenerateLibrary();
+      await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
-        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
+        await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
+        await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -700,10 +704,10 @@ class AndroidProject extends FlutterProjectPlatform {
     if (_editableHostAppDirectory.existsSync()) {
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     }
-    _regenerateLibrary();
-    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    await _regenerateLibrary();
+    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
@@ -713,19 +717,19 @@ class AndroidProject extends FlutterProjectPlatform {
 
   Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
 
-  void _regenerateLibrary() {
+  Future<void> _regenerateLibrary() async {
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(globals.fs.path.join(
+    await _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
       featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+    await _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
-  void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = Template.fromName(path);
+  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+    final Template template = await Template.fromName(path, fileSystem: globals.fs);
     template.render(
       target,
       <String, dynamic>{
@@ -952,6 +956,9 @@ class WindowsProject extends FlutterProjectPlatform {
   /// the build.
   File get generatedPropertySheetFile => ephemeralDirectory.childFile('Generated.props');
 
+  /// Contains configuration to add plugins to the build.
+  File get generatedPluginPropertySheetFile => managedDirectory.childFile('GeneratedPlugins.props');
+
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
@@ -999,6 +1006,9 @@ class LinuxProject extends FlutterProjectPlatform {
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
   File get generatedMakeConfigFile => ephemeralDirectory.childFile('generated_config.mk');
+
+  /// Makefile with rules and variables for plugin builds.
+  File get generatedPluginMakeFile => managedDirectory.childFile('generated_plugins.mk');
 
   /// The directory to write plugin symlinks.
   Directory get pluginSymlinkDirectory => ephemeralDirectory.childDirectory('.plugin_symlinks');

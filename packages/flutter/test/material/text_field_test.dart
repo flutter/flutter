@@ -18,6 +18,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -140,45 +141,6 @@ void main() {
   const String kMoreThanFourLines =
     kThreeLines +
     "\nFourth line won't display and ends at";
-
-  // Returns the first RenderEditable.
-  RenderEditable findRenderEditable(WidgetTester tester) {
-    final RenderObject root = tester.renderObject(find.byType(EditableText));
-    expect(root, isNotNull);
-
-    RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
-      if (child is RenderEditable) {
-        renderEditable = child;
-        return;
-      }
-      child.visitChildren(recursiveFinder);
-    }
-    root.visitChildren(recursiveFinder);
-    expect(renderEditable, isNotNull);
-    return renderEditable;
-  }
-
-  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
-      return TextSelectionPoint(
-        box.localToGlobal(point.point),
-        point.direction,
-      );
-    }).toList();
-  }
-
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
-    final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(
-        TextSelection.collapsed(offset: offset),
-      ),
-      renderEditable,
-    );
-    expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
-  }
 
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -663,7 +625,7 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -681,10 +643,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_cursor_width_test.0.0.png', version: 0),
+      matchesGoldenFile('text_field_cursor_width_test.0.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !isLinux);
+  });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -703,10 +665,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_cursor_width_test.1.0.png', version: 0),
+      matchesGoldenFile('text_field_cursor_width_test.1.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !isLinux);
+  });
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -1125,7 +1087,7 @@ void main() {
       matching: find.byType(Container),
     ));
     expect(container.size, Size.zero);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
@@ -2352,7 +2314,6 @@ void main() {
           controller: controller,
           style: const TextStyle(color: Colors.black, fontSize: 34.0),
           maxLines: 3,
-          strutStyle: StrutStyle.disabled,
         ),
       ),
     );
@@ -3379,6 +3340,30 @@ void main() {
     }
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/35848
+  testWidgets('Clearing text field with suffixIcon does not cause text selection exception', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Prefilled text.',
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: controller.clear,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(IconButton));
+    expect(controller.text, '');
+  });
+
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
     final TextEditingController textController = TextEditingController();
 
@@ -3391,6 +3376,31 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '0123456789101112');
     expect(textController.text, '0123456789');
+  });
+
+  testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/37420.
+    final TextEditingController textController = TextEditingController();
+    const String testValue = '0123456789';
+
+    await tester.pumpWidget(boilerplate(
+      child: TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    // Max out the character limit in the field.
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(textController.text, testValue);
+
+    // Entering more characters at the end does nothing.
+    await tester.enterText(find.byType(TextField), testValue + '9999999');
+    expect(textController.text, testValue);
+
+    // Entering text in the middle of the field also does nothing.
+    await tester.enterText(find.byType(TextField), '0123455555555556789');
+    expect(textController.text, testValue);
   });
 
   testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
@@ -3740,7 +3750,6 @@ void main() {
               child: TextField(
                 controller: controller,
                 maxLines: 3,
-                strutStyle: StrutStyle.disabled,
               ),
             ),
           ),
@@ -5664,7 +5673,7 @@ void main() {
 
       // But don't trigger the toolbar.
       expect(find.byType(FlatButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
     'two slow taps do not trigger a word selection',
@@ -5789,7 +5798,7 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
     'double tap on top of cursor also selects word',
@@ -5838,7 +5847,7 @@ void main() {
 
       // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
     'double double tap just shows the selection menu',
@@ -6120,7 +6129,7 @@ void main() {
 
       // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
       expect(find.byType(FlatButton), findsNWidgets(4));
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets(
     'long press tap cannot initiate a double tap',
@@ -6498,7 +6507,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(find.byType(FlatButton), findsNothing);
-  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia }));
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('force press selects word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -6999,14 +7008,13 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<FadeTransition> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-    // On Android, an empty app contains a single FadeTransition. The following
-    // two are the left and right text selection handles, respectively.
-    expect(transitions.length, 3);
-    final FadeTransition left = transitions[1];
-    final FadeTransition right = transitions[2];
-
+    final List<FadeTransition> transitions = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionHandleOverlay'),
+      matching: find.byType(FadeTransition),
+    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
   });

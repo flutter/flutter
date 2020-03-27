@@ -45,6 +45,11 @@ void main() {
     });
   });
 
+  test('iOS AOT targets has analyicsName', () {
+    expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
+    expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
+  });
+
   test('DebugUniveralFramework creates expected binary with arm64 only arch', () => testbed.run(() async {
     environment.defines[kIosArchs] = 'arm64';
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -111,7 +116,7 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
     // App kernel
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
     // Stub framework
@@ -140,7 +145,7 @@ void main() {
     globals.fs.file('.packages').writeAsStringSync('\n');
     // Plist file
     globals.fs.file(globals.fs.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-      ..createSync(recursive: true);
+      .createSync(recursive: true);
 
     // Real framework
     environment.buildDir

@@ -153,6 +153,12 @@ class CommandHelp {
     'Toggle elevation checker.',
   );
 
+  CommandHelpOption _k;
+  CommandHelpOption get k => _k ??= _makeOption(
+    'k',
+    'Toggle CanvasKit rendering.',
+  );
+
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
   ]) {
@@ -175,7 +181,7 @@ class CommandHelpOption {
     this.description, {
     this.inParenthesis = '',
     @required Logger logger,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required Platform platform,
     @required OutputPreferences outputPreferences,
   }) : _logger = logger,
@@ -185,7 +191,7 @@ class CommandHelpOption {
 
   final Logger _logger;
 
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
 
   final Platform _platform;
 

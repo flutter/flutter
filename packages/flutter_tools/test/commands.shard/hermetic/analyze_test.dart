@@ -5,11 +5,8 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 const String _kFlutterRoot = '/data/flutter';
 
@@ -29,27 +26,39 @@ void main() {
   });
 
   group('analyze', () {
-    testUsingContext('inRepo', () {
+    testWithoutContext('inRepo', () {
+      bool inRepo(List<String> fileList) {
+        if (fileList == null || fileList.isEmpty) {
+          fileList = <String>[fs.path.current];
+        }
+        final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
+        final String prefix = root + fs.path.separator;
+        for (String file in fileList) {
+          file = fs.path.normalize(fs.path.absolute(file));
+          if (file == root || file.startsWith(prefix)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
       // Absolute paths
       expect(inRepo(<String>[tempDir.path]), isFalse);
-      expect(inRepo(<String>[globals.fs.path.join(tempDir.path, 'foo')]), isFalse);
+      expect(inRepo(<String>[fs.path.join(tempDir.path, 'foo')]), isFalse);
       expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
-      expect(inRepo(<String>[globals.fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
+      expect(inRepo(<String>[fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
 
       // Relative paths
-      globals.fs.currentDirectory = Cache.flutterRoot;
+      fs.currentDirectory = Cache.flutterRoot;
       expect(inRepo(<String>['.']), isTrue);
       expect(inRepo(<String>['foo']), isTrue);
-      globals.fs.currentDirectory = tempDir.path;
+      fs.currentDirectory = tempDir.path;
       expect(inRepo(<String>['.']), isFalse);
       expect(inRepo(<String>['foo']), isFalse);
 
       // Ensure no exceptions
       inRepo(null);
       inRepo(<String>[]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

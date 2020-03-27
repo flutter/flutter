@@ -124,7 +124,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      highContrast = false,
+      highContrast = window.accessibilityFeatures.highContrast,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).

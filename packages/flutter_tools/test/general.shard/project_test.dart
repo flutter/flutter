@@ -225,6 +225,20 @@ void main() {
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
         project.windows.managedDirectory.createSync(recursive: true);
+        project.windows.solutionFile.createSync(recursive: true);
+        // Just enough solution file to allow injection to pass.
+        // TODO(stuartmorgan): Consider allowing injecting a mock solution util
+        // class into the test environment instead.
+        project.windows.solutionFile.writeAsStringSync('''
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Runner", "Runner.vcxproj", "{3842E94C-E348-463A-ADBE-625A2B69B628}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6419BF13-6ECD-4CD2-9E85-E566A1F03F8F} = {6419BF13-6ECD-4CD2-9E85-E566A1F03F8F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+EndGlobal''');
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
         expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'));
@@ -622,6 +636,15 @@ void testInMemory(String description, Future<void> testMethod()) {
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);
+  // Set up enough of the packages to satisfy the templating code.
+  final File packagesFile = testFileSystem.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childFile('.packages');
+  final Directory dummyTemplateImagesDirectory = testFileSystem.directory(Cache.flutterRoot).parent;
+  dummyTemplateImagesDirectory.createSync(recursive: true);
+  packagesFile.createSync(recursive: true);
+  packagesFile.writeAsStringSync('flutter_template_images:${dummyTemplateImagesDirectory.uri}');
 
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
 

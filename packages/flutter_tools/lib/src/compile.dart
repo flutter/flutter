@@ -196,7 +196,7 @@ class StdoutHandler {
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
+    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath), fileSystem: globals.fs).map;
     final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
     final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
     for (final String packageName in packageMap.keys) {
@@ -241,7 +241,8 @@ class PackageUriMapper {
   }
 }
 
-List<String> _buildModeOptions(BuildMode mode) {
+/// List the preconfigured build options for a given build mode.
+List<String> buildModeOptions(BuildMode mode) {
   switch (mode) {
     case BuildMode.debug:
       return <String>[
@@ -316,7 +317,7 @@ class KernelCompiler {
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (!linkPlatformKernelIn) '--no-link-platform',
       if (aot) ...<String>[
@@ -357,14 +358,9 @@ class KernelCompiler {
     ];
 
     globals.printTrace(command.join(' '));
-    final Process server = await globals.processManager
-      .start(command)
-      .catchError((dynamic error, StackTrace stack) {
-        globals.printError('Failed to start frontend server $error, $stack');
-      });
+    final Process server = await globals.processManager.start(command);
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
-
     server.stderr
       .transform<String>(utf8.decoder)
       .listen(globals.printError);
@@ -462,13 +458,13 @@ abstract class ResidentCompiler {
     List<String> experimentalFlags,
     String platformDill,
     List<String> dartDefines,
+    String librariesSpec,
   }) = DefaultResidentCompiler;
 
   // TODO(jonahwilliams): find a better way to configure additional file system
   // roots from the runner.
   // See: https://github.com/flutter/flutter/issues/50494
   void addFileSystemRoot(String root);
-
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -527,6 +523,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.experimentalFlags,
     this.platformDill,
     List<String> dartDefines,
+    this.librariesSpec,
   }) : assert(sdkRoot != null),
        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
        dartDefines = dartDefines ?? const <String>[],
@@ -543,6 +540,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final bool unsafePackageSerialization;
   final List<String> experimentalFlags;
   final List<String> dartDefines;
+  final String librariesSpec;
 
   @override
   void addFileSystemRoot(String root) {
@@ -658,12 +656,20 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
+      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/52693
+      '--debugger-module-names',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[
         '--output-dill',
         outputPath,
+      ],
+      if (librariesSpec != null) ...<String>[
+        '--libraries-spec',
+        librariesSpec,
       ],
       if (packagesFilePath != null) ...<String>[
         '--packages',
@@ -672,7 +678,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--packages',
         packagesPath,
       ],
-      ..._buildModeOptions(buildMode),
+      ...buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
         for (final String root in fileSystemRoots) ...<String>[

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
@@ -13,7 +12,7 @@ import '../gen_l10n.dart';
 import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
-Future<void> main(List<String> arguments) async {
+void main(List<String> arguments) {
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addFlag(
     'help',
@@ -56,6 +55,23 @@ Future<void> main(List<String> arguments) async {
       "For example, pass in ['en_US'] if you would like your app to "
       'default to American English if a device supports it.',
   );
+  parser.addOption(
+    'header',
+    help: 'The header to prepend to the generated Dart localizations '
+      'files. This option takes in a string. \n\n'
+      'For example, pass in "/// All localized files." if you would '
+      'like this string prepended to the generated Dart file. \n\n'
+      'Alternatively, see the `header-file` option to pass in a text '
+      'file for longer headers.'
+  );
+  parser.addOption(
+    'header-file',
+    help: 'The header to prepend to the generated Dart localizations '
+      'files. The value of this option is the name of the file that '
+      'contains the header text. \n\n'
+      'Alternatively, see the `header` option to pass in a string '
+      'for a simpler header.'
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -63,17 +79,19 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  final String flutterBin = Platform.isWindows ? 'flutter.bat' : 'flutter';
-  final String flutterPath = flutterRoot == null ? flutterBin : path.join(flutterRoot, 'bin', flutterBin);
+  precacheLanguageAndRegionTags();
+
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
   final String classNameString = results['output-class'] as String;
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
+  final String headerString = results['header'] as String;
+  final String headerFile = results['header-file'] as String;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
+
   try {
     localizationsGenerator
       ..initialize(
@@ -82,35 +100,16 @@ Future<void> main(List<String> arguments) async {
         outputFileString: outputFileString,
         classNameString: classNameString,
         preferredSupportedLocaleString: preferredSupportedLocaleString,
+        headerString: headerString,
+        headerFile: headerFile,
       )
-      ..parseArbFiles()
-      ..generateClassMethods()
-      ..generateOutputFile();
+      ..loadResources()
+      ..writeOutputFile();
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {
     exitWithError(e.message);
   } on L10nException catch (e) {
     exitWithError(e.message);
-  }
-
-  final ProcessResult pubGetResult = await Process.run(flutterPath, <String>['pub', 'get']);
-  if (pubGetResult.exitCode != 0) {
-    stderr.write(pubGetResult.stderr);
-    exit(1);
-  }
-
-  final ProcessResult generateFromArbResult = await Process.run(flutterPath, <String>[
-    'pub',
-    'run',
-    'intl_translation:generate_from_arb',
-    '--output-dir=${localizationsGenerator.l10nDirectory.path}',
-    '--no-use-deferred-loading',
-    localizationsGenerator.outputFile.path,
-    ...localizationsGenerator.arbPathStrings,
-  ]);
-  if (generateFromArbResult.exitCode != 0) {
-    stderr.write(generateFromArbResult.stderr);
-    exit(1);
   }
 }

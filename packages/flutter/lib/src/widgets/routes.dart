@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
@@ -606,8 +607,18 @@ mixin LocalHistoryRoute<T> on Route<T> {
     _localHistory.remove(entry);
     entry._owner = null;
     entry._notifyRemoved();
-    if (_localHistory.isEmpty)
-      changedInternalState();
+    if (_localHistory.isEmpty) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+        // The local history might be removed as a result of disposing inactive
+        // elements during finalizeTree. The state is locked at this moment, and
+        // we can only notify state has changed in the next frame.
+        SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+          changedInternalState();
+        });
+      } else {
+        changedInternalState();
+      }
+    }
   }
 
   @override
@@ -1727,6 +1738,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
+/// The `routeSettings` will be used in the construction of the dialog's route.
+/// See [RouteSettings] for more details.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -1743,6 +1757,7 @@ Future<T> showGeneralDialog<T>({
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
   bool useRootNavigator = true,
+  RouteSettings routeSettings,
 }) {
   assert(pageBuilder != null);
   assert(useRootNavigator != null);
@@ -1754,6 +1769,7 @@ Future<T> showGeneralDialog<T>({
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
+    settings: routeSettings,
   ));
 }
 

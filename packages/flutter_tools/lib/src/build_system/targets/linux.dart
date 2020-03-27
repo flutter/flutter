@@ -98,7 +98,15 @@ class UnpackLinuxDebug extends Target {
       }
     }
     final Depfile depfile = Depfile(inputs, outputs);
-    depfile.writeToFile(environment.buildDir.childFile('linux_engine_sources.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('linux_engine_sources.d'),
+    );
   }
 }
 
@@ -151,6 +159,14 @@ class DebugBundleLinuxAssets extends Target {
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
     final Depfile depfile = await copyAssets(environment, outputDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 }

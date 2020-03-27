@@ -62,6 +62,54 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad --template=stateful_widget_material}
+/// This example shows how to move the focus to the next field when the user
+/// presses the ENTER key.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Material(
+///     child: Center(
+///       child: Shortcuts(
+///         shortcuts: <LogicalKeySet, Intent>{
+///           // Pressing enter on the field will now move to the next field.
+///           LogicalKeySet(LogicalKeyboardKey.enter):
+///               Intent(NextFocusAction.key),
+///         },
+///         child: FocusTraversalGroup(
+///           child: Form(
+///             autovalidate: true,
+///             onChanged: () {
+///               Form.of(primaryFocus.context).save();
+///             },
+///             child: Wrap(
+///               children: List<Widget>.generate(5, (int index) {
+///                 return Padding(
+///                   padding: const EdgeInsets.all(8.0),
+///                   child: ConstrainedBox(
+///                     constraints: BoxConstraints.tight(Size(200, 50)),
+///                     child: TextFormField(
+///                       onSaved: (String value) {
+///                         print('Value for field $index saved as "$value"');
+///                       },
+///                     ),
+///                   ),
+///                 );
+///               }),
+///             ),
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * <https://material.io/design/components/text-fields.html>

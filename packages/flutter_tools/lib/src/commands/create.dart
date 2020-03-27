@@ -139,11 +139,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'kotlin',
       allowed: <String>['java', 'kotlin'],
     );
+    // TODO(egarciad): Remove this flag. https://github.com/flutter/flutter/issues/52363
     argParser.addFlag(
       'androidx',
+      hide: true,
       negatable: true,
-      defaultsTo: true,
-      help: 'Generate a project using the AndroidX support libraries',
+      help: 'Deprecated. Setting this flag has no effect.',
     );
   }
 
@@ -239,13 +240,21 @@ class CreateCommand extends FlutterCommand {
     }
 
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    return utf8.decode(await _net.fetchUrl(snippetsUri));
+    final List<int> data = await _net.fetchUrl(snippetsUri);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
     final Uri snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    return utf8.decode(await _net.fetchUrl(snippetsUri, maxAttempts: 2));
+    final List<int> data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
+    if (data == null || data.isEmpty) {
+      return null;
+    }
+    return utf8.decode(data);
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -259,12 +268,11 @@ class CreateCommand extends FlutterCommand {
       final String samplesJson = await _fetchSamplesIndexFromServer();
       if (samplesJson == null) {
         throwToolExit('Unable to download samples', exitCode: 2);
-      }
-      else {
+      } else {
         outputFile.writeAsStringSync(samplesJson);
         globals.printStatus('Wrote samples JSON to "$outputFilePath"');
       }
-    } catch (e) {
+    } on Exception catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
     }
   }
@@ -394,16 +402,17 @@ class CreateCommand extends FlutterCommand {
       flutterRoot: flutterRoot,
       renderDriverTest: boolArg('with-driver-test'),
       withPluginHook: generatePlugin,
-      androidX: boolArg('androidx'),
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
+      linux: featureFlags.isLinuxEnabled,
       macos: featureFlags.isMacOSEnabled,
+      windows: featureFlags.isWindowsEnabled,
     );
 
     final String relativeDirPath = globals.fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
-      globals.printStatus('Creating project $relativeDirPath... androidx: ${boolArg('androidx')}');
+      globals.printStatus('Creating project $relativeDirPath...');
     } else {
       if (sampleCode != null && !overwrite) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
@@ -490,6 +499,21 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
             'directory in order to launch your app.');
         globals.printStatus('Your $application code is in $relativeAppMain');
       }
+
+      // Warn about unstable templates. This shuold be last so that it's not
+      // lost among the other output.
+      if (featureFlags.isLinuxEnabled) {
+        globals.printStatus('');
+        globals.printStatus('WARNING: The Linux tooling and APIs are not yet stable. '
+            'You will likely need to re-create the "linux" directory after future '
+            'Flutter updates.');
+      }
+      if (featureFlags.isWindowsEnabled) {
+        globals.printStatus('');
+        globals.printStatus('WARNING: The Windows tooling and APIs are not yet stable. '
+            'You will likely need to re-create the "windows" directory after future '
+            'Flutter updates.');
+      }
     }
     return FlutterCommandResult.success();
   }
@@ -500,7 +524,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(globals.fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate(globals.fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.create,
@@ -519,7 +543,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('package', directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPackage,
@@ -536,7 +560,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? stringArg('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
     if (boolArg('pub')) {
       await pub.get(
         context: PubContext.createPlugin,
@@ -564,13 +588,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
-    generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
+    generatedCount += await _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (boolArg('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
-      generatedCount += _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
+      generatedCount += await _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
     if (boolArg('pub')) {
@@ -602,13 +626,14 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String projectName,
     String projectDescription,
     String androidLanguage,
-    bool androidX,
     String iosLanguage,
     String flutterRoot,
     bool renderDriverTest = false,
     bool withPluginHook = false,
     bool web = false,
+    bool linux = false,
     bool macos = false,
+    bool windows = false,
   }) {
     flutterRoot = globals.fs.path.normalize(flutterRoot);
 
@@ -626,7 +651,6 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'macosIdentifier': appleIdentifier,
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'androidX': androidX,
       'useAndroidEmbeddingV2': featureFlags.isAndroidEmbeddingV2Enabled,
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
@@ -634,26 +658,23 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
+      'pluginCppHeaderGuard': projectName.toUpperCase(),
+      'pluginProjectUUID': Uuid().generateV4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
       'web': web,
+      'linux': linux,
       'macos': macos,
+      'windows': windows,
       'year': DateTime.now().year,
-      // For now, the new plugin schema is only used when a desktop plugin is
-      // enabled. Once the new schema is supported on stable, this should be
-      // removed, and the new schema should always be used.
-      'useNewPluginSchema': macos,
-      // If a desktop platform is included, add a workaround for #31366.
-      // When Linux and Windows are added, we will need this workaround again.
-      'includeTargetPlatformWorkaround': false,
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
-    final Template template = Template.fromName(templateName);
+  Future<int> _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) async {
+    final Template template = await Template.fromName(templateName, fileSystem: globals.fs);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
 

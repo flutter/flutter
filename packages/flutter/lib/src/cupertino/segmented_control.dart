@@ -628,6 +628,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   @override
   void performLayout() {
+    final BoxConstraints constraints = this.constraints;
     double maxHeight = _kMinSegmentedControlHeight;
 
     double childWidth = constraints.minWidth / childCount;
