@@ -744,7 +744,7 @@ class BrowserManager {
 
     var suiteID = _suiteID++;
     RunnerSuiteController controller;
-    void closeIframe() {
+    closeIframe() {
       if (_closed) return;
       _controllers.remove(controller);
       _channel.sink.add({'command': 'closeSuite', 'id': suiteID});
