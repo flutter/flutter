@@ -515,15 +515,16 @@ abstract class FlutterDriver {
   ///
   ///  HACK: There will be a 2-second artificial delay before screenshotting,
   ///        the delay here is to deal with a race between the driver script and
-  ///        the GPU thread. The issue is that driver API synchronizes with the
-  ///        framework based on transient callbacks, which are out of sync with
-  ///        the GPU thread. Here's the timeline of events in ASCII art:
+  ///        the raster thread (formerly known as the GPU thread). The issue is
+  ///        that driver API synchronizes with the framework based on transient
+  ///        callbacks, which are out of sync with the raster thread.
+  ///        Here's the timeline of events in ASCII art:
   ///
   ///        -------------------------------------------------------------------
   ///        Without this delay:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              | random |
   ///        Driver:                        <-- screenshot -->
   ///
@@ -532,7 +533,7 @@ abstract class FlutterDriver {
   ///        `screenshot()`. The gap is random because it is determined by the
   ///        unpredictable network communication between the driver process and
   ///        the application. If this gap is too short, which it typically will
-  ///        be, the screenshot is taken before the GPU thread is done
+  ///        be, the screenshot is taken before the raster thread is done
   ///        rasterizing the frame, so the screenshot of the previous frame is
   ///        taken, which is wrong.
   ///
@@ -540,11 +541,11 @@ abstract class FlutterDriver {
   ///        With this delay, if we're lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize -->
+  ///        Raster:               <-- rasterize -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
-  ///        The two-second gap should be long enough for the GPU thread to
+  ///        The two-second gap should be long enough for the raster thread to
   ///        finish rasterizing the frame, but not longer than necessary to keep
   ///        driver tests as fast a possible.
   ///
@@ -552,7 +553,7 @@ abstract class FlutterDriver {
   ///        With this delay, if we're not lucky:
   ///        -------------------------------------------------------------------
   ///        UI    : <-- build -->
-  ///        GPU   :               <-- rasterize randomly slow today -->
+  ///        Raster:               <-- rasterize randomly slow today -->
   ///        Gap   :              |    2 seconds or more   |
   ///        Driver:                                        <-- screenshot -->
   ///
