@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
@@ -17,6 +18,11 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+
+final Platform linuxPlatform = FakePlatform(
+  operatingSystem: 'linux',
+  environment: <String, String>{},
+);
 
 // This test verifies that the terminal prompt selection when Gradle outputs
 // multiple APKs works correctly. For testing of the ranking and automatic
@@ -130,6 +136,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.2-all.zip
     ProcessManager: () => FakeProcessManager.any(),
     AndroidSdk: () => MockAndroidSdk(),
     Cache: () => cache,
+    Platform: () => linuxPlatform,
   });
 }
 
