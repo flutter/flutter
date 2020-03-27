@@ -57,11 +57,11 @@ typedef WillPopCallback = Future<bool> Function();
 
 /// Signature for the [Navigator.onPopPage] callback.
 ///
-/// This callback must call [Route.didPop] or [Route.didComplete] on the
-/// specified route and must properly update the pages list the next time it
-/// is passed into [Navigator.pages] so that it no longer includes the
-/// corresponding [Page]. (Otherwise, the page will be interpreted as a new page
-/// to show when the [Navigator.pages] list is next updated.)
+/// This callback must call [Route.didPop] on the specified route and must
+/// properly update the pages list the next time it is passed into
+/// [Navigator.pages] so that it no longer includes the corresponding [Page].
+/// (Otherwise, the page will be interpreted as a new page to show when the
+/// [Navigator.pages] list is next updated.)
 typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 
 /// Indicates whether the current route should be popped.
@@ -614,8 +614,8 @@ abstract class RouteTransitionRecord {
 
   /// Whether this route is entering the screen.
   ///
-  /// If this property is true, this route requires a explicit decision on how to
-  /// transition into the screen. Such a decision should be made in the
+  /// If this property is true, this route requires an explicit decision on how
+  /// to transition into the screen. Such a decision should be made in the
   /// [TransitionDelegate.resolve].
   bool get isEntering;
 
@@ -665,9 +665,14 @@ abstract class RouteTransitionRecord {
 ///
 /// To make route transition decisions, subclass must implement [resolve].
 ///
-/// An example subclass that always removes or adds routes without animated
-/// transitions and puts the removed routes at the top of the list would be
-/// implemented as the following.
+/// {@tool sample --template=freeform}
+/// The following example demonstrates how to implement a subclass that always
+/// removes or adds routes without animated transitions and puts the removed
+/// routes at the top of the list.
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// ```
 ///
 /// ```dart
 /// class NoAnimationTransitionDelegate extends TransitionDelegate<void> {
@@ -702,6 +707,7 @@ abstract class RouteTransitionRecord {
 /// }
 ///
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -1316,6 +1322,8 @@ class Navigator extends StatefulWidget {
   ///
   /// The [onGenerateRoute], [pages], [onGenerateInitialRoutes],
   /// [transitionDelegate], [observers]  arguments must not be null.
+  ///
+  /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
     Key key,
     this.pages = const <Page<dynamic>>[],
@@ -2481,33 +2489,55 @@ class _RouteEntry extends RouteTransitionRecord {
 
   @override
   void markForPush() {
-    assert(isEntering && !_debugWaitingForExitDecision);
+    assert(
+      isEntering && !_debugWaitingForExitDecision,
+      'This route cannot be marked for push. Either a decision has already been '
+      'made or it does not require an explicit decision on how to transition in.'
+    );
     currentState = _RouteLifecycle.push;
   }
 
   @override
   void markForAdd() {
-    assert(isEntering && !_debugWaitingForExitDecision);
+    assert(
+      isEntering && !_debugWaitingForExitDecision,
+      'This route cannot be marked for add. Either a decision has already been '
+      'made or it does not require an explicit decision on how to transition in.'
+    );
     currentState = _RouteLifecycle.add;
   }
 
   @override
   void markForPop([dynamic result]) {
-    assert(!isEntering && _debugWaitingForExitDecision);
+    assert(
+      !isEntering && _debugWaitingForExitDecision,
+      'This route cannot be marked for pop. Either a decision has already been '
+      'made or it does not require an explicit decision on how to transition out.'
+    );
     pop<dynamic>(result);
     _debugWaitingForExitDecision = false;
   }
 
   @override
   void markForComplete([dynamic result]) {
-    assert(!isEntering && _debugWaitingForExitDecision);
+    assert(
+      !isEntering && _debugWaitingForExitDecision,
+      'This route cannot be marked for complete. Either a decision has already '
+      'been made or it does not require an explicit decision on how to transition '
+      'out.'
+    );
     complete<dynamic>(result);
     _debugWaitingForExitDecision = false;
   }
 
   @override
   void markForRemove() {
-    assert(!isEntering && _debugWaitingForExitDecision);
+    assert(
+      !isEntering && _debugWaitingForExitDecision,
+      'This route cannot be marked for remove. Either a decision has already '
+      'been made or it does not require an explicit decision on how to transition '
+      'out.'
+    );
     remove();
     _debugWaitingForExitDecision = false;
   }
