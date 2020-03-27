@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
 

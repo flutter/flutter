@@ -1154,5 +1154,6 @@ EngineLineMetrics line(
     width: width,
     lineNumber: lineNumber,
     left: left,
+    endIndexWithoutNewlines: -1,
   );
 }
