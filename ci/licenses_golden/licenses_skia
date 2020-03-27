@@ -1,4 +1,4 @@
-Signature: 107380be15d2ea8a6af16f32e612af59
+Signature: eea4d9938ea13509a3f4156d3aac0a12
 
 UNUSED LICENSES:
 
@@ -2452,10 +2452,10 @@ FILE: ../../../third_party/skia/src/gpu/GrResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplerState.h
 FILE: ../../../third_party/skia/src/gpu/GrSimpleMesh.h
-FILE: ../../../third_party/skia/src/gpu/GrTessellator.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTessellator.h
 FILE: ../../../third_party/skia/src/gpu/GrTestUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTestUtils.h
+FILE: ../../../third_party/skia/src/gpu/GrTriangulator.cpp
+FILE: ../../../third_party/skia/src/gpu/GrTriangulator.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrYUVProvider.h
@@ -2503,8 +2503,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrTriangulatingPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
 FILE: ../../../third_party/skia/src/gpu/text/GrStrikeCache.cpp
@@ -2878,7 +2878,7 @@ FILE: ../../../third_party/skia/include/effects/SkRuntimeEffect.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
-FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
+FILE: ../../../third_party/skia/modules/canvaskit/WasmCommon.h
 FILE: ../../../third_party/skia/modules/canvaskit/paragraph_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
@@ -3913,13 +3913,17 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceState.h
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSurfaceResource.cpp
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DSurfaceResource.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureResource.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTypesPriv.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DUtil.h
