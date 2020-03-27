@@ -56,7 +56,7 @@ flutter.buildMode=debug
 org.gradle.jvmargs=-Xmx1536M
 android.useAndroidX=true
 android.enableJetifier=true
-android.enableR8=true   
+android.enableR8=true
 ''');
     fileSystem.file('android/gradle/wrapper/gradle-wrapper.jar')
       .createSync(recursive: true);
@@ -68,7 +68,7 @@ distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.2-all.zip 
+distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.2-all.zip
 ''');
     fileSystem.file('android/gradlew').createSync();
 
