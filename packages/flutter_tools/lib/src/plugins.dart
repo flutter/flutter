@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
-import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/time.dart';
@@ -584,7 +583,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
 
   final Map<String, dynamic> templateContext = <String, dynamic>{
     'plugins': androidPlugins,
-    'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
+    'androidX': project.android.isAppUsingAndroidX(),
   };
   final String javaSourcePath = globals.fs.path.join(
     project.android.pluginRegistrantHost.path,

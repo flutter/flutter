@@ -90,30 +90,9 @@ String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
 }
 
-/// Returns true if the current version of the Gradle plugin is supported.
-bool _isSupportedVersion(AndroidProject project) {
-  final File plugin = project.hostAppGradleRoot.childFile(
-      globals.fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
-  if (plugin.existsSync()) {
-    return false;
-  }
-  final File appGradle = project.hostAppGradleRoot.childFile(
-      globals.fs.path.join('app', 'build.gradle'));
-  if (!appGradle.existsSync()) {
-    return false;
-  }
-  for (final String line in appGradle.readAsLinesSync()) {
-    if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
-        line.contains("def flutterPluginVersion = 'managed'")) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /// Returns the apk file created by [buildGradleProject]
 Future<File> getGradleAppOut(AndroidProject androidProject) async {
-  if (!_isSupportedVersion(androidProject)) {
+  if (!androidProject.isSupportedVersion()) {
     _exitWithUnsupportedProjectMessage();
   }
   return getApkDirectory(androidProject.parent).childFile('app.apk');
@@ -220,12 +199,12 @@ Future<void> buildGradleApp({
   if (!project.android.isUsingGradle) {
     _exitWithProjectNotUsingGradleMessage();
   }
-  if (!_isSupportedVersion(project.android)) {
+  if (!project.android.isSupportedVersion()) {
     _exitWithUnsupportedProjectMessage();
   }
   final Directory buildDirectory = project.android.buildDirectory;
 
-  final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+  final bool usesAndroidX = project.android.isAppUsingAndroidX();
   if (usesAndroidX) {
     BuildEvent('app-using-android-x').send();
   } else if (!usesAndroidX) {
@@ -725,17 +704,6 @@ void _exitWithProjectNotUsingGradleMessage() {
     'https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
     'for details on how to upgrade the project.'
   );
-}
-
-/// Returns [true] if the current app uses AndroidX.
-// TODO(egarciad): https://github.com/flutter/flutter/issues/40800
-// Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
-bool isAppUsingAndroidX(Directory androidDirectory) {
-  final File properties = androidDirectory.childFile('gradle.properties');
-  if (!properties.existsSync()) {
-    return false;
-  }
-  return properties.readAsStringSync().contains('android.useAndroidX=true');
 }
 
 /// Builds the plugins as AARs.

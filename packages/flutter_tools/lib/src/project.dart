@@ -692,6 +692,39 @@ class AndroidProject extends FlutterProjectPlatform {
     gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
   }
 
+  /// Returns true if the current version of the Gradle plugin is supported.
+  bool isSupportedVersion() {
+    final File plugin = hostAppGradleRoot.childFile(
+        globals.fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
+    if (plugin.existsSync()) {
+      return false;
+    }
+    final File appGradle = hostAppGradleRoot.childFile(
+        globals.fs.path.join('app', 'build.gradle'));
+    if (!appGradle.existsSync()) {
+      return false;
+    }
+    final RegExp applyPattern = RegExp(r'apply from: .*/flutter.gradle');
+    for (final String line in appGradle.readAsLinesSync()) {
+      if (line.contains(applyPattern) ||
+          line.contains("def flutterPluginVersion = 'managed'")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Returns [true] if the current app uses AndroidX.
+  // TODO(egarciad): https://github.com/flutter/flutter/issues/40800
+  // Remove `FlutterManifest.usesAndroidX` and provide a unified `AndroidProject.usesAndroidX`.
+  bool isAppUsingAndroidX() {
+    final File properties = hostAppGradleRoot.childFile('gradle.properties');
+    if (!properties.existsSync()) {
+      return false;
+    }
+    return properties.readAsStringSync().contains('android.useAndroidX=true');
+  }
+
   bool _shouldRegenerateFromTemplate() {
     return globals.fsUtils.isOlderThanReference(
       entity: ephemeralDirectory,

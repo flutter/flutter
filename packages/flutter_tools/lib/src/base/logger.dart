@@ -380,17 +380,21 @@ class BufferLogger extends Logger {
   }) : _outputPreferences = outputPreferences,
        _terminal = terminal,
        _timeoutConfiguration = timeoutConfiguration,
-       _stopwatchFactory = stopwatchFactory;
+       _stopwatchFactory = stopwatchFactory,
+       _hasTerminal = false;
 
   @visibleForTesting
   BufferLogger.test({
     Terminal terminal,
     OutputPreferences outputPreferences,
+    bool hasTerminal = false,
   }) : _terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        _timeoutConfiguration = const TimeoutConfiguration(),
-       _stopwatchFactory = const StopwatchFactory();
+       _stopwatchFactory = const StopwatchFactory(),
+       _hasTerminal = hasTerminal;
 
+  final bool _hasTerminal;
 
   @override
   final OutputPreferences _outputPreferences;
@@ -420,7 +424,7 @@ class BufferLogger extends Logger {
   String get eventText => _events.toString();
 
   @override
-  bool get hasTerminal => false;
+  bool get hasTerminal => _hasTerminal;
 
   @override
   void printError(

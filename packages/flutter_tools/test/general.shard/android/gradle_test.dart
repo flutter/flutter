@@ -810,47 +810,56 @@ flutter:
   });
 
   group('isAppUsingAndroidX', () {
-    FileSystem fs;
+    FileSystem fileSystem;
 
     setUp(() {
-      fs = MemoryFileSystem();
+      fileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext('returns true when the project is using AndroidX', () async {
-      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
-
+      fileSystem.file('pubspec.yaml').createSync();
+      final Directory androidDirectory = fileSystem.directory('android')
+        ..createSync();
       androidDirectory
         .childFile('gradle.properties')
         .writeAsStringSync('android.useAndroidX=true');
 
-      expect(isAppUsingAndroidX(androidDirectory), isTrue);
+      final AndroidProject androidProject = FlutterProject
+        .fromDirectory(fileSystem.currentDirectory).android;
 
+      expect(androidProject.isAppUsingAndroidX(), isTrue);
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
-      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
+      fileSystem.file('pubspec.yaml').createSync();
+      final Directory androidDirectory = fileSystem.directory('android')
+        ..createSync();
 
       androidDirectory
         .childFile('gradle.properties')
         .writeAsStringSync('android.useAndroidX=false');
 
-      expect(isAppUsingAndroidX(androidDirectory), isFalse);
+      final AndroidProject androidProject = FlutterProject
+        .fromDirectory(fileSystem.currentDirectory).android;
 
+      expect(androidProject.isAppUsingAndroidX(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
-      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('android').createSync();
+      final AndroidProject androidProject = FlutterProject
+        .fromDirectory(fileSystem.currentDirectory).android;
 
-      expect(isAppUsingAndroidX(androidDirectory), isFalse);
-
+      expect(androidProject.isAppUsingAndroidX(), isFalse);
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
