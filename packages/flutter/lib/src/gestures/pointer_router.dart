@@ -75,6 +75,13 @@ class PointerRouter {
       event = event.transformed(transform);
       route(event);
     } catch (exception, stack) {
+      InformationCollector collector;
+      assert(() {
+        collector = () sync* {
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+        };
+        return true;
+      }());
       FlutterError.reportError(FlutterErrorDetailsForPointerRouter(
         exception: exception,
         stack: stack,
@@ -83,9 +90,7 @@ class PointerRouter {
         router: this,
         route: route,
         event: event,
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
-        },
+        informationCollector: collector
       ));
     }
   }
