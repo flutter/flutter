@@ -480,6 +480,30 @@ void main() {
     Usage: () => MockFlutterUsage(),
   }));
 
+  test('Faithfully displays stdout messages with leading/trailing spaces', () => testbed.run(() async {
+    _setupMocks();
+    final StreamController<Event> stdoutController = StreamController<Event>();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation invocation) {
+      return stdoutController.stream;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    stdoutController.add(Event(
+      timestamp: 0,
+      kind: 'Stdout',
+      bytes: base64.encode(utf8.encode('    This is a message with 4 leading and trailing spaces    '))),
+    );
+    // Wait one event loop for the stream listener to fire.
+    await null;
+
+    expect(testLogger.statusText,
+      contains('    This is a message with 4 leading and trailing spaces    '));
+  }));
+
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
