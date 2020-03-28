@@ -276,14 +276,30 @@ class UpdatePackagesCommand extends FlutterCommand {
         final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
-        // First we run "pub upgrade" on this generated package:
+        // First, we create a synthetic flutter SDK so that transitive flutter SDK
+        // constraints are not affected by this upgrade.
+        final Directory temporaryFlutterSdk = createTemporaryFlutterSdk(
+          globals.fs,
+          globals.fs.directory(Cache.flutterRoot),
+          pubspecs,
+        );
+
+        // Next we run "pub upgrade" on this generated package:
         await pub.get(
           context: PubContext.updatePackages,
           directory: tempDir.path,
           upgrade: true,
           checkLastModified: false,
           offline: offline,
+          flutterRootOverride: temporaryFlutterSdk.path,
         );
+        // Cleanup the temporary SDK
+        try {
+          temporaryFlutterSdk.deleteSync(recursive: true);
+        } on FileSystemException {
+          // So sad...
+        }
+
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -1170,7 +1186,8 @@ class PubspecDependency extends PubspecLine {
 
 /// Generates the File object for the pubspec.yaml file of a given Directory.
 File _pubspecFor(Directory directory) {
-  return globals.fs.file(globals.fs.path.join(directory.path, 'pubspec.yaml'));
+  return directory.fileSystem.file(
+    directory.fileSystem.path.join(directory.path, 'pubspec.yaml'));
 }
 
 /// Generates the source of a fake pubspec.yaml file given a list of
@@ -1333,4 +1350,78 @@ String _computeChecksum(Iterable<String> names, String getVersion(String name)) 
     }
   }
   return ((upperCheck << 8) | lowerCheck).toRadixString(16).padLeft(4, '0');
+}
+
+/// Create a synthetic Flutter SDK so that pub version solving does not get
+/// stuck on the old versions.
+Directory createTemporaryFlutterSdk(FileSystem fileSystem, Directory realFlutter, List<PubspecYaml> pubspecs) {
+  final Set<String> currentPackages = realFlutter
+    .childDirectory('packages')
+    .listSync()
+    .whereType<Directory>()
+    .map((Directory directory) => fileSystem.path.basename(directory.path))
+    .toSet();
+
+  final Map<String, PubspecYaml> pubspecsByName = <String, PubspecYaml>{};
+  for (final PubspecYaml pubspec in pubspecs) {
+    pubspecsByName[pubspec.name] = pubspec;
+  }
+
+  final Directory directory = fileSystem.systemTempDirectory
+    .createTempSync('flutter_upgrade_sdk.')
+    ..createSync();
+  // Fill in version info.
+  realFlutter.childFile('version')
+    .copySync(directory.childFile('version').path);
+
+  // Directory structure should mirror the current Flutter SDK
+  final Directory packages = directory.childDirectory('packages');
+  for (final String flutterPackage in currentPackages) {
+    final File pubspecFile = packages
+      .childDirectory(flutterPackage)
+      .childFile('pubspec.yaml')
+      ..createSync(recursive: true);
+    final PubspecYaml pubspecYaml = pubspecsByName[flutterPackage];
+    final StringBuffer output = StringBuffer('name: $flutterPackage\n');
+
+    // Fill in SDK dependency constraint.
+    output.write('''
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+''');
+
+    output.writeln('dependencies:');
+    for (final PubspecDependency dependency in pubspecYaml.dependencies) {
+      if (dependency.isTransitive || dependency.isDevDependency) {
+        continue;
+      }
+      if (dependency.kind == DependencyKind.sdk) {
+        output.writeln('  ${dependency.name}:\n    sdk: flutter');
+        continue;
+      }
+      output.writeln('  ${dependency.name}: any');
+    }
+    pubspecFile.writeAsStringSync(output.toString());
+  }
+
+  // Create the sky engine pubspec.yaml
+  directory
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childDirectory('pkg')
+    .childDirectory('sky_engine')
+    .childFile('pubspec.yaml')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''
+name: sky_engine
+version: 0.0.99
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: Dart SDK extensions for dart:ui
+homepage: http://flutter.io
+# sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
+environment:
+  sdk: '>=1.11.0 <3.0.0'
+''');
+
+  return directory;
 }
