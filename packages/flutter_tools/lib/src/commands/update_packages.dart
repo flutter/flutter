@@ -276,13 +276,16 @@ class UpdatePackagesCommand extends FlutterCommand {
         final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
-        // First, we create a synthetic flutter SDK so that transitive flutter SDK
+        // Create a synthetic flutter SDK so that transitive flutter SDK
         // constraints are not affected by this upgrade.
-        final Directory temporaryFlutterSdk = createTemporaryFlutterSdk(
-          globals.fs,
-          globals.fs.directory(Cache.flutterRoot),
-          pubspecs,
-        );
+        Directory temporaryFlutterSdk;
+        if (upgrade) {
+          temporaryFlutterSdk = createTemporaryFlutterSdk(
+            globals.fs,
+            globals.fs.directory(Cache.flutterRoot),
+            pubspecs,
+          );
+        }
 
         // Next we run "pub upgrade" on this generated package:
         await pub.get(
@@ -291,13 +294,15 @@ class UpdatePackagesCommand extends FlutterCommand {
           upgrade: true,
           checkLastModified: false,
           offline: offline,
-          flutterRootOverride: temporaryFlutterSdk.path,
+          flutterRootOverride: upgrade
+            ? temporaryFlutterSdk.path
+            : null,
         );
         // Cleanup the temporary SDK
         try {
-          temporaryFlutterSdk.deleteSync(recursive: true);
+          temporaryFlutterSdk?.deleteSync(recursive: true);
         } on FileSystemException {
-          // So sad...
+          // Failed to delete temporary SDK.
         }
 
         // Then we run "pub deps --style=compact" on the result. We pipe all the
