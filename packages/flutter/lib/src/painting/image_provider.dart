@@ -333,16 +333,21 @@ abstract class ImageProvider<T> {
         await null; // wait an event turn in case a listener has been added to the image stream.
         final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
         stream.setCompleter(imageCompleter);
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
+          };
+          return true;
+        }());
         imageCompleter.setError(
           exception: exception,
           stack: stack,
           context: ErrorDescription('while resolving an image'),
           silent: true, // could be a network error or whatnot
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-            yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
-            yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-            },
+          informationCollector: collector
           );
         },
       );
@@ -384,13 +389,18 @@ abstract class ImageProvider<T> {
         if (handleError != null) {
           handleError(exception, stack);
         } else {
-          FlutterError.onError(FlutterErrorDetails(
-            context: ErrorDescription('while checking the cache location of an image'),
-            informationCollector: () sync* {
+          InformationCollector collector;
+          assert(() {
+            collector = () sync* {
               yield DiagnosticsProperty<ImageProvider>('Image provider', this);
               yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
               yield DiagnosticsProperty<T>('Image key', key, defaultValue: null);
-            },
+            };
+            return true;
+          }());
+          FlutterError.onError(FlutterErrorDetails(
+            context: ErrorDescription('while checking the cache location of an image'),
+            informationCollector: collector,
             exception: exception,
             stack: stack,
           ));
@@ -626,13 +636,18 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// image using [loadAsync].
   @override
   ImageStreamCompleter load(AssetBundleImageKey key, DecoderCallback decode) {
+    InformationCollector collector;
+    assert(() {
+      collector = () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
+      };
+      return true;
+    }());
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
-      informationCollector: () sync* {
-        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
-      },
+      informationCollector: collector
     );
   }
 

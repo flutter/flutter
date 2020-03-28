@@ -119,6 +119,17 @@ mixin AnimationLocalListenersMixin {
   void notifyListeners() {
     final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (final VoidCallback listener in localListeners) {
+      InformationCollector collector;
+      assert(() {
+        collector = () sync* {
+          yield DiagnosticsProperty<AnimationLocalListenersMixin>(
+            'The $runtimeType notifying listeners was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          );
+        };
+        return true;
+      }());
       try {
         if (_listeners.contains(listener))
           listener();
@@ -128,13 +139,7 @@ mixin AnimationLocalListenersMixin {
           stack: stack,
           library: 'animation library',
           context: ErrorDescription('while notifying listeners for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<AnimationLocalListenersMixin>(
-              'The $runtimeType notifying listeners was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
+          informationCollector: collector,
         ));
       }
     }
@@ -192,18 +197,23 @@ mixin AnimationLocalStatusListenersMixin {
         if (_statusListeners.contains(listener))
           listener(status);
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'animation library',
-          context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
               'The $runtimeType notifying status listeners was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'animation library',
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: collector
         ));
       }
     }
