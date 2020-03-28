@@ -475,7 +475,7 @@ void main() {
             ),
           )
       );
-    } on AssertionError catch(_){
+    } on AssertionError catch(_) {
       return;
     }
     fail('The assertion was not thrown when strokeWidth was null');
@@ -500,7 +500,10 @@ void main() {
     );
 
     //By default the value of strokeWidth is 2.0
-    expect(tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,2.0);
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        2.0,
+    );
 
     await tester.pumpWidget(
         MaterialApp(
@@ -520,6 +523,9 @@ void main() {
         )
     );
 
-    expect(tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,4.0);
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        4.0,
+    );
   });
 }
