@@ -15,6 +15,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
+import 'shaders.dart';
 
 const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 
@@ -402,6 +403,7 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     KernelSnapshot(),
     DebugMacOSFramework(),
     DebugUnpackMacOS(),
+    BundleSkSLShadersTarget('App.framework/Versions/A/Resources/flutter_assets'),
   ];
 
   @override
@@ -432,6 +434,7 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
     ProfileUnpackMacOS(),
+    BundleSkSLShadersTarget('App.framework/Versions/A/Resources/flutter_assets'),
   ];
 }
 
@@ -447,5 +450,6 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Target> get dependencies => const <Target>[
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
+    BundleSkSLShadersTarget('App.framework/Versions/A/Resources/flutter_assets'),
   ];
 }

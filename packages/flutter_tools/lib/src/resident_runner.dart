@@ -20,6 +20,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -671,7 +672,7 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
-  bool get supportsWriteSkSl => supportsServiceProtocol;
+  bool get supportsWriteSkSL => supportsServiceProtocol;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -739,29 +740,41 @@ abstract class ResidentRunner {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
-  /// Dump the sksl shaders to a file in the project directory.
-  Future<void> writeSkSl() async {
-    if (!supportsWriteSkSl) {
-      throw Exception('writeSkSl is not supported by this runner.');
+  /// Dump the SkSL shaders to a folder in build directory.
+  Future<void> writeSkSL() async {
+    if (!supportsWriteSkSL) {
+      throw Exception('writeSkSL is not supported by this runner.');
     }
-    final Map<String, Uint8List> data = await flutterDevices.first.views.first.getSkSls();
+    final Map<String, Uint8List> data = await flutterDevices.first.views.first.getSkSLs();
     if (data.isEmpty) {
       globals.logger.printStatus(
-        'No data was receieved. To ensure SkSl data can be generated: \n'
+        'No data was receieved. To ensure SkSL data can be generated: \n'
         '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
         '  2. Interact with the application to force shaders to be compiled.\n'
       );
       return;
     }
-    final Directory outputDirectory = globals.fs.currentDirectory
+    final Directory outputDirectory = globals.fs.directory(getBuildDirectory())
       .childDirectory('shaders')
-      ..createSync();
+      .childDirectory('sksl')
+      ..createSync(recursive: true);
+    final Map<String, Object> manifest = <String, Object>{
+      'version': globals.flutterVersion.engineRevision,
+      'files': data.keys.toList(),
+    };
     for (final String key in data.keys) {
       outputDirectory.childFile(key).writeAsBytesSync(data[key]);
     }
-    globals.logger.printStatus('Wrote SkSl data to ${outputDirectory.path}. '
-      'These will be autmatically packaged into your app to speed up the '
-      'initial rendering.');
+    outputDirectory.childFile('manifest.json')
+      .writeAsStringSync(json.encode(manifest));
+    final String relativePath = globals.fs.path.relative(outputDirectory.path,
+      from: globals.fs.currentDirectory.path);
+    globals.logger.printStatus(
+      'Wrote SkSL data to $relativePath}. This can be added to your app for '
+      'faster startup by adding the following to your pubpsec.yaml:\n'
+      '  flutter:\n'
+      '    bundle-sksl: true'
+    );
   }
 
   /// The resident runner API for interaction with the reloadMethod vmservice
@@ -1091,7 +1104,7 @@ abstract class ResidentRunner {
       if (supportsCanvasKit){
         commandHelp.k.print();
       }
-      if (supportsWriteSkSl) {
+      if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
       // `P` should precede `a`
@@ -1255,8 +1268,8 @@ class TerminalHandler {
         }
         return false;
       case 'M':
-        if (residentRunner.supportsWriteSkSl) {
-          await residentRunner.writeSkSl();
+        if (residentRunner.supportsWriteSkSL) {
+          await residentRunner.writeSkSL();
           return true;
         }
         return false;

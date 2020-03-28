@@ -23,7 +23,6 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
   await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
-    includeShaderFiles: true,
   );
   final Pool pool = Pool(kMaxOpenFiles);
   final List<File> inputs = <File>[

@@ -13,6 +13,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
+import 'shaders.dart';
 
 /// Prepares the asset bundle in the format expected by flutter.gradle.
 ///
@@ -78,6 +79,7 @@ abstract class AndroidAssetBundle extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    BundleSkSLShadersTarget('flutter_assets'),
   ];
 }
 

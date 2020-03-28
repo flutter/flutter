@@ -122,6 +122,11 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] as bool ?? false;
   }
 
+  /// The path to the SkSL shader files, if provided.
+  bool get includeSkSL {
+    return _flutterDescriptor['sksl'] as bool;
+  }
+
   /// True if this Flutter module should use AndroidX dependencies.
   ///
   /// If false the deprecated Android Support library will be used.
@@ -376,6 +381,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
     }
     switch (kvp.key as String) {
       case 'uses-material-design':
+      case 'sksl':
         if (kvp.value is! bool) {
           errors.add('Expected "${kvp.key}" to be a bool, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }

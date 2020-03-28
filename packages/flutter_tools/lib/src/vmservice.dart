@@ -1521,7 +1521,7 @@ class FlutterView extends ServiceObject {
         });
   }
 
-  Future<Map<String, Uint8List>> getSkSls() async {
+  Future<Map<String, Uint8List>> getSkSLs() async {
     final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
       '_flutter.getSkSLs',
       params: <String, dynamic>{

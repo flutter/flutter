@@ -18,6 +18,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
+import 'shaders.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -247,6 +248,7 @@ abstract class IosAssetBundle extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
+    BundleSkSLShadersTarget('App.framework/flutter_assets'),
   ];
 
   @override

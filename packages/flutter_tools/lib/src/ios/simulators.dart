@@ -407,6 +407,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
         if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
+        if (debuggingOptions.cacheSkSL) '--cache-sksl',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];

@@ -53,7 +53,6 @@ abstract class AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
-    bool includeShaderFiles = false,
   });
 }
 
@@ -123,7 +122,6 @@ class _ManifestAssetBundle implements AssetBundle {
     String packagesPath,
     bool includeDefaultFonts = true,
     bool reportLicensedPackages = false,
-    bool includeShaderFiles = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
@@ -249,22 +247,6 @@ class _ManifestAssetBundle implements AssetBundle {
     for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= globals.fs.directory(uri);
     }
-
-    final List<File> newAdditionalDependencies = <File>[];
-
-    // Include the SkSl shader files in shaders/
-    if (includeShaderFiles && globals.fs.directory('shaders').existsSync()) {
-      final List<File> shaderFiles = globals.fs.directory('shaders')
-        .listSync()
-        .whereType<File>()
-        .toList();
-      for (final File shaderFile in shaderFiles) {
-        final Uri uri = Uri(pathSegments: <String>['shaders', globals.fs.path.basename(shaderFile.path)]);
-        entries[uri.toString()] = DevFSFileContent(shaderFile);
-      }
-      newAdditionalDependencies.addAll(shaderFiles);
-    }
-
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
 
     entries[kFontManifestJson] = DevFSStringContent(json.encode(fonts));
@@ -272,8 +254,7 @@ class _ManifestAssetBundle implements AssetBundle {
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     final LicenseResult licenseResult = licenseCollector.obtainLicenses(packageMap);
     entries[_license] = DevFSStringContent(licenseResult.combinedLicenses);
-    newAdditionalDependencies.addAll(licenseResult.dependencies);
-    additionalDependencies = newAdditionalDependencies;
+    additionalDependencies = licenseResult.dependencies;
 
     return 0;
   }
