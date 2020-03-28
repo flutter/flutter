@@ -296,6 +296,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     setState(() {
       switch (_entryMode) {
         case DatePickerEntryMode.calendar:
+          _autoValidate = false;
           _entryMode = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:

@@ -20,6 +20,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     addBuildModeFlags();
     usesPubOption();
     usesDartDefineOption();
+    usesExtraFrontendOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -32,10 +33,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: defaultIOSArchs.map<String>(getNameForDarwinArch),
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
-      )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
       )
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,

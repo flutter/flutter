@@ -87,7 +87,7 @@ final RegExp _whitespace = RegExp(r'\s+');
 @visibleForTesting
 List<String> runningProcess(String processName) {
   // TODO(jonahwilliams): find a way to do this without powershell.
-  final RunResult result = globals.processUtils.runSync(
+  final RunResult result = processUtils.runSync(
     <String>['powershell', '-script="Get-CimInstance Win32_Process"'],
   );
   if (result.exitCode != 0) {

@@ -5,23 +5,31 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/net.dart';
+import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart' as globals;
+import '../flutter_project_metadata.dart';
 import '../project.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
-  GitHubTemplateCreator() :
-      _client = (context.get<HttpClientFactory>() == null)
-        ? HttpClient()
-        : context.get<HttpClientFactory>()();
+  GitHubTemplateCreator({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required FlutterProjectFactory flutterProjectFactory,
+    @required HttpClient client,
+  }) : _fileSystem = fileSystem,
+      _logger = logger,
+      _flutterProjectFactory = flutterProjectFactory,
+      _client = client;
 
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final FlutterProjectFactory _flutterProjectFactory;
   final HttpClient _client;
 
   Future<String> toolCrashSimilarIssuesGitHubURL(String errorString) async {
@@ -76,7 +84,7 @@ ${_projectMetadataInformation()}
   String _projectMetadataInformation() {
     FlutterProject project;
     try {
-      project = FlutterProject.current();
+      project = _flutterProjectFactory.fromDirectory(_fileSystem.currentDirectory);
     } on Exception catch (exception) {
       // pubspec may be malformed.
       return exception.toString();
@@ -86,14 +94,18 @@ ${_projectMetadataInformation()}
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
+      final FlutterProjectMetadata metadata = FlutterProjectMetadata(project.metadataFile, _logger);
       final StringBuffer description = StringBuffer()
+        ..writeln('**Type**: ${metadata.projectType?.name}')
         ..writeln('**Version**: ${manifest.appVersion}')
         ..writeln('**Material**: ${manifest.usesMaterialDesign}')
         ..writeln('**Android X**: ${manifest.usesAndroidX}')
         ..writeln('**Module**: ${manifest.isModule}')
         ..writeln('**Plugin**: ${manifest.isPlugin}')
         ..writeln('**Android package**: ${manifest.androidPackage}')
-        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}')
+        ..writeln('**Creation channel**: ${metadata.versionChannel}')
+        ..writeln('**Creation framework version**: ${metadata.versionRevision}');
 
       final File file = project.flutterPluginsFile;
       if (file.existsSync()) {
@@ -107,7 +119,7 @@ ${_projectMetadataInformation()}
           }
           // Write the last part of the path, which includes the plugin name and version.
           // Example: camera-0.5.7+2
-          final List<String> pathParts = globals.fs.path.split(pluginParts[1]);
+          final List<String> pathParts = _fileSystem.path.split(pluginParts[1]);
           description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
         }
       }
@@ -124,7 +136,7 @@ ${_projectMetadataInformation()}
   Future<String> _shortURL(String fullURL) async {
     String url;
     try {
-      globals.printTrace('Attempting git.io shortener: $fullURL');
+      _logger.printTrace('Attempting git.io shortener: $fullURL');
       final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
       final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
@@ -134,10 +146,10 @@ ${_projectMetadataInformation()}
       if (response.statusCode == 201) {
         url = response.headers[HttpHeaders.locationHeader]?.first;
       } else {
-        globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
+        _logger.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
     } on Exception catch (sendError) {
-      globals.printTrace('Failed to shorten GitHub template URL: $sendError');
+      _logger.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 
     return url ?? fullURL;

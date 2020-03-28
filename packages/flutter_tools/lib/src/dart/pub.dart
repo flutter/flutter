@@ -11,6 +11,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
@@ -254,7 +255,7 @@ class _DefaultPub implements Pub {
     int code;
     loop: while (true) {
       attempts += 1;
-      code = await globals.processUtils.stream(
+      code = await processUtils.stream(
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
@@ -300,7 +301,7 @@ class _DefaultPub implements Pub {
     String directory,
   }) async {
     Cache.releaseLockEarly();
-    final io.Process process = await globals.processUtils.start(
+    final io.Process process = await processUtils.start(
       _pubCommand(arguments),
       workingDirectory: directory,
       environment: await _createPubEnvironment(PubContext.interactive),

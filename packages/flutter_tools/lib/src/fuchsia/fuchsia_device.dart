@@ -508,8 +508,13 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) =>
-      _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on Fuchsia.');
+    return _logReader ??= _FuchsiaLogReader(this, app);
+  }
   _FuchsiaLogReader _logReader;
 
   @override
@@ -575,7 +580,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return await processUtils.run(<String>[
       'ssh',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,
@@ -590,7 +595,7 @@ class FuchsiaDevice extends Device {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
-    return await globals.processUtils.run(<String>[
+    return await processUtils.run(<String>[
       'scp',
       '-F',
       globals.fuchsiaArtifacts.sshConfig.absolute.path,

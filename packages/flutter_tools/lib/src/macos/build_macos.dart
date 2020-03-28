@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
@@ -72,7 +73,7 @@ Future<void> buildMacOS({
   );
   int result;
   try {
-    result = await globals.processUtils.stream(<String>[
+    result = await processUtils.stream(<String>[
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',

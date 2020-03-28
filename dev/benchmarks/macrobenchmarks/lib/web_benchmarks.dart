@@ -37,6 +37,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
     BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
+    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid(useCanvas: false),
+    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid(useCanvas: true),
   }
 };
 

@@ -180,6 +180,8 @@ class RunResult {
 
 typedef RunResultChecker = bool Function(int);
 
+ProcessUtils get processUtils => ProcessUtils.instance;
+
 abstract class ProcessUtils {
   factory ProcessUtils({
     @required ProcessManager processManager,
@@ -188,6 +190,8 @@ abstract class ProcessUtils {
     processManager: processManager,
     logger: logger,
   );
+
+  static ProcessUtils get instance => context.get<ProcessUtils>();
 
   /// Spawns a child process to run the command [cmd].
   ///

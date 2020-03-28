@@ -11,6 +11,7 @@ import 'package:webdriver/async_io.dart' as async_io;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
@@ -107,7 +108,10 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('android-emulator',
         defaultsTo: true,
         help: 'Whether to perform Flutter Driver testing on Android Emulator.'
-          'Works only if \'browser-name\' is set to \'android-chrome\'');
+          'Works only if \'browser-name\' is set to \'android-chrome\'')
+      ..addOption('chrome-binary',
+        help: 'Location of Chrome binary. '
+          'Works only if \'browser-name\' is set to \'chrome\'');
   }
 
   @override
@@ -244,6 +248,7 @@ class DriveCommand extends RunCommandBase {
           driverPort,
           browser,
           argResults['headless'].toString() == 'true',
+          stringArg('chrome-binary'),
         );
       } on Exception catch (ex) {
         throwToolExit(
@@ -467,7 +472,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
 
   PackageMap.globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = globals.fs.path.join(dartSdkPath, 'bin', 'dart');
-  final int result = await globals.processUtils.stream(
+  final int result = await processUtils.stream(
     <String>[
       dartVmPath,
       ...dartVmFlags,
@@ -528,17 +533,18 @@ Browser _browserNameToEnum(String browserName){
   throw UnsupportedError('Browser $browserName not supported');
 }
 
-Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, bool headless) async {
+Future<async_io.WebDriver> _createDriver(String driverPort, Browser browser, bool headless, String chromeBinary) async {
   return async_io.createDriver(
       uri: Uri.parse('http://localhost:$driverPort/'),
-      desired: getDesiredCapabilities(browser, headless),
+      desired: getDesiredCapabilities(browser, headless, chromeBinary),
       spec: async_io.WebDriverSpec.Auto
   );
 }
 
-/// Returns desired capabilities for given [browser] and [headless].
+/// Returns desired capabilities for given [browser], [headless] and
+/// [chromeBinary].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
+Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless, [String chromeBinary]) {
   switch (browser) {
     case Browser.chrome:
       return <String, dynamic>{
@@ -546,6 +552,8 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ async_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          if (chromeBinary != null)
+            'binary': chromeBinary,
           'w3c': false,
           'args': <String>[
             '--bwsi',
@@ -565,7 +573,7 @@ Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
                 'v8,blink.console,benchmark,blink,'
                 'blink.user_timing'
           }
-        }
+        },
       };
       break;
     case Browser.firefox:
