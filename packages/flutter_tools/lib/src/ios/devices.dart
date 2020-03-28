@@ -819,7 +819,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
+  Future<ForwardedPort> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect) {
       final int freePort = await _operatingSystemUtils?.findFreePort();
@@ -855,7 +855,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     );
     _logger.printTrace('Forwarded port $forwardedPort');
     forwardedPorts.add(forwardedPort);
-    return hostPort;
+    return forwardedPort;
   }
 
   @override

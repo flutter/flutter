@@ -83,10 +83,11 @@ void main() {
         mockDds = MockDartDevelopmentService();
         when(device.portForwarder)
           .thenReturn(portForwarder);
+        final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .thenAnswer((_) async => hostPort);
+          .thenAnswer((_) async => forwardedPort);
         when(portForwarder.forwardedPorts)
-          .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+          .thenReturn(<ForwardedPort>[forwardedPort]);
         when(portForwarder.unforward(any))
           .thenAnswer((_) async {});
         when(device.dds).thenReturn(mockDds);
@@ -295,14 +296,15 @@ void main() {
       final MockAndroidDevice device = MockAndroidDevice();
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
       when(device.portForwarder)
         .thenReturn(portForwarder);
       when(device.dds)
         .thenReturn(mockDds);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-        .thenAnswer((_) async => hostPort);
+        .thenAnswer((_) async => forwardedPort);
       when(portForwarder.forwardedPorts)
-        .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        .thenReturn(<ForwardedPort>[forwardedPort]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
@@ -377,14 +379,15 @@ void main() {
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder)
         .thenReturn(portForwarder);
-      when(device.dds)
-        .thenReturn(mockDds);
+      final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
+      
+      when(device.portForwarder).thenReturn(portForwarder);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) => mockLogReader);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-        .thenAnswer((_) async => hostPort);
+        .thenAnswer((_) async => forwardedPort);
       when(portForwarder.forwardedPorts)
-        .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        .thenReturn(<ForwardedPort>[forwardedPort]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async {});
       when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
@@ -435,13 +438,14 @@ void main() {
         portForwarder = MockPortForwarder();
         final MockDartDevelopmentService mockDds = MockDartDevelopmentService();
         device = MockAndroidDevice();
+        final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
 
         when(device.portForwarder)
           .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort))
-          .thenAnswer((_) async => hostPort);
+          .thenAnswer((_) async => forwardedPort);
         when(portForwarder.forwardedPorts)
-          .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+          .thenReturn(<ForwardedPort>[forwardedPort]);
         when(portForwarder.unforward(any))
           .thenAnswer((_) async {});
         when(device.dds)

@@ -854,8 +854,8 @@ class DeviceDomain extends Domain {
       throw "device '$deviceId' not found";
     }
 
-    hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
-
+    final ForwardedPort forwardedPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
+    hostPort = forwardedPort?.hostPort;
     return <String, dynamic>{'hostPort': hostPort};
   }
 

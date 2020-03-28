@@ -50,7 +50,9 @@ void main() {
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await chromeDevice.portForwarder.forward(1), 1);
+    final ForwardedPort forwardedPort = await chromeDevice.portForwarder.forward(1, hostPort: 2);
+    expect(forwardedPort.devicePort, 1);
+    expect(forwardedPort.hostPort, 2);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
     expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
@@ -76,7 +78,9 @@ void main() {
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await chromeDevice.portForwarder.forward(1), 1);
+    final ForwardedPort forwardedPort = await chromeDevice.portForwarder.forward(1, hostPort: 2);
+    expect(forwardedPort.devicePort, 1);
+    expect(forwardedPort.hostPort, 2);
 
     expect(chromeDevice.supportsRuntimeMode(BuildMode.debug), true);
     expect(chromeDevice.supportsRuntimeMode(BuildMode.profile), true);
@@ -99,7 +103,9 @@ void main() {
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
     expect(device.getLogReader(), isA<NoOpDeviceLogReader>());
-    expect(await device.portForwarder.forward(1), 1);
+    final ForwardedPort forwardedPort = await device.portForwarder.forward(1, hostPort: 2);
+    expect(forwardedPort.devicePort, 1);
+    expect(forwardedPort.hostPort, 2);
 
     expect(device.supportsRuntimeMode(BuildMode.debug), true);
     expect(device.supportsRuntimeMode(BuildMode.profile), true);

@@ -138,18 +138,19 @@ class FallbackDiscovery {
     @required int hostVmservicePort,
     @required String packageName,
   }) async {
-    int hostPort;
+    ForwardedPort forwardedPort;
     Uri assumedWsUri;
     try {
-      hostPort = await _portForwarder.forward(
+      forwardedPort = await _portForwarder.forward(
         assumedDevicePort,
         hostPort: hostVmservicePort,
       );
-      assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
+      assumedWsUri = Uri.parse('ws://localhost:${forwardedPort?.hostPort}/ws');
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
       _logger.printTrace('Failed to connect directly, falling back to mDNS');
       _sendFailureEvent(err, assumedDevicePort);
+      await _portForwarder.unforward(forwardedPort);
       return null;
     }
 
@@ -180,7 +181,7 @@ class FallbackDiscovery {
             // This vmService instance must be disposed of, otherwise DDS will
             // fail to start.
             vmService.dispose();
-            return Uri.parse('http://localhost:$hostPort');
+            return Uri.parse('http://localhost:${forwardedPort.hostPort}');
           }
         }
       } on Exception catch (err) {
@@ -200,6 +201,7 @@ class FallbackDiscovery {
       await Future<void>.delayed(_pollingDelay);
       attempts += 1;
     }
+    await _portForwarder.unforward(forwardedPort);
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
     _sendFailureEvent(firstException, assumedDevicePort);
     return null;

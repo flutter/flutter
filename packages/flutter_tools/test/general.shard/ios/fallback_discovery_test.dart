@@ -45,7 +45,7 @@ void main() {
       pollingDelay: Duration.zero,
     );
     when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
-      .thenAnswer((Invocation invocation) async => 1);
+      .thenAnswer((Invocation invocation) async => ForwardedPort(1, 23));
   });
 
   testWithoutContext('Selects assumed port if VM service connection is successful', () async {
@@ -67,6 +67,7 @@ void main() {
       usesIpv6: false,
       packageName: 'hello',
     ), Uri.parse('http://localhost:1'));
+    verifyNever(mockPortForwarder.unforward(any));
   });
 
   testWithoutContext('Selects assumed port when another isolate has no root library', () async {
@@ -92,6 +93,7 @@ void main() {
       usesIpv6: false,
       packageName: 'hello',
     ), Uri.parse('http://localhost:1'));
+    verifyNever(mockPortForwarder.unforward(any));
   });
 
   testWithoutContext('Selects mdns discovery if VM service connecton fails due to Sentinel', () async {
@@ -121,8 +123,9 @@ void main() {
       hostVmservicePort: 1,
       packageId: 'hello',
       usesIpv6: false,
-       packageName: 'hello',
+      packageName: 'hello',
     ), Uri.parse('http://localhost:1234'));
+    verify(mockPortForwarder.unforward(any)).called(1);
   });
 
   testWithoutContext('Selects mdns discovery if VM service connecton fails', () async {
@@ -145,6 +148,7 @@ void main() {
       usesIpv6: false,
        packageName: 'hello',
     ), Uri.parse('http://localhost:1234'));
+    verify(mockPortForwarder.unforward(any)).called(1);
   });
 
   testWithoutContext('Selects log scanning if both VM Service and mDNS fails', () async {
@@ -167,6 +171,7 @@ void main() {
       usesIpv6: false,
       packageName: 'hello',
     ), Uri.parse('http://localhost:5678'));
+    verify(mockPortForwarder.unforward(any)).called(1);
   });
 }
 

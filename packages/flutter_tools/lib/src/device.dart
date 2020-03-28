@@ -939,7 +939,7 @@ abstract class DevicePortForwarder {
   /// Forward [hostPort] on the host to [devicePort] on the device.
   /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<ForwardedPort> forward(int devicePort, { int hostPort });
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
@@ -1001,7 +1001,7 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   const NoOpDevicePortForwarder();
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async => devicePort;
+  Future<ForwardedPort> forward(int devicePort, { int hostPort }) async => ForwardedPort(hostPort, devicePort);
 
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];

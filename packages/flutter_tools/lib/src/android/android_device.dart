@@ -1256,7 +1256,7 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
+  Future<ForwardedPort> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
     final RunResult process = await _processUtils.run(
       <String>[
@@ -1308,7 +1308,7 @@ class AndroidDevicePortForwarder extends DevicePortForwarder {
       }
     }
 
-    return hostPort;
+    return ForwardedPort(hostPort, devicePort);
   }
 
   @override

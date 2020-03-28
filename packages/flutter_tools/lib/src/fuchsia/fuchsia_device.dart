@@ -784,7 +784,8 @@ class FuchsiaIsolateDiscoveryProtocol {
       if (_ports.containsKey(port)) {
         service = _ports[port];
       } else {
-        final int localPort = await _device.portForwarder.forward(port);
+        final ForwardedPort forwardedPort = await _device.portForwarder.forward(port);
+        final int localPort = forwardedPort?.hostPort;
         try {
           final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$localPort');
           await _ddsStarter(_device, uri, true);
@@ -825,7 +826,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   final Map<int, Process> _processes = <int, Process>{};
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<ForwardedPort> forward(int devicePort, {int hostPort}) async {
     hostPort ??= await globals.os.findFreePort();
     if (hostPort == 0) {
       throwToolExit('Failed to forward port $devicePort. No free host-side ports');
@@ -852,8 +853,9 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       }
     }));
     _processes[hostPort] = process;
-    _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
-    return hostPort;
+    final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
+    _forwardedPorts.add(forwardedPort);
+    return forwardedPort;
   }
 
   @override

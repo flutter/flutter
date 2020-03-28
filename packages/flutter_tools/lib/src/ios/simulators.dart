@@ -911,13 +911,14 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => _ports;
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
+  Future<ForwardedPort> forward(int devicePort, { int hostPort }) async {
     if (hostPort == null || hostPort == 0) {
       hostPort = devicePort;
     }
     assert(devicePort == hostPort);
-    _ports.add(ForwardedPort(devicePort, hostPort));
-    return hostPort;
+    final ForwardedPort forwardedPort = ForwardedPort(devicePort, hostPort);
+    _ports.add(forwardedPort);
+    return forwardedPort;
   }
 
   @override

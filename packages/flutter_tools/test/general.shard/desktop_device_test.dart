@@ -188,8 +188,10 @@ void main() {
   test('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = FakeDesktopDevice();
     final DevicePortForwarder portForwarder = device.portForwarder;
-    final int result = await portForwarder.forward(2);
-    expect(result, 2);
+
+    final ForwardedPort result = await portForwarder.forward(1, hostPort: 2);
+    expect(result.devicePort, 1);
+    expect(result.hostPort, 2);
     expect(portForwarder.forwardedPorts.isEmpty, true);
   });
 }

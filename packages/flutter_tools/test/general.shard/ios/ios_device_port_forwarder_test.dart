@@ -43,7 +43,7 @@ void main() {
       logger: BufferLogger.test(),
         operatingSystemUtils: operatingSystemUtils,
     );
-    final int hostPort = await portForwarder.forward(devicePort);
+    final int hostPort = (await portForwarder.forward(devicePort))?.hostPort;
 
     // First port tried (49154) should fail, then succeed on the next
     expect(hostPort, 49154 + 1);

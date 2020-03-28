@@ -372,12 +372,12 @@ class MockPortForwarder extends DevicePortForwarder {
   final int availablePort;
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async {
+  Future<ForwardedPort> forward(int devicePort, { int hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
-      return availablePort;
+      return ForwardedPort(availablePort, devicePort);
     }
-    return hostPort;
+    return ForwardedPort(hostPort, devicePort);
   }
 
   @override

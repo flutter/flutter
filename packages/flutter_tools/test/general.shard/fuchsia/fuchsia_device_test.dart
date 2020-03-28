@@ -780,7 +780,7 @@ void main() {
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
-          .thenAnswer((Invocation invocation) async => 2);
+          .thenAnswer((Invocation invocation) async => ForwardedPort(2, 100));
       setHttpAddress(Uri.parse('example'), fakeVmServiceHost.vmService);
       return await discoveryProtocol.uri;
     }
