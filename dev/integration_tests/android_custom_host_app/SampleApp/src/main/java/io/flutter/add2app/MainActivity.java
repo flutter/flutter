@@ -6,13 +6,7 @@ package io.flutter.add2app;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import io.flutter.facade.Flutter;
+import io.flutter.embedding.android.FlutterActivity;
 
-public class MainActivity extends AppCompatActivity {
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(Flutter.createView(this, getLifecycle(), "route1"));
-  }
+public class MainActivity extends FlutterActivity {
 }
