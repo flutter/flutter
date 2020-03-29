@@ -6,8 +6,32 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'app_bar_theme.dart';
+import 'banner_theme.dart';
+import 'bottom_app_bar_theme.dart';
+import 'bottom_sheet_theme.dart';
+import 'button_bar_theme.dart';
+import 'button_theme.dart';
+import 'card_theme.dart';
+import 'chip_theme.dart';
+import 'color_scheme.dart';
+import 'colors.dart';
+import 'dialog_theme.dart';
+import 'divider_theme.dart';
+import 'floating_action_button_theme.dart';
+import 'ink_well.dart';
+import 'input_decorator.dart';
 import 'material_localizations.dart';
+import 'navigation_rail_theme.dart';
+import 'page_transitions_theme.dart';
+import 'popup_menu_theme.dart';
+import 'slider_theme.dart';
+import 'snack_bar_theme.dart';
+import 'tab_bar_theme.dart';
+import 'text_theme.dart';
 import 'theme_data.dart';
+import 'toggle_buttons_theme.dart';
+import 'tooltip_theme.dart';
 import 'typography.dart';
 
 export 'theme_data.dart' show Brightness, ThemeData;
@@ -42,9 +66,154 @@ class Theme extends StatelessWidget {
     @required this.data,
     this.isMaterialAppTheme = false,
     @required this.child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(data != null),
+        super(key: key);
+
+  /// Creates a theme that controls the the colors and typographic choices of
+  /// descendant widgets, and merges in the current theme, if any.
+  ///
+  /// The [child] argument must not be null.
+  static Widget merge({
+    Key key,
+    Brightness brightness,
+    VisualDensity visualDensity,
+    MaterialColor primarySwatch,
+    Color primaryColor,
+    Brightness primaryColorBrightness,
+    Color primaryColorLight,
+    Color primaryColorDark,
+    Color accentColor,
+    Brightness accentColorBrightness,
+    Color canvasColor,
+    Color scaffoldBackgroundColor,
+    Color bottomAppBarColor,
+    Color cardColor,
+    Color dividerColor,
+    Color focusColor,
+    Color hoverColor,
+    Color highlightColor,
+    Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
+    Color selectedRowColor,
+    Color unselectedWidgetColor,
+    Color disabledColor,
+    Color buttonColor,
+    ButtonThemeData buttonTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
+    Color secondaryHeaderColor,
+    Color textSelectionColor,
+    Color cursorColor,
+    Color textSelectionHandleColor,
+    Color backgroundColor,
+    Color dialogBackgroundColor,
+    Color indicatorColor,
+    Color hintColor,
+    Color errorColor,
+    Color toggleableActiveColor,
+    String fontFamily,
+    TextTheme textTheme,
+    TextTheme primaryTextTheme,
+    TextTheme accentTextTheme,
+    InputDecorationTheme inputDecorationTheme,
+    IconThemeData iconTheme,
+    IconThemeData primaryIconTheme,
+    IconThemeData accentIconTheme,
+    SliderThemeData sliderTheme,
+    TabBarTheme tabBarTheme,
+    TooltipThemeData tooltipTheme,
+    CardTheme cardTheme,
+    ChipThemeData chipTheme,
+    TargetPlatform platform,
+    MaterialTapTargetSize materialTapTargetSize,
+    bool applyElevationOverlayColor,
+    PageTransitionsTheme pageTransitionsTheme,
+    AppBarTheme appBarTheme,
+    BottomAppBarTheme bottomAppBarTheme,
+    ColorScheme colorScheme,
+    DialogTheme dialogTheme,
+    FloatingActionButtonThemeData floatingActionButtonTheme,
+    NavigationRailThemeData navigationRailTheme,
+    Typography typography,
+    CupertinoThemeData cupertinoOverrideTheme,
+    SnackBarThemeData snackBarTheme,
+    BottomSheetThemeData bottomSheetTheme,
+    PopupMenuThemeData popupMenuTheme,
+    MaterialBannerThemeData bannerTheme,
+    DividerThemeData dividerTheme,
+    ButtonBarThemeData buttonBarTheme,
+    @required Widget child,
+  }) {
+    return Builder(
+      builder: (BuildContext context) {
+        return Theme(
+          key: key,
+          data: Theme.of(context).copyWith(
+            brightness: brightness,
+            visualDensity: visualDensity,
+            primarySwatch: primarySwatch,
+            primaryColor: primaryColor,
+            primaryColorLight: primaryColorLight,
+            primaryColorDark: primaryColorDark,
+            accentColor: accentColor,
+            accentColorBrightness: accentColorBrightness,
+            canvasColor: canvasColor,
+            scaffoldBackgroundColor: scaffoldBackgroundColor,
+            bottomAppBarColor: bottomAppBarColor,
+            cardColor: cardColor,
+            dividerColor: dividerColor,
+            focusColor: focusColor,
+            hoverColor: hoverColor,
+            highlightColor: highlightColor,
+            splashColor: splashColor,
+            splashFactory: splashFactory,
+            selectedRowColor: selectedRowColor,
+            unselectedWidgetColor: unselectedWidgetColor,
+            disabledColor: disabledColor,
+            buttonColor: buttonColor,
+            buttonTheme: buttonTheme,
+            toggleButtonsTheme: toggleButtonsTheme,
+            secondaryHeaderColor: secondaryHeaderColor,
+            textSelectionColor: textSelectionColor,
+            cursorColor: cursorColor,
+            textSelectionHandleColor: textSelectionHandleColor,
+            backgroundColor: backgroundColor,
+            dialogBackgroundColor: dialogBackgroundColor,
+            indicatorColor: indicatorColor,
+            hintColor: hintColor,
+            errorColor: errorColor,
+            toggleableActiveColor: toggleableActiveColor,
+            fontFamily: fontFamily,
+            textTheme: textTheme,
+            primaryTextTheme: primaryTextTheme,
+            accentTextTheme: accentTextTheme,
+            inputDecorationTheme: inputDecorationTheme,
+            iconTheme: iconTheme,
+            chipTheme: chipTheme,
+            platform: platform,
+            materialTapTargetSize: materialTapTargetSize,
+            applyElevationOverlayColor: applyElevationOverlayColor,
+            pageTransitionsTheme: pageTransitionsTheme,
+            appBarTheme: appBarTheme,
+            bottomAppBarTheme: bottomAppBarTheme,
+            colorScheme: colorScheme,
+            dialogTheme: dialogTheme,
+            floatingActionButtonTheme: floatingActionButtonTheme,
+            navigationRailTheme: navigationRailTheme,
+            typography: typography,
+            cupertinoOverrideTheme: cupertinoOverrideTheme,
+            snackBarTheme: snackBarTheme,
+            bottomSheetTheme: bottomSheetTheme,
+            popupMenuTheme: popupMenuTheme,
+            bannerTheme: bannerTheme,
+            dividerTheme: dividerTheme,
+            buttonBarTheme: buttonBarTheme,
+          ),
+          child: child,
+        );
+      },
+    );
+  }
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

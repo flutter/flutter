@@ -1025,10 +1025,14 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
-  /// Creates a copy of this theme but with the given fields replaced with the new values.
+  /// Creates a copy of this theme but with the given fields replaced with the
+  /// new values.
+  ///
+  /// All default values of this theme will be recalculated.
   ThemeData copyWith({
     Brightness brightness,
     VisualDensity visualDensity,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color primaryColorLight,
@@ -1048,9 +1052,9 @@ class ThemeData with Diagnosticable {
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
+    Color buttonColor,
     ButtonThemeData buttonTheme,
     ToggleButtonsThemeData toggleButtonsTheme,
-    Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color cursorColor,
@@ -1061,6 +1065,7 @@ class ThemeData with Diagnosticable {
     Color hintColor,
     Color errorColor,
     Color toggleableActiveColor,
+    String fontFamily,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
@@ -1092,72 +1097,393 @@ class ThemeData with Diagnosticable {
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
   }) {
-    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    return ThemeData.raw(
+    final ThemeData dark = ThemeData.dark();
+    final ThemeData light = ThemeData.light();
+
+    final bool thisIsDark = this.brightness == Brightness.dark;
+
+    T thisOrNull<T>(
+      T obj, {
+      @required T dark,
+      @required T light,
+    }) {
+      if ((thisIsDark && obj != dark) || (!thisIsDark && obj != light)) {
+        return obj;
+      } else {
+        return null;
+      }
+    }
+
+    return ThemeData(
       brightness: brightness ?? this.brightness,
       visualDensity: visualDensity ?? this.visualDensity,
-      primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
-      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
-      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
-      accentColor: accentColor ?? this.accentColor,
-      accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
-      canvasColor: canvasColor ?? this.canvasColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
-      bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
-      cardColor: cardColor ?? this.cardColor,
-      dividerColor: dividerColor ?? this.dividerColor,
-      focusColor: focusColor ?? this.focusColor,
-      hoverColor: hoverColor ?? this.hoverColor,
-      highlightColor: highlightColor ?? this.highlightColor,
-      splashColor: splashColor ?? this.splashColor,
-      splashFactory: splashFactory ?? this.splashFactory,
-      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
-      unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
-      disabledColor: disabledColor ?? this.disabledColor,
-      buttonColor: buttonColor ?? this.buttonColor,
-      buttonTheme: buttonTheme ?? this.buttonTheme,
-      toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
-      secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      textSelectionColor: textSelectionColor ?? this.textSelectionColor,
-      cursorColor: cursorColor ?? this.cursorColor,
-      textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
-      indicatorColor: indicatorColor ?? this.indicatorColor,
-      hintColor: hintColor ?? this.hintColor,
-      errorColor: errorColor ?? this.errorColor,
-      toggleableActiveColor: toggleableActiveColor ?? this.toggleableActiveColor,
-      textTheme: textTheme ?? this.textTheme,
-      primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
-      accentTextTheme: accentTextTheme ?? this.accentTextTheme,
-      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
-      iconTheme: iconTheme ?? this.iconTheme,
-      primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
-      accentIconTheme: accentIconTheme ?? this.accentIconTheme,
-      sliderTheme: sliderTheme ?? this.sliderTheme,
-      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
-      tooltipTheme: tooltipTheme ?? this.tooltipTheme,
-      cardTheme: cardTheme ?? this.cardTheme,
-      chipTheme: chipTheme ?? this.chipTheme,
-      platform: platform ?? this.platform,
-      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
-      applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
-      pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
-      appBarTheme: appBarTheme ?? this.appBarTheme,
-      bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
-      colorScheme: colorScheme ?? this.colorScheme,
-      dialogTheme: dialogTheme ?? this.dialogTheme,
-      floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
-      navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
-      typography: typography ?? this.typography,
-      cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
-      snackBarTheme: snackBarTheme ?? this.snackBarTheme,
-      bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
-      popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
-      bannerTheme: bannerTheme ?? this.bannerTheme,
-      dividerTheme: dividerTheme ?? this.dividerTheme,
-      buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
+      primarySwatch: primarySwatch,
+      primaryColor: primaryColor ??
+          thisOrNull(
+            this.primaryColor,
+            dark: dark.primaryColor,
+            light: light.primaryColor,
+          ),
+      primaryColorBrightness: primaryColorBrightness ??
+          thisOrNull(
+            this.primaryColorBrightness,
+            dark: dark.primaryColorBrightness,
+            light: light.primaryColorBrightness,
+          ),
+      primaryColorLight: primaryColorLight ??
+          thisOrNull(
+            this.primaryColorLight,
+            dark: dark.primaryColorLight,
+            light: light.primaryColorLight,
+          ),
+      primaryColorDark: primaryColorDark ??
+          thisOrNull(
+            this.primaryColorDark,
+            dark: dark.primaryColorDark,
+            light: light.primaryColorDark,
+          ),
+      accentColor: accentColor ??
+          thisOrNull(
+            this.accentColor,
+            dark: dark.accentColor,
+            light: light.accentColor,
+          ),
+      accentColorBrightness: accentColorBrightness ??
+          thisOrNull(
+            this.accentColorBrightness,
+            dark: dark.accentColorBrightness,
+            light: light.accentColorBrightness,
+          ),
+      canvasColor: canvasColor ??
+          thisOrNull(
+            this.canvasColor,
+            dark: dark.canvasColor,
+            light: light.canvasColor,
+          ),
+      scaffoldBackgroundColor: scaffoldBackgroundColor ??
+          thisOrNull(
+            this.scaffoldBackgroundColor,
+            dark: dark.scaffoldBackgroundColor,
+            light: light.scaffoldBackgroundColor,
+          ),
+      bottomAppBarColor: bottomAppBarColor ??
+          thisOrNull(
+            this.bottomAppBarColor,
+            dark: dark.bottomAppBarColor,
+            light: light.bottomAppBarColor,
+          ),
+      cardColor: cardColor ??
+          thisOrNull(
+            this.cardColor,
+            dark: dark.cardColor,
+            light: light.cardColor,
+          ),
+      dividerColor: dividerColor ??
+          thisOrNull(
+            this.dividerColor,
+            dark: dark.dividerColor,
+            light: light.dividerColor,
+          ),
+      focusColor: focusColor ??
+          thisOrNull(
+            this.focusColor,
+            dark: dark.focusColor,
+            light: light.focusColor,
+          ),
+      hoverColor: hoverColor ??
+          thisOrNull(
+            this.hoverColor,
+            dark: dark.hoverColor,
+            light: light.hoverColor,
+          ),
+      highlightColor: highlightColor ??
+          thisOrNull(
+            this.highlightColor,
+            dark: dark.highlightColor,
+            light: light.highlightColor,
+          ),
+      splashColor: splashColor ??
+          thisOrNull(
+            this.splashColor,
+            dark: dark.splashColor,
+            light: light.splashColor,
+          ),
+      splashFactory: splashFactory ??
+          thisOrNull(
+            this.splashFactory,
+            dark: dark.splashFactory,
+            light: light.splashFactory,
+          ),
+      selectedRowColor: selectedRowColor ??
+          thisOrNull(
+            this.selectedRowColor,
+            dark: dark.selectedRowColor,
+            light: light.selectedRowColor,
+          ),
+      unselectedWidgetColor: unselectedWidgetColor ??
+          thisOrNull(
+            this.unselectedWidgetColor,
+            dark: dark.unselectedWidgetColor,
+            light: light.unselectedWidgetColor,
+          ),
+      disabledColor: disabledColor ??
+          thisOrNull(
+            this.disabledColor,
+            dark: dark.disabledColor,
+            light: light.disabledColor,
+          ),
+      buttonColor: buttonColor ??
+          thisOrNull(
+            this.buttonColor,
+            dark: dark.buttonColor,
+            light: light.buttonColor,
+          ),
+      buttonTheme: buttonTheme ??
+          thisOrNull(
+            this.buttonTheme,
+            dark: dark.buttonTheme,
+            light: light.buttonTheme,
+          ),
+      toggleButtonsTheme: toggleButtonsTheme ??
+          thisOrNull(
+            this.toggleButtonsTheme,
+            dark: dark.toggleButtonsTheme,
+            light: light.toggleButtonsTheme,
+          ),
+      secondaryHeaderColor: secondaryHeaderColor ??
+          thisOrNull(
+            this.secondaryHeaderColor,
+            dark: dark.secondaryHeaderColor,
+            light: light.secondaryHeaderColor,
+          ),
+      textSelectionColor: textSelectionColor ??
+          thisOrNull(
+            this.textSelectionColor,
+            dark: dark.textSelectionColor,
+            light: light.textSelectionColor,
+          ),
+      cursorColor: cursorColor ??
+          thisOrNull(
+            this.cursorColor,
+            dark: dark.cursorColor,
+            light: light.cursorColor,
+          ),
+      textSelectionHandleColor: textSelectionHandleColor ??
+          thisOrNull(
+            this.textSelectionHandleColor,
+            dark: dark.textSelectionHandleColor,
+            light: light.textSelectionHandleColor,
+          ),
+      backgroundColor: backgroundColor ??
+          thisOrNull(
+            this.backgroundColor,
+            dark: dark.backgroundColor,
+            light: light.backgroundColor,
+          ),
+      dialogBackgroundColor: dialogBackgroundColor ??
+          thisOrNull(
+            this.dialogBackgroundColor,
+            dark: dark.dialogBackgroundColor,
+            light: light.dialogBackgroundColor,
+          ),
+      indicatorColor: indicatorColor ??
+          thisOrNull(
+            this.indicatorColor,
+            dark: dark.indicatorColor,
+            light: light.indicatorColor,
+          ),
+      hintColor: hintColor ??
+          thisOrNull(
+            this.hintColor,
+            dark: dark.hintColor,
+            light: light.hintColor,
+          ),
+      errorColor: errorColor ??
+          thisOrNull(
+            this.errorColor,
+            dark: dark.errorColor,
+            light: light.errorColor,
+          ),
+      toggleableActiveColor: toggleableActiveColor ??
+          thisOrNull(
+            this.toggleableActiveColor,
+            dark: dark.toggleableActiveColor,
+            light: light.toggleableActiveColor,
+          ),
+      textTheme: textTheme ??
+          thisOrNull(
+            this.textTheme,
+            dark: dark.textTheme,
+            light: light.textTheme,
+          ),
+      primaryTextTheme: primaryTextTheme ??
+          thisOrNull(
+            this.primaryTextTheme,
+            dark: dark.primaryTextTheme,
+            light: light.primaryTextTheme,
+          ),
+      accentTextTheme: accentTextTheme ??
+          thisOrNull(
+            this.accentTextTheme,
+            dark: dark.accentTextTheme,
+            light: light.accentTextTheme,
+          ),
+      inputDecorationTheme: inputDecorationTheme ??
+          thisOrNull(
+            this.inputDecorationTheme,
+            dark: dark.inputDecorationTheme,
+            light: light.inputDecorationTheme,
+          ),
+      iconTheme: iconTheme ??
+          thisOrNull(
+            this.iconTheme,
+            dark: dark.iconTheme,
+            light: light.iconTheme,
+          ),
+      primaryIconTheme: primaryIconTheme ??
+          thisOrNull(
+            this.primaryIconTheme,
+            dark: dark.primaryIconTheme,
+            light: light.primaryIconTheme,
+          ),
+      accentIconTheme: accentIconTheme ??
+          thisOrNull(
+            this.accentIconTheme,
+            dark: dark.accentIconTheme,
+            light: light.accentIconTheme,
+          ),
+      sliderTheme: sliderTheme ??
+          thisOrNull(
+            this.sliderTheme,
+            dark: dark.sliderTheme,
+            light: light.sliderTheme,
+          ),
+      tabBarTheme: tabBarTheme ??
+          thisOrNull(
+            this.tabBarTheme,
+            dark: dark.tabBarTheme,
+            light: light.tabBarTheme,
+          ),
+      tooltipTheme: tooltipTheme ??
+          thisOrNull(
+            this.tooltipTheme,
+            dark: dark.tooltipTheme,
+            light: light.tooltipTheme,
+          ),
+      cardTheme: cardTheme ??
+          thisOrNull(
+            this.cardTheme,
+            dark: dark.cardTheme,
+            light: light.cardTheme,
+          ),
+      chipTheme: chipTheme ??
+          thisOrNull(
+            this.chipTheme,
+            dark: dark.chipTheme,
+            light: light.chipTheme,
+          ),
+      platform: platform ??
+          thisOrNull(
+            this.platform,
+            dark: dark.platform,
+            light: light.platform,
+          ),
+      materialTapTargetSize: materialTapTargetSize ??
+          thisOrNull(
+            this.materialTapTargetSize,
+            dark: dark.materialTapTargetSize,
+            light: light.materialTapTargetSize,
+          ),
+      applyElevationOverlayColor: applyElevationOverlayColor ??
+          thisOrNull(
+            this.applyElevationOverlayColor,
+            dark: dark.applyElevationOverlayColor,
+            light: light.applyElevationOverlayColor,
+          ),
+      pageTransitionsTheme: pageTransitionsTheme ??
+          thisOrNull(
+            this.pageTransitionsTheme,
+            dark: dark.pageTransitionsTheme,
+            light: light.pageTransitionsTheme,
+          ),
+      appBarTheme: appBarTheme ??
+          thisOrNull(
+            this.appBarTheme,
+            dark: dark.appBarTheme,
+            light: light.appBarTheme,
+          ),
+      bottomAppBarTheme: bottomAppBarTheme ??
+          thisOrNull(
+            this.bottomAppBarTheme,
+            dark: dark.bottomAppBarTheme,
+            light: light.bottomAppBarTheme,
+          ),
+      colorScheme: colorScheme ??
+          thisOrNull(
+            this.colorScheme,
+            dark: dark.colorScheme,
+            light: light.colorScheme,
+          ),
+      dialogTheme: dialogTheme ??
+          thisOrNull(
+            this.dialogTheme,
+            dark: dark.dialogTheme,
+            light: light.dialogTheme,
+          ),
+      floatingActionButtonTheme: floatingActionButtonTheme ??
+          thisOrNull(
+            this.floatingActionButtonTheme,
+            dark: dark.floatingActionButtonTheme,
+            light: light.floatingActionButtonTheme,
+          ),
+      typography: typography ??
+          thisOrNull(
+            this.typography,
+            dark: dark.typography,
+            light: light.typography,
+          ),
+      cupertinoOverrideTheme: cupertinoOverrideTheme?.noDefault() ??
+          thisOrNull(
+            this.cupertinoOverrideTheme,
+            dark: dark.cupertinoOverrideTheme,
+            light: light.cupertinoOverrideTheme,
+          ),
+      snackBarTheme: snackBarTheme ??
+          thisOrNull(
+            this.snackBarTheme,
+            dark: dark.snackBarTheme,
+            light: light.snackBarTheme,
+          ),
+      bottomSheetTheme: bottomSheetTheme ??
+          thisOrNull(
+            this.bottomSheetTheme,
+            dark: dark.bottomSheetTheme,
+            light: light.bottomSheetTheme,
+          ),
+      popupMenuTheme: popupMenuTheme ??
+          thisOrNull(
+            this.popupMenuTheme,
+            dark: dark.popupMenuTheme,
+            light: light.popupMenuTheme,
+          ),
+      bannerTheme: bannerTheme ??
+          thisOrNull(
+            this.bannerTheme,
+            dark: dark.bannerTheme,
+            light: light.bannerTheme,
+          ),
+      dividerTheme: dividerTheme ??
+          thisOrNull(
+            this.dividerTheme,
+            dark: dark.dividerTheme,
+            light: light.dividerTheme,
+          ),
+      buttonBarTheme: buttonBarTheme ??
+          thisOrNull(
+            this.buttonBarTheme,
+            dark: dark.buttonBarTheme,
+            light: light.buttonBarTheme,
+          ),
     );
   }
 
