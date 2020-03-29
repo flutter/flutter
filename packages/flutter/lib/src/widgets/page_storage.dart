@@ -121,7 +121,7 @@ class PageStorageBucket {
 /// switched out, its widget is destroyed and its state is lost. By adding a
 /// [PageStorage] at the root and adding a [PageStorageKey] to each page, few
 /// page's state, like Scrollable Widgets, will be stored automatically in its closest ancestor [PageStorage], and
-/// restored when it's switched back. Only the state knowing how to use [PageStorage] is persisted.
+/// restored when it's switched back.
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
 /// included in routes.
