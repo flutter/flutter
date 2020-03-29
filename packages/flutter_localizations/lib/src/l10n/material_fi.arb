@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 merkki jäljellä",
   "remainingTextFieldCharacterCountOther": "$remainingCount merkkiä jäljellä",
   "refreshIndicatorSemanticLabel": "Päivitys",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Lisää"
 }

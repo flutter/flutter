@@ -2544,7 +2544,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get alertDialogLabel => 'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => 'A.M.';
+  String get anteMeridiemAbbreviation => 'a. m.';
 
   @override
   String get copyButtonLabel => 'Copiar';
@@ -2598,10 +2598,10 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get pasteButtonLabel => 'Pegar';
 
   @override
-  String get postMeridiemAbbreviation => 'P.M.';
+  String get postMeridiemAbbreviation => 'p. m.';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todo';
+  String get selectAllButtonLabel => 'Seleccionar todos';
 
   @override
   String get timerPickerHourLabelFew => null;
@@ -2695,16 +2695,10 @@ class CupertinoLocalizationEs419 extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Argentina (`es_AR`).
@@ -2741,16 +2735,10 @@ class CupertinoLocalizationEsAr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Bolivia (`es_BO`).
@@ -2787,16 +2775,10 @@ class CupertinoLocalizationEsBo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Chile (`es_CL`).
@@ -2833,16 +2815,10 @@ class CupertinoLocalizationEsCl extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Colombia (`es_CO`).
@@ -2879,16 +2855,10 @@ class CupertinoLocalizationEsCo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Costa Rica (`es_CR`).
@@ -2925,16 +2895,10 @@ class CupertinoLocalizationEsCr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in the Dominican Republic (`es_DO`).
@@ -2971,16 +2935,10 @@ class CupertinoLocalizationEsDo extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Ecuador (`es_EC`).
@@ -3017,16 +2975,10 @@ class CupertinoLocalizationEsEc extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Guatemala (`es_GT`).
@@ -3063,16 +3015,10 @@ class CupertinoLocalizationEsGt extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Honduras (`es_HN`).
@@ -3109,16 +3055,10 @@ class CupertinoLocalizationEsHn extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Mexico (`es_MX`).
@@ -3155,16 +3095,10 @@ class CupertinoLocalizationEsMx extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Nicaragua (`es_NI`).
@@ -3201,16 +3135,10 @@ class CupertinoLocalizationEsNi extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Panama (`es_PA`).
@@ -3247,16 +3175,10 @@ class CupertinoLocalizationEsPa extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Peru (`es_PE`).
@@ -3293,16 +3215,10 @@ class CupertinoLocalizationEsPe extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Puerto Rico (`es_PR`).
@@ -3339,16 +3255,10 @@ class CupertinoLocalizationEsPr extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Paraguay (`es_PY`).
@@ -3385,16 +3295,10 @@ class CupertinoLocalizationEsPy extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in El Salvador (`es_SV`).
@@ -3431,16 +3335,10 @@ class CupertinoLocalizationEsSv extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in the United States (`es_US`).
@@ -3477,16 +3375,10 @@ class CupertinoLocalizationEsUs extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Uruguay (`es_UY`).
@@ -3523,16 +3415,10 @@ class CupertinoLocalizationEsUy extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Spanish Castilian, as used in Venezuela (`es_VE`).
@@ -3569,16 +3455,10 @@ class CupertinoLocalizationEsVe extends CupertinoLocalizationEs {
   String get datePickerHourSemanticsLabelOther => '\$hour en punto';
 
   @override
-  String get datePickerDateOrderString => 'mdy';
-
-  @override
   String get anteMeridiemAbbreviation => 'a.m.';
 
   @override
   String get postMeridiemAbbreviation => 'p.m.';
-
-  @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
 }
 
 /// The translations for Estonian (`et`).
