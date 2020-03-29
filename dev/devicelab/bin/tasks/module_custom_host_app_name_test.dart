@@ -198,7 +198,7 @@ Future<void> main() async {
           await exec('chmod', <String>['+x', 'gradlew']);
         }
         await exec(gradlewExecutable,
-          <String>['app:assembleDebug'],
+          <String>['SampleApp:assembleDebug'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -210,12 +210,12 @@ Future<void> main() async {
 
       final String debugHostApk = path.join(
         hostApp.path,
-        'app',
+        'SampleApp',
         'build',
         'outputs',
         'apk',
         'debug',
-        'app-debug.apk',
+        'SampleApp-debug.apk',
       );
       if (!exists(File(debugHostApk))) {
         return TaskResult.failure('Failed to build debug host APK');
@@ -255,7 +255,7 @@ Future<void> main() async {
 
       final String readonlyDebugAssetFilePath = path.join(
         hostApp.path,
-        'app',
+        'SampleApp',
         'build',
         'intermediates',
         'merged_assets',
@@ -278,7 +278,7 @@ Future<void> main() async {
 
       await inDirectory(hostApp, () async {
         await exec(gradlewExecutable,
-          <String>['app:assembleRelease'],
+          <String>['SampleApp:assembleRelease'],
           environment: <String, String>{
             'JAVA_HOME': javaHome,
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -288,12 +288,12 @@ Future<void> main() async {
 
       final String releaseHostApk = path.join(
         hostApp.path,
-        'app',
+        'SampleApp',
         'build',
         'outputs',
         'apk',
         'release',
-        'app-release-unsigned.apk',
+        'SampleApp-release-unsigned.apk',
       );
       if (!exists(File(releaseHostApk))) {
         return TaskResult.failure('Failed to build release host APK');
@@ -325,7 +325,7 @@ Future<void> main() async {
 
       final String readonlyReleaseAssetFilePath = path.join(
         hostApp.path,
-        'app',
+        'SampleApp',
         'build',
         'intermediates',
         'merged_assets',
