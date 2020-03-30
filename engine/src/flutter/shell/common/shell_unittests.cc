@@ -1132,8 +1132,7 @@ TEST_F(ShellTest, CanDecompressImageFromAsset) {
   DestroyShell(std::move(shell));
 }
 
-// TODO(53399): Re-enable once it passes on Fuchsia.
-TEST_F(ShellTest, DISABLED_OnServiceProtocolGetSkSLsWorks) {
+TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
   // Create 2 dummpy SkSL cache file IE (base32 encoding of A), II (base32
   // encoding of B) with content x and y.
   fml::ScopedTemporaryDirectory temp_dir;
