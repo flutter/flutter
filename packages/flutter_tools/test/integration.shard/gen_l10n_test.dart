@@ -112,7 +112,6 @@ void main() {
       '#l10n 33 (Flutter\'s amazing!)\n'
       '#l10n 34 (Flutter is "amazing"!)\n'
       '#l10n END\n'
-      ''
     );
   });
 }
