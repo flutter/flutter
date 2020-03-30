@@ -136,7 +136,7 @@ Future<void> buildWithAssemble({
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()
     : const ReleaseCopyFlutterBundle();
-  final BuildResult result = await buildSystem.build(target, environment);
+  final BuildResult result = await globals.buildSystem.build(target, environment);
 
   if (!result.success) {
     for (final ExceptionMeasurement measurement in result.exceptions.values) {

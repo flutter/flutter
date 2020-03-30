@@ -335,7 +335,7 @@ class UpgradeCommandRunner {
 
   //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
   //  delete mode 100644 doc/index.html
-  //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
+  //  create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart
   static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
 
   static bool matchesGitLine(String line) {

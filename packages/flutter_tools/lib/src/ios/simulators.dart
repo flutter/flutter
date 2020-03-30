@@ -43,15 +43,16 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get canListAnything => globals.iosWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async => _iosSimulatorUtils.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async => _iosSimulatorUtils.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
-    @required SimControl simControl,
     @required Xcode xcode,
-  }) : _simControl = simControl,
-       _xcode = xcode;
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _simControl = SimControl(logger: logger, processManager: processManager),
+      _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
@@ -405,6 +406,7 @@ class IOSSimulator extends Device {
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
+        if (debuggingOptions.traceWhitelist != null) '--trace-whitelist="${debuggingOptions.traceWhitelist}"',
         '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];
@@ -518,8 +520,12 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ covariant IOSApp app }) {
+  DeviceLogReader getLogReader({
+    covariant IOSApp app,
+    bool includePastLogs = false,
+  }) {
     assert(app is IOSApp);
+    assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }
@@ -658,6 +664,10 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   static final RegExp _flutterRunnerRegex = RegExp(r' FlutterRunner\[\d+\] ');
 
+  // Remember what we did with the last line, in case we need to process
+  // a multiline record
+  bool _lastLineMatched = false;
+
   String _filterDeviceLine(String string) {
     final Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
@@ -709,6 +719,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       return null;
     }
 
+    // Starts with space(s) - continuation of the multiline message
+    if (RegExp(r'\s+').matchAsPrefix(string) != null && !_lastLineMatched) {
+      return null;
+    }
+
     return string;
   }
 
@@ -730,6 +745,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       _lastLine = _filterDeviceLine(line);
       if (_lastLine != null) {
         _linesController.add(_lastLine);
+        _lastLineMatched = true;
+      } else {
+        _lastLineMatched = false;
       }
     }
   }

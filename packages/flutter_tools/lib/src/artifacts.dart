@@ -18,7 +18,6 @@ enum Artifact {
   genSnapshot,
   /// The flutter tester binary.
   flutterTester,
-  snapshotDart,
   flutterFramework,
   /// The framework directory of the macOS desktop.
   flutterMacOSFramework,
@@ -73,8 +72,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'gen_snapshot';
     case Artifact.flutterTester:
       return 'flutter_tester$exe';
-    case Artifact.snapshotDart:
-      return 'snapshot.dart';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
     case Artifact.flutterMacOSFramework:
@@ -155,9 +152,8 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
-  static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
+  static LocalEngineArtifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(
-      engineSrcPath,
       engineBuildPaths.targetEngine,
       engineBuildPaths.hostEngine,
       cache: globals.cache,
@@ -247,7 +243,6 @@ class CachedArtifacts extends Artifacts {
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
-      case Artifact.snapshotDart:
       case Artifact.flutterFramework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String artifactFileName = _artifactToFileName(artifact);
@@ -441,7 +436,6 @@ HostPlatform _currentHostPlatformAsHost(Platform platform) {
 /// Manages the artifacts of a locally built engine.
 class LocalEngineArtifacts extends Artifacts {
   LocalEngineArtifacts(
-    this._engineSrcPath,
     this.engineOutPath,
     this._hostEngineOutPath, {
     @required FileSystem fileSystem,
@@ -453,7 +447,6 @@ class LocalEngineArtifacts extends Artifacts {
        _processManager = processManager,
        _platform = platform;
 
-  final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
   final String _hostEngineOutPath;
   final FileSystem _fileSystem;
@@ -466,8 +459,6 @@ class LocalEngineArtifacts extends Artifacts {
     platform ??= _currentHostPlatform(_platform);
     final String artifactFileName = _artifactToFileName(artifact, platform, mode);
     switch (artifact) {
-      case Artifact.snapshotDart:
-        return _fileSystem.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
       case Artifact.genSnapshot:
         return _genSnapshotPath();
       case Artifact.flutterTester:

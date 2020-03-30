@@ -587,7 +587,9 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        globals.fs.currentDirectory = cwd;
+        // If the full directory is used instead of the path then this causes
+        // a TypeError with the ErrorHandlingFileSystem.
+        globals.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });

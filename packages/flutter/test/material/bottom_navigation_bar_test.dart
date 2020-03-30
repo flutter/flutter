@@ -913,7 +913,7 @@ void main() {
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
     double builderIconSize;
@@ -1023,7 +1023,7 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(66.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
@@ -1055,7 +1055,7 @@ void main() {
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
     final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1125,7 +1125,7 @@ void main() {
           ..translate(x: 400.0)
           ..circle(x: 200.0),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
     const Key filled = Key('filled');
@@ -1452,7 +1452,7 @@ void main() {
           find.byType(BottomNavigationBar),
           matchesGoldenFile('bottom_navigation_bar.shifting_transition.${pump - 1}.png'),
         );
-      }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
+      });
     }
   });
 

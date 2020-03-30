@@ -196,7 +196,7 @@ class StdoutHandler {
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
+    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath), fileSystem: globals.fs).map;
     final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
     final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
     for (final String packageName in packageMap.keys) {
@@ -656,6 +656,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       sdkRoot,
       '--incremental',
       '--target=$targetModel',
+      // TODO(jonahwilliams): remove once this becomes the default behavior
+      // in the frontend_server.
+      // https://github.com/flutter/flutter/issues/52693
+      '--debugger-module-names',
       '-Ddart.developer.causal_async_stacks=${buildMode == BuildMode.debug}',
       for (final Object dartDefine in dartDefines)
         '-D$dartDefine',

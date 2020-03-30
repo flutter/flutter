@@ -1112,7 +1112,21 @@ class TextTreeRenderer {
   }) {
     if (kReleaseMode) {
       return '';
+    } else {
+      return _debugRender(
+          node,
+          prefixLineOne: prefixLineOne,
+          prefixOtherLines: prefixOtherLines,
+          parentConfiguration: parentConfiguration);
     }
+  }
+
+  String _debugRender(
+    DiagnosticsNode node, {
+    String prefixLineOne = '',
+    String prefixOtherLines,
+    TextTreeConfiguration parentConfiguration,
+  }) {
     final bool isSingleLine = _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
     prefixOtherLines ??= prefixLineOne;
     if (node.linePrefix != null) {
@@ -1536,49 +1550,51 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    if (kReleaseMode) {
-      return <String, Object>{};
-    }
-    final bool hasChildren = getChildren().isNotEmpty;
-    return <String, Object>{
-      'description': toDescription(),
-      'type': runtimeType.toString(),
-      if (name != null)
-        'name': name,
-      if (!showSeparator)
-        'showSeparator': showSeparator,
-      if (level != DiagnosticLevel.info)
-        'level': describeEnum(level),
-      if (showName == false)
-        'showName': showName,
-      if (emptyBodyDescription != null)
-        'emptyBodyDescription': emptyBodyDescription,
-      if (style != DiagnosticsTreeStyle.sparse)
-        'style': describeEnum(style),
-      if (allowTruncate)
-        'allowTruncate': allowTruncate,
-      if (hasChildren)
-        'hasChildren': hasChildren,
-      if (linePrefix?.isNotEmpty == true)
-        'linePrefix': linePrefix,
-      if (!allowWrap)
-        'allowWrap': allowWrap,
-      if (allowNameWrap)
-        'allowNameWrap': allowNameWrap,
-      ...delegate.additionalNodeProperties(this),
-      if (delegate.includeProperties)
-        'properties': toJsonList(
-          delegate.filterProperties(getProperties(), this),
-          this,
-          delegate,
-        ),
-      if (delegate.subtreeDepth > 0)
-        'children': toJsonList(
-          delegate.filterChildren(getChildren(), this),
-          this,
-          delegate,
-        ),
-    };
+    Map<String, Object> result = <String, Object>{};
+    assert(() {
+      final bool hasChildren = getChildren().isNotEmpty;
+      result = <String, Object>{
+        'description': toDescription(),
+        'type': runtimeType.toString(),
+        if (name != null)
+          'name': name,
+        if (!showSeparator)
+          'showSeparator': showSeparator,
+        if (level != DiagnosticLevel.info)
+          'level': describeEnum(level),
+        if (showName == false)
+          'showName': showName,
+        if (emptyBodyDescription != null)
+          'emptyBodyDescription': emptyBodyDescription,
+        if (style != DiagnosticsTreeStyle.sparse)
+          'style': describeEnum(style),
+        if (allowTruncate)
+          'allowTruncate': allowTruncate,
+        if (hasChildren)
+          'hasChildren': hasChildren,
+        if (linePrefix?.isNotEmpty == true)
+          'linePrefix': linePrefix,
+        if (!allowWrap)
+          'allowWrap': allowWrap,
+        if (allowNameWrap)
+          'allowNameWrap': allowNameWrap,
+        ...delegate.additionalNodeProperties(this),
+        if (delegate.includeProperties)
+          'properties': toJsonList(
+            delegate.filterProperties(getProperties(), this),
+            this,
+            delegate,
+          ),
+        if (delegate.subtreeDepth > 0)
+          'children': toJsonList(
+            delegate.filterChildren(getChildren(), this),
+            this,
+            delegate,
+          ),
+      };
+      return true;
+    }());
+    return result;
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -1622,22 +1638,28 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
-    if (kReleaseMode) {
-      return super.toString();
-    }
+    String result = super.toString();
     assert(style != null);
     assert(minLevel != null);
-    if (_isSingleLine(style))
-      return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
+    assert(() {
+      if (_isSingleLine(style)) {
+        result = toStringDeep(
+            parentConfiguration: parentConfiguration, minLevel: minLevel);
+      } else {
+        final String description = toDescription(
+            parentConfiguration: parentConfiguration);
+        assert(description != null);
 
-    final String description = toDescription(parentConfiguration: parentConfiguration);
-    assert(description != null);
-
-    if (name == null || name.isEmpty || !showName)
-      return description;
-
-    return description.contains('\n') ? '$name$_separator\n$description'
-                                      : '$name$_separator $description';
+        if (name == null || name.isEmpty || !showName) {
+          result = description;
+        } else {
+          result = description.contains('\n') ? '$name$_separator\n$description'
+              : '$name$_separator $description';
+        }
+      }
+      return true;
+    }());
+    return result;
   }
 
   /// Returns a configuration specifying how this object should be rendered
@@ -1699,19 +1721,21 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    return TextTreeRenderer(
-      minLevel: minLevel,
-      wrapWidth: 65,
-      wrapWidthProperties: 65,
-    ).render(
-      this,
-      prefixLineOne: prefixLineOne,
-      prefixOtherLines: prefixOtherLines,
-      parentConfiguration: parentConfiguration,
-    );
+    String result = '';
+    assert(() {
+      result = TextTreeRenderer(
+        minLevel: minLevel,
+        wrapWidth: 65,
+        wrapWidthProperties: 65,
+      ).render(
+        this,
+        prefixLineOne: prefixLineOne,
+        prefixOtherLines: prefixOtherLines,
+        parentConfiguration: parentConfiguration,
+      );
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -2893,13 +2917,18 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   ///
   /// It will cache the result to prevent duplicate operation.
   DiagnosticPropertiesBuilder get builder {
-    if (kReleaseMode)
+    if (kReleaseMode) {
       return null;
-    if (_cachedBuilder == null) {
-      _cachedBuilder = DiagnosticPropertiesBuilder();
-      value?.debugFillProperties(_cachedBuilder);
+    } else {
+      assert(() {
+        if (_cachedBuilder == null) {
+          _cachedBuilder = DiagnosticPropertiesBuilder();
+          value?.debugFillProperties(_cachedBuilder);
+        }
+        return true;
+      }());
+      return _cachedBuilder;
     }
-    return _cachedBuilder;
   }
 
   @override
@@ -2920,10 +2949,12 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   String toDescription({ TextTreeConfiguration parentConfiguration }) {
-    if (kReleaseMode) {
-      return '';
-    }
-    return value.toStringShort();
+    String result = '';
+    assert(() {
+      result = value.toStringShort();
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -3002,9 +3033,10 @@ class DiagnosticPropertiesBuilder {
 
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    if (!kReleaseMode) {
+    assert(() {
       properties.add(property);
-    }
+      return true;
+    }());
   }
 
   /// List of properties accumulated so far.
@@ -3376,15 +3408,21 @@ abstract class DiagnosticableTree with Diagnosticable {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toString());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toString());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3463,15 +3501,21 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     if (kReleaseMode) {
       return toString();
     }
-    final StringBuffer result = StringBuffer();
-    result.write(toStringShort());
-    result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    debugFillProperties(builder);
-    result.write(
-      builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
-    );
-    return result.toString();
+    String shallowString;
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      result.write(toStringShort());
+      result.write(joiner);
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      result.write(
+        builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel))
+            .join(joiner),
+      );
+      shallowString = result.toString();
+      return true;
+    }());
+    return shallowString;
   }
 
   @override

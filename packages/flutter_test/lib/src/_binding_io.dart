@@ -84,7 +84,7 @@ class _MockHttpOverrides extends HttpOverrides {
         'Warning: At least one test in this suite creates an HttpClient. When\n'
         'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
         'requests will return status code 400, and no network request will\n'
-        'actually be made. Any test expecting an real network connection and\n'
+        'actually be made. Any test expecting a real network connection and\n'
         'status code will fail.\n'
         'To test code that needs an HttpClient, provide your own HttpClient\n'
         'implementation to the code under test, so that your test can\n'

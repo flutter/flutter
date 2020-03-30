@@ -79,7 +79,12 @@ class FlutterTesterDevice extends Device {
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    return _logReader;
+  }
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
@@ -246,7 +251,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 }

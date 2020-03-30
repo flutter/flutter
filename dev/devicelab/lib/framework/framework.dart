@@ -251,6 +251,9 @@ class TaskResult {
 
     return json;
   }
+
+  @override
+  String toString() => message;
 }
 
 class TaskResultCheckProcesses extends TaskResult {

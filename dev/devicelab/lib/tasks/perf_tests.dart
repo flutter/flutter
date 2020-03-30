@@ -30,9 +30,17 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createPlatformViewsScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/scroll_perf.dart',
+    'platform_views_scroll_perf',
+  ).run;
+}
+
 TaskFunction createHomeScrollPerfTest() {
   return PerfTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     'test_driver/scroll_perf.dart',
     'home_scroll_perf',
   ).run;
@@ -100,7 +108,7 @@ TaskFunction createPictureCachePerfTest() {
 
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
-    '${flutterDirectory.path}/examples/flutter_gallery',
+    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
   ).run;
 }
 
@@ -118,7 +126,7 @@ TaskFunction createHelloWorldStartupTest() {
 }
 
 TaskFunction createFlutterGalleryCompileTest() {
-  return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
+  return CompileTest('${flutterDirectory.path}/dev/integration_tests/flutter_gallery').run;
 }
 
 TaskFunction createHelloWorldCompileTest() {
@@ -170,6 +178,14 @@ TaskFunction createTextfieldPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/textfield_perf.dart',
     'textfield_perf',
+  ).run;
+}
+
+TaskFunction createColorFilterAndFadePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/color_filter_and_fade_perf.dart',
+    'color_filter_and_fade_perf',
   ).run;
 }
 
@@ -259,12 +275,10 @@ class PerfTest {
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
-        'missed_frame_build_budget_count',
         '90th_percentile_frame_build_time_millis',
         '99th_percentile_frame_build_time_millis',
         'average_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
-        'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
         if (needsMeasureCpuGPu) 'cpu_percentage',
@@ -295,7 +309,7 @@ class WebCompileTest {
       await _measureSize('hello_world', output, metrics);
       return null;
     });
-    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
+    await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', () async {
       await flutter('packages', options: <String>['get']);
       await evalFlutter('build', options: <String>[
         'web',
@@ -305,7 +319,7 @@ class WebCompileTest {
       ], environment: <String, String>{
         'FLUTTER_WEB': 'true',
       });
-      final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
+      final String output = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery/build/web/main.dart.js';
       await _measureSize('flutter_gallery', output, metrics);
       return null;
     });

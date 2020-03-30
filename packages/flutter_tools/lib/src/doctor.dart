@@ -56,6 +56,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
+  final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
+  final WebWorkflow webWorkflow = WebWorkflow(
+    platform: globals.platform,
+    featureFlags: featureFlags,
+  );
+
   @override
   List<DoctorValidator> get validators {
     if (_validators != null) {
@@ -67,17 +77,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       ...IntelliJValidator.installedValidators,
       ...VsCodeValidator.installedValidators,
     ];
-    final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
-      platform: globals.platform,
-      featureFlags: featureFlags,
-    );
-
     _validators = <DoctorValidator>[
       FlutterValidator(),
       if (androidWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
         WebValidator(
           chromeLauncher: globals.chromeLauncher,
@@ -119,10 +124,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _workflows.add(fuchsiaWorkflow);
       }
 
-      final LinuxWorkflow linuxWorkflow = LinuxWorkflow(
-        platform: globals.platform,
-        featureFlags: featureFlags,
-      );
       if (linuxWorkflow.appliesToHostPlatform) {
         _workflows.add(linuxWorkflow);
       }
@@ -228,8 +229,8 @@ class Doctor {
       buffer.write(wrapText(
         lineBuffer.toString(),
         hangingIndent: result.leadingBox.length + 1,
-        columnWidth: outputPreferences.wrapColumn,
-        shouldWrap: outputPreferences.wrapText,
+        columnWidth: globals.outputPreferences.wrapColumn,
+        shouldWrap: globals.outputPreferences.wrapText,
       ));
       buffer.writeln();
 
@@ -639,7 +640,8 @@ class FlutterValidator extends DoctorValidator {
       globals.artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
-    if (!_genSnapshotRuns(genSnapshotPath)) {
+    if (globals.fs.file(genSnapshotPath).existsSync()
+        && !_genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buf = StringBuffer();
       buf.writeln(userMessages.flutterBinariesDoNotRun);
       if (globals.platform.isLinux) {

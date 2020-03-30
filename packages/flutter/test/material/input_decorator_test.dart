@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // needs substantial triage.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -2627,7 +2626,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 16.0);
     expect(getBorderBottom(tester), kMinInteractiveDimension); // 40 bumped up to minimum.
     expect(getBorderWeight(tester), 1.0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2667,7 +2666,7 @@ void main() {
     expect(tester.getSize(find.text('hint')).height, 16.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
     expect(getBorderWeight(tester), 0.0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('InputDecorator with baseStyle', (WidgetTester tester) async {
     // Setting the baseStyle of the InputDecoration and the style of the input
@@ -2708,7 +2707,7 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')).dy, 24.75);
     expect(tester.getTopLeft(find.text('label')).dy, 19.0);
     expect(tester.getTopLeft(find.text('text')).dy, 24.75);
-  }, skip: isBrowser);
+  });
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
     // Same as not specifying any style overrides
@@ -2750,7 +2749,7 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2804,7 +2803,7 @@ void main() {
 
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
-  }, skip: isBrowser);
+  });
 
   test('InputDecorationTheme copyWith, ==, hashCode basics', () {
     expect(const InputDecorationTheme(), const InputDecorationTheme().copyWith());
@@ -2850,7 +2849,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3670,7 +3669,7 @@ void main() {
       )
       ..restore(),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
@@ -3880,6 +3879,6 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')).dy, 28.75);
 
     // Ideographic (incorrect) value is 50.299999713897705
-    expect(tester.getBottomLeft(find.text('hint')).dy, 47.75);
+    expect(tester.getBottomLeft(find.text('hint')).dy, isBrowser ? 45.75 : 47.75);
   });
 }

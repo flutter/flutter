@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -23,147 +22,12 @@ import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
-
-class MockFile extends Mock implements File {
-  @override
-  bool existsSync() {
-    return true;
-  }
-
-  @override
-  String get path => '.';
-}
-
-class MockAndroidApk extends Mock implements AndroidApk {
-  @override
-  String get id => '0';
-
-  @override
-  File get file => MockFile();
-}
-
-class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
 void main() {
-  group('android_device', () {
-    testUsingContext('stores the requested id', () {
-      const String deviceId = '1234';
-      final AndroidDevice device = AndroidDevice(deviceId);
-      expect(device.id, deviceId);
-    });
-
-    group('startApp', () {
-      MockAndroidApk mockApk;
-      MockProcessManager mockProcessManager;
-      MockAndroidSdk mockAndroidSdk;
-
-      setUp(() {
-        mockApk = MockAndroidApk();
-        mockProcessManager = MockProcessManager();
-        mockAndroidSdk = MockAndroidSdk();
-      });
-
-      testUsingContext('succeeds with --cache-sksl', () async {
-        const String deviceId = '1234';
-        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
-
-        final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        globals.config.setValue('android-sdk', sdkDir.path);
-        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
-
-        when(mockAndroidSdk.licensesAvailable).thenReturn(true);
-        when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
-
-        when(mockProcessManager.run(
-          <String>[adbExe.path, '-s', deviceId, 'shell', 'getprop'],
-          stdoutEncoding: latin1,
-          stderrEncoding: latin1,
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]', '');
-        });
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '', '');
-        });
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return FakeProcess();
-        });
-
-        final LaunchResult launchResult = await device.startApp(
-          mockApk,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
-            cacheSkSL: true,
-          ),
-          platformArgs: <String, dynamic>{},
-        );
-
-        expect(launchResult.started, isTrue);
-        expect(verify(mockProcessManager.run(captureAny)).captured.last.join(','),
-          contains(<String>['--ez', 'cache-sksl', 'true'].join(',')));
-      }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FileSystem: () => MemoryFileSystem(),
-        ProcessManager: () => mockProcessManager,
-      });
-
-      testUsingContext('can run a release build on x64', () async {
-        const String deviceId = '1234';
-        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
-
-        final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        globals.config.setValue('android-sdk', sdkDir.path);
-        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
-
-        when(mockAndroidSdk.licensesAvailable).thenReturn(true);
-        when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
-
-        when(mockProcessManager.run(
-          <String>[adbExe.path, '-s', deviceId, 'shell', 'getprop'],
-          stdoutEncoding: latin1,
-          stderrEncoding: latin1,
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
-        });
-        when(mockProcessManager.run(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return ProcessResult(0, 0, '', '');
-        });
-        when(mockProcessManager.start(
-          any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')
-        )).thenAnswer((_) async {
-          return FakeProcess();
-        });
-
-        final LaunchResult launchResult = await device.startApp(
-          mockApk,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(
-            const BuildInfo(BuildMode.release, null, treeShakeIcons: false),
-          ),
-          platformArgs: <String, dynamic>{},
-        );
-        expect(launchResult.started, true);
-      }, overrides: <Type, Generator>{
-        AndroidSdk: () => mockAndroidSdk,
-        FileSystem: () => MemoryFileSystem(),
-        ProcessManager: () => mockProcessManager,
-      });
-    });
+  testUsingContext('AndroidDevice stores the requested id', () {
+    const String deviceId = '1234';
+    final AndroidDevice device = AndroidDevice(deviceId);
+    expect(device.id, deviceId);
   });
 
   group('parseAdbDeviceProperties', () {
@@ -604,14 +468,45 @@ flutter:
     });
   });
 
-  group('lastLogcatTimestamp', () {
+  group('logcat', () {
     final ProcessManager mockProcessManager = MockProcessManager();
     final AndroidDevice device = AndroidDevice('1234');
 
-    testUsingContext('returns null if shell command failed', () async {
+    testUsingContext('lastLogcatTimestamp returns null if shell command failed', () async {
       when(mockProcessManager.runSync(argThat(contains('logcat'))))
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(device.lastLogcatTimestamp, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('AdbLogReaders for past+future and future logs are not the same', () async {
+      when(mockProcessManager.run(
+        argThat(contains('getprop')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.build.version.sdk]: [23]');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+      when(mockProcessManager.run(
+        argThat(contains('shell')),
+        stderrEncoding: anyNamed('stderrEncoding'),
+        stdoutEncoding: anyNamed('stdoutEncoding'),
+      )).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('11-27 15:39:04.506');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+      final DeviceLogReader pastLogReader = await device.getLogReader(includePastLogs: true);
+      final DeviceLogReader defaultLogReader = await device.getLogReader();
+      expect(pastLogReader, isNot(equals(defaultLogReader)));
+      // Getting again is cached.
+      expect(pastLogReader, equals(await device.getLogReader(includePastLogs: true)));
+      expect(defaultLogReader, equals(await device.getLogReader()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

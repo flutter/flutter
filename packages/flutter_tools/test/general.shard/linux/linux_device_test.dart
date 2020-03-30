@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -17,14 +16,17 @@ import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   final LinuxDevice device = LinuxDevice();
   final MockPlatform notLinux = MockPlatform();
-
   when(notLinux.isLinux).thenReturn(false);
 
-  testUsingContext('LinuxDevice defaults', () async {
+  final MockPlatform mockLinuxPlatform = MockPlatform();
+  when(mockLinuxPlatform.isLinux).thenReturn(true);
+
+  testWithoutContext('LinuxDevice defaults', () async {
     final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
     expect(device.name, 'Linux');
@@ -36,11 +38,34 @@ void main() {
     expect(device.category, Category.desktop);
   });
 
-  testUsingContext('LinuxDevice: no devices listed if platform unsupported', () async {
+  testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(await LinuxDevices(
       platform: notLinux,
-      featureFlags: featureFlags,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
     ).devices, <Device>[]);
+  });
+
+  testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
+    expect(await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
+    ).devices, <Device>[]);
+  });
+
+  testWithoutContext('LinuxDevice: devices', () async {
+    expect(await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+    ).devices, hasLength(1));
+  });
+
+  testWithoutContext('LinuxDevice: discoverDevices', () async {
+    // Timeout ignored.
+    final List<Device> devices = await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+    ).discoverDevices(timeout: const Duration(seconds: 10));
+    expect(devices, hasLength(1));
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
