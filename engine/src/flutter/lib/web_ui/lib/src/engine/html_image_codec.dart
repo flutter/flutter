@@ -49,7 +49,7 @@ class HtmlCodec implements ui.Codec {
           imgElement.naturalHeight,
         );
         completer.complete(SingleFrameInfo(image));
-      }).catchError((e) {
+      }).catchError((dynamic e) {
         // This code path is hit on Chrome 80.0.3987.16 when too many
         // images are on the page (~1000).
         // Fallback here is to load using onLoad instead.

@@ -8,7 +8,9 @@ part of engine;
 Int32List _encodeColorList(List<ui.Color> colors) {
   final int colorCount = colors.length;
   final Int32List result = Int32List(colorCount);
-  for (int i = 0; i < colorCount; ++i) result[i] = colors[i].value;
+  for (int i = 0; i < colorCount; ++i) {
+    result[i] = colors[i].value;
+  }
   return result;
 }
 
@@ -117,7 +119,9 @@ class SkVertices implements ui.Vertices {
   }
 
   static js.JsArray<js.JsArray<double>> _encodePoints(List<double> points) {
-    if (points == null) return null;
+    if (points == null) {
+      return null;
+    }
 
     js.JsArray<js.JsArray<double>> encodedPoints =
         js.JsArray<js.JsArray<double>>();
