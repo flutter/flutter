@@ -43,21 +43,21 @@ void main() {
     });
 
     testUsingContext('getAllConnectedDevices caches', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
 
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
     });
 
     testUsingContext('refreshAllConnectedDevices does not cache', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device1]);
 
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
     });

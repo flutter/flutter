@@ -25,7 +25,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'screenshot': false,
         'fastStart': false,
         'flutterExit': true,
-        'hwRendering': true,
+        'hardwareRendering': true,
         'startPaused': true
       }
     }
@@ -47,7 +47,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         'screenshot': false,
         'fastStart': false,
         'flutterExit': true,
-        'hwRendering': false,
+        'hardwareRendering': false,
         'startPaused': true
       }
     }

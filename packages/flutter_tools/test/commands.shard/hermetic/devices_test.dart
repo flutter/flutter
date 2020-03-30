@@ -57,7 +57,7 @@ void main() {
               'screenshot': false,
               'fastStart': false,
               'flutterExit': true,
-              'hwRendering': true,
+              'hardwareRendering': true,
               'startPaused': true
             }
           },
@@ -74,7 +74,7 @@ void main() {
               'screenshot': false,
               'fastStart': false,
               'flutterExit': true,
-              'hwRendering': false,
+              'hardwareRendering': false,
               'startPaused': true
             }
           }
@@ -119,7 +119,11 @@ class _FakeDeviceManager extends DeviceManager {
   _FakeDeviceManager();
 
   @override
-  Future<List<Device>> getAllConnectedDevices() {
-    return Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
-  }
+  Future<List<Device>> getAllConnectedDevices() =>
+    Future<List<Device>>.value(fakeDevices.map((FakeDeviceJsonData d) => d.dev).toList());
+
+  @override
+  Future<List<Device>> refreshAllConnectedDevices({Duration timeout}) =>
+    getAllConnectedDevices();
+
 }
