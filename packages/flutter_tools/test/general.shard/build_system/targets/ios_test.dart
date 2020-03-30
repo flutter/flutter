@@ -39,9 +39,16 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      environment = Environment.test(globals.fs.currentDirectory, defines: <String, String>{
-        kTargetPlatform: 'ios',
-      });
+      environment = Environment.test(
+        globals.fs.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+        },
+        processManager: processManager,
+        artifacts: MockArtifacts(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
+      );
     });
   });
 

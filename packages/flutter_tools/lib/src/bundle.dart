@@ -132,6 +132,10 @@ Future<void> buildWithAssemble({
       if (dartDefines != null && dartDefines.isNotEmpty)
         kDartDefines: jsonEncode(dartDefines),
     },
+    artifacts: globals.artifacts,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    processManager: globals.processManager,
   );
   final Target target = buildMode == BuildMode.debug
     ? const CopyFlutterBundle()

@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -14,6 +15,7 @@ import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   Environment environment;
@@ -29,6 +31,10 @@ void main() {
     fileSystem.directory('build').createSync();
     environment = Environment.test(
       fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      logger: logger,
+      fileSystem: fileSystem,
     );
     environment.buildDir.createSync(recursive: true);
   });
@@ -168,4 +174,6 @@ class FakeForwardingFileSystem extends ForwardingFileSystem {
   @override
   File file(dynamic path) => files[path] ?? super.file(path);
 }
+
 class MockFile extends Mock implements File {}
+class MockArtifacts extends Mock implements Artifacts {}
