@@ -1678,8 +1678,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     _value = value;
-    // Use the last formatted value when a repeat pass is detected.
-    if (textChanged && _lastFormattedValue != null) {
+    if (isRepeatText && isRepeatSelection && isRepeatComposing && textChanged && _lastFormattedValue != null) {
+    // // Use the last formatted value when an identical repeat pass is detected.
       _value = _lastFormattedValue;
     }
 
