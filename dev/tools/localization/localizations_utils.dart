@@ -397,12 +397,6 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// Strings with newlines are not supported.
 String generateString(String value, { bool escapeDollar = true }) {
   assert(escapeDollar != null);
-  assert(
-    !value.contains('\n'),
-    'Since it is assumed that the input string comes '
-    'from a json/arb file source, messages cannot '
-    'contain newlines.'
-  );
 
   const String backslash = '__BACKSLASH__';
   assert(
@@ -419,6 +413,7 @@ String generateString(String value, { bool escapeDollar = true }) {
   value = value
     .replaceAll("'", "\\'")
     .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
     .replaceAll(backslash, '\\\\');
 
   return "'$value'";
