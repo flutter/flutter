@@ -25,6 +25,17 @@ const String singleMessageArbFileString = '''
     "description": "Title for the application"
   }
 }''';
+const String twoMessageArbFileString = '''
+{
+  "title": "Title",
+  "@title": {
+    "description": "Title for the application"
+  },
+  "subtitle": "Subtitle",
+  "@subtitle": {
+    "description": "Subtitle for the application"
+  }
+}''';
 const String esArbFileName = 'app_es.arb';
 const String singleEsMessageArbFileString = '''
 {
@@ -275,6 +286,37 @@ void main() {
     }
 
     expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('correctly creates an unimplemented messages file', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..generateCode()
+        ..writeUnimplementedMessagesFile();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final File unimplementedOutputFile = fs.file(
+      path.join('lib', 'l10n', 'unimplemented_message_translations.txt'),
+    );
+    final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
+    expect(unimplementedOutputString, contains('es'));
+    expect(unimplementedOutputString, contains('subtitle'));
   });
 
   test('setting both a headerString and a headerFile should fail', () {

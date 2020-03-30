@@ -673,13 +673,21 @@ class LocalizationsGenerator {
       path.join(l10nDirectory.path, 'unimplemented_message_translations.txt'),
     );
 
-    String resultingFile = 'Locales with missing message translations: \n';
-    _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-      resultingFile += '$locale: \n';
-      resultingFile += messages.join(', \n');
-      resultingFile += '\n\n';
-    });
+    String resultingFile = 'Locales with missing message translations: \n\n';
 
+    int count = 0;
+    final int numberOfLocales = _unimplementedMessages.length;
+    _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+      resultingFile += 'Locale ($locale):\n';
+      for (int i = 0; i < messages.length; i += 1) {
+        resultingFile += '#${i + 1}: ${messages[i]} \n';
+      }
+
+      count += 1;
+      if (count < numberOfLocales)
+        resultingFile += '\n';
+
+    });
     unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
   }
 }
