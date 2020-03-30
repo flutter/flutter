@@ -10,19 +10,65 @@
 
 namespace flutter {
 
+//------------------------------------------------------------------------------
+/// @brief      Provides thread-safe access to data that is necessary to
+///             bootstrap a new Dart VM instance. All snapshots referenced by
+///             this object are read-only.
+///
 class DartVMData {
  public:
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a new instance of `DartVMData`. Both the VM and
+  ///             isolate snapshot members are optional and may be `nullptr`. If
+  ///             `nullptr`, the snapshot resolvers present in the settings
+  ///             object are used to infer the snapshots. If the snapshots
+  ///             cannot be inferred from the settings object, this method
+  ///             return `nullptr`.
+  ///
+  /// @param[in]  settings          The settings used to infer the VM and
+  ///                               isolate snapshots if they are not provided
+  ///                               directly.
+  /// @param[in]  vm_snapshot       The VM snapshot or `nullptr`.
+  /// @param[in]  isolate_snapshot  The isolate snapshot or `nullptr`.
+  ///
+  /// @return     A new instance of VM data that can be used to bootstrap a Dart
+  ///             VM. `nullptr` if the snapshots are not provided and cannot be
+  ///             inferred from the settings object.
+  ///
   static std::shared_ptr<const DartVMData> Create(
       Settings settings,
       fml::RefPtr<DartSnapshot> vm_snapshot,
       fml::RefPtr<DartSnapshot> isolate_snapshot);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Collect the DartVMData instance.
+  ///
   ~DartVMData();
 
+  //----------------------------------------------------------------------------
+  /// @brief      The settings object from which the Dart snapshots were
+  ///             inferred.
+  ///
+  /// @return     The settings.
+  ///
   const Settings& GetSettings() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Gets the VM snapshot. This can be in the call to bootstrap
+  ///             the Dart VM via `Dart_Initialize`.
+  ///
+  /// @return     The VM snapshot.
+  ///
   const DartSnapshot& GetVMSnapshot() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the isolate snapshot necessary to launch isolates in the
+  ///             Dart VM. The Dart VM instance in which these isolates are
+  ///             launched must be the same as the VM created using snapshot
+  ///             accessed via `GetVMSnapshot`.
+  ///
+  /// @return     The isolate snapshot.
+  ///
   fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
 
  private:
