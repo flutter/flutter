@@ -125,6 +125,9 @@ class SingleViewPresentation extends Presentation {
         .setFlags(
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      getWindow().setType(WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
+    }
   }
 
   /**
