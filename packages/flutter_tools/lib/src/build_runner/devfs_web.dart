@@ -46,14 +46,14 @@ class WebExpressionCompiler implements ExpressionCompiler {
 
   @override
   Future<ExpressionCompilationResult> compileExpressionToJs(
-      String isolateId,
-      String libraryUri,
-      int line,
-      int column,
-      Map<String, String> jsModules,
-      Map<String, String> jsFrameValues,
-      String moduleName,
-      String expression
+    String isolateId,
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
   ) async {
     final CompilerOutput compilerOutput = await _generator.compileExpressionToJs(libraryUri,
         line, column, jsModules, jsFrameValues, moduleName, expression);

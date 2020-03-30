@@ -440,16 +440,16 @@ class _CompileExpressionToJsRequest extends _CompilationRequest {
     this.jsModules,
     this.jsFrameValues,
     this.moduleName,
-    this.expression
+    this.expression,
   ) : super(completer);
 
-  String libraryUri;
-  int line;
-  int column;
-  Map<String, String> jsModules;
-  Map<String, String> jsFrameValues;
-  String moduleName;
-  String expression;
+  final String libraryUri;
+  final int line;
+  final int column;
+  final Map<String, String> jsModules;
+  final Map<String, String> jsFrameValues;
+  final String moduleName;
+  final String expression;
 
   @override
   Future<CompilerOutput> _run(DefaultResidentCompiler compiler) async =>
@@ -514,14 +514,34 @@ abstract class ResidentCompiler {
     bool isStatic,
   );
 
+  /// Compiles [expression] in [libraryUri] at [line]:[column] to JavaScript
+  /// in [moduleName].
+  ///
+  /// Values listed in [jsFrameValues] are substituted for their names in the
+  /// [expression].
+  ///
+  /// Ensures that all [jsModules] are loaded and accessible inside the
+  /// expression.
+  ///
+  /// Example values of parameters:
+  /// [moduleName] is of the form '/packages/hello_world_main.dart'
+  /// [jsFrameValues] is a map from js variable name to its primitive value
+  /// or another variable name, for example
+  /// { 'x': '1', 'y': 'y', 'o': 'null' }
+  /// [jsModules] is a map from variable name to the module name, where
+  /// variable name is the name originally used in JavaScript to contain the
+  /// module object, for example:
+  /// { 'dart':'dart_sdk', 'main': '/packages/hello_world_main.dart' }
+  /// Returns a [CompilerOutput] including the name of the file containing the
+  /// compilation result and a number of errors
   Future<CompilerOutput> compileExpressionToJs(
-      String libraryUri,
-      int line,
-      int column,
-      Map<String, String> jsModules,
-      Map<String, String> jsFrameValues,
-      String moduleName,
-      String expression,
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
   );
 
   /// Should be invoked when results of compilation are accepted by the client.
@@ -821,8 +841,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     Map<String, String> jsModules,
     Map<String, String> jsFrameValues,
     String moduleName,
-    String expression) {
-
+    String expression,
+  ) {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -836,7 +856,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   Future<CompilerOutput> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
-
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression-to-js' should be invoked after compiler has been started,
