@@ -35,14 +35,17 @@ import 'ticker_provider.dart';
 ///
 /// When building a [CustomScrollView] with a [GlowingOverscrollIndicator], the
 /// indicator will apply to the entire scrollable area, regardless of what
-/// slivers the CustomScrollView contains, like a [SliverAppBar]. When building
-/// a CustomScrollView with a SliverAppBar, the GlowingOverscrollIndicator
-/// can be better manipulated through the use of a [NestedScrollView].
+/// slivers the CustomScrollView contains.
+///
+/// For example, if your CustomScrollView contains a SliverAppBar in the first
+/// position, the GlowingOverscrollIndicator will overlay the SliverAppBar. To
+/// manipulate the position of the GlowingOverscrollIndicator in this case, use
+/// a [NestedScrollView].
 ///
 /// {@tool dartpad --template=stateless_widget_scaffold}
 ///
 /// This example demonstrates how to use a [NestedScrollView] to manipulate the
-/// the placement of a [GlowingOverscrollIndicator] when building a
+/// placement of a [GlowingOverscrollIndicator] when building a
 /// [CustomScrollView]. Drag the scrollable to see the bounds of the overscroll
 /// indicator.
 ///
