@@ -569,7 +569,7 @@ void main() {
     try {
       MediaQueryData(size: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'size != null\''));
+      expect(error.toString(), contains('size != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -580,7 +580,7 @@ void main() {
     try {
       MediaQueryData(devicePixelRatio: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'devicePixelRatio != null\''));
+      expect(error.toString(), contains('devicePixelRatio != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -591,7 +591,7 @@ void main() {
     try {
       MediaQueryData(textScaleFactor: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'textScaleFactor != null\''));
+      expect(error.toString(), contains('textScaleFactor != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -602,7 +602,7 @@ void main() {
     try {
       MediaQueryData(platformBrightness: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'platformBrightness != null\''));
+      expect(error.toString(), contains('platformBrightness != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -613,7 +613,7 @@ void main() {
     try {
       MediaQueryData(padding: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'padding != null\''));
+      expect(error.toString(), contains('padding != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -624,7 +624,7 @@ void main() {
     try {
       MediaQueryData(viewInsets: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'viewInsets != null\''));
+      expect(error.toString(), contains('viewInsets != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -635,7 +635,7 @@ void main() {
     try {
       MediaQueryData(systemGestureInsets: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'systemGestureInsets != null\''));
+      expect(error.toString(), contains('systemGestureInsets != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -646,7 +646,7 @@ void main() {
     try {
       MediaQueryData(viewPadding: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'viewPadding != null\''));
+      expect(error.toString(), contains('viewPadding != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -657,7 +657,7 @@ void main() {
     try {
       MediaQueryData(physicalDepth: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'physicalDepth != null\''));
+      expect(error.toString(), contains('physicalDepth != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -668,7 +668,7 @@ void main() {
     try {
       MediaQueryData(alwaysUse24HourFormat: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'alwaysUse24HourFormat != null\''));
+      expect(error.toString(), contains('alwaysUse24HourFormat != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -679,7 +679,7 @@ void main() {
     try {
       MediaQueryData(accessibleNavigation: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'accessibleNavigation != null\''));
+      expect(error.toString(), contains('accessibleNavigation != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -690,7 +690,7 @@ void main() {
     try {
       MediaQueryData(invertColors: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'invertColors != null\''));
+      expect(error.toString(), contains('invertColors != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -701,7 +701,7 @@ void main() {
     try {
       MediaQueryData(highContrast: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'highContrast != null\''));
+      expect(error.toString(), contains('highContrast != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -712,7 +712,7 @@ void main() {
     try {
       MediaQueryData(disableAnimations: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'disableAnimations != null\''));
+      expect(error.toString(), contains('disableAnimations != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
@@ -723,7 +723,7 @@ void main() {
     try {
       MediaQueryData(boldText: null);
     } on AssertionError catch (error) {
-      expect(error.toString(), contains('\'boldText != null\''));
+      expect(error.toString(), contains('boldText != null'));
       expect(error.toString(), contains('is not true'));
       return;
     }
