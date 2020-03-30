@@ -17,9 +17,9 @@
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
-@implementation FlutterView
-
-id<FlutterViewEngineDelegate> _delegate;
+@implementation FlutterView {
+  id<FlutterViewEngineDelegate> _delegate;
+}
 
 - (instancetype)init {
   @throw([NSException exceptionWithName:@"FlutterView must initWithDelegate"
