@@ -4298,10 +4298,6 @@ void main() {
     expect(formatter.formatCallCount, 4);
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
     expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
-    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
-    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
-    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
-    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2)));
 
     const List<String> referenceLog = <String>[
       '[1]: , 01',
