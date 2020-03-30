@@ -230,7 +230,7 @@ void _runMainZoned(Function startMainIsolateFunction,
                    Function userMainFunction,
                    List<String> args) {
   startMainIsolateFunction((){
-    runZoned<void>(() {
+    runZonedGuarded<void>(() {
       if (userMainFunction is _BinaryFunction) {
         // This seems to be undocumented but supported by the command line VM.
         // Let's do the same in case old entry-points are ported to Flutter.
@@ -240,7 +240,7 @@ void _runMainZoned(Function startMainIsolateFunction,
       } else {
         userMainFunction();
       }
-    }, onError: (Object error, StackTrace stackTrace) {
+    }, (Object error, StackTrace stackTrace) {
       _reportUnhandledException(error.toString(), stackTrace.toString());
     });
   }, null);
