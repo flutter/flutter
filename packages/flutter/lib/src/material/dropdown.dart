@@ -146,14 +146,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   void _handleOnTap() {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item;
-    Navigator.pop(
-      context,
-      _DropdownRouteResult<T>(dropdownMenuItem.value),
-    );
 
     if (dropdownMenuItem.onTap != null) {
       dropdownMenuItem.onTap();
     }
+
+    Navigator.pop(
+      context,
+      _DropdownRouteResult<T>(dropdownMenuItem.value),
+    );
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
