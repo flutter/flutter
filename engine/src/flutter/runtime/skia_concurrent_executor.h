@@ -11,13 +11,38 @@
 
 namespace flutter {
 
+//------------------------------------------------------------------------------
+/// @brief      An interface used by Skia to schedule work on engine managed
+///             threads (usually workers in a concurrent message loop).
+///
+///             Skia may decide that certain workloads don't have thread
+///             affinity and may be performed on a background thread. However,
+///             Skia does not manage its own threads. So, it delegates the
+///             scheduling of this work to the engine via this interface. The
+///             engine has a dedicated pool of threads it uses for scheduling
+///             background tasks that have no thread affinity. This thread
+///             worker pool is held next to the process global Dart VM instance.
+///             The Skia executor is wired up there as well.
+///
 class SkiaConcurrentExecutor : public SkExecutor {
  public:
+  //----------------------------------------------------------------------------
+  /// The callback invoked by the executor to schedule the given task onto an
+  /// engine managed background thread.
+  ///
   using OnWorkCallback = std::function<void(fml::closure work)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Create a new instance of the executor.
+  ///
+  /// @param[in]  on_work  The work callback.
+  ///
   SkiaConcurrentExecutor(const OnWorkCallback& on_work);
 
+  // |SkExecutor|
   ~SkiaConcurrentExecutor() override;
 
+  // |SkExecutor|
   void add(fml::closure work) override;
 
  private:
