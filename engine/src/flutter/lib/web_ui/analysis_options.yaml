@@ -3,9 +3,9 @@
 # uncommented, we'll delete this file and simply inherit the root options.
 
 analyzer:
-  # TODO(uncomment) strong-mode:
+  strong-mode:
     # TODO(uncomment) implicit-casts: false
-    # TODO(uncomment) implicit-dynamic: false
+    implicit-dynamic: false
   errors:
     missing_required_param: warning
     missing_return: warning
@@ -15,7 +15,7 @@ analyzer:
 linter:
   rules:
     - always_declare_return_types
-    # TODO(uncomment) - always_put_control_body_on_new_line
+    - always_put_control_body_on_new_line
     # TODO(uncomment) - always_specify_types
     # TODO(uncomment) - annotate_overrides
     # TODO(uncomment) - avoid_classes_with_only_static_members

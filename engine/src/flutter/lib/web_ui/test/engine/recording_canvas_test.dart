@@ -27,7 +27,7 @@ void main() {
       underTest.drawDRRect(rrect, rrect.deflate(1), somePaint);
       underTest.apply(mockCanvas);
 
-      _expectDrawCall(mockCanvas, {
+      _expectDrawCall(mockCanvas, <String, dynamic>{
         'outer': rrect,
         'inner': rrect.deflate(1),
         'paint': somePaint.paintData,
@@ -75,7 +75,7 @@ void main() {
       underTest.apply(mockCanvas);
 
       // Expect to draw, even when inner has negative radii (which get ignored by canvas)
-      _expectDrawCall(mockCanvas, {
+      _expectDrawCall(mockCanvas, <String, dynamic>{
         'outer': outer,
         'inner': inner,
         'paint': somePaint.paintData,
@@ -91,7 +91,7 @@ void main() {
       underTest.drawDRRect(outer, inner, somePaint);
       underTest.apply(mockCanvas);
 
-      _expectDrawCall(mockCanvas, {
+      _expectDrawCall(mockCanvas, <String, dynamic>{
         'outer': outer,
         'inner': inner,
         'paint': somePaint.paintData,

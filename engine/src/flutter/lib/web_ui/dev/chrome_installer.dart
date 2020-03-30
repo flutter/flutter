@@ -45,7 +45,7 @@ class ChromeArgParser extends BrowserArgParser {
 
   @override
   void parseOptions(ArgResults argResults) {
-    _version = argResults['chrome-version'];
+    _version = argResults['chrome-version'] as String;
   }
 
   @override
@@ -108,7 +108,7 @@ Future<String> _findSystemChromeExecutable() async {
         'Failed to locate system Chrome installation.');
   }
 
-  return which.stdout;
+  return which.stdout as String;
 }
 
 /// Manages the installation of a particular [version] of Chrome.

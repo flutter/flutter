@@ -171,7 +171,7 @@ void main() {
       await _strategy.simulateUserTypingUrl('/page3');
       // This delay is necessary to wait for [BrowserHistory] because it
       // performs a `back` operation which results in a new event loop.
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       // 1. The engine sends a `pushRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');
@@ -212,7 +212,7 @@ void main() {
       await _strategy.simulateUserTypingUrl('/unknown');
       // This delay is necessary to wait for [BrowserHistory] because it
       // performs a `back` operation which results in a new event loop.
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       // 1. The engine sends a `pushRoute` platform message.
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/navigation');

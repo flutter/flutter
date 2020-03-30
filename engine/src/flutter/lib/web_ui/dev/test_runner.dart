@@ -33,7 +33,7 @@ enum TestTypesRequested {
   all,
 }
 
-class TestCommand extends Command<bool> {
+class TestCommand extends Command<bool> with ArgUtils {
   TestCommand() {
     argParser
       ..addFlag(
@@ -84,13 +84,13 @@ class TestCommand extends Command<bool> {
 
   /// Check the flags to see what type of tests are requested.
   TestTypesRequested findTestType() {
-    if (argResults['unit-tests-only'] && argResults['integration-tests-only']) {
+    if (boolArg('unit-tests-only') && boolArg('integration-tests-only')) {
       throw ArgumentError('Conflicting arguments: unit-tests-only and '
           'integration-tests-only are both set');
-    } else if (argResults['unit-tests-only']) {
+    } else if (boolArg('unit-tests-only')) {
       print('Running the unit tests only');
       return TestTypesRequested.unit;
-    } else if (argResults['integration-tests-only']) {
+    } else if (boolArg('integration-tests-only')) {
       if (!isChrome) {
         throw UnimplementedError(
             'Integration tests are only available on Chrome Desktop for now');
@@ -163,7 +163,7 @@ class TestCommand extends Command<bool> {
   ///
   /// In this mode the browser pauses before running the test to allow
   /// you set breakpoints or inspect the code.
-  bool get isDebug => argResults['debug'];
+  bool get isDebug => boolArg('debug');
 
   /// Paths to targets to run, e.g. a single test.
   List<String> get targets => argResults.rest;
@@ -178,13 +178,15 @@ class TestCommand extends Command<bool> {
   /// Whether all tests should run.
   bool get runAllTests => targets.isEmpty;
 
-  String get browser => argResults['browser'];
+  /// The name of the browser to run tests in.
+  String get browser => stringArg('browser');
 
-  bool get isChrome => argResults['browser'] == 'chrome';
+  /// Whether [browser] is set to "chrome".
+  bool get isChrome => browser == 'chrome';
 
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
-  bool get doUpdateScreenshotGoldens => argResults['update-screenshot-goldens'];
+  bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens');
 
   Future<void> _runTargetTests(List<FilePath> targets) async {
     await _runTestBatch(targets, concurrency: 1, expectFailure: false);

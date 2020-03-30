@@ -145,7 +145,7 @@ class CanvasKitCanvas implements ui.Canvas {
     _drawLine(p1, p2, paint);
   }
 
-  void _drawLine(ui.Offset p1, ui.Offset p2, paint) {
+  void _drawLine(ui.Offset p1, ui.Offset p2, ui.Paint paint) {
     _canvas.drawLine(p1, p2, paint);
   }
 

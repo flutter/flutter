@@ -71,7 +71,7 @@ class DomRenderer {
   /// This getter calls the `hasFocus` method of the `Document` interface.
   /// See for more details:
   /// https://developer.mozilla.org/en-US/docs/Web/API/Document/hasFocus
-  bool get windowHasFocus => js_util.callMethod(html.document, 'hasFocus', []);
+  bool get windowHasFocus => js_util.callMethod(html.document, 'hasFocus', <dynamic>[]);
 
   void _setupHotRestart() {
     // This persists across hot restarts to clear stale DOM.

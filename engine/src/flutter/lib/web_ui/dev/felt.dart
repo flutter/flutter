@@ -32,7 +32,7 @@ void main(List<String> args) async {
   _listenToShutdownSignals();
 
   try {
-    final bool result = await runner.run(args);
+    final bool result = (await runner.run(args)) as bool;
     if (result == false) {
       print('Sub-command returned false: `${args.join(' ')}`');
       _cleanup();

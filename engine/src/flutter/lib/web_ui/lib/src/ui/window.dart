@@ -485,8 +485,12 @@ class Locale {
 
   String _rawToString(String separator) {
     final StringBuffer out = StringBuffer(languageCode);
-    if (scriptCode != null) out.write('$separator$scriptCode');
-    if (_countryCode != null) out.write('$separator$countryCode');
+    if (scriptCode != null) {
+      out.write('$separator$scriptCode');
+    }
+    if (_countryCode != null) {
+      out.write('$separator$countryCode');
+    }
     return out.toString();
   }
 }

@@ -51,8 +51,8 @@ abstract class Browser {
   ///
   /// If there's a problem starting or running the browser, this will complete
   /// with an error.
-  Future get onExit => _onExitCompleter.future;
-  final _onExitCompleter = Completer();
+  Future<void> get onExit => _onExitCompleter.future;
+  final _onExitCompleter = Completer<void>();
 
   /// Standard IO streams for the underlying browser process.
   final _ioSubscriptions = <StreamSubscription>[];
@@ -96,7 +96,7 @@ abstract class Browser {
       // resolve the ambiguity is to wait a brief amount of time and see if this
       // browser is actually closed.
       if (!_closed && exitCode < 0) {
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future<void>.delayed(Duration(milliseconds: 200));
       }
 
       if (!_closed && exitCode != 0) {
@@ -110,15 +110,21 @@ abstract class Browser {
       }
 
       _onExitCompleter.complete();
-    }, onError: (error, StackTrace stackTrace) {
+    }, onError: (dynamic error, StackTrace stackTrace) {
       // Ignore any errors after the browser has been closed.
-      if (_closed) return;
+      if (_closed) {
+        return;
+      }
 
       // Make sure the process dies even if the error wasn't fatal.
       _process.then((process) => process.kill());
 
-      if (stackTrace == null) stackTrace = Trace.current();
-      if (_onExitCompleter.isCompleted) return;
+      if (stackTrace == null) {
+        stackTrace = Trace.current();
+      }
+      if (_onExitCompleter.isCompleted) {
+        return;
+      }
       _onExitCompleter.completeError(
           Exception('Failed to run $name: ${getErrorMessage(error)}.'),
           stackTrace);
@@ -142,6 +148,6 @@ abstract class Browser {
     (await _process).kill();
 
     // Swallow exceptions. The user should explicitly use [onExit] for these.
-    return onExit.catchError((_) {});
+    return onExit.catchError((dynamic _) {});
   }
 }

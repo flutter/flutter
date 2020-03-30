@@ -133,7 +133,7 @@ class IntegrationTestsManager {
   Future<bool> _runTestsInDirectory(io.Directory directory) async {
     final io.Directory testDirectory =
         io.Directory(pathlib.join(directory.path, 'test_driver'));
-    final List<io.FileSystemEntity> entities = testDirectory
+    final List<io.File> entities = testDirectory
         .listSync(followLinks: false)
         .whereType<io.File>()
         .toList();

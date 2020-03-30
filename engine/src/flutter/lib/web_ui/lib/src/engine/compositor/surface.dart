@@ -50,7 +50,9 @@ class Surface {
     final SkSurface surface = acquireRenderSurface(size);
     canvasKit.callMethod('setCurrentContext', <int>[surface.context]);
 
-    if (surface == null) return null;
+    if (surface == null) {
+      return null;
+    }
 
     SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, SkCanvas canvas) {
@@ -115,7 +117,7 @@ class Surface {
     final int glContext = canvasKit
         .callMethod('GetWebGLContext', <html.CanvasElement>[htmlCanvas]);
     final js.JsObject grContext =
-        canvasKit.callMethod('MakeGrContext', [glContext]);
+        canvasKit.callMethod('MakeGrContext', <dynamic>[glContext]);
     final js.JsObject skSurface =
         canvasKit.callMethod('MakeOnScreenGLSurface', <dynamic>[
       grContext,
@@ -137,7 +139,7 @@ class Surface {
       return false;
     }
 
-    canvasKit.callMethod('setCurrentContext', [_surface.context]);
+    canvasKit.callMethod('setCurrentContext', <dynamic>[_surface.context]);
     _surface.getCanvas().flush();
     return true;
   }

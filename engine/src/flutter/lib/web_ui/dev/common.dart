@@ -71,8 +71,8 @@ const String _kBaseDownloadUrl =
 class _WindowsBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Win'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Win'] as int;
   }
 
   @override
@@ -110,8 +110,8 @@ class _WindowsBinding implements PlatformBinding {
 class _LinuxBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Linux'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Linux'] as int;
   }
 
   @override
@@ -151,8 +151,8 @@ class _LinuxBinding implements PlatformBinding {
 class _MacBinding implements PlatformBinding {
   @override
   int getChromeBuild(YamlMap browserLock) {
-    final YamlMap chromeMap = browserLock['chrome'];
-    return chromeMap['Mac'];
+    final YamlMap chromeMap = browserLock['chrome'] as YamlMap;
+    return chromeMap['Mac'] as int;
   }
 
   @override
@@ -192,10 +192,10 @@ class _MacBinding implements PlatformBinding {
 }
 
 class BrowserInstallation {
-  const BrowserInstallation(
-      {@required this.version,
-      @required this.executable,
-      fetchLatestChromeVersion});
+  const BrowserInstallation({
+    @required this.version,
+    @required this.executable,
+  });
 
   /// Browser version.
   final String version;
@@ -230,7 +230,7 @@ class BrowserLock {
   BrowserLock._() {
     final io.File lockFile = io.File(
         path.join(environment.webUiRootDir.path, 'dev', 'browser_lock.yaml'));
-    this._configuration = loadYaml(lockFile.readAsStringSync());
+    this._configuration = loadYaml(lockFile.readAsStringSync()) as YamlMap;
   }
 }
 
