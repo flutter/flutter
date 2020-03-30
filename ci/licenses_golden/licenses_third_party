@@ -1,4 +1,4 @@
-Signature: da1bde54103c07da0fd99fa9e639a77b
+Signature: f410ed851c283cb74c817135c16276f4
 
 UNUSED LICENSES:
 
@@ -7421,6 +7421,12 @@ FILE: ../../../third_party/dart/benchmarks/IsolateJson/dart/sample.json
 FILE: ../../../third_party/dart/benchmarks/IsolateSpawn/dart/helloworld.dart
 FILE: ../../../third_party/dart/benchmarks/IsolateSpawnMemory/dart/helloworld.dart
 FILE: ../../../third_party/dart/benchmarks/SoundSplayTreeSieve/dart/iterable.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/datext_latin1_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/entext_ascii_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/netext_3_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/rutext_2_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/sktext_10k.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/zhtext_10k.dart
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
@@ -7740,6 +7746,7 @@ ORIGIN: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/ListCopy/dart/ListCopy.dart
 FILE: ../../../third_party/dart/benchmarks/TypedDataDuplicate/dart/TypedDataDuplicate.dart
+FILE: ../../../third_party/dart/benchmarks/Utf8Decode/dart/Utf8Decode.dart
 FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/dartdev_utils.h
 FILE: ../../../third_party/dart/runtime/bin/exe_utils.cc
@@ -7751,6 +7758,7 @@ FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/xref_extra
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_base.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/reachability_fence_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/call.cc
@@ -7789,8 +7797,10 @@ FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_native_port_call.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/vm/lib/ffi_struct_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
