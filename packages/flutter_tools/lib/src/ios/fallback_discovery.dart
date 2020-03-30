@@ -48,7 +48,7 @@ class FallbackDiscovery {
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
-      _flutterUsage = flutterUsage,
+       _flutterUsage = flutterUsage,
        _vmServiceConnectUri = vmServiceConnectUri;
 
   static const String _kEventName = 'ios-handshake';

@@ -8,11 +8,11 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/fallback_discovery.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../commands.shard/hermetic/config_test.dart';
 import '../../src/common.dart';
 import '../../src/mocks.dart';
 
@@ -38,7 +38,7 @@ void main() {
       mDnsObservatoryDiscovery: mockMDnsObservatoryDiscovery,
       portForwarder: mockPortForwarder,
       protocolDiscovery: mockPrototcolDiscovery,
-      flutterUsage: MockUsage(),
+      flutterUsage: Usage.test(),
       vmServiceConnectUri: (String uri, {Log log}) async {
         return mockVmService;
       },
