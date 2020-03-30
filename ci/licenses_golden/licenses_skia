@@ -1,4 +1,4 @@
-Signature: b0ea5feef6396c23f492abb5fab4cf58
+Signature: 6cfc18d48cb45c407bc43d221507b731
 
 UNUSED LICENSES:
 
@@ -3913,6 +3913,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DGpu.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
@@ -5072,12 +5074,12 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrStencilAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrGpuTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrStencilPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellatePathOp.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrTessellationPathRenderer.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
@@ -5634,6 +5636,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGDashEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
+FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
