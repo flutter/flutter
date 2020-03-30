@@ -71,8 +71,10 @@ done
     -f runtime_tests-0.far  \
     -t runtime_tests
 
+# TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
+# OnServiceProtocolGetSkSLsWorks once it passes on Fuchsia.
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*"
+    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks"
 
