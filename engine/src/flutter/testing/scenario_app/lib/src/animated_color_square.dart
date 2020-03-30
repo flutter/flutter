@@ -99,7 +99,7 @@ class _NumberSwinger<T extends num> {
     } else if (_current <= _begin) {
       _up = true;
     }
-    _current = _up ? _current + 1 : _current - 1;
+    _current = (_up ? _current + 1 : _current - 1) as T;
     return _current;
   }
 }
