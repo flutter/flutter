@@ -79,6 +79,10 @@ class _CanvasPool extends _SaveStackTracking {
     bool requiresClearRect = false;
     if (_reusablePool != null && _reusablePool.isNotEmpty) {
       _canvas = _reusablePool.removeAt(0);
+      // If a canvas is the first element we set z-index = -1 to workaround
+      // blink compositing bug. To make sure this does not leak when reused
+      // reset z-index.
+      _canvas.style.removeProperty('z-index');
       requiresClearRect = true;
     } else {
       // Compute the final CSS canvas size given the actual pixel count we
