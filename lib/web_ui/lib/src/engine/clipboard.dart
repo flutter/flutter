@@ -27,7 +27,7 @@ class ClipboardMessageHandler {
         callback(codec.encodeErrorEnvelope(
             code: 'copy_fail', message: 'Clipboard.setData failed'));
       }
-    }).catchError((_) {
+    }).catchError((dynamic _) {
       callback(codec.encodeErrorEnvelope(
           code: 'copy_fail', message: 'Clipboard.setData failed'));
     });
@@ -37,9 +37,9 @@ class ClipboardMessageHandler {
   void getDataMethodCall(ui.PlatformMessageResponseCallback callback) {
     const MethodCodec codec = JSONMethodCodec();
     _pasteFromClipboardStrategy.getData().then((String data) {
-      final Map<String, dynamic> map = {'text': data};
+      final Map<String, dynamic> map = <String, dynamic>{'text': data};
       callback(codec.encodeSuccessEnvelope(map));
-    }).catchError((error) {
+    }).catchError((dynamic error) {
       print('Could not get text from clipboard: $error');
       callback(codec.encodeErrorEnvelope(
           code: 'paste_fail', message: 'Clipboard.getData failed'));

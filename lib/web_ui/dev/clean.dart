@@ -10,8 +10,9 @@ import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 import 'environment.dart';
+import 'utils.dart';
 
-class CleanCommand extends Command<bool> {
+class CleanCommand extends Command<bool> with ArgUtils {
   CleanCommand() {
     argParser
       ..addFlag(
@@ -24,7 +25,7 @@ class CleanCommand extends Command<bool> {
   @override
   String get name => 'clean';
 
-  bool get _alsoCleanNinja => argResults['ninja'];
+  bool get _alsoCleanNinja => boolArg('ninja');
 
   @override
   String get description => 'Deletes build caches and artifacts.';

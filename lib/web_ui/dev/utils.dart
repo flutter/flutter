@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -97,14 +98,14 @@ Future<String> evalProcess(
   );
   if (result.exitCode != 0) {
     throw ProcessException(
-      description: result.stderr,
+      description: result.stderr as String,
       executable: executable,
       arguments: arguments,
       workingDirectory: workingDirectory,
       exitCode: result.exitCode,
     );
   }
-  return result.stdout;
+  return result.stdout as String;
 }
 
 @immutable
@@ -132,5 +133,31 @@ class ProcessException implements Exception {
       ..writeln('Working directory: ${workingDirectory ?? io.Directory.current.path}')
       ..writeln('Exit code: $exitCode');
     return '$message';
+  }
+}
+
+/// Adds utility methods
+mixin ArgUtils<T> on Command<T> {
+  /// Extracts a boolean argument from [argResults].
+  bool boolArg(String name) => argResults[name] as bool;
+
+  /// Extracts a string argument from [argResults].
+  String stringArg(String name) => argResults[name] as String;
+
+  /// Extracts a integer argument from [argResults].
+  ///
+  /// If the argument value cannot be parsed as [int] throws an [ArgumentError].
+  int intArg(String name) {
+    final String rawValue = stringArg(name);
+    if (rawValue == null) {
+      return null;
+    }
+    final int value = int.tryParse(rawValue);
+    if (value == null) {
+      throw ArgumentError(
+        'Argument $name should be an integer value but was "$rawValue"',
+      );
+    }
+    return value;
   }
 }

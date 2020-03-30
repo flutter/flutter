@@ -36,7 +36,7 @@ class EdgeArgParser extends BrowserArgParser {
 
   @override
   void parseOptions(ArgResults argResults) {
-    _version = argResults['edge-version'];
+    _version = argResults['edge-version'] as String;
     assert(_version == 'system');
   }
 
@@ -124,7 +124,7 @@ class EdgeLauncher {
 
   EdgeLauncher()
       : version =
-            BrowserLock.instance.configuration['edge']['launcher_version'];
+            BrowserLock.instance.configuration['edge']['launcher_version'] as String;
 
   /// Install the launcher if it does not exist in this system.
   void install() async {

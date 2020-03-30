@@ -45,7 +45,7 @@ const double kLightOffsetY = -400.0;
 /// This is not a complete physical model. For example, this does not take into
 /// account the size of the shape (this function doesn't even take the shape as
 /// a parameter). It's just a good enough approximation.
-ui.Offset computeShadowOffset(elevation) {
+ui.Offset computeShadowOffset(double elevation) {
   if (elevation == 0.0) {
     return ui.Offset.zero;
   }

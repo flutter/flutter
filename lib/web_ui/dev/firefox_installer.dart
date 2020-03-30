@@ -26,7 +26,7 @@ class FirefoxArgParser extends BrowserArgParser {
   @override
   void populateOptions(ArgParser argParser) {
     final YamlMap browserLock = BrowserLock.instance.configuration;
-    String firefoxVersion = browserLock['firefox']['version'];
+    String firefoxVersion = browserLock['firefox']['version'] as String;
 
     argParser
       ..addOption(
@@ -42,7 +42,7 @@ class FirefoxArgParser extends BrowserArgParser {
 
   @override
   void parseOptions(ArgResults argResults) {
-    _version = argResults['firefox-version'];
+    _version = argResults['firefox-version'] as String;
   }
 
   @override
@@ -260,7 +260,7 @@ class FirefoxInstaller {
               'Exit code ${mountResult.exitCode}.\n${mountResult.stderr}');
     }
 
-    List<String> processOutput = mountResult.stdout.split('\n');
+    List<String> processOutput = (mountResult.stdout as String).split('\n');
     String volumePath = _volumeFromMountResult(processOutput);
     if (volumePath == null) {
       throw BrowserInstallerException(
@@ -313,7 +313,7 @@ Future<String> _findSystemFirefoxExecutable() async {
     throw BrowserInstallerException(
         'Failed to locate system Firefox installation.');
   }
-  return which.stdout;
+  return which.stdout as String;
 }
 
 /// Fetches the latest available Firefox build version on Linux.

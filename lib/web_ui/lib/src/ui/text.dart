@@ -1105,8 +1105,12 @@ class TextRange {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! TextRange) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! TextRange) {
+      return false;
+    }
     final TextRange typedOther = other;
     return typedOther.start == start && typedOther.end == end;
   }

@@ -1970,7 +1970,7 @@ class _TouchEventContext extends _BasicEventContext with _MultiPointerEventMixin
     double clientX,
     double clientY,
   }) {
-    return html.Touch({
+    return html.Touch(<String, dynamic>{
       'identifier': identifier,
       'clientX': clientX,
       'clientY': clientY,
@@ -1979,7 +1979,7 @@ class _TouchEventContext extends _BasicEventContext with _MultiPointerEventMixin
   }
 
   html.TouchEvent _createTouchEvent(String eventType, List<_TouchDetails> touches) {
-    return html.TouchEvent(eventType, {
+    return html.TouchEvent(eventType, <String, dynamic>{
       'changedTouches': touches.map(
         (_TouchDetails details) =>
           _createTouch(
@@ -2138,7 +2138,7 @@ class _PointerEventContext extends _BasicEventContext with _ButtonedEventMixin i
   }
 
   html.Event _downWithFullDetails({double clientX, double clientY, int button, int buttons, int pointer, String pointerType}) {
-    return html.PointerEvent('pointerdown', {
+    return html.PointerEvent('pointerdown', <String, dynamic>{
       'pointerId': pointer,
       'button': button,
       'buttons': buttons,
@@ -2173,7 +2173,7 @@ class _PointerEventContext extends _BasicEventContext with _ButtonedEventMixin i
   }
 
   html.Event _moveWithFullDetails({double clientX, double clientY, int button, int buttons, int pointer, String pointerType}) {
-    return html.PointerEvent('pointermove', {
+    return html.PointerEvent('pointermove', <String, dynamic>{
       'pointerId': pointer,
       'button': button,
       'buttons': buttons,
@@ -2206,7 +2206,7 @@ class _PointerEventContext extends _BasicEventContext with _ButtonedEventMixin i
   }
 
   html.Event _upWithFullDetails({double clientX, double clientY, int button, int pointer, String pointerType}) {
-    return html.PointerEvent('pointerup', {
+    return html.PointerEvent('pointerup', <String, dynamic>{
       'pointerId': pointer,
       'button': button,
       'buttons': 0,
@@ -2218,7 +2218,7 @@ class _PointerEventContext extends _BasicEventContext with _ButtonedEventMixin i
 
   @override
   List<html.Event> multiTouchCancel(List<_TouchDetails> touches) {
-    return touches.map((_TouchDetails details) => html.PointerEvent('pointercancel', {
+    return touches.map((_TouchDetails details) => html.PointerEvent('pointercancel', <String, dynamic>{
       'pointerId': details.pointer,
       'button': 0,
       'buttons': 0,
