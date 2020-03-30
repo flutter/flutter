@@ -364,6 +364,10 @@ class BitmapCanvas extends EngineCanvas {
     final ui.BlendMode blendMode = paint.blendMode;
     imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
     if (_canvasPool.isClipped) {
+      // Reset width/height since they may have been previously set.
+      imgElement.style
+        ..removeProperty('width')
+        ..removeProperty('height');
       final List<html.Element> clipElements = _clipContent(
           _canvasPool._clipStack, imgElement, p, _canvasPool.currentTransform);
       for (html.Element clipElement in clipElements) {
@@ -375,7 +379,10 @@ class BitmapCanvas extends EngineCanvas {
           transformWithOffset(_canvasPool.currentTransform, p).storage);
       imgElement.style
         ..transformOrigin = '0 0 0'
-        ..transform = cssTransform;
+        ..transform = cssTransform
+        // Reset width/height since they may have been previously set.
+        ..removeProperty('width')
+        ..removeProperty('height');
       rootElement.append(imgElement);
       _children.add(imgElement);
     }
