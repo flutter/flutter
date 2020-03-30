@@ -166,6 +166,8 @@ void main() {
   group('JSON encode devices', () {
     testUsingContext('Consistency of JSON representation', () async {
       expect(
+        // This tests that fakeDevices is a list of tuples where "second" is the
+        // correct JSON representation of the "first". Actual values are irrelevant
         await Future.wait(fakeDevices.map((FakeDeviceJsonData d) => d.dev.toJson())),
         fakeDevices.map((FakeDeviceJsonData d) => d.json)
       );

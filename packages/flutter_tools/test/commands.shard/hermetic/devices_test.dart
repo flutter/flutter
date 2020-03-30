@@ -43,10 +43,45 @@ void main() {
       await createTestCommandRunner(command).run(<String>['devices', '--machine']);
       expect(
         json.decode(testLogger.statusText),
-        fakeDevices.map((FakeDeviceJsonData d) => d.json)
+        <Map<String,Object>>[
+          <String, Object>{
+            'name': 'ephemeral',
+            'id': 'ephemeral',
+            'isSupported': true,
+            'targetPlatform': 'android-arm',
+            'emulator': true,
+            'sdk': 'Test SDK (1.2.3)',
+            'capabilities': <String, Object>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hwRendering': true,
+              'startPaused': true
+            }
+          },
+          <String,Object>{
+            'name': 'webby',
+            'id': 'webby',
+            'isSupported': true,
+            'targetPlatform': 'web-javascript',
+            'emulator': true,
+            'sdk': 'Web SDK (1.2.4)',
+            'capabilities': <String, Object>{
+              'hotReload': true,
+              'hotRestart': true,
+              'screenshot': false,
+              'fastStart': false,
+              'flutterExit': true,
+              'hwRendering': false,
+              'startPaused': true
+            }
+          }
+        ]
       );
     }, overrides: <Type, Generator>{
-      DeviceManager: () => FakeDeviceManager(),
+      DeviceManager: () => _FakeDeviceManager(),
       ProcessManager: () => MockProcessManager(),
     });
   });
@@ -80,8 +115,8 @@ class MockProcessManager extends Mock implements ProcessManager {
   }
 }
 
-class FakeDeviceManager extends DeviceManager {
-  FakeDeviceManager();
+class _FakeDeviceManager extends DeviceManager {
+  _FakeDeviceManager();
 
   @override
   Future<List<Device>> getAllConnectedDevices() {
