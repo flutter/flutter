@@ -455,4 +455,77 @@ void main() {
 
     expect(layoutCount, 1);
   });
+
+  testWidgets('strokeWidth cannot be null in RefreshIndicator', (WidgetTester tester) async {
+    try {
+      await tester.pumpWidget(
+          MaterialApp(
+            home: RefreshIndicator(
+              onRefresh: () async {},
+              strokeWidth: null,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                  return SizedBox(
+                    height: 200.0,
+                    child: Text(item),
+                  );
+                }).toList(),
+              ),
+            ),
+          )
+      );
+    } on AssertionError catch(_) {
+      return;
+    }
+    fail('The assertion was not thrown when strokeWidth was null');
+  });
+
+  testWidgets('RefreshIndicator responds to strokeWidth', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    //By default the value of strokeWidth is 2.0
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        2.0,
+    );
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: RefreshIndicator(
+            onRefresh: () async {},
+            strokeWidth: 4.0,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                return SizedBox(
+                  height: 200.0,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        )
+    );
+
+    expect(
+        tester.widget<RefreshIndicator>(find.byType(RefreshIndicator)).strokeWidth,
+        4.0,
+    );
+  });
 }

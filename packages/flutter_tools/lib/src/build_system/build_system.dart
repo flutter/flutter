@@ -8,13 +8,16 @@ import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
@@ -286,6 +289,10 @@ class Environment {
     @required Directory outputDir,
     @required Directory cacheDir,
     @required Directory flutterRootDir,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
   }) {
@@ -314,6 +321,10 @@ class Environment {
       cacheDir: cacheDir,
       defines: defines,
       flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
   }
 
@@ -327,6 +338,10 @@ class Environment {
     Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
@@ -335,6 +350,10 @@ class Environment {
       flutterRootDir: flutterRootDir ?? testDirectory,
       buildDir: buildDir,
       defines: defines,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
   }
 
@@ -346,6 +365,10 @@ class Environment {
     @required this.cacheDir,
     @required this.defines,
     @required this.flutterRootDir,
+    @required this.processManager,
+    @required this.logger,
+    @required this.fileSystem,
+    @required this.artifacts,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -399,6 +422,14 @@ class Environment {
 
   /// The root build directory shared by all builds.
   final Directory rootBuildDir;
+
+  final ProcessManager processManager;
+
+  final Logger logger;
+
+  final Artifacts artifacts;
+
+  final FileSystem fileSystem;
 }
 
 /// The result information from the build system.
@@ -422,7 +453,17 @@ class BuildResult {
 
 /// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
-  const BuildSystem();
+  const BuildSystem({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required Logger logger,
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _logger = logger;
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final Logger _logger;
 
   /// Build `target` and all of its dependencies.
   Future<BuildResult> build(
@@ -436,15 +477,22 @@ class BuildSystem {
     // Load file hash store from previous builds.
     final FileHashStore fileCache = FileHashStore(
       environment: environment,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: _fileSystem,
+      logger: _logger,
     )..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: buildSystemConfig,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
     bool passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
@@ -486,9 +534,18 @@ class BuildSystem {
 
 /// An active instance of a build.
 class _BuildInstance {
-  _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? globals.platform?.numberOfProcessors ?? 1);
+  _BuildInstance({
+    this.environment,
+    this.fileCache,
+    this.buildSystemConfig,
+    this.logger,
+    this.fileSystem,
+    Platform platform,
+  })
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
+  final Logger logger;
+  final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
@@ -545,17 +602,17 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache);
+        await node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
-        globals.printTrace('Skipping target: ${node.target.name}');
+        logger.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
         return passed;
       }
-      globals.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
-      globals.printTrace('${node.target.name}: Complete');
+      logger.printTrace('${node.target.name}: Complete');
 
       node.inputs
         ..clear()
@@ -581,7 +638,7 @@ class _BuildInstance {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
-        final File previousFile = globals.fs.file(previousOutput);
+        final File previousFile = fileSystem.file(previousOutput);
         if (previousFile.existsSync()) {
           previousFile.deleteSync();
         }
@@ -771,6 +828,8 @@ class Node {
   Future<bool> computeChanges(
     Environment environment,
     FileHashStore fileHashStore,
+    FileSystem fileSystem,
+    Logger logger,
   ) async {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
@@ -808,7 +867,7 @@ class Node {
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
-      final File file = globals.fs.file(previousOutput);
+      final File file = fileSystem.file(previousOutput);
       if (!file.existsSync()) {
         invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
@@ -833,7 +892,7 @@ class Node {
     if (missingInputs.isNotEmpty) {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
-      globals.printTrace('invalidated build due to missing files: $missingMessage');
+      logger.printTrace('invalidated build due to missing files: $missingMessage');
       invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 

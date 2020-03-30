@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 tegn gjenstår",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår",
   "refreshIndicatorSemanticLabel": "Laster inn på nytt",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Mer"
 }

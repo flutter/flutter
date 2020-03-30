@@ -102,7 +102,21 @@ class MediaQueryData {
     this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
-  });
+  }) : assert(size != null),
+       assert(devicePixelRatio != null),
+       assert(textScaleFactor != null),
+       assert(platformBrightness != null),
+       assert(padding != null),
+       assert(viewInsets != null),
+       assert(systemGestureInsets != null),
+       assert(viewPadding != null),
+       assert(physicalDepth != null),
+       assert(alwaysUse24HourFormat != null),
+       assert(accessibleNavigation != null),
+       assert(invertColors != null),
+       assert(highContrast != null),
+       assert(disableAnimations != null),
+       assert(boldText != null);
 
   /// Creates data for a media query based on the given window.
   ///

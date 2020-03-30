@@ -278,6 +278,20 @@ void main() {
       });
     });
 
+    testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
+      initialDate = DateTime(2020, DateTime.march, 15);
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        await tester.tap(nextMonthIcon);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        expect(find.text('April 2020'), findsOneWidget);
+        await tester.tap(find.text('25'));
+        await tester.pumpAndSettle();
+        expect(find.text('April 2020'), findsOneWidget);
+        // There isn't a 31 in April so there shouldn't be one if it is showing April
+        expect(find.text('31'), findsNothing);
+      });
+    });
+
     testWidgets('Changing year does not change selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('January 2016'));

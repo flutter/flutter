@@ -56,5 +56,5 @@
   "remainingTextFieldCharacterCountOne": "Liko 1 simbolis",
   "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių",
   "refreshIndicatorSemanticLabel": "Atnaujinti",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Daugiau"
 }

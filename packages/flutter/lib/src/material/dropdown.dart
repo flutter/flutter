@@ -145,9 +145,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   void _handleOnTap() {
+    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item;
+
+    if (dropdownMenuItem.onTap != null) {
+      dropdownMenuItem.onTap();
+    }
+
     Navigator.pop(
       context,
-      _DropdownRouteResult<T>(widget.route.items[widget.itemIndex].item.value),
+      _DropdownRouteResult<T>(dropdownMenuItem.value),
     );
   }
 
@@ -656,10 +662,14 @@ class DropdownMenuItem<T> extends _DropdownMenuItemContainer {
   /// The [child] argument is required.
   const DropdownMenuItem({
     Key key,
+    this.onTap,
     this.value,
     @required Widget child,
   }) : assert(child != null),
        super(key: key, child: child);
+
+  /// Called when the dropdown menu item is tapped.
+  final VoidCallback onTap;
 
   /// The value to return if the user selects this menu item.
   ///
@@ -787,6 +797,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.hint,
     this.disabledHint,
     @required this.onChanged,
+    this.onTap,
     this.elevation = 8,
     this.style,
     this.underline,
@@ -857,6 +868,14 @@ class DropdownButton<T> extends StatefulWidget {
   /// be displayed.
   /// {@endtemplate}
   final ValueChanged<T> onChanged;
+
+  /// Called when the dropdown button is tapped.
+  ///
+  /// This is distinct from [onChanged], which is called when the user
+  /// selects an item from the dropdown.
+  ///
+  /// The callback will not be invoked if the dropdown button is disabled.
+  final VoidCallback onTap;
 
   /// A builder to customize the dropdown buttons corresponding to the
   /// [DropdownMenuItem]s in [items].
@@ -1179,6 +1198,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.onChanged != null)
         widget.onChanged(newValue.result);
     });
+
+    if (widget.onTap != null) {
+      widget.onTap();
+    }
   }
 
   Action _createAction() {
@@ -1402,6 +1425,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     DropdownButtonBuilder selectedItemBuilder,
     Widget hint,
     @required this.onChanged,
+    VoidCallback onTap,
     this.decoration = const InputDecoration(),
     FormFieldSetter<T> onSaved,
     FormFieldValidator<T> validator,
@@ -1452,6 +1476,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  selectedItemBuilder: selectedItemBuilder,
                  hint: hint,
                  onChanged: onChanged == null ? null : state.didChange,
+                 onTap: onTap,
                  disabledHint: disabledHint,
                  elevation: elevation,
                  style: style,
