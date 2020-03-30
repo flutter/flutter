@@ -4311,7 +4311,7 @@ void main() {
       '[3]: aaaa, 0123',
       '[3]: normal aaaaaa',
       '[4]: 0123, 01234',
-      '[4]: normal aaaaaaaa',
+      '[4]: normal aaaaaaaa'
     ];
 
     expect(formatter.log, referenceLog);
