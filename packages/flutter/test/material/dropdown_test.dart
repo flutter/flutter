@@ -34,6 +34,7 @@ Widget buildFrame({
   Key buttonKey,
   String value = 'two',
   ValueChanged<String> onChanged,
+  VoidCallback onTap,
   Widget icon,
   Color iconDisabledColor,
   Color iconEnabledColor,
@@ -66,6 +67,7 @@ Widget buildFrame({
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
+            onTap: onTap,
             icon: icon,
             iconSize: iconSize,
             iconDisabledColor: iconDisabledColor,
@@ -2353,8 +2355,47 @@ void main() {
     // Tap dropdown button.
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
+    
+    expect(value, equals('one'));    
+    expect(dropdownButtonTapCounter, 1); // Should update counter.
 
-    expect(value, equals('one'));
+    // Tap dropdown menu item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();    
+    
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 1); // Should not change.    
+    
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 2); // Should update counter.    
+
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();    
+    
+    expect(value, equals('two'));
+    expect(dropdownButtonTapCounter, 2); // Should not change.
+  });
+    
+  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+    int dropdownButtonTapCounter = 0;
+    String value = 'one';
+
+    void onChanged(String newValue) { value = newValue; }
+    void onTap() { dropdownButtonTapCounter += 1; }
+
+    Widget build() => buildFrame(
+      value: value,
+      onChanged: onChanged,
+      onTap: onTap,
+    );
+    await tester.pumpWidget(build());
+    
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();    
+    
     // Counters should still be zero.
     expect(menuItemTapCounters, <int>[0, 0, 0, 0]);
 

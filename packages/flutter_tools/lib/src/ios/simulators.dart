@@ -48,10 +48,11 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
-    @required SimControl simControl,
     @required Xcode xcode,
-  }) : _simControl = simControl,
-       _xcode = xcode;
+    @required Logger logger,
+    @required ProcessManager processManager,
+  }) : _simControl = SimControl(logger: logger, processManager: processManager),
+      _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
@@ -519,8 +520,12 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ covariant IOSApp app }) {
+  DeviceLogReader getLogReader({
+    covariant IOSApp app,
+    bool includePastLogs = false,
+  }) {
     assert(app is IOSApp);
+    assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }

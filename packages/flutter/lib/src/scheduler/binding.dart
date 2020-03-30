@@ -254,17 +254,22 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
           callback(timings);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          context: ErrorDescription('while executing callbacks for FrameTiming'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<TimingsCallback>(
               'The TimingsCallback that gets executed was',
               callback,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: collector
         ));
       }
     }
@@ -774,7 +779,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
-    if (_hasScheduledFrame || !_framesEnabled)
+    if (_hasScheduledFrame || !framesEnabled)
       return;
     assert(() {
       if (debugPrintScheduleFrameStacks)
@@ -808,7 +813,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void scheduleForcedFrame() {
     // TODO(chunhtai): Removes the if case once the issue is fixed
     // https://github.com/flutter/flutter/issues/45131
-    if (!_framesEnabled)
+    if (!framesEnabled)
       return;
 
     if (_hasScheduledFrame)

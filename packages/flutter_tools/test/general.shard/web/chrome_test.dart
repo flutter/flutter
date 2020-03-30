@@ -63,14 +63,14 @@ void main() {
   });
 
   test('can launch chrome and connect to the devtools', () async {
-    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+    await testLaunchChrome('/.tmp_rand0/flutter_tools_chrome_device.rand0', processManager, chromeLauncher);
   });
 
   test('cannot have two concurrent instances of chrome', () async {
-    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+    await testLaunchChrome('/.tmp_rand0/flutter_tools_chrome_device.rand0', processManager, chromeLauncher);
     bool pass = false;
     try {
-      await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
+      await testLaunchChrome('/.tmp_rand0/flutter_tools_chrome_device.rand1', processManager, chromeLauncher);
     } on ToolExit catch (_) {
       pass = true;
     }
@@ -78,16 +78,16 @@ void main() {
   });
 
   test('can launch new chrome after stopping a previous chrome', () async {
-    final Chrome  chrome = await testLaunchChrome('/.tmp_rand0/flutter_tool.rand0', processManager, chromeLauncher);
+    final Chrome  chrome = await testLaunchChrome('/.tmp_rand0/flutter_tools_chrome_device.rand0', processManager, chromeLauncher);
     await chrome.close();
-    await testLaunchChrome('/.tmp_rand0/flutter_tool.rand1', processManager, chromeLauncher);
+    await testLaunchChrome('/.tmp_rand0/flutter_tools_chrome_device.rand1', processManager, chromeLauncher);
   });
 
   test('can launch chrome with a custom debug port', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
+        '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
         '--remote-debugging-port=10000',
         ..._kChromeArgs,
         'example_url',
@@ -106,7 +106,7 @@ void main() {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'example_chrome',
-        '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
+        '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
         '--remote-debugging-port=1234',
         ..._kChromeArgs,
         '--headless',
@@ -125,9 +125,10 @@ void main() {
     );
   });
 
-  test('can seed chrome temp directory with existing preferences', () async {
+  test('can seed chrome temp directory with existing session data', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory dataDir = fileSystem.directory('chrome-stuff');
+
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -135,9 +136,17 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync('example');
 
+    final Directory localStorageContentsDirectory = dataDir
+        .childDirectory('Default')
+        .childDirectory('Local Storage')
+        .childDirectory('leveldb');
+    localStorageContentsDirectory.createSync(recursive: true);
+    localStorageContentsDirectory.childFile('LOCK').writeAsBytesSync(<int>[]);
+    localStorageContentsDirectory.childFile('LOG').writeAsStringSync('contents');
+
     processManager.addCommand(FakeCommand(command: const <String>[
       'example_chrome',
-      '--user-data-dir=/.tmp_rand1/flutter_tool.rand1',
+      '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
       '--remote-debugging-port=1234',
       ..._kChromeArgs,
       'example_url',
@@ -146,11 +155,12 @@ void main() {
     await chromeLauncher.launch(
       'example_url',
       skipCheck: true,
-      dataDir: dataDir,
+      cacheDir: dataDir,
     );
 
+    // validate preferences
     final File tempFile = fileSystem
-      .directory('.tmp_rand1/flutter_tool.rand1')
+      .directory('.tmp_rand1/flutter_tools_chrome_device.rand1')
       .childDirectory('Default')
       .childFile('preferences');
 
@@ -163,6 +173,21 @@ void main() {
 
     // writes non-crash back to dart_tool
     expect(preferencesFile.readAsStringSync(), '"exit_type":"Normal"');
+
+    // validate local storage
+    final Directory storageDir = fileSystem
+        .directory('.tmp_rand1/flutter_tools_chrome_device.rand1')
+        .childDirectory('Default')
+        .childDirectory('Local Storage')
+        .childDirectory('leveldb');
+
+    expect(storageDir.existsSync(), true);
+
+    expect(storageDir.childFile('LOCK').existsSync(), true);
+    expect(storageDir.childFile('LOCK').readAsBytesSync(), hasLength(0));
+
+    expect(storageDir.childFile('LOG').existsSync(), true);
+    expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
   });
 }
 

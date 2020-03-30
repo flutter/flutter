@@ -157,6 +157,24 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('handles web server paths without .lib extension', () => testbed.run(() async {
+    final File source = globals.fs.file('source')
+      ..writeAsStringSync('main() {}');
+    final File sourcemap = globals.fs.file('sourcemap')
+      ..writeAsStringSync('{}');
+    final File manifest = globals.fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.dart.lib.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, 2],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap);
+
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/foo.dart.js')));
+
+    expect(response.statusCode, HttpStatus.ok);
+  }));
+
   test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
@@ -360,6 +378,12 @@ void main() {
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
     await webDevFS.create();
+    webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
+    globals.fs.currentDirectory
+      .childDirectory('lib')
+      .childFile('web_entrypoint.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('GENERATED');
     webDevFS.webAssetServer.dartSdk
       ..createSync(recursive: true)
       ..writeAsStringSync('HELLO');
@@ -402,8 +426,8 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('dart_sdk.js.map'), 'CHUM');
 
     // Generated entrypoint.
-    expect(await webDevFS.webAssetServer.dartSourceContents(null),
-      contains('/* no sourcemaps available. */'));
+    expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
+      contains('GENERATED'));
 
     await webDevFS.destroy();
   }));

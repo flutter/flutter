@@ -672,7 +672,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         // thrown if we're not already subscribed.
       }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes)).trim();
+        final String message = utf8.decode(base64.decode(log.bytes));
         globals.printStatus(message);
       });
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));

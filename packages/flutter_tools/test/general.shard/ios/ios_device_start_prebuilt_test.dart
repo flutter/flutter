@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
@@ -386,6 +387,12 @@ IOSDevice setUpIOSDevice({
     iosDeploy: IOSDeploy(
       logger: logger ?? BufferLogger.test(),
       platform: macPlatform,
+      processManager: processManager ?? FakeProcessManager.any(),
+      artifacts: artifacts,
+      cache: cache,
+    ),
+    iMobileDevice: IMobileDevice(
+      logger: logger ?? BufferLogger.test(),
       processManager: processManager ?? FakeProcessManager.any(),
       artifacts: artifacts,
       cache: cache,

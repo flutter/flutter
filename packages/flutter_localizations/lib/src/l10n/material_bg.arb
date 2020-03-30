@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "Остава 1 знак",
   "remainingTextFieldCharacterCountOther": "Остават $remainingCount знака",
   "refreshIndicatorSemanticLabel": "Опресняване",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Още"
 }

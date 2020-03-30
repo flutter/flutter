@@ -12,10 +12,10 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-class MockOnPressedFunction implements Function {
+class MockOnPressedFunction {
   int called = 0;
 
-  void call() {
+  void handler() {
     called++;
   }
 }
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconButton(
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
       ),
@@ -49,7 +49,7 @@ void main() {
       wrap(
           child: IconButton(
             iconSize: 10.0,
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
       ),
@@ -65,7 +65,7 @@ void main() {
           child: IconButton(
             iconSize: 10.0,
             padding: const EdgeInsets.all(30.0),
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
       ),
@@ -80,7 +80,7 @@ void main() {
       wrap(
         child: IconButton(
           iconSize: 10.0,
-          onPressed: mockOnPressedFunction,
+          onPressed: mockOnPressedFunction.handler,
           icon: const Icon(Icons.link),
           constraints: const BoxConstraints(),
         ),
@@ -100,7 +100,7 @@ void main() {
         child: IconButton(
           iconSize: 10.0,
           padding: const EdgeInsets.all(3.0),
-          onPressed: mockOnPressedFunction,
+          onPressed: mockOnPressedFunction.handler,
           icon: const Icon(Icons.link),
           constraints: const BoxConstraints(),
         ),
@@ -121,7 +121,7 @@ void main() {
           data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1)),
           child: IconButton(
             iconSize: 10.0,
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
             constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
           ),
@@ -143,7 +143,7 @@ void main() {
       wrap(
           child: IconButton(
             padding: EdgeInsets.zero,
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
@@ -163,7 +163,7 @@ void main() {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget> [
               IconButton(
-                onPressed: mockOnPressedFunction,
+                onPressed: mockOnPressedFunction.handler,
                 icon: const Icon(Icons.ac_unit),
               ),
             ],
@@ -180,7 +180,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
           child: IconButton(
-            onPressed: mockOnPressedFunction,
+            onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
@@ -197,7 +197,7 @@ void main() {
         home: Material(
           child: Center(
             child: IconButton(
-              onPressed: mockOnPressedFunction,
+              onPressed: mockOnPressedFunction.handler,
               icon: const Icon(Icons.ac_unit),
             ),
           ),
@@ -215,7 +215,7 @@ void main() {
         home: Material(
           child: Center(
             child: IconButton(
-              onPressed: mockOnPressedFunction,
+              onPressed: mockOnPressedFunction.handler,
               icon: const Icon(Icons.ac_unit),
               tooltip: 'Test tooltip',
             ),
@@ -239,7 +239,7 @@ void main() {
             actions: <Widget>[
               IconButton(
                 padding: EdgeInsets.zero,
-                onPressed: mockOnPressedFunction,
+                onPressed: mockOnPressedFunction.handler,
                 icon: const Icon(Icons.ac_unit),
               ),
             ],
@@ -343,7 +343,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: IconButton(
-          onPressed: mockOnPressedFunction,
+          onPressed: mockOnPressedFunction.handler,
           icon: const Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),

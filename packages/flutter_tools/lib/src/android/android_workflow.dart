@@ -154,7 +154,7 @@ class AndroidValidator extends DoctorValidator {
       } else {
         // Instruct user to set [kAndroidSdkRoot] and not deprecated [kAndroidHome]
         // See https://github.com/flutter/flutter/issues/39301
-        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidSdkRoot)));
+        messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidSdkRoot, _platform)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -174,7 +174,12 @@ class AndroidValidator extends DoctorValidator {
     if (_androidSdk.latestVersion != null) {
       if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(ValidationMessage.error(
-          _userMessages.androidSdkBuildToolsOutdated(_androidSdk.sdkManagerPath, kAndroidSdkMinVersion, kAndroidSdkBuildToolsMinVersion.toString())),
+          _userMessages.androidSdkBuildToolsOutdated(
+            _androidSdk.sdkManagerPath,
+            kAndroidSdkMinVersion,
+            kAndroidSdkBuildToolsMinVersion.toString(),
+            _platform,
+          )),
         );
         return ValidationResult(ValidationType.missing, messages);
       }
@@ -184,7 +189,7 @@ class AndroidValidator extends DoctorValidator {
         _androidSdk.latestVersion.platformName,
         _androidSdk.latestVersion.buildToolsVersionName)));
     } else {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidHome)));
+      messages.add(ValidationMessage.error(_userMessages.androidMissingSdkInstructions(kAndroidHome, _platform)));
     }
 
     if (_platform.environment.containsKey(kAndroidHome)) {
@@ -203,7 +208,7 @@ class AndroidValidator extends DoctorValidator {
       messages.addAll(validationResult.map<ValidationMessage>((String message) {
         return ValidationMessage.error(message);
       }));
-      messages.add(ValidationMessage(_userMessages.androidSdkInstallHelp));
+      messages.add(ValidationMessage(_userMessages.androidSdkInstallHelp(_platform)));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
@@ -261,7 +266,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(userMessages.androidLicensesNone));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
-        messages.add(ValidationMessage.error(userMessages.androidLicensesUnknown));
+        messages.add(ValidationMessage.error(userMessages.androidLicensesUnknown(globals.platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
     return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
@@ -356,7 +361,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     if (!_canRunSdkManager()) {
-      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
+      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath, globals.platform));
     }
 
     try {
@@ -394,6 +399,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       throwToolExit(userMessages.androidCannotRunSdkManager(
         androidSdk.sdkManagerPath,
         e.toString(),
+        globals.platform,
       ));
       return false;
     }

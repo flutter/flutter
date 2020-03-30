@@ -224,6 +224,29 @@ abstract class MaterialLocalizations {
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
 
+  /// Formats the date in a compact format.
+  ///
+  /// Usually just the numeric values for the for day, month and year are used.
+  ///
+  /// Examples:
+  ///
+  /// - US English: 02/21/2019
+  /// - Russian: 21.02.2019
+  ///
+  /// See also:
+  ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
+  String formatCompactDate(DateTime date);
+
+  /// Formats the date using a short-width format.
+  ///
+  /// Includes the abbreviation of the month, the day and year.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21, 2019
+  /// - Russian: 21 февр. 2019 г.
+  String formatShortDate(DateTime date);
+
   /// Formats the date using a medium-width format.
   ///
   /// Abbreviates month and days of week. This appears in the header of the date
@@ -251,6 +274,24 @@ abstract class MaterialLocalizations {
   /// The returned string does not contain the day of the month. This appears
   /// in the date picker invoked using [showDatePicker].
   String formatMonthYear(DateTime date);
+
+  /// Formats the month and day of the given [date].
+  ///
+  /// Examples:
+  ///
+  /// - US English: Feb 21
+  /// - Russian: 21 февр.
+  String formatShortMonthDay(DateTime date);
+
+  /// Converts the given compact date formatted string into a [DateTime].
+  ///
+  /// The format of the string must be a valid compact date format for the
+  /// given locale. If the text doesn't represent a valid date, `null` will be
+  /// returned.
+  ///
+  /// See also:
+  ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
+  DateTime parseCompactDate(String inputString);
 
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
@@ -437,6 +478,23 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'December',
   ];
 
+  /// Returns the number of days in a month, according to the proleptic
+  /// Gregorian calendar.
+  ///
+  /// This applies the leap year logic introduced by the Gregorian reforms of
+  /// 1582. It will not give valid results for dates prior to that time.
+  int _getDaysInMonth(int year, int month) {
+    if (month == DateTime.february) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
+          (year % 400 == 0);
+      if (isLeapYear)
+        return 29;
+      return 28;
+    }
+    const List<int> daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysInMonth[month - 1];
+  }
+
   @override
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
@@ -471,6 +529,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatYear(DateTime date) => date.year.toString();
 
   @override
+  String formatCompactDate(DateTime date) {
+    // Assumes US mm/dd/yyyy format
+    final String month = _formatTwoDigitZeroPad(date.month);
+    final String day = _formatTwoDigitZeroPad(date.day);
+    final String year = date.year.toString().padLeft(4, '0');
+    return '$month/$day/$year';
+  }
+
+  @override
+  String formatShortDate(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}, ${date.year}';
+  }
+
+  @override
   String formatMediumDate(DateTime date) {
     final String day = _shortWeekdays[date.weekday - DateTime.monday];
     final String month = _shortMonths[date.month - DateTime.january];
@@ -488,6 +561,37 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String year = formatYear(date);
     final String month = _months[date.month - DateTime.january];
     return '$month $year';
+  }
+
+  @override
+  String formatShortMonthDay(DateTime date) {
+    final String month = _shortMonths[date.month - DateTime.january];
+    return '$month ${date.day}';
+  }
+
+  @override
+  DateTime parseCompactDate(String inputString) {
+    // Assumes US mm/dd/yyyy format
+    final List<String> inputParts = inputString.split('/');
+    if (inputParts.length != 3) {
+      return null;
+    }
+
+    final int year = int.tryParse(inputParts[2], radix: 10);
+    if (year == null || year < 1) {
+      return null;
+    }
+
+    final int month = int.tryParse(inputParts[0], radix: 10);
+    if (month == null || month < 1 || month > 12) {
+      return null;
+    }
+
+    final int day = int.tryParse(inputParts[1], radix: 10);
+    if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
+      return null;
+    }
+    return DateTime(year, month, day);
   }
 
   @override

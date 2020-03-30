@@ -103,10 +103,8 @@ void main() {
         ),
       ];
     });
-    when(mockVmService.getIsolate(any)).thenAnswer((Invocation invocation) async {
-      return Sentinel(kind: 'Something', valueAsString: 'Something');
-    });
-
+    when(mockVmService.getIsolate(any))
+      .thenThrow(SentinelException.parse('Something', <String, dynamic>{}));
     when(mockMDnsObservatoryDiscovery.getObservatoryUri(
       'hello',
       null, // Device
