@@ -50,7 +50,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    }, skip: true); // TODO(gspencergoog): Stop skipping when issue is fixed. https://github.com/flutter/flutter/issues/42455
+    }, skip: true); // https://github.com/flutter/flutter/issues/42455
 
     testWidgets('data_table_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -538,7 +538,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: ChipDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21647
+      });
 
       testWidgets('data_table_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -546,7 +546,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: DataTableDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21647
+      });
 
       testWidgets('date_and_time_picker_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -554,7 +554,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: DateAndTimePickerDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21647
+      });
 
       testWidgets('dialog_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
@@ -602,7 +602,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: IconsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      }, skip: true); // https://github.com/flutter/flutter/issues/21647
+      });
 
       testWidgets('leave_behind_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));
