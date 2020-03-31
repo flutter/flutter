@@ -386,6 +386,7 @@ String generateServiceWorker(Map<String, String> resources) {
 'use strict';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
+  "/" :"constant",
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
 
