@@ -136,10 +136,15 @@ static gboolean run_flutter_engine(FlView* self) {
   config.open_gl.fbo_callback = fl_view_gl_fbo_callback;
   config.open_gl.present = fl_view_gl_present;
 
+  g_autofree gchar* assets_path =
+      fl_dart_project_get_assets_path(self->flutter_project);
+  g_autofree gchar* icu_data_path =
+      fl_dart_project_get_icu_data_path(self->flutter_project);
+
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = fl_dart_project_get_assets_path(self->flutter_project);
-  args.icu_data_path = fl_dart_project_get_icu_data_path(self->flutter_project);
+  args.assets_path = assets_path;
+  args.icu_data_path = icu_data_path;
 
   FlutterEngineResult result = FlutterEngineInitialize(
       FLUTTER_ENGINE_VERSION, &config, &args, self, &self->flutter_engine);
