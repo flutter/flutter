@@ -17,14 +17,14 @@ import 'package:flutter/widgets.dart';
 
 /// Minimum number of samples collected by a benchmark irrespective of noise
 /// levels.
-const int _kMinSampleCount = 50;
+const int kMinSampleCount = 50;
 
 /// Maximum number of samples collected by a benchmark irrespective of noise
 /// levels.
 ///
 /// If the noise doesn't settle down before we reach the max we'll report noisy
 /// results assuming the benchmarks is simply always noisy.
-const int _kMaxSampleCount = 10 * _kMinSampleCount;
+const int kMaxSampleCount = 10 * kMinSampleCount;
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
@@ -513,7 +513,7 @@ class Profile {
       final Timeseries timeseries = scoreData[key];
 
       // Collect enough data points before considering to stop.
-      if (timeseries.count < _kMinSampleCount) {
+      if (timeseries.count < kMinSampleCount) {
         return true;
       }
 
@@ -522,11 +522,11 @@ class Profile {
         // If the timeseries has enough data, stop it, even if it's noisy under
         // the assumption that this benchmark is always noisy and there's nothing
         // we can do about it.
-        if (timeseries.count > _kMaxSampleCount) {
+        if (timeseries.count > kMaxSampleCount) {
           buffer.writeln(
             'WARNING: Noise of benchmark "$name.$key" did not converge below '
             '${_ratioToPercent(_kNoiseThreshold)}. Stopping because it reached the '
-            'maximum number of samples $_kMaxSampleCount. Noise level is '
+            'maximum number of samples $kMaxSampleCount. Noise level is '
             '${_ratioToPercent(timeseries.noise)}.',
           );
           return false;
