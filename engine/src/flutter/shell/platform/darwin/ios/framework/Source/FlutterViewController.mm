@@ -714,6 +714,10 @@ static flutter::PointerData::Change PointerDataChangeFromUITouchPhase(UITouchPha
       return flutter::PointerData::Change::kUp;
     case UITouchPhaseCancelled:
       return flutter::PointerData::Change::kCancel;
+    default:
+      // TODO(53695): Handle the `UITouchPhaseRegion`... enum values.
+      FML_DLOG(INFO) << "Unhandled touch phase: " << phase;
+      break;
   }
 
   return flutter::PointerData::Change::kCancel;
@@ -727,9 +731,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         return flutter::PointerData::DeviceKind::kTouch;
       case UITouchTypeStylus:
         return flutter::PointerData::DeviceKind::kStylus;
+      default:
+        // TODO(53696): Handle the UITouchTypeIndirectPointer enum value.
+        FML_DLOG(INFO) << "Unhandled touch type: " << touch.type;
+        break;
     }
-  } else {
-    return flutter::PointerData::DeviceKind::kTouch;
   }
 
   return flutter::PointerData::DeviceKind::kTouch;
