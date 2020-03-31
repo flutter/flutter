@@ -27,6 +27,7 @@ class RunningProcessInfo {
 
   @override
   int get hashCode {
+    // TODO(dnfield): Replace this when Object.hashValues lands, https://github.com/dart-lang/sdk/issues/11617
     int hash = 17;
     if (pid != null) {
       hash = hash * 23 + pid.hashCode;
