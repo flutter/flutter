@@ -90,6 +90,14 @@ class PrecacheCommand extends FlutterCommand {
     if (boolArg('use-unsigned-mac-binaries')) {
       globals.cache.useUnsignedMacBinaries = true;
     }
+    // Build a reverse map of child artifact names to umbrella names.
+    final Map<String, String> umbrellaForArtifact = <String, String>{};
+    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
+      for (final String childArtifactName in childArtifactNames) {
+        umbrellaForArtifact[childArtifactName] = umbrellaName;
+      }
+    });
+
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
@@ -100,25 +108,8 @@ class PrecacheCommand extends FlutterCommand {
         continue;
       }
 
-      bool expandedArtifactProcessed = false;
-      _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-        if (!childArtifactNames.contains(artifact.name)) {
-          return;
-        }
-        expandedArtifactProcessed = true;
-
-        // Expanded artifacts options are true by default.
-        // Explicitly ignore them if umbrella name is excluded.
-        // Example: --no-android [--android_gen_snapshot]
-        if (!boolArg(umbrellaName)) {
-          return;
-        }
-
-        // Example: --android [--android_gen_snapshot]
-        requiredArtifacts.add(artifact);
-      });
-
-      if (!expandedArtifactProcessed && boolArg(artifact.name)) {
+      final String argumentName = umbrellaForArtifact[artifact.name] ?? artifact.name;
+      if (boolArg(argumentName)) {
         requiredArtifacts.add(artifact);
       }
     }
