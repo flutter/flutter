@@ -562,6 +562,36 @@ void main() {
   }, overrides: <Type, Generator> {
     Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
   });
+
+  testUsingContext('macOS desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'macos'});
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'linux',
+  });
+
+  testUsingContext('Windows desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'windows'});
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'linux',
+  });
+
+  testUsingContext('Linux desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform()..operatingSystem = 'macos',
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {

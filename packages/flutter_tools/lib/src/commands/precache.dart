@@ -66,6 +66,35 @@ class PrecacheCommand extends FlutterCommand {
     ]
   };
 
+  /// Returns a reverse mapping of _expandedArtifacts, from child artifact name
+  /// to umbrella name.
+  Map<String, String> get _umbrellaForArtifactMap {
+    final Map<String, String> reverseMap = <String, String>{};
+    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
+      for (final String childArtifactName in childArtifactNames) {
+        reverseMap[childArtifactName] = umbrellaName;
+      }
+    });
+    return reverseMap;
+  }
+
+  /// Returns the name of all artifacts that were explicitly chosen via flags.
+  ///
+  /// If an umbrella is chosen, its children will be included as well.
+  Set<String> get _explicitArtifactSelections {
+    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap;
+    final Set<String> selections = <String>{};
+    bool explicitlySelected(String name) => boolArg(name) && argResults.wasParsed(name);
+    for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+      final String umbrellaName = umbrellaForArtifact[artifact.name];
+      if (explicitlySelected(artifact.name) ||
+          (umbrellaName != null && explicitlySelected(umbrellaName))) {
+        selections.add(artifact.name);
+      }
+    }
+    return selections;
+  }
+
   @override
   Future<void> validateCommand() {
     _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
@@ -84,20 +113,15 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (boolArg('all-platforms')) {
+    final bool includeAllPlatforms = boolArg('all-platforms');
+    if (includeAllPlatforms) {
       globals.cache.includeAllPlatforms = true;
     }
     if (boolArg('use-unsigned-mac-binaries')) {
       globals.cache.useUnsignedMacBinaries = true;
     }
-    // Build a reverse map of child artifact names to umbrella names.
-    final Map<String, String> umbrellaForArtifact = <String, String>{};
-    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-      for (final String childArtifactName in childArtifactNames) {
-        umbrellaForArtifact[childArtifactName] = umbrellaName;
-      }
-    });
-
+    globals.cache.platformOverrideArtifacts = _explicitArtifactSelections;
+    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap;
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
@@ -109,7 +133,7 @@ class PrecacheCommand extends FlutterCommand {
       }
 
       final String argumentName = umbrellaForArtifact[artifact.name] ?? artifact.name;
-      if (boolArg(argumentName)) {
+      if (includeAllPlatforms || boolArg(argumentName)) {
         requiredArtifacts.add(artifact);
       }
     }
