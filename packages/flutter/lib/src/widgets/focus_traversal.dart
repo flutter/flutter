@@ -1780,8 +1780,8 @@ class NextFocusAction extends Action<NextFocusIntent> {
   }
 }
 
-/// An [Intent] bound to [PreviousFocusAction], which moves the focus to the next
-/// focusable node in the focus traversal order.
+/// An [Intent] bound to [PreviousFocusAction], which moves the focus to the
+/// previous focusable node in the focus traversal order.
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class PreviousFocusIntent extends Intent {

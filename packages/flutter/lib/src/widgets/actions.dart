@@ -34,8 +34,6 @@ BuildContext _getParent(BuildContext context) {
 @immutable
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
-  ///
-  /// The [key] argument must not be null.
   const Intent();
 }
 
@@ -62,8 +60,8 @@ typedef ActionListenerCallback = void Function(Action<Intent> action);
 ///    up key combinations in order to invoke actions.
 ///  * [Actions], which is a widget that defines a map of [Intent] to [Action]
 ///    and allows redefining of actions for its descendants.
-///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
-///    [FocusNode] for context.
+///  * [ActionDispatcher], a class that takes an [Action] and invokes it, passing
+///    a given [Intent].
 abstract class Action<T extends Intent> with Diagnosticable {
   final ObserverList<ActionListenerCallback> _listeners = ObserverList<ActionListenerCallback>();
 
@@ -90,15 +88,14 @@ abstract class Action<T extends Intent> with Diagnosticable {
   @protected
   Object invoke(covariant T intent);
 
-  /// Register a callback to be called when the object changes.
-  ///
-  /// This method can be used to listen for changes to the state of this action.
+  /// Register a callback to listen for changes to the state of this action.
   ///
   /// If you call this, you must call [removeActionListener] a matching number
   /// of times, or memory leaks will occur. To help manage this and avoid memory
   /// leaks, use of the [ActionListener] widget to register and unregister your
   /// listener appropriately is highly recommended.
   ///
+  /// {@template flutter.widgets.actions.multipleAdds}
   /// If a listener had been added twice, and is removed once during an
   /// iteration (i.e. in response to a notification), it will still be called
   /// again. If, on the other hand, it is removed as many times as it was
@@ -111,6 +108,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// This surprising behavior can be unexpectedly observed when registering a
   /// listener on two separate objects which are both forwarding all
   /// registrations to a common upstream object.
+  /// {@endtemplate}
   @mustCallSuper
   void addActionListener(ActionListenerCallback listener) => _listeners.add(listener);
 
@@ -124,18 +122,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// memory leaks, use of the [ActionListener] widget to register and
   /// unregister your listener appropriately is highly recommended.
   ///
-  /// If a listener had been added twice, and is removed once during an
-  /// iteration (i.e. in response to a notification), it will still be called
-  /// again. If, on the other hand, it is removed as many times as it was
-  /// registered, then it will no longer be called. This odd behavior is the
-  /// result of the [Action] not being able to determine which listener
-  /// is being removed, since they are identical, and therefore conservatively
-  /// still calling all the listeners when it knows that any are still
-  /// registered.
-  ///
-  /// This surprising behavior can be unexpectedly observed when registering a
-  /// listener on two separate objects which are both forwarding all
-  /// registrations to a common upstream object.
+  /// {@macro flutter.widgets.actions.multipleAdds}
   @mustCallSuper
   void removeActionListener(ActionListenerCallback listener) => _listeners.remove(listener);
 
@@ -163,6 +150,17 @@ abstract class Action<T extends Intent> with Diagnosticable {
     // being iterated over.
     final List<ActionListenerCallback> localListeners = List<ActionListenerCallback>.from(_listeners);
     for (final ActionListenerCallback listener in localListeners) {
+      InformationCollector collector;
+      assert(() {
+        collector = () sync* {
+          yield DiagnosticsProperty<Action<T>>(
+            'The $runtimeType sending notification was',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          );
+        };
+        return true;
+      }());
       try {
         if (_listeners.contains(listener)) {
           listener(this);
@@ -173,13 +171,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
           stack: stack,
           library: 'widgets library',
           context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
-            yield DiagnosticsProperty<Action<T>>(
-              'The $runtimeType sending notification was',
-              this,
-              style: DiagnosticsTreeStyle.errorProperty,
-            );
-          },
+          informationCollector: collector,
         ));
       }
     }
@@ -256,11 +248,11 @@ class _ActionListenerState extends State<ActionListener> {
   Widget build(BuildContext context) => widget.child;
 }
 
-/// An abstract [Action] subclass that adds an optional [BuildContext] to the [invoke]
-/// method to be able to provide context to actions.
+/// An abstract [Action] subclass that adds an optional [BuildContext] to the
+/// [invoke] method to be able to provide context to actions.
 ///
 /// [ActionDispatcher.invokeAction] checks to see if the action it is invoking
-/// is a [ContextAction], and if it is, tries to supply it with a context.
+/// is a [ContextAction], and if it is, supplies it with a context.
 abstract class ContextAction<T extends Intent> extends Action<T> {
   /// Called when the action is to be performed.
   ///
@@ -308,7 +300,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   final OnInvokeCallback<T> onInvoke;
 
   @override
-  Object invoke(covariant T intent) => onInvoke.call(intent);
+  Object invoke(covariant T intent) => onInvoke(intent);
 }
 
 /// An action dispatcher that simply invokes the actions given to it.
@@ -317,25 +309,27 @@ class CallbackAction<T extends Intent> extends Action<T> {
 ///
 ///  - [ShortcutManager], that uses this class to invoke actions.
 ///  - [Shortcuts] widget, which defines key mappings to [Intent]s.
-///  - [Actions] widget, which defines a mapping between a [Key] and an [Action].
+///  - [Actions] widget, which defines a mapping between a in [Intent] type and
+///    an [Action].
 class ActionDispatcher with Diagnosticable {
   /// Const constructor so that subclasses can be immutable.
   const ActionDispatcher();
 
-  /// Invokes the given action, optionally without regard for the currently
-  /// focused node in the focus tree.
+  /// Invokes the given `action`, passing it the given `intent`.
   ///
   /// The action will be invoked with the given `context`, if given, but only if
-  /// the action is a [ContextAction] subclass. If the action isn't a
-  /// [ContextAction] subclass, then the `context` may still be used to ask the
-  /// intent if it is enabled.
+  /// the action is a [ContextAction] subclass. If no `context` is given, and
+  /// the action is a [ContextAction], then the context from the [primaryFocus]
+  /// is used.
   ///
-  /// Returns true if the action was successfully invoked.
+  /// Returns the object returned from [Action.invoke] if the action was
+  /// successfully invoked, and null if the action is not enabled. May also
+  /// return null if [Action.invoke] returns null.
   Object invokeAction(covariant Action<Intent> action, covariant Intent intent, [BuildContext context]) {
     assert(action != null);
     assert(intent != null);
     context ??= primaryFocus?.context;
-    if (context == null || action.enabled) {
+    if (action.enabled) {
       if (action is ContextAction) {
         return action.invoke(intent, context);
       } else {
@@ -430,12 +424,18 @@ class Actions extends StatefulWidget {
   }
 
   /// Returns a [VoidCallback] handler that invokes the bound action for the
-  /// given intent if the action is enabled, and returns null if the action is
+  /// given `intent` if the action is enabled, and returns null if the action is
   /// not enabled.
   ///
   /// This is intended to be used in widgets which have something similar to an
   /// `onTap` handler, which takes a `VoidCallback`, and can be set to the
   /// result of calling this function.
+  ///
+  /// Creates a dependency on the [Actions] widget that the bound action is
+  /// found in so that if the actions change, the context will be rebuilt and
+  /// find the updated action. If you cache the result of this function, you
+  /// should refresh your cached value in [State.didChangeDependencies], since a
+  /// change in dependencies may change the enabled state of the action.
   static VoidCallback handler<T extends Intent>(BuildContext context, T intent, {bool nullOk = false}) {
     final Action<T> action = Actions.find<T>(context, nullOk: nullOk);
     if (action != null && action.enabled) {
@@ -448,8 +448,11 @@ class Actions extends StatefulWidget {
 
   /// Finds the [Action] bound to the given intent type `T` in the given `context`.
   ///
-  /// Creates a dependency on the widget found so that if the actions change,
-  /// the context will be rebuilt and find the updated action.
+  /// Creates a dependency on the [Actions] widget that the bound action is
+  /// found in so that if the actions change, the context will be rebuilt and
+  /// find the updated action. If you cache the result of this function, you
+  /// should refresh your cached value in [State.didChangeDependencies], since a
+  /// change in dependencies may change the enabled state of the action.
   static Action<T> find<T extends Intent>(BuildContext context, {bool nullOk = false}) {
     Action<T> action;
 
@@ -586,11 +589,13 @@ class Actions extends StatefulWidget {
 }
 
 class _ActionsState extends State<Actions> {
-  // Keeps the last-known enabled state of each action in the action map.
+  // Keeps the last-known enabled state of each action in the action map in
+  // order to be able to appropriately notify dependents that the state has
+  // changed.
   Map<Action<Intent>, bool> enabledState = <Action<Intent>, bool>{};
-  // Used to tell the market to rebuild when the enabled state of an action in
+  // Used to tell the marker to rebuild when the enabled state of an action in
   // the map changes.
-  LocalKey rebuildKey = UniqueKey();
+  Object rebuildKey = Object();
 
   @override
   void initState() {
@@ -605,7 +610,7 @@ class _ActionsState extends State<Actions> {
       setState(() {
         enabledState[action] = actionEnabled;
         // Generate a new key so that the marker notifies dependents.
-        rebuildKey = UniqueKey();
+        rebuildKey = Object();
       });
     }
   }
@@ -627,6 +632,8 @@ class _ActionsState extends State<Actions> {
         action.addActionListener(_handleActionChanged);
       }
     }
+    // Unregister from any actions in the previous enabledState map that aren't
+    // going to be transferred to the new one.
     for (final Action<Intent> action in enabledState.keys) {
       if (!foundActions.contains(action)) {
         action.removeActionListener(_handleActionChanged);
@@ -676,7 +683,7 @@ class _ActionsMarker extends InheritedWidget {
 
   final ActionDispatcher dispatcher;
   final Map<Type, Action<Intent>> actions;
-  final LocalKey rebuildKey;
+  final Object rebuildKey;
 
   @override
   bool updateShouldNotify(_ActionsMarker oldWidget) {

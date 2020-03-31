@@ -17,6 +17,11 @@ void main() {
   ));
 }
 
+/// A class that can hold invocation information that an [UndoableAction] can
+/// use to undo/redo itself.
+///
+/// Instances of this class are returned from [UndoableAction]s and placed on
+/// the undo stack when they are invoked.
 class Memento extends Object with DiagnosticableMixin implements Diagnosticable {
   const Memento({
     @required this.name,
@@ -24,7 +29,16 @@ class Memento extends Object with DiagnosticableMixin implements Diagnosticable 
     @required this.redo,
   });
 
+  /// Returns true if this Memento can be used to undo.
+  ///
+  /// Subclasses could override to provide their own conditions when a command is
+  /// undoable.
   bool get canUndo => true;
+
+  /// Returns true if this Memento can be used to redo.
+  ///
+  /// Subclasses could override to provide their own conditions when a command is
+  /// redoable.
   bool get canRedo => true;
 
   final String name;
@@ -185,10 +199,9 @@ class UndoAction extends Action<UndoIntent> {
   }
 
   @override
-  Object invoke(UndoIntent intent) {
+  void invoke(UndoIntent intent) {
     final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext, nullOk: true) as UndoableActionDispatcher;
     manager?.undo();
-    return null;
   }
 }
 
@@ -204,7 +217,7 @@ class RedoAction extends Action<RedoIntent> {
   }
 
   @override
-  Object invoke(RedoIntent intent) {
+  RedoAction invoke(RedoIntent intent) {
     final UndoableActionDispatcher manager = Actions.of(primaryFocus.context, nullOk: true) as UndoableActionDispatcher;
     manager?.redo();
     return this;
@@ -222,9 +235,8 @@ abstract class UndoableAction<T extends Intent> extends Action<T> {
 
   @override
   @mustCallSuper
-  Memento invoke(T intent) {
+  void invoke(T intent) {
     invocationIntent = intent;
-    return null;
   }
 }
 

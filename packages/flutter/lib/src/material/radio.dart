@@ -278,7 +278,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     if (widget.onChanged != null) {
       widget.onChanged(widget.value);
     }
-    final RenderObject renderObject = primaryFocus.context.findRenderObject();
+    final RenderObject renderObject = context.findRenderObject();
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
   }
 

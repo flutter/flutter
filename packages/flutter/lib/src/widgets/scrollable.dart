@@ -1010,7 +1010,7 @@ class ScrollAction extends Action<ScrollIntent> {
   }
 
   @override
-  Object invoke(ScrollIntent intent) {
+  void invoke(ScrollIntent intent) {
     final ScrollableState state = Scrollable.of(primaryFocus.context);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
@@ -1020,17 +1020,16 @@ class ScrollAction extends Action<ScrollIntent> {
 
     // Don't do anything if the user isn't allowed to scroll.
     if (state.widget.physics != null && !state.widget.physics.shouldAcceptUserOffset(state.position)) {
-      return this;
+      return;
     }
     final double increment = _getIncrement(state, intent);
     if (increment == 0.0) {
-      return this;
+      return;
     }
     state.position.moveTo(
       state.position.pixels + increment,
       duration: const Duration(milliseconds: 100),
       curve: Curves.easeInOut,
     );
-    return this;
   }
 }

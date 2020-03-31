@@ -288,6 +288,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// If a key mapping is found, then the associated action will be invoked
   /// using the [Intent] that the [LogicalKeySet] maps to, and the currently
   /// focused widget's context (from [FocusManager.primaryFocus]).
+  ///
+  /// The object returned is the result of [Action.invoke] being called on the
+  /// [Action] bound to the [Intent] that the key press maps to, or null, if the
+  /// key press didn't match any intent.
   @protected
   Object handleKeypress(
     BuildContext context,
