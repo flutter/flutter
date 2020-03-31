@@ -176,6 +176,41 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
   );
 }
 
+Future<void> checkDropdownColor(WidgetTester tester, {Color color}) async {
+  const String text = 'foo';
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: DropdownButton<String>(
+          dropdownColor: color,
+          value: text,
+          items: const <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              value: text,
+              child: Text(text),
+            ),
+          ],
+          onChanged: (_) { },
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(text));
+  await tester.pump();
+
+  expect(
+      find.ancestor(
+          of: find.text(text).last,
+          matching: find.byType(CustomPaint)).at(2),
+      paints
+        ..save()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: color ?? const Color.fromRGBO(250, 250, 250, 1), hasMaskFilter: false)
+  );
+}
+
 bool sameGeometry(RenderBox box1, RenderBox box2) {
   expect(box1.localToGlobal(Offset.zero), equals(box2.localToGlobal(Offset.zero)));
   expect(box1.size.height, equals(box2.size.height));
@@ -1776,42 +1811,12 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton uses dropdownColor when expanded', (WidgetTester tester) async {
-    const String value = 'foo';
-    final UniqueKey itemKey = UniqueKey();
-    const Color colorToTest = Color.fromRGBO(100, 200, 50, 0.9);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: DropdownButton<String>(
-            dropdownColor: colorToTest,
-            value: value,
-            items: <DropdownMenuItem<String>>[
-              DropdownMenuItem<String>(
-                key: itemKey,
-                value: value,
-                child: const Text(value),
-              ),
-            ],
-            onChanged: (_) { },
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text(value));
-    await tester.pump();
+  testWidgets('DropdownButton uses default color when expanded', (WidgetTester tester) async {
+    await checkDropdownColor(tester);
+  });
 
-    expect(
-        find.ancestor(
-            of: find.byKey(itemKey).last,
-            matching: find.byType(CustomPaint)).at(2),
-        paints
-          ..save()
-          ..rrect()
-          ..rrect()
-          ..rrect()
-          ..rrect(color: colorToTest, hasMaskFilter: false)
-    );
+  testWidgets('DropdownButton uses dropdownColor when expanded when given', (WidgetTester tester) async {
+    await checkDropdownColor(tester, color: const Color.fromRGBO(120, 220, 70, 0.8));
   });
 
   testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
