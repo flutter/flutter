@@ -127,10 +127,10 @@ class CupertinoApp extends StatefulWidget {
   /// system values.
   final CupertinoThemeData theme;
 
-  /// Themeto use in event user has enabled system-wide dark mode
+  /// Theme to use in event user has enabled system-wide dark mode, similiar to [MaterialApp.darkTheme]
   final CupertinoThemeData darkTheme;
 
-  /// Cupertino Theme Mode
+  /// Cupertino Theme Mode, similiar to [MaterialApp.themeMode]
   final CupertinoThemeMode themeMode;
   /// The application's top-level routing table.
   ///
@@ -302,12 +302,11 @@ class _CupertinoAppState extends State<CupertinoApp> {
               onGenerateRoute: widget.onGenerateRoute,
               onUnknownRoute: widget.onUnknownRoute,
               builder: (BuildContext context, Widget child) {
+                // Theme resolving is nested inside the WidgetsApp so MediaQuery can resolve PlatformBrightness
                 final CupertinoThemeMode mode = widget.themeMode ?? CupertinoThemeMode.system;
                 CupertinoThemeData theme;
                 if (widget.darkTheme != null) {
-                  print("not null");
                   final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-                  print(platformBrightness);
                   if (mode == CupertinoThemeMode.dark ||
                   (mode == CupertinoThemeMode.system && platformBrightness == ui.Brightness.dark)) {
                     theme = widget.darkTheme;
