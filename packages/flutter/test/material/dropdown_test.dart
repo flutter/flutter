@@ -207,7 +207,7 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color color}) async {
         ..rrect()
         ..rrect()
         ..rrect()
-        ..rrect(color: color ?? const Color.fromRGBO(250, 250, 250, 1), hasMaskFilter: false)
+        ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false)
   );
 }
 
