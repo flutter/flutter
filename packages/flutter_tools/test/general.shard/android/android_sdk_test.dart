@@ -98,7 +98,7 @@ void main() {
           .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
       if (globals.platform.isMacOS) {
         when(globals.processManager.runSync(
-          <String>['/usr/libexec/java_home'],
+          <String>['/usr/libexec/java_home', '-v', '1.8'],
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         )).thenReturn(ProcessResult(0, 0, '', ''));
@@ -137,7 +137,7 @@ void main() {
           .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
       if (globals.platform.isMacOS) {
         when(globals.processManager.runSync(
-          <String>['/usr/libexec/java_home'],
+          <String>['/usr/libexec/java_home', '-v', '1.8'],
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment'),
         )).thenReturn(ProcessResult(0, 0, '', ''));

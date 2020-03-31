@@ -583,14 +583,13 @@ class AndroidSdk {
     if (platform.isMacOS) {
       try {
         final String javaHomeOutput = processUtils.runSync(
-          <String>['/usr/libexec/java_home'],
+          <String>['/usr/libexec/java_home', '-v', '1.8'],
           throwOnError: true,
           hideStdout: true,
         ).stdout.trim();
         if (javaHomeOutput != null) {
-          final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
-          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
-            final String javaHome = javaHomeOutputSplit[0].trim();
+          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
+            final String javaHome = javaHomeOutput.split('\n').last.trim();
             return fileSystem.path.join(javaHome, 'bin', 'java');
           }
         }
