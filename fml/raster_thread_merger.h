@@ -33,7 +33,7 @@ class RasterThreadMerger
   void ExtendLeaseTo(size_t lease_term);
 
   // Returns |RasterThreadStatus::kUnmergedNow| if this call resulted in
-  // splitting the GPU and platform threads. Reduces the lease term by 1.
+  // splitting the raster and platform threads. Reduces the lease term by 1.
   RasterThreadStatus DecrementLease();
 
   bool IsMerged() const;
