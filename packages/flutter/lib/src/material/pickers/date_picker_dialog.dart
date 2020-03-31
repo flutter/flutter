@@ -12,6 +12,7 @@ import '../button_theme.dart';
 import '../color_scheme.dart';
 import '../debug.dart';
 import '../dialog.dart';
+import '../dialog_theme.dart';
 import '../flat_button.dart';
 import '../icons.dart';
 import '../material_localizations.dart';
@@ -427,6 +428,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     );
 
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
+    final DialogTheme dialogTheme = Theme.of(context).dialogTheme;
     return Dialog(
       child: AnimatedContainer(
         width: dialogSize.width,
@@ -473,11 +475,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      shape: const RoundedRectangleBorder(
+      // Only overriding shape because the material spec was updated to radius 4,
+      // but the default for Dialogs are radius 2 which can can't update without
+      // breaking apps.
+      shape: dialogTheme.shape ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4.0))
       ),
       clipBehavior: Clip.antiAlias,
-      elevation: 24.0,
     );
   }
 }
