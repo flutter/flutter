@@ -34,7 +34,7 @@ Future<bool> run(List<String> arguments) async {
     ..addOption(
       'shard-index',
       defaultsTo: '0',
-      help: 'The current shard to run the tests as. Used in continuous integration.',
+      help: 'The current shard to run the tests with the range [0 .. shards - 1]. Used in continuous integration.',
       valueHelp: 'count',
     )
     ..addFlag(
@@ -105,8 +105,16 @@ Future<bool> run(List<String> arguments) async {
     return help;
   }
 
+  if (verbose)
+    print('Starting run_tests.dart...');
+
   if (files.length < shardIndex)
     print('Warning: There are more shards than tests. Some shards will not run any tests.');
+
+  if (numberShards <= shardIndex) {
+    print('Error: There are more shard indexes than shards.');
+    return help;
+  }
 
   // Best attempt at evenly splitting tests among the shards
   final List<File> shardedFiles = <File>[];
@@ -114,24 +122,22 @@ Future<bool> run(List<String> arguments) async {
     shardedFiles.add(files[i]);
   }
 
-  if (verbose) {
-    print('Tests in this shard:');
-    for (final File file in shardedFiles)
-      print(file.path);
-  }
-
-  if (verbose)
-    print('Starting run_tests.dart...');
-
   int testCount = 0;
   int failures = 0;
 
   if (verbose) {
     final String s = files.length == 1 ? '' : 's';
     final String ss = shardedFiles.length == 1 ? '' : 's';
-    print('${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex');
+    print('${files.length} file$s specified. ${shardedFiles.length} test$ss in shard #$shardIndex.');
     print('');
   }
+
+  if (verbose) {
+    print('Tests in this shard:');
+    for (final File file in shardedFiles)
+      print(file.path);
+  }
+  print('');
 
   for (final File file in shardedFiles) {
     if (verbose)
