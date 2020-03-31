@@ -7,10 +7,16 @@ import 'dart:ui';
 import 'recorder.dart';
 import 'test_data.dart';
 
-/// The number of rows should be such that
+/// The height of each row.
 const double kRowHeight = 20.0;
+
+/// Number of rows.
 const int kRows = 100;
+
+/// Number of columns.
 const int kColumns = 10;
+
+/// The amount the picture is scrolled on every iteration of the benchmark.
 const double kScrollDelta = 2.0;
 
 /// Draws one complex picture, then moves a clip around it simulating scrolling
