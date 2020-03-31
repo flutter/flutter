@@ -49,7 +49,7 @@ class CompositorContext final : public flutter::CompositorContext {
       const SkMatrix& root_surface_transformation,
       bool instrumentation_enabled,
       bool surface_supports_readback,
-      fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) override;
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };

@@ -134,9 +134,6 @@ FILE: ../../../flutter/fml/eintr_wrapper.h
 FILE: ../../../flutter/fml/file.cc
 FILE: ../../../flutter/fml/file.h
 FILE: ../../../flutter/fml/file_unittest.cc
-FILE: ../../../flutter/fml/gpu_thread_merger.cc
-FILE: ../../../flutter/fml/gpu_thread_merger.h
-FILE: ../../../flutter/fml/gpu_thread_merger_unittests.cc
 FILE: ../../../flutter/fml/hash_combine.h
 FILE: ../../../flutter/fml/hash_combine_unittests.cc
 FILE: ../../../flutter/fml/icu_util.cc
@@ -229,6 +226,9 @@ FILE: ../../../flutter/fml/platform/win/paths_win.cc
 FILE: ../../../flutter/fml/platform/win/posix_wrappers_win.cc
 FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
 FILE: ../../../flutter/fml/posix_wrappers.h
+FILE: ../../../flutter/fml/raster_thread_merger.cc
+FILE: ../../../flutter/fml/raster_thread_merger.h
+FILE: ../../../flutter/fml/raster_thread_merger_unittests.cc
 FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/status.h
 FILE: ../../../flutter/fml/synchronization/atomic_object.h

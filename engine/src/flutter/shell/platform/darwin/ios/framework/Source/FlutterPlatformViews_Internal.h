@@ -146,7 +146,7 @@ class FlutterPlatformViewsController {
   // returns nil.
   NSObject<FlutterPlatformView>* GetPlatformViewByID(int view_id);
 
-  PostPrerollResult PostPrerollAction(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
+  PostPrerollResult PostPrerollAction(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 

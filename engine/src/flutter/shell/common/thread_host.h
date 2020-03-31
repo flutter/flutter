@@ -23,7 +23,7 @@ struct ThreadHost {
 
   std::unique_ptr<fml::Thread> platform_thread;
   std::unique_ptr<fml::Thread> ui_thread;
-  std::unique_ptr<fml::Thread> gpu_thread;
+  std::unique_ptr<fml::Thread> raster_thread;
   std::unique_ptr<fml::Thread> io_thread;
 
   ThreadHost();

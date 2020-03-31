@@ -37,10 +37,10 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
-    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   return std::make_unique<ScopedFrame>(
       *this, gr_context, canvas, view_embedder, root_surface_transformation,
-      instrumentation_enabled, surface_supports_readback, gpu_thread_merger);
+      instrumentation_enabled, surface_supports_readback, raster_thread_merger);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(
@@ -51,7 +51,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
     bool surface_supports_readback,
-    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger)
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger)
     : context_(context),
       gr_context_(gr_context),
       canvas_(canvas),
@@ -59,7 +59,7 @@ CompositorContext::ScopedFrame::ScopedFrame(
       root_surface_transformation_(root_surface_transformation),
       instrumentation_enabled_(instrumentation_enabled),
       surface_supports_readback_(surface_supports_readback),
-      gpu_thread_merger_(gpu_thread_merger) {
+      raster_thread_merger_(raster_thread_merger) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 
@@ -74,8 +74,9 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
   bool root_needs_readback = layer_tree.Preroll(*this, ignore_raster_cache);
   bool needs_save_layer = root_needs_readback && !surface_supports_readback();
   PostPrerollResult post_preroll_result = PostPrerollResult::kSuccess;
-  if (view_embedder_ && gpu_thread_merger_) {
-    post_preroll_result = view_embedder_->PostPrerollAction(gpu_thread_merger_);
+  if (view_embedder_ && raster_thread_merger_) {
+    post_preroll_result =
+        view_embedder_->PostPrerollAction(raster_thread_merger_);
   }
 
   if (post_preroll_result == PostPrerollResult::kResubmitFrame) {

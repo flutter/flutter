@@ -69,7 +69,7 @@ void PlatformView::NotifyCreated() {
   auto* platform_view = this;
   fml::ManualResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetGPUTaskRunner(), [platform_view, &surface, &latch]() {
+      task_runners_.GetRasterTaskRunner(), [platform_view, &surface, &latch]() {
         surface = platform_view->CreateRenderingSurface();
         latch.Signal();
       });

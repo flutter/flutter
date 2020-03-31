@@ -451,8 +451,8 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   // Start on the platform thread.
   weakPlatformView->SetNextFrameCallback([weakSelf = [self getWeakPtr],
                                           platformTaskRunner = [_engine.get() platformTaskRunner],
-                                          gpuTaskRunner = [_engine.get() GPUTaskRunner]]() {
-    FML_DCHECK(gpuTaskRunner->RunsTasksOnCurrentThread());
+                                          RasterTaskRunner = [_engine.get() RasterTaskRunner]]() {
+    FML_DCHECK(RasterTaskRunner->RunsTasksOnCurrentThread());
     // Get callback on raster thread and jump back to platform thread.
     platformTaskRunner->PostTask([weakSelf]() {
       fml::scoped_nsobject<FlutterViewController> flutterViewController(

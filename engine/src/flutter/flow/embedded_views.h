@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "flutter/fml/gpu_thread_merger.h"
 #include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/raster_thread_merger.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint.h"
@@ -239,7 +239,7 @@ class ExternalViewEmbedder {
   // after it does any requisite tasks needed to bring itself to a valid state.
   // Returns kSuccess if the view embedder is already in a valid state.
   virtual PostPrerollResult PostPrerollAction(
-      fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
     return PostPrerollResult::kSuccess;
   }
 

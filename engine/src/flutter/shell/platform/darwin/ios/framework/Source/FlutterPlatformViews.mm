@@ -261,14 +261,14 @@ bool FlutterPlatformViewsController::HasPendingViewOperations() {
 const int FlutterPlatformViewsController::kDefaultMergedLeaseDuration;
 
 PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
-    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   const bool uiviews_mutated = HasPendingViewOperations();
   if (uiviews_mutated) {
-    if (gpu_thread_merger->IsMerged()) {
-      gpu_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
+    if (raster_thread_merger->IsMerged()) {
+      raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     } else {
       CancelFrame();
-      gpu_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+      raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
       return PostPrerollResult::kResubmitFrame;
     }
   }

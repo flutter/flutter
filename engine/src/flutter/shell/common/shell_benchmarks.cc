@@ -48,7 +48,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
 
     TaskRunners task_runners("test",
                              thread_host->platform_thread->GetTaskRunner(),
-                             thread_host->gpu_thread->GetTaskRunner(),
+                             thread_host->raster_thread->GetTaskRunner(),
                              thread_host->ui_thread->GetTaskRunner(),
                              thread_host->io_thread->GetTaskRunner());
 

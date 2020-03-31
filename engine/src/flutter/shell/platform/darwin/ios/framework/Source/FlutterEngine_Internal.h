@@ -32,7 +32,7 @@
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)GPUTaskRunner;
+- (fml::RefPtr<fml::TaskRunner>)RasterTaskRunner;
 
 - (fml::WeakPtr<flutter::PlatformView>)platformView;
 

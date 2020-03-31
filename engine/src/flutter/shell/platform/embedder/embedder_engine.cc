@@ -232,7 +232,7 @@ bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
     return false;
   }
 
-  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(task);
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(task);
   return true;
 }
 
@@ -260,7 +260,8 @@ bool EmbedderEngine::PostTaskOnEngineManagedNativeThreads(
 
   // Post the task to all thread host threads.
   const auto& task_runners = shell_->GetTaskRunners();
-  trampoline(kFlutterNativeThreadTypeRender, task_runners.GetGPUTaskRunner());
+  trampoline(kFlutterNativeThreadTypeRender,
+             task_runners.GetRasterTaskRunner());
   trampoline(kFlutterNativeThreadTypeWorker, task_runners.GetIOTaskRunner());
   trampoline(kFlutterNativeThreadTypeUI, task_runners.GetUITaskRunner());
   trampoline(kFlutterNativeThreadTypePlatform,

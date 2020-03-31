@@ -69,9 +69,9 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
   if (surface_->GetExternalViewEmbedder()) {
     const auto platform_id =
         task_runners_.GetPlatformTaskRunner()->GetTaskQueueId();
-    const auto gpu_id = task_runners_.GetGPUTaskRunner()->GetTaskQueueId();
-    gpu_thread_merger_ =
-        fml::MakeRefCounted<fml::GpuThreadMerger>(platform_id, gpu_id);
+    const auto gpu_id = task_runners_.GetRasterTaskRunner()->GetTaskQueueId();
+    raster_thread_merger_ =
+        fml::MakeRefCounted<fml::RasterThreadMerger>(platform_id, gpu_id);
   }
 }
 
@@ -111,11 +111,12 @@ void Rasterizer::DrawLastLayerTree() {
 
 void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
-  if (gpu_thread_merger_ && !gpu_thread_merger_->IsOnRasterizingThread()) {
+  if (raster_thread_merger_ &&
+      !raster_thread_merger_->IsOnRasterizingThread()) {
     // we yield and let this frame be serviced on the right thread.
     return;
   }
-  FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
 
   RasterStatus raster_status = RasterStatus::kFailed;
   Pipeline<flutter::LayerTree>::Consumer consumer =
@@ -137,7 +138,7 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   // between successive tries.
   switch (consume_result) {
     case PipelineConsumeResult::MoreAvailable: {
-      task_runners_.GetGPUTaskRunner()->PostTask(
+      task_runners_.GetRasterTaskRunner()->PostTask(
           [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
             if (weak_this) {
               weak_this->Draw(pipeline);
@@ -232,7 +233,7 @@ sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
 
 RasterStatus Rasterizer::DoDraw(
     std::unique_ptr<flutter::LayerTree> layer_tree) {
-  FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
+  FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
 
   if (!layer_tree || !surface_) {
     return RasterStatus::kFailed;
@@ -283,9 +284,9 @@ RasterStatus Rasterizer::DoDraw(
   //   - |Draw| for B yields as its on the wrong thread.
   // This enqueue ensures that we attempt to consume from the right
   // thread one more time after un-merge.
-  if (gpu_thread_merger_) {
-    if (gpu_thread_merger_->DecrementLease() ==
-        fml::GpuThreadStatus::kUnmergedNow) {
+  if (raster_thread_merger_) {
+    if (raster_thread_merger_->DecrementLease() ==
+        fml::RasterThreadStatus::kUnmergedNow) {
       return RasterStatus::kEnqueuePipeline;
     }
   }
@@ -334,7 +335,7 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
       root_surface_transformation,  // root surface transformation
       true,                         // instrumentation enabled
       frame->supports_readback(),   // surface supports pixel reads
-      gpu_thread_merger_            // thread merger
+      raster_thread_merger_         // thread merger
   );
 
   if (compositor_frame) {

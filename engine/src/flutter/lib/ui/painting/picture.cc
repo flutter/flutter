@@ -79,7 +79,7 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
       new tonic::DartPersistentValue(dart_state, raw_image_callback);
   auto unref_queue = dart_state->GetSkiaUnrefQueue();
   auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
-  auto gpu_task_runner = dart_state->GetTaskRunners().GetGPUTaskRunner();
+  auto raster_task_runner = dart_state->GetTaskRunners().GetRasterTaskRunner();
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();
 
   // We can't create an image on this task runner because we don't have a
@@ -117,7 +117,7 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
 
   // Kick things off on the GPU.
   fml::TaskRunner::RunNowOrPostTask(
-      gpu_task_runner,
+      raster_task_runner,
       [ui_task_runner, snapshot_delegate, picture, picture_bounds, ui_task] {
         sk_sp<SkImage> raster_image =
             snapshot_delegate->MakeRasterSnapshot(picture, picture_bounds);
