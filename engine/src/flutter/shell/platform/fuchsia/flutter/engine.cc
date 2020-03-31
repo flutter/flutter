@@ -38,7 +38,7 @@ static void UpdateNativeThreadLabelNames(const std::string& label,
   };
   set_thread_name(runners.GetPlatformTaskRunner(), label, ".platform");
   set_thread_name(runners.GetUITaskRunner(), label, ".ui");
-  set_thread_name(runners.GetGPUTaskRunner(), label, ".gpu");
+  set_thread_name(runners.GetRasterTaskRunner(), label, ".raster");
   set_thread_name(runners.GetIOTaskRunner(), label, ".io");
 }
 
@@ -474,7 +474,7 @@ void Engine::OnSessionMetricsDidChange(
     return;
   }
 
-  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
       [rasterizer = shell_->GetRasterizer(), metrics]() {
         if (rasterizer) {
           auto compositor_context =
@@ -491,7 +491,7 @@ void Engine::OnDebugWireframeSettingsChanged(bool enabled) {
     return;
   }
 
-  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
       [rasterizer = shell_->GetRasterizer(), enabled]() {
         if (rasterizer) {
           auto compositor_context =
@@ -509,7 +509,7 @@ void Engine::OnSessionSizeChangeHint(float width_change_factor,
     return;
   }
 
-  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(
+  shell_->GetTaskRunners().GetRasterTaskRunner()->PostTask(
       [rasterizer = shell_->GetRasterizer(), width_change_factor,
        height_change_factor]() {
         if (rasterizer) {

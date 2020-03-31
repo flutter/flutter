@@ -36,7 +36,7 @@ Animator::Animator(Delegate& delegate,
       // https://github.com/flutter/engine/pull/9132 for discussion.
       layer_tree_pipeline_(fml::MakeRefCounted<LayerTreePipeline>(
           task_runners.GetPlatformTaskRunner() ==
-                  task_runners.GetGPUTaskRunner()
+                  task_runners.GetRasterTaskRunner()
               ? 1
               : 2)),
 #endif  // FLUTTER_SHELL_ENABLE_METAL
