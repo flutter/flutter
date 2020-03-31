@@ -76,13 +76,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # codegen_integration_win:
-  #   description: >
-  #     Runs codegeneration and verifies that it can execute
-  #     correctly.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows/android"]
+  codegen_integration_win:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
 
   codegen_integration_mac:
     description: >
