@@ -1776,6 +1776,44 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
+  testWidgets('DropdownButton uses dropdownColor when expanded', (WidgetTester tester) async {
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+    const Color colorToTest = Color.fromRGBO(100, 200, 50, 0.9);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButton<String>(
+            dropdownColor: colorToTest,
+            value: value,
+            items: <DropdownMenuItem<String>>[
+              DropdownMenuItem<String>(
+                key: itemKey,
+                value: value,
+                child: const Text(value),
+              ),
+            ],
+            onChanged: (_) { },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text(value));
+    await tester.pump();
+
+    expect(
+        find.ancestor(
+            of: find.byKey(itemKey).last,
+            matching: find.byType(CustomPaint)).at(2),
+        paints
+          ..save()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: colorToTest, hasMaskFilter: false)
+    );
+  });
+
   testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42340
     final List<String> items = <String>['1', '2', '3'];
