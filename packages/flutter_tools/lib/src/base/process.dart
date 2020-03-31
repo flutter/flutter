@@ -245,6 +245,7 @@ abstract class ProcessUtils {
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
+    ProcessStartMode mode,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to
@@ -457,12 +458,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     String workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String> environment,
+    ProcessStartMode mode,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     return _processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      mode: mode ?? ProcessStartMode.normal,
     );
   }
 
