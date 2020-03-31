@@ -378,6 +378,7 @@ String generateServiceWorker(Map<String, String> resources) {
 'use strict';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
+  "/":"6666cd76f96956469e7be39d750cc7d9",
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
 
@@ -400,7 +401,13 @@ self.addEventListener('fetch', function (event) {
         if (response) {
           return response;
         }
-        return fetch(event.request);
+        return fetch(event.request).then(function(newResponse){
+            if(event.request.url==='https://unpkg.com/canvaskit-wasm@0.12.0/bin/canvaskit.wasm' ||
+            event.request.url==='https://unpkg.com/canvaskit-wasm@0.12.0/bin/canvaskit.js'){
+                cache.put(request,response);
+            }
+            return newResponse;
+        });
       })
   );
 });
