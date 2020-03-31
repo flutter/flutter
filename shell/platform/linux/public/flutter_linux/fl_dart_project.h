@@ -15,12 +15,13 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlDartProject, fl_dart_project, FL, DART_PROJECT, GObject)
 
-FlDartProject* fl_dart_project_new(const gchar* assets_path,
-                                   const gchar* icu_data_path);
+FlDartProject* fl_dart_project_new(const gchar* path);
 
-const gchar* fl_dart_project_get_assets_path(FlDartProject* project);
+const gchar* fl_dart_project_get_path(FlDartProject* project);
 
-const gchar* fl_dart_project_get_icu_data_path(FlDartProject* project);
+gchar* fl_dart_project_get_assets_path(FlDartProject* project);
+
+gchar* fl_dart_project_get_icu_data_path(FlDartProject* project);
 
 G_END_DECLS
 

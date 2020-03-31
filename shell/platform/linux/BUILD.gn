@@ -58,6 +58,8 @@ if (build_linux_shell) {
   }
 
   source_set("flutter_linux") {
+    public = _public_headers
+
     sources = [
       "fl_dart_project.cc",
       "fl_view.cc",
