@@ -1162,10 +1162,14 @@ TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
   document.Accept(writer);
   DestroyShell(std::move(shell));
 
-  // Base64 encoding of x, y are eQ, eA.
-  ASSERT_STREQ(
-      buffer.GetString(),
-      "{\"type\":\"GetSkSLs\",\"SkSLs\":{\"II\":\"eQ==\",\"IE\":\"eA==\"}}");
+  const std::string expected_json1 =
+      "{\"type\":\"GetSkSLs\",\"SkSLs\":{\"II\":\"eQ==\",\"IE\":\"eA==\"}}";
+  const std::string expected_json2 =
+      "{\"type\":\"GetSkSLs\",\"SkSLs\":{\"IE\":\"eA==\",\"II\":\"eQ==\"}}";
+  bool json_is_expected = (expected_json1 == buffer.GetString()) ||
+                          (expected_json2 == buffer.GetString());
+  ASSERT_TRUE(json_is_expected) << buffer.GetString() << " is not equal to "
+                                << expected_json1 << " or " << expected_json2;
 
   // Cleanup files
   fml::FileVisitor recursive_cleanup = [&recursive_cleanup](
