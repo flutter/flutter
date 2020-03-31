@@ -109,7 +109,7 @@ int RunTester(const flutter::Settings& settings,
 
   std::unique_ptr<ThreadHost> threadhost;
   fml::RefPtr<fml::TaskRunner> platform_task_runner;
-  fml::RefPtr<fml::TaskRunner> gpu_task_runner;
+  fml::RefPtr<fml::TaskRunner> raster_task_runner;
   fml::RefPtr<fml::TaskRunner> ui_task_runner;
   fml::RefPtr<fml::TaskRunner> io_task_runner;
 
@@ -118,17 +118,17 @@ int RunTester(const flutter::Settings& settings,
         thread_label, ThreadHost::Type::Platform | ThreadHost::Type::IO |
                           ThreadHost::Type::UI | ThreadHost::Type::GPU);
     platform_task_runner = current_task_runner;
-    gpu_task_runner = threadhost->gpu_thread->GetTaskRunner();
+    raster_task_runner = threadhost->raster_thread->GetTaskRunner();
     ui_task_runner = threadhost->ui_thread->GetTaskRunner();
     io_task_runner = threadhost->io_thread->GetTaskRunner();
   } else {
-    platform_task_runner = gpu_task_runner = ui_task_runner = io_task_runner =
-        current_task_runner;
+    platform_task_runner = raster_task_runner = ui_task_runner =
+        io_task_runner = current_task_runner;
   }
 
   const flutter::TaskRunners task_runners(thread_label,  // dart thread label
                                           platform_task_runner,  // platform
-                                          gpu_task_runner,       // raster
+                                          raster_task_runner,    // raster
                                           ui_task_runner,        // ui
                                           io_task_runner         // io
   );

@@ -13,9 +13,14 @@ namespace fml {
 
 class MessageLoopImpl;
 
-enum class GpuThreadStatus { kRemainsMerged, kRemainsUnmerged, kUnmergedNow };
+enum class RasterThreadStatus {
+  kRemainsMerged,
+  kRemainsUnmerged,
+  kUnmergedNow
+};
 
-class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
+class RasterThreadMerger
+    : public fml::RefCountedThreadSafe<RasterThreadMerger> {
  public:
   // Merges the raster thread into platform thread for the duration of
   // the lease term. Lease is managed by the caller by either calling
@@ -27,14 +32,14 @@ class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
 
   void ExtendLeaseTo(size_t lease_term);
 
-  // Returns |GpuThreadStatus::kUnmergedNow| if this call resulted in splitting
-  // the GPU and platform threads. Reduces the lease term by 1.
-  GpuThreadStatus DecrementLease();
+  // Returns |RasterThreadStatus::kUnmergedNow| if this call resulted in
+  // splitting the GPU and platform threads. Reduces the lease term by 1.
+  RasterThreadStatus DecrementLease();
 
   bool IsMerged() const;
 
-  GpuThreadMerger(fml::TaskQueueId platform_queue_id,
-                  fml::TaskQueueId gpu_queue_id);
+  RasterThreadMerger(fml::TaskQueueId platform_queue_id,
+                     fml::TaskQueueId gpu_queue_id);
 
   // Returns true if the current thread owns rasterizing.
   // When the threads are merged, platform thread owns rasterizing.
@@ -49,9 +54,9 @@ class GpuThreadMerger : public fml::RefCountedThreadSafe<GpuThreadMerger> {
   std::atomic_int lease_term_;
   bool is_merged_;
 
-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(GpuThreadMerger);
-  FML_FRIEND_MAKE_REF_COUNTED(GpuThreadMerger);
-  FML_DISALLOW_COPY_AND_ASSIGN(GpuThreadMerger);
+  FML_FRIEND_REF_COUNTED_THREAD_SAFE(RasterThreadMerger);
+  FML_FRIEND_MAKE_REF_COUNTED(RasterThreadMerger);
+  FML_DISALLOW_COPY_AND_ASSIGN(RasterThreadMerger);
 };
 
 }  // namespace fml

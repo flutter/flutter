@@ -83,7 +83,7 @@ sk_sp<SkImage> ConvertToRasterUsingResourceContext(
 
 void ConvertImageToRaster(sk_sp<SkImage> image,
                           std::function<void(sk_sp<SkImage>)> encode_task,
-                          fml::RefPtr<fml::TaskRunner> gpu_task_runner,
+                          fml::RefPtr<fml::TaskRunner> raster_task_runner,
                           fml::RefPtr<fml::TaskRunner> io_task_runner,
                           GrContext* resource_context,
                           fml::WeakPtr<SnapshotDelegate> snapshot_delegate) {
@@ -118,9 +118,9 @@ void ConvertImageToRaster(sk_sp<SkImage> image,
   // Cross-context images do not support makeRasterImage. Convert these images
   // by drawing them into a surface.  This must be done on the raster thread
   // to prevent concurrent usage of the image on both the IO and raster threads.
-  gpu_task_runner->PostTask([image, encode_task = std::move(encode_task),
-                             resource_context, snapshot_delegate,
-                             io_task_runner]() {
+  raster_task_runner->PostTask([image, encode_task = std::move(encode_task),
+                                resource_context, snapshot_delegate,
+                                io_task_runner]() {
     sk_sp<SkImage> raster_image =
         snapshot_delegate->ConvertToRasterImage(image);
 
@@ -210,7 +210,7 @@ void EncodeImageAndInvokeDataCallback(
     std::unique_ptr<DartPersistentValue> callback,
     ImageByteFormat format,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
-    fml::RefPtr<fml::TaskRunner> gpu_task_runner,
+    fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<fml::TaskRunner> io_task_runner,
     GrContext* resource_context,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate) {
@@ -227,7 +227,7 @@ void EncodeImageAndInvokeDataCallback(
          encoded = std::move(encoded)] { callback_task(encoded); });
   };
 
-  ConvertImageToRaster(std::move(image), encode_task, gpu_task_runner,
+  ConvertImageToRaster(std::move(image), encode_task, raster_task_runner,
                        io_task_runner, resource_context, snapshot_delegate);
 }
 
@@ -252,14 +252,14 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [callback = std::move(callback), image = canvas_image->image(),
        image_format, ui_task_runner = task_runners.GetUITaskRunner(),
-       gpu_task_runner = task_runners.GetGPUTaskRunner(),
+       raster_task_runner = task_runners.GetRasterTaskRunner(),
        io_task_runner = task_runners.GetIOTaskRunner(),
        io_manager = UIDartState::Current()->GetIOManager(),
        snapshot_delegate =
            UIDartState::Current()->GetSnapshotDelegate()]() mutable {
         EncodeImageAndInvokeDataCallback(
             std::move(image), std::move(callback), image_format,
-            std::move(ui_task_runner), std::move(gpu_task_runner),
+            std::move(ui_task_runner), std::move(raster_task_runner),
             std::move(io_task_runner), io_manager->GetResourceContext().get(),
             std::move(snapshot_delegate));
       }));

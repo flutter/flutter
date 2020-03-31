@@ -112,10 +112,10 @@ void IOSSurface::PrerollCompositeEmbeddedView(int view_id,
 
 // |ExternalViewEmbedder|
 PostPrerollResult IOSSurface::PostPrerollAction(
-    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSSurface::PostPrerollAction");
   FML_CHECK(platform_views_controller_ != nullptr);
-  return platform_views_controller_->PostPrerollAction(gpu_thread_merger);
+  return platform_views_controller_->PostPrerollAction(raster_thread_merger);
 }
 
 // |ExternalViewEmbedder|

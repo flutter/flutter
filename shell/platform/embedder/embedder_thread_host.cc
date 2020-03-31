@@ -168,7 +168,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   auto render_task_runner = render_task_runner_pair.second
                                 ? static_cast<fml::RefPtr<fml::TaskRunner>>(
                                       render_task_runner_pair.second)
-                                : thread_host.gpu_thread->GetTaskRunner();
+                                : thread_host.raster_thread->GetTaskRunner();
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
@@ -219,10 +219,10 @@ EmbedderThreadHost::CreateEngineManagedThreadHost() {
 
   flutter::TaskRunners task_runners(
       kFlutterThreadName,
-      platform_task_runner,                     // platform
-      thread_host.gpu_thread->GetTaskRunner(),  // raster
-      thread_host.ui_thread->GetTaskRunner(),   // ui
-      thread_host.io_thread->GetTaskRunner()    // io
+      platform_task_runner,                        // platform
+      thread_host.raster_thread->GetTaskRunner(),  // raster
+      thread_host.ui_thread->GetTaskRunner(),      // ui
+      thread_host.io_thread->GetTaskRunner()       // io
   );
 
   if (!task_runners.IsValid()) {

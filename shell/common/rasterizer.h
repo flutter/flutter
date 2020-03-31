@@ -13,8 +13,8 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/closure.h"
-#include "flutter/fml/gpu_thread_merger.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/raster_thread_merger.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
@@ -420,7 +420,7 @@ class Rasterizer final : public SnapshotDelegate {
   bool user_override_resource_cache_bytes_;
   std::optional<size_t> max_cache_bytes_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
-  fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
+  fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,

@@ -12,8 +12,8 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/texture.h"
-#include "flutter/fml/gpu_thread_merger.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/raster_thread_merger.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
@@ -46,7 +46,7 @@ class CompositorContext {
                 const SkMatrix& root_surface_transformation,
                 bool instrumentation_enabled,
                 bool surface_supports_readback,
-                fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
+                fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
 
     virtual ~ScopedFrame();
 
@@ -75,7 +75,7 @@ class CompositorContext {
     const SkMatrix& root_surface_transformation_;
     const bool instrumentation_enabled_;
     const bool surface_supports_readback_;
-    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
@@ -91,7 +91,7 @@ class CompositorContext {
       const SkMatrix& root_surface_transformation,
       bool instrumentation_enabled,
       bool surface_supports_readback,
-      fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger);
 
   void OnGrContextCreated();
 
