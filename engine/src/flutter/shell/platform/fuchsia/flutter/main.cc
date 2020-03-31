@@ -17,7 +17,6 @@ int main(int argc, char const* argv[]) {
 
   std::unique_ptr<trace::TraceProviderWithFdio> provider;
   {
-    TRACE_DURATION("flutter", "CreateTraceProvider");
     bool already_started;
     // Use CreateSynchronously to prevent loss of early events.
     trace::TraceProviderWithFdio::CreateSynchronously(
