@@ -156,6 +156,7 @@ task:
         - $FRAMEWORK_PATH/flutter/bin/flutter config --local-engine=host_debug_unopt --no-analytics --enable-web
         - $FRAMEWORK_PATH/flutter/bin/flutter pub get --local-engine=host_debug_unopt
         - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/text_editing_e2e.dart -d web-server --release --browser-name=chrome --local-engine=host_debug_unopt
+        - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/treeshaking_e2e.dart -d web-server --profile --browser-name=chrome --local-engine=host_debug_unopt
         - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/image_loading_e2e.dart -d web-server --release --browser-name=chrome --local-engine=host_debug_unopt
 
     - name: build_and_test_web_linux_firefox
