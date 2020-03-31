@@ -475,9 +475,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ),
       ),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      // Only overriding shape because the material spec was updated to radius 4,
-      // but the default for Dialogs are radius 2 which can can't update without
-      // breaking apps.
+      // The default dialog shape is radius 2 rounded rect, but the spec has
+      // been updated to 4, so we will use that here for the Date Picker, but
+      // only if there isn't one provided in the theme.
       shape: dialogTheme.shape ?? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(4.0))
       ),
