@@ -77,8 +77,6 @@ class UserMessages {
   String androidSdkInstallHelp(Platform platform) =>
       'Try re-installing or updating your Android SDK,\n'
       'visit ${_androidSdkInstallUrl(platform)} for detailed instructions.';
-  String get androidMissingNdk => 'Android NDK location not configured (optional; useful for native profiling support)';
-  String androidNdkLocation(String directory) => 'Android NDK at $directory';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
 

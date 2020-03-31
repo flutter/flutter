@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -159,96 +158,6 @@ void main() {
       FileSystem: () => fs,
       ProcessManager: () => processManager,
     });
-
-    group('ndk', () {
-      const <String, String>{
-        'linux': 'linux-x86_64',
-        'macos': 'darwin-x86_64',
-      }.forEach((String os, String osDir) {
-        testUsingContext('detection on $os', () {
-          sdkDir = MockAndroidSdk.createSdkDirectory(
-              withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true);
-          globals.config.setValue('android-sdk', sdkDir.path);
-
-          final String realSdkDir = sdkDir.path;
-          final String realNdkDir = globals.fs.path.join(realSdkDir, 'ndk-bundle');
-          final String realNdkCompiler = globals.fs.path.join(
-              realNdkDir,
-              'toolchains',
-              'arm-linux-androideabi-4.9',
-              'prebuilt',
-              osDir,
-              'bin',
-              'arm-linux-androideabi-gcc');
-          final String realNdkSysroot =
-              globals.fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
-
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-          expect(sdk.directory, realSdkDir);
-          expect(sdk.ndk, isNotNull);
-          expect(sdk.ndk.directory, realNdkDir);
-          expect(sdk.ndk.compiler, realNdkCompiler);
-          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot]);
-        }, overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => FakePlatform(operatingSystem: os),
-        });
-
-        testUsingContext('newer NDK require explicit -fuse-ld on $os', () {
-          sdkDir = MockAndroidSdk.createSdkDirectory(
-              withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true, ndkVersion: 18);
-          globals.config.setValue('android-sdk', sdkDir.path);
-
-          final String realSdkDir = sdkDir.path;
-          final String realNdkDir = globals.fs.path.join(realSdkDir, 'ndk-bundle');
-          final String realNdkToolchainBin = globals.fs.path.join(
-              realNdkDir,
-              'toolchains',
-              'arm-linux-androideabi-4.9',
-              'prebuilt',
-              osDir,
-              'bin');
-          final String realNdkCompiler = globals.fs.path.join(
-              realNdkToolchainBin,
-              'arm-linux-androideabi-gcc');
-          final String realNdkLinker = globals.fs.path.join(
-              realNdkToolchainBin,
-              'arm-linux-androideabi-ld');
-          final String realNdkSysroot =
-              globals.fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
-
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-          expect(sdk.directory, realSdkDir);
-          expect(sdk.ndk, isNotNull);
-          expect(sdk.ndk.directory, realNdkDir);
-          expect(sdk.ndk.compiler, realNdkCompiler);
-          expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=$realNdkLinker']);
-        }, overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => FakePlatform(operatingSystem: os),
-        });
-      });
-
-      for (final String os in <String>['linux', 'macos']) {
-        testUsingContext('detection on $os (no ndk available)', () {
-          sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: true);
-          globals.config.setValue('android-sdk', sdkDir.path);
-
-          final String realSdkDir = sdkDir.path;
-          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-          expect(sdk.directory, realSdkDir);
-          expect(sdk.ndk, isNull);
-          final String explanation = AndroidNdk.explainMissingNdk(sdk.directory);
-          expect(explanation, contains('Can not locate ndk-bundle'));
-        }, overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Platform: () => FakePlatform(operatingSystem: os),
-        });
-      }
-    });
   });
 }
 
@@ -256,8 +165,6 @@ void main() {
 class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
     bool withAndroidN = false,
-    String withNdkDir,
-    bool withNdkSysroot = false,
     bool withSdkManager = true,
   }) {
     final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
