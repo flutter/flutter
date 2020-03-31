@@ -14,7 +14,7 @@ void main() {
     });
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/53712
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
