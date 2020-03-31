@@ -584,7 +584,7 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
+  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/43029
   # system_debug_ios:
   #   description: >
   #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
