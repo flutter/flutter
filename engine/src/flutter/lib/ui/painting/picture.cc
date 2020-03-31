@@ -115,7 +115,7 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
     delete image_callback;
   });
 
-  // Kick things off on the GPU.
+  // Kick things off on the raster rask runner.
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner,
       [ui_task_runner, snapshot_delegate, picture, picture_bounds, ui_task] {
