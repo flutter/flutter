@@ -4313,6 +4313,7 @@ void main() {
     expect(formatter.log, referenceLog);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/53612
   testWidgets('formatter logic handles initial repeat edge case', (WidgetTester tester) async {
     final MockTextFormatter formatter = MockTextFormatter();
     await tester.pumpWidget(
