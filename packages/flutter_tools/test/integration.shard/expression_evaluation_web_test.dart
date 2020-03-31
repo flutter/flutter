@@ -52,7 +52,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter run expression evaluation - can evaluate trivial expressions in build method', () async {
     await initProject();
@@ -60,7 +60,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter run expression evaluation - can evaluate complex expressions in top level function', () async {
     await initProject();
@@ -68,7 +68,7 @@ void batch1() {
     await breakInTopLevelFunction(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter run expression evaluation - can evaluate complex expressions in build method', () async {
     await initProject();
@@ -76,7 +76,7 @@ void batch1() {
     await breakInBuildMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter run expression evaluation - can evaluate expressions returning complex objects in top level function', () async {
     await initProject();
@@ -124,7 +124,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateTrivialExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter test expression evaluation - can evaluate complex expressions in a test', () async {
     await initProject();
@@ -132,7 +132,7 @@ void batch2() {
     await breakInMethod(_flutter);
     await evaluateComplexExpressions(_flutter);
     await cleanProject();
-  });
+  }, skip: !Platform.isLinux);
 
   test('flutter test expression evaluation - can evaluate expressions returning complex objects in a test', () async {
     await initProject();
