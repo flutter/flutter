@@ -8,7 +8,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:package_config/package_config.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
@@ -812,13 +811,13 @@ abstract class FlutterCommand extends Command<void> {
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
         if (!globals.fs.file(kPackagesFileName).existsSync()) {
-          String message = '$packagesPath does not exist.';	
+          String message = '$kPackagesFileName does not exist.';
           final String pubspecPath = globals.fs.path.absolute(
-            globals.fs.path.dirname(packagesPath), 'pubspec.yaml');
-          if (_fileSystem.isFileSync(pubspecPath)) {	
-            message += '\nDid you run "flutter pub get" in this directory?';	
-          } else {	
-            message += '\nDid you run this command from the same directory as your pubspec.yaml file?';	
+            globals.fs.path.dirname(kPackagesFileName), 'pubspec.yaml');
+          if (globals.fs.isFileSync(pubspecPath)) {
+            message += '\nDid you run "flutter pub get" in this directory?';
+          } else {
+            message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
           }
           throwToolExit(message);
         }
