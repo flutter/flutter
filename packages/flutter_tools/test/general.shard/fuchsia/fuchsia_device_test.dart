@@ -97,6 +97,11 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    test('is ephemeral', () {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(device.ephemeral, true);
+    });
+
     testUsingContext('supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
