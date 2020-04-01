@@ -1430,7 +1430,7 @@ TEST_F(EmbedderTest,
       });
 
   context.GetCompositor().SetPlatformViewRendererCallback(
-      [&](const FlutterLayer& layer, GrContext *
+      [&](const FlutterLayer& layer, GrContext*
           /* don't use because software compositor */) -> sk_sp<SkImage> {
         auto surface = CreateRenderSurface(
             layer, nullptr /* null because software compositor */);
@@ -3001,6 +3001,12 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   auto renderered_scene = context.GetNextSceneImage();
 
   latch.Wait();
+
+  // TODO(https://github.com/flutter/flutter/issues/53784): enable this on all
+  // platforms.
+#if !defined(OS_LINUX)
+  GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
+#endif  // OS_LINUX
   ASSERT_TRUE(ImageMatchesFixture("verifyb143464703_soft_noxform.png",
                                   renderered_scene));
 }
