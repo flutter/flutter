@@ -812,7 +812,7 @@ abstract class FlutterCommand extends Command<void> {
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
         await loadPackageConfig(globals.fs.file(kPackagesFileName), onError: (dynamic error) {
-          throw ToolExit(error.toString());
+          throwToolExit(error.toString());
         });
       }
     }

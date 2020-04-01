@@ -494,9 +494,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (globals.fs.isFileSync(kPackagesFileName)) {
-      final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(kPackagesFileName));
+      PackageConfig packageConfig;
       Uri flutterUri;
       try {
+        packageConfig = await loadPackageConfig(globals.fs.file(kPackagesFileName));
         flutterUri = packageConfig['flutter'].packageUriRoot;
       } on FormatException {
         // We're not quite sure why this can happen, perhaps the user
