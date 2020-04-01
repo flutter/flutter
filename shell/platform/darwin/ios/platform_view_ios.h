@@ -66,6 +66,24 @@ class PlatformViewIOS final : public PlatformView {
     id<NSObject> observer_;
   };
 
+  /// Smart pointer that guarentees we communicate clearing Accessibility
+  /// information to Dart.
+  class AccessibilityBridgePtr {
+   public:
+    AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled);
+    AccessibilityBridgePtr(const std::function<void(bool)>& set_semantics_enabled,
+                           AccessibilityBridge* bridge);
+    ~AccessibilityBridgePtr();
+    explicit operator bool() const noexcept { return static_cast<bool>(accessibility_bridge_); }
+    AccessibilityBridge* operator->() const noexcept { return accessibility_bridge_.get(); }
+    void reset(AccessibilityBridge* bridge = nullptr);
+
+   private:
+    FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgePtr);
+    std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+    std::function<void(bool)> set_semantics_enabled_;
+  };
+
   fml::WeakPtr<FlutterViewController> owner_controller_;
   // Since the `ios_surface_` is created on the platform thread but
   // used on the raster thread we need to protect it with a mutex.
@@ -73,7 +91,7 @@ class PlatformViewIOS final : public PlatformView {
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   PlatformMessageRouter platform_message_router_;
-  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  AccessibilityBridgePtr accessibility_bridge_;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
   fml::closure firstFrameCallback_;
   ScopedObserver dealloc_view_controller_observer_;
