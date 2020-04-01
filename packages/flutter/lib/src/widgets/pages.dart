@@ -15,12 +15,14 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     this.fullscreenDialog = false,
   }) : super(settings: settings);
 
+  /// {@template flutter.widgets.pageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.
   ///
   /// In Material and Cupertino, being fullscreen has the effects of making
   /// the app bars have a close button instead of a back button. On
   /// iOS, dialogs transitions animate differently and are also not closeable
   /// with the back swipe gesture.
+  /// {@endtemplate}
   final bool fullscreenDialog;
 
   @override

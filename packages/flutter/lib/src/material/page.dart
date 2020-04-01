@@ -33,9 +33,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [PageTransitionsTheme], which defines the default page transitions used
-///    by [MaterialPageRoute.buildTransitions].
-class MaterialPageRoute<T> extends PageRoute<T> {
+///  * [MaterialRouteTransitionMixin], which provides the material transition
+///  for this route.
+class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   ///
   /// The values of [builder], [maintainState], and [fullScreenDialog] must not
@@ -51,11 +51,34 @@ class MaterialPageRoute<T> extends PageRoute<T> {
        assert(opaque),
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
-  /// Builds the primary contents of the route.
+  @override
   final WidgetBuilder builder;
 
   @override
   final bool maintainState;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${settings.name})';
+}
+
+
+/// A mixin that provides platform-adaptive transitions for a [PageRoute].
+///
+/// For Android, the entrance transition for the page slides the page upwards
+/// and fades it in. The exit transition is the same, but in reverse.
+///
+/// The transition is adaptive to the platform and on iOS, the page slides in
+/// from the right and exits in reverse. The page also shifts to the left in
+/// parallax when another page enters to cover it. (These directions are flipped
+/// in environments with a right-to-left reading direction.)
+///
+/// See also:
+///
+///  * [PageTransitionsTheme], which defines the default page transitions used
+///    by the [MaterialRouteTransitionMixin.buildTransitions].
+mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
+  /// Builds the primary contents of the route.
+  WidgetBuilder get builder;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -69,8 +92,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return (nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog)
-        || (nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog);
+    return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
+      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
   }
 
   @override
@@ -101,7 +124,60 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
+}
+
+/// A material style page that creates a [MaterialPageRoute].
+class MaterialPage<T> extends Page<T> {
+  /// Creates a material page.
+  const MaterialPage({
+    @required this.builder,
+    this.maintainState = true,
+    this.fullscreenDialog = false,
+    LocalKey key,
+    String name,
+    Object arguments,
+  }) : assert(builder != null),
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
+       super(key: key, name: name, arguments: arguments);
+
+  /// Builds the primary contents of the route.
+  final WidgetBuilder builder;
+
+  /// {@macro flutter.widgets.modalRoute.maintainState}
+  final bool maintainState;
+
+  /// {@macro flutter.widgets.pageRoute.fullscreenDialog}
+  final bool fullscreenDialog;
 
   @override
-  String get debugLabel => '${super.debugLabel}(${settings.name})';
+  Route<T> createRoute(BuildContext context) {
+    return _PageBasedMaterialPageRoute<T>(page: this);
+  }
+}
+
+// A page-based version of MaterialPageRoute.
+//
+// This route uses the builder from the page to build its content. This ensures
+// the content is up to date after page updates.
+class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+  _PageBasedMaterialPageRoute({
+    @required MaterialPage<T> page,
+  }) : assert(page != null),
+       assert(opaque),
+       super(settings: page);
+
+  MaterialPage<T> get page => settings as MaterialPage<T>;
+
+  @override
+  WidgetBuilder get builder => page.builder;
+
+  @override
+  bool get maintainState => page.maintainState;
+
+  @override
+  bool get fullscreenDialog => page.fullscreenDialog;
+
+  @override
+  String get debugLabel => '${super.debugLabel}(${page.name})';
 }

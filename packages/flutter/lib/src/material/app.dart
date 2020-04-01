@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -201,6 +202,56 @@ class MaterialApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
+       routeNameParser = null,
+       routerDelegate = null,
+       backButtonDispatcher = null,
+       routeNameProvider = null,
+       super(key: key);
+
+  /// Creates a MaterialApp with router.
+  const MaterialApp.router({
+    Key key,
+    @required this.routeNameParser,
+    @required this.routerDelegate,
+    this.backButtonDispatcher,
+    this.routeNameProvider,
+    this.builder,
+    this.title = '',
+    this.onGenerateTitle,
+    this.color,
+    this.theme,
+    this.darkTheme,
+    this.themeMode = ThemeMode.system,
+    this.locale,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.debugShowMaterialGrid = false,
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowCheckedModeBanner = true,
+    this.shortcuts,
+    this.actions,
+  }) : assert(routeNameParser != null),
+       assert(routerDelegate != null),
+       assert(title != null),
+       assert(debugShowMaterialGrid != null),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       assert(showSemanticsDebugger != null),
+       assert(debugShowCheckedModeBanner != null),
+       navigatorObservers = null,
+       navigatorKey = null,
+       onGenerateRoute = null,
+       home = null,
+       onGenerateInitialRoutes = null,
+       onUnknownRoute = null,
+       routes = null,
+       initialRoute = null,
        super(key: key);
 
   /// {@macro flutter.widgets.widgetsApp.navigatorKey}
@@ -233,6 +284,18 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver> navigatorObservers;
+
+  /// {@macro flutter.widgets.widgetsApp.routeNameParser}
+  final RouteNameParser<dynamic> routeNameParser;
+
+  /// {@macro flutter.widgets.widgetsApp.routerDelegate}
+  final RouterDelegate<dynamic> routerDelegate;
+
+  /// {@macro flutter.widgets.widgetsApp.backButtonDispatcher}
+  final BackButtonDispatcher backButtonDispatcher;
+
+  /// {@macro flutter.widgets.widgetsApp.routeNameProvider}
+  final RouteNameProvider routeNameProvider;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
@@ -532,6 +595,15 @@ class MaterialApp extends StatefulWidget {
   ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
+  /// Creates a hero controller with material style tween.
+  static HeroController createMaterialHeroController() {
+    return HeroController(
+      createRectTween: (Rect begin, Rect end) {
+        return MaterialRectArcTween(begin: begin, end: end);
+      },
+    );
+  }
+
   @override
   _MaterialAppState createState() => _MaterialAppState();
 }
@@ -567,42 +639,46 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 class _MaterialAppState extends State<MaterialApp> {
   HeroController _heroController;
 
+  bool get _usesRouter => widget.routerDelegate != null;
+
   @override
   void initState() {
     super.initState();
-    _heroController = HeroController(createRectTween: _createRectTween);
-    _updateNavigator();
+    if (!_usesRouter) {
+      _heroController = MaterialApp.createMaterialHeroController();
+      _updateNavigator();
+    }
   }
 
   @override
   void didUpdateWidget(MaterialApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey) {
-      // If the Navigator changes, we have to create a new observer, because the
-      // old Navigator won't be disposed (and thus won't unregister with its
-      // observers) until after the new one has been created (because the
-      // Navigator has a GlobalKey).
-      _heroController = HeroController(createRectTween: _createRectTween);
+    if (!_usesRouter) {
+      if (widget.navigatorKey != oldWidget.navigatorKey) {
+        // If the Navigator changes, we have to create a new observer, because the
+        // old Navigator won't be disposed (and thus won't unregister with its
+        // observers) until after the new one has been created (because the
+        // Navigator has a GlobalKey).
+        _heroController = MaterialApp.createMaterialHeroController();
+      }
+      _updateNavigator();
     }
-    _updateNavigator();
   }
 
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {
-    if (widget.home != null ||
-        widget.routes.isNotEmpty ||
-        widget.onGenerateRoute != null ||
-        widget.onUnknownRoute != null) {
+    if (
+      widget.home != null ||
+      widget.routes.isNotEmpty ||
+      widget.onGenerateRoute != null ||
+      widget.onUnknownRoute != null
+    ) {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
       _navigatorObservers = const <NavigatorObserver>[];
     }
-  }
-
-  RectTween _createRectTween(Rect begin, Rect end) {
-    return MaterialRectArcTween(begin: begin, end: end);
   }
 
   // Combine the Localizations for Material with the ones contributed
@@ -617,9 +693,86 @@ class _MaterialAppState extends State<MaterialApp> {
     yield DefaultCupertinoLocalizations.delegate;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Widget result = WidgetsApp(
+  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+    return FloatingActionButton(
+      child: const Icon(Icons.search),
+      onPressed: onPressed,
+      mini: true,
+    );
+  }
+
+  WidgetsApp _buildWidgetApp(BuildContext context) {
+    final TransitionBuilder materialBuilder = (BuildContext context, Widget child) {
+      // Use a light theme, dark theme, or fallback theme.
+      final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
+      ThemeData theme;
+      if (widget.darkTheme != null) {
+        final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+        if (mode == ThemeMode.dark ||
+          (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
+          theme = widget.darkTheme;
+        }
+      }
+      theme ??= widget.theme ?? ThemeData.fallback();
+
+      return AnimatedTheme(
+        data: theme,
+        isMaterialAppTheme: true,
+        child: widget.builder != null
+          ? Builder(
+              builder: (BuildContext context) {
+                // Why are we surrounding a builder with a builder?
+                //
+                // The widget.builder may contain code that invokes
+                // Theme.of(), which should return the theme we selected
+                // above in AnimatedTheme. However, if we invoke
+                // widget.builder() directly as the child of AnimatedTheme
+                // then there is no Context separating them, and the
+                // widget.builder() will not find the theme. Therefore, we
+                // surround widget.builder with yet another builder so that
+                // a context separates them and Theme.of() correctly
+                // resolves to the theme we passed to AnimatedTheme.
+                return widget.builder(context, child);
+              },
+            )
+          : child,
+      );
+    };
+    if (_usesRouter) {
+      return WidgetsApp.router(
+        key: GlobalObjectKey(this),
+        routerDelegate: widget.routerDelegate,
+        routeNameParser: widget.routeNameParser,
+        routeNameProvider: widget.routeNameProvider,
+        backButtonDispatcher: widget.backButtonDispatcher,
+        builder: materialBuilder,
+        title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
+        textStyle: _errorTextStyle,
+        // The color property is always pulled from the light theme, even if dark
+        // mode is activated. This was done to simplify the technical details
+        // of switching themes and it was deemed acceptable because this color
+        // property is only used on old Android OSes to color the app bar in
+        // Android's switcher UI.
+        //
+        // blue is the primary color of the default theme
+        color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
+        locale: widget.locale,
+        localizationsDelegates: _localizationsDelegates,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        localeListResolutionCallback: widget.localeListResolutionCallback,
+        supportedLocales: widget.supportedLocales,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+        inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
+        shortcuts: widget.shortcuts,
+        actions: widget.actions,
+      );
+    }
+    return WidgetsApp(
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: _navigatorObservers,
@@ -632,42 +785,7 @@ class _MaterialAppState extends State<MaterialApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
-      builder: (BuildContext context, Widget child) {
-        // Use a light theme, dark theme, or fallback theme.
-        final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
-        ThemeData theme;
-        if (widget.darkTheme != null) {
-          final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-          if (mode == ThemeMode.dark ||
-              (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
-            theme = widget.darkTheme;
-          }
-        }
-        theme ??= widget.theme ?? ThemeData.fallback();
-
-        return AnimatedTheme(
-          data: theme,
-          isMaterialAppTheme: true,
-          child: widget.builder != null
-              ? Builder(
-                  builder: (BuildContext context) {
-                    // Why are we surrounding a builder with a builder?
-                    //
-                    // The widget.builder may contain code that invokes
-                    // Theme.of(), which should return the theme we selected
-                    // above in AnimatedTheme. However, if we invoke
-                    // widget.builder() directly as the child of AnimatedTheme
-                    // then there is no Context separating them, and the
-                    // widget.builder() will not find the theme. Therefore, we
-                    // surround widget.builder with yet another builder so that
-                    // a context separates them and Theme.of() correctly
-                    // resolves to the theme we passed to AnimatedTheme.
-                    return widget.builder(context, child);
-                  },
-                )
-              : child,
-        );
-      },
+      builder: materialBuilder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
       textStyle: _errorTextStyle,
@@ -689,16 +807,15 @@ class _MaterialAppState extends State<MaterialApp> {
       checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       showSemanticsDebugger: widget.showSemanticsDebugger,
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-      inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-        return FloatingActionButton(
-          child: const Icon(Icons.search),
-          onPressed: onPressed,
-          mini: true,
-        );
-      },
+      inspectorSelectButtonBuilder: _inspectorSelectButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget result = _buildWidgetApp(context);
 
     assert(() {
       if (widget.debugShowMaterialGrid) {

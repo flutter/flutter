@@ -1189,6 +1189,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [AnimatedModalBarrier], the widget that implements this feature.
   Curve get barrierCurve => Curves.ease;
 
+  /// {@template flutter.widgets.modalRoute.maintainState}
   /// Whether the route should remain in memory when it is inactive.
   ///
   /// If this is true, then the route is maintained, so that any futures it is
@@ -1200,6 +1201,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The value of this getter should not change during the lifetime of the
   /// object. It is used by [createOverlayEntries], which is called by
   /// [install] near the beginning of the route lifecycle.
+  /// {@endtemplate}
   bool get maintainState;
 
 

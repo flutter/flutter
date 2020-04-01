@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater);
+  const StockSettings(this.configuration);
 
   final StockConfiguration configuration;
-  final ValueChanged<StockConfiguration> updater;
 
   @override
   StockSettingsState createState() => StockSettingsState();
@@ -19,44 +18,44 @@ class StockSettings extends StatefulWidget {
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    sendUpdates(widget.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
+    widget.configuration.stockMode = value ? StockMode.optimistic : StockMode.pessimistic;
   }
 
   void _handleBackupChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
+    widget.configuration.backupMode = value ? BackupMode.enabled : BackupMode.disabled;
   }
 
   void _handleShowGridChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowGrid: value));
+    widget.configuration.debugShowGrid = value;
   }
 
   void _handleShowSizesChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowSizes: value));
+    widget.configuration.debugShowSizes = value;
   }
 
   void _handleShowBaselinesChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowBaselines: value));
+    widget.configuration.debugShowBaselines = value;
   }
 
   void _handleShowLayersChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowLayers: value));
+    widget.configuration.debugShowLayers = value;
   }
 
   void _handleShowPointersChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowPointers: value));
+    widget.configuration.debugShowPointers = value;
   }
 
   void _handleShowRainbowChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(debugShowRainbow: value));
+    widget.configuration.debugShowRainbow = value;
   }
 
 
   void _handleShowPerformanceOverlayChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(showPerformanceOverlay: value));
+    widget.configuration.showPerformanceOverlay = value;
   }
 
   void _handleShowSemanticsDebuggerChanged(bool value) {
-    sendUpdates(widget.configuration.copyWith(showSemanticsDebugger: value));
+    widget.configuration.showSemanticsDebugger = value;
   }
 
   void _confirmOptimismChange() {
@@ -90,11 +89,6 @@ class StockSettingsState extends State<StockSettings> {
         ).then<void>(_handleOptimismChanged);
         break;
     }
-  }
-
-  void sendUpdates(StockConfiguration value) {
-    if (widget.updater != null)
-      widget.updater(value);
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -215,4 +209,15 @@ class StockSettingsState extends State<StockSettings> {
       body: buildSettingsPane(context),
     );
   }
+}
+
+class StockSettingsPage extends MaterialPage<void> {
+  StockSettingsPage(
+    StockConfiguration configuration,
+  ) : super(
+      key: const ValueKey<String>('settings'),
+      builder: (BuildContext context) {
+        return StockSettings(configuration);
+      }
+  );
 }

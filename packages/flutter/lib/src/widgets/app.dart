@@ -20,6 +20,7 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'router.dart';
 import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
@@ -258,6 +259,62 @@ class WidgetsApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
+       routeNameParser = null,
+       routerDelegate = null,
+       backButtonDispatcher = null,
+       routeNameProvider = null,
+       super(key: key);
+
+  /// A WidgetApp initializes with [Router].
+  WidgetsApp.router({
+    Key key,
+    @required this.routeNameParser,
+    @required this.routerDelegate,
+    BackButtonDispatcher backButtonDispatcher,
+    this.routeNameProvider,
+    this.builder,
+    this.title = '',
+    this.onGenerateTitle,
+    this.textStyle,
+    @required this.color,
+    this.locale,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
+    this.localeResolutionCallback,
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
+    this.showPerformanceOverlay = false,
+    this.checkerboardRasterCacheImages = false,
+    this.checkerboardOffscreenLayers = false,
+    this.showSemanticsDebugger = false,
+    this.debugShowWidgetInspector = false,
+    this.debugShowCheckedModeBanner = true,
+    this.inspectorSelectButtonBuilder,
+    this.shortcuts,
+    this.actions,
+  }) : assert(
+         routeNameParser != null &&
+         routerDelegate != null,
+         'The routeNameParser and routerDelegate cannot be null.'
+       ),
+       assert(title != null),
+       assert(color != null),
+       assert(supportedLocales != null && supportedLocales.isNotEmpty),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       assert(showSemanticsDebugger != null),
+       assert(debugShowCheckedModeBanner != null),
+       assert(debugShowWidgetInspector != null),
+       navigatorObservers = null,
+       backButtonDispatcher = backButtonDispatcher ?? RootBackButtonDispatcher(),
+       navigatorKey = null,
+       onGenerateRoute = null,
+       pageRouteBuilder = null,
+       home = null,
+       onGenerateInitialRoutes = null,
+       onUnknownRoute = null,
+       routes = null,
+       initialRoute = null,
        super(key: key);
 
   /// {@template flutter.widgets.widgetsApp.navigatorKey}
@@ -318,6 +375,28 @@ class WidgetsApp extends StatefulWidget {
   /// This callback can be used, for example, to specify that a [MaterialPageRoute]
   /// or a [CupertinoPageRoute] should be used for building page transitions.
   final PageRouteFactory pageRouteBuilder;
+
+  /// {@template flutter.widgets.widgetsApp.routeNameParser}
+  /// A parser to parse the route name into a generic data type for configuring
+  /// tne [routerDelegate].
+  /// {@endtemplate}
+  final RouteNameParser<dynamic> routeNameParser;
+
+  /// {@template flutter.widgets.widgetsApp.routerDelegate}
+  /// A delegate that configures a [Navigator] that will be used by the [Router].
+  /// {@endtemplate}
+  final RouterDelegate<dynamic> routerDelegate;
+
+  /// {@template flutter.widgets.widgetsApp.backButtonDispatcher}
+  /// A back button dispatcher that decide whether to handle the android back
+  /// button intent.
+  /// {@endtemplate}
+  final BackButtonDispatcher backButtonDispatcher;
+
+  /// {@template flutter.widgets.widgetsApp.routeNameProvider}
+  /// A route name provider.
+  /// {@endtemplate}
+  final RouteNameProvider routeNameProvider;
 
   /// {@template flutter.widgets.widgetsApp.home}
   /// The widget for the default route of the app ([Navigator.defaultRouteName],
@@ -949,10 +1028,21 @@ class WidgetsApp extends StatefulWidget {
 class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
+  // If window.defaultRouteName isn't '/', we should assume it was set
+  // intentionally via `setInitialRoute`, and should override whatever is in
+  // [widget.initialRoute].
+  String get _initialRouteName => WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
+    ? WidgetsBinding.instance.window.defaultRouteName
+    : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName;
+
   @override
   void initState() {
     super.initState();
-    _updateNavigator();
+    if (_usesRouter) {
+      _updateRouter();
+    } else {
+      _updateNavigator();
+    }
     _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
@@ -960,14 +1050,30 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   void didUpdateWidget(WidgetsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey)
+    if (oldWidget.routeNameProvider != widget.routeNameProvider) {
+      _updateRouter();
+    }
+    if (widget.navigatorKey != oldWidget.navigatorKey) {
       _updateNavigator();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  bool get _usesRouter => widget.routerDelegate != null;
+
+  // ROUTER
+  RouteNameProvider get _effectiveRouteNameProvider => widget.routeNameProvider ?? _defaultRouteNameProvider;
+  RouteNameProvider _defaultRouteNameProvider;
+
+  void _updateRouter() {
+    _defaultRouteNameProvider?.dispose();
+    if (widget.routeNameProvider == null)
+      _defaultRouteNameProvider = PlatformRouteNameProvider(initialRouteName: _initialRouteName);
   }
 
   // NAVIGATOR
@@ -1037,6 +1143,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   Future<bool> didPopRoute() async {
     assert(mounted);
+    // The back button dispatcher should handle the pop route if we uses a
+    // router.
+    if (_usesRouter)
+      return false;
+
     final NavigatorState navigator = _navigator?.currentState;
     if (navigator == null)
       return false;
@@ -1046,6 +1157,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   @override
   Future<bool> didPushRoute(String route) async {
     assert(mounted);
+    // The route name provider should handle the push route if we uses a
+    // router.
+    if (_usesRouter)
+      return false;
+
     final NavigatorState navigator = _navigator?.currentState;
     if (navigator == null)
       return false;
@@ -1278,16 +1394,20 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Widget navigator;
-    if (_navigator != null) {
-      navigator = Navigator(
+    Widget routing;
+    if (_usesRouter) {
+      assert(_effectiveRouteNameProvider != null);
+      routing = Router<dynamic>(
+        routeNameProvider: _effectiveRouteNameProvider,
+        routeNameParser: widget.routeNameParser,
+        routerDelegate: widget.routerDelegate,
+        backButtonDispatcher: widget.backButtonDispatcher,
+      );
+    } else {
+      assert(_navigator != null);
+      routing = Navigator(
         key: _navigator,
-        // If window.defaultRouteName isn't '/', we should assume it was set
-        // intentionally via `setInitialRoute`, and should override whatever
-        // is in [widget.initialRoute].
-        initialRoute: WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
-            ? WidgetsBinding.instance.window.defaultRouteName
-            : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
+        initialRoute: _initialRouteName,
         onGenerateRoute: _onGenerateRoute,
         onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
           ? Navigator.defaultGenerateInitialRoutes
@@ -1303,12 +1423,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (widget.builder != null) {
       result = Builder(
         builder: (BuildContext context) {
-          return widget.builder(context, navigator);
+          return widget.builder(context, routing);
         },
       );
     } else {
-      assert(navigator != null);
-      result = navigator;
+      assert(routing != null);
+      result = routing;
     }
 
     if (widget.textStyle != null) {

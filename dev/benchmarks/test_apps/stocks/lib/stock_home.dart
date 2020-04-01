@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
+import 'stock_state.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
@@ -52,11 +53,9 @@ class _NotImplementedDialog extends StatelessWidget {
 }
 
 class StockHome extends StatefulWidget {
-  const StockHome(this.stocks, this.configuration, this.updater);
+  const StockHome(this.configuration);
 
-  final StockData stocks;
   final StockConfiguration configuration;
-  final ValueChanged<StockConfiguration> updater;
 
   @override
   StockHomeState createState() => StockHomeState();
@@ -83,8 +82,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode value) {
-    if (widget.updater != null)
-      widget.updater(widget.configuration.copyWith(stockMode: value));
+    widget.configuration.stockMode = value;
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -181,7 +179,10 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleShowSettings() {
-    Navigator.popAndPushNamed(context, '/settings');
+    // Removes the openned drawer.
+    Navigator.of(context).pop();
+    final StockState state = StockStateProvider.of(context);
+    state.routePath = const StockSettingsPath();
   }
 
   void _handleShowAbout() {
@@ -263,7 +264,8 @@ class StockHomeState extends State<StockHome> {
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock) {
-        Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
+        final StockState state = StockStateProvider.of(context);
+        state.routePath = StockSymbolPath(stock.symbol);
       },
       onShow: (Stock stock) {
         _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
@@ -271,12 +273,12 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  Widget _buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
+  Widget _buildStockTab(BuildContext context, StockData stocks, StockHomeTab tab, List<String> stockSymbols) {
     return AnimatedBuilder(
       key: ValueKey<StockHomeTab>(tab),
-      animation: Listenable.merge(<Listenable>[_searchQuery, widget.stocks]),
+      animation: Listenable.merge(<Listenable>[_searchQuery, stocks]),
       builder: (BuildContext context, Widget child) {
-        return _buildStockList(context, _filterBySearchQuery(_getStockList(widget.stocks, stockSymbols)).toList(), tab);
+        return _buildStockList(context, _filterBySearchQuery(_getStockList(stocks, stockSymbols)).toList(), tab);
       },
     );
   }
@@ -317,6 +319,7 @@ class StockHomeState extends State<StockHome> {
 
   @override
   Widget build(BuildContext context) {
+    final StockData stocks = StockStateProvider.of(context).stocks;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -328,8 +331,8 @@ class StockHomeState extends State<StockHome> {
         body: TabBarView(
           dragStartBehavior: DragStartBehavior.down,
           children: <Widget>[
-            _buildStockTab(context, StockHomeTab.market, widget.stocks.allSymbols),
-            _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
+            _buildStockTab(context, stocks, StockHomeTab.market, stocks.allSymbols),
+            _buildStockTab(context, stocks, StockHomeTab.portfolio, portfolioSymbols),
           ],
         ),
       ),
@@ -354,4 +357,15 @@ class _CreateCompanySheet extends StatelessWidget {
       ],
     );
   }
+}
+
+class StockHomePage extends MaterialPage<void> {
+  StockHomePage(
+    StockConfiguration configuration,
+  ) : super(
+    key: const ValueKey<String>('home'),
+    builder: (BuildContext context) {
+      return StockHome(configuration);
+    }
+  );
 }
