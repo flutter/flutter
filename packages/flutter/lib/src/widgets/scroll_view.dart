@@ -205,7 +205,8 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Children after [center] will be placed in the [axisDirection] relative to
   /// the [center]. Children before [center] will be placed in the opposite of
-  /// the [axisDirection] relative to the [center].
+  /// the [axisDirection] relative to the [center]. This makes the [center] the
+  /// inflection point of the growth direction.
   ///
   /// The [center] must be the key of one of the slivers built by [buildSlivers].
   ///

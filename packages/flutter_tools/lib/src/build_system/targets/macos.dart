@@ -16,8 +16,6 @@ import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
 
-const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
-
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
 /// This class is abstract to share logic between the three concrete
@@ -31,11 +29,6 @@ const String _kOutputPrefix = '{OUTPUT_DIR}/FlutterMacOS.framework';
 ///   * [DebugUnpackMacOS]
 ///   * [ProfileUnpackMacOS]
 ///   * [ReleaseUnpackMacOS]
-///
-// TODO(jonahwilliams): remove shell out.
-// TODO(jonahwilliams): the subtypes are required to specify the different
-// input dependencies as a current limitation of the build system planning.
-// This should be resolved after https://github.com/flutter/flutter/issues/38937.
 abstract class UnpackMacOS extends Target {
   const UnpackMacOS();
 
@@ -45,29 +38,13 @@ abstract class UnpackMacOS extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('$_kOutputPrefix/FlutterMacOS'),
-    // Headers
-    Source.pattern('$_kOutputPrefix/Headers/FlutterDartProject.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterEngine.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterViewController.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterMacros.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
-    // Modules
-    Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
-    // Resources
-    Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
-    Source.pattern('$_kOutputPrefix/Resources/Info.plist'),
-    // Ignore Versions folder for now
-  ];
+  List<Source> get outputs => const <Source>[];
 
   @override
   List<Target> get dependencies => <Target>[];
+
+  @override
+  List<String> get depfiles => const <String>['unpack_macos.d'];
 
   @override
   Future<void> build(Environment environment) async {
@@ -79,9 +56,20 @@ abstract class UnpackMacOS extends Target {
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
+    // This is necessary because multiple different build configurations will
+    // output different files here. Build cleaning only works when the files
+    // change within a build configuration.
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
+    final List<File> inputs = globals.fs.directory(basePath)
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
+    final List<File> outputs = inputs.map((File file) {
+      final String relativePath = globals.fs.path.relative(file.path, from: basePath);
+      return globals.fs.file(globals.fs.path.join(targetDirectory.path, relativePath));
+    }).toList();
     final ProcessResult result = await globals.processManager
         .run(<String>['cp', '-R', basePath, targetDirectory.path]);
     if (result.exitCode != 0) {
@@ -90,6 +78,15 @@ abstract class UnpackMacOS extends Target {
         '${result.stdout}\n---\n${result.stderr}',
       );
     }
+    final DepfileService depfileService = DepfileService(
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+    );
+    depfileService.writeToFile(
+      Depfile(inputs, outputs),
+      environment.buildDir.childFile('unpack_macos.d'),
+    );
   }
 }
 
@@ -294,6 +291,12 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Directory assetDirectory = outputDirectory
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
+    // This is necessary because multiple different build configurations will
+    // output different files here. Build cleaning only works when the files
+    // change within a build configuration.
+    if (assetDirectory.existsSync()) {
+      assetDirectory.deleteSync(recursive: true);
+    }
     assetDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, assetDirectory);
     final DepfileService depfileService = DepfileService(

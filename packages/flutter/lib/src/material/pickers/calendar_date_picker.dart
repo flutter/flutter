@@ -592,7 +592,6 @@ class _MonthPickerState extends State<_MonthPicker> {
           _DayHeaders(),
           Expanded(
             child: PageView.builder(
-              key: ValueKey<DateTime>(widget.selectedDate),
               controller: _pageController,
               itemBuilder: _buildItems,
               itemCount: utils.monthDelta(widget.firstDate, widget.lastDate) + 1,
