@@ -298,6 +298,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _entries.length;
   }
 
+  /// Used to check whether given entry already exists on the overlay
+  bool containsEntry(OverlayEntry entry) {
+    return _entries.contains(entry);
+  }
+
   /// Insert the given entry into the overlay.
   ///
   /// If `below` is non-null, the entry is inserted just below `below`.
