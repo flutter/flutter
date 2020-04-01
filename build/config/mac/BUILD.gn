@@ -9,15 +9,6 @@ config("sdk") {
 
   cflags = common_flags
   ldflags = common_flags
-
-  common_ccflags = [
-    "-nostdinc++",
-    "-isystem",
-    "$xcode_toolchain/usr/include/c++/v1",
-  ]
-
-  cflags_cc = common_ccflags
-  cflags_objcc = common_ccflags
 }
 
 # On Mac, this is used for everything except static libraries.

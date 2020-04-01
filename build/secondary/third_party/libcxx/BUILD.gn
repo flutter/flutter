@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 config("libcxx_config") {
-  include_dirs = [ "include" ]
+  defines = [ "_LIBCPP_DISABLE_AVAILABILITY=1" ]
 }
 
 source_set("libcxx") {
@@ -42,6 +42,7 @@ source_set("libcxx") {
     "src/variant.cpp",
     "src/vector.cpp",
   ]
+
   # filesystem uses statvfs, which requires API level 19+.
   if (!is_android) {
     sources += [

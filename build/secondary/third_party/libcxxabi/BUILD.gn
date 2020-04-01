@@ -29,8 +29,6 @@ source_set("libcxxabi") {
   configs -= [ "//build/config/compiler:cxx_version_default" ]
   configs += [ "//build/config/compiler:cxx_version_11" ]
 
-  configs += [ "../libcxx:libcxx_config" ]
-
   # No translation units in the engine are built with exceptions. But, using
   # Objective-C exceptions requires some infrastructure setup for exceptions.
   # Build support for the same in cxxabi on Darwin.

@@ -280,7 +280,7 @@ if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
   is_clang = true
 }
 
-use_flutter_cxx = is_clang && (is_linux || is_android)
+use_flutter_cxx = is_clang && (is_linux || is_android || is_mac)
 
 if (is_msan && !is_linux) {
   assert(false, "Memory sanitizer is only available on Linux.")
@@ -307,6 +307,14 @@ _native_compiler_configs = [
   "//build/config/compiler:no_rtti",
   "//build/config/compiler:runtime_library",
 ]
+
+if (use_flutter_cxx) {
+  _native_compiler_configs += [
+    "//third_party/libcxxabi:libcxxabi_config",
+    "//third_party/libcxx:libcxx_config",
+  ]
+}
+
 if (is_win) {
   _native_compiler_configs += [
     "//build/config/win:lean_and_mean",
