@@ -1,4 +1,4 @@
-Signature: 94449c0766bdad0c6d983e3777d226a5
+Signature: a8a81675aedb136a08fdd2ffe69e72e9
 
 UNUSED LICENSES:
 
@@ -3891,7 +3891,6 @@ FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
-FILE: ../../../third_party/skia/src/gpu/d3d/GrD3D12.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
