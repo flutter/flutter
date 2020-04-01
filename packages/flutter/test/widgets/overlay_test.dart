@@ -941,6 +941,43 @@ void main() {
 
     expect(tester.getTopLeft(find.text('positioned child')), const Offset(145, 123));
   });
+
+  testWidgets('Can verify if OverlayEntry is already on the Overlay', (WidgetTester tester) async {
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final Key exists = UniqueKey();
+    final Key doNotExists = UniqueKey();
+    final Widget existsWidget = StatefulTestWidget(key: exists);
+    final Widget doNotExistsWidget = StatefulTestWidget(key: doNotExists);
+
+    final OverlayEntry existsEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return existsWidget;
+      }
+    );
+
+    final OverlayEntry doNotExistsEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return doNotExistsWidget;
+      }
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            existsEntry,
+          ],
+        ),
+      ),
+    );
+
+    expect(overlayKey.currentState.containsEntry(existsEntry), true);
+    expect(overlayKey.currentState.containsEntry(doNotExistsEntry), false);
+  });
 }
 
 class StatefulTestWidget extends StatefulWidget {
