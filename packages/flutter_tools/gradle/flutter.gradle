@@ -645,9 +645,9 @@ class FlutterPlugin implements Plugin<Project> {
             variant.outputs.all { output ->
                 variant.assembleProvider.get().doLast {
                     def outputDirectory = variant.packageApplicationProvider.get().outputDirectory
+                    //  `outputDirectory` is a `DirectoryProperty` in AGP 4.1.
                     String outputDirectoryStr = outputDirectory.metaClass.respondsTo(outputDirectory, "get")
                         ? outputDirectory.get() : outputDirectory
-
                     String filename = "app"
                     String abi = output.getFilter(OutputFile.ABI)
                     if (abi != null && !abi.isEmpty()) {
