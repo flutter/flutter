@@ -68,21 +68,19 @@ class PrecacheCommand extends FlutterCommand {
 
   /// Returns a reverse mapping of _expandedArtifacts, from child artifact name
   /// to umbrella name.
-  Map<String, String> get _umbrellaForArtifactMap {
-    final Map<String, String> reverseMap = <String, String>{};
-    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
-      for (final String childArtifactName in childArtifactNames) {
-        reverseMap[childArtifactName] = umbrellaName;
-      }
-    });
-    return reverseMap;
+  Map<String, String> _umbrellaForArtifactMap() {
+    return <String, String>{
+      for (final MapEntry<String, List<String>> entry in _expandedArtifacts.entries)
+        for (final String childArtifactName in entry.value)
+          childArtifactName: entry.key
+    };
   }
 
   /// Returns the name of all artifacts that were explicitly chosen via flags.
   ///
   /// If an umbrella is chosen, its children will be included as well.
-  Set<String> get _explicitArtifactSelections {
-    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap;
+  Set<String> _explicitArtifactSelections() {
+    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
     bool explicitlySelected(String name) => boolArg(name) && argResults.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
@@ -120,8 +118,8 @@ class PrecacheCommand extends FlutterCommand {
     if (boolArg('use-unsigned-mac-binaries')) {
       globals.cache.useUnsignedMacBinaries = true;
     }
-    globals.cache.platformOverrideArtifacts = _explicitArtifactSelections;
-    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap;
+    globals.cache.platformOverrideArtifacts = _explicitArtifactSelections();
+    final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.

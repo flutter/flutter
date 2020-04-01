@@ -274,11 +274,13 @@ void main() {
   testUsingContext('precache downloads iOS and Android artifacts by default', () async {
     final PrecacheCommand command = PrecacheCommand();
     applyMocksToCommand(command);
+
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
       ],
     );
+
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.iOS,
@@ -293,12 +295,14 @@ void main() {
   testUsingContext('precache --all-platforms gets all artifacts', () async {
     final PrecacheCommand command = PrecacheCommand();
     applyMocksToCommand(command);
+
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
         '--all-platforms',
       ],
     );
+
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.iOS,
@@ -326,11 +330,13 @@ void main() {
   testUsingContext('precache with default artifacts does not override platform filtering', () async {
     final PrecacheCommand command = PrecacheCommand();
     applyMocksToCommand(command);
+
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
       ],
     );
+
     verify(cache.platformOverrideArtifacts = <String>{});
   }, overrides: <Type, Generator>{
     Cache: () => cache,
@@ -340,6 +346,7 @@ void main() {
   testUsingContext('precache with explicit artifact options overrides platform filtering', () async {
     final PrecacheCommand command = PrecacheCommand();
     applyMocksToCommand(command);
+
     await createTestCommandRunner(command).run(
       const <String>[
         'precache',
@@ -348,6 +355,7 @@ void main() {
         '--macos',
       ],
     );
+
     expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
       DevelopmentArtifact.universal,
       DevelopmentArtifact.macOS,
@@ -359,12 +367,13 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(
       isMacOSEnabled: true,
     ),
-    Platform: () => FakePlatform()
-      ..operatingSystem = 'windows'
-      ..environment = <String, String>{
+    Platform: () => FakePlatform(
+      operatingSystem: 'windows',
+      environment: <String, String>{
         'FLUTTER_ROOT': 'flutter',
         'FLUTTER_ALREADY_LOCKED': 'true',
       },
+    ),
   });
 
   testUsingContext('precache downloads artifacts when --force is provided', () async {
