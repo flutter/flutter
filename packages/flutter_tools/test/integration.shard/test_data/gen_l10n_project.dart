@@ -193,7 +193,7 @@ void main() {
 
   "helloNewlineWorld": "Hello \n World",
   "@helloNewlineWorld": {
-    "description": "A message with a backslash followed by an n"
+    "description": "The JSON decoder should convert backslash-n to a newline character in the generated Dart string."
   },
 
   "hello": "Hello {world}",
