@@ -783,7 +783,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(_CupertinoTextSelectionToolbarItems newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
 
@@ -1078,8 +1078,26 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     }
   }
 
+  // Returns true iff the single child is hit by the given position.
+  static bool hitTestChild(RenderBox child, BoxHitTestResult result, { Offset position }) {
+    if (child == null) {
+      return false;
+    }
+    final ToolbarItemsParentData childParentData =
+        child.parentData as ToolbarItemsParentData;
+    return result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
+  }
+
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+    // Hit test list children.
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox child = lastChild;
     while (child != null) {
@@ -1091,18 +1109,26 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         continue;
       }
 
-      final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - childParentData.offset);
-          return child.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit)
+      if (hitTestChild(child, result, position: position)) {
         return true;
+      }
       child = childParentData.previousSibling;
     }
+
+    // Hit test slot children.
+    if (hitTestChild(_backButton, result, position: position)) {
+      return true;
+    }
+    if (hitTestChild(_divider, result, position: position)) {
+      return true;
+    }
+    if (hitTestChild(_nextButton, result, position: position)) {
+      return true;
+    }
+    if (hitTestChild(_nextButtonDisabled, result, position: position)) {
+      return true;
+    }
+
     return false;
   }
 
@@ -1144,13 +1170,13 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       visitor(_backButton);
     }
     if (_divider != null) {
-    visitor(_divider);
+      visitor(_divider);
     }
     if (_nextButton != null) {
-    visitor(_nextButton);
+      visitor(_nextButton);
     }
     if (_nextButtonDisabled != null) {
-    visitor(_nextButtonDisabled);
+      visitor(_nextButtonDisabled);
     }
     // Visit the list children.
     super.visitChildren(visitor);
