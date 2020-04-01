@@ -95,7 +95,11 @@ class AotBuilder {
           kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
         if (platform == TargetPlatform.ios)
           kIosArchs: iosBuildArchs.map(getNameForDarwinArch).join(' ')
-      }
+      },
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     );
     final BuildResult result = await globals.buildSystem.build(target, environment);
     status?.stop();

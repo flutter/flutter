@@ -166,10 +166,6 @@ class AndroidValidator extends DoctorValidator {
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(_androidSdk.directory)));
 
-    messages.add(ValidationMessage(_androidSdk.ndk == null
-          ? _userMessages.androidMissingNdk
-          : _userMessages.androidNdkLocation(_androidSdk.ndk.directory)));
-
     String sdkVersionText;
     if (_androidSdk.latestVersion != null) {
       if (_androidSdk.latestVersion.sdkLevel < 28 || _androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {

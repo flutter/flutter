@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:uuid/uuid.dart';
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
@@ -610,7 +611,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'pluginCppHeaderGuard': projectName.toUpperCase(),
-      'pluginProjectUUID': Uuid().generateV4().toUpperCase(),
+      'pluginProjectUUID': Uuid().v4().toUpperCase(),
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,

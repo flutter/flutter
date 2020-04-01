@@ -77,8 +77,7 @@ Future<void> main() async {
         'build',
         'app',
         'outputs',
-        'apk',
-        'release',
+        'flutter-apk',
         'app-release.apk',
       ));
 
@@ -116,8 +115,7 @@ Future<void> main() async {
         'build',
         'app',
         'outputs',
-        'apk',
-        'debug',
+        'flutter-apk',
         'app-debug.apk',
       ));
 
