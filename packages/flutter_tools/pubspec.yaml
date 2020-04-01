@@ -11,12 +11,12 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 2.0.13
   args: 1.6.0
-  dwds: 3.0.1
+  dwds: 3.0.2
   completion: 0.2.2
   coverage: 0.13.9
   crypto: 2.1.4
   file: 5.1.0
-  flutter_template_images: 1.0.0
+  flutter_template_images: 1.0.1
   http: 0.12.0+4
   intl: 0.16.1
   meta: 1.1.8
@@ -111,8 +111,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-<<<<<<< HEAD
-# PUBSPEC CHECKSUM: 4e5a
-=======
-# PUBSPEC CHECKSUM: 65c1
->>>>>>> 19e7db585dc33491cacce78571da119a1dd9a094
+# PUBSPEC CHECKSUM: da86
