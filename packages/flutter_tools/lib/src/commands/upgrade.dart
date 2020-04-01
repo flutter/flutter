@@ -81,6 +81,8 @@ class UpgradeCommandRunner {
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
   }) async {
+    globals.printStatus('gitTagVersion is ${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}+hotfix.${gitTagVersion.hotfix}'); // TODO delete trace
+    globals.printStatus('Cache.flutterRoot is: ${Cache.flutterRoot}');
     if (!continueFlow) {
       await runCommandFirstHalf(
         force: force,
@@ -219,6 +221,30 @@ class UpgradeCommandRunner {
     }
   }
 
+  /// Checks git tags for all known forms of a version
+  ///
+  /// Currently checks for tags of the forms `v1.2.3` and `1.2.3-dev.4.5`.
+  Future<String> detectTag(GitTagVersion gitTagVersion) async {
+    final List<String> tags = <String>[
+      'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}',
+      '${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}-dev.0.0',
+    ];
+    for (final String tag in tags) {
+      final RunResult result = await processUtils.run(
+        <String>['git', 'tag', '--list', tag],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+      if (result.stdout.isNotEmpty) {
+        globals.printStatus('found :\"${result.stdout.trim()}\"');
+        return result.stdout.trim();
+      }
+      globals.printStatus('tag: $tag\n${result.stdout.length}');
+    }
+    exit(1);
+    return null;
+  }
+
   /// Attempts to reset to the last non-hotfix tag.
   ///
   /// If the git history is on a hotfix, doing a fast forward will not pick up
@@ -226,10 +252,14 @@ class UpgradeCommandRunner {
   /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
     String tag;
+    // Resetting is only necessary if we are currently on a hotfix tag
+    if (gitTagVersion.hotfix == null) {
+      return;
+    }
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
     } else {
-      tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
+      tag = await detectTag(gitTagVersion);
     }
     try {
       await processUtils.run(
