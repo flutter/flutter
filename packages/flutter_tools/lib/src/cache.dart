@@ -156,6 +156,10 @@ class Cache {
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
 
+  // Names of artifacts which should be cached even if they would normally
+  // be filtered out for the current platform.
+  Set<String> platformOverrideArtifacts;
+
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
   bool useUnsignedMacBinaries = false;
 
@@ -523,6 +527,12 @@ abstract class CachedArtifact extends ArtifactSet {
   @visibleForTesting
   final List<File> downloadedFiles = <File>[];
 
+  // Whether or not to bypass normal platform filtering for this artifact.
+  bool get ignorePlatformFiltering {
+    return cache.includeAllPlatforms ||
+      (cache.platformOverrideArtifacts != null && cache.platformOverrideArtifacts.contains(developmentArtifact.name));
+  }
+
   @override
   bool isUpToDate() {
     if (!location.existsSync()) {
@@ -859,7 +869,7 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isMacOS) {
+    if (globals.platform.isMacOS || ignorePlatformFiltering) {
       return _macOSDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -881,7 +891,7 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isWindows) {
+    if (globals.platform.isWindows || ignorePlatformFiltering) {
       return _windowsDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -903,7 +913,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isLinux) {
+    if (globals.platform.isLinux || ignorePlatformFiltering) {
       return _linuxDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -1020,14 +1030,14 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (globals.platform.isMacOS || cache.includeAllPlatforms)
+      if (globals.platform.isMacOS || ignorePlatformFiltering)
         ..._iosBinaryDirs,
     ];
   }
 
   @override
   List<String> getLicenseDirs() {
-    if (cache.includeAllPlatforms || globals.platform.isMacOS) {
+    if (globals.platform.isMacOS || ignorePlatformFiltering) {
       return const <String>['ios', 'ios-profile', 'ios-release'];
     }
     return const <String>[];
@@ -1302,7 +1312,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    if (!globals.platform.isMacOS && !cache.includeAllPlatforms) {
+    if (!globals.platform.isMacOS && !ignorePlatformFiltering) {
       return Future<void>.value();
     }
     if (location.existsSync()) {
