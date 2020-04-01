@@ -261,10 +261,40 @@ String generateBaseClassMethod(Message message) {
     //     .replaceAll('@(class)', '$className${locales.first.camelCase()}');
     // }
 
+String generateLookupByScriptCode(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
+      return locale.scriptCode != null && locale.countryCode == null;
+    });
+
+    if (localesWithScriptCodes.isEmpty)
+      return null;
+
+    return scriptCodeSwitchTemplate
+      .replaceAll('@(languageCode)', language)
+      .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
+      .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
+          return switchClauseTemplate
+            .replaceAll('@(case)', locale.scriptCode)
+            .replaceAll('@(class)', '$className${locale.camelCase()}');
+        }).join('\n        '));
+  });
+
+  return countryCodeLookupTemplate.replaceAll(
+    '@(countryCodeSwitchClauses)',
+    switchClauses
+      .where((String switchClause) => switchClause != null)
+      .join('\n    ')
+  );
+}
+
 String generateLookupByCountryCode(AppResourceBundleCollection allBundles, String className) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) => locale.countryCode != null);
+    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
+      return locale.countryCode != null && locale.scriptCode == null;
+    });
 
     if (localesWithCountryCodes.isEmpty)
       return null;
@@ -289,7 +319,8 @@ String generateLookupByCountryCode(AppResourceBundleCollection allBundles, Strin
 
 String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
   return lookupBodyTemplate
-    .replaceAll('@(lookupCountryCodeSpecified)', generateLookupByCountryCode(allBundles, className));
+    .replaceAll('@(lookupCountryCodeSpecified)', generateLookupByCountryCode(allBundles, className))
+    .replaceAll('@(lookupScriptCodeSpecified)', generateLookupByScriptCode(allBundles, className));
 }
 
 class LocalizationsGenerator {

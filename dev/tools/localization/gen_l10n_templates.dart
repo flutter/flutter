@@ -207,7 +207,7 @@ const String baseClassMethodTemplate = '''
 
 const String lookupBodyTemplate = '''//@(lookupAllCodesSpecified)
 
-  //@(lookupScriptCodeSpecified)
+  @(lookupScriptCodeSpecified)
 
   @(lookupCountryCodeSpecified)
 
@@ -220,16 +220,16 @@ const String allCodesSpecifiedTemplate = '''if (locale.countryCode != null && lo
   }
 }''';
 
-const String scriptCodeSpecifiedTemplate = '''if (locale.countryCode == null && locale.scriptCode != null) {
-  // scriptCodeSwitchLogic
-  switch(locale.scriptCode) {
-    @(switchClauses)
-  }
-}''';
+const String scriptCodeSwitchTemplate = '''case '@(languageCode)': {
+      switch (locale.scriptCode) {
+        @(switchClauses)
+      }
+      break;
+    }''';
 
-const String scriptCodeSwitchClauseTemplate = '''case '@(case)': {
-
-}''';
+const String scriptCodeLookupTemplate = '''switch (locale.languageCode) {
+    @(scriptCodeSwitchClauses)
+  }''';
 
 const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
 
