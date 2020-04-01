@@ -199,15 +199,15 @@ Future<void> checkDropdownColor(WidgetTester tester, {Color color}) async {
   await tester.pump();
 
   expect(
-      find.ancestor(
-          of: find.text(text).last,
-          matching: find.byType(CustomPaint)).at(2),
-      paints
-        ..save()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false)
+    find.ancestor(
+      of: find.text(text).last,
+      matching: find.byType(CustomPaint)).at(2),
+    paints
+      ..save()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false)
   );
 }
 
