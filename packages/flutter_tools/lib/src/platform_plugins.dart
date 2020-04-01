@@ -230,8 +230,8 @@ class MacOSPlugin extends PluginPlatform {
 
 /// Contains the parameters to template a Windows plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
 class WindowsPlugin extends PluginPlatform {
   const WindowsPlugin({
     @required this.name,
