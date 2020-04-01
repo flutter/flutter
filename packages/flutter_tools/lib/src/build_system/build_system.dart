@@ -519,6 +519,11 @@ class BuildSystem {
                      path.contains('.dart_tool');
       });
     }
+    trackSharedBuildDirectory(
+      environment, _fileSystem, buildInstance.outputFiles);
+    environment.buildDir.childFile('outputs.json')
+      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
@@ -528,6 +533,57 @@ class BuildSystem {
       outputFiles: buildInstance.outputFiles.values.toList()
           ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
+  }
+
+  /// Write the configuration of the last build into the output directory and
+  /// remove the previous build's output.
+  ///
+  /// This is used to perform a targeted cleanup of the last output files, if
+  /// these were not already covered by the buil-in cleanup. This is only
+  /// necessary when multiple different build configurations output to the same
+  /// directory.
+  @visibleForTesting
+  static void trackSharedBuildDirectory(
+    Environment environment,
+    FileSystem fileSystem,
+    Map<String, File> currentOutputs,
+  ) {
+    final String currentConfig = fileSystem.path.basename(environment.buildDir.path);
+    final File lastConfigFile = environment.outputDir.childFile('.last_config');
+    if (!lastConfigFile.existsSync()) {
+      lastConfigFile.writeAsStringSync(currentConfig);
+      // No config file, either output was cleaned or this is the first build.
+      return;
+    }
+    final String lastConfig = lastConfigFile.readAsStringSync().trim();
+    if (lastConfig == currentConfig) {
+      // The last build was the same configuration as the current build
+      return;
+    }
+    // Update the output dir with the latest config.
+    lastConfigFile
+      ..createSync()
+      ..writeAsStringSync(currentConfig);
+    final File outputsFile = environment.buildDir
+      .parent
+      .childDirectory(lastConfig)
+      .childFile('outputs.json');
+
+    if (!outputsFile.existsSync()) {
+      // There is no output list. This could happen if the user manually
+      // edited .last_config or deleted .dart_tool.
+      return;
+    }
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object>)
+      .cast<String>();
+    for (final String lastOutput in lastOutputs) {
+      if (!currentOutputs.containsKey(lastOutput)) {
+        final File lastOutputFile = fileSystem.file(lastOutput);
+        if (lastOutputFile.existsSync()) {
+          lastOutputFile.deleteSync();
+        }
+      }
+    }
   }
 }
 
