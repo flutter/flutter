@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -278,7 +279,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
-    final String enginePath = _findEnginePath(topLevelResults);
+    final String enginePath = await _findEnginePath(topLevelResults);
     if (enginePath != null) {
       contextOverrides.addAll(<Type, dynamic>{
         Artifacts: Artifacts.getLocalEngine(_findEngineBuildPath(topLevelResults, enginePath)),
@@ -300,7 +301,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
-        _checkFlutterCopy();
+        await _checkFlutterCopy();
         try {
           await globals.flutterVersion.ensureVersionFile();
         } on FileSystemException catch (e) {
@@ -348,13 +349,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return null;
   }
 
-  String _findEnginePath(ArgResults globalResults) {
+  Future<String> _findEnginePath(ArgResults globalResults) async {
     String engineSourcePath = globalResults['local-engine-src-path'] as String
       ?? globals.platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).map[kFlutterEnginePackageName];
+        final Package skyEngine = (await loadPackageConfig(
+          globals.fs.file(PackageMap.globalPackagesPath)))[kFlutterEnginePackageName];
+        Uri engineUri = skyEngine.packageUriRoot;
         // Skip if sky_engine is the self-contained one.
         if (engineUri != null && globals.fs.identicalSync(globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib'), engineUri.path)) {
           engineUri = null;
@@ -467,7 +470,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return projectPaths;
   }
 
-  void _checkFlutterCopy() {
+  Future<void> _checkFlutterCopy() async {
     // If the current directory is contained by a flutter repo, check that it's
     // the same flutter that is currently running.
     String directory = globals.fs.path.normalize(globals.fs.path.absolute(globals.fs.currentDirectory.path));
@@ -491,10 +494,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (globals.fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = PackageMap(kPackagesFileName, fileSystem: globals.fs);
+      final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(kPackagesFileName));
       Uri flutterUri;
       try {
-        flutterUri = packageMap.map['flutter'];
+        flutterUri = packageConfig['flutter'].packageUriRoot;
       } on FormatException {
         // We're not quite sure why this can happen, perhaps the user
         // accidentally edited the .packages file. Re-running pub should

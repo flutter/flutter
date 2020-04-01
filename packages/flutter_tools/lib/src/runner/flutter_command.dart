@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
@@ -810,10 +811,9 @@ abstract class FlutterCommand extends Command<void> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        final String error = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).checkValid();
-        if (error != null) {
-          throw ToolExit(error);
-        }
+        await loadPackageConfig(globals.fs.file(kPackagesFileName), onError: (dynamic error) {
+          throw ToolExit(error.toString());
+        });
       }
     }
 

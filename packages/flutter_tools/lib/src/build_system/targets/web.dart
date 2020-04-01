@@ -64,7 +64,7 @@ class WebEntrypointTarget extends Target {
     // file-scheme will cause said library to be recognized as two distinct
     // libraries. This can cause surprising behavior as types from that library
     // will be considered distinct from each other.
-    final PackageUriMapper packageUriMapper = PackageUriMapper(
+    final PackageUriMapper packageUriMapper = await PackageUriMapper.create(
       importPath,
       PackageMap.globalPackagesPath,
       null,

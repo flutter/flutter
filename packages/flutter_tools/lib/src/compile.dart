@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
@@ -15,7 +17,6 @@ import 'base/terminal.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
@@ -195,33 +196,38 @@ class StdoutHandler {
 
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath), fileSystem: globals.fs).map;
+  PackageUriMapper(this._packageName, this._uriPrefixes);
+
+  static Future<PackageUriMapper> create(
+    String scriptPath,
+    String packagesPath,
+    String fileSystemScheme,
+    List<String> fileSystemRoots,
+  ) async {
+    final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(packagesPath));
     final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
     final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
-    for (final String packageName in packageMap.keys) {
-      final String prefix = packageMap[packageName].toString();
+    for (final Package package in packageConfig.packages) {
+      final String prefix = package.packageUriRoot.toString();
       // Only perform a multi-root mapping if there are multiple roots.
       if (fileSystemScheme != null
         && fileSystemRoots != null
         && fileSystemRoots.length > 1
         && prefix.contains(fileSystemScheme)) {
-        _packageName = packageName;
-        _uriPrefixes = fileSystemRoots
+        final List<String> uriPrefixes = fileSystemRoots
           .map((String name) => Uri.file(name, windows:globals.platform.isWindows).toString())
           .toList();
-        return;
+        return PackageUriMapper(package.name, uriPrefixes);
       }
       if (scriptUri.startsWith(prefix)) {
-        _packageName = packageName;
-        _uriPrefixes = <String>[prefix];
-        return;
+         return PackageUriMapper(package.name, <String>[prefix]);
       }
     }
+    return PackageUriMapper(null, null);
   }
 
-  String _packageName;
-  List<String> _uriPrefixes;
+  final String _packageName;
+  final List<String> _uriPrefixes;
 
   Uri map(String scriptPath) {
     if (_packageName == null) {
@@ -236,8 +242,8 @@ class PackageUriMapper {
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
+  static Future<Uri> findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) async {
+    return (await PackageUriMapper.create(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots)).map(scriptPath);
   }
 }
 
@@ -301,7 +307,7 @@ class KernelCompiler {
     }
     Uri mainUri;
     if (packagesPath != null) {
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+      mainUri = await PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
     // TODO(jonahwilliams): The output file must already exist, but this seems
     // unnecessary.
@@ -589,7 +595,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     // scratch ignoring list of invalidated files.
     PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null || packagesPath != null) {
-      packageUriMapper = PackageUriMapper(
+      packageUriMapper = await PackageUriMapper.create(
         request.mainPath,
         request.packagesFilePath ?? packagesPath,
         fileSystemScheme,

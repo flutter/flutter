@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -247,8 +248,9 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
   if (!fileSystem.file(packageFilePath).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);
   }
-  final PackageMap packageConfig = PackageMap(packageFilePath, fileSystem: fileSystem);
-  final Uri imagePackageLibDir = packageConfig.map['flutter_template_images'];
+
+  final PackageConfig packageConfig = await loadPackageConfig(fileSystem.file(kPackagesFileName));
+  final Uri imagePackageLibDir = packageConfig['flutter_template_images'].packageUriRoot;
   // Ensure that the template image package is present.
   if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
     await _ensurePackageDependencies(toolPackagePath);

@@ -553,11 +553,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ..createSync();
       result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
 
-      final bool hasWebPlugins = findPlugins(flutterProject)
+      final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       await injectPlugins(flutterProject, checkProjects: true);
 
-      final PackageUriMapper packageUriMapper = PackageUriMapper(main, packagesPath, null, null);
+      final PackageUriMapper packageUriMapper = await PackageUriMapper.create(main, packagesPath, null, null);
       final String generatedPath = globals.fs.currentDirectory
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
