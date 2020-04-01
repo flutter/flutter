@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-const String kPackagesFileName = '.packages';
+import '../globals.dart' as globals;
+
+final String kPackagesFileName = globals.fs.path.join('.dart_tool', 'package_config.json');
 
 class PackageMap {
   PackageMap();

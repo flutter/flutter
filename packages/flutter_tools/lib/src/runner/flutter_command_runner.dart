@@ -499,7 +499,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         packageConfig = await loadPackageConfig(globals.fs.file(kPackagesFileName));
         flutterUri = packageConfig['flutter'].packageUriRoot;
-      } on FormatException {
+        // Can't catch PackageConfigArgumentError since it is not exported.
+      } catch (err) { // ignore: avoid_catches_without_on_clauses
         // We're not quite sure why this can happen, perhaps the user
         // accidentally edited the .packages file. Re-running pub should
         // fix the issue, and we definitely shouldn't crash here.
