@@ -811,9 +811,17 @@ abstract class FlutterCommand extends Command<void> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        await loadPackageConfig(globals.fs.file(kPackagesFileName), onError: (dynamic error) {
-          throwToolExit(error.toString());
-        });
+        if (!globals.fs.file(kPackagesFileName).existsSync()) {
+          String message = '$packagesPath does not exist.';	
+          final String pubspecPath = globals.fs.path.absolute(
+            globals.fs.path.dirname(packagesPath), 'pubspec.yaml');
+          if (_fileSystem.isFileSync(pubspecPath)) {	
+            message += '\nDid you run "flutter pub get" in this directory?';	
+          } else {	
+            message += '\nDid you run this command from the same directory as your pubspec.yaml file?';	
+          }
+          throwToolExit(message);
+        }
       }
     }
 
