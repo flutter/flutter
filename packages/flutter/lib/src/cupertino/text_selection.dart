@@ -1117,10 +1117,15 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
   @override
   void detach() {
+    // Detach list children.
     super.detach();
+
+    // Detach slot children.
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      child.detach();
+      if (childToSlot.containsKey(child)) {
+        child.detach();
+      }
     });
   }
 
