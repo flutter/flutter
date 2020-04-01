@@ -140,18 +140,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
   FML_DCHECK(needs_painting());
 
-#if defined(OS_FUCHSIA)
-  // TODO(mikejurka,dworsham,liyl): Re-enable shadow drawing here.
-  // Shadows are not rendered for PhysicalShapeLayers that exist as separate
-  // system services; this is to maintain compatibility with the previous
-  // implementation and has the added benefit of requiring smaller textures,
-  // since extra space is not needed for the shadows. This behavior might change
-  // after clients adjust their usage of PhysicalShaperLayer to make elevation
-  // correlate to desired shadow size.
-  if (false && !child_layer_exists_below_ && elevation_ != 0) {
-#else
   if (elevation_ != 0) {
-#endif
     DrawShadow(context.leaf_nodes_canvas, path_, shadow_color_, elevation_,
                SkColorGetA(color_) != 0xff, context.frame_device_pixel_ratio);
   }
