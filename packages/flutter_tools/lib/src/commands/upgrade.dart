@@ -271,6 +271,7 @@ class UpgradeCommandRunner {
         '\nError: $error.'
       );
     }
+    globals.printStatus('Git status:\n${processUtils.runSync(<String>['git', 'status']).stdout}'); // TODO delete
   }
 
   /// Attempts to upgrade the channel.
@@ -290,7 +291,6 @@ class UpgradeCommandRunner {
   /// If the fast forward lands us on the same channel and revision, then
   /// returns true, otherwise returns false.
   Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
-    globals.printStatus(processUtils.runSync(<String>['git', 'status']).stdout);
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: workingDirectory,

@@ -96,6 +96,7 @@ void main() {
       '--verbose',
     ], workingDirectory: testDirectory.path);
     print('stdout: ${result.stdout}\nstderr: ${result.stderr}');
+    expect(result.exitCode, 0);
 
     print('Step 5');
     // Step 5. Verify that the version is different.
