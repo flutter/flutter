@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -968,8 +969,8 @@ flutter:
         final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
-        expect(registrantHeader.existsSync(), isFalse);
-        expect(registrantImpl.existsSync(), isFalse);
+        expect(registrantHeader, isNot(exists));
+        expect(registrantImpl, isNot(exists));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
