@@ -915,6 +915,18 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
+// List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
+//   // Plugins without a 'pluginClass' definition shouldn't create native cpp files. The plugin might
+//   // be a pure Dart implementation, and the class will be defined by 'dartPluginClass'.
+//   final List<Plugin> nativePlugins = plugins.where((Plugin element) {
+//     final WindowsPlugin windowsPlugin = element.platforms[platformKey] as WindowsPlugin;
+//     if (windowsPlugin == null) {
+//       return false;
+//     }
+//     return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
+//   }).toList();
+// }
+
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
   // Plugins without a 'pluginClass' definition shouldn't create native cpp files. The plugin might
   // be a pure Dart implementation, and the class will be defined by 'dartPluginClass'.
