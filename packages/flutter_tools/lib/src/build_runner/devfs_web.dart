@@ -152,6 +152,7 @@ class WebAssetServer implements AssetReader {
       // In debug builds, spin up DWDS and the full asset server.
       final Dwds dwds = await Dwds.start(
         assetReader: server,
+        enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
