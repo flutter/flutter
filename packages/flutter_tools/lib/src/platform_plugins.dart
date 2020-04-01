@@ -267,7 +267,7 @@ class WindowsPlugin extends PluginPlatform {
     return <String, dynamic>{
       'name': name,
       'class': pluginClass,
-      'file': _filenameForCppClass(pluginClass),
+      'filename': _filenameForCppClass(pluginClass),
       'dartPluginClass': dartPluginClass,
     };
   }

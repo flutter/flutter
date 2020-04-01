@@ -129,6 +129,23 @@ void main() {
   ''');
     }
 
+    void configureDummyWindowsPackage({String pluginClass, String dartPluginClass}) {
+      String pluginString = '''
+  flutter:
+    plugin:
+      platforms:
+        windows:
+  ''';
+      if (pluginClass != null) {
+        pluginString += '         pluginClass: $pluginClass';
+      }
+      if (dartPluginClass != null) {
+        pluginString += '         dartPluginClass: $dartPluginClass';
+      }
+      dummyPackageDirectory.parent.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(pluginString);
+    }
 
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
@@ -940,6 +957,27 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting does not create a generated Windows registrant if no pluginClass is defined', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        configureDummyWindowsPackage(dartPluginClass: 'SomePlugin');
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader.existsSync(), isFalse);
+        expect(registrantImpl.existsSync(), isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -925,6 +925,9 @@ Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugi
     }
     return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
   }).toList();
+  if (nativeWindowsPlugins.isEmpty) {
+    return;
+  }
 
   final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativeWindowsPlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
