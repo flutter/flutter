@@ -590,6 +590,8 @@ TEST_F(FuchsiaLayerTest, PhysicalShapeLayersAndChildSceneLayers) {
   // against the list above.
   root->UpdateScene(*(test_context->scene_update_context));
 
+  test_context->session->Flush();
+
   // Run loop until idle, so that the Session receives and processes
   // its method calls.
   async_loop_run_until_idle(
@@ -750,6 +752,8 @@ TEST_F(FuchsiaLayerTest, Opacity) {
   // Finally, UpdateScene(). The MockSession will check the emitted
   // commands against the list above.
   root->UpdateScene(*(test_context->scene_update_context));
+
+  test_context->session->Flush();
 
   // Run loop until idle, so that the Session receives and processes
   // its method calls.
