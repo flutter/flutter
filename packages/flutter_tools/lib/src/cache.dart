@@ -529,7 +529,8 @@ abstract class CachedArtifact extends ArtifactSet {
 
   // Whether or not to bypass normal platform filtering for this artifact.
   bool get ignorePlatformFiltering {
-    return cache.includeAllPlatforms || cache.platformOverrideArtifacts.contains(developmentArtifact.name);
+    return cache.includeAllPlatforms ||
+      (cache.platformOverrideArtifacts != null && cache.platformOverrideArtifacts.contains(developmentArtifact.name));
   }
 
   @override
