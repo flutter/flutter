@@ -272,6 +272,7 @@ class UpgradeCommandRunner {
       );
     }
     globals.printStatus('Git status:\n${processUtils.runSync(<String>['git', 'status']).stdout}'); // TODO delete
+    globals.printStatus('rev name:\n${processUtils.runSync(<String>['git', 'rev-parse', 'HEAD']).stdout}'); // TODO delete
   }
 
   /// Attempts to upgrade the channel.
