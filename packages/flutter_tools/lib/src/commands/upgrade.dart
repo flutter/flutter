@@ -81,8 +81,6 @@ class UpgradeCommandRunner {
     @required GitTagVersion gitTagVersion,
     @required FlutterVersion flutterVersion,
   }) async {
-    globals.printStatus('gitTagVersion is ${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}+hotfix.${gitTagVersion.hotfix}'); // TODO delete trace
-    globals.printStatus('Cache.flutterRoot is: ${Cache.flutterRoot}');
     if (!continueFlow) {
       await runCommandFirstHalf(
         force: force,

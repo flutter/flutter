@@ -780,7 +780,7 @@ class GitTagVersion {
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = [null, null];
+    List<int> devParts = <int>[null, null];
     if (parts[4] != null) {
       devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
         .matchAsPrefix(parts[4])

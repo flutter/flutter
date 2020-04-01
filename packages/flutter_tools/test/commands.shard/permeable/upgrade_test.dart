@@ -29,7 +29,14 @@ void main() {
     MockProcessManager processManager;
     FakePlatform fakePlatform;
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
-    const GitTagVersion gitTagVersion = GitTagVersion(1, 2, 3, 4, 5, 'asd');
+    const GitTagVersion gitTagVersion = GitTagVersion(
+      x: 1,
+      y: 2,
+      z: 3,
+      hotfix: 4,
+      commits: 5,
+      hash: 'asd',
+    );
     when(flutterVersion.channel).thenReturn('dev');
 
     setUp(() {
