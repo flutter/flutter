@@ -252,10 +252,6 @@ class UpgradeCommandRunner {
   /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
     String tag;
-    // Resetting is only necessary if we are currently on a hotfix tag
-    if (gitTagVersion.hotfix == null) {
-      return;
-    }
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
     } else {
@@ -294,6 +290,7 @@ class UpgradeCommandRunner {
   /// If the fast forward lands us on the same channel and revision, then
   /// returns true, otherwise returns false.
   Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
+    globals.printStatus(processUtils.runSync(<String>['git', 'status']).stdout);
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: workingDirectory,
