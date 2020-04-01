@@ -21,6 +21,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
 void main() {
@@ -351,7 +352,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
@@ -481,7 +482,7 @@ void main() {
         final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
-        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        final FakeDeviceLogReader mockDeviceLogReader = FakeDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
@@ -611,11 +612,13 @@ void main() {
     });
 
     test('Chrome with headless off', () {
+      const String chromeBinary = 'random-binary';
       final Map<String, dynamic> expected = <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
+          'binary': chromeBinary,
           'w3c': false,
           'args': <String>[
             '--bwsi',
@@ -637,7 +640,7 @@ void main() {
         }
       };
 
-      expect(getDesiredCapabilities(Browser.chrome, false), expected);
+      expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary), expected);
 
     });
 

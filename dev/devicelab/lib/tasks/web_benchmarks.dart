@@ -24,6 +24,7 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
   return await inDirectory(macrobenchmarksDirectory, () async {
     await evalFlutter('build', options: <String>[
       'web',
+      '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       if (useCanvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       '--profile',
@@ -136,10 +137,6 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
         for (final String scoreKey in scoreKeys) {
           if (scoreKey == null || scoreKey.isEmpty) {
             throw 'Score key is empty in benchmark "$benchmarkName". '
-                'Received [${scoreKeys.join(', ')}]';
-          }
-          if (scoreKey.contains('.')) {
-            throw 'Score key contain dots in benchmark "$benchmarkName". '
                 'Received [${scoreKeys.join(', ')}]';
           }
           benchmarkScoreKeys.add('$namespace.$scoreKey');

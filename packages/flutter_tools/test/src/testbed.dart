@@ -830,6 +830,9 @@ class FakeCache implements Cache {
   bool includeAllPlatforms;
 
   @override
+  Set<String> platformOverrideArtifacts;
+
+  @override
   bool useUnsignedMacBinaries;
 
   @override
@@ -844,7 +847,7 @@ class FakeCache implements Cache {
   String get storageBaseUrl => null;
 
   @override
-  MapEntry<String, String> get dyLdLibEntry => null;
+  MapEntry<String, String> get dyLdLibEntry => const MapEntry<String, String>('DYLD_LIBRARY_PATH', '');
 
   @override
   String get engineRevision => null;

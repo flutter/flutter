@@ -382,7 +382,7 @@ class BufferLogger extends Logger {
        _timeoutConfiguration = timeoutConfiguration,
        _stopwatchFactory = stopwatchFactory;
 
-  @visibleForTesting
+  /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal terminal,
     OutputPreferences outputPreferences,
@@ -697,7 +697,7 @@ abstract class Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
@@ -877,7 +877,7 @@ class AnsiSpinner extends Status {
     @required Duration timeout,
     @required TimeoutConfiguration timeoutConfiguration,
     @required Stopwatch stopwatch,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     VoidCallback onFinish,
     this.slowWarningCallback,
     Stdio stdio,
@@ -893,7 +893,7 @@ class AnsiSpinner extends Status {
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
   final Stdio _stdio;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
 
   bool timedOut = false;
 

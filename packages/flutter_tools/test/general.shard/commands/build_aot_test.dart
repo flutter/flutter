@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/aot.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/ios/bitcode.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -37,7 +39,7 @@ void main() {
       equals('Flutter.framework not found at ios_profile/Flutter.framework'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -66,7 +68,7 @@ void main() {
              'Expected a string like "Apple (LLVM|clang) #.#.# (clang-####.#.##.#)".'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -94,7 +96,7 @@ void main() {
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
 
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -105,6 +107,48 @@ void main() {
     Xcode: () => mockXcode,
     PlistParser: () => mockPlistUtils,
   });
+
+  testUsingContext('build aot outputs timing info', () async {
+    globals.fs.file('.dart_tool/flutter_build/cce09742720db17ffec62331bd7e42d5/app.so')
+      .createSync(recursive: true);
+    when(globals.buildSystem.build(any, any))
+      .thenAnswer((Invocation invocation) async {
+        return BuildResult(success: true, performance: <String, PerformanceMeasurement>{
+          'kernel_snapshot': PerformanceMeasurement(
+            analyicsName: 'kernel_snapshot',
+            target: 'kernel_snapshot',
+            elapsedMilliseconds: 1000,
+            passed: true,
+            skipped: false,
+          ),
+          'anything': PerformanceMeasurement(
+            analyicsName: 'android_aot',
+            target: 'anything',
+            elapsedMilliseconds: 1000,
+            passed: true,
+            skipped: false,
+          ),
+        });
+      });
+
+    await AotBuilder().build(
+      platform: TargetPlatform.android_arm64,
+      outputPath: '/',
+      buildInfo: BuildInfo.release,
+      mainDartFile: globals.fs.path.join('lib', 'main.dart'),
+      reportTimings: true,
+    );
+
+    expect(testLogger.statusText, allOf(
+      contains('frontend(CompileTime): 1000 ms.'),
+      contains('snapshot(CompileTime): 1000 ms.'),
+    ));
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
 
   testUsingContext('build aot can parse valid Xcode Clang version (11)', () async {
     final Directory flutterFramework = memoryFileSystem.directory('ios_profile/Flutter.framework')
@@ -121,7 +165,7 @@ void main() {
 
     await validateBitcode(BuildMode.profile, TargetPlatform.ios);
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -154,7 +198,7 @@ void main() {
              'of Xcode to at least 10.0.1.'),
     );
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -183,7 +227,7 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -212,7 +256,7 @@ void main() {
 
     expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
-    Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile',
+    Artifacts: () => LocalEngineArtifacts('ios_profile', 'host_profile',
       fileSystem: memoryFileSystem,
       cache: globals.cache,
       platform: globals.platform,
@@ -227,3 +271,4 @@ void main() {
 
 class MockXcode extends Mock implements Xcode {}
 class MockPlistUtils extends Mock implements PlistParser {}
+class MockBuildSystem extends Mock implements BuildSystem {}

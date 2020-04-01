@@ -47,19 +47,37 @@ import 'package:flutter/material.dart';
 import 'l10n/app_localizations.dart';
 
 class LocaleBuilder extends StatelessWidget {
-  const LocaleBuilder({ Key key, this.locale, this.callback }) : super(key: key);
+  const LocaleBuilder({ Key key, this.locale, this.test, this.callback }) : super(key: key);
   final Locale locale;
+  final String test;
   final void Function (BuildContext context) callback;
   @override build(BuildContext context) {
     return Localizations.override(
       locale: locale,
       context: context,
-      child: Builder(
-        builder: (BuildContext context) {
-          callback(context);
-          return Container();
-        },
+      child: ResultBuilder(
+        test: test,
+        callback: callback,
       ),
+    );
+  }
+}
+
+class ResultBuilder extends StatelessWidget {
+  const ResultBuilder({ Key key, this.test, this.callback }) : super(key: key);
+  final String test;
+  final void Function (BuildContext context) callback;
+  @override build(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) {
+        try {
+          callback(context);
+        } on Exception catch (e) {
+          print('#l10n A(n) $e has occurred trying to generate "$test" results.');
+          print('#l10n END');
+        }
+        return Container();
+      },
     );
   }
 }
@@ -70,82 +88,117 @@ class Home extends StatelessWidget {
     final List<String> results = [];
     return Row(
       children: <Widget>[
+        ResultBuilder(
+          test: 'supportedLocales',
+          callback: (BuildContext context) {
+            results.add('--- supportedLocales tests ---');
+            int n = 0;
+            for (Locale locale in AppLocalizations.supportedLocales) {
+              String languageCode = locale.languageCode;
+              String countryCode = locale.countryCode;
+              String scriptCode = locale.scriptCode;
+              results.add('supportedLocales[$n]: languageCode: $languageCode, countryCode: $countryCode, scriptCode: $scriptCode');
+              n += 1;
+            }
+          },
+        ),
         LocaleBuilder(
           locale: Locale('en', 'CA'),
+          test: 'countryCode - en_CA',
           callback: (BuildContext context) {
+            results.add('--- countryCode (en_CA) tests ---');
             results.add(AppLocalizations.of(context).helloWorld);
             results.add(AppLocalizations.of(context).hello("CA fallback World"));
           },
         ),
         LocaleBuilder(
           locale: Locale('en', 'GB'),
+          test: 'countryCode - en_GB',
           callback: (BuildContext context) {
+            results.add('--- countryCode (en_GB) tests ---');
             results.add(AppLocalizations.of(context).helloWorld);
             results.add(AppLocalizations.of(context).hello("GB fallback World"));
           },
         ),
         LocaleBuilder(
           locale: Locale('zh'),
+          test: 'zh',
           callback: (BuildContext context) {
+            results.add('--- zh ---');
             results.add(AppLocalizations.of(context).helloWorld);
           },
         ),
         LocaleBuilder(
           locale: Locale('zh', 'TW'),
+          test: 'countryCode - zh_TW',
           callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_TW ---');
             results.add(AppLocalizations.of(context).helloWorld);
           },
         ),
         LocaleBuilder(
           locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
           callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
             results.add(AppLocalizations.of(context).helloWorld);
           },
         ),
         LocaleBuilder(
           locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
           callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_TW_Hant ---');
             results.add(AppLocalizations.of(context).helloWorld);
           },
         ),
         LocaleBuilder(
           locale: Locale('en'),
+          test: 'General formatting',
           callback: (BuildContext context) {
-            int n = 0;
+            results.add('--- General formatting tests ---');
+            final AppLocalizations localizations = AppLocalizations.of(context);
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.hello("World")}',
+              '${localizations.greeting("Hello", "World")}',
+              '${localizations.helloWorldOn(DateTime(1960))}',
+              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
+              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
+              '${localizations.helloFor(123)}',
+              '${localizations.helloCost("price", 123)}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+              '${localizations.helloAdjectiveWorlds(0, "new")}',
+              '${localizations.helloAdjectiveWorlds(1, "new")}',
+              '${localizations.helloAdjectiveWorlds(2, "new")}',
+              '${localizations.helloWorldsOn(0, DateTime(1960))}',
+              '${localizations.helloWorldsOn(1, DateTime(1960))}',
+              '${localizations.helloWorldsOn(2, DateTime(1960))}',
+              '${localizations.helloWorldPopulation(0, 100)}',
+              '${localizations.helloWorldPopulation(1, 101)}',
+              '${localizations.helloWorldPopulation(2, 102)}',
+              '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.singleQuote}',
+              '${localizations.doubleQuote}',
+            ]);
+          },
+        ),
+        Builder(
+          builder: (BuildContext context) {
             try {
-              final AppLocalizations localizations = AppLocalizations.of(context);
-              results.addAll(<String>[
-                '${localizations.helloWorld}',
-                '${localizations.hello("World")}',
-                '${localizations.greeting("Hello", "World")}',
-                '${localizations.helloWorldOn(DateTime(1960))}',
-                '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
-                '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
-                '${localizations.helloFor(123)}',
-                '${localizations.helloCost("price", 123)}',
-                '${localizations.helloWorlds(0)}',
-                '${localizations.helloWorlds(1)}',
-                '${localizations.helloWorlds(2)}',
-                '${localizations.helloAdjectiveWorlds(0, "new")}',
-                '${localizations.helloAdjectiveWorlds(1, "new")}',
-                '${localizations.helloAdjectiveWorlds(2, "new")}',
-                '${localizations.helloWorldsOn(0, DateTime(1960))}',
-                '${localizations.helloWorldsOn(1, DateTime(1960))}',
-                '${localizations.helloWorldsOn(2, DateTime(1960))}',
-                '${localizations.helloWorldPopulation(0, 100)}',
-                '${localizations.helloWorldPopulation(1, 101)}',
-                '${localizations.helloWorldPopulation(2, 102)}',
-                '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
-                '${localizations.singleQuote}',
-                '${localizations.doubleQuote}',
-              ]);
+              int n = 0;
               for (final String result in results) {
-                print('#l10n $n ($result)\n');
+                // Newline character replacement is necessary because
+                // the stream breaks up stdout by new lines.
+                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
                 n += 1;
               }
             }
             finally {
-              print('#l10n END\n');
+              print('#l10n END');
             }
           },
         ),
@@ -172,6 +225,11 @@ void main() {
   "helloWorld": "Hello World",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
+  },
+
+  "helloNewlineWorld": "Hello \n World",
+  "@helloNewlineWorld": {
+    "description": "The JSON decoder should convert backslash-n to a newline character in the generated Dart string."
   },
 
   "hello": "Hello {world}",
@@ -351,6 +409,7 @@ void main() {
 {
   "@@locale": "zh",
   "helloWorld": "你好世界",
+  "helloNewlineWorld": "Hello \n World",
   "hello": "Hello {world}",
   "greeting": "{hello} {world}",
   "helloWorldOn": "Hello World on {date}",
@@ -372,7 +431,7 @@ void main() {
   final String appZhHans = r'''
 {
   "@@locale": "zh_Hans",
-  "helloWorld": "簡體你好世界"
+  "helloWorld": "简体你好世界"
 }
   ''';
 

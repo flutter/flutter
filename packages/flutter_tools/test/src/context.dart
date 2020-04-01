@@ -120,7 +120,7 @@ void testUsingContext(
           OutputPreferences: () => OutputPreferences.test(),
           Logger: () => BufferLogger(
             terminal: globals.terminal,
-            outputPreferences: outputPreferences,
+            outputPreferences: globals.outputPreferences,
           ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
@@ -158,7 +158,7 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, onError: (dynamic error, StackTrace stackTrace) {
+          }, onError: (Object error, StackTrace stackTrace) { // ignore: deprecated_member_use
             io.stdout.writeln(error);
             io.stdout.writeln(stackTrace);
             _printBufferedErrors(context);
@@ -217,6 +217,9 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   Future<List<Device>> getAllConnectedDevices() async => devices;
+
+  @override
+  Future<List<Device>> refreshAllConnectedDevices({ Duration timeout }) async => devices;
 
   @override
   Future<List<Device>> getDevicesById(String deviceId) async {
@@ -398,7 +401,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme) {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) {
     return null;
   }
 

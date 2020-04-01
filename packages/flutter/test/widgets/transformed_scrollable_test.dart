@@ -214,5 +214,5 @@ void main() {
     // coordinate space of the screen, the scroll view actually moved far more
     // pixels in its local coordinate system due to the perspective transform.
     expect(controller.offset, greaterThan(100));
-  }, skip: isBrowser);
+  });
 }

@@ -63,9 +63,6 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
 class MockAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
     bool withAndroidN = false,
-    String withNdkDir,
-    int ndkVersion = 16,
-    bool withNdkSysroot = false,
     bool withSdkManager = true,
     bool withPlatformTools = true,
     bool withBuildTools = true,
@@ -98,41 +95,6 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
 
     if (withSdkManager) {
       _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
-    }
-
-    if (withNdkDir != null) {
-      final String ndkToolchainBin = globals.fs.path.join(
-        'ndk-bundle',
-        'toolchains',
-        'arm-linux-androideabi-4.9',
-        'prebuilt',
-        withNdkDir,
-        'bin',
-      );
-      final String ndkCompiler = globals.fs.path.join(
-        ndkToolchainBin,
-        'arm-linux-androideabi-gcc',
-      );
-      final String ndkLinker = globals.fs.path.join(
-        ndkToolchainBin,
-        'arm-linux-androideabi-ld',
-      );
-      _createSdkFile(dir, ndkCompiler);
-      _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, globals.fs.path.join('ndk-bundle', 'source.properties'), contents: '''
-Pkg.Desc = Android NDK[]
-Pkg.Revision = $ndkVersion.1.5063045
-
-''');
-    }
-    if (withNdkSysroot) {
-      final String armPlatform = globals.fs.path.join(
-        'ndk-bundle',
-        'platforms',
-        'android-9',
-        'arch-arm',
-      );
-      _createDir(dir, armPlatform);
     }
 
     return dir;
@@ -526,7 +488,12 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices() async => _devices;
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+    lastPollingTimeout = timeout;
+    return _devices;
+  }
+
+  Duration lastPollingTimeout;
 
   @override
   bool get supportsPlatform => true;
@@ -534,14 +501,22 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => true;
 
-  void addDevice(MockAndroidDevice device) {
+  void addDevice(Device device) {
     _devices.add(device);
-
     _onAddedController.add(device);
   }
 
-  @override
-  Future<List<Device>> get devices async => _devices;
+  void _removeDevice(Device device) {
+    _devices.remove(device);
+    _onRemovedController.add(device);
+  }
+
+  void setDevices(List<Device> devices) {
+    while(_devices.isNotEmpty) {
+      _removeDevice(_devices.first);
+    }
+    devices.forEach(addDevice);
+  }
 
   @override
   Stream<Device> get onAdded => _onAddedController.stream;
@@ -597,40 +572,6 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
-}
-
-class MockDeviceLogReader extends DeviceLogReader {
-  @override
-  String get name => 'MockLogReader';
-
-  StreamController<String> _cachedLinesController;
-
-  final List<String> _lineQueue = <String>[];
-  StreamController<String> get _linesController {
-    _cachedLinesController ??= StreamController<String>
-      .broadcast(onListen: () {
-        _lineQueue.forEach(_linesController.add);
-        _lineQueue.clear();
-     });
-    return _cachedLinesController;
-  }
-
-  @override
-  Stream<String> get logLines => _linesController.stream;
-
-  void addLine(String line) {
-    if (_linesController.hasListener) {
-      _linesController.add(line);
-    } else {
-      _lineQueue.add(line);
-    }
-  }
-
-  @override
-  Future<void> dispose() async {
-    _lineQueue.clear();
-    await _linesController.close();
-  }
 }
 
 void applyMocksToCommand(FlutterCommand command) {

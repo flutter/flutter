@@ -97,7 +97,6 @@ class _TaskRunner {
       for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
-          // TODO(dnfield): remove this special casing after https://github.com/flutter/flutter/issues/29141 is resolved.
           if (result is TaskResultCheckProcesses) {
             result = TaskResult.failure('This test leaked dart processes');
           }
@@ -251,6 +250,9 @@ class TaskResult {
 
     return json;
   }
+
+  @override
+  String toString() => message;
 }
 
 class TaskResultCheckProcesses extends TaskResult {

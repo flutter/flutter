@@ -34,7 +34,6 @@ Future<void> main() async {
           'create',
           options: <String>[
             '--org', 'io.flutter.devicelab',
-            '--androidx',
             'hello',
           ],
         );
@@ -81,8 +80,7 @@ Future<void> main() async {
         'build',
         'app',
         'outputs',
-        'apk',
-        'release',
+        'flutter-apk',
         'app-release.apk',
       ));
 
@@ -119,8 +117,7 @@ Future<void> main() async {
         'build',
         'app',
         'outputs',
-        'apk',
-        'debug',
+        'flutter-apk',
         'app-debug.apk',
       ));
 

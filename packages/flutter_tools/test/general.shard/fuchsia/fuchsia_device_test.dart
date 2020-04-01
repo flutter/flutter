@@ -43,6 +43,7 @@ void main() {
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
       sshConfig = MockFile();
+      when(sshConfig.existsSync()).thenReturn(true);
       when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
@@ -96,6 +97,11 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    test('is ephemeral', () {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(device.ephemeral, true);
+    });
+
     testUsingContext('supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       globals.fs.directory('fuchsia').createSync(recursive: true);
@@ -113,6 +119,15 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('targetPlatform does not throw when sshConfig is missing', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
+      ProcessManager: () => MockProcessManager(),
     });
 
     testUsingContext('targetPlatform arm64 works', () async {
@@ -888,6 +903,7 @@ void main() {
 
     setUp(() {
       sshConfig = MockFile();
+      when(sshConfig.existsSync()).thenReturn(true);
       when(sshConfig.absolute).thenReturn(sshConfig);
 
       mockSuccessProcessManager = MockProcessManager();
@@ -913,6 +929,15 @@ void main() {
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
+    });
+
+    testUsingContext('does not throw on non-existant ssh config', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(await device.sdkNameAndVersion, equals('Fuchsia'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockSuccessProcessManager,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: null),
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     testUsingContext('returns what we get from the device on success', () async {
@@ -1344,7 +1369,7 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return <String>['192.168.42.172 scare-cable-skip-joy'];
   }
 
@@ -1356,7 +1381,7 @@ class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
 
 class FailingDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list() async {
+  Future<List<String>> list({ Duration timeout }) async {
     return null;
   }
 

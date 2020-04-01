@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('CocoaPods validation', () {
@@ -22,44 +22,36 @@ void main() {
       when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
 
-    testUsingContext('Emits installed status when CocoaPods is installed', () async {
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+    testWithoutContext('Emits installed status when CocoaPods is installed', () async {
+      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
-    }, overrides: <Type, Generator>{
-      CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits missing status when CocoaPods is not installed', () async {
+    testWithoutContext('Emits missing status when CocoaPods is not installed', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
-    }, overrides: <Type, Generator>{
-      CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods is installed with unknown version', () async {
+    testWithoutContext('Emits partial status when CocoaPods is installed with unknown version', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{
-      CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
+    testWithoutContext('Emits partial status when CocoaPods is not initialized', () async {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{
-      CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods version is too low', () async {
+    testWithoutContext('Emits partial status when CocoaPods version is too low', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
       const String currentVersion = '1.4.0';
@@ -68,7 +60,7 @@ void main() {
       const String recommendedVersion = '1.8.0';
       when(cocoaPods.cocoaPodsRecommendedVersion)
           .thenAnswer((_) => recommendedVersion);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsValidator workflow = CocoaPodsValidator(cocoaPods, UserMessages());
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.length, 1);
@@ -76,8 +68,6 @@ void main() {
       expect(message.type, ValidationMessageType.hint);
       expect(message.message, contains('CocoaPods $currentVersion out of date'));
       expect(message.message, contains('($recommendedVersion is recommended)'));
-    }, overrides: <Type, Generator>{
-      CocoaPods: () => cocoaPods,
     });
   });
 }

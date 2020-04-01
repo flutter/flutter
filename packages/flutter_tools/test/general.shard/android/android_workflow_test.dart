@@ -230,6 +230,7 @@ void main() {
       sdk.sdkManagerPath,
       kAndroidSdkMinVersion,
       kAndroidSdkBuildToolsMinVersion.toString(),
+      FakePlatform(),
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
