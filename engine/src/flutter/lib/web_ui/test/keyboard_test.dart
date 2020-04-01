@@ -242,7 +242,7 @@ void main() {
       Keyboard.instance.dispose();
     });
 
-    test('ignores keyboard events triggered on text fields', () {
+    test('keyboard events should be triggered on text fields', () {
       Keyboard.initialize();
 
       int count = 0;
@@ -260,7 +260,7 @@ void main() {
         );
 
         expect(event.defaultPrevented, isFalse);
-        expect(count, 0);
+        expect(count, 1);
       });
 
       Keyboard.instance.dispose();
