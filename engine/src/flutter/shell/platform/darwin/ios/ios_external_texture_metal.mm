@@ -27,13 +27,15 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
                                     const SkRect& bounds,
                                     bool freeze,
                                     GrContext* context) {
-  if (!freeze && texture_frame_available_) {
-    external_image_ = nullptr;
-  }
+  const bool needs_updated_texture = (!freeze && texture_frame_available_) || !external_image_;
 
-  if (!external_image_) {
-    external_image_ = WrapExternalPixelBuffer(context);
-    texture_frame_available_ = false;
+  if (needs_updated_texture) {
+    // If the application told us there was a texture frame available but did not provide one when
+    // asked for it, reuse the previous texture but make sure to ask again the next time around.
+    if (auto wrapped_texture = WrapExternalPixelBuffer(context)) {
+      external_image_ = wrapped_texture;
+      texture_frame_available_ = false;
+    }
   }
 
   if (external_image_) {
@@ -46,7 +48,7 @@ void IOSExternalTextureMetal::Paint(SkCanvas& canvas,
   }
 }
 
-sk_sp<SkImage> IOSExternalTextureMetal::WrapExternalPixelBuffer(GrContext* context) {
+sk_sp<SkImage> IOSExternalTextureMetal::WrapExternalPixelBuffer(GrContext* context) const {
   auto pixel_buffer = fml::CFRef<CVPixelBufferRef>([external_texture_ copyPixelBuffer]);
   if (!pixel_buffer) {
     return nullptr;
