@@ -414,6 +414,10 @@ String generateString(String value, { bool escapeDollar = true }) {
     .replaceAll("'", "\\'")
     .replaceAll('"', '\\"')
     .replaceAll('\n', '\\n')
+    .replaceAll('\f', '\\f')
+    .replaceAll('\t', '\\t')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\b', '\\b')
     .replaceAll(backslash, '\\\\');
 
   return "'$value'";

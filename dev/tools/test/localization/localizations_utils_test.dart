@@ -52,8 +52,24 @@ void main() {
       expect(generateString('ab\\nc'), "'ab\\\\nc'");
     });
 
-    test('supports newline character', () {
+    test('supports newline escaping', () {
       expect(generateString('ab\nc'), "'ab\\nc'");
+    });
+
+    test('supports form feed escaping', () {
+      expect(generateString('ab\fc'), "'ab\\fc'");
+    });
+
+    test('supports tab escaping', () {
+      expect(generateString('ab\tc'), "'ab\\tc'");
+    });
+
+    test('supports carriage return escaping', () {
+      expect(generateString('ab\rc'), "'ab\\rc'");
+    });
+
+    test('supports backspace escaping', () {
+      expect(generateString('ab\bc'), "'ab\\bc'");
     });
   });
 }
