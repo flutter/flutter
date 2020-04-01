@@ -257,7 +257,7 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
 
       entity_node().SetScale(decomposition.scale().x(),  //
                              decomposition.scale().y(),  //
-                             0.f                         //
+                             1.f                         //
       );
       context.top_scale_x_ *= decomposition.scale().x();
       context.top_scale_y_ *= decomposition.scale().y();
