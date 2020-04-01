@@ -247,6 +247,77 @@ void main() {
       expect(nestedObserver.datePickerCount, 1);
     });
 
+    testWidgets('honors DialogTheme for shape and elevation', (WidgetTester tester) async {
+      // Test that the defaults work
+      const DialogTheme datePickerDefaultDialogTheme = DialogTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0))
+        ),
+        elevation: 24,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      final Material defaultDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      expect(defaultDialogMaterial.shape, datePickerDefaultDialogTheme.shape);
+      expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
+
+      // Test that it honors ThemeData.dialogTheme settings
+      const DialogTheme customDialogTheme = DialogTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(40.0))
+        ),
+        elevation: 50,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.fallback().copyWith(dialogTheme: customDialogTheme),
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      final Material themeDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      expect(themeDialogMaterial.shape, customDialogTheme.shape);
+      expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
+    });
+
   });
 
   group('Calendar mode', () {
