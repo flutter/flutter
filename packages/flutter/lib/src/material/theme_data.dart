@@ -1762,6 +1762,24 @@ class VisualDensity with Diagnosticable {
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
+  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms,
+  /// it returns a default-constructed [VisualDensity].
+  static VisualDensity get adaptivePlatformDensity {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return compact;
+    }
+    return const VisualDensity();
+  }
+
   /// Copy the current [VisualDensity] with the given values replacing the
   /// current values.
   VisualDensity copyWith({

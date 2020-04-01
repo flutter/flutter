@@ -21,12 +21,10 @@ ThemeData _buildDarkTheme() {
   final ColorScheme colorScheme = const ColorScheme.dark().copyWith(
     primary: primaryColor,
     secondary: secondaryColor,
-    onPrimary: secondaryColor,
   );
   final ThemeData base = ThemeData(
     brightness: Brightness.dark,
     accentColorBrightness: Brightness.dark,
-    colorScheme: colorScheme,
     primaryColor: primaryColor,
     primaryColorDark: const Color(0xFF0050a0),
     primaryColorLight: secondaryColor,

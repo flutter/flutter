@@ -33,16 +33,18 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
     const Color green = Color.fromARGB(255, 0, 255, 0);
 
     // We don't want paragraph generation and layout to pollute benchmark numbers.
-    singleLineParagraphs = _generateParagraphs(
+    singleLineParagraphs = generateLaidOutParagraphs(
       paragraphCount: 500,
       minWordCountPerParagraph: 2,
-      maxWordCountPerParagraph: 5,
+      maxWordCountPerParagraph: 4,
+      widthConstraint: window.physicalSize.width / 2,
       color: red,
     );
-    multiLineParagraphs = _generateParagraphs(
+    multiLineParagraphs = generateLaidOutParagraphs(
       paragraphCount: 50,
       minWordCountPerParagraph: 30,
-      maxWordCountPerParagraph: 50,
+      maxWordCountPerParagraph: 49,
+      widthConstraint: window.physicalSize.width / 2,
       color: green,
     );
   }
@@ -115,39 +117,5 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
     sceneBuilder.pushOffset(0.0, 0.0);
     sceneBuilder.addPicture(Offset.zero, picture);
     sceneBuilder.pop();
-  }
-
-  /// Generates strings and builds pre-laid out paragraphs to be used by the
-  /// benchmark.
-  List<Paragraph> _generateParagraphs({
-    int paragraphCount,
-    int minWordCountPerParagraph,
-    int maxWordCountPerParagraph,
-    Color color,
-  }) {
-    final List<Paragraph> strings = <Paragraph>[];
-    int wordPointer = 0; // points to the next word in lipsum to extract
-    for (int i = 0; i < paragraphCount; i++) {
-      final int wordCount = minWordCountPerParagraph +
-          _random.nextInt(maxWordCountPerParagraph - minWordCountPerParagraph);
-      final List<String> string = <String>[];
-      for (int j = 0; j < wordCount; j++) {
-        string.add(lipsum[wordPointer]);
-        wordPointer = (wordPointer + 1) % lipsum.length;
-      }
-
-      final ParagraphBuilder builder =
-          ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
-            ..pushStyle(TextStyle(color: color, fontSize: 18.0))
-            ..addText(string.join(' '))
-            ..pop();
-      final Paragraph paragraph = builder.build();
-
-      // Fill half the screen.
-      paragraph
-          .layout(ParagraphConstraints(width: window.physicalSize.width / 2));
-      strings.add(paragraph);
-    }
-    return strings;
   }
 }

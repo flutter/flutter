@@ -830,6 +830,9 @@ class FakeCache implements Cache {
   bool includeAllPlatforms;
 
   @override
+  Set<String> platformOverrideArtifacts;
+
+  @override
   bool useUnsignedMacBinaries;
 
   @override
