@@ -513,7 +513,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // and "Flutter". The regex tries to strike a balance between not producing
     // false positives and not producing false negatives.
     _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
-    _loggingSubscriptions = <StreamSubscription<ServiceEvent>>[];
+    _loggingSubscriptions = <StreamSubscription<void>>[];
   }
 
   /// Create a new [IOSDeviceLogReader].
@@ -576,14 +576,14 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     await connectedVmService.streamListen('Stdout');
     _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
-      final String message = utf8.decode(base64.decode(event.bytes)).trim();
+      final String message = utf8.decode(base64.decode(event.bytes));
       if (message.isNotEmpty) {
         _linesController.add(message);
       }
     }));
   }
 
-  void _listenToSysLog () {
+  void _listenToSysLog() {
     // syslog is not written on iOS 13+.
     if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
       return;
