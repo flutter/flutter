@@ -388,16 +388,14 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo\ bar => 'foo\\ bar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to true, the result avoids character
-/// escaping, with the exception of the dollar sign:
-///
+/// When [shouldEscapeDollar] is set to true, the '$' characters in the
+/// input will be replaced by '$' in the returned string:
 /// ```
 /// foo$bar = 'foo\$bar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to false, the result tries to avoid
-/// character escaping:
-///
+/// When [shouldEscapeDollar] is set to false, '$' will be replaced
+/// by '\$' in the returned string:
 /// ```
 /// foo$bar => 'foo\\\$bar'
 /// ```
