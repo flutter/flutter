@@ -124,23 +124,6 @@ void DidDrawCanvas::onDrawPath(const SkPath& path, const SkPaint& paint) {
   MarkDrawIfNonTransparentPaint(paint);
 }
 
-#if defined(SK_SUPPORT_LEGACY_ONDRAWBITMAP_VIRTUALS)
-void DidDrawCanvas::onDrawBitmap(const SkBitmap& bitmap,
-                                 SkScalar x,
-                                 SkScalar y,
-                                 const SkPaint* paint) {
-  did_draw_ = true;
-}
-
-void DidDrawCanvas::onDrawBitmapRect(const SkBitmap& bitmap,
-                                     const SkRect* src,
-                                     const SkRect& dst,
-                                     const SkPaint* paint,
-                                     SrcRectConstraint constraint) {
-  did_draw_ = true;
-}
-#endif
-
 void DidDrawCanvas::onDrawImage(const SkImage* image,
                                 SkScalar left,
                                 SkScalar top,
