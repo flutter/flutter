@@ -34,7 +34,7 @@ void main() {
     )));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -78,5 +78,5 @@ void main() {
     )));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 }

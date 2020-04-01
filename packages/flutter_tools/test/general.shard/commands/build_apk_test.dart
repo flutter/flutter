@@ -279,6 +279,38 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('--extra-front-end-options are provided to gradle project', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      await expectLater(() async {
+        await runBuildApkCommand(projectPath, arguments: <String>[
+          '--extra-front-end-options=foo',
+          '--extra-front-end-options=bar',
+        ]);
+      }, throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'));
+
+      verify(mockProcessManager.start(
+        <String>[
+          gradlew,
+          '-q',
+          '-Ptarget-platform=android-arm,android-arm64,android-x64',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptrack-widget-creation=true',
+          '-Pextra-front-end-options=foo,bar',
+          '-Pshrink=true',
+          'assembleRelease',
+        ],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('shrinking is disabled when --no-shrink is passed', () async {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=app']);

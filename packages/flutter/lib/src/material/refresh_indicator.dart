@@ -106,9 +106,11 @@ class RefreshIndicator extends StatefulWidget {
     this.notificationPredicate = defaultScrollNotificationPredicate,
     this.semanticsLabel,
     this.semanticsValue,
+    this.strokeWidth = 2.0
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
+       assert(strokeWidth != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -152,6 +154,11 @@ class RefreshIndicator extends StatefulWidget {
 
   /// {@macro flutter.material.progressIndicator.semanticsValue}
   final String semanticsValue;
+
+  /// Defines `strokeWidth` for `RefreshIndicator`.
+  ///
+  /// By default, the value of `strokeWidth` is 2.0 pixels.
+  final double strokeWidth;
 
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
@@ -409,26 +416,26 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return _pendingRefreshFuture;
   }
 
-  final GlobalKey _key = GlobalKey();
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final Widget child = NotificationListener<ScrollNotification>(
-      key: _key,
       onNotification: _handleScrollNotification,
       child: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
         child: widget.child,
       ),
     );
-    if (_mode == null) {
-      assert(_dragOffset == null);
-      assert(_isIndicatorAtTop == null);
-      return child;
-    }
-    assert(_dragOffset != null);
-    assert(_isIndicatorAtTop != null);
+    assert(() {
+      if (_mode == null) {
+        assert(_dragOffset == null);
+        assert(_isIndicatorAtTop == null);
+      } else {
+        assert(_dragOffset != null);
+        assert(_isIndicatorAtTop != null);
+      }
+      return true;
+    }());
 
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
@@ -436,7 +443,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return Stack(
       children: <Widget>[
         child,
-        Positioned(
+        if (_mode != null) Positioned(
           top: _isIndicatorAtTop ? 0.0 : null,
           bottom: !_isIndicatorAtTop ? 0.0 : null,
           left: 0.0,
@@ -462,6 +469,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
                       backgroundColor: widget.backgroundColor,
+                      strokeWidth: widget.strokeWidth,
                     );
                   },
                 ),

@@ -190,7 +190,7 @@ class FuchsiaDevice extends Device {
       id,
       platformType: PlatformType.fuchsia,
       category: null,
-      ephemeral: false,
+      ephemeral: true,
   );
 
   @override
@@ -508,8 +508,13 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) =>
-      _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on Fuchsia.');
+    return _logReader ??= _FuchsiaLogReader(this, app);
+  }
   _FuchsiaLogReader _logReader;
 
   @override

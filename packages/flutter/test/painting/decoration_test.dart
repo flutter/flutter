@@ -40,6 +40,22 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   }
 }
 
+class SynchronousErrorTestImageProvider extends ImageProvider<int> {
+  const SynchronousErrorTestImageProvider(this.throwable);
+
+  final Object throwable;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    throw throwable;
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    throw throwable;
+  }
+}
+
 class AsyncTestImageProvider extends ImageProvider<int> {
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
@@ -267,6 +283,26 @@ void main() {
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
+  });
+
+  test('DecorationImage - error listener', () async {
+    String exception;
+    final DecorationImage backgroundImage = DecorationImage(
+      image: const SynchronousErrorTestImageProvider('threw'),
+      onError: (dynamic error, StackTrace stackTrace) {
+        exception = error as String;
+      }
+    );
+
+    backgroundImage.createPainter(() { }).paint(
+      TestCanvas(),
+      Rect.largest,
+      Path(),
+      ImageConfiguration.empty,
+    );
+    // Yield so that the exception callback gets called before we check it.
+    await null;
+    expect(exception, 'threw');
   });
 
   test('BoxDecoration.lerp - shapes', () {

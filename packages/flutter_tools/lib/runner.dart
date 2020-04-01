@@ -14,6 +14,7 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/net.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
@@ -68,7 +69,7 @@ Future<int> run(
         return await _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
-    }, onError: (Object error, StackTrace stackTrace) async {
+    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
@@ -157,7 +158,13 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   globals.printError('A crash report has been written to ${file.path}.');
   globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
-  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator();
+  final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
+  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    flutterProjectFactory: globals.projectFactory,
+    client: clientFactory != null ? clientFactory() : HttpClient(),
+  );
   final String similarIssuesURL = await gitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(errorString);
   globals.printStatus('$similarIssuesURL\n', wrap: false);
   globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);

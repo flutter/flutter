@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:path/path.dart' as path; // ignore: package_path_import
@@ -14,8 +15,13 @@ import '../../src/testbed.dart';
 
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
-class MockPlatform extends Mock implements Platform {}
 class MockPathContext extends Mock implements path.Context {}
+class MockDirectory extends Mock implements Directory {}
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{}
+);
 
 void main() {
   group('throws ToolExit on Windows', () {
@@ -23,17 +29,11 @@ void main() {
     const int kUserMappedSectionOpened = 1224;
     Testbed testbed;
     MockFileSystem mockFileSystem;
-    MockPlatform windowsPlatform;
     ErrorHandlingFileSystem fs;
 
     setUp(() {
       mockFileSystem = MockFileSystem();
       fs = ErrorHandlingFileSystem(mockFileSystem);
-
-      windowsPlatform = MockPlatform();
-      when(windowsPlatform.isWindows).thenReturn(true);
-      when(windowsPlatform.isLinux).thenReturn(false);
-      when(windowsPlatform.isMacOS).thenReturn(false);
       when(mockFileSystem.path).thenReturn(MockPathContext());
       testbed = Testbed(overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
@@ -117,6 +117,14 @@ void main() {
     when(mockFileSystem.path).thenReturn(MockPathContext());
 
     expect(identical(firstPath, fs.path), false);
+  });
+
+  test('Throws type error if Directory type is set to curentDirectory with LocalFileSystem', () {
+    final FileSystem fs = ErrorHandlingFileSystem(const LocalFileSystem());
+    final MockDirectory directory = MockDirectory();
+    when(directory.path).thenReturn('path');
+
+    expect(() => fs.currentDirectory = directory, throwsA(isA<TypeError>()));
   });
 
   group('toString() gives toString() of delegate', () {

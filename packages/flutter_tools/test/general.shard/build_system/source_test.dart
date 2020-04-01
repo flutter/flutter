@@ -14,6 +14,7 @@ import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -32,6 +33,10 @@ void main() {
       environment = Environment.test(
         globals.fs.currentDirectory,
         outputDir: outputs,
+        artifacts: globals.artifacts, // using real artifacts
+        processManager: FakeProcessManager.any(),
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);
@@ -212,3 +217,4 @@ void main() {
 }
 
 class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}

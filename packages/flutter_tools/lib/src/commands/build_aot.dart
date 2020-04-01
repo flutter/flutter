@@ -20,6 +20,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     addBuildModeFlags();
     usesPubOption();
     usesDartDefineOption();
+    usesExtraFrontendOptions();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
@@ -33,10 +34,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: DarwinArch.values.map<String>(getNameForDarwinArch),
         help: 'iOS architectures to build.',
       )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
-        splitCommas: true,
-        hide: true,
-      )
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
@@ -45,7 +42,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
-      );
+      )
+      ..addFlag('report-timings', hide: true);
   }
 
   AotBuilder aotBuilder;
@@ -76,6 +74,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       bitcode: boolArg('bitcode'),
       quiet: boolArg('quiet'),
       iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
+      reportTimings: boolArg('report-timings'),
     );
     return FlutterCommandResult.success();
   }

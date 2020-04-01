@@ -195,7 +195,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId()) as Isolate;
+    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
   }
 
@@ -245,7 +245,7 @@ abstract class FlutterTestDriver {
         // But also check if the isolate was already paused (only after we've set
         // up the subscription) to avoid races. If it was paused, we don't need to wait
         // for the event.
-        final Isolate isolate = await _vmService.getIsolate(flutterIsolate) as Isolate;
+        final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
         if (isolate.pauseEvent.kind.startsWith('Pause')) {
           _debugPrint('Isolate was already paused (${isolate.pauseEvent.kind}).');
         } else {
@@ -305,7 +305,7 @@ abstract class FlutterTestDriver {
 
   Future<Frame> getTopStackFrame() async {
     final String flutterIsolateId = await _getFlutterIsolateId();
-    final Stack stack = await _vmService.getStack(flutterIsolateId) as Stack;
+    final Stack stack = await _vmService.getStack(flutterIsolateId);
     if (stack.frames.isEmpty) {
       throw Exception('Stack is empty');
     }

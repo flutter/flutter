@@ -382,7 +382,7 @@ class BufferLogger extends Logger {
        _timeoutConfiguration = timeoutConfiguration,
        _stopwatchFactory = stopwatchFactory;
 
-  @visibleForTesting
+  /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal terminal,
     OutputPreferences outputPreferences,

@@ -204,7 +204,10 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = environment.defines[kExtraFrontEndOptions]?.split(',');
+    final String rawFrontEndOption = environment.defines[kExtraFrontEndOptions];
+    final List<String> extraFrontEndOptions = (rawFrontEndOption?.isNotEmpty ?? false)
+      ? rawFrontEndOption?.split(',')
+      : null;
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -256,6 +259,9 @@ class KernelSnapshot extends Target {
 /// Supports compiling a dart kernel file to an ELF binary.
 abstract class AotElfBase extends Target {
   const AotElfBase();
+
+  @override
+  String get analyticsName => 'android_aot';
 
   @override
   Future<void> build(Environment environment) async {

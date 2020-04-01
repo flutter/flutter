@@ -53,5 +53,5 @@
   "remainingTextFieldCharacterCountOne": "1 тэмдэгт үлдсэн",
   "remainingTextFieldCharacterCountOther": "$remainingCount тэмдэгт үлдсэн",
   "refreshIndicatorSemanticLabel": "Сэргээх",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Бусад"
 }

@@ -20,27 +20,30 @@ import 'base/os.dart';
 import 'base/template.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'fuchsia/fuchsia_sdk.dart';
-import 'ios/ios_deploy.dart';
 import 'ios/ios_workflow.dart';
-import 'ios/mac.dart';
 import 'ios/plist_parser.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
+import 'macos/cocoapods.dart';
 import 'macos/xcode.dart';
 import 'persistent_tool_state.dart';
+import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
 import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
+BuildSystem get buildSystem => context.get<BuildSystem>();
 Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Usage get flutterUsage => context.get<Usage>();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
@@ -70,13 +73,11 @@ Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 AndroidStudio get androidStudio => context.get<AndroidStudio>();
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
+CocoaPods get cocoaPods => context.get<CocoaPods>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>();
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
-IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
-IOSDeploy get iosDeploy => context.get<IOSDeploy>();
 IOSSimulatorUtils get iosSimulatorUtils => context.get<IOSSimulatorUtils>();
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
-SimControl get simControl => context.get<SimControl>();
 UserMessages get userMessages => context.get<UserMessages>();
 Xcode get xcode => context.get<Xcode>();
 XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();

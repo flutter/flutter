@@ -83,6 +83,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
     iosDeploy: null, // not used in this test
+    iMobileDevice: null, // not used in this test
     platform: FakePlatform(operatingSystem: 'macos'),
     name: 'iPhone 1',
     sdkVersion: '13.3',
