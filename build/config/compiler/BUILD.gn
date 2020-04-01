@@ -631,16 +631,20 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
-    "-Wno-implicit-int-float-conversion",
-    "-Wno-c99-designator",
   ]
 
-  if (!is_fuchsia) {
+  if (!use_xcode) {
     default_warning_flags += [
-      "-Wno-non-c-typedef-for-linkage",
-      "-Wno-deprecated-copy",
-      "-Wno-range-loop-construct",
+      "-Wno-implicit-int-float-conversion",
+      "-Wno-c99-designator",
     ]
+    if (!is_fuchsia) {
+      default_warning_flags += [
+        "-Wno-non-c-typedef-for-linkage",
+        "-Wno-deprecated-copy",
+        "-Wno-range-loop-construct",
+      ]
+    }
   }
 
   if (is_mac || is_ios) {
