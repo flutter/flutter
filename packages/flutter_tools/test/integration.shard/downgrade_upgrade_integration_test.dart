@@ -12,8 +12,8 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 
-const String _kInitialVersion = 'v1.9.1+hotfix.6';
-const String _kBranch = 'stable';
+const String _kInitialVersion = 'v1.9.1';
+const String _kBranch = 'dev';
 const FileSystem fileSystem = LocalFileSystem();
 const ProcessManager processManager = LocalProcessManager();
 final Stdio stdio = Stdio();
