@@ -251,6 +251,10 @@ class UpgradeCommandRunner {
   /// major or minor version upgrades. By resetting to the point before the
   /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
+    // We only need to reset if we're on a hotfix version
+    if (gitTagVersion.hotfix == null) {
+      return;
+    }
     String tag;
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
@@ -271,8 +275,6 @@ class UpgradeCommandRunner {
         '\nError: $error.'
       );
     }
-    globals.printStatus('Git status:\n${processUtils.runSync(<String>['git', 'status']).stdout}'); // TODO delete
-    globals.printStatus('rev name:\n${processUtils.runSync(<String>['git', 'rev-parse', 'HEAD']).stdout}'); // TODO delete
   }
 
   /// Attempts to upgrade the channel.

@@ -692,14 +692,26 @@ String _shortGitRevision(String revision) {
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
 
+/// Version of Flutter SDK parsed from git
 class GitTagVersion {
-  const GitTagVersion(this.x, this.y, this.z, this.hotfix, this.commits, this.hash);
+  const GitTagVersion({
+    this.x,
+    this.y,
+    this.z,
+    this.hotfix,
+    this.devVersion,
+    this.devPatch,
+    this.commits,
+    this.hash,
+  });
   const GitTagVersion.unknown()
     : x = null,
       y = null,
       z = null,
       hotfix = null,
       commits = 0,
+      devVersion = null,
+      devPatch = null,
       hash = '';
 
   /// The X in vX.Y.Z.
@@ -720,6 +732,12 @@ class GitTagVersion {
   /// The git hash (or an abbreviation thereof) for this commit.
   final String hash;
 
+  /// The N in X.Y.Z-dev.N.M
+  final int devVersion;
+
+  /// The M in X.Y.Z-dev.N.M
+  final int devPatch;
+
   static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
@@ -729,27 +747,73 @@ class GitTagVersion {
         _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
       }
     }
-    // `--match` glob must match old version tag `v1.2.3` and new `1.2.3--dev.0.0`
+    // `--match` glob must match old version tag `v1.2.3` and new `1.2.3-dev.4.5`
     return parse(_runGit('git describe --match *.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 
-  static GitTagVersion parse(String version) {
+  /// Check for the release tag format pre-v1.17.0
+  static GitTagVersion parseFirstVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^v?([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6, 7]);
+      r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
-      globals.printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
-    final int majorVersionNumber = parsedParts[0];
-    final int minorVersionNumber = parsedParts[1];
-    final int patchVersionNumber = parsedParts[2];
-    final int hotfixInfo = parsedParts[3];
-    //parsedParts[4] is dev release info, not used
-    final int distanceFromTag = parsedParts[5];
-    final String revisionHash = parts[6];
-    return GitTagVersion(majorVersionNumber, minorVersionNumber, patchVersionNumber, hotfixInfo, distanceFromTag, revisionHash);
+    return GitTagVersion(
+      x: parsedParts[0],
+      y: parsedParts[1],
+      z: parsedParts[2],
+      hotfix: parsedParts[3],
+      commits: parsedParts[4],
+      hash: parts[5],
+    );
+  }
+
+  /// Check for the release tag format from v1.17.0 on
+  static GitTagVersion parseSecondVersion(String version) {
+    final RegExp versionPattern = RegExp(
+      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6, 7]);
+    if (parts == null) {
+      return const GitTagVersion.unknown();
+    }
+    final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    List<int> devParts = [null, null];
+    if (parts[4] != null) {
+      devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
+        .matchAsPrefix(parts[4])
+        ?.groups(<int>[1, 2])
+        ?.map<int>(
+          (String source) => source == null ? null : int.tryParse(source)
+        )?.toList() ?? <int>[null, null];
+    }
+    return GitTagVersion(
+      x: parsedParts[0],
+      y: parsedParts[1],
+      z: parsedParts[2],
+      hotfix: parsedParts[3],
+      devVersion: devParts[0],
+      devPatch: devParts[1],
+      commits: parsedParts[5],
+      hash: parts[6],
+    );
+  }
+
+  static GitTagVersion parse(String version) {
+    GitTagVersion gitTagVersion;
+
+    gitTagVersion = parseFirstVersion(version);
+    if (gitTagVersion != const GitTagVersion.unknown()) {
+      return gitTagVersion;
+    }
+    gitTagVersion = parseSecondVersion(version);
+    if (gitTagVersion != const GitTagVersion.unknown()) {
+      return gitTagVersion;
+    }
+    globals.printTrace('Could not interpret results of "git describe": $version');
+    return const GitTagVersion.unknown();
   }
 
   String frameworkVersionFor(String revision) {
