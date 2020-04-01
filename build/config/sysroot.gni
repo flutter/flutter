@@ -9,6 +9,10 @@ declare_args() {
   # The absolute path of the sysroot that is applied when compiling using
   # the target toolchain.
   target_sysroot = ""
+
+  # The absolute path to the Xcode toolchain. This is used to look for headers
+  # that usually ship with the toolchain like c++/v1.
+  xcode_toolchain = ""
 }
 
 if (current_toolchain == default_toolchain && target_sysroot != "") {
@@ -30,4 +34,11 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   sysroot = ios_sdk_path
 } else {
   sysroot = ""
+}
+
+if ((is_mac || is_ios) && xcode_toolchain == "") {
+  xcode_toolchain = exec_script("//build/config/mac/xcode_toolchain.py",
+                                [],
+                                "trim string",
+                                [])
 }
