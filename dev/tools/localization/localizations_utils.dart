@@ -377,24 +377,27 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo\nbar => 'foo\\\\nbar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to true, the
-/// result avoids character escaping, with the
-/// exception of the dollar sign:
+/// This function is used by tools that take in a JSON-formatted file to
+/// generate Dart code. For this reason, characters with special meaning
+/// in JSON files, such as the backspace character (\b) have to be
+/// properly escaped by this function so that the generated Dart code
+/// correctly represents this character.
+///
+/// When [shouldEscapeDollar] is set to true, the result avoids character
+/// escaping, with the exception of the dollar sign:
 ///
 /// ```
 /// foo$bar = 'foo\$bar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to false, the
-/// result tries to avoid character escaping:
+/// When [shouldEscapeDollar] is set to false, the result tries to avoid
+/// character escaping:
 ///
 /// ```
 /// foo$bar => 'foo\\\$bar'
 /// ```
 ///
 /// [shouldEscapeDollar] is true by default.
-///
-/// Strings with newlines are not supported.
 String generateString(String value, { bool escapeDollar = true }) {
   assert(escapeDollar != null);
 

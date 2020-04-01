@@ -45,11 +45,11 @@ void main() {
     });
 
     test('handles backslash', () {
-      expect(generateString(r'ab\c'), "'ab\\\\c'");
+      expect(generateString(r'ab\c'), r"'ab\\c'");
     });
 
     test('handles backslash followed by "n" character', () {
-      expect(generateString('ab\\nc'), "'ab\\\\nc'");
+      expect(generateString(r'ab\nc'), r"'ab\\nc'");
     });
 
     test('supports newline escaping', () {
