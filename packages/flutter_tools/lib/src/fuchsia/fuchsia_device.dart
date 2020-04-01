@@ -190,7 +190,7 @@ class FuchsiaDevice extends Device {
       id,
       platformType: PlatformType.fuchsia,
       category: null,
-      ephemeral: false,
+      ephemeral: true,
   );
 
   @override
