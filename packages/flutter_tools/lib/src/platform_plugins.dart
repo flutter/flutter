@@ -235,7 +235,8 @@ class MacOSPlugin extends PluginPlatform {
 class WindowsPlugin extends PluginPlatform {
   const WindowsPlugin({
     @required this.name,
-    @required this.pluginClass,
+    this.pluginClass,
+    this.dartPluginClass,
   });
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
@@ -243,6 +244,7 @@ class WindowsPlugin extends PluginPlatform {
     return WindowsPlugin(
       name: name,
       pluginClass: yaml['pluginClass'] as String,
+      dartPluginClass: yaml['dartPluginClass'] as String,
     );
   }
 
@@ -250,20 +252,23 @@ class WindowsPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return (yaml['dartPluginClass'] != null && yaml['dartPluginClass'] is String) ||
+           (yaml['pluginClass'] != null && yaml['pluginClass'] is String);
   }
 
   static const String kConfigKey = 'windows';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'class': pluginClass,
-      'filename': _filenameForCppClass(pluginClass),
+      'file': _filenameForCppClass(pluginClass),
+      'dartPluginClass': dartPluginClass,
     };
   }
 }
@@ -361,6 +366,9 @@ class WebPlugin extends PluginPlatform {
 
 final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
+  if (className == null) {
+    return null;
+  }
   return className.splitMapJoin(
     _internalCapitalLetterRegex,
     onMatch: (_) => '_',

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -251,7 +252,17 @@ EndProject\r
   /// in [plugins].
   Map<String, String> _getWindowsPluginNamesByGuid(List<Plugin> plugins) {
     final Map<String, String> currentPluginInfo = <String, String>{};
-    for (final Plugin plugin in plugins) {
+    // Plugins without a 'pluginClass' definition shouldn't generate a GUID. The plugin might
+    // be a pure Dart implementation.
+    final List<Plugin> nativeWindowsPlugins = plugins.where((final Plugin element) {
+      final WindowsPlugin windowsPlugin = element.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+      if (windowsPlugin == null) {
+        return false;
+      }
+      return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
+    }).toList();
+
+    for (final Plugin plugin in nativeWindowsPlugins) {
       if (plugin.platforms.containsKey(_project.pluginConfigKey)) {
         final _PluginProjectInfo info = _PluginProjectInfo(plugin, fileSystem: _fileSystem);
         if (currentPluginInfo.containsKey(info.guid)) {
