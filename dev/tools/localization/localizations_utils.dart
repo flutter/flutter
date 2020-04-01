@@ -373,15 +373,20 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => 'foo\\bar'
-/// foo\nbar => 'foo\\\\nbar'
 /// ```
 ///
 /// This function is used by tools that take in a JSON-formatted file to
 /// generate Dart code. For this reason, characters with special meaning
-/// in JSON files, such as the backspace character (\b) have to be
+/// in JSON files. For example, the backspace character (\b) have to be
 /// properly escaped by this function so that the generated Dart code
-/// correctly represents this character.
+/// correctly represents this character:
+/// ```
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\nbar'
+/// foo\\nbar => 'foo\\\\nbar'
+/// foo\\bar => 'foo\\\\bar'
+/// foo\ bar => 'foo\\ bar'
+/// ```
 ///
 /// When [shouldEscapeDollar] is set to true, the result avoids character
 /// escaping, with the exception of the dollar sign:
