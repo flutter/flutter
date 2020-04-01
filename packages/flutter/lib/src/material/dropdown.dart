@@ -1064,7 +1064,7 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// The background color of the dropdown.
   ///
-  /// If it is not provided the theme's [ThemeData.canvasColor] will be used
+  /// If it is not provided, the theme's [ThemeData.canvasColor] will be used
   /// instead.
   final Color dropdownColor;
 
