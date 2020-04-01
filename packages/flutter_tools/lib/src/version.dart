@@ -729,18 +729,27 @@ class GitTagVersion {
         _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
       }
     }
-    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags', processUtils, workingDirectory));
+    // `--match` glob must match old version tag `v1.2.3` and new `1.2.3--dev.0.0`
+    return parse(_runGit('git describe --match *.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 
   static GitTagVersion parse(String version) {
-    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
+    final RegExp versionPattern = RegExp(
+      r'^v?([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6, 7]);
     if (parts == null) {
       globals.printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
-    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
+    final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final int majorVersionNumber = parsedParts[0];
+    final int minorVersionNumber = parsedParts[1];
+    final int patchVersionNumber = parsedParts[2];
+    final int hotfixInfo = parsedParts[3];
+    //parsedParts[4] is dev release info, not used
+    final int distanceFromTag = parsedParts[5];
+    final String revisionHash = parts[6];
+    return GitTagVersion(majorVersionNumber, minorVersionNumber, patchVersionNumber, hotfixInfo, distanceFromTag, revisionHash);
   }
 
   String frameworkVersionFor(String revision) {
