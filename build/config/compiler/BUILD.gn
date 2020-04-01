@@ -633,10 +633,15 @@ if (is_win) {
     "-Wno-unused-parameter",  # Unused function parameters.
     "-Wno-implicit-int-float-conversion",
     "-Wno-c99-designator",
-    "-Wno-non-c-typedef-for-linkage",
-    "-Wno-deprecated-copy",
-    "-Wno-range-loop-construct",
   ]
+
+  if (!is_fuchsia) {
+    default_warning_flags += [
+      "-Wno-non-c-typedef-for-linkage",
+      "-Wno-deprecated-copy",
+      "-Wno-range-loop-construct",
+    ]
+  }
 
   if (is_mac || is_ios) {
     # When compiling Objective-C, warns if a method is used whose
