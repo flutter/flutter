@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 
 import 'button.dart';
 import 'colors.dart';
-import 'icons.dart';
 import 'localizations.dart';
 import 'theme.dart';
 
@@ -656,18 +655,14 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     if (slot is _DestinationSlot) {
       assert(child is RenderBox);
       assert(slot is _DestinationSlot);
-      final _DestinationSlot slottedSlot = slot as _DestinationSlot;
-      _updateRenderObject(child as RenderBox, slottedSlot);
+      _updateRenderObject(child as RenderBox, slot);
       assert(renderObject.childToSlot.keys.contains(child));
-      assert(renderObject.slotToChild.keys.contains(slottedSlot));
+      assert(renderObject.slotToChild.keys.contains(slot));
       return;
     }
     if (slot is IndexedSlot) {
-      final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-        this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
       assert(renderObject.debugValidateChild(child));
-      renderObject.insert(child, after: slot?.value?.renderObject);
-      assert(renderObject == this.renderObject);
+      renderObject.insert(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
       return;
     }
     assert(false, 'slot must be _DestinationSlot or IndexedSlot');
@@ -676,11 +671,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   // This is not reachable for slotted children.
   @override
   void moveChildRenderObject(RenderObject child, IndexedSlot<Element> slot) {
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObject =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
     assert(child.parent == renderObject);
-    renderObject.move(child, after: slot?.value?.renderObject);
-    assert(renderObject == this.renderObject);
+    renderObject.move(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
   }
 
   static bool _shouldPaint(Element child) {
@@ -699,11 +691,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     }
 
     // Otherwise look for it in the list of children.
-    final ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>> renderObjectList =
-      this.renderObject as ContainerRenderObjectMixin<RenderObject, ContainerParentDataMixin<RenderObject>>;
-    assert(child.parent == renderObjectList);
-    renderObjectList.remove(child);
-    assert(renderObjectList == this.renderObject);
+    assert(child.parent == renderObject);
+    renderObject.remove(child as RenderBox);
   }
 
   @override
@@ -1047,9 +1036,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     _paintSlottedChild(context, offset, nextButtonDisabled);
 
     // Paint needed list children and dividers.
-    int i = -1;
     visitChildren((RenderObject renderObjectChild) {
-      i++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
@@ -1182,7 +1169,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.visitChildren(visitor);
   }
 
-  // TODO(justinmc)
+  // TODO(justinmc): Adapt and uncomment.
   /*
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
@@ -1198,9 +1185,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   */
 }
 
+// TODO(justinmc): Rename.
 enum _DestinationSlot {
   backButton,
-  children,
   divider,
   nextButton,
   nextButtonDisabled,
