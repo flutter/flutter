@@ -56,6 +56,7 @@ abstract class UnpackMacOS extends Target {
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
+    targetDirectory.createSync(recursive: true);
     final List<File> inputs = globals.fs.directory(basePath)
       .listSync(recursive: true)
       .whereType<File>()
