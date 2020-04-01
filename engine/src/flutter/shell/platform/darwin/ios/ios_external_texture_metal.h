@@ -48,7 +48,7 @@ class IOSExternalTextureMetal final : public Texture {
   // |Texture|
   void OnTextureUnregistered() override;
 
-  sk_sp<SkImage> WrapExternalPixelBuffer(GrContext* context);
+  sk_sp<SkImage> WrapExternalPixelBuffer(GrContext* context) const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureMetal);
 };
