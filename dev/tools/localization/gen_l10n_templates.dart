@@ -120,9 +120,7 @@ class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
 }
 
 @(class) @(lookupName)(Locale locale) {
-  switch(locale.languageCode) {
-    @(lookupBody)
-  }
+  @(lookupBody)
   assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
   return null;
 }
@@ -207,11 +205,41 @@ const String baseClassMethodTemplate = '''
   String @(name)(@(parameters));
 ''';
 
+const String lookupBodyTemplate = '''//@(lookupAllCodesSpecified)
+
+  //@(lookupScriptCodeSpecified)
+
+  @(lookupCountryCodeSpecified)
+
+  //@(lookupLanguageCodeSpecified)''';
+
+const String allCodesSpecifiedTemplate = '''if (locale.countryCode != null && locale.scriptCode != null) {
+  // scriptCodeSwitchLogic
+  switch(locale.scriptCode) {
+    @(switchClauses)
+  }
+}''';
+
+const String scriptCodeSpecifiedTemplate = '''if (locale.countryCode == null && locale.scriptCode != null) {
+  // scriptCodeSwitchLogic
+  switch(locale.scriptCode) {
+    @(switchClauses)
+  }
+}''';
+
+const String scriptCodeSwitchClauseTemplate = '''case '@(case)': {
+
+}''';
+
 const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
 
 const String countryCodeSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.countryCode) {
         @(switchClauses)
       }
-      return @(class)();
+      break;
     }''';
+
+const String countryCodeLookupTemplate = '''switch (locale.languageCode) {
+    @(countryCodeSwitchClauses)
+  }''';

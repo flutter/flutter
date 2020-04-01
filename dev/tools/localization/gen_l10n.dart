@@ -255,16 +255,20 @@ String generateBaseClassMethod(Message message) {
     .replaceAll('@(name)', message.resourceId);
 }
 
-String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+    // if (locales.length == 1) {
+    //   return switchClauseTemplate
+    //     .replaceAll('@(case)', language)
+    //     .replaceAll('@(class)', '$className${locales.first.camelCase()}');
+    // }
+
+String generateLookupByCountryCode(AppResourceBundleCollection allBundles, String className) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    if (locales.length == 1) {
-      return switchClauseTemplate
-        .replaceAll('@(case)', language)
-        .replaceAll('@(class)', '$className${locales.first.camelCase()}');
-    }
-
     final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) => locale.countryCode != null);
+
+    if (localesWithCountryCodes.isEmpty)
+      return null;
+
     return countryCodeSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
@@ -274,7 +278,18 @@ String generateLookupBody(AppResourceBundleCollection allBundles, String classNa
             .replaceAll('@(class)', '$className${locale.camelCase()}');
         }).join('\n        '));
   });
-  return switchClauses.join('\n    ');
+
+  return countryCodeLookupTemplate.replaceAll(
+    '@(countryCodeSwitchClauses)',
+    switchClauses
+      .where((String switchClause) => switchClause != null)
+      .join('\n    ')
+  );
+}
+
+String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+  return lookupBodyTemplate
+    .replaceAll('@(lookupCountryCodeSpecified)', generateLookupByCountryCode(allBundles, className));
 }
 
 class LocalizationsGenerator {
