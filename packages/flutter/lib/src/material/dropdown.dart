@@ -799,7 +799,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// [isExpanded] arguments must not be null.
   ///
   /// The [dropdownColor] argument specifies the background color of the
-  /// dropdown when it is open. If it is null the current theme's
+  /// dropdown when it is open. If it is null, the current theme's
   /// [ThemeData.canvasColor] will be used instead.
   DropdownButton({
     Key key,
@@ -1062,9 +1062,10 @@ class DropdownButton<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The color of the dropdown's background color.
+  /// The background color of the dropdown.
   ///
-  /// If not provided the theme's [ThemeData.canvasColor] will be used instead.
+  /// If it is not provided the theme's [ThemeData.canvasColor] will be used
+  /// instead.
   final Color dropdownColor;
 
   @override
