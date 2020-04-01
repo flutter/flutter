@@ -129,24 +129,6 @@ void main() {
   ''');
     }
 
-    void configureDummyWindowsPackage({String pluginClass, String dartPluginClass}) {
-      String pluginString = '''
-  flutter:
-    plugin:
-      platforms:
-        windows:
-  ''';
-      if (pluginClass != null) {
-        pluginString += '         pluginClass: $pluginClass';
-      }
-      if (dartPluginClass != null) {
-        pluginString += '         dartPluginClass: $dartPluginClass';
-      }
-      dummyPackageDirectory.parent.childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(pluginString);
-    }
-
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
               fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
@@ -967,7 +949,17 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         when(windowsProject.existsSync()).thenReturn(true);
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);
-        configureDummyWindowsPackage(dartPluginClass: 'SomePlugin');
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      windows:
+        dartPluginClass: SomePlugin
+    ''');
+
         createDummyWindowsSolutionFile();
         createDummyPluginWindowsProjectFile();
 
