@@ -127,21 +127,6 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
   void onDrawPath(const SkPath&, const SkPaint&) override;
 
-#if defined(SK_SUPPORT_LEGACY_ONDRAWBITMAP_VIRTUALS)
-  // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-  void onDrawBitmap(const SkBitmap&,
-                    SkScalar left,
-                    SkScalar top,
-                    const SkPaint*) override;
-
-  // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-  void onDrawBitmapRect(const SkBitmap&,
-                        const SkRect* src,
-                        const SkRect& dst,
-                        const SkPaint*,
-                        SrcRectConstraint) override;
-#endif
-
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
   void onDrawImage(const SkImage*,
                    SkScalar left,
@@ -168,13 +153,6 @@ class DidDrawCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
                        const SkPaint*) override;
 
   // |SkCanvasVirtualEnforcer<SkNoDrawCanvas>|
-#ifdef SK_SUPPORT_LEGACY_DRAWVERTS_VIRTUAL
-  void onDrawVerticesObject(const SkVertices*,
-                            const SkVertices::Bone[],
-                            int,
-                            SkBlendMode,
-                            const SkPaint&) override {}
-#endif
   void onDrawVerticesObject(const SkVertices*,
                             SkBlendMode,
                             const SkPaint&) override;

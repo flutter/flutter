@@ -225,31 +225,12 @@ void MockCanvas::onDrawRRect(const SkRRect&, const SkPaint&) {
   FML_DCHECK(false);
 }
 
-#if defined(SK_SUPPORT_LEGACY_ONDRAWBITMAP_VIRTUALS)
-void MockCanvas::onDrawBitmap(const SkBitmap&,
-                              SkScalar,
-                              SkScalar,
-                              const SkPaint*) {
-  FML_DCHECK(false);
-}
-#endif
-
 void MockCanvas::onDrawImage(const SkImage*,
                              SkScalar,
                              SkScalar,
                              const SkPaint*) {
   FML_DCHECK(false);
 }
-
-#if defined(SK_SUPPORT_LEGACY_ONDRAWBITMAP_VIRTUALS)
-void MockCanvas::onDrawBitmapRect(const SkBitmap&,
-                                  const SkRect*,
-                                  const SkRect&,
-                                  const SkPaint*,
-                                  SrcRectConstraint) {
-  FML_DCHECK(false);
-}
-#endif
 
 void MockCanvas::onDrawImageRect(const SkImage*,
                                  const SkRect*,
