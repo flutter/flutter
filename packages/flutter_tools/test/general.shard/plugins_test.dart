@@ -969,8 +969,10 @@ flutter:
         final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
-        expect(registrantHeader, isNot(exists));
-        expect(registrantImpl, isNot(exists));
+        expect(registrantHeader, exists);
+        expect(registrantImpl, exists);
+        expect(registrantHeader, isNot(contains('SomePlugin')));
+        expect(registrantImpl,  isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
