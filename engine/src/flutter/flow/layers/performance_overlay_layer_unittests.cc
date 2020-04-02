@@ -88,6 +88,8 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
       << "Please either set --golden-dir, or make sure that the unit test is "
       << "run from the right directory (e.g., flutter/engine/src).";
 
+  // TODO(https://github.com/flutter/flutter/issues/53784): enable this on all
+  // platforms.
 #if !defined(OS_LINUX)
   GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
 #endif  // OS_LINUX

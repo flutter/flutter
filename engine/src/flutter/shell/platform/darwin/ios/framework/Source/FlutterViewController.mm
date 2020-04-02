@@ -543,14 +543,14 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   // thread.
   if (appeared) {
     [self installFirstFrameCallback];
-    [_engine.get() platformViewsController] -> SetFlutterView(_flutterView.get());
-    [_engine.get() platformViewsController] -> SetFlutterViewController(self);
-    [_engine.get() platformView] -> NotifyCreated();
+    [_engine.get() platformViewsController]->SetFlutterView(_flutterView.get());
+    [_engine.get() platformViewsController]->SetFlutterViewController(self);
+    [_engine.get() platformView]->NotifyCreated();
   } else {
     self.displayingFlutterUI = NO;
-    [_engine.get() platformView] -> NotifyDestroyed();
-    [_engine.get() platformViewsController] -> SetFlutterView(nullptr);
-    [_engine.get() platformViewsController] -> SetFlutterViewController(nullptr);
+    [_engine.get() platformView]->NotifyDestroyed();
+    [_engine.get() platformViewsController]->SetFlutterView(nullptr);
+    [_engine.get() platformViewsController]->SetFlutterViewController(nullptr);
   }
 }
 
