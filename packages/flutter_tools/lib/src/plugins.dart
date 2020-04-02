@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 

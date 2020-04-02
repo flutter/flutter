@@ -194,8 +194,8 @@ class IOSPlugin extends PluginPlatform {
 
 /// Contains the parameters to template a macOS plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
 class MacOSPlugin extends PluginPlatform {
   const MacOSPlugin({
     @required this.name,
@@ -263,8 +263,6 @@ class WindowsPlugin extends PluginPlatform {
   }
 
   static const String kConfigKey = 'windows';
-  static const String kPluginClass = 'pluginClass';
-  static const String kDartPluginClass = 'dartPluginClass';
 
   final String name;
   final String pluginClass;
@@ -283,8 +281,8 @@ class WindowsPlugin extends PluginPlatform {
 
 /// Contains the parameters to template a Linux plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
 class LinuxPlugin extends PluginPlatform {
   const LinuxPlugin({
     @required this.name,
