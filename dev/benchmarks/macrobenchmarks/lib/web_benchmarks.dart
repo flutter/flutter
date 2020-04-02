@@ -32,6 +32,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
   BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
+  if (isCanvasKit)
+    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 
   // Benchmarks that we don't want to run using CanvasKit.
   if (!isCanvasKit) ...<String, RecorderFactory>{
@@ -39,8 +41,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
     BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
-    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid(useCanvas: false),
-    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid(useCanvas: true),
+    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
+    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
   }
 };
 
@@ -81,10 +83,30 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
-  final Recorder recorder = recorderFactory();
-
   try {
-    final Profile profile = await recorder.run();
+    final Runner runner = Runner(
+      recorder: recorderFactory(),
+      setUpAllDidRun: () async {
+        if (!isInManualMode) {
+          await html.HttpRequest.request(
+            '/start-performance-tracing?label=$benchmarkName',
+            method: 'POST',
+            mimeType: 'application/json',
+          );
+        }
+      },
+      tearDownAllWillRun: () async {
+        if (!isInManualMode) {
+          await html.HttpRequest.request(
+            '/stop-performance-tracing',
+            method: 'POST',
+            mimeType: 'application/json',
+          );
+        }
+      },
+    );
+
+    final Profile profile = await runner.run();
     if (!isInManualMode) {
       final html.HttpRequest request = await html.HttpRequest.request(
         '/profile-data',
