@@ -754,7 +754,17 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
-    _children.where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child)).forEach(visitor);
+    // Visit slot children.
+    childToSlot.forEach((Element child, _) {
+      if (_shouldPaint(child) != true || _forgottenChildren.contains(child)) {
+        return;
+      }
+      visitor(child);
+    });
+    // Visit list children.
+    _children
+        .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
+        .forEach(visitor);
   }
 
   // Update slotted child.
@@ -1103,16 +1113,16 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     }
 
     // Hit test slot children.
-    if (hitTestChild(_backButton, result, position: position)) {
+    if (hitTestChild(backButton, result, position: position)) {
       return true;
     }
-    if (hitTestChild(_divider, result, position: position)) {
+    if (hitTestChild(divider, result, position: position)) {
       return true;
     }
-    if (hitTestChild(_nextButton, result, position: position)) {
+    if (hitTestChild(nextButton, result, position: position)) {
       return true;
     }
-    if (hitTestChild(_nextButtonDisabled, result, position: position)) {
+    if (hitTestChild(nextButtonDisabled, result, position: position)) {
       return true;
     }
 

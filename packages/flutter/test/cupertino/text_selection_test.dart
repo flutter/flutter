@@ -167,7 +167,7 @@ void main() {
     }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
     testWidgets('When a menu item doesn\'t fit, a second page is used.', (WidgetTester tester) async {
-      // Set the screen size to more narrow, so that Select All can't fit.
+      // Set the screen size to more narrow, so that Paste can't fit.
       tester.binding.window.physicalSizeTestValue = const Size(800, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
@@ -201,7 +201,6 @@ void main() {
       await tester.tapAt(textOffset);
       await tester.pumpAndSettle();
 
-      // The full menu is shown without the navigation buttons.
       // The last button is missing, and a next button is shown.
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
@@ -272,8 +271,7 @@ void main() {
       await tester.tapAt(textOffset);
       await tester.pumpAndSettle();
 
-      // The full menu is shown without the navigation buttons.
-      // The last button is missing, and a next button is shown.
+      // Only the first button fits, and a next button is shown.
       expect(find.byType(CupertinoButton), findsNWidgets(2));
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsNothing);
