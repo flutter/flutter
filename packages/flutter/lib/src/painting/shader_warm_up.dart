@@ -24,9 +24,9 @@ import 'package:flutter/foundation.dart';
 /// done before calling [runApp].
 ///
 /// To determine whether a draw operation is useful for warming up shaders,
-/// check whether it improves the slowest raster frame. Also, tracing with
-/// `flutter run --profile --trace-skia` may reveal whether there is shader-
-/// compilation-related jank. If there is such jank, some long
+/// check whether it improves the slowest frame rasterization time. Also,
+/// tracing with `flutter run --profile --trace-skia` may reveal whether
+/// there is shader-compilation-related jank. If there is such jank, some long
 /// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
 /// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
 /// `CircularRRectOp`) would suggest Xyz draw operations are causing the
