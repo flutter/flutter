@@ -747,8 +747,8 @@ abstract class ResidentRunner {
     final Map<String, Object> data = await flutterDevices.first.views.first.getSkSLs();
     if (data.isEmpty) {
       globals.logger.printStatus(
-        'No data was receieved. To ensure SkSL data can be generated run on a '
-        'physical device the\n'
+        'No data was receieved. To ensure SkSL data can be generated use a '
+        'physical device then:\n'
         '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
         '  2. Interact with the application to force shaders to be compiled.\n'
       );
