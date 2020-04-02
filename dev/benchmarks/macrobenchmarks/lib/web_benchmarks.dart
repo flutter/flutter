@@ -12,6 +12,7 @@ import 'package:macrobenchmarks/src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/bench_build_material_checkbox.dart';
 import 'src/web/bench_card_infinite_scroll.dart';
 import 'src/web/bench_draw_rect.dart';
+import 'src/web/bench_dynamic_clip_on_static_picture.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
 import 'src/web/recorder.dart';
@@ -30,11 +31,16 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchTextOutOfPictureBounds.benchmarkName: () => BenchTextOutOfPictureBounds(),
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
+  BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
 
   // Benchmarks that we don't want to run using CanvasKit.
   if (!isCanvasKit) ...<String, RecorderFactory>{
-    BenchTextDomLayout.benchmarkName: () => BenchTextDomLayout(),
-    BenchTextDomCachedLayout.benchmarkName: () => BenchTextDomCachedLayout(),
+    BenchTextLayout.domBenchmarkName: () => BenchTextLayout(useCanvas: false),
+    BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
+    BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
+    BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
+    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid(useCanvas: false),
+    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid(useCanvas: true),
   }
 };
 

@@ -27,8 +27,18 @@ abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 
   @override
+  String get analyticsName => 'ios_aot';
+
+  @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      xcode: globals.xcode,
+      artifacts: globals.artifacts,
+      processManager: globals.processManager,
+    );
     final String buildOutputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_assembly');
@@ -36,6 +46,8 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
+    final List<String> extraGenSnapshotOptions = environment
+      .defines[kExtraGenSnapshotOptions]?.split(',') ?? const <String>[];
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -65,6 +77,7 @@ abstract class AotAssemblyBase extends Target {
         quiet: true,
         splitDebugInfo: splitDebugInfo,
         dartObfuscation: dartObfuscation,
+        extraGenSnapshotOptions: extraGenSnapshotOptions,
       ));
     }
     final List<int> results = await Future.wait(pending);
@@ -263,6 +276,13 @@ abstract class IosAssetBundle extends Target {
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     frameworkDirectory.createSync(recursive: true);
+
+    // This is necessary because multiple different build configurations will
+    // output different files here. Build cleaning only works when the files
+    // change within a build configuration.
+    if (assetDirectory.existsSync()) {
+      assetDirectory.deleteSync(recursive: true);
+    }
     assetDirectory.createSync();
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.

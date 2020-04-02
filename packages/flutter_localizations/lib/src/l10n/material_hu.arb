@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 karakter maradt",
   "remainingTextFieldCharacterCountOther": "$remainingCount karakter maradt",
   "refreshIndicatorSemanticLabel": "Frissítés",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Több"
 }

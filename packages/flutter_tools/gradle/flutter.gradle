@@ -757,7 +757,49 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         if (project.android.hasProperty("applicationVariants")) {
-            project.android.applicationVariants.all addFlutterDeps
+            project.android.applicationVariants.all { variant ->
+                addFlutterDeps(variant)
+                // Copy the output APKs into a known location, so `flutter run` or `flutter build apk`
+                // can discover them. By default, this is `<app-dir>/build/app/outputs/flutter-apk/<filename>.apk`.
+                //
+                // The filename consists of `app<-abi>?<-flavor-name>?-<build-mode>.apk`.
+                // Where:
+                //   * `abi` can be `armeabi-v7a|arm64-v8a|x86|x86_64` only if the flag `split-per-abi` is set.
+                //   * `flavor-name` is the flavor used to build the app in lower case if the assemble task is called.
+                //   * `build-mode` can be `release|debug|profile`.
+                variant.outputs.all { output ->
+                    // `assemble` became `assembleProvider` in AGP 3.3.0.
+                    def assembleTask = variant.hasProperty("assembleProvider")
+                        ? variant.assembleProvider.get()
+                        : variant.assemble
+                    assembleTask.doLast {
+                        // `packageApplication` became `packageApplicationProvider` in AGP 3.3.0.
+                        def outputDirectory = variant.hasProperty("packageApplicationProvider")
+                            ? variant.packageApplicationProvider.get().outputDirectory
+                            : variant.packageApplication.outputDirectory
+                        //  `outputDirectory` is a `DirectoryProperty` in AGP 4.1.
+                        String outputDirectoryStr = outputDirectory.metaClass.respondsTo(outputDirectory, "get")
+                            ? outputDirectory.get()
+                            : outputDirectory
+                        String filename = "app"
+                        String abi = output.getFilter(OutputFile.ABI)
+                        if (abi != null && !abi.isEmpty()) {
+                            filename += "-${abi}"
+                        }
+                        if (variant.flavorName != null && !variant.flavorName.isEmpty()) {
+                            filename += "-${variant.flavorName.toLowerCase()}"
+                        }
+                        filename += "-${buildModeFor(variant.buildType)}"
+                        project.copy {
+                            from new File("$outputDirectoryStr/${output.outputFileName}")
+                            into new File("${project.buildDir}/outputs/flutter-apk");
+                            rename {
+                                return "${filename}.apk"
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             project.android.libraryVariants.all addFlutterDeps
         }

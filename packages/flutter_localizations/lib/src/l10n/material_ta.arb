@@ -44,7 +44,7 @@
   "modalBarrierDismissLabel": "நிராகரிக்கும்",
   "signedInLabel": "உள்நுழைந்துள்ளீர்கள்",
   "drawerLabel": "வழிசெலுத்தல் மெனு",
-  "popupMenuLabel": "பாப் அப் மெனு",
+  "popupMenuLabel": "பாப்-அப் மெனு",
   "dialogLabel": "உரையாடல்",
   "alertDialogLabel": "விழிப்பூட்டல்",
   "expandedIconTapHint": "சுருக்கும்",
@@ -53,5 +53,5 @@
   "remainingTextFieldCharacterCountOne": "1 எழுத்து மீதமுள்ளது",
   "remainingTextFieldCharacterCountOther": "$remainingCount எழுத்துகள் மீதமுள்ளன",
   "refreshIndicatorSemanticLabel": "ரெஃப்ரெஷ் செய்யும்",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "மேலும்"
 }

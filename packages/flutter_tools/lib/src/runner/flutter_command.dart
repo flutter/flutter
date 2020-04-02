@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
-import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -128,7 +127,7 @@ abstract class FlutterCommand extends Command<void> {
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
     allowTrailingOptions: false,
-    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+    usageLineLength: globals.outputPreferences.wrapText ? globals.outputPreferences.wrapColumn : null,
   );
 
   @override
@@ -428,6 +427,13 @@ abstract class FlutterCommand extends Command<void> {
             'further reduce the size of your app. '
             'To learn more, see: https://developer.android.com/studio/build/shrink-code',
       );
+  }
+
+  void usesExtraFrontendOptions() {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      splitCommas: true,
+      hide: true,
+    );
   }
 
   void usesFuchsiaOptions({ bool hide = false }) {
@@ -804,7 +810,7 @@ abstract class FlutterCommand extends Command<void> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
+        final String error = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).checkValid();
         if (error != null) {
           throw ToolExit(error);
         }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, TextHeightBehavior;
 
@@ -844,6 +845,12 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  // Caches [SemanticsNode]s created during [assembleSemanticsNode] so they
+  // can be re-used when [assembleSemanticsNode] is called again. This ensures
+  // stable ids for the [SemanticsNode]s of [TextSpan]s across
+  // [assembleSemanticsNode] invocations.
+  Queue<SemanticsNode> _cachedChildNodes;
+
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     assert(_semanticsInfo != null && _semanticsInfo.isNotEmpty);
@@ -854,6 +861,7 @@ class RenderParagraph extends RenderBox
     int start = 0;
     int placeholderIndex = 0;
     RenderBox child = firstChild;
+    final Queue<SemanticsNode> newChildCache = Queue<SemanticsNode>();
     for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(
@@ -914,15 +922,25 @@ class RenderParagraph extends RenderBox
             assert(false);
           }
         }
-        newChildren.add(
-          SemanticsNode()
-            ..updateWith(config: configuration)
-            ..rect = currentRect,
-        );
+        final SemanticsNode newChild = (_cachedChildNodes?.isNotEmpty == true)
+            ? _cachedChildNodes.removeFirst()
+            : SemanticsNode();
+        newChild
+          ..updateWith(config: configuration)
+          ..rect = currentRect;
+        newChildCache.addLast(newChild);
+        newChildren.add(newChild);
       }
       start += info.text.length;
     }
+    _cachedChildNodes = newChildCache;
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _cachedChildNodes = null;
   }
 
   @override

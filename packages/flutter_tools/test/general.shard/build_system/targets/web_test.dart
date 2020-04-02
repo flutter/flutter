@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -55,7 +56,11 @@ void main() {
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
-        }
+        },
+        artifacts: MockArtifacts(),
+        processManager: FakeProcessManager.any(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
       depfileService = DepfileService(
       fileSystem: globals.fs,
@@ -457,6 +462,22 @@ void main() {
     // Depends on resource file.
     expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a/a.txt'));
   }));
+
+  test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
+    environment.outputDir
+      .childFile('index.html')
+      .createSync(recursive: true);
+    await const WebServiceWorker().build(environment);
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
+    // Contains file hash for both `/` and index.html.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"/": "d41d8cd98f00b204e9800998ecf8427e"'));
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
+    expect(environment.buildDir.childFile('service_worker.d'), exists);
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockArtifacts extends Mock implements Artifacts {}

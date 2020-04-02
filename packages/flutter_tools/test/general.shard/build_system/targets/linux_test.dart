@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -12,11 +13,12 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../../src/common.dart';
+import '../../../src/context.dart';
 import '../../../src/testbed.dart';
 
 void main() {
   Testbed testbed;
-  const BuildSystem buildSystem = BuildSystem();
+  BuildSystem buildSystem;
   Environment environment;
   MockPlatform mockPlatform;
 
@@ -33,11 +35,20 @@ void main() {
     when(mockPlatform.environment).thenReturn(Map<String, String>.unmodifiable(<String, String>{}));
     testbed = Testbed(setup: () {
       Cache.flutterRoot = '';
+      buildSystem = BuildSystem(
+        logger: globals.logger,
+        platform: globals.platform,
+        fileSystem: globals.fs,
+      );
       environment = Environment.test(
         globals.fs.currentDirectory,
         defines: <String, String>{
           kBuildMode: 'debug',
-        }
+        },
+        artifacts: MockArtifacts(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       globals.fs.file('bin/cache/artifacts/engine/linux-x64/unrelated-stuff').createSync(recursive: true);
       globals.fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').createSync(recursive: true);
@@ -105,3 +116,4 @@ void main() {
 }
 
 class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}

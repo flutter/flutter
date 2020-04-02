@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -240,10 +239,12 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
   }
 
+  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('EXTRA_FRONT_END_OPTIONS=${buildInfo.extraFrontEndOptions.join(',')}');
+  }
+
   return xcodeBuildSettings;
 }
-
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -252,18 +253,21 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
+    @required Usage usage,
   }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _terminal = terminal,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+      _fileSystem = fileSystem,
+      _terminal = terminal,
+      _logger = logger,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _usage = usage;
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final Logger _logger;
+  final Usage _usage;
 
   static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
@@ -358,6 +362,7 @@ class XcodeProjectInterpreter {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),
+          flutterUsage: _usage,
         ).send();
       }
       _logger.printTrace('Unexpected failure to get the build settings: $error.');
@@ -367,14 +372,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);

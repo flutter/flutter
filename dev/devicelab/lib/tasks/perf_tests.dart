@@ -30,6 +30,14 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createPlatformViewsScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/scroll_perf.dart',
+    'platform_views_scroll_perf',
+  ).run;
+}
+
 TaskFunction createHomeScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',

@@ -28,6 +28,7 @@ class BuildIOSCommand extends BuildSubCommand {
     usesBuildNameOption();
     addDartObfuscationOption();
     usesDartDefineOption();
+    usesExtraFrontendOptions();
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device.',
@@ -88,7 +89,7 @@ class BuildIOSCommand extends BuildSubCommand {
     );
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result);
+      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
       throwToolExit('Encountered error while building for $logTarget.');
     }
 

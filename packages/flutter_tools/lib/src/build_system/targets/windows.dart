@@ -5,7 +5,6 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 
 /// Copies the Windows desktop embedding files to the copy directory.
@@ -40,21 +39,24 @@ class UnpackWindows extends Target {
   @override
   Future<void> build(Environment environment) async {
     // This path needs to match the prefix in the rule below.
-    final String basePath = globals.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    for (final File input in globals.fs.directory(basePath)
+    final String basePath = environment.artifacts
+      .getArtifactPath(Artifact.windowsDesktopPath);
+    for (final File input in environment.fileSystem.directory(basePath)
         .listSync(recursive: true)
         .whereType<File>()) {
-      final String outputPath = globals.fs.path.join(
+      final String outputPath = environment.fileSystem.path.join(
         environment.projectDir.path,
         'windows',
         'flutter',
-        globals.fs.path.relative(input.path, from: basePath),
+        environment.fileSystem.path
+          .relative(input.path, from: basePath),
       );
-      final File destinationFile = globals.fs.file(outputPath);
+      final File destinationFile = environment.fileSystem.file(outputPath);
       if (!destinationFile.parent.existsSync()) {
         destinationFile.parent.createSync(recursive: true);
       }
-      globals.fs.file(input).copySync(destinationFile.path);
+      environment.fileSystem
+        .file(input).copySync(destinationFile.path);
     }
   }
 }
