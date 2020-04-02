@@ -716,7 +716,7 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('Service extensions - fastReassemble', () async {
     Map<String, dynamic> result;

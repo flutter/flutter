@@ -68,7 +68,7 @@ void main() {
       expect(frames.contains(StackFrame.stackOverFlowElision), true);
     }
     expect(overflowed, true);
-  });
+  }, skip: isBrowser); // Reference needed
 }
 
 const String stackString = '''
