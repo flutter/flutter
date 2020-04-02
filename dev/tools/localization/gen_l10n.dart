@@ -253,15 +253,15 @@ String _generateLookupByAllCodes(AppResourceBundleCollection allBundles, String 
     return locale.scriptCode != null && locale.countryCode != null;
   });
 
+  if (localesWithAllCodes.isEmpty) {
+    return '';
+  }
+
   final Iterable<String> switchClauses = localesWithAllCodes.map<String>((LocaleInfo locale) {
     return switchClauseTemplate
       .replaceAll('@(case)', locale.toString())
       .replaceAll('@(class)', '$className${locale.camelCase()}');
   });
-
-  if (switchClauses.isEmpty) {
-    return '';
-  }
 
   return allCodesLookupTemplate.replaceAll(
     '@(allCodesSwitchClauses)',
