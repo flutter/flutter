@@ -21,6 +21,8 @@ import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import io.flutter.Log;
@@ -159,6 +161,16 @@ class InputConnectionAdaptor extends BaseInputConnection {
 
     updateEditingState();
     return result;
+  }
+
+  // TODO(garyq): Implement a more feature complete version of getExtractedText
+  @Override
+  public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
+    ExtractedText extractedText = new ExtractedText();
+    extractedText.selectionStart = Selection.getSelectionStart(mEditable);
+    extractedText.selectionEnd = Selection.getSelectionEnd(mEditable);
+    extractedText.text = mEditable.toString();
+    return extractedText;
   }
 
   // Detect if the keyboard is a Samsung keyboard, where we apply Samsung-specific hacks to
