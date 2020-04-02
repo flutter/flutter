@@ -547,7 +547,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
             pressedOpacity: 0.7,
             child: const Text('◀', style: _kToolbarButtonFontStyle),
           ),
-          divider: SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio),
+          dividerWidth: 1.0 / MediaQuery.of(context).devicePixelRatio,
           nextButton: CupertinoButton(
             borderRadius: null,
             color: _kToolbarBackgroundColor,
@@ -579,13 +579,13 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
     @required this.page,
     @required this.children,
     @required this.backButton,
-    @required this.divider,
+    @required this.dividerWidth,
     @required this.nextButton,
     @required this.nextButtonDisabled,
   }) : assert(children != null),
        assert(children.isNotEmpty),
        assert(backButton != null),
-       assert(divider != null),
+       assert(dividerWidth != null),
        assert(nextButton != null),
        assert(nextButtonDisabled != null),
        assert(page != null),
@@ -593,7 +593,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
 
   final Widget backButton;
   final List<Widget> children;
-  final Widget divider;
+  final double dividerWidth;
   final Widget nextButton;
   final Widget nextButtonDisabled;
   final int page;
@@ -601,6 +601,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   @override
   _CupertinoTextSelectionToolbarItemsRenderBox createRenderObject(BuildContext context) {
     return _CupertinoTextSelectionToolbarItemsRenderBox(
+      dividerWidth: dividerWidth,
       page: page,
     );
   }
@@ -637,9 +638,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     switch (slot) {
       case _DestinationSlot.backButton:
         renderObject.backButton = child;
-        break;
-      case _DestinationSlot.divider:
-        renderObject.divider = child;
         break;
       case _DestinationSlot.nextButton:
         renderObject.nextButton = child;
@@ -738,7 +736,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     super.mount(parent, newSlot);
     // Mount slotted children.
     _mountChild(widget.backButton, _DestinationSlot.backButton);
-    _mountChild(widget.divider, _DestinationSlot.divider);
     _mountChild(widget.nextButton, _DestinationSlot.nextButton);
     _mountChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
 
@@ -788,7 +785,6 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
     // Update slotted children.
     _updateChild(widget.backButton, _DestinationSlot.backButton);
-    _updateChild(widget.divider, _DestinationSlot.divider);
     _updateChild(widget.nextButton, _DestinationSlot.nextButton);
     _updateChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
 
@@ -800,8 +796,11 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
 class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
+    @required double dividerWidth,
     @required int page,
-  }) : assert(page != null),
+  }) : assert(dividerWidth != null),
+       assert(page != null),
+       _dividerWidth = dividerWidth,
        _page = page,
        super();
 
@@ -838,10 +837,14 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     _backButton = _updateChild(_backButton, value, _DestinationSlot.backButton);
   }
 
-  RenderBox _divider;
-  RenderBox get divider => _divider;
-  set divider(RenderBox value) {
-    _divider = _updateChild(_divider, value, _DestinationSlot.divider);
+  double _dividerWidth;
+  double get dividerWidth => _dividerWidth;
+  set dividerWidth(double value) {
+    if (value == _dividerWidth) {
+      return;
+    }
+    _dividerWidth = value;
+    markNeedsLayout();
   }
 
   RenderBox _nextButton;
@@ -922,7 +925,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
     // Layout slotted children.
     _backButton.layout(constraints.loosen(), parentUsesSize: true);
-    _divider.layout(constraints.loosen(), parentUsesSize: true);
     _nextButton.layout(constraints.loosen(), parentUsesSize: true);
     _nextButtonDisabled.layout(constraints.loosen(), parentUsesSize: true);
 
@@ -964,7 +966,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       // page and relayout the child.
       if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
         currentPage++;
-        pageWidth = _backButton.size.width;
+        pageWidth = _backButton.size.width + dividerWidth;
         final double nextPageButtonWidth = _backButton.size.width
             + _nextButton.size.width;
         child.layout(
@@ -975,10 +977,8 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
           parentUsesSize: true,
         );
       }
-      // TODO(justinmc): Divider needs to be considered in where the children
-      // are placed here.
       childParentData.offset = Offset(pageWidth, 0.0);
-      pageWidth += child.size.width;
+      pageWidth += child.size.width + dividerWidth;
       childParentData.shouldPaint = currentPage == page;
 
       // TODO(justinmc): Can I optimize by not laying out pages after the
@@ -1024,6 +1024,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         // already been taken care of when laying out the children to
         // accommodate the back button.
       }
+    } else {
+      // No divider for the next button when there's only one page.
+      parentWidth -= dividerWidth;
     }
 
     size = Size(parentWidth, _kToolbarHeight);
@@ -1039,31 +1042,13 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Paint needed slotted children, except for divider, which is painted
-    // between list children.
-    _paintSlottedChild(context, offset, backButton);
-    _paintSlottedChild(context, offset, nextButton);
-    _paintSlottedChild(context, offset, nextButtonDisabled);
-
-    // Paint needed list children and dividers.
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
-      // TODO(justinmc): Actually can I just paint everything here? Watch out
-      // for divider.
-      // Skip slotted children.
-      if (childToSlot.containsKey(child)) {
-        return;
-      }
-
       if (childParentData.shouldPaint) {
         final Offset childOffset = childParentData.offset + offset;
         context.paintChild(child, childOffset);
-        // TODO(justinmc): Divider doesn't appear now because its width isn't
-        // considered when placing children, and it has no color of its own.
-        final Offset dividerOffset = childOffset + Offset(child.size.width, 0.0);
-        context.paintChild(_divider, dividerOffset);
       }
     });
   }
@@ -1116,9 +1101,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     if (hitTestChild(backButton, result, position: position)) {
       return true;
     }
-    if (hitTestChild(divider, result, position: position)) {
-      return true;
-    }
     if (hitTestChild(nextButton, result, position: position)) {
       return true;
     }
@@ -1166,9 +1148,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     if (_backButton != null) {
       visitor(_backButton);
     }
-    if (_divider != null) {
-      visitor(_divider);
-    }
     if (_nextButton != null) {
       visitor(_nextButton);
     }
@@ -1198,7 +1177,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 // TODO(justinmc): Rename.
 enum _DestinationSlot {
   backButton,
-  divider,
   nextButton,
   nextButtonDisabled,
 }
