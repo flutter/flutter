@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -387,8 +388,8 @@ void main() {
     expect(residentRunner.isRunningDebug, true);
     // does not support CanvasKit
     expect(residentRunner.supportsCanvasKit, false);
-    // does not support SkSL
-    expect(residentRunner.supportsWriteSkSL, false);
+    // does support SkSL
+    expect(residentRunner.supportsWriteSkSL, true);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -408,6 +409,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.M,
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
@@ -416,14 +418,38 @@ void main() {
     ));
   }));
 
-  test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
+  test('ResidentRunner does support CanvasKit', () => testbed.run(() async {
     expect(() => residentRunner.toggleCanvaskit(),
       throwsA(isA<Exception>()));
   }));
 
-  test('ResidentRunner does not support writeSkSL', () => testbed.run(() async {
-    expect(() => residentRunner.writeSkSL(),
-      throwsA(isA<Exception>()));
+  test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
+    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
+      return <String, Object>{};
+    });
+    await residentRunner.writeSkSL();
+
+    expect(testLogger.statusText, contains('No data was receieved'));
+  }));
+
+  test('ResidentRunner can write SkSL data to a unique file with engine version and target platform', () => testbed.run(() async {
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
+      return <String, Object>{
+        'A': 'B',
+      };
+    });
+    await residentRunner.writeSkSL();
+
+    expect(testLogger.statusText, contains('flutter_01.sksl'));
+    expect(globals.fs.file('flutter_01.sksl'), exists);
+    expect(json.decode(globals.fs.file('flutter_01.sksl').readAsStringSync()), <String, Object>{
+      'device': 'android-arm',
+      'version': '42.2', // From FakeFlutterVersion
+      'data': <String, Object>{'A': 'B'}
+    });
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
