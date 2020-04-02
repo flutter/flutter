@@ -124,6 +124,7 @@ class Home extends StatelessWidget {
             final AppLocalizations localizations = AppLocalizations.of(context);
             results.addAll(<String>[
               '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
               '${localizations.hello("World")}',
               '${localizations.greeting("Hello", "World")}',
               '${localizations.helloWorldOn(DateTime(1960))}',
@@ -154,7 +155,9 @@ class Home extends StatelessWidget {
             try {
               int n = 0;
               for (final String result in results) {
-                print('#l10n $n ($result)');
+                // Newline character replacement is necessary because
+                // the stream breaks up stdout by new lines.
+                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
                 n += 1;
               }
             }
@@ -186,6 +189,11 @@ void main() {
   "helloWorld": "Hello World",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
+  },
+
+  "helloNewlineWorld": "Hello \n World",
+  "@helloNewlineWorld": {
+    "description": "The JSON decoder should convert backslash-n to a newline character in the generated Dart string."
   },
 
   "hello": "Hello {world}",

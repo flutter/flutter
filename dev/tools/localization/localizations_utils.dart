@@ -373,36 +373,36 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
 /// foo 'bar' "baz" => '''foo 'bar' "baz"'''
-/// foo\bar => 'foo\\bar'
-/// foo\nbar => 'foo\\\\nbar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to true, the
-/// result avoids character escaping, with the
-/// exception of the dollar sign:
+/// This function is used by tools that take in a JSON-formatted file to
+/// generate Dart code. For this reason, characters with special meaning
+/// in JSON files. For example, the backspace character (\b) have to be
+/// properly escaped by this function so that the generated Dart code
+/// correctly represents this character:
+/// ```
+/// foo\bar => 'foo\\bar'
+/// foo\nbar => 'foo\\nbar'
+/// foo\\nbar => 'foo\\\\nbar'
+/// foo\\bar => 'foo\\\\bar'
+/// foo\ bar => 'foo\\ bar'
+/// ```
 ///
+/// When [shouldEscapeDollar] is set to true, the '$' characters in the
+/// input will be replaced by '$' in the returned string:
 /// ```
 /// foo$bar = 'foo\$bar'
 /// ```
 ///
-/// When [shouldEscapeDollar] is set to false, the
-/// result tries to avoid character escaping:
-///
+/// When [shouldEscapeDollar] is set to false, '$' will be replaced
+/// by '\$' in the returned string:
 /// ```
 /// foo$bar => 'foo\\\$bar'
 /// ```
 ///
 /// [shouldEscapeDollar] is true by default.
-///
-/// Strings with newlines are not supported.
 String generateString(String value, { bool escapeDollar = true }) {
   assert(escapeDollar != null);
-  assert(
-    !value.contains('\n'),
-    'Since it is assumed that the input string comes '
-    'from a json/arb file source, messages cannot '
-    'contain newlines.'
-  );
 
   const String backslash = '__BACKSLASH__';
   assert(
@@ -419,6 +419,11 @@ String generateString(String value, { bool escapeDollar = true }) {
   value = value
     .replaceAll("'", "\\'")
     .replaceAll('"', '\\"')
+    .replaceAll('\n', '\\n')
+    .replaceAll('\f', '\\f')
+    .replaceAll('\t', '\\t')
+    .replaceAll('\r', '\\r')
+    .replaceAll('\b', '\\b')
     .replaceAll(backslash, '\\\\');
 
   return "'$value'";

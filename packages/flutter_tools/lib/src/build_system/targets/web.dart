@@ -354,6 +354,10 @@ class WebServiceWorker extends Target {
         ).toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
+      // Add an additional entry for the base URL.
+      if (globals.fs.path.basename(url) == 'index.html') {
+        urlToHash['/'] = hash;
+      }
     }
 
     final File serviceWorkerFile = environment.outputDir
