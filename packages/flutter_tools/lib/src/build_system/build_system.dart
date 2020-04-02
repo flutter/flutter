@@ -523,7 +523,8 @@ class BuildSystem {
       });
     }
     trackSharedBuildDirectory(
-      environment, _fileSystem, buildInstance.outputFiles);
+      environment, _fileSystem, buildInstance.outputFiles,
+    );
     environment.buildDir.childFile('outputs.json')
       .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
 
