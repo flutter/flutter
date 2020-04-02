@@ -4,6 +4,7 @@
 
 package io.flutter;
 
+import io.flutter.embedding.android.FlutterActivityAndFragmentDelegateTest;
 import io.flutter.embedding.android.FlutterActivityTest;
 import io.flutter.embedding.android.FlutterAndroidComponentTest;
 import io.flutter.embedding.android.FlutterFragmentTest;
@@ -32,8 +33,8 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-  // FlutterActivityAndFragmentDelegateTest.class, //TODO(mklim): Fix and re-enable this
   DartExecutorTest.class,
+  FlutterActivityAndFragmentDelegateTest.class,
   FlutterActivityTest.class,
   FlutterAndroidComponentTest.class,
   FlutterEngineCacheTest.class,
