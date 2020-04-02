@@ -917,8 +917,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
-/// Filters out plugins without a 'pluginClass' definition. These are Dart-only plugins, who shouldn't
-/// be added to the native generated registrants.
+/// Filters out Dart-only plugins, which shouldn't be added to the native generated registrants.
 List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
   return plugins.where((Plugin element) {
     final PluginPlatform plugin = element.platforms[platformKey];

@@ -948,7 +948,7 @@ flutter:
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
         expect(registrantImpl, exists);
-        expect(registrantImpl,  isNot(contains('SomePlugin')));
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1025,7 +1025,7 @@ flutter:
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
         expect(registrantImpl, exists);
-        expect(registrantImpl,  isNot(contains('SomePlugin')));
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
