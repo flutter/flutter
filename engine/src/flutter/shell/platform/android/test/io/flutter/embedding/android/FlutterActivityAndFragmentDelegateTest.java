@@ -220,7 +220,18 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itGivesHostAnOpportunityToConfigureFlutterTextureView() {
     // ---- Test setup ----
     Host customMockHost = mock(Host.class);
+    when(customMockHost.getContext()).thenReturn(RuntimeEnvironment.application);
+    when(customMockHost.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
+    when(customMockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
+    when(customMockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[] {}));
+    when(customMockHost.getDartEntrypointFunctionName()).thenReturn("main");
+    when(customMockHost.getAppBundlePath()).thenReturn("/fake/path");
+    when(customMockHost.getInitialRoute()).thenReturn("/");
     when(customMockHost.getRenderMode()).thenReturn(RenderMode.texture);
+    when(customMockHost.getTransparencyMode()).thenReturn(TransparencyMode.transparent);
+    when(customMockHost.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
+    when(customMockHost.shouldAttachEngineToActivity()).thenReturn(true);
+    when(customMockHost.shouldDestroyEngineWithHost()).thenReturn(true);
 
     // Create the real object that we're testing.
     FlutterActivityAndFragmentDelegate delegate =
