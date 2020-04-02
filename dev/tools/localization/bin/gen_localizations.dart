@@ -213,6 +213,19 @@ String generateArbBasedLocalizationSubclasses({
       }
     }
 
+    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
+    if (countryCodeCount == 0) {
+      if (scriptCodeCount == 0)
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
+      else
+        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's') + ')');
+
+    } else if (countryCodeCount == 1) {
+      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
+    } else {
+      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations$scriptCodeMessage)');
+    }
+
     // See https://github.com/flutter/flutter/issues/53036 for context on why
     // 'no' is being used as a synonym for 'nb'. It only uses this synonym
     // if 'nb' is not detected as a valid arb file.
@@ -227,20 +240,7 @@ String generateArbBasedLocalizationSubclasses({
       );
       output.writeln('}');
 
-        supportedLocales.writeln('///  * `nb` - ${describeLocale('nb')}, which is synonymous with `no` in this library');
-    }
-
-    final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
-    if (countryCodeCount == 0) {
-      if (scriptCodeCount == 0)
-        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)}');
-      else
-        supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's') + ')');
-
-    } else if (countryCodeCount == 1) {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus one country variation$scriptCodeMessage)');
-    } else {
-      supportedLocales.writeln('///  * `$languageName` - ${describeLocale(languageName)} (plus $countryCodeCount country variations$scriptCodeMessage)');
+      supportedLocales.writeln('///  * `nb` - ${describeLocale('nb')}, which is synonymous with `no` in this library');
     }
   }
 
