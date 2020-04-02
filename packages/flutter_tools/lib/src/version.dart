@@ -761,7 +761,7 @@ class GitTagVersion {
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
     return GitTagVersion(
       x: parsedParts[0],
       y: parsedParts[1],
