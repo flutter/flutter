@@ -899,6 +899,36 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantHeader = linuxProject.managedDirectory.childFile('generated_plugin_registrant.h');
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantHeader, exists);
+        expect(registrantImpl, exists);
+        expect(registrantHeader, isNot(contains('SomePlugin')));
+        expect(registrantImpl,  isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Injecting creates generated Linux plugin makefile', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
@@ -946,7 +976,7 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Injecting does not create a generated Windows registrant if no pluginClass is defined', () async {
+      testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
         when(windowsProject.existsSync()).thenReturn(true);
         when(featureFlags.isWindowsEnabled).thenReturn(true);
         when(flutterProject.isModule).thenReturn(false);

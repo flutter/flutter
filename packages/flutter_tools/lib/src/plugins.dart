@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
@@ -917,11 +918,11 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
 
 List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
   return plugins.where((Plugin element) {
-    final WindowsPlugin windowsPlugin = element.platforms[platformKey] as WindowsPlugin;
-    if (windowsPlugin == null) {
+    final PluginPlatform nativePlugin = element.platforms[platformKey];
+    if (nativePlugin == null) {
       return false;
     }
-    return windowsPlugin.pluginClass != null;
+    return nativePlugin.toMap()['class'] != null;
   }).toList();
 }
 
@@ -1095,13 +1096,13 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
   if (featureFlags.isLinuxEnabled && project.linux.existsSync()) {
-    await _writeLinuxPluginFiles(project, plugins);
+    final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
+    await _writeLinuxPluginFiles(project, nativePlugins);
   }
   if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
-    // Filter out plugins without a 'pluginClass' definition since they might be Dart-only plugins.
     final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
     await _writeWindowsPluginFiles(project, nativePlugins);
     await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(nativePlugins);

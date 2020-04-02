@@ -9,6 +9,9 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'globals.dart' as globals;
 
+  const String kPluginClass = 'pluginClass';
+  const String kDartPluginClass = 'dartPluginClass';
+
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
@@ -243,8 +246,8 @@ class WindowsPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml[_kPluginClass] as String,
-      dartPluginClass: yaml[_kDartPluginClass] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -252,12 +255,12 @@ class WindowsPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml[_kDartPluginClass] is String || yaml[_kPluginClass] is String;
+    return yaml[kDartPluginClass] is String || yaml[kPluginClass] is String;
   }
 
   static const String kConfigKey = 'windows';
-  static const String _kPluginClass = 'pluginClass';
-  static const String _kDartPluginClass = 'dartPluginClass';
+  static const String kPluginClass = 'pluginClass';
+  static const String kDartPluginClass = 'dartPluginClass';
 
   final String name;
   final String pluginClass;
@@ -281,14 +284,16 @@ class WindowsPlugin extends PluginPlatform {
 class LinuxPlugin extends PluginPlatform {
   const LinuxPlugin({
     @required this.name,
-    @required this.pluginClass,
-  });
+    this.pluginClass,
+    this.dartPluginClass,
+  }) : assert(pluginClass != null || dartPluginClass != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -296,13 +301,14 @@ class LinuxPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
   }
 
   static const String kConfigKey = 'linux';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
 
   @override
   Map<String, dynamic> toMap() {
@@ -310,6 +316,7 @@ class LinuxPlugin extends PluginPlatform {
       'name': name,
       'class': pluginClass,
       'filename': _filenameForCppClass(pluginClass),
+      'dartPluginClass': dartPluginClass,
     };
   }
 }
