@@ -1225,14 +1225,7 @@ void main() {
       ifNull: 'disabled',
     );
 
-    expect(
-      present.toString(),
-      equals(
-        'onClick:\n'
-        '  Closure: () => void from: function onClick() {\n'
-        '        }',
-      ),
-    );
+    expect(present.toString(), equals('onClick: Closure: () => void'));
     expect(present.isFiltered(DiagnosticLevel.fine), isTrue);
     expect(present.value, equals(onClick));
     expect(missing.toString(), equals('disabled'));
