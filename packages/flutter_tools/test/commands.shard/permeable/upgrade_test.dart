@@ -344,9 +344,6 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<bool> hasUncomittedChanges() async => willHaveUncomittedChanges;
 
   @override
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {}
-
-  @override
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
