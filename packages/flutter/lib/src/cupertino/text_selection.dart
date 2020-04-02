@@ -1158,20 +1158,28 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     super.visitChildren(visitor);
   }
 
-  // TODO(justinmc): Adapt and uncomment.
-  /*
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    void add(RenderBox child, String name) {
-      if (child != null)
-        value.add(child.toDiagnosticsNode(name: name));
-    }
-    add(icon, 'icon');
-    add(label, 'label');
+    visitChildren((RenderObject renderObjectChild) {
+      if (renderObjectChild == null) {
+        return;
+      }
+      final RenderBox child = renderObjectChild as RenderBox;
+      if (child == backButton) {
+        value.add(child.toDiagnosticsNode(name: 'back button'));
+      } else if (child == nextButton) {
+        value.add(child.toDiagnosticsNode(name: 'next button'));
+      } else if (child == nextButtonDisabled) {
+        value.add(child.toDiagnosticsNode(name: 'next button disabled'));
+
+      // List children.
+      } else {
+        value.add(child.toDiagnosticsNode(name: 'menu item'));
+      }
+    });
     return value;
   }
-  */
 }
 
 // TODO(justinmc): Rename.
