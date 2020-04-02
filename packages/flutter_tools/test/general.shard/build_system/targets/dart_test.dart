@@ -77,7 +77,7 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
     expect(
       const KernelSnapshot().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('KernelSnapshot handles null result from kernel compilation', () => testbed.run(() async {
@@ -328,33 +328,33 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(const AotElfProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotElfProfile throws error if missing target platform', () => testbed.run(() async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotElfProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing build mode', () => testbed.run(() async {
     iosEnvironment.defines.remove(kBuildMode);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing target platform', () => testbed.run(() async {
     iosEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if built for non-iOS platform', () => testbed.run(() async {
     expect(const AotAssemblyProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<Exception>()));
+      throwsA(isA<Exception>()));
   }));
 
   test('AotAssemblyProfile generates multiple arches and lipos together', () => testbed.run(() async {

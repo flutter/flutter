@@ -242,7 +242,7 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult);
+        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger);
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -338,6 +338,7 @@ class IOSDevice extends Device {
         mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
+        flutterUsage: globals.flutterUsage,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,

@@ -132,7 +132,7 @@ void main() {
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       verify(mockUsage.sendEvent('build',
         any,
         label: 'xcode-bitcode-failure',
@@ -140,8 +140,6 @@ void main() {
           cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
           cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
       })).called(1);
-    }, overrides: <Type, Generator>{
-      Usage: () => mockUsage,
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -210,9 +208,9 @@ Error launching application on iPhone.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains("No Provisioning Profile was found for your project's Bundle Identifier or your \ndevice."),
       );
     }, overrides: noColorTerminalOverride);
@@ -291,9 +289,9 @@ Could not build the precompiled application for the device.''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a \nProvisioning Profile.'),
       );
     }, overrides: noColorTerminalOverride);
@@ -328,9 +326,9 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);
@@ -365,9 +363,9 @@ Exited (sigterm)''',
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult);
+      await diagnoseXcodeBuildFailure(buildResult, mockUsage, logger);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Your Xcode project requires migration.'),
       );
     }, overrides: noColorTerminalOverride);

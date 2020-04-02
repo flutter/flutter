@@ -301,7 +301,7 @@ void writeLocalProperties(File properties) {
 }
 
 void exitWithNoSdkMessage() {
-  BuildEvent('unsupported-project', eventError: 'android-sdk-not-found').send();
+  BuildEvent('unsupported-project', eventError: 'android-sdk-not-found', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.'
