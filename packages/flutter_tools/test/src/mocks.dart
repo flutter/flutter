@@ -482,7 +482,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     throw const io.StdoutException('unspecified mock value');
   }
   set terminalColumns(int value) => _terminalColumns = value;
-  int _terminalColumns;
+  int _terminalColumns = 80;
 
   @override
   int get terminalLines {

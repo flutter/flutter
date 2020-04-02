@@ -204,7 +204,7 @@ class PackageUriMapper {
     String fileSystemScheme,
     List<String> fileSystemRoots,
   ) async {
-    final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(packagesPath));
+    final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(packagesPath).absolute);
     final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
     final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
     for (final Package package in packageConfig.packages) {

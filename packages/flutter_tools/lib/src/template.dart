@@ -249,7 +249,7 @@ Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) as
     await _ensurePackageDependencies(toolPackagePath);
   }
 
-  final PackageConfig packageConfig = await loadPackageConfig(fileSystem.file(kPackagesFileName));
+  final PackageConfig packageConfig = await loadPackageConfig(fileSystem.file(kPackagesFileName).absolute);
   final Uri imagePackageLibDir = packageConfig['flutter_template_images'].packageUriRoot;
   // Ensure that the template image package is present.
   if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {

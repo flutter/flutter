@@ -285,7 +285,7 @@ void main() {
           ],
         }
       ));
-    final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile);
+    final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
 
     final LicenseResult result = licenseCollector.obtainLicenses(packageConfig);
 

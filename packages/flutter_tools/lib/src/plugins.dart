@@ -305,13 +305,17 @@ Future<List<Plugin>> findPlugins(FlutterProject project) async {
     project.directory.path,
     PackageMap.globalPackagesPath,
   );
-  final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(packagesFile));
-  for (final Package package in packageConfig.packages) {
-    final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
-    if (plugin != null) {
-      plugins.add(plugin);
+  try {
+    final PackageConfig packageConfig = await loadPackageConfig(globals.fs.file(packagesFile).absolute);
+    for (final Package package in packageConfig.packages) {
+      final Uri packageRoot = package.packageUriRoot.resolve('..');
+      final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
+      if (plugin != null) {
+        plugins.add(plugin);
+      }
     }
+  } on FormatException {
+    // Do nothing.
   }
   return plugins;
 }
