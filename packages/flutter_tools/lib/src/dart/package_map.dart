@@ -4,7 +4,8 @@
 
 import '../globals.dart' as globals;
 
-final String kPackagesFileName = globals.fs.path.join('.dart_tool', 'package_config.json');
+// TODO(jonahwilliams): update to .dart_tool/package_config.json.
+final String kPackagesFileName = globals.fs.path.join('.packages');
 
 class PackageMap {
   PackageMap();
