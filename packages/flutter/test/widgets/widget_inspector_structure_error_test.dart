@@ -13,7 +13,7 @@ void main() {
 class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorService {
 
   static void runTests() {
-    final TestWidgetInspectorService service = TestWidgetInspectorService();
+    final StructureErrorTestWidgetInspectorService service = StructureErrorTestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
     test('ext.flutter.inspector.structuredErrors still report error to original on error', () async {
