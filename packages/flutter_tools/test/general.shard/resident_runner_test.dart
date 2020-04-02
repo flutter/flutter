@@ -387,6 +387,8 @@ void main() {
     expect(residentRunner.isRunningDebug, true);
     // does not support CanvasKit
     expect(residentRunner.supportsCanvasKit, false);
+    // does not support SkSL
+    expect(residentRunner.supportsWriteSkSL, false);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -416,6 +418,11 @@ void main() {
 
   test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
     expect(() => residentRunner.toggleCanvaskit(),
+      throwsA(isA<Exception>()));
+  }));
+
+  test('ResidentRunner does not support writeSkSL', () => testbed.run(() async {
+    expect(() => residentRunner.writeSkSL(),
       throwsA(isA<Exception>()));
   }));
 
