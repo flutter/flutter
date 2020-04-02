@@ -18,5 +18,6 @@
   "cutButtonLabel": "Ebaki",
   "copyButtonLabel": "Kopiatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu guztiak"
+  "selectAllButtonLabel": "Hautatu guztiak",
+  "modalBarrierDismissLabel": "Baztertu"
 }

@@ -18,5 +18,6 @@
   "cutButtonLabel": "កាត់",
   "copyButtonLabel": "ចម្លង",
   "pasteButtonLabel": "ដាក់​ចូល",
-  "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់"
+  "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
+  "modalBarrierDismissLabel": "ច្រាន​ចោល"
 }

@@ -18,5 +18,6 @@
   "cutButtonLabel": "Sika",
   "copyButtonLabel": "Kopisha",
   "pasteButtonLabel": "Namathisela",
-  "selectAllButtonLabel": "Khetha konke"
+  "selectAllButtonLabel": "Khetha konke",
+  "modalBarrierDismissLabel": "Cashisa"
 }

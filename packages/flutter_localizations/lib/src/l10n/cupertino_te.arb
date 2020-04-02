@@ -18,5 +18,6 @@
   "cutButtonLabel": "కత్తిరించు",
   "copyButtonLabel": "కాపీ చేయి",
   "pasteButtonLabel": "అతికించు",
-  "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి"
+  "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
+  "modalBarrierDismissLabel": "విస్మరించు"
 }

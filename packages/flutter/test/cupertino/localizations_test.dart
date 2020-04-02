@@ -29,5 +29,7 @@ void main() {
     expect(localizations.timerPickerHourLabel(0), isNotNull);
     expect(localizations.timerPickerMinuteLabel(0), isNotNull);
     expect(localizations.timerPickerSecondLabel(0), isNotNull);
+
+    expect(localizations.modalBarrierDismissLabel, isNotNull);
   });
 }

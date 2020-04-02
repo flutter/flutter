@@ -18,5 +18,6 @@
   "cutButtonLabel": "Cắt",
   "copyButtonLabel": "Sao chép",
   "pasteButtonLabel": "Dán",
-  "selectAllButtonLabel": "Chọn tất cả"
+  "selectAllButtonLabel": "Chọn tất cả",
+  "modalBarrierDismissLabel": "Bỏ qua"
 }

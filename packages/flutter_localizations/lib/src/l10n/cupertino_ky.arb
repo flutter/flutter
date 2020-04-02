@@ -18,5 +18,6 @@
   "cutButtonLabel": "Кесүү",
   "copyButtonLabel": "Көчүрүү",
   "pasteButtonLabel": "Чаптоо",
-  "selectAllButtonLabel": "Баарын тандоо"
+  "selectAllButtonLabel": "Баарын тандоо",
+  "modalBarrierDismissLabel": "Жабуу"
 }

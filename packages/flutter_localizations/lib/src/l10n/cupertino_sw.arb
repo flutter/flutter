@@ -18,5 +18,6 @@
   "cutButtonLabel": "Kata",
   "copyButtonLabel": "Nakili",
   "pasteButtonLabel": "Bandika",
-  "selectAllButtonLabel": "Teua Zote"
+  "selectAllButtonLabel": "Teua Zote",
+  "modalBarrierDismissLabel": "Ondoa"
 }

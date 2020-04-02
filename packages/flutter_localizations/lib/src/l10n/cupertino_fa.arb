@@ -18,5 +18,6 @@
   "cutButtonLabel": "برش",
   "copyButtonLabel": "کپی",
   "pasteButtonLabel": "جای‌گذاری",
-  "selectAllButtonLabel": "انتخاب همه"
+  "selectAllButtonLabel": "انتخاب همه",
+  "modalBarrierDismissLabel": "نپذیرفتن"
 }

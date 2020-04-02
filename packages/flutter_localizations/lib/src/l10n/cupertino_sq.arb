@@ -18,5 +18,6 @@
   "cutButtonLabel": "Prit",
   "copyButtonLabel": "Kopjo",
   "pasteButtonLabel": "Ngjit",
-  "selectAllButtonLabel": "Zgjidhi të gjitha"
+  "selectAllButtonLabel": "Zgjidhi të gjitha",
+  "modalBarrierDismissLabel": "Hiq"
 }

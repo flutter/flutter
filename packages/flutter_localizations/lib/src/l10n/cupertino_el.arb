@@ -18,5 +18,6 @@
   "cutButtonLabel": "Αποκοπή",
   "copyButtonLabel": "Αντιγραφή",
   "pasteButtonLabel": "Επικόλληση",
-  "selectAllButtonLabel": "Επιλογή όλων"
+  "selectAllButtonLabel": "Επιλογή όλων",
+  "modalBarrierDismissLabel": "Παράβλεψη"
 }

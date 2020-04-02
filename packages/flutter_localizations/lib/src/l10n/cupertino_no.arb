@@ -18,5 +18,6 @@
   "cutButtonLabel": "Klipp ut",
   "copyButtonLabel": "Kopiér",
   "pasteButtonLabel": "Lim inn",
-  "selectAllButtonLabel": "Velg alle"
+  "selectAllButtonLabel": "Velg alle",
+  "modalBarrierDismissLabel": "Avvis"
 }

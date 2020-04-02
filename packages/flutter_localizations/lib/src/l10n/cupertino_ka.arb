@@ -18,5 +18,6 @@
   "cutButtonLabel": "ამოჭრა",
   "copyButtonLabel": "კოპირება",
   "pasteButtonLabel": "ჩასმა",
-  "selectAllButtonLabel": "ყველას არჩევა"
+  "selectAllButtonLabel": "ყველას არჩევა",
+  "modalBarrierDismissLabel": "დახურვა"
 }

@@ -18,5 +18,6 @@
   "cutButtonLabel": "Կտրել",
   "copyButtonLabel": "Պատճենել",
   "pasteButtonLabel": "Տեղադրել",
-  "selectAllButtonLabel": "Նշել բոլորը"
+  "selectAllButtonLabel": "Նշել բոլորը",
+  "modalBarrierDismissLabel": "Փակել"
 }

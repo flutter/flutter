@@ -18,5 +18,6 @@
   "cutButtonLabel": "କଟ୍ କରନ୍ତୁ",
   "copyButtonLabel": "କପି କରନ୍ତୁ",
   "pasteButtonLabel": "ପେଷ୍ଟ କରନ୍ତୁ",
-  "selectAllButtonLabel": "ସମସ୍ତ ଚୟନ କରନ୍ତୁ"
+  "selectAllButtonLabel": "ସମସ୍ତ ଚୟନ କରନ୍ତୁ",
+  "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ"
 }

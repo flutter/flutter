@@ -18,5 +18,6 @@
   "cutButtonLabel": "Kivágás",
   "copyButtonLabel": "Másolás",
   "pasteButtonLabel": "Beillesztés",
-  "selectAllButtonLabel": "Összes kijelölése"
+  "selectAllButtonLabel": "Összes kijelölése",
+  "modalBarrierDismissLabel": "Elvetés"
 }

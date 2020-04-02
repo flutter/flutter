@@ -23,5 +23,6 @@
   "cutButtonLabel": "Izreži",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Zalijepi",
-  "selectAllButtonLabel": "Odaberi sve"
+  "selectAllButtonLabel": "Odaberi sve",
+  "modalBarrierDismissLabel": "Odbaci"
 }

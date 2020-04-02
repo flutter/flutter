@@ -82,5 +82,10 @@
   "selectAllButtonLabel": "Select All",
   "@selectAllButtonLabel": {
     "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "modalBarrierDismissLabel": "Dismiss",
+  "@modalBarrierDismissLabel": {
+    "description": "Label read out by accessibility tools (VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can, for example, be found behind an alert or popup to block user interaction with elements behind it."
   }
 }
