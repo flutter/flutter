@@ -525,7 +525,7 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection direction) {
-    assert(direction != null);
+    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction) {
       case TextDirection.rtl:
         return Alignment(-start, y);
@@ -621,7 +621,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   Alignment resolve(TextDirection direction) {
-    assert(direction != null);
+    assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction) {
       case TextDirection.rtl:
         return Alignment(_x - _start, _y);
