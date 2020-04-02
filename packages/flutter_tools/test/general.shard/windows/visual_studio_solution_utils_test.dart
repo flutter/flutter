@@ -222,12 +222,9 @@ EndGlobal''');
 
     // Configures and returns a mock plugin with the given name and GUID in the
     // project's plugin symlink directory.
-    Plugin getMockPlugin(String name, String guid, {bool createProject = true, bool isNative = true}) {
+    Plugin getMockPlugin(String name, String guid, {bool createProject = true}) {
       final MockPlugin plugin = MockPlugin();
-      final WindowsPlugin windowsPlugin = isNative
-          ? const WindowsPlugin(name: 'Plugin', pluginClass: 'PluginClass')
-          : const WindowsPlugin(name: 'Plugin', dartPluginClass: 'DartPluginClass');
-      when(plugin.platforms).thenReturn(<String, PluginPlatform>{project.pluginConfigKey: windowsPlugin});
+      when(plugin.platforms).thenReturn(<String, PluginPlatform>{project.pluginConfigKey: null});
       when(plugin.name).thenReturn(name);
       when(plugin.path).thenReturn(project.pluginSymlinkDirectory.childDirectory(name).path);
       if (createProject) {
@@ -235,18 +232,6 @@ EndGlobal''');
       }
       return plugin;
     }
-
-    test('Dart-only plugin GUIDs should not be included in the solution' , () async {
-      writeSolutionWithoutPlugins();
-
-      final List<Plugin> plugins = <Plugin>[
-        getMockPlugin('plugin_a', pluginAGuid, isNative: false),
-      ];
-      await VisualStudioSolutionUtils(project: project, fileSystem: fs).updatePlugins(plugins);
-
-      final String newSolutionContents = project.solutionFile.readAsStringSync();
-      expect(newSolutionContents, isNot(contains(pluginAGuid)));
-    });
 
     test('Adding the first plugin to a solution adds the expected references', () async {
       writeSolutionWithoutPlugins();
