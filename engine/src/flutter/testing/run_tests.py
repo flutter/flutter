@@ -110,6 +110,8 @@ def RunCCTests(build_dir, filter):
 
   RunEngineExecutable(build_dir, 'common_cpp_core_unittests', filter, shuffle_flags)
 
+  RunEngineExecutable(build_dir, 'common_cpp_unittests', filter, shuffle_flags)
+
   RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter, shuffle_flags)
 
   # https://github.com/flutter/flutter/issues/36294

@@ -12,10 +12,7 @@ source_set("client_wrapper") {
 
   deps = [
     "//flutter/shell/platform/common/cpp:common_cpp_library_headers",
-    "//third_party/rapidjson",
   ]
-
-  defines = [ "USE_RAPID_JSON" ]
 
   configs +=
       [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]

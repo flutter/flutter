@@ -33,6 +33,8 @@ source_set("common_cpp_library_headers") {
 source_set("common_cpp") {
   public = [
     "incoming_message_dispatcher.h",
+    "json_message_codec.h",
+    "json_method_codec.h",
     "text_input_model.h",
   ]
 
@@ -40,6 +42,8 @@ source_set("common_cpp") {
   # to the _public_headers above into this target.
   sources = [
     "incoming_message_dispatcher.cc",
+    "json_message_codec.cc",
+    "json_method_codec.cc",
     "text_input_model.cc",
   ]
 
@@ -53,16 +57,12 @@ source_set("common_cpp") {
 
   public_deps = [
     ":common_cpp_core",
+    "//third_party/rapidjson",
   ]
-
-  # TODO: Remove once text input model refactor lands, at which point this code
-  # won't have a JSON dependency.
-  defines = [ "USE_RAPID_JSON" ]
-  deps += [ "//third_party/rapidjson" ]
 
   if (is_win) {
     # For wstring_conversion. See issue #50053.
-    defines += [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
+    defines = [ "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" ]
   }
 }
 
@@ -96,6 +96,28 @@ executable("common_cpp_core_unittests") {
     ":common_cpp_core_fixtures",
     "//flutter/testing",
     "//third_party/dart/runtime:libdart_jit",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+}
+
+test_fixtures("common_cpp_fixtures") {
+  fixtures = []
+}
+
+executable("common_cpp_unittests") {
+  testonly = true
+
+  sources = [
+    "json_message_codec_unittests.cc",
+    "json_method_codec_unittests.cc",
+  ]
+
+  deps = [
+    ":common_cpp",
+    ":common_cpp_fixtures",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
+    "//flutter/testing",
   ]
 
   public_configs = [ "//flutter:config" ]

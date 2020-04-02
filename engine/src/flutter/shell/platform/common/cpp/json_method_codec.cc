@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "include/flutter/json_method_codec.h"
+#include "flutter/shell/platform/common/cpp/json_method_codec.h"
 
-#include "include/flutter/json_message_codec.h"
+#include "flutter/shell/platform/common/cpp/json_message_codec.h"
 
 namespace flutter {
 
@@ -20,16 +20,15 @@ const JsonMethodCodec& JsonMethodCodec::GetInstance() {
   return sInstance;
 }
 
-std::unique_ptr<MethodCall<JsonValueType>>
+std::unique_ptr<MethodCall<rapidjson::Document>>
 JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
                                           const size_t message_size) const {
-  std::unique_ptr<JsonValueType> json_message =
+  std::unique_ptr<rapidjson::Document> json_message =
       JsonMessageCodec::GetInstance().DecodeMessage(message, message_size);
   if (!json_message) {
     return nullptr;
   }
 
-#if USE_RAPID_JSON
   auto method_name_iter = json_message->FindMember(kMessageMethodKey);
   if (method_name_iter == json_message->MemberEnd()) {
     return nullptr;
@@ -57,20 +56,10 @@ JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
   }
   return std::make_unique<MethodCall<rapidjson::Document>>(
       method_name, std::move(arguments));
-#else
-  Json::Value method = (*json_message)[kMessageMethodKey];
-  if (method.isNull()) {
-    return nullptr;
-  }
-  return std::make_unique<MethodCall<Json::Value>>(
-      method.asString(),
-      std::make_unique<Json::Value>((*json_message)[kMessageArgumentsKey]));
-#endif
 }
 
 std::unique_ptr<std::vector<uint8_t>> JsonMethodCodec::EncodeMethodCallInternal(
-    const MethodCall<JsonValueType>& method_call) const {
-#if USE_RAPID_JSON
+    const MethodCall<rapidjson::Document>& method_call) const {
   // TODO: Consider revisiting the codec APIs to avoid the need to copy
   // everything when doing encoding (e.g., by having a version that takes
   // owership of the object to encode, so that it can be moved instead).
@@ -83,20 +72,13 @@ std::unique_ptr<std::vector<uint8_t>> JsonMethodCodec::EncodeMethodCallInternal(
   }
   message.AddMember(kMessageMethodKey, name, allocator);
   message.AddMember(kMessageArgumentsKey, arguments, allocator);
-#else
-  Json::Value message(Json::objectValue);
-  message[kMessageMethodKey] = method_call.method_name();
-  const Json::Value* arguments = method_call.arguments();
-  message[kMessageArgumentsKey] = arguments ? *arguments : Json::Value();
-#endif
 
   return JsonMessageCodec::GetInstance().EncodeMessage(message);
 }
 
 std::unique_ptr<std::vector<uint8_t>>
 JsonMethodCodec::EncodeSuccessEnvelopeInternal(
-    const JsonValueType* result) const {
-#if USE_RAPID_JSON
+    const rapidjson::Document* result) const {
   rapidjson::Document envelope;
   envelope.SetArray();
   rapidjson::Value result_value;
@@ -104,10 +86,6 @@ JsonMethodCodec::EncodeSuccessEnvelopeInternal(
     result_value.CopyFrom(*result, envelope.GetAllocator());
   }
   envelope.PushBack(result_value, envelope.GetAllocator());
-#else
-  Json::Value envelope(Json::arrayValue);
-  envelope.append(result == nullptr ? Json::Value() : *result);
-#endif
 
   return JsonMessageCodec::GetInstance().EncodeMessage(envelope);
 }
@@ -116,8 +94,7 @@ std::unique_ptr<std::vector<uint8_t>>
 JsonMethodCodec::EncodeErrorEnvelopeInternal(
     const std::string& error_code,
     const std::string& error_message,
-    const JsonValueType* error_details) const {
-#if USE_RAPID_JSON
+    const rapidjson::Document* error_details) const {
   rapidjson::Document envelope(rapidjson::kArrayType);
   auto& allocator = envelope.GetAllocator();
   envelope.PushBack(rapidjson::Value(error_code, allocator), allocator);
@@ -127,12 +104,6 @@ JsonMethodCodec::EncodeErrorEnvelopeInternal(
     details_value.CopyFrom(*error_details, allocator);
   }
   envelope.PushBack(details_value, allocator);
-#else
-  Json::Value envelope(Json::arrayValue);
-  envelope.append(error_code);
-  envelope.append(error_message.empty() ? Json::Value() : error_message);
-  envelope.append(error_details == nullptr ? Json::Value() : *error_details);
-#endif
 
   return JsonMessageCodec::GetInstance().EncodeMessage(envelope);
 }
