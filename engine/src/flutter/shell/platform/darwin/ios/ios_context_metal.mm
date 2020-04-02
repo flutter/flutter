@@ -5,9 +5,21 @@
 #include "flutter/shell/platform/darwin/ios/ios_context_metal.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_metal.h"
+#include "third_party/skia/include/gpu/GrContextOptions.h"
 
 namespace flutter {
+
+static GrContextOptions CreateMetalGrContextOptions() {
+  GrContextOptions options = {};
+  if (PersistentCache::cache_sksl()) {
+    options.fShaderCacheStrategy = GrContextOptions::ShaderCacheStrategy::kSkSL;
+  }
+  PersistentCache::MarkStrategySet();
+  options.fPersistentCache = PersistentCache::GetCacheForProcess();
+  return options;
+}
 
 IOSContextMetal::IOSContextMetal() {
   device_.reset([MTLCreateSystemDefaultDevice() retain]);
@@ -25,15 +37,19 @@ IOSContextMetal::IOSContextMetal() {
 
   [main_queue_ setLabel:@"Flutter Main Queue"];
 
+  const auto& context_options = CreateMetalGrContextOptions();
+
   // Skia expect arguments to `MakeMetal` transfer ownership of the reference in for release later
   // when the GrContext is collected.
-  main_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain]);
-  resource_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain]);
+  main_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
+  resource_context_ = GrContext::MakeMetal([device_ retain], [main_queue_ retain], context_options);
 
   if (!main_context_ || !resource_context_) {
     FML_DLOG(ERROR) << "Could not create Skia Metal contexts.";
     return;
   }
+
+  resource_context_->setResourceCacheLimits(0u, 0u);
 
   CVMetalTextureCacheRef texture_cache_raw = NULL;
   auto cv_return = CVMetalTextureCacheCreate(kCFAllocatorDefault,  // allocator
