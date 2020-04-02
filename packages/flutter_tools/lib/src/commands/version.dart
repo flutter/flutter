@@ -52,7 +52,7 @@ class VersionCommand extends FlutterCommand {
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to get the tags. '
-        'This might be due to git not being installed or an internal error'
+        'This is likely due to an internal git error.'
         '\nError: $error.'
       );
     }
