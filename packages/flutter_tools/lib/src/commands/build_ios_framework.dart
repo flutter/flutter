@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
-import '../aot.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -16,9 +15,13 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/ios.dart';
 import '../bundle.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
@@ -35,12 +38,12 @@ import 'build.dart';
 class BuildIOSFrameworkCommand extends BuildSubCommand {
   BuildIOSFrameworkCommand({
     FlutterVersion flutterVersion, // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
-    @required AotBuilder aotBuilder,
     @required BundleBuilder bundleBuilder,
+    @required BuildSystem buildSystem,
     Cache cache,
     Platform platform
   }) : _flutterVersion = flutterVersion,
-       _aotBuilder = aotBuilder,
+       _buildSystem = buildSystem,
        _bundleBuilder = bundleBuilder,
        _injectedCache = cache,
        _injectedPlatform = platform {
@@ -95,8 +98,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       );
   }
 
-  final AotBuilder _aotBuilder;
   final BundleBuilder _bundleBuilder;
+  final BuildSystem _buildSystem;
 
   Cache get _cache => _injectedCache ?? globals.cache;
   final Cache _injectedCache;
@@ -429,15 +432,11 @@ end
       timeout: timeoutConfiguration.slowOperation,
     );
     try {
-      await _aotBuilder.build(
-        platform: TargetPlatform.ios,
-        outputPath: destinationDirectory.path,
-        buildInfo: buildInfo,
-        // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
-        mainDartFile: globals.fs.path.absolute(targetFile),
-        quiet: true,
-        bitcode: true,
-        iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
+      await _buildAotFrameworkWithAssemble(
+        buildInfo,
+        destinationDirectory,
+        targetFile,
+        true,
       );
     } finally {
       status.stop();
@@ -753,6 +752,49 @@ end
     if (xcframeworkResult.exitCode != 0) {
       throwToolExit(
           'Unable to create XCFramework: ${xcframeworkResult.stderr}');
+    }
+  }
+
+  Future<void> _buildAotFrameworkWithAssemble(
+    BuildInfo buildInfo,
+    Directory outputDirectory,
+    String mainDartFile,
+    bool bitcode,
+  ) async {
+    final Target target = buildInfo.isRelease
+      ? const AotAssemblyRelease()
+      : const AotAssemblyProfile();
+    final Environment environment = Environment(
+      projectDir: globals.fs.currentDirectory,
+      outputDir: outputDirectory,
+      buildDir: FlutterProject.current().dartTool.childDirectory('flutter_build'),
+      cacheDir: null,
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      defines: <String, String>{
+        kTargetFile: mainDartFile,
+        kBuildMode: getNameForBuildMode(buildInfo.mode),
+        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        kDartDefines: jsonEncode(buildInfo.dartDefines),
+        kBitcodeFlag: bitcode.toString(),
+        if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
+          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
+        if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
+          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+        kIosArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64]
+          .map(getNameForDarwinArch).join(' '),
+      },
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+    );
+    final BuildResult result = await _buildSystem.build(target, environment);
+    if (!result.success) {
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError(measurement.exception.toString());
+      }
+      throwToolExit('The aot build failed.');
     }
   }
 }
