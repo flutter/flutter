@@ -753,7 +753,7 @@ class GitTagVersion {
 
   // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
   /// Check for the release tag format pre-v1.17.0
-  static GitTagVersion parseFirstVersion(String version) {
+  static GitTagVersion parseLegacyVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
 
@@ -773,7 +773,7 @@ class GitTagVersion {
   }
 
   /// Check for the release tag format from v1.17.0 on
-  static GitTagVersion parseSecondVersion(String version) {
+  static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
@@ -804,11 +804,11 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
-    gitTagVersion = parseFirstVersion(version);
+    gitTagVersion = parseLegacyVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }
-    gitTagVersion = parseSecondVersion(version);
+    gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }
