@@ -2937,7 +2937,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   }
 
   @override
-  String get emptyBodyDescription => kReleaseMode ? '' : builder.emptyBodyDescription;
+  String get emptyBodyDescription => (kReleaseMode || kProfileMode) ? '' : builder.emptyBodyDescription;
 
   @override
   List<DiagnosticsNode> getProperties() => (kReleaseMode || kProfileMode) ? const <DiagnosticsNode>[] : builder.properties;
