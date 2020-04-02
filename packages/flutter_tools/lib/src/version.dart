@@ -751,6 +751,7 @@ class GitTagVersion {
     return parse(_runGit('git describe --match *.*.* --first-parent --long --tags', processUtils, workingDirectory));
   }
 
+  // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
   /// Check for the release tag format pre-v1.17.0
   static GitTagVersion parseFirstVersion(String version) {
     final RegExp versionPattern = RegExp(
