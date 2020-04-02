@@ -6,12 +6,20 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const List<String> _defaultMaterials = <String>[
+const List<String> _defaultMaterialsA = <String>[
   'poker',
   'tortilla',
   'fish and',
   'micro',
   'wood',
+];
+
+const List<String> _defaultMaterialsB = <String>[
+  'apple',
+  'orange',
+  'tomato',
+  'grape',
+  'lettuce',
 ];
 
 const List<String> _defaultActions = <String>[
@@ -38,12 +46,20 @@ const Map<String, String> _results = <String, String>{
   'eat': 'eating',
 };
 
-const List<String> _defaultTools = <String>[
+const List<String> _defaultToolsA = <String>[
   'hammer',
   'chisel',
   'fryer',
   'fabricator',
   'customer',
+];
+
+const List<String> _defaultToolsB = <String>[
+  'keyboard',
+  'mouse',
+  'monitor',
+  'printer',
+  'cable',
 ];
 
 const Map<String, String> _avatars = <String, String>{
@@ -130,55 +146,50 @@ class _ChipDemoState extends State<ChipDemo> {
     _reset();
   }
 
-  final Set<String> _materials = <String>{};
+  final Set<String> _materialsA = <String>{};
+  final Set<String> _materialsB = <String>{};
   String _selectedMaterial = '';
   String _selectedAction = '';
-  final Set<String> _tools = <String>{};
+  final Set<String> _toolsA = <String>{};
+  final Set<String> _toolsB = <String>{};
   final Set<String> _selectedTools = <String>{};
   final Set<String> _actions = <String>{};
   bool _showShapeBorder = false;
 
   // Initialize members with the default data.
   void _reset() {
-    _materials.clear();
-    _materials.addAll(_defaultMaterials);
+    _materialsA.clear();
+    _materialsA.addAll(_defaultMaterialsA);
+    _materialsB.clear();
+    _materialsB.addAll(_defaultMaterialsB);
     _actions.clear();
     _actions.addAll(_defaultActions);
-    _tools.clear();
-    _tools.addAll(_defaultTools);
+    _toolsA.clear();
+    _toolsA.addAll(_defaultToolsA);
+    _toolsB.clear();
+    _toolsB.addAll(_defaultToolsB);
     _selectedMaterial = '';
     _selectedAction = '';
     _selectedTools.clear();
   }
 
   void _removeMaterial(String name) {
-    _materials.remove(name);
+    _materialsA.remove(name);
+    _materialsB.remove(name);
     if (_selectedMaterial == name) {
       _selectedMaterial = '';
     }
   }
 
   void _removeTool(String name) {
-    _tools.remove(name);
+    _toolsA.remove(name);
+    _toolsB.remove(name);
     _selectedTools.remove(name);
   }
 
   String _capitalize(String name) {
     assert(name != null && name.isNotEmpty);
     return name.substring(0, 1).toUpperCase() + name.substring(1);
-  }
-
-  // This converts a String to a unique color, based on the hash value of the
-  // String object.  It takes the bottom 16 bits of the hash, and uses that to
-  // pick a hue for an HSV color, and then creates the color (with a preset
-  // saturation and value).  This means that any unique strings will also have
-  // unique colors, but they'll all be readable, since they have the same
-  // saturation and value.
-  Color _nameToColor(String name) {
-    assert(name.length > 1);
-    final int hash = name.hashCode & 0xffff;
-    final double hue = (360.0 * hash / (1 << 15)) % 360.0;
-    return HSVColor.fromAHSV(1.0, hue, 0.4, 0.90).toColor();
   }
 
   AssetImage _nameToAvatar(String name) {
@@ -198,11 +209,16 @@ class _ChipDemoState extends State<ChipDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> chips = _materials.map<Widget>((String name) {
+    final ThemeData theme = Theme.of(context);
+    final List<Widget> chips = _materialsA.map<Widget>((String name) {
       return Chip(
         key: ValueKey<String>(name),
-        backgroundColor: _nameToColor(name),
-        label: Text(_capitalize(name)),
+        backgroundColor: theme.colorScheme.secondaryVariant,
+        deleteIconColor: theme.colorScheme.onSecondary,
+        label: Text(
+          _capitalize(name),
+          style: theme.textTheme.bodyText1.copyWith(color: theme.colorScheme.onSecondary),
+        ),
         onDeleted: () {
           setState(() {
             _removeMaterial(name);
@@ -211,7 +227,7 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final List<Widget> inputChips = _tools.map<Widget>((String name) {
+    final List<Widget> inputChips = _toolsA.map<Widget>((String name) {
       return InputChip(
           key: ValueKey<String>(name),
           avatar: CircleAvatar(
@@ -225,11 +241,14 @@ class _ChipDemoState extends State<ChipDemo> {
           });
     }).toList();
 
-    final List<Widget> choiceChips = _materials.map<Widget>((String name) {
+    final List<Widget> choiceChips = _materialsB.map<Widget>((String name) {
       return ChoiceChip(
         key: ValueKey<String>(name),
-        backgroundColor: _nameToColor(name),
-        label: Text(_capitalize(name)),
+        backgroundColor: theme.colorScheme.secondaryVariant,
+        label: Text(
+          _capitalize(name),
+          style: theme.textTheme.bodyText1.copyWith(color: theme.colorScheme.onSecondary),
+        ),
         selected: _selectedMaterial == name,
         onSelected: (bool value) {
           setState(() {
@@ -239,12 +258,12 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final List<Widget> filterChips = _defaultTools.map<Widget>((String name) {
+    final List<Widget> filterChips = _toolsB.map<Widget>((String name) {
       return FilterChip(
         key: ValueKey<String>(name),
         label: Text(_capitalize(name)),
-        selected: _tools.contains(name) && _selectedTools.contains(name),
-        onSelected: !_tools.contains(name)
+        selected: _toolsB.contains(name) && _selectedTools.contains(name),
+        onSelected: !_toolsB.contains(name)
             ? null
             : (bool value) {
                 setState(() {
@@ -277,7 +296,6 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final ThemeData theme = Theme.of(context);
     final List<Widget> tiles = <Widget>[
       const SizedBox(height: 8.0, width: 0.0),
       _ChipsTile(label: 'Available Materials (Chip)', children: chips),
