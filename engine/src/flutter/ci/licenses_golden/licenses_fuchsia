@@ -1,4 +1,4 @@
-Signature: e34dc0786388aabfff148b4dd093ca44
+Signature: 18c6c9c5873393a0ab127ace3b75f16e
 
 UNUSED LICENSES:
 
@@ -3268,6 +3268,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/profile_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.memorypressure/memorypressure.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/session/session_restart_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
