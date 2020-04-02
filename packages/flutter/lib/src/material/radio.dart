@@ -175,8 +175,8 @@ class Radio<T> extends StatefulWidget {
   /// The default is false.
   ///
   /// {@tool dartpad --template=stateful_widget_scaffold}
-  /// This example shows how a radio button can be allowed to be toggled off by
-  /// setting the [toggleable] attribute.
+  /// This example shows how to enable deselecting a radio button by setting the
+  /// [toggleable] attribute.
   ///
   /// ```dart
   /// int groupValue;
