@@ -621,8 +621,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   ) : super(widget);
 
   List<Element> _children;
-  final Map<_DestinationSlot, Element> slotToChild = <_DestinationSlot, Element>{};
-  final Map<Element, _DestinationSlot> childToSlot = <Element, _DestinationSlot>{};
+  final Map<_CupertinoTextSelectionToolbarItemsSlot, Element> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, Element>{};
+  final Map<Element, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <Element, _CupertinoTextSelectionToolbarItemsSlot>{};
 
   // We keep a set of forgotten children to avoid O(n^2) work walking _children
   // repeatedly to remove children.
@@ -634,15 +634,15 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   _CupertinoTextSelectionToolbarItemsRenderBox get renderObject => super.renderObject as _CupertinoTextSelectionToolbarItemsRenderBox;
 
-  void _updateRenderObject(RenderBox child, _DestinationSlot slot) {
+  void _updateRenderObject(RenderBox child, _CupertinoTextSelectionToolbarItemsSlot slot) {
     switch (slot) {
-      case _DestinationSlot.backButton:
+      case _CupertinoTextSelectionToolbarItemsSlot.backButton:
         renderObject.backButton = child;
         break;
-      case _DestinationSlot.nextButton:
+      case _CupertinoTextSelectionToolbarItemsSlot.nextButton:
         renderObject.nextButton = child;
         break;
-      case _DestinationSlot.nextButtonDisabled:
+      case _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled:
         renderObject.nextButtonDisabled = child;
         break;
     }
@@ -650,9 +650,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
-    if (slot is _DestinationSlot) {
+    if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
-      assert(slot is _DestinationSlot);
+      assert(slot is _CupertinoTextSelectionToolbarItemsSlot);
       _updateRenderObject(child as RenderBox, slot);
       assert(renderObject.childToSlot.keys.contains(child));
       assert(renderObject.slotToChild.keys.contains(slot));
@@ -663,7 +663,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
       renderObject.insert(child as RenderBox, after: slot?.value?.renderObject as RenderBox);
       return;
     }
-    assert(false, 'slot must be _DestinationSlot or IndexedSlot');
+    assert(false, 'slot must be _CupertinoTextSelectionToolbarItemsSlot or IndexedSlot');
   }
 
   // This is not reachable for slotted children.
@@ -708,7 +708,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
     if (childToSlot.keys.contains(child)) {
-      final _DestinationSlot slot = childToSlot[child];
+      final _CupertinoTextSelectionToolbarItemsSlot slot = childToSlot[child];
       childToSlot.remove(child);
       slotToChild.remove(slot);
     } else {
@@ -718,7 +718,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   // Mount slotted child.
-  void _mountChild(Widget widget, _DestinationSlot slot) {
+  void _mountChild(Widget widget, _CupertinoTextSelectionToolbarItemsSlot slot) {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
@@ -735,9 +735,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
-    _mountChild(widget.backButton, _DestinationSlot.backButton);
-    _mountChild(widget.nextButton, _DestinationSlot.nextButton);
-    _mountChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
+    _mountChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
+    _mountChild(widget.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
+    _mountChild(widget.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
 
     // Mount list children.
     _children = List<Element>(widget.children.length);
@@ -765,7 +765,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   // Update slotted child.
-  void _updateChild(Widget widget, _DestinationSlot slot) {
+  void _updateChild(Widget widget, _CupertinoTextSelectionToolbarItemsSlot slot) {
     final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
@@ -784,9 +784,9 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     assert(widget == newWidget);
 
     // Update slotted children.
-    _updateChild(widget.backButton, _DestinationSlot.backButton);
-    _updateChild(widget.nextButton, _DestinationSlot.nextButton);
-    _updateChild(widget.nextButtonDisabled, _DestinationSlot.nextButtonDisabled);
+    _updateChild(widget.backButton, _CupertinoTextSelectionToolbarItemsSlot.backButton);
+    _updateChild(widget.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
+    _updateChild(widget.nextButtonDisabled, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
 
     // Update list children.
     _children = updateChildren(_children, widget.children, forgottenChildren: _forgottenChildren);
@@ -804,10 +804,10 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
        _page = page,
        super();
 
-  final Map<_DestinationSlot, RenderBox> slotToChild = <_DestinationSlot, RenderBox>{};
-  final Map<RenderBox, _DestinationSlot> childToSlot = <RenderBox, _DestinationSlot>{};
+  final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slotToChild = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
+  final Map<RenderBox, _CupertinoTextSelectionToolbarItemsSlot> childToSlot = <RenderBox, _CupertinoTextSelectionToolbarItemsSlot>{};
 
-  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _DestinationSlot slot) {
+  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _CupertinoTextSelectionToolbarItemsSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
       childToSlot.remove(oldChild);
@@ -834,7 +834,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   RenderBox _backButton;
   RenderBox get backButton => _backButton;
   set backButton(RenderBox value) {
-    _backButton = _updateChild(_backButton, value, _DestinationSlot.backButton);
+    _backButton = _updateChild(_backButton, value, _CupertinoTextSelectionToolbarItemsSlot.backButton);
   }
 
   double _dividerWidth;
@@ -850,13 +850,13 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   RenderBox _nextButton;
   RenderBox get nextButton => _nextButton;
   set nextButton(RenderBox value) {
-    _nextButton = _updateChild(_nextButton, value, _DestinationSlot.nextButton);
+    _nextButton = _updateChild(_nextButton, value, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
   }
 
   RenderBox _nextButtonDisabled;
   RenderBox get nextButtonDisabled => _nextButtonDisabled;
   set nextButtonDisabled(RenderBox value) {
-    _nextButtonDisabled = _updateChild(_nextButtonDisabled, value, _DestinationSlot.nextButtonDisabled);
+    _nextButtonDisabled = _updateChild(_nextButtonDisabled, value, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
   }
 
   /*
@@ -1032,14 +1032,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     size = Size(parentWidth, _kToolbarHeight);
   }
 
-  static void _paintSlottedChild(PaintingContext context, Offset offset, RenderBox child) {
-    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
-    if (!childParentData.shouldPaint) {
-      return;
-    }
-    context.paintChild(child, offset + childParentData.offset);
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
@@ -1182,8 +1174,9 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
   }
 }
 
-// TODO(justinmc): Rename.
-enum _DestinationSlot {
+// The slots that can be occupied by widgets in
+// _CupertinoTextSelectionToolbarItems, excluding the list of children.
+enum _CupertinoTextSelectionToolbarItemsSlot {
   backButton,
   nextButton,
   nextButtonDisabled,
