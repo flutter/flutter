@@ -715,9 +715,12 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
-    } on vm_service.RPCError {
+    } on vm_service.SentinelException catch (err, st) {
       restartEvent = 'exception';
-      return OperationResult(1, 'hot restart failed to complete', fatal: true);
+      return OperationResult(1, 'hot restart failed to complete: $err\n$st', fatal: true);
+    } on vm_service.RPCError  catch (err, st) {
+      restartEvent = 'exception';
+      return OperationResult(1, 'hot restart failed to complete: $err\n$st', fatal: true);
     } finally {
       HotEvent(restartEvent,
         targetPlatform: targetPlatform,

@@ -91,7 +91,18 @@ typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Obje
 void main() {
   testUsingContext('VMService can refreshViews', () async {
     final MockVMService mockVmService = MockVMService();
-    final VMService vmService = VMService(null, null, null, null, null, null, null, mockVmService, Completer<void>());
+    final VMService vmService = VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockVmService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
     verify(mockVmService.registerServiceCallback('streamNotify', any)).called(1);
     verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
@@ -122,7 +133,18 @@ void main() {
   testUsingContext('VmService registers reloadSources', () {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
     final MockVMService mockVMService = MockVMService();
-    VMService(null, null, reloadSources, null, null, null, null, mockVMService, Completer<void>());
+    VMService(
+      null,
+      null,
+      reloadSources,
+      null,
+      null,
+      null,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
     verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
@@ -132,7 +154,18 @@ void main() {
   testUsingContext('VmService registers reloadMethod', () {
     Future<void> reloadMethod({  String classId, String libraryId,}) async {}
     final MockVMService mockVMService = MockVMService();
-    VMService(null, null, null, null, null, null, reloadMethod, mockVMService, Completer<void>());
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      reloadMethod,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
     verify(mockVMService.registerService('reloadMethod', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
@@ -142,7 +175,18 @@ void main() {
   testUsingContext('VmService registers flutterMemoryInfo service', () {
     final MockDevice mockDevice = MockDevice();
     final MockVMService mockVMService = MockVMService();
-    VMService(null, null, null, null, null, mockDevice, null, mockVMService, Completer<void>());
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockDevice,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
     verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
@@ -151,7 +195,18 @@ void main() {
 
   testUsingContext('VMService returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
-    VMService(null, null, null, null, null, null, null, mockVMService, Completer<void>());
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{

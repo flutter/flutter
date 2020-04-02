@@ -574,7 +574,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    await connectedVmService.streamListen('Stdout');
+    try {
+      await connectedVmService.streamListen('Stdout');
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
     _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
       final String message = utf8.decode(base64.decode(event.bytes));
       if (message.isNotEmpty) {

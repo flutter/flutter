@@ -8,10 +8,11 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart' show required;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
-import 'convert.dart' show base64, utf8;
+import 'convert.dart' show base64, json, utf8;
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
@@ -73,7 +74,9 @@ typedef ReloadMethod = Future<void> Function({
   String libraryId,
 });
 
-Future<io.WebSocket> _defaultOpenChannel(String url, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
+Future<io.WebSocket> _defaultOpenChannel(String url, {
+  io.CompressionOptions compression = io.CompressionOptions.compressionDefault
+}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
@@ -134,12 +137,18 @@ class VMService implements vm_service.VmService {
     ReloadMethod reloadMethod,
     this._delegateService,
     this.streamClosedCompleter,
+    Stream<dynamic> secondary,
   ) {
     _vm = VM._empty(this);
 
-    _delegateService.registerServiceCallback('streamNotify', (Map<String, dynamic> params) {
-      _handleStreamNotify(params);
-      return Future<Map<String, dynamic>>.value(<String, dynamic>{});
+    // TODO(jonahwilliams): this is temporary to support the current vm_service
+    // semantics of update-in-place.
+    secondary.listen((dynamic rawData) {
+      final String message = rawData as String;
+      final dynamic map = json.decode(message);
+      if (map != null && map['method'] == 'streamNotify') {
+        _handleStreamNotify(map['params'] as Map<String, dynamic>);
+      }
     });
 
     if (reloadSources != null) {
@@ -339,13 +348,26 @@ class VMService implements vm_service.VmService {
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
     final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
+    final StreamController<dynamic> primary = StreamController<dynamic>();
+    final StreamController<dynamic> secondary = StreamController<dynamic>();
+
+    channel.listen((dynamic data) {
+      primary.add(data);
+      secondary.add(data);
+    }, onDone: ()  {
+      primary.close();
+      secondary.close();
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      primary.addError(error, stackTrace);
+      secondary.addError(error, stackTrace);
+    });
 
     // Create an instance of the package:vm_service API in addition to the flutter
     // tool's to allow gradual migration.
     final Completer<void> streamClosedCompleter = Completer<void>();
 
     final vm_service.VmService delegateService = vm_service.VmService(
-      channel,
+      primary.stream,
       channel.add,
       log: null,
       disposeHandler: () async {
@@ -363,6 +385,7 @@ class VMService implements vm_service.VmService {
       reloadMethod,
       delegateService,
       streamClosedCompleter,
+      secondary.stream,
     );
 
     // This call is to ensure we are able to establish a connection instead of
@@ -1261,7 +1284,11 @@ class Isolate extends ServiceObjectOwner {
         'message': e.message,
         'data': e.data,
       });
+    } on vm_service.SentinelException catch (e) {
+      throwToolExit('Unexpected Sentinel while reloading sources: $e');
     }
+    assert(false);
+    return null;
   }
 
   Future<Map<String, dynamic>> getObject(Map<String, dynamic> objectRef) {
@@ -1482,7 +1509,11 @@ class FlutterView extends ServiceObject {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<void> completer = Completer<void>();
-    await owner.vm.vmService.streamListen('Isolate');
+    try {
+      await owner.vm.vmService.streamListen('Isolate');
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
     final StreamSubscription<vm_service.Event> subscription =
       owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
         if (event.kind == ServiceEvent.kIsolateRunnable) {
