@@ -205,17 +205,10 @@ String generateBaseClassFile(
     .where((Message message) => bundle.translationFor(message) != null)
     .map((Message message) => generateMethod(message, bundle));
 
-  String baseClassName = className;
-  if (locale.countryCode != null) {
-    final String camelCasedLocaleInfo = LocaleInfo.fromString(
-      locale.languageCode,
-    ).camelCase();
-    baseClassName = '$className$camelCasedLocaleInfo';
-  }
   return classFileTemplate
     .replaceAll('@(header)', header)
     .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', baseClassName)
+    .replaceAll('@(baseClass)', className)
     .replaceAll('@(fileName)', fileName)
     .replaceAll('@(class)', '$className${locale.camelCase()}')
     .replaceAll('@(localeName)', locale.toString())
