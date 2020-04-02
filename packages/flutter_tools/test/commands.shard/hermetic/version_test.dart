@@ -42,7 +42,7 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -187,7 +187,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>[
         'version',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -236,7 +236,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (failGitTag) {
         return ProcessResult(0, 1, '', '');
       }
-      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0', '');
+      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {
       version = command[2] as String;
