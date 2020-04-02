@@ -288,8 +288,8 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   args.push_back(action_id >> 8);
   args.push_back(action_id >> 16);
   args.push_back(action_id >> 24);
-  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kCustomAction,
-                                           std::move(args));
+  [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kCustomAction,
+                                         std::move(args));
   return YES;
 }
 
@@ -385,7 +385,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   CGFloat scale = [[[self bridge]->view() window] screen].scale;
   auto result =
       CGRectMake(rect.x() / scale, rect.y() / scale, rect.width() / scale, rect.height() / scale);
-  return UIAccessibilityConvertFrameToScreenCoordinates(result, [self bridge] -> view());
+  return UIAccessibilityConvertFrameToScreenCoordinates(result, [self bridge]->view());
 }
 
 #pragma mark - UIAccessibilityElement protocol
@@ -413,7 +413,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return NO;
   if (![self node].HasAction(flutter::SemanticsAction::kTap))
     return NO;
-  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kTap);
+  [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kTap);
   return YES;
 }
 
@@ -422,7 +422,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return;
   if ([self node].HasAction(flutter::SemanticsAction::kIncrease)) {
     [self node].value = [self node].increasedValue;
-    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kIncrease);
+    [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kIncrease);
   }
 }
 
@@ -431,7 +431,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return;
   if ([self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     [self node].value = [self node].decreasedValue;
-    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDecrease);
+    [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDecrease);
   }
 }
 
@@ -441,7 +441,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   flutter::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
   if (![self node].HasAction(action))
     return NO;
-  [self bridge] -> DispatchSemanticsAction([self uid], action);
+  [self bridge]->DispatchSemanticsAction([self uid], action);
   return YES;
 }
 
@@ -450,7 +450,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return NO;
   if (![self node].HasAction(flutter::SemanticsAction::kDismiss))
     return NO;
-  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDismiss);
+  [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDismiss);
   return YES;
 }
 
@@ -460,11 +460,11 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   if (![self isAccessibilityBridgeAlive])
     return;
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden)) {
-    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
+    [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
   }
   if ([self node].HasAction(flutter::SemanticsAction::kDidGainAccessibilityFocus)) {
-    [self bridge] -> DispatchSemanticsAction([self uid],
-                                             flutter::SemanticsAction::kDidGainAccessibilityFocus);
+    [self bridge]->DispatchSemanticsAction([self uid],
+                                           flutter::SemanticsAction::kDidGainAccessibilityFocus);
   }
 }
 
@@ -472,8 +472,8 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   if (![self isAccessibilityBridgeAlive])
     return;
   if ([self node].HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
-    [self bridge] -> DispatchSemanticsAction([self uid],
-                                             flutter::SemanticsAction::kDidLoseAccessibilityFocus);
+    [self bridge]->DispatchSemanticsAction([self uid],
+                                           flutter::SemanticsAction::kDidLoseAccessibilityFocus);
   }
 }
 
