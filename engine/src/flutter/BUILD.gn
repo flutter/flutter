@@ -76,6 +76,7 @@ group("flutter") {
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/platform/common/cpp:common_cpp_core_unittests",
+      "//flutter/shell/platform/common/cpp:common_cpp_unittests",
       "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
       "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",

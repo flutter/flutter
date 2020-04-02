@@ -60,8 +60,6 @@ source_set("flutter_windows_source") {
     "window_state.h",
   ]
 
-  defines = [ "USE_RAPID_JSON" ]
-
   configs += [
     "//flutter/shell/platform/common/cpp:desktop_library_implementation",
     "//third_party/angle:gl_prototypes",
