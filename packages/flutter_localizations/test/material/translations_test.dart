@@ -462,4 +462,25 @@ void main() {
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');
   });
+
+  testWidgets('Norwegian synonym (`no` and `nb`) spot check', (WidgetTester tester) async {
+    Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationNo>());
+
+    final String alertDialogLabelNo = localizations.alertDialogLabel;
+    final String anteMeridiemAbbreviationNo = localizations.anteMeridiemAbbreviation;
+    final String closeButtonLabelNo = localizations.closeButtonLabel;
+    final String okButtonLabelNo = localizations.okButtonLabel;
+
+    locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationNb>());
+    expect(localizations.alertDialogLabel, alertDialogLabelNo);
+    expect(localizations.anteMeridiemAbbreviation, anteMeridiemAbbreviationNo);
+    expect(localizations.closeButtonLabel, closeButtonLabelNo);
+    expect(localizations.okButtonLabel, okButtonLabelNo);
+  });
 }
