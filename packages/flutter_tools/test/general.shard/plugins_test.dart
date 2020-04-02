@@ -945,12 +945,9 @@ flutter:
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File registrantHeader = linuxProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
-        expect(registrantHeader, exists);
         expect(registrantImpl, exists);
-        expect(registrantHeader, isNot(contains('SomePlugin')));
         expect(registrantImpl,  isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -1025,12 +1022,9 @@ flutter:
 
         await injectPlugins(flutterProject, checkProjects: true);
 
-        final File registrantHeader = windowsProject.managedDirectory.childFile('generated_plugin_registrant.h');
         final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
 
-        expect(registrantHeader, exists);
         expect(registrantImpl, exists);
-        expect(registrantHeader, isNot(contains('SomePlugin')));
         expect(registrantImpl,  isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

@@ -9,14 +9,23 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'globals.dart' as globals;
 
-  const String kPluginClass = 'pluginClass';
-  const String kDartPluginClass = 'dartPluginClass';
+/// Constant for 'pluginClass' key in plugin maps.
+const String kPluginClass = 'pluginClass';
+
+/// Constant for 'pluginClass' key in plugin maps.
+const String kDartPluginClass = 'dartPluginClass';
 
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
 
   Map<String, dynamic> toMap();
+}
+
+abstract class NativeOrDartPlugin {
+  /// Determines whether the plugin has a native implementation or if it's a
+  /// Dart-only plugin.
+  bool isNative();
 }
 
 /// Contains parameters to template an Android plugin.
@@ -196,7 +205,7 @@ class IOSPlugin extends PluginPlatform {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class MacOSPlugin extends PluginPlatform {
+class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const MacOSPlugin({
     @required this.name,
     this.pluginClass,
@@ -226,11 +235,14 @@ class MacOSPlugin extends PluginPlatform {
   final String dartPluginClass;
 
   @override
+  bool isNative() => pluginClass != null;
+
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
-      'dartPluginClass': dartPluginClass,
+      if (pluginClass != null) 'class': pluginClass,
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }
@@ -239,7 +251,7 @@ class MacOSPlugin extends PluginPlatform {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform {
+class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   const WindowsPlugin({
     @required this.name,
     this.pluginClass,
@@ -269,12 +281,15 @@ class WindowsPlugin extends PluginPlatform {
   final String dartPluginClass;
 
   @override
+  bool isNative() => pluginClass != null;
+
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
-      'filename': _filenameForCppClass(pluginClass),
-      'dartPluginClass': dartPluginClass,
+      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }
@@ -283,7 +298,7 @@ class WindowsPlugin extends PluginPlatform {
 ///
 /// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
 /// [pluginClass] will be the entry point to the plugin's native code.
-class LinuxPlugin extends PluginPlatform {
+class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const LinuxPlugin({
     @required this.name,
     this.pluginClass,
@@ -313,12 +328,15 @@ class LinuxPlugin extends PluginPlatform {
   final String dartPluginClass;
 
   @override
+  bool isNative() => pluginClass != null;
+
+  @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
-      'filename': _filenameForCppClass(pluginClass),
-      'dartPluginClass': dartPluginClass,
+      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }
@@ -376,9 +394,6 @@ class WebPlugin extends PluginPlatform {
 
 final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
-  if (className == null) {
-    return null;
-  }
   return className.splitMapJoin(
     _internalCapitalLetterRegex,
     onMatch: (_) => '_',
