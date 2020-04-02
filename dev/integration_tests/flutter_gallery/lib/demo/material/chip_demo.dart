@@ -192,6 +192,20 @@ class _ChipDemoState extends State<ChipDemo> {
     return name.substring(0, 1).toUpperCase() + name.substring(1);
   }
 
+  // This converts a String to a unique color, based on the hash value of the
+  // String object.  It takes the bottom 16 bits of the hash, and uses that to
+  // pick a hue for an HSV color, and then creates the color (with a preset
+  // saturation and value).  This means that any unique strings will also have
+  // unique colors, but they'll all be readable, since they have the same
+  // saturation and value.
+  Color _nameToColor(String name, ThemeData theme) {
+    assert(name.length > 1);
+    final int hash = name.hashCode & 0xffff;
+    final double hue = (360.0 * hash / (1 << 15)) % 360.0;
+    final double themeValue = HSVColor.fromColor(theme.backgroundColor).value;
+    return HSVColor.fromAHSV(1.0, hue, 0.4, themeValue).toColor();
+  }
+
   AssetImage _nameToAvatar(String name) {
     assert(_avatars.containsKey(name));
     return AssetImage(
@@ -213,12 +227,8 @@ class _ChipDemoState extends State<ChipDemo> {
     final List<Widget> chips = _materialsA.map<Widget>((String name) {
       return Chip(
         key: ValueKey<String>(name),
-        backgroundColor: theme.colorScheme.secondaryVariant,
-        deleteIconColor: theme.colorScheme.onSecondary,
-        label: Text(
-          _capitalize(name),
-          style: theme.textTheme.bodyText1.copyWith(color: theme.colorScheme.onSecondary),
-        ),
+        backgroundColor: _nameToColor(name, theme),
+        label: Text(_capitalize(name)),
         onDeleted: () {
           setState(() {
             _removeMaterial(name);
@@ -244,11 +254,8 @@ class _ChipDemoState extends State<ChipDemo> {
     final List<Widget> choiceChips = _materialsB.map<Widget>((String name) {
       return ChoiceChip(
         key: ValueKey<String>(name),
-        backgroundColor: theme.colorScheme.secondaryVariant,
-        label: Text(
-          _capitalize(name),
-          style: theme.textTheme.bodyText1.copyWith(color: theme.colorScheme.onSecondary),
-        ),
+        backgroundColor: _nameToColor(name, theme),
+        label: Text(_capitalize(name)),
         selected: _selectedMaterial == name,
         onSelected: (bool value) {
           setState(() {
