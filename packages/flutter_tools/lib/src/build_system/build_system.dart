@@ -539,7 +539,7 @@ class BuildSystem {
   /// remove the previous build's output.
   ///
   /// This is used to perform a targeted cleanup of the last output files, if
-  /// these were not already covered by the buil-in cleanup. This is only
+  /// these were not already covered by the built-in cleanup. This is only
   /// necessary when multiple different build configurations output to the same
   /// directory.
   @visibleForTesting
