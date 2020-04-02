@@ -293,6 +293,7 @@ class Environment {
     @required Logger logger,
     @required Artifacts artifacts,
     @required ProcessManager processManager,
+    @required String engineVersion,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
   }) {
@@ -302,6 +303,10 @@ class Environment {
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
     final StringBuffer buffer = StringBuffer();
+    // The engine revision is `null` for local or custom engines.
+    if (engineVersion != null) {
+      buffer.write(engineVersion);
+    }
     for (final String key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
@@ -325,12 +330,14 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      engineVersion: engineVersion,
     );
   }
 
   /// Create a new [Environment] object for unit testing.
   ///
   /// Any directories not provided will fallback to a [testDirectory]
+  @visibleForTesting
   factory Environment.test(Directory testDirectory, {
     Directory projectDir,
     Directory outputDir,
@@ -338,6 +345,7 @@ class Environment {
     Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    String engineVersion = 'abcdefghijklmnop',
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -354,6 +362,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      engineVersion: engineVersion,
     );
   }
 
@@ -369,6 +378,7 @@ class Environment {
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
+    @required this.engineVersion,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -430,6 +440,9 @@ class Environment {
   final Artifacts artifacts;
 
   final FileSystem fileSystem;
+
+  /// The version of the current engine, or `null` if built with a local engine.
+  final String engineVersion;
 }
 
 /// The result information from the build system.

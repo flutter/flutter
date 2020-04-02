@@ -155,6 +155,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      engineVersion: globals.flutterVersion.engineRevision
     );
     return result;
   }
