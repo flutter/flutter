@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "HH:mm",
   "openAppDrawerTooltip": "Åpne navigasjonsmenyen",
   "backButtonTooltip": "Tilbake",
   "closeButtonTooltip": "Lukk",
