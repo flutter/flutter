@@ -510,6 +510,15 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   @override
+  void didUpdateWidget(_CupertinoTextSelectionToolbarContent oldWidget) {
+    // If the children are changing, the current page should be reset.
+    if (widget.children != oldWidget.children) {
+      _page = 0;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -928,7 +937,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     _nextButton.layout(constraints.loosen(), parentUsesSize: true);
     _nextButtonDisabled.layout(constraints.loosen(), parentUsesSize: true);
 
-    double pageWidth = 0.0;
+    double buttonPosition = 0.0;
     double parentWidth = constraints.maxWidth; // The width of the whole widget.
     double firstPageWidth;
     int currentPage = 0;
@@ -943,19 +952,18 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         return;
       }
 
-      double buttonWidth = 0.0;
+      double buttonsWidth = 0.0;
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
-        buttonWidth = i == childCount - 1 ? 0.0 : _nextButton.size.width;
+        buttonsWidth = i == childCount - 1 ? 0.0 : _nextButton.size.width;
       } else {
-        buttonWidth = _backButton.size.width + _nextButton.size.width;
+        buttonsWidth = _backButton.size.width + _nextButton.size.width;
       }
 
       // The width of the menu is set by the first page.
-      final double maxWidth = currentPage == 0 ? constraints.maxWidth : firstPageWidth;
       child.layout(
         BoxConstraints.loose(Size(
-          math.max(maxWidth - buttonWidth - pageWidth, _kToolbarButtonMinimumWidth),
+          (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - buttonsWidth,
           constraints.maxHeight,
         )),
         parentUsesSize: true,
@@ -964,31 +972,31 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
-      if (pageWidth + buttonWidth + child.size.width > constraints.maxWidth) {
+      if (buttonPosition + buttonsWidth + child.size.width > constraints.maxWidth) {
         currentPage++;
-        pageWidth = _backButton.size.width + dividerWidth;
-        final double nextPageButtonWidth = _backButton.size.width
-            + _nextButton.size.width;
+        buttonPosition = _backButton.size.width + dividerWidth;
+        buttonsWidth = _backButton.size.width + _nextButton.size.width;
         child.layout(
           BoxConstraints.loose(Size(
-            math.max(firstPageWidth - nextPageButtonWidth, _kToolbarButtonMinimumWidth),
+            //math.max(firstPageWidth - buttonsWidth, _kToolbarButtonMinimumWidth),
+            firstPageWidth - buttonsWidth,
             constraints.maxHeight,
           )),
           parentUsesSize: true,
         );
       }
-      childParentData.offset = Offset(pageWidth, 0.0);
-      pageWidth += child.size.width + dividerWidth;
+      childParentData.offset = Offset(buttonPosition, 0.0);
+      buttonPosition += child.size.width + dividerWidth;
       childParentData.shouldPaint = currentPage == page;
 
       // TODO(justinmc): Can I optimize by not laying out pages after the
       // current page?
 
       if (currentPage == 0) {
-        firstPageWidth = pageWidth;
+        firstPageWidth = buttonPosition + _nextButton.size.width;
       }
       if (currentPage == page) {
-        parentWidth = pageWidth;
+        parentWidth = buttonPosition;
       }
     });
 
