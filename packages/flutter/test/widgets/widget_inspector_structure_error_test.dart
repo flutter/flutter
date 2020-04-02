@@ -28,12 +28,12 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
 
       WidgetsFlutterBinding.ensureInitialized();
       try {
-        // Enable structured errors.
+        // Enables structured errors.
         expect(await service.testBoolExtension(
           'structuredErrors', <String, String>{'enabled': 'true'}),
           equals('true'));
 
-        // Create an error.
+        // Creates an error.
         final FlutterErrorDetails expectedError = FlutterErrorDetailsForRendering(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
@@ -41,7 +41,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
         );
         FlutterError.reportError(expectedError);
 
-        // Validate the spy still received an error.
+        // Validates the spy still received an error.
         expect(actualError, expectedError);
       } finally {
         FlutterError.onError = oldHandler;
