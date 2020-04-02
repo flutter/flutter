@@ -39,7 +39,6 @@ void main() {
   });
 
   tearDown(() {
-    //print('Investigate ${parentDirectory.path}');
     try {
       parentDirectory.deleteSync(recursive: true);
     } on FileSystemException {

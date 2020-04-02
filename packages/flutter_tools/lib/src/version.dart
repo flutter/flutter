@@ -775,16 +775,16 @@ class GitTagVersion {
   /// Check for the release tag format from v1.17.0 on
   static GitTagVersion parseSecondVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6, 7]);
+      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(6).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
     List<int> devParts = <int>[null, null];
-    if (parts[4] != null) {
+    if (parts[3] != null) {
       devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
-        .matchAsPrefix(parts[4])
+        .matchAsPrefix(parts[3])
         ?.groups(<int>[1, 2])
         ?.map<int>(
           (String source) => source == null ? null : int.tryParse(source)
@@ -794,11 +794,10 @@ class GitTagVersion {
       x: parsedParts[0],
       y: parsedParts[1],
       z: parsedParts[2],
-      hotfix: parsedParts[3],
       devVersion: devParts[0],
       devPatch: devParts[1],
-      commits: parsedParts[5],
-      hash: parts[6],
+      commits: parsedParts[4],
+      hash: parts[5],
     );
   }
 
