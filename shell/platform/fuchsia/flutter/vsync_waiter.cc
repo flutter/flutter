@@ -141,7 +141,7 @@ void VsyncWaiter::AwaitVSync() {
   fml::TimeDelta delta = next_vsync_start_time - now;
 
   task_runners_.GetUITaskRunner()->PostDelayedTask(
-      [& weak_factory_ui = this->weak_factory_ui_] {
+      [&weak_factory_ui = this->weak_factory_ui_] {
         if (!weak_factory_ui) {
           FML_LOG(WARNING) << "WeakPtrFactory for VsyncWaiter is null, likely "
                               "due to the VsyncWaiter being destroyed.";

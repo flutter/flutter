@@ -73,7 +73,7 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
     }
 
     out_vulkan_image->vk_image = {
-        vk_image, [& vulkan_provider = vulkan_provider](VkImage image) {
+        vk_image, [&vulkan_provider = vulkan_provider](VkImage image) {
           vulkan_provider.vk().DestroyImage(vulkan_provider.vk_device(), image,
                                             NULL);
         }};
@@ -263,8 +263,8 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
       return false;
     }
 
-    vk_memory_ = {vk_memory, [& vulkan_provider =
-                                  vulkan_provider_](VkDeviceMemory memory) {
+    vk_memory_ = {vk_memory,
+                  [&vulkan_provider = vulkan_provider_](VkDeviceMemory memory) {
                     vulkan_provider.vk().FreeMemory(vulkan_provider.vk_device(),
                                                     memory, NULL);
                   }};
