@@ -915,33 +915,18 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
-// List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
-//   // Plugins without a 'pluginClass' definition shouldn't create native cpp files. The plugin might
-//   // be a pure Dart implementation, and the class will be defined by 'dartPluginClass'.
-//   final List<Plugin> nativePlugins = plugins.where((Plugin element) {
-//     final WindowsPlugin windowsPlugin = element.platforms[platformKey] as WindowsPlugin;
-//     if (windowsPlugin == null) {
-//       return false;
-//     }
-//     return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
-//   }).toList();
-// }
-
-Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  // Plugins without a 'pluginClass' definition shouldn't create native cpp files. The plugin might
-  // be a pure Dart implementation, and the class will be defined by 'dartPluginClass'.
-  final List<Plugin> nativeWindowsPlugins = plugins.where((Plugin element) {
-    final WindowsPlugin windowsPlugin = element.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
+List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
+  return plugins.where((Plugin element) {
+    final WindowsPlugin windowsPlugin = element.platforms[platformKey] as WindowsPlugin;
     if (windowsPlugin == null) {
       return false;
     }
-    return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
+    return windowsPlugin.pluginClass != null;
   }).toList();
-  if (nativeWindowsPlugins.isEmpty) {
-    return;
-  }
+}
 
-  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativeWindowsPlugins, WindowsPlugin.kConfigKey);
+Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': windowsPlugins,
   };
@@ -1116,8 +1101,10 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
-    await _writeWindowsPluginFiles(project, plugins);
-    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(plugins);
+    // Filter out plugins without a 'pluginClass' definition since they might be Dart-only plugins.
+    final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+    await _writeWindowsPluginFiles(project, nativePlugins);
+    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(nativePlugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {

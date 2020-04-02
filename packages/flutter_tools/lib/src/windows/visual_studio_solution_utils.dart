@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../convert.dart';
-import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'visual_studio_project.dart';
@@ -252,17 +251,7 @@ EndProject\r
   /// in [plugins].
   Map<String, String> _getWindowsPluginNamesByGuid(List<Plugin> plugins) {
     final Map<String, String> currentPluginInfo = <String, String>{};
-    // Plugins without a 'pluginClass' definition shouldn't generate a GUID. The plugin might
-    // be a pure Dart implementation.
-    final List<Plugin> nativeWindowsPlugins = plugins.where((Plugin element) {
-      final WindowsPlugin windowsPlugin = element.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
-      if (windowsPlugin == null) {
-        return false;
-      }
-      return windowsPlugin.pluginClass != null && windowsPlugin.pluginClass.isNotEmpty;
-    }).toList();
-
-    for (final Plugin plugin in nativeWindowsPlugins) {
+    for (final Plugin plugin in plugins) {
       if (plugin.platforms.containsKey(_project.pluginConfigKey)) {
         final _PluginProjectInfo info = _PluginProjectInfo(plugin, fileSystem: _fileSystem);
         if (currentPluginInfo.containsKey(info.guid)) {

@@ -237,7 +237,7 @@ class WindowsPlugin extends PluginPlatform {
     @required this.name,
     this.pluginClass,
     this.dartPluginClass,
-  });
+  }) : assert(pluginClass != null || dartPluginClass != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
@@ -252,8 +252,7 @@ class WindowsPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return (yaml.containsKey(_kDartPluginClass) && yaml[_kDartPluginClass] is String) ||
-           (yaml.containsKey(_kPluginClass) && yaml[_kPluginClass] is String);
+    return yaml[_kDartPluginClass] is String || yaml[_kPluginClass] is String;
   }
 
   static const String kConfigKey = 'windows';
