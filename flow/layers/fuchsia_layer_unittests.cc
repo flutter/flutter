@@ -20,6 +20,7 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
+#include "flutter/flow/layers/transform_layer.h"
 #include "flutter/flow/view_holder.h"
 #include "flutter/fml/platform/fuchsia/message_loop_fuchsia.h"
 #include "flutter/fml/task_runner.h"
@@ -45,6 +46,14 @@ class MockSession : public fuchsia::ui::scenic::testing::Session_TestBase {
     return "{" + std::to_string(value.value.x) + ", " +
            std::to_string(value.value.y) + ", " +
            std::to_string(value.value.z) + "}";
+  }
+
+  static std::string QuaternionValueToString(
+      fuchsia::ui::gfx::QuaternionValue value) {
+    return "{" + std::to_string(value.value.x) + ", " +
+           std::to_string(value.value.y) + ", " +
+           std::to_string(value.value.z) + ", " +
+           std::to_string(value.value.w) + "}";
   }
 
   static std::string GfxCreateResourceCmdToString(
@@ -93,9 +102,10 @@ class MockSession : public fuchsia::ui::scenic::testing::Session_TestBase {
                " value: " + Vec3ValueToString(cmd.set_translation().value);
       case fuchsia::ui::gfx::Command::Tag::kSetScale:
         return "SetScale id: " + std::to_string(cmd.set_scale().id) +
-               " value: " + Vec3ValueToString(cmd.set_translation().value);
+               " value: " + Vec3ValueToString(cmd.set_scale().value);
       case fuchsia::ui::gfx::Command::Tag::kSetRotation:
-        return "SetRotation id: " + std::to_string(cmd.set_rotation().id);
+        return "SetRotation id: " + std::to_string(cmd.set_rotation().id) +
+               " value: " + QuaternionValueToString(cmd.set_rotation().value);
       case fuchsia::ui::gfx::Command::Tag::kSetOpacity:
         return "SetOpacity id: " + std::to_string(cmd.set_opacity().node_id) +
                ", opacity: " + std::to_string(cmd.set_opacity().opacity);
@@ -601,13 +611,13 @@ TEST_F(FuchsiaLayerTest, PhysicalShapeLayersAndChildSceneLayers) {
   EXPECT_EQ(72u, test_context->mock_session.num_enqueued_commands());
 }
 
-// Create a hierarchy with OpacityLayers, PhysicalShapeLayers and
-// ChildSceneLayers, and inspect the commands sent to Scenic.
+// Create a hierarchy with OpacityLayers, TransformLayer, PhysicalShapeLayers
+// and ChildSceneLayers, and inspect the commands sent to Scenic.
 //
 // We are interested in verifying that the opacity values of children are
-// correct.
+// correct, and the transform values as well.
 //
-TEST_F(FuchsiaLayerTest, Opacity) {
+TEST_F(FuchsiaLayerTest, OpacityAndTransformLayer) {
   auto test_context = InitTest();
 
   // Root.
@@ -625,7 +635,13 @@ TEST_F(FuchsiaLayerTest, Opacity) {
       std::make_shared<OpacityLayer>(127, SkPoint::Make(0, 0));
   opacity_layer1->Add(opacity_layer2);
 
-  // Child #1: ChildSceneLayer.
+  // TransformLayer
+  SkMatrix translate_and_scale;
+  translate_and_scale.setScaleTranslate(1.1f, 1.1f, 2.f, 2.f);
+  auto transform_layer = std::make_shared<TransformLayer>(translate_and_scale);
+  opacity_layer2->Add(transform_layer);
+
+  // TransformLayer Child #1: ChildSceneLayer.
   const zx_koid_t kChildLayerId1 = GetChildLayerId();
   auto [unused_view_token1, unused_view_holder_token1] =
       scenic::ViewTokenPair::New();
@@ -638,14 +654,14 @@ TEST_F(FuchsiaLayerTest, Opacity) {
   auto child_view1 = std::make_shared<ChildSceneLayer>(
       kChildLayerId1, SkPoint::Make(1, 1), SkSize::Make(10, 10),
       /*hit_testable=*/false);
-  opacity_layer2->Add(child_view1);
+  transform_layer->Add(child_view1);
 
-  // Child #2: PhysicalShapeLayer.
+  // TransformLayer Child #2: PhysicalShapeLayer.
   auto physical_shape1 = std::make_shared<PhysicalShapeLayer>(
       /*color=*/SK_ColorCYAN,
       /*shadow_color=*/SK_ColorBLACK,
       /*elevation*/ 23.f, path, Clip::antiAlias);
-  opacity_layer2->Add(physical_shape1);
+  transform_layer->Add(physical_shape1);
 
   // Preroll.
   root->Preroll(test_context->preroll_context.get(), SkMatrix());
@@ -670,7 +686,7 @@ TEST_F(FuchsiaLayerTest, Opacity) {
   expected.push_back(scenic::NewCreateEntityNodeCmd(/*id=*/1));
   expected.push_back(scenic::NewCreateOpacityNodeCmdHACK(/*id=*/2));
   expected.push_back(scenic::NewSetLabelCmd(/*id=*/1, "fuchsia test root"));
-  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/1, {0, 0}));
+  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/1, {0, 0, 0}));
   expected.push_back(scenic::NewAddChildCmd(/*id=*/1, /*child_id=*/2));
   expected.push_back(scenic::NewSetOpacityCmd(/*id=*/2, kOneMinusEpsilon));
 
@@ -685,67 +701,79 @@ TEST_F(FuchsiaLayerTest, Opacity) {
   // Expect no new commands for this.
 
   //
-  // Child #1: ChildSceneLayer.
+  // TransformLayer
+  //
   //
   expected.push_back(scenic::NewCreateEntityNodeCmd(/*id=*/3));
-  expected.push_back(scenic::NewCreateOpacityNodeCmdHACK(/*id=*/4));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/2, /*child_id=*/3));
+  expected.push_back(scenic::NewSetLabelCmd(/*id=*/3, "flutter::Transform"));
+  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/3, {2.f, 2.f, 0.f}));
+  expected.push_back(scenic::NewSetScaleCmd(/*id=*/3, {1.1f, 1.1f, 1.f}));
+  expected.push_back(scenic::NewSetRotationCmd(/*id=*/3, {0.f, 0.f, 0.f, 1.f}));
+
+  //
+  // TransformLayer Child #1: ChildSceneLayer.
+  //
+  expected.push_back(scenic::NewCreateEntityNodeCmd(/*id=*/4));
+  expected.push_back(scenic::NewCreateOpacityNodeCmdHACK(/*id=*/5));
   auto [view_token1, view_holder_token1] = scenic::ViewTokenPair::New();
   expected.push_back(scenic::NewCreateViewHolderCmd(
-      /*id=*/5, std::move(view_holder_token1), ""));
-  expected.push_back(scenic::NewAddChildCmd(/*id=*/4, /*child_id=*/3));
-  expected.push_back(scenic::NewSetLabelCmd(/*id=*/4, "flutter::ViewHolder"));
+      /*id=*/6, std::move(view_holder_token1), ""));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/5, /*child_id=*/4));
+  expected.push_back(scenic::NewSetLabelCmd(/*id=*/5, "flutter::ViewHolder"));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/4, /*child_id=*/6));
   expected.push_back(scenic::NewAddChildCmd(/*id=*/3, /*child_id=*/5));
-  expected.push_back(scenic::NewAddChildCmd(/*id=*/2, /*child_id=*/4));
 
   // Check opacity value. Extra rounding required because we pass alpha as
   // a uint/SkAlpha to SceneUpdateContext::Frame.
   float opacity1 = kOneMinusEpsilon * (127 / 255.f) * (127 / 255.f);
   opacity1 = SkScalarRoundToInt(opacity1 * 255) / 255.f;
-  expected.push_back(scenic::NewSetOpacityCmd(/*id=*/4, opacity1));
-  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/3, {1, 1, -0.1}));
+  expected.push_back(scenic::NewSetOpacityCmd(/*id=*/5, opacity1));
+  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/4, {1, 1, -0.1}));
   expected.push_back(scenic::NewSetHitTestBehaviorCmd(
-      /*id=*/3, /*ignored*/ fuchsia::ui::gfx::HitTestBehavior::kSuppress));
+      /*id=*/4, /*ignored*/ fuchsia::ui::gfx::HitTestBehavior::kSuppress));
 
   //
-  // Child #2: PhysicalShapeLayer
+  // TransformLayer Child #2: PhysicalShapeLayer
   //
-  expected.push_back(scenic::NewCreateEntityNodeCmd(/*id=*/6));
-  expected.push_back(scenic::NewAddChildCmd(/*id=*/2, /*child_id=*/6));
-  expected.push_back(scenic::NewCreateOpacityNodeCmdHACK(/*id=*/7));
+  expected.push_back(scenic::NewCreateEntityNodeCmd(/*id=*/7));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/3, /*child_id=*/7));
+  expected.push_back(scenic::NewCreateOpacityNodeCmdHACK(/*id=*/8));
   expected.push_back(
-      scenic::NewSetLabelCmd(/*id=*/6, "flutter::PhysicalShapeLayer"));
+      scenic::NewSetLabelCmd(/*id=*/7, "flutter::PhysicalShapeLayer"));
   expected.push_back(scenic::NewSetTranslationCmd(
-      /*id=*/6, {0, 0, -kScenicZElevationBetweenLayers}));
-  expected.push_back(scenic::NewAddChildCmd(/*id=*/6, /*child_id=*/7));
+      /*id=*/7, {0, 0, -kScenicZElevationBetweenLayers}));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/7, /*child_id=*/8));
 
   // Check opacity value. Extra rounding required because we pass alpha as
   // a uint/SkAlpha to SceneUpdateContext::Frame.
   float opacity2 = kOneMinusEpsilon * (127 / 255.f) * (127 / 255.f);
   opacity2 = SkScalarRoundToInt(opacity2 * 255) / 255.f;
-  expected.push_back(scenic::NewSetOpacityCmd(/*id=*/7, opacity2));
-  expected.push_back(scenic::NewSetClipPlanesCmd(/*id=*/6, /*ignored*/ {}));
-  expected.push_back(scenic::NewCreateShapeNodeCmd(/*id=*/8));
+  expected.push_back(scenic::NewSetOpacityCmd(/*id=*/8, opacity2));
+  expected.push_back(scenic::NewSetClipPlanesCmd(/*id=*/7, /*ignored*/ {}));
+  expected.push_back(scenic::NewCreateShapeNodeCmd(/*id=*/9));
   expected.push_back(scenic::NewCreateRectangleCmd(
-      /*id=*/9, /*width=*/10, /*height=*/10));
-  expected.push_back(scenic::NewSetShapeCmd(/*id=*/8, /*shape_id=*/9));
-  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/8, {5, 5, 0}));
-  expected.push_back(scenic::NewCreateMaterialCmd(/*id=*/10));
-  expected.push_back(scenic::NewSetMaterialCmd(/*id=*/8,
-                                               /*material_id=*/10));
-  expected.push_back(scenic::NewAddChildCmd(/*id=*/6,
-                                            /*child_id=*/8));
+      /*id=*/10, /*width=*/10, /*height=*/10));
+  expected.push_back(scenic::NewSetShapeCmd(/*id=*/9, /*shape_id=*/10));
+  expected.push_back(scenic::NewSetTranslationCmd(/*id=*/9, {5, 5, 0}));
+  expected.push_back(scenic::NewCreateMaterialCmd(/*id=*/11));
+  expected.push_back(scenic::NewSetMaterialCmd(/*id=*/9,
+                                               /*material_id=*/11));
+  expected.push_back(scenic::NewAddChildCmd(/*id=*/7,
+                                            /*child_id=*/9));
 
-  expected.push_back(scenic::NewCreateImageCmd(/*id=*/11, 0, 0, {}));
-  expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/6));
-  expected.push_back(scenic::NewSetColorCmd(/*id=*/10, /*r*/ 255,
+  expected.push_back(scenic::NewCreateImageCmd(/*id=*/12, 0, 0, {}));
+  expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/7));
+  expected.push_back(scenic::NewSetColorCmd(/*id=*/11, /*r*/ 255,
                                             /*g*/ 255,
                                             /*b*/ 255, /*a*/ 63));
   expected.push_back(
-      scenic::NewSetTextureCmd(/*material_id=*/10, /*texture_id=*/11));
+      scenic::NewSetTextureCmd(/*material_id=*/11, /*texture_id=*/12));
+  expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/11));
   expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/10));
   expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/9));
   expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/8));
-  expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/7));
+  expected.push_back(scenic::NewReleaseResourceCmd(/*id=*/3));
 
   test_context->mock_session.SetExpectedCommands(std::move(expected));
 
@@ -761,7 +789,7 @@ TEST_F(FuchsiaLayerTest, Opacity) {
       async_loop_from_dispatcher(async_get_default_dispatcher()));
 
   // Ensure we saw enough commands.
-  EXPECT_EQ(39u, test_context->mock_session.num_enqueued_commands());
+  EXPECT_EQ(46u, test_context->mock_session.num_enqueued_commands());
 }
 
 }  // namespace testing
