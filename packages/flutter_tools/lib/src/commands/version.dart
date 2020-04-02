@@ -88,8 +88,14 @@ class VersionCommand extends FlutterCommand {
     }
 
     final String version = argResults.rest[0].replaceFirst('v', '');
-    if (!tags.contains(version)) {
+    final List<String> matchingTags = tags.where((String tag) => tag.contains(version)).toList();
+    String matchingTag;
+    // TODO(fujino): make this a tool exit and fix tests
+    if (matchingTags.isEmpty) {
       globals.printError('There is no version: $version');
+      matchingTag = version;
+    } else {
+      matchingTag = matchingTags.first;
     }
 
     // check min supported version
@@ -113,7 +119,7 @@ class VersionCommand extends FlutterCommand {
 
     try {
       await processUtils.run(
-        <String>['git', 'checkout', version],
+        <String>['git', 'checkout', matchingTag],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
