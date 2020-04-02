@@ -1,4 +1,4 @@
-Signature: a8a81675aedb136a08fdd2ffe69e72e9
+Signature: 9d8b38d1dab95f90a0c6ecfc899fb210
 
 UNUSED LICENSES:
 
@@ -1285,6 +1285,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/confetti.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/drinks.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/lego_loader.json
 FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/onboarding.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/matrix.bench.js
 FILE: ../../../third_party/skia/modules/canvaskit/postamble.js
 FILE: ../../../third_party/skia/modules/canvaskit/preamble.js
 FILE: ../../../third_party/skia/modules/canvaskit/ready.js
@@ -5605,8 +5606,10 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/Animator.h
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.h
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Scalar.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Shape.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Vector.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Vector.h
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
