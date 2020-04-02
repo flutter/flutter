@@ -8841,6 +8841,34 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get todayLabel => 'I dag';
 }
 
+/// The translations for Norwegian Bokmål (`nb`).
+class CupertinoLocalizationNb extends CupertinoLocalizationNo {
+  /// Create an instance of the translation bundle for Norwegian Bokmål.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationNb({
+    String localeName = 'nb',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+}
+
 /// The translations for Oriya (`or`).
 class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Oriya.

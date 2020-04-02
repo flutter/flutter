@@ -13269,6 +13269,36 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'SE LISENSER';
 }
 
+/// The translations for Norwegian Bokmål (`nb`).
+class MaterialLocalizationNb extends MaterialLocalizationNo {
+  /// Create an instance of the translation bundle for Norwegian Bokmål.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationNb({
+    String localeName = 'nb',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+}
+
 /// The translations for Oriya (`or`).
 class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Oriya.

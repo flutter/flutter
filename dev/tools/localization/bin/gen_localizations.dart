@@ -117,7 +117,7 @@ String generateArbBasedLocalizationSubclasses({
 
   // If scriptCodes for a language are defined, we expect a scriptCode to be
   // defined for locales that contain a countryCode. The superclass becomes
-  // the script sublcass (e.g. `MaterialLocalizationZhHant`) and the generated
+  // the script subclass (e.g. `MaterialLocalizationZhHant`) and the generated
   // subclass will also contain the script code (e.g. `MaterialLocalizationZhHantTW`).
 
   // When scriptCodes are not defined for languages that use scriptCodes to distinguish
@@ -212,6 +212,22 @@ String generateArbBasedLocalizationSubclasses({
        output.writeln('}');
       }
     }
+
+    // See https://github.com/flutter/flutter/issues/53036 for context on why
+    // 'no' is being used as a synonym for 'nb'. It only uses this synonym
+    // if 'nb' is not detected as a valid arb file.
+    if (languageName == 'no' && !languageCodes.contains('nb')) {
+      output.writeln(generateClassDeclaration(
+        LocaleInfo.fromString('nb'),
+        generatedClassPrefix,
+        '${generatedClassPrefix}No'),
+      );
+      output.writeln(generateConstructor(
+        LocaleInfo.fromString('nb')),
+      );
+      output.writeln('}');
+    }
+
     final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
     if (countryCodeCount == 0) {
       if (scriptCodeCount == 0)
