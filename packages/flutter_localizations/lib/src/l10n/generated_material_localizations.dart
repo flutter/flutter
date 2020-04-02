@@ -19376,8 +19376,8 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `my` - Burmese
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
-///  * `nb` - Norwegian Bokmål, which is synonymous with `no` in this library
 ///  * `no` - Norwegian
+///  * `nb` - Norwegian Bokmål, which is synonymous with `no` in this library
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
