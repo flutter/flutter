@@ -43,6 +43,7 @@ Map<String, Scenario> _scenarios = <String, Scenario>{
 Scenario _currentScenario = _scenarios['animated_color_square'];
 
 void main() {
+  assert(window.locale != null);
   window
     ..onPlatformMessage = _handlePlatformMessage
     ..onBeginFrame = _onBeginFrame
