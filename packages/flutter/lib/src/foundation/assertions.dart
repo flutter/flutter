@@ -926,7 +926,7 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
     // is addressed.
     lines = lines.skipWhile((String line) {
       return line.contains('StackTrace.current') ||
-             line.contains('dart:sdk_internal');
+             line.contains('dart-sdk/lib/_internal');
     });
   }
   if (maxFrames != null)
