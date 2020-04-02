@@ -131,7 +131,6 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
     if (alreadyUpToDate) {
@@ -215,62 +214,6 @@ class UpgradeCommandRunner {
         'Unable to upgrade Flutter: no origin repository configured. '
         "Run 'git remote add origin "
         "https://github.com/flutter/flutter' in $workingDirectory",
-      );
-    }
-  }
-
-  /// Checks git tags for all known forms of a version
-  ///
-  /// Currently checks for tags of the forms `v1.2.3` and `1.2.3-dev.4.5`.
-  Future<String> detectTag(GitTagVersion gitTagVersion) async {
-    final List<String> tags = <String>[
-      'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}',
-      '${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}-dev.0.0',
-    ];
-    for (final String tag in tags) {
-      final RunResult result = await processUtils.run(
-        <String>['git', 'tag', '--list', tag],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
-      if (result.stdout.isNotEmpty) {
-        globals.printStatus('found :\"${result.stdout.trim()}\"');
-        return result.stdout.trim();
-      }
-      globals.printStatus('tag: $tag\n${result.stdout.length}');
-    }
-    exit(1);
-    return null;
-  }
-
-  /// Attempts to reset to the last non-hotfix tag.
-  ///
-  /// If the git history is on a hotfix, doing a fast forward will not pick up
-  /// major or minor version upgrades. By resetting to the point before the
-  /// hotfix, doing a git fast forward should succeed.
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    // We only need to reset if we're on a hotfix version
-    if (gitTagVersion.hotfix == null) {
-      return;
-    }
-    String tag;
-    if (gitTagVersion == const GitTagVersion.unknown()) {
-      tag = 'v0.0.0';
-    } else {
-      tag = await detectTag(gitTagVersion);
-    }
-    try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', tag],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
-    } on ProcessException catch (error) {
-      throwToolExit(
-        'Unable to upgrade Flutter: The tool could not update to the version $tag. '
-        'This may be due to git not being installed or an internal error. '
-        'Please ensure that git is installed on your computer and retry again.'
-        '\nError: $error.'
       );
     }
   }
