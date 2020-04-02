@@ -20,7 +20,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
-void main() {
+void testValidateReloadReport() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
       expect(HotRunner.validateReloadReport(<String, dynamic>{}), false);
