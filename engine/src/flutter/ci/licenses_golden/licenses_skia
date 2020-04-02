@@ -1,4 +1,4 @@
-Signature: 700acd3a99866d4d13b956193c9255f1
+Signature: 9d9bbbc53975fe3640278f517c6d165c
 
 UNUSED LICENSES:
 
@@ -3233,7 +3233,6 @@ FILE: ../../../third_party/skia/gm/scaledemoji.cpp
 FILE: ../../../third_party/skia/gm/scaledemoji_rendering.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
-FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
 FILE: ../../../third_party/skia/gm/unpremul.cpp
 FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
