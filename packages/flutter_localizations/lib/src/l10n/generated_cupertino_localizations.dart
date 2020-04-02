@@ -8397,6 +8397,34 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get todayLabel => 'ယနေ့';
 }
 
+/// The translations for Norwegian Bokmål (`nb`).
+class CupertinoLocalizationNb extends CupertinoLocalizationNo {
+  /// Create an instance of the translation bundle for Norwegian Bokmål.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationNb({
+    String localeName = 'nb',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+}
+
 /// The translations for Nepali (`ne`).
 class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Nepali.
@@ -8839,34 +8867,6 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'I dag';
-}
-
-/// The translations for Norwegian Bokmål (`nb`).
-class CupertinoLocalizationNb extends CupertinoLocalizationNo {
-  /// Create an instance of the translation bundle for Norwegian Bokmål.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalizationNb({
-    String localeName = 'nb',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat dayFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat singleDigitHourFormat,
-    @required intl.DateFormat singleDigitMinuteFormat,
-    @required intl.DateFormat doubleDigitMinuteFormat,
-    @required intl.DateFormat singleDigitSecondFormat,
-    @required intl.NumberFormat decimalFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
 }
 
 /// The translations for Oriya (`or`).
@@ -12819,6 +12819,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'mr', // Marathi
   'ms', // Malay
   'my', // Burmese
+  'nb', // Norwegian Bokmål
   'ne', // Nepali
   'nl', // Dutch Flemish
   'no', // Norwegian
@@ -12907,10 +12908,10 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `my` - Burmese
+///  * `nb` - Norwegian Bokmål
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
 ///  * `no` - Norwegian
-///  * `nb` - Norwegian Bokmål, which is synonymous with `no` in this library
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
@@ -13205,6 +13206,8 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
     }
     case 'zu':
       return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'nb':
+      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
   assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;

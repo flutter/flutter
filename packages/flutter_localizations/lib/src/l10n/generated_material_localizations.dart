@@ -12630,6 +12630,36 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'လိုင်စင်များကို ကြည့်ရန်';
 }
 
+/// The translations for Norwegian Bokmål (`nb`).
+class MaterialLocalizationNb extends MaterialLocalizationNo {
+  /// Create an instance of the translation bundle for Norwegian Bokmål.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationNb({
+    String localeName = 'nb',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+}
+
 /// The translations for Nepali (`ne`).
 class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Nepali.
@@ -13267,36 +13297,6 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => 'SE LISENSER';
-}
-
-/// The translations for Norwegian Bokmål (`nb`).
-class MaterialLocalizationNb extends MaterialLocalizationNo {
-  /// Create an instance of the translation bundle for Norwegian Bokmål.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationNb({
-    String localeName = 'nb',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat compactDateFormat,
-    @required intl.DateFormat shortDateFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.DateFormat shortMonthDayFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    compactDateFormat: compactDateFormat,
-    shortDateFormat: shortDateFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    shortMonthDayFormat: shortMonthDayFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
 }
 
 /// The translations for Oriya (`or`).
@@ -19285,6 +19285,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'mr', // Marathi
   'ms', // Malay
   'my', // Burmese
+  'nb', // Norwegian Bokmål
   'ne', // Nepali
   'nl', // Dutch Flemish
   'no', // Norwegian
@@ -19374,10 +19375,10 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `my` - Burmese
+///  * `nb` - Norwegian Bokmål
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
 ///  * `no` - Norwegian
-///  * `nb` - Norwegian Bokmål, which is synonymous with `no` in this library
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
@@ -19681,6 +19682,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
     }
     case 'zu':
       return MaterialLocalizationZu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'nb':
+      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
   assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;
