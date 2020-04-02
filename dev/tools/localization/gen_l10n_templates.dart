@@ -212,46 +212,23 @@ const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupCountryCodeSpecified)
   @(lookupLanguageCodeSpecified)''';
 
-
-// GENERAL LOOKUP TEMPLATE
 const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
 
-// SCRIPT AND COUNTRY CODE LOOKUP TEMPLATES
-const String allCodesSpecifiedTemplate = '''if (locale.countryCode != null && locale.scriptCode != null) {
-  // scriptCodeSwitchLogic
-  switch(locale.scriptCode) {
-    @(switchClauses)
-  }
-}''';
-
-// SCRIPT CODE LOOKUP TEMPLATES
-const String scriptCodeSwitchTemplate = '''case '@(languageCode)': {
-      switch (locale.scriptCode) {
+const String nestedSwitchTemplate = '''case '@(languageCode)': {
+      switch (locale.@(code)) {
         @(switchClauses)
       }
       break;
     }''';
 
-const String scriptCodeLookupTemplate = '''switch (locale.languageCode) {
-    @(scriptCodeSwitchClauses)
-  }
-''';
-
-// COUNTRY CODE LOOKUP TEMPLATES
-const String countryCodeSwitchTemplate = '''case '@(languageCode)': {
-      switch (locale.countryCode) {
-        @(switchClauses)
-      }
-      break;
-    }''';
-
-const String countryCodeLookupTemplate = '''switch (locale.languageCode) {
-    @(countryCodeSwitchClauses)
-  }
-''';
-
-// LANGUAGE CODE LOOKUP TEMPLATES
-const String languageCodeSwitchTemplate = '''switch (locale.languageCode) {
+const String languageCodeSwitchTemplate = '''@(comment)
+  switch (locale.languageCode) {
     @(switchClauses)
+  }
+''';
+
+const String allCodesLookupTemplate = '''// Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    @(allCodesSwitchClauses)
   }
 ''';
