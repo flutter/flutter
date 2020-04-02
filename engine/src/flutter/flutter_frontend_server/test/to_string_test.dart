@@ -270,9 +270,13 @@ void main(List<String> args) async {
       ]));
       final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
       _checkProcessResult(runResult);
+      String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
+      if (const bool.fromEnvironment('dart.vm.product', defaultValue: false)) {
+        paintString = '"Paint.toString":"Instance of \'Paint\'"';
+      }
       expect(
         runResult.stdout.trim(),
-        '{"Paint.toString":"Paint(Color(0xffffffff))",'
+        '{$paintString,'
          '"Brightness.toString":"Brightness.dark",'
          '"Foo.toString":"I am a Foo",'
          '"Keep.toString":"I am a Keep"}',
