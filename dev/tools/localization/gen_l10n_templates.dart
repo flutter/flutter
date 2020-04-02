@@ -207,7 +207,7 @@ const String baseClassMethodTemplate = '''
 
 // DELEGATE LOOKUP TEMPLATES
 
-const String lookupBodyTemplate = '''//@(lookupAllCodesSpecified)
+const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupScriptCodeSpecified)
   @(lookupCountryCodeSpecified)
   @(lookupLanguageCodeSpecified)''';

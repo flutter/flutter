@@ -255,6 +255,32 @@ String generateBaseClassMethod(Message message) {
     .replaceAll('@(name)', message.resourceId);
 }
 
+const String allCodesLookupTemplate = '''switch (locale.toString()) {
+    @(allCodesSwitchClauses)
+  }
+''';
+
+String generateLookupByAllCodes(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((LocaleInfo locale) {
+    return locale.scriptCode != null && locale.countryCode != null;
+  });
+
+  final Iterable<String> switchClauses = localesWithAllCodes.map<String>((LocaleInfo locale) {
+    return switchClauseTemplate
+      .replaceAll('@(case)', locale.toString())
+      .replaceAll('@(class)', '$className${locale.camelCase()}');
+  });
+
+  if (switchClauses.isEmpty) {
+    return '';
+  }
+
+  return allCodesLookupTemplate.replaceAll(
+    '@(allCodesSwitchClauses)',
+    switchClauses.join('\n    '),
+  );
+}
+
 String generateLookupByScriptCode(AppResourceBundleCollection allBundles, String className) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
@@ -273,13 +299,15 @@ String generateLookupByScriptCode(AppResourceBundleCollection allBundles, String
             .replaceAll('@(case)', locale.scriptCode)
             .replaceAll('@(class)', '$className${locale.camelCase()}');
         }).join('\n        '));
-  });
+  }).where((String switchClause) => switchClause != null);
 
-  return countryCodeLookupTemplate.replaceAll(
-    '@(countryCodeSwitchClauses)',
-    switchClauses
-      .where((String switchClause) => switchClause != null)
-      .join('\n    ')
+  if (switchClauses.isEmpty) {
+    return '';
+  }
+
+  return scriptCodeLookupTemplate.replaceAll(
+    '@(scriptCodeSwitchClauses)',
+    switchClauses.join('\n    '),
   );
 }
 
@@ -309,7 +337,7 @@ String generateLookupByCountryCode(AppResourceBundleCollection allBundles, Strin
 
   return countryCodeLookupTemplate.replaceAll(
     '@(countryCodeSwitchClauses)',
-    switchClauses.join('\n    ')
+    switchClauses.join('\n    '),
   );
 }
 
@@ -342,6 +370,7 @@ String generateLookupByLanguageCode(AppResourceBundleCollection allBundles, Stri
 
 String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
   return lookupBodyTemplate
+    .replaceAll('@(lookupAllCodesSpecified)', generateLookupByAllCodes(allBundles, className))
     .replaceAll('@(lookupCountryCodeSpecified)', generateLookupByCountryCode(allBundles, className))
     .replaceAll('@(lookupScriptCodeSpecified)', generateLookupByScriptCode(allBundles, className))
     .replaceAll('@(lookupLanguageCodeSpecified)', generateLookupByLanguageCode(allBundles, className));
