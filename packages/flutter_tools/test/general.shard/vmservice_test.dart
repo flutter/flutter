@@ -104,7 +104,6 @@ void main() {
       const Stream<dynamic>.empty(),
     );
 
-    verify(mockVmService.registerServiceCallback('streamNotify', any)).called(1);
     verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
 
     when(mockVmService.callServiceExtension('getVM',
