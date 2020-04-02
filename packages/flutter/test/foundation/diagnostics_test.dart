@@ -1232,7 +1232,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(
