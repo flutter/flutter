@@ -12909,6 +12909,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `my` - Burmese
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
+///  * `nb` - Norwegian Bokmål, which is synonymous with `no` in this library
 ///  * `no` - Norwegian
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi

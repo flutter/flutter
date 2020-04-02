@@ -226,6 +226,8 @@ String generateArbBasedLocalizationSubclasses({
         LocaleInfo.fromString('nb')),
       );
       output.writeln('}');
+
+        supportedLocales.writeln('///  * `nb` - ${describeLocale('nb')}, which is synonymous with `no` in this library');
     }
 
     final String scriptCodeMessage = scriptCodeCount == 0 ? '' : ' and $scriptCodeCount script' + (scriptCodeCount == 1 ? '' : 's');
