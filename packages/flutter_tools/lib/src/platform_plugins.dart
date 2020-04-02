@@ -199,14 +199,16 @@ class IOSPlugin extends PluginPlatform {
 class MacOSPlugin extends PluginPlatform {
   const MacOSPlugin({
     @required this.name,
-    @required this.pluginClass,
+    this.pluginClass,
+    this.dartPluginClass,
   });
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -214,19 +216,21 @@ class MacOSPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
   }
 
   static const String kConfigKey = 'macos';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
       'class': pluginClass,
+      'dartPluginClass': dartPluginClass,
     };
   }
 }

@@ -1100,7 +1100,8 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     await _writeLinuxPluginFiles(project, nativePlugins);
   }
   if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
-    await _writeMacOSPluginRegistrant(project, plugins);
+    final List<Plugin>nativePlugins = _filterNativePlugins(plugins, MacOSPlugin.kConfigKey);
+    await _writeMacOSPluginRegistrant(project, nativePlugins);
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
