@@ -394,8 +394,11 @@ class Environment {
 
   /// The `BUILD_DIR` environment variable.
   ///
-  /// Defaults to `{PROJECT_ROOT}/build`. The root of the output directory where
-  /// build step intermediates and outputs are written.
+  /// The root of the output directory where build step intermediates and
+  /// outputs are written. Current usages of assemble configure ths to be
+  /// a unique directory under `.dart_tool/flutter_build`, though it can
+  /// be placed anywhere. The uniqueness is only enforced by callers, and
+  /// is currently done by hashing the build configuration.
   final Directory buildDir;
 
   /// The `CACHE_DIR` environment variable.
