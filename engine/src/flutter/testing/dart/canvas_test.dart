@@ -181,7 +181,7 @@ void main() {
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'canvas_test_gradient.png');
     expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+  });
 
   test('Simple dithered gradient', () async {
     Paint.enableDithering = true;
@@ -197,5 +197,5 @@ void main() {
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'canvas_test_dithered_gradient.png');
     expect(areEqual, true);
-  }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
+  });
 }
