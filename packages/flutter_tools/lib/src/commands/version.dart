@@ -95,7 +95,7 @@ class VersionCommand extends FlutterCommand {
       globals.printError('There is no version: $version');
       matchingTag = version;
     } else {
-      matchingTag = matchingTags.first;
+      matchingTag = matchingTags.first.trim();
     }
 
     // check min supported version
