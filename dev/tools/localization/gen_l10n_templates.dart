@@ -205,14 +205,18 @@ const String baseClassMethodTemplate = '''
   String @(name)(@(parameters));
 ''';
 
+// DELEGATE LOOKUP TEMPLATES
+
 const String lookupBodyTemplate = '''//@(lookupAllCodesSpecified)
-
   @(lookupScriptCodeSpecified)
-
   @(lookupCountryCodeSpecified)
+  @(lookupLanguageCodeSpecified)''';
 
-  //@(lookupLanguageCodeSpecified)''';
 
+// GENERAL LOOKUP TEMPLATE
+const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
+
+// SCRIPT AND COUNTRY CODE LOOKUP TEMPLATES
 const String allCodesSpecifiedTemplate = '''if (locale.countryCode != null && locale.scriptCode != null) {
   // scriptCodeSwitchLogic
   switch(locale.scriptCode) {
@@ -220,6 +224,7 @@ const String allCodesSpecifiedTemplate = '''if (locale.countryCode != null && lo
   }
 }''';
 
+// SCRIPT CODE LOOKUP TEMPLATES
 const String scriptCodeSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.scriptCode) {
         @(switchClauses)
@@ -229,10 +234,10 @@ const String scriptCodeSwitchTemplate = '''case '@(languageCode)': {
 
 const String scriptCodeLookupTemplate = '''switch (locale.languageCode) {
     @(scriptCodeSwitchClauses)
-  }''';
+  }
+''';
 
-const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
-
+// COUNTRY CODE LOOKUP TEMPLATES
 const String countryCodeSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.countryCode) {
         @(switchClauses)
@@ -242,4 +247,11 @@ const String countryCodeSwitchTemplate = '''case '@(languageCode)': {
 
 const String countryCodeLookupTemplate = '''switch (locale.languageCode) {
     @(countryCodeSwitchClauses)
-  }''';
+  }
+''';
+
+// LANGUAGE CODE LOOKUP TEMPLATES
+const String languageCodeSwitchTemplate = '''switch (locale.languageCode) {
+    @(switchClauses)
+  }
+''';
