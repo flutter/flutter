@@ -564,11 +564,15 @@ class HotRunner extends ResidentRunner {
     if (benchmarkMode) {
       final List<Future<void>> isolateNotifications = <Future<void>>[];
       for (final FlutterDevice device in flutterDevices) {
-        await device.vmService.streamListen('Isolate');
+        try {
+          await device.vmService.streamListen('Isolate');
+        } on vm_service.RPCError {
+          // Do nothing, we're already subcribed.
+        }
         for (final FlutterView view in device.views) {
           isolateNotifications.add(
             view.owner.vm.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-              return event.kind == vm_service.EventKind.kIsolateExit;
+              return event.kind == vm_service.EventKind.kServiceExtensionAdded;
             }),
           );
         }
