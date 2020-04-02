@@ -42,8 +42,6 @@ source_set("flutter_glfw") {
     "text_input_plugin.h",
   ]
 
-  defines = [ "USE_RAPID_JSON" ]
-
   configs +=
       [ "//flutter/shell/platform/common/cpp:desktop_library_implementation" ]
 
