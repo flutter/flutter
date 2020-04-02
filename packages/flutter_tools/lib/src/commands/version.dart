@@ -45,7 +45,7 @@ class VersionCommand extends FlutterCommand {
     RunResult runResult;
     try {
       runResult = await processUtils.run(
-        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        <String>['git', 'tag', '-l', '*.*.*', '--sort=-creatordate'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
@@ -88,7 +88,7 @@ class VersionCommand extends FlutterCommand {
     }
 
     final String version = argResults.rest[0].replaceFirst('v', '');
-    if (!tags.contains('v$version')) {
+    if (!tags.contains(version)) {
       globals.printError('There is no version: $version');
     }
 
@@ -113,7 +113,7 @@ class VersionCommand extends FlutterCommand {
 
     try {
       await processUtils.run(
-        <String>['git', 'checkout', 'v$version'],
+        <String>['git', 'checkout', version],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
