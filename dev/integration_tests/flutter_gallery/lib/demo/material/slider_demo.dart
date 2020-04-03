@@ -273,7 +273,7 @@ class _SlidersState extends State<_Sliders> {
                   ),
                 ),
               ),
-              Slider(
+              Slider.adaptive(
                 label: _continuousValue.toStringAsFixed(6).toString(),
                 value: _continuousValue,
                 min: 0.0,
