@@ -85,6 +85,28 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
   /// its subclasses, and only when [enabled] is true.
+  ///
+  /// When overriding this method, the returned value can be any Object, but
+  /// changing the return type of the override to match the type of the returned
+  /// value provides more type safety.
+  ///
+  /// For instance, if your override if `invoke` returns an `int`, then define
+  /// it like so:
+  ///
+  /// ```dart
+  /// class IncrementIntent extends Intent {
+  ///   const IncrementIntent({this.index});
+  ///
+  ///   final int index;
+  /// }
+  ///
+  /// class MyIncrementAction extends Action<IncrementIntent> {
+  ///   @override
+  ///   int invoke(IncrementIntent intent) {
+  ///     return intent.index + 1;
+  ///   }
+  /// }
+  /// ```
   @protected
   Object invoke(covariant T intent);
 
@@ -261,12 +283,33 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// [ActionDispatcher.invokeAction] directly.
   ///
   /// This method is only meant to be invoked by an [ActionDispatcher], or by
-  /// its subclasses, and only when [enabled] is true, not to be called
-  /// directly.
+  /// its subclasses, and only when [enabled] is true.
   ///
   /// The optional `context` parameter is the context of the invocation of the
   /// action, and in the case of an action invoked by a [ShortcutsManager], via
   /// a [Shortcuts] widget, will be the context of the [Shortcuts] widget.
+  ///
+  /// When overriding this method, the returned value can be any Object, but
+  /// changing the return type of the override to match the type of the returned
+  /// value provides more type safety.
+  ///
+  /// For instance, if your override if `invoke` returns an `int`, then define
+  /// it like so:
+  ///
+  /// ```dart
+  /// class IncrementIntent extends Intent {
+  ///   const IncrementIntent({this.index});
+  ///
+  ///   final int index;
+  /// }
+  ///
+  /// class MyIncrementAction extends ContextAction<IncrementIntent> {
+  ///   @override
+  ///   int invoke(IncrementIntent intent, [BuildContext context]) {
+  ///     return intent.index + 1;
+  ///   }
+  /// }
+  /// ```
   @protected
   @override
   Object invoke(covariant T intent, [BuildContext context]);
@@ -431,11 +474,9 @@ class Actions extends StatefulWidget {
   /// `onTap` handler, which takes a `VoidCallback`, and can be set to the
   /// result of calling this function.
   ///
-  /// Creates a dependency on the [Actions] widget that the bound action is
-  /// found in so that if the actions change, the context will be rebuilt and
-  /// find the updated action. If you cache the result of this function, you
-  /// should refresh your cached value in [State.didChangeDependencies], since a
-  /// change in dependencies may change the enabled state of the action.
+  /// Creates a dependency on the [Actions] widget that maps the bound action so
+  /// that if the actions change, the context will be rebuilt and find the
+  /// updated action.
   static VoidCallback handler<T extends Intent>(BuildContext context, T intent, {bool nullOk = false}) {
     final Action<T> action = Actions.find<T>(context, nullOk: nullOk);
     if (action != null && action.enabled) {
@@ -448,11 +489,9 @@ class Actions extends StatefulWidget {
 
   /// Finds the [Action] bound to the given intent type `T` in the given `context`.
   ///
-  /// Creates a dependency on the [Actions] widget that the bound action is
-  /// found in so that if the actions change, the context will be rebuilt and
-  /// find the updated action. If you cache the result of this function, you
-  /// should refresh your cached value in [State.didChangeDependencies], since a
-  /// change in dependencies may change the enabled state of the action.
+  /// Creates a dependency on the [Actions] widget that maps the bound action so
+  /// that if the actions change, the context will be rebuilt and find the
+  /// updated action.
   static Action<T> find<T extends Intent>(BuildContext context, {bool nullOk = false}) {
     Action<T> action;
 
