@@ -512,9 +512,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
-    print('_handleFocusHighlightChanged');
     if (focused != _focused) {
-      print('setState');
       setState(() { _focused = focused; });
     }
   }
