@@ -1213,12 +1213,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
     expect(
       semantics,
       hasSemantics(
-        TestSemantics(
-          id: 0,
+        TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
@@ -1256,12 +1254,19 @@ void main() {
     ));
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: [
+            TestSemantics.rootChild(
+              id: 3,
+            )
+          ]
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
@@ -1292,19 +1297,28 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        TestSemantics.root(children: <TestSemantics>[
-          TestSemantics.rootChild(
-            id: 1,
-            value: '50%',
-            increasedValue: '60%',
-            decreasedValue: '40%',
-            textDirection: TextDirection.ltr,
-            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-          ),
-        ]),
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  value: '50%',
+                  increasedValue: '60%',
+                  decreasedValue: '40%',
+                  textDirection: TextDirection.ltr,
+                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                ),
+              ],
+            )
+          ],
+        ),
         ignoreRect: true,
         ignoreTransform: true,
-      ));
+      ),
+    );
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
@@ -1329,21 +1343,31 @@ void main() {
     ));
 
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(children: <TestSemantics>[
-            TestSemantics.rootChild(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
               id: 1,
-              value: '40',
-              increasedValue: '60',
-              decreasedValue: '20',
-              textDirection: TextDirection.ltr,
-              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-            ),
-          ]),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  value: '40',
+                  increasedValue: '60',
+                  decreasedValue: '20',
+                  textDirection: TextDirection.ltr,
+                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                ),
+              ],
+            )
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
     semantics.dispose();
   });
 

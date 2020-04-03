@@ -955,7 +955,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _updateLabelPainter();
   }
 
-  /// True if this toggleable has the input focus.
+  /// True if this slider has the input focus.
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
   set hasFocus(bool value) {
@@ -970,7 +970,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
   }
 
-  /// True if this toggleable is being hovered over by a pointer.
+  /// True if this slider is being hovered over by a pointer.
   bool get hovering => _hovering;
   bool _hovering;
   set hovering(bool value) {
