@@ -396,6 +396,39 @@ void main() {
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
       }, skip: isBrowser);
+
+      test('NetworkImage is evicted from cache on SocketException', () async {
+        final MockHttpClient mockHttpClient = MockHttpClient();
+        when(mockHttpClient.getUrl(any)).thenAnswer((_) => throw const SocketException('test exception'));
+        debugNetworkImageHttpClientProvider = () => mockHttpClient;
+
+
+        final ImageProvider imageProvider = NetworkImage(nonconst('testing.url'));
+        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.statusForKey(imageProvider).untracked, true);
+
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+
+        expect(imageCache.pendingImageCount, 1);
+        expect(imageCache.statusForKey(imageProvider).pending, true);
+        final Completer<dynamic> caughtError = Completer<dynamic>();
+        result.addListener(ImageStreamListener(
+          (ImageInfo info, bool syncCall) {},
+          onError: (dynamic error, StackTrace stackTrace) {
+            caughtError.complete(error);
+          },
+        ));
+
+        final dynamic err = await caughtError.future;
+
+        expect(err, isA<SocketException>());
+
+        expect(imageCache.pendingImageCount, 0);
+        expect(imageCache.statusForKey(imageProvider).untracked, true);
+        expect(imageCache.containsKey(result), isFalse);
+
+        debugNetworkImageHttpClientProvider = null;
+      }, skip: isBrowser); // Browser does not resolve images this way.
     });
   });
 
