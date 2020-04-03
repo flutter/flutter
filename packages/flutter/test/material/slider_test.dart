@@ -1622,7 +1622,7 @@ void main() {
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
 
-      final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));R
+      final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));
 
       expect(
         slider,
