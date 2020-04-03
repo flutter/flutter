@@ -13,9 +13,18 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///
 /// {@macro flutter.services.autofill.AutofillScope}
 ///
+/// The [AutofillGroup] widget finds its [AutofillClient]s by traversing its
+/// subtree using [Element.visitChildElements], looking for [Element]s or [State]s
+/// that are [AutofillClient]s. Other [AutofillGroup] nodes and their subtrees
+/// will be ignored in this process. As a result, [AutofillGroup] will not pick
+/// up [AutofillClient]s that are not mounted, for example, an [AutofillClient]
+/// within a [Scrollable] that has never been scrolled into the viewport. To
+/// workaround this problem, ensure clients in the same [AutofillGroup] are built
+/// together:
+///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
-/// An example [Form] with autofillable username and password fields.
+/// An example form with autofillable fields grouped into different `AutofillGroup`s.
 ///
 /// ```dart
 ///  bool isSameAddress = true;
@@ -36,7 +45,7 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///        const Text('Shipping address'),
 ///        // The address fields are grouped together as some platforms are capable
 ///        // of autofilling all these fields in one go.
-///        Autofill(
+///        AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
 ///              TextField(
@@ -58,7 +67,7 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///          },
 ///        ),
 ///        // Again the address fields are grouped together for the same reason.
-///        if (!isSameAddress) Autofill(
+///        if (!isSameAddress) AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
 ///              TextField(
@@ -75,7 +84,7 @@ export 'package:flutter/services.dart' show AutofillHints;
 ///        const Text('Credit Card Information'),
 ///        // The credit card number and the security code are grouped together as
 ///        // some platforms are capable of autofilling both fields.
-///        Autofill(
+///        AutofillGroup(
 ///          child: Column(
 ///            children: <Widget>[
 ///              TextField(
@@ -105,24 +114,13 @@ class AutofillGroup extends StatefulWidget {
   /// Creates a scope for autofillable input fields.
   ///
   /// The [child] argument must not be null.
-  ///
-  /// The [AutofillGroup] traverses its subtree using [Element.visitChildElements],
-  /// looking for [Element]s or [State]s that are [AutofillClient]s. Other
-  /// [AutofillGroup] nodes and their subtrees will be ignored in this process.
   const AutofillGroup({
     Key key,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
 
-  /// Returns the closest [AutofillScope]'s [State] which encloses the given context.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// FormState form = Form.of(context);
-  /// form.save();
-  /// ```
+  /// Returns the closest [AutofillScope] which encloses the given context.
   static _AutofillScopeState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
@@ -139,12 +137,6 @@ class AutofillGroup extends StatefulWidget {
   _AutofillScopeState createState() => _AutofillScopeState();
 }
 
-/// State associated with a [Form] widget.
-///
-/// A [FormState] object can be used to [save], [reset], and [validate] every
-/// [FormField] that is a descendant of the associated [Form].
-///
-/// Typically obtained via [Form.of].
 class _AutofillScopeState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   Iterable<AutofillClient> get autofillClients {
@@ -168,7 +160,7 @@ class _AutofillScopeState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   Widget build(BuildContext context) {
     return _AutofillScope(
-      formState: this,
+      autofillScopeState: this,
       child: widget.child,
     );
   }
@@ -178,8 +170,8 @@ class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
     Key key,
     Widget child,
-    _AutofillScopeState formState,
-  }) : _scope = formState,
+    _AutofillScopeState autofillScopeState,
+  }) : _scope = autofillScopeState,
        super(key: key, child: child);
 
   final _AutofillScopeState _scope;
