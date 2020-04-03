@@ -24,7 +24,7 @@ void main() {
   });
 
   group('GitHub template creator', () {
-    testWithoutContext('similar issues URL', () async {
+    testWithoutContext('similar issues URL', () {
       expect(
         GitHubTemplateCreator.toolCrashSimilarIssuesURL('this is a 100% error'),
         'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error',
