@@ -151,7 +151,7 @@ FontCollection::GetMinikinFontCollectionForFamilies(
   // Search for default font family if no user font families were found.
   if (minikin_families.empty()) {
     const auto default_font_families = GetDefaultFontFamilies();
-    for (auto family : default_font_families) {
+    for (const auto& family : default_font_families) {
       std::shared_ptr<minikin::FontFamily> minikin_family =
           FindFontFamilyInManagers(family);
       if (minikin_family != nullptr) {
@@ -166,7 +166,8 @@ FontCollection::GetMinikinFontCollectionForFamilies(
     return nullptr;
   }
   if (enable_font_fallback_) {
-    for (std::string fallback_family : fallback_fonts_for_locale_[locale]) {
+    for (const std::string& fallback_family :
+         fallback_fonts_for_locale_[locale]) {
       auto it = fallback_fonts_.find(fallback_family);
       if (it != fallback_fonts_.end()) {
         minikin_families.push_back(it->second);
