@@ -103,6 +103,28 @@ public class FlutterEngineTest {
   }
 
   @Test
+  public void itNotifiesPlatformViewsControllerAboutJNILifecycle() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+
+    // Execute behavior under test.
+    FlutterEngine engine =
+        new FlutterEngine(
+            RuntimeEnvironment.application,
+            mock(FlutterLoader.class),
+            mockFlutterJNI,
+            platformViewsController,
+            /*dartVmArgs=*/ new String[] {},
+            /*automaticallyRegisterPlugins=*/ false);
+    verify(platformViewsController, times(1)).onAttachedToJNI();
+
+    engine.destroy();
+    verify(platformViewsController, times(1)).onDetachedFromJNI();
+  }
+
+  @Test
   public void itUsesApplicationContext() {
     Context context = mock(Context.class);
 

@@ -225,6 +225,7 @@ public class FlutterEngine {
     textInputChannel = new TextInputChannel(dartExecutor);
 
     this.platformViewsController = platformViewsController;
+    this.platformViewsController.onAttachedToJNI();
 
     this.pluginRegistry =
         new FlutterEnginePluginRegistry(context.getApplicationContext(), this, flutterLoader);
@@ -289,6 +290,7 @@ public class FlutterEngine {
     Log.v(TAG, "Destroying.");
     // The order that these things are destroyed is important.
     pluginRegistry.destroy();
+    platformViewsController.onDetachedFromJNI();
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.detachFromNativeAndReleaseResources();
