@@ -5,14 +5,18 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart' show required;
-import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:stream_channel/stream_channel.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
-import 'convert.dart' show base64, json, utf8;
+import 'convert.dart' show base64, utf8;
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
@@ -21,24 +25,10 @@ import 'version.dart';
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
 
-WebSocketConnector _openChannel = _defaultOpenChannel;
+/// A function that opens a two-way communication channel to the specified [uri].
+typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri, {io.CompressionOptions compression});
 
-/// The error codes for the JSON-RPC standard.
-///
-/// See also: https://www.jsonrpc.org/specification#error_object
-abstract class RPCErrorCodes {
-  /// The method does not exist or is not available.
-  static const int kMethodNotFound = -32601;
-
-  /// Invalid method parameter(s), such as a mismatched type.
-  static const int kInvalidParams = -32602;
-
-  /// Internal JSON-RPC error.
-  static const int kInternalError = -32603;
-
-  /// Application specific error codes.s
-  static const int kServerError = -32000;
-}
+_OpenChannel _openChannel = _defaultOpenChannel;
 
 /// A function that reacts to the invocation of the 'reloadSources' service.
 ///
@@ -74,9 +64,7 @@ typedef ReloadMethod = Future<void> Function({
   String libraryId,
 });
 
-Future<io.WebSocket> _defaultOpenChannel(String url, {
-  io.CompressionOptions compression = io.CompressionOptions.compressionDefault
-}) async {
+Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
@@ -102,14 +90,14 @@ Future<io.WebSocket> _defaultOpenChannel(String url, {
   while (socket == null) {
     attempts += 1;
     try {
-      socket = await constructor(url, compression: compression);
+      socket = await constructor(uri.toString(), compression: compression);
     } on io.WebSocketException catch (e) {
       await handleError(e);
     } on io.SocketException catch (e) {
       await handleError(e);
     }
   }
-  return socket;
+  return IOWebSocketChannel(socket).cast<String>();
 }
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
@@ -124,10 +112,10 @@ typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
 });
 
 /// A connection to the Dart VM Service.
-///
-/// This also implements the package:vm_service API to enable a gradual migration.
-class VMService implements vm_service.VmService {
+// TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
+class VMService {
   VMService(
+    this._peer,
     this.httpAddress,
     this.wsAddress,
     ReloadSources reloadSources,
@@ -135,49 +123,38 @@ class VMService implements vm_service.VmService {
     CompileExpression compileExpression,
     Device device,
     ReloadMethod reloadMethod,
-    this._delegateService,
-    this.streamClosedCompleter,
-    Stream<dynamic> secondary,
   ) {
     _vm = VM._empty(this);
+    _peer.listen().catchError(_connectionError.completeError);
 
-    // TODO(jonahwilliams): this is temporary to support the current vm_service
-    // semantics of update-in-place.
-    secondary.listen((dynamic rawData) {
-      final String message = rawData as String;
-      final dynamic map = json.decode(message);
-      if (map != null && map['method'] == 'streamNotify') {
-        _handleStreamNotify(map['params'] as Map<String, dynamic>);
-      }
+    _peer.registerMethod('streamNotify', (rpc.Parameters event) {
+      _handleStreamNotify(event.asMap.cast<String, dynamic>());
     });
 
     if (reloadSources != null) {
-      _delegateService.registerServiceCallback('reloadSources', (Map<String, dynamic> params) async {
+      _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].value as String;
-        final bool force = params['force'] as bool ?? false;
-        final bool pause = params['pause'] as bool ?? false;
+        final bool force = params.asMap['force'] as bool ?? false;
+        final bool pause = params.asMap['pause'] as bool ?? false;
 
         if (isolateId.isEmpty) {
-          throw vm_service.RPCError(
-            "Invalid 'isolateId': $isolateId",
-            RPCErrorCodes.kInvalidParams,
-            '',
-          );
+          throw rpc.RpcException.invalidParams("Invalid 'isolateId': $isolateId");
         }
         try {
           await reloadSources(isolateId, force: force, pause: pause);
           return <String, String>{'type': 'Success'};
-        } on vm_service.RPCError {
+        } on rpc.RpcException {
           rethrow;
         } on Exception catch (e, st) {
-          throw vm_service.RPCError(
-            'Error during Sources Reload: $e\n$st',
-            RPCErrorCodes.kServerError,
-            '',
-          );
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Sources Reload: $e\n$st');
         }
       });
-      _delegateService.registerService('reloadSources', 'Flutter Tools');
+
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'reloadSources',
+        'alias': 'Flutter Tools',
+      });
 
     }
 
@@ -191,23 +168,15 @@ class VMService implements vm_service.VmService {
       // if the build method of a StatelessWidget is updated, this is the name of class.
       // If the build method of a StatefulWidget is updated, then this is the name
       // of the Widget class that created the State object.
-      _delegateService.registerServiceCallback('reloadMethod', (Map<String, dynamic> params) async {
-        final String libraryId = params['library'] as String;
-        final String classId = params['class'] as String;
+      _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
+        final String libraryId = params['library'].value as String;
+        final String classId = params['class'].value as String;
 
         if (libraryId.isEmpty) {
-          throw vm_service.RPCError(
-            "Invalid 'libraryId': $libraryId",
-            RPCErrorCodes.kInvalidParams,
-            '',
-          );
+          throw rpc.RpcException.invalidParams("Invalid 'libraryId': $libraryId");
         }
         if (classId.isEmpty) {
-          throw vm_service.RPCError(
-            "Invalid 'classId': $classId",
-            RPCErrorCodes.kInvalidParams,
-            '',
-          );
+          throw rpc.RpcException.invalidParams("Invalid 'classId': $classId");
         }
 
         globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
@@ -218,95 +187,111 @@ class VMService implements vm_service.VmService {
             classId: classId,
           );
           return <String, String>{'type': 'Success'};
-        } on vm_service.RPCError {
+        } on rpc.RpcException {
           rethrow;
         } on Exception catch (e, st) {
-          throw vm_service.RPCError('Error during Sources Reload: $e\n$st', -32000, '');
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Sources Reload: $e\n$st');
         }
       });
-      _delegateService.registerService('reloadMethod', 'Flutter Tools');
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'reloadMethod',
+        'alias': 'Flutter Tools',
+      });
     }
 
     if (restart != null) {
-      _delegateService.registerServiceCallback('hotRestart', (Map<String, dynamic> params) async {
-        final bool pause = params['pause'] as bool ?? false;
+      _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
+        final bool pause = params.asMap['pause'] as bool ?? false;
+
+        if (pause is! bool) {
+          throw rpc.RpcException.invalidParams("Invalid 'pause': $pause");
+        }
+
         try {
           await restart(pause: pause);
           return <String, String>{'type': 'Success'};
-        } on vm_service.RPCError {
+        } on rpc.RpcException {
           rethrow;
         } on Exception catch (e, st) {
-          throw vm_service.RPCError(
-            'Error during Hot Restart: $e\n$st',
-            RPCErrorCodes.kServerError,
-            '',
-          );
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Hot Restart: $e\n$st');
         }
       });
-      _delegateService.registerService('hotRestart', 'Flutter Tools');
+
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'hotRestart',
+        'alias': 'Flutter Tools',
+      });
     }
 
-    _delegateService.registerServiceCallback('flutterVersion', (Map<String, dynamic> params) async {
+    _peer.registerMethod('flutterVersion', (rpc.Parameters params) async {
       final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;
       return versionJson;
     });
-    _delegateService.registerService('flutterVersion', 'Flutter Tools');
+
+    _peer.sendNotification('registerService', <String, String>{
+      'service': 'flutterVersion',
+      'alias': 'Flutter Tools',
+    });
 
     if (compileExpression != null) {
-      _delegateService.registerServiceCallback('compileExpression', (Map<String, dynamic> params) async {
-        final String isolateId = params['isolateId'] as String;
+      _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
+        final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty) {
-          throw throw vm_service.RPCError(
-            "Invalid 'isolateId': $isolateId",
-            RPCErrorCodes.kInvalidParams,
-            '',
-          );
+          throw rpc.RpcException.invalidParams(
+              "Invalid 'isolateId': $isolateId");
         }
-        final String expression = params['expression'] as String;
+        final String expression = params['expression'].asString;
         if (expression is! String || expression.isEmpty) {
-          throw throw vm_service.RPCError(
-            "Invalid 'expression': $expression",
-            RPCErrorCodes.kInvalidParams,
-            '',
-          );
+          throw rpc.RpcException.invalidParams(
+              "Invalid 'expression': $expression");
         }
-        final List<String> definitions = List<String>.from(params['definitions'] as List<dynamic>);
-        final List<String> typeDefinitions = List<String>.from(params['typeDefinitions'] as List<dynamic>);
-        final String libraryUri = params['libraryUri'] as String;
-        final String klass = params['klass'] as String;
-        final bool isStatic = params['isStatic'] as bool ?? false;
+        final List<String> definitions =
+            List<String>.from(params['definitions'].asList);
+        final List<String> typeDefinitions =
+            List<String>.from(params['typeDefinitions'].asList);
+        final String libraryUri = params['libraryUri'].asString;
+        final String klass = params['klass'].exists ? params['klass'].asString : null;
+        final bool isStatic = params['isStatic'].asBoolOr(false);
+
         try {
           final String kernelBytesBase64 = await compileExpression(isolateId,
               expression, definitions, typeDefinitions, libraryUri, klass,
               isStatic);
-          return <String, dynamic>{
-            'type': 'Success',
-            'result': <String, dynamic>{
-              'result': <String, dynamic>{'kernelBytes': kernelBytesBase64},
-            },
-          };
-        } on vm_service.RPCError {
+          return <String, dynamic>{'type': 'Success',
+            'result': <String, dynamic> {'kernelBytes': kernelBytesBase64}};
+        } on rpc.RpcException {
           rethrow;
         } on Exception catch (e, st) {
-          throw vm_service.RPCError(
-            'Error during expression compilation: $e\n$st',
-            RPCErrorCodes.kServerError,
-            '',
-          );
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during expression compilation: $e\n$st');
         }
       });
-      _delegateService.registerService('compileExpression', 'Flutter Tools');
+
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'compileExpression',
+        'alias': 'Flutter Tools',
+      });
     }
     if (device != null) {
-      _delegateService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
+      _peer.registerMethod('flutterMemoryInfo', (rpc.Parameters params) async {
         final MemoryInfo result = await device.queryMemoryInfo();
         return result.toJson();
       });
-      _delegateService.registerService('flutterMemoryInfo', 'Flutter Tools');
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'flutterMemoryInfo',
+        'alias': 'Flutter Tools',
+      });
     }
+  }
+
+  static void _unhandledError(dynamic error, dynamic stack) {
+    globals.logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
+    assert(false);
   }
 
   /// Connect to a Dart VM Service at [httpUri].
@@ -347,35 +332,10 @@ class VMService implements vm_service.VmService {
     Device device,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
-    final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
-    final StreamController<dynamic> primary = StreamController<dynamic>();
-    final StreamController<dynamic> secondary = StreamController<dynamic>();
-
-    channel.listen((dynamic data) {
-      primary.add(data);
-      secondary.add(data);
-    }, onDone: ()  {
-      primary.close();
-      secondary.close();
-    }, onError: (dynamic error, StackTrace stackTrace) {
-      primary.addError(error, stackTrace);
-      secondary.addError(error, stackTrace);
-    });
-
-    // Create an instance of the package:vm_service API in addition to the flutter
-    // tool's to allow gradual migration.
-    final Completer<void> streamClosedCompleter = Completer<void>();
-
-    final vm_service.VmService delegateService = vm_service.VmService(
-      primary.stream,
-      channel.add,
-      log: null,
-      disposeHandler: () async {
-        streamClosedCompleter.complete();
-      },
-    );
-
+    final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
+    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
     final VMService service = VMService(
+      peer,
       httpUri,
       wsUri,
       reloadSources,
@@ -383,21 +343,17 @@ class VMService implements vm_service.VmService {
       compileExpression,
       device,
       reloadMethod,
-      delegateService,
-      streamClosedCompleter,
-      secondary.stream,
     );
-
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
-    await delegateService.getVersion();
+    await service._sendRequest('getVersion', const <String, dynamic>{});
     return service;
   }
 
-  final vm_service.VmService _delegateService;
   final Uri httpAddress;
   final Uri wsAddress;
-  final Completer<void> streamClosedCompleter;
+  final rpc.Peer _peer;
+  final Completer<Map<String, dynamic>> _connectionError = Completer<Map<String, dynamic>>();
 
   VM _vm;
   /// The singleton [VM] object. Owns [Isolate] and [FlutterView] objects.
@@ -406,36 +362,46 @@ class VMService implements vm_service.VmService {
   final Map<String, StreamController<ServiceEvent>> _eventControllers =
       <String, StreamController<ServiceEvent>>{};
 
+  final Set<String> _listeningFor = <String>{};
+
   /// Whether our connection to the VM service has been closed;
-  bool get isClosed => streamClosedCompleter.isCompleted;
+  bool get isClosed => _peer.isClosed;
 
   Future<void> get done async {
-    return streamClosedCompleter.future;
+    await _peer.done;
   }
 
-  @override
-  Stream<vm_service.Event> get onDebugEvent => onEvent('Debug');
+  // Events
+  Future<Stream<ServiceEvent>> get onDebugEvent => onEvent('Debug');
+  Future<Stream<ServiceEvent>> get onExtensionEvent => onEvent('Extension');
+  // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
+  Future<Stream<ServiceEvent>> get onIsolateEvent => onEvent('Isolate');
+  Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
+  Future<Stream<ServiceEvent>> get onStdoutEvent => onEvent('Stdout'); // WriteEvent
 
-  @override
-  Stream<vm_service.Event> get onExtensionEvent => onEvent('Extension');
+  // TODO(johnmccutchan): Add FlutterView events.
 
-  @override
-  Stream<vm_service.Event> get onIsolateEvent => onEvent('Isolate');
-
-  @override
-  Stream<vm_service.Event> get onTimelineEvent => onEvent('Timeline');
-
-  @override
-  Stream<vm_service.Event> get onStdoutEvent => onEvent('Stdout');
-
-  @override
-  Future<vm_service.Success> streamListen(String streamId) {
-    return _delegateService.streamListen(streamId);
+  /// Returns a stream of VM service events.
+  ///
+  /// This purposely returns a `Future<Stream<T>>` rather than a `Stream<T>`
+  /// because it first registers with the VM to receive events on the stream,
+  /// and only once the VM has acknowledged that the stream has started will
+  /// we return the associated stream. Any attempt to streamline this API into
+  /// returning `Stream<T>` should take that into account to avoid race
+  /// conditions.
+  Future<Stream<ServiceEvent>> onEvent(String streamId) async {
+    await _streamListen(streamId);
+    return _getEventController(streamId).stream;
   }
 
-  @override
-  Stream<vm_service.Event> onEvent(String streamId) {
-    return _delegateService.onEvent(streamId);
+  Future<Map<String, dynamic>> _sendRequest(
+    String method,
+    Map<String, dynamic> params,
+  ) {
+    return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
+      _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
+      _connectionError.future,
+    ]);
   }
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
@@ -475,20 +441,19 @@ class VMService implements vm_service.VmService {
     _getEventController(streamId).add(event);
   }
 
+  Future<void> _streamListen(String streamId) async {
+    if (!_listeningFor.contains(streamId)) {
+      _listeningFor.add(streamId);
+      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
+    }
+  }
+
   /// Reloads the VM.
-  Future<void> getVMOld() async => await vm.reload();
+  Future<void> getVM() async => await vm.reload();
 
   Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
 
-  Future<void> close() async {
-    _delegateService?.dispose();
-  }
-
-  // To enable a gradual migration to package:vm_service
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnsupportedError('${invocation.memberName} is not currently supported');
-  }
+  Future<void> close() async => await _peer.close();
 }
 
 /// An error that is thrown when constructing/updating a service object.
@@ -971,15 +936,36 @@ class VM extends ServiceObjectOwner {
     return Future<Isolate>.value(_isolateCache[isolateId]);
   }
 
+  static String _truncate(String message, int width, String ellipsis) {
+    assert(ellipsis.length < width);
+    if (message.length <= width) {
+      return message;
+    }
+    return message.substring(0, width - ellipsis.length) + ellipsis;
+  }
+
   /// Invoke the RPC and return the raw response.
   Future<Map<String, dynamic>> invokeRpcRaw(
     String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
     bool truncateLogs = true,
   }) async {
-    final vm_service.Response response = await _vmService
-      ._delegateService.callServiceExtension(method, args: params);
-    return response.json;
+    globals.printTrace('Sending to VM service: $method($params)');
+    assert(params != null);
+    try {
+      final Map<String, dynamic> result = await _vmService._sendRequest(method, params);
+      final String resultString =
+          truncateLogs ? _truncate(result.toString(), 250, '...') : result.toString();
+      globals.printTrace('Result: $resultString');
+      return result;
+    } on WebSocketChannelException catch (error) {
+      throwToolExit('Error connecting to observatory: $error');
+      return null;
+    } on rpc.RpcException catch (error) {
+      globals.printError('Error ${error.code} received from application: ${error.message}');
+      globals.printTrace('${error.data}');
+      rethrow;
+    }
   }
 
   /// Invoke the RPC and return a [ServiceObject] response.
@@ -1278,17 +1264,13 @@ class Isolate extends ServiceObjectOwner {
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
-    } on vm_service.RPCError catch (e) {
+    } on rpc.RpcException catch (e) {
       return Future<Map<String, dynamic>>.value(<String, dynamic>{
         'code': e.code,
         'message': e.message,
         'data': e.data,
       });
-    } on vm_service.SentinelException catch (e) {
-      throwToolExit('Unexpected Sentinel while reloading sources: $e');
     }
-    assert(false);
-    return null;
   }
 
   Future<Map<String, dynamic>> getObject(Map<String, dynamic> objectRef) {
@@ -1311,9 +1293,9 @@ class Isolate extends ServiceObjectOwner {
   }) async {
     try {
       return await invokeRpcRaw(method, params: params);
-    } on vm_service.RPCError catch (err) {
+    } on rpc.RpcException catch (e) {
       // If an application is not using the framework
-      if (err.code == RPCErrorCodes.kMethodNotFound) {
+      if (e.code == rpc_error_code.METHOD_NOT_FOUND) {
         return null;
       }
       rethrow;
@@ -1509,13 +1491,10 @@ class FlutterView extends ServiceObject {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<void> completer = Completer<void>();
-    try {
-      await owner.vm.vmService.streamListen('Isolate');
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
-    }
-    final StreamSubscription<vm_service.Event> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
+    final StreamSubscription<ServiceEvent> subscription =
+      (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
+        // TODO(johnmccutchan): Listen to the debug stream and catch initial
+        // launch errors.
         if (event.kind == ServiceEvent.kIsolateRunnable) {
           globals.printTrace('Isolate is runnable.');
           if (!completer.isCompleted) {
