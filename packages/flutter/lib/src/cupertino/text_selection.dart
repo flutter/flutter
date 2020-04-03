@@ -43,9 +43,6 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 const Color _kToolbarBackgroundColor = Color(0xEB202020);
 const Color _kToolbarDividerColor = Color(0xFF808080);
 
-// TODO(justinmc): Revisit this value.
-const double _kToolbarButtonMinimumWidth = 100.0;
-
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
   fontSize: 14.0,
@@ -375,7 +372,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     //addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
-    //addToolbarButtonIfNeeded('Copyyyyyyyyyyyyyyyyyyyyyyyyyyyy', canCopy, handleCopy);
+    //addToolbarButtonIfNeeded('Copyyyyyyyyyyyyy', canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     //addToolbarButtonIfNeeded('Pasteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
@@ -762,7 +759,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     // Visit slot children.
     childToSlot.forEach((Element child, _) {
-      if (_shouldPaint(child) != true || _forgottenChildren.contains(child)) {
+      if (!_shouldPaint(child) || _forgottenChildren.contains(child)) {
         return;
       }
       visitor(child);
@@ -868,63 +865,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     _nextButtonDisabled = _updateChild(_nextButtonDisabled, value, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
   }
 
-  /*
-  void layoutChildren() {
-    double pageWidth = 0.0;
-    double parentWidth = 0.0;
-    RenderBox buttonBack;
-    RenderBox buttonForward;
-    RenderBox buttonForwardDisabled;
-    int currentPage = 0;
-    int i = -1;
-    visitChildren((RenderObject renderObjectChild) {
-      i++;
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
-
-      double buttonWidth = 0.0;
-      if (i > 2) {
-        if (currentPage == 0) {
-          // If this is the last child, it's ok to fit without a forward button.
-          buttonWidth = i == childCount - 1 ? 0.0 : buttonForward.size.width;
-        } else {
-          buttonWidth = buttonBack.size.width + buttonForward.size.width;
-        }
-      }
-
-      // The width of the menu is set by the first page.
-      child.layout(
-        constraints.loosen(),
-        parentUsesSize: true,
-      );
-
-      if (i == 0) {
-        buttonBack = child;
-        return;
-      }
-      if (i == 1) {
-        buttonForward = child;
-        return;
-      }
-      if (i == 2) {
-        buttonForwardDisabled = child;
-        return;
-      }
-    });
-  }
-
-  void placeChildren() {
-    visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
-      childParentData.shouldPaint = true;
-      childParentData.offset = Offset.zero;
-    });
-
-    size = Size(constraints.maxWidth, constraints.maxHeight);
-  }
-  */
-
   @override
   void performLayout() {
     if (firstChild == null) {
@@ -946,6 +886,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
+      childParentData.shouldPaint = false;
 
       // Skip slotted children.
       if (childToSlot.containsKey(child)) {
@@ -968,7 +909,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         )),
         parentUsesSize: true,
       );
-      childParentData.shouldPaint = false;
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
@@ -978,7 +918,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
         buttonsWidth = _backButton.size.width + _nextButton.size.width;
         child.layout(
           BoxConstraints.loose(Size(
-            //math.max(firstPageWidth - buttonsWidth, _kToolbarButtonMinimumWidth),
             firstPageWidth - buttonsWidth,
             constraints.maxHeight,
           )),
@@ -988,9 +927,6 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       childParentData.offset = Offset(buttonPosition, 0.0);
       buttonPosition += child.size.width + dividerWidth;
       childParentData.shouldPaint = currentPage == page;
-
-      // TODO(justinmc): Can I optimize by not laying out pages after the
-      // current page?
 
       if (currentPage == 0) {
         firstPageWidth = buttonPosition + _nextButton.size.width;
@@ -1007,20 +943,14 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     final ToolbarItemsParentData nextButtonParentData = _nextButton.parentData as ToolbarItemsParentData;
     final ToolbarItemsParentData nextButtonDisabledParentData = _nextButtonDisabled.parentData as ToolbarItemsParentData;
     final ToolbarItemsParentData backButtonParentData = _backButton.parentData as ToolbarItemsParentData;
-    // TODO(justinmc): Clean up this shouldPaint setting and resetting.
-    backButtonParentData.shouldPaint = false;
-    nextButtonParentData.shouldPaint = false;
-    nextButtonDisabledParentData.shouldPaint = false;
     if (currentPage > 0) {
       // The forward button always shows if there is more than one page, even on
       // the last page (it's just disabled).
       if (page == currentPage) {
-        nextButtonParentData.shouldPaint = false;
         nextButtonDisabledParentData.offset = Offset(parentWidth, 0.0);
         nextButtonDisabledParentData.shouldPaint = true;
         parentWidth += nextButtonDisabled.size.width;
       } else {
-        nextButtonDisabledParentData.shouldPaint = false;
         nextButtonParentData.offset = Offset(parentWidth, 0.0);
         nextButtonParentData.shouldPaint = true;
         parentWidth += nextButton.size.width;

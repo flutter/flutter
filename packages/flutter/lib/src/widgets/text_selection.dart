@@ -95,7 +95,7 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
   ///
   /// Children in the selection toolbar may be laid out for measurement purposes
   /// but not painted. This allows these children to be identified.
-  bool shouldPaint;
+  bool shouldPaint = false;
 
   @override
   String toString() => '${super.toString()}; shouldPaint=$shouldPaint';

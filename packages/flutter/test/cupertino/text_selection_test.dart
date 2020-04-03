@@ -237,7 +237,7 @@ void main() {
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
-      tester.binding.window.physicalSizeTestValue = const Size(680, 800);
+      tester.binding.window.physicalSizeTestValue = const Size(640, 800);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
