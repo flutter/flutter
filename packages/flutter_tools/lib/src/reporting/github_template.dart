@@ -32,9 +32,8 @@ class GitHubTemplateCreator {
   final FlutterProjectFactory _flutterProjectFactory;
   final HttpClient _client;
 
-  Future<String> toolCrashSimilarIssuesGitHubURL(String errorString) async {
-    final String fullURL = 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
-    return await _shortURL(fullURL);
+  static String toolCrashSimilarIssuesURL(String errorString) {
+    return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.
