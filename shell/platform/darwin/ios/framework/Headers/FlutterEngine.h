@@ -36,6 +36,11 @@ extern NSString* const FlutterDefaultDartEntrypoint;
  * `FlutterViewController` instances to maintain state and/or asynchronous tasks
  * (such as downloading a large file).
  *
+ * A FlutterEngine can also be used to prewarm the Dart execution environment and reduce the
+ * latency of showing the Flutter screen when a `FlutterViewController` is created and presented.
+ * See http://flutter.dev/docs/development/add-to-app/performance for more details on loading
+ * performance.
+ *
  * Alternatively, you can simply create a new `FlutterViewController` with only a
  * `FlutterDartProject`. That `FlutterViewController` will internally manage its
  * own instance of a FlutterEngine, but will not guarantee survival of the engine
