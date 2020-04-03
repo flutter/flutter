@@ -968,7 +968,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _state.overlayController.reverse();
     }
-    markNeedsPaint();
   }
 
   /// True if this toggleable is being hovered over by a pointer.
@@ -984,7 +983,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     } else {
       _state.overlayController.reverse();
     }
-    markNeedsPaint();
   }
 
   bool get showValueIndicator {
