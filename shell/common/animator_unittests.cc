@@ -84,9 +84,13 @@ TEST_F(ShellTest, VSyncTargetTime) {
                                     });
 
   on_target_time_latch.Wait();
-  ASSERT_EQ(ConstantFiringVsyncWaiter::frame_target_time.ToEpochDelta()
-                .ToMicroseconds(),
+  const auto vsync_waiter_target_time =
+      ConstantFiringVsyncWaiter::frame_target_time;
+  ASSERT_EQ(vsync_waiter_target_time.ToEpochDelta().ToMicroseconds(),
             target_time);
+
+  // validate that the latest target time has also been updated.
+  ASSERT_EQ(GetLatestFrameTargetTime(shell.get()), vsync_waiter_target_time);
 
   // teardown.
   DestroyShell(std::move(shell), std::move(task_runners));

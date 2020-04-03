@@ -250,6 +250,10 @@ TaskRunners ShellTest::GetTaskRunnersForFixture() {
   };
 }
 
+fml::TimePoint ShellTest::GetLatestFrameTargetTime(Shell* shell) const {
+  return shell->GetLatestFrameTargetTime();
+}
+
 std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
                                               bool simulate_vsync) {
   return CreateShell(std::move(settings), GetTaskRunnersForFixture(),
