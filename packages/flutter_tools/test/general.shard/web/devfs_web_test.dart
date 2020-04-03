@@ -449,6 +449,7 @@ void main() {
       BuildMode.debug,
       true,
       Uri.file('test.dart'),
+      null,
       dwdsLauncher: ({
         AssetReader assetReader,
         Stream<BuildResult> buildResults,
