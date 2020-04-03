@@ -14,6 +14,8 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+FLUTTER_ASSERT_NOT_ARC
+
 namespace {
 
 constexpr int32_t kRootNodeId = 0;
@@ -162,8 +164,14 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 @end
 
+@interface SemanticsObject ()
+/** Should only be called in conjunction with setting child/parent relationship. */
+- (void)privateSetParent:(SemanticsObject*)parent;
+@end
+
 @implementation SemanticsObject {
   fml::scoped_nsobject<SemanticsObjectContainer> _container;
+  NSMutableArray<SemanticsObject*>* _children;
 }
 
 #pragma mark - Override base class designated initializers
@@ -197,7 +205,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (void)dealloc {
   for (SemanticsObject* child in _children) {
-    child.parent = nil;
+    [child privateSetParent:nil];
   }
   [_children removeAllObjects];
   [_children release];
@@ -237,6 +245,28 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return YES;
   }
   return [self.children count] != 0;
+}
+
+- (void)privateSetParent:(SemanticsObject*)parent {
+  _parent = parent;
+}
+
+- (void)setChildren:(NSArray<SemanticsObject*>*)children {
+  for (SemanticsObject* child in _children) {
+    [child privateSetParent:nil];
+  }
+  [_children release];
+  _children = [[NSMutableArray alloc] initWithArray:children];
+  for (SemanticsObject* child in _children) {
+    [child privateSetParent:self];
+  }
+}
+
+- (void)replaceChildAtIndex:(NSInteger)index withChild:(SemanticsObject*)child {
+  SemanticsObject* oldChild = _children[index];
+  [oldChild privateSetParent:nil];
+  [child privateSetParent:self];
+  [_children replaceObjectAtIndex:index withObject:child];
 }
 
 #pragma mark - UIAccessibility overrides
@@ -653,7 +683,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return ((FlutterPlatformViewSemanticsContainer*)element).index;
   }
 
-  NSMutableArray<SemanticsObject*>* children = [_semanticsObject children];
+  NSArray<SemanticsObject*>* children = [_semanticsObject children];
   for (size_t i = 0; i < [children count]; i++) {
     SemanticsObject* child = children[i];
     if ((![child hasChildren] && child == element) ||
@@ -741,7 +771,6 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
         [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.childrenInTraversalOrder[i], nodes);
-      child.parent = object;
       [newChildren addObject:child];
     }
     object.children = newChildren;
@@ -847,10 +876,8 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
   assert(oldObject.node.id == newObject.node.id);
   NSNumber* nodeId = @(oldObject.node.id);
   NSUInteger positionInChildlist = [oldObject.parent.children indexOfObject:oldObject];
-  SemanticsObject* parent = oldObject.parent;
   [objects removeObjectForKey:nodeId];
-  newObject.parent = parent;
-  [newObject.parent.children replaceObjectAtIndex:positionInChildlist withObject:newObject];
+  [oldObject.parent replaceChildAtIndex:positionInChildlist withChild:newObject];
   objects[nodeId] = newObject;
 }
 
