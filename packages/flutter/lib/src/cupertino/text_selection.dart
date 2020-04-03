@@ -368,13 +368,9 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
-    // TODO(justinmc): Delete commented out long buttons.
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
-    //addToolbarButtonIfNeeded('Cuttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt', canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
-    //addToolbarButtonIfNeeded('Copyyyyyyyyyyyyy', canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
-    //addToolbarButtonIfNeeded('Pasteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
 
     return CupertinoTextSelectionToolbar._(
