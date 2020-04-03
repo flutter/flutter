@@ -86,7 +86,7 @@ public class FlutterPluginRegistry
 
   public void detach() {
     mPlatformViewsController.detach();
-    mPlatformViewsController.onFlutterViewDestroyed();
+    mPlatformViewsController.onDetachedFromJNI();
     mFlutterView = null;
     mActivity = null;
   }
@@ -239,6 +239,6 @@ public class FlutterPluginRegistry
   }
 
   public void destroy() {
-    mPlatformViewsController.onFlutterViewDestroyed();
+    mPlatformViewsController.onDetachedFromJNI();
   }
 }

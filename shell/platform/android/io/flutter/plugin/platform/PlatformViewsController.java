@@ -404,7 +404,21 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     return registry;
   }
 
-  public void onFlutterViewDestroyed() {
+  /**
+   * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@link
+   * PlatformViewsController} attaches to JNI.
+   */
+  public void onAttachedToJNI() {
+    // Currently no action needs to be taken after JNI attachment.
+  }
+
+  /**
+   * Invoked when the {@link io.flutter.embedding.engine.FlutterEngine} that owns this {@link
+   * PlatformViewsController} detaches from JNI.
+   */
+  public void onDetachedFromJNI() {
+    // Dispose all virtual displays so that any future updates to textures will not be
+    // propagated to the native peer.
     flushAllViews();
   }
 
