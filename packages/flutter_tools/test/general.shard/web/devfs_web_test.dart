@@ -373,6 +373,7 @@ void main() {
       enableDwds: false,
       entrypoint: Uri.base,
       testMode: true,
+      expressionCompiler: null,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);

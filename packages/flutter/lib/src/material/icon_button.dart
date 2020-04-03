@@ -35,7 +35,7 @@ const double _kMinButtonSize = kMinInteractiveDimension;
 ///
 /// The hit region of an icon button will, if possible, be at least
 /// kMinInteractiveDimension pixels in size, regardless of the actual
-/// [iconSize], to satisfy the [touch target size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
+/// [iconSize], to satisfy the [touch target size](https://material.io/design/layout/spacing-methods.html#touch-targets)
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///

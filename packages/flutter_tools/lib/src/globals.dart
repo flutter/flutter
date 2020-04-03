@@ -52,7 +52,8 @@ const FileSystem _kLocalFs = LocalFileSystem();
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem get fs => ErrorHandlingFileSystem(
-  context.get<FileSystem>() ?? _kLocalFs,
+  delegate: context.get<FileSystem>() ?? _kLocalFs,
+  platform: platform,
 );
 
 final FileSystemUtils _defaultFileSystemUtils = FileSystemUtils(
