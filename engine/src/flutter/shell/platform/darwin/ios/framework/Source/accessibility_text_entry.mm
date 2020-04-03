@@ -177,7 +177,8 @@ static const UIAccessibilityTraits UIAccessibilityTraitUndocumentedEmptyLine = 0
   FlutterInactiveTextInput* _inactive_text_input;
 }
 
-- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge uid:(int32_t)uid {
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
+                           uid:(int32_t)uid {
   self = [super initWithBridge:bridge uid:uid];
 
   if (self) {

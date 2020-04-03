@@ -874,8 +874,11 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterView.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewControllerTest.m
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
