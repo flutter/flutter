@@ -22,7 +22,7 @@
 typedef void (^FlutterHeadlessDartRunnerCallback)(BOOL success);
 
 /**
- * The FlutterHeadlessDartRunner runs Flutter Dart code with a null rasterizer,
+ * The deprecated FlutterHeadlessDartRunner runs Flutter Dart code with a null rasterizer,
  * and no native drawing surface. It is appropriate for use in running Dart
  * code e.g. in the background from a plugin.
  *

@@ -35,14 +35,17 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  * handled by `FlutterEngine`. Calls on this class to those members all proxy through to the
  * `FlutterEngine` attached FlutterViewController.
  *
- * A FlutterViewController can be initialized either with an already-running `FlutterEngine` via
- * the `initWithEngine:` initializer, or it can be initialized with a `FlutterDartProject` that
- * will be used to implicitly spin up a new `FlutterEngine`. Creating a `FlutterEngine before
- * showing a `FlutterViewController` can be used to pre-initialize the Dart VM and to prepare the
- * isolate in order to reduce the latency to the first rendered frame. Holding a `FlutterEngine`
- * independently of FlutterViewControllers can also be used to not to lose Dart-related state and
- * asynchronous tasks when navigating back and forth between a FlutterViewController and other
- * `UIViewController`s.
+ * A FlutterViewController can be initialized either with an already-running `FlutterEngine` via the
+ * `initWithEngine:` initializer, or it can be initialized with a `FlutterDartProject` that will be
+ * used to implicitly spin up a new `FlutterEngine`. Creating a `FlutterEngine before showing a
+ * FlutterViewController can be used to pre-initialize the Dart VM and to prepare the isolate in
+ * order to reduce the latency to the first rendered frame. See
+ * https://flutter.dev/docs/development/add-to-app/performance for more details on loading
+ * latency.
+ *
+ * Holding a `FlutterEngine` independently of FlutterViewControllers can also be used to not to lose
+ * Dart-related state and asynchronous tasks when navigating back and forth between a
+ * FlutterViewController and other `UIViewController`s.
  */
 FLUTTER_EXPORT
 @interface FlutterViewController : UIViewController <FlutterTextureRegistry, FlutterPluginRegistry>
@@ -63,6 +66,9 @@ FLUTTER_EXPORT
 /**
  * Initializes a new FlutterViewController and `FlutterEngine` with the specified
  * `FlutterDartProject`.
+ *
+ * This will implicitly create a new `FlutterEngine` which is retrievable via the `engine` property
+ * after initialization.
  *
  * @param project The `FlutterDartProject` to initialize the `FlutterEngine` with.
  * @param nibName The NIB name to initialize this UIViewController with.
@@ -174,7 +180,9 @@ FLUTTER_EXPORT
 @property(nonatomic, getter=isViewOpaque) BOOL viewOpaque;
 
 /**
- * The `FlutterEngine` instance for this view controller.
+ * The `FlutterEngine` instance for this view controller. This could be the engine this
+ * `FlutterViewController` is initialized with or a new `FlutterEngine` implicitly created if
+ * no engine was supplied during initialization.
  */
 @property(weak, nonatomic, readonly) FlutterEngine* engine;
 
