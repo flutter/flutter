@@ -623,8 +623,7 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-//    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    final slider = Material.of(tester.element(find.byType(Slider)));
+    final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));
 
     // Check default theme for enabled widget.
     expect(slider, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
