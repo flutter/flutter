@@ -22,6 +22,7 @@
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -33,7 +34,6 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/common/surface.h"
-#include "fml/time/time_point.h"
 
 namespace flutter {
 
