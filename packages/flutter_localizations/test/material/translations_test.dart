@@ -465,8 +465,7 @@ void main() {
     expect(localizations.okButtonLabel, '確定');
   });
 
-  // See https://github.com/flutter/flutter/issues/53036 for context on why
-  // `no` is being used as a synonym for `nb`.
+  // Regression test for https://github.com/flutter/flutter/issues/53036.
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
     final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
     final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');

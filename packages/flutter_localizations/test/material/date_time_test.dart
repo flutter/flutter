@@ -29,6 +29,7 @@ void main() {
       }, throwsAssertionError);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/53036.
     test('`nb` uses `no` as a synonym when `nb` arb file is not present', () async {
       final File nbMaterialArbFile = File('lib/src/l10n/material_nb.arb');
       final File noMaterialArbFile = File('lib/src/l10n/material_no.arb');

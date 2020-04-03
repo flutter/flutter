@@ -76,6 +76,9 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesConstant.isNotEmpty);
   assert(supportedLanguagesDocMacro.isNotEmpty);
 
+  // See https://github.com/flutter/flutter/issues/53036 for context on why
+  // 'no' is being used as a synonym for 'nb'. It only uses this synonym
+  // if 'nb' is not detected as a valid arb file.
   bool isNbSynonymOfNo = false;
 
   final StringBuffer output = StringBuffer();
