@@ -165,7 +165,7 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
     flutterProjectFactory: globals.projectFactory,
     client: clientFactory != null ? clientFactory() : HttpClient(),
   );
-  final String similarIssuesURL = await gitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(errorString);
+  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(errorString);
   globals.printStatus('$similarIssuesURL\n', wrap: false);
   globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
   globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);

@@ -81,9 +81,6 @@ void main() {
     });
 
     testUsingContext('GitHub issue template', () async {
-      const String similarURL = 'https://example.com/1';
-      when(mockGitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(any))
-        .thenAnswer((_) async => similarURL);
       const String templateURL = 'https://example.com/2';
       when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any, any))
         .thenAnswer((_) async => templateURL);
@@ -115,7 +112,7 @@ void main() {
       expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
 
       final String statusText = testLogger.statusText;
-      expect(statusText, contains(similarURL));
+      expect(statusText, contains('https://github.com/flutter/flutter/issues?q=is%3Aissue+an+exception+%25+--'));
       expect(statusText, contains('https://flutter.dev/docs/resources/bug-reports'));
       expect(statusText, contains(templateURL));
 

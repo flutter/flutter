@@ -18,6 +18,10 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     return super.setUpIn(dir);
   }
 
@@ -114,6 +118,38 @@ class Home extends StatelessWidget {
             results.add('--- countryCode (en_GB) tests ---');
             results.add(AppLocalizations.of(context).helloWorld);
             results.add(AppLocalizations.of(context).hello("GB fallback World"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('zh'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- zh ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode: zh_Hans ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant_TW ---');
+            results.add(AppLocalizations.of(context).helloWorld);
           },
         ),
         LocaleBuilder(
@@ -363,6 +399,53 @@ void main() {
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
+}
+''';
+
+  // Only tests `helloWorld`. The rest of the messages are added out of
+  // necessity since every base class requires an override for every
+  // message.
+  final String appZh = r'''
+{
+  "@@locale": "zh",
+  "helloWorld": "你好世界",
+  "helloNewlineWorld": "Hello \n World",
+  "hello": "Hello {world}",
+  "greeting": "{hello} {world}",
+  "helloWorldOn": "Hello World on {date}",
+  "helloWorldDuring": "Hello World from {startDate} to {endDate}",
+  "helloOn": "Hello {world} on {date} at {time}",
+  "helloFor": "Hello for {value}",
+  "helloCost": "Hello for {price} {value}",
+  "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
+  "helloAdjectiveWorlds": "{count,plural, =0{Hello} =1{Hello {adjective} World} =2{Hello two {adjective} worlds} other{Hello other {count} {adjective} worlds}}",
+  "helloWorldsOn": "{count,plural, =0{Hello on {date}} =1{Hello World, on {date}} =2{Hello two worlds, on {date}} other{Hello other {count} worlds, on {date}}}",
+  "helloWorldPopulation": "{count,plural, =1{Hello World of {population} citizens} =2{Hello two worlds with {population} total citizens} many{Hello all {count} worlds, with a total of {population} citizens} other{Hello other {count} worlds, with a total of {population} citizens}}",
+  "helloWorldInterpolation": "[{hello}] #{world}#",
+  "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
+  "singleQuote": "Flutter's amazing!",
+  "doubleQuote": "Flutter is \"amazing\"!"
+}
+''';
+
+  final String appZhHans = r'''
+{
+  "@@locale": "zh_Hans",
+  "helloWorld": "简体你好世界"
+}
+  ''';
+
+  final String appZhHant = r'''
+{
+  "@@locale": "zh_Hant",
+  "helloWorld": "繁體你好世界"
+}
+  ''';
+
+  final String appZhHantTw = r'''
+{
+  "@@locale": "zh_Hant_TW",
+  "helloWorld": "台灣繁體你好世界"
 }
 ''';
 }

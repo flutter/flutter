@@ -88,30 +88,39 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Checkbox(
-                value: checkboxValueA,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueA = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox A',
+                child: Checkbox(
+                  value: checkboxValueA,
+                  onChanged: (bool value) {
+                    setState(() {
+                      checkboxValueA = value;
+                    });
+                  },
+                ),
               ),
-              Checkbox(
-                value: checkboxValueB,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueB = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox B',
+                child: Checkbox(
+                  value: checkboxValueB,
+                  onChanged: (bool value) {
+                    setState(() {
+                      checkboxValueB = value;
+                    });
+                  },
+                ),
               ),
-              Checkbox(
-                value: checkboxValueC,
-                tristate: true,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueC = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox C',
+                child: Checkbox(
+                  value: checkboxValueC,
+                  tristate: true,
+                  onChanged: (bool value) {
+                    setState(() {
+                      checkboxValueC = value;
+                    });
+                  },
+                ),
               ),
             ],
           ),
