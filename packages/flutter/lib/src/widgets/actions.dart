@@ -90,7 +90,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override if `invoke` returns an `int`, then define
+  /// For instance, if your override of `invoke` returns an `int`, then define
   /// it like so:
   ///
   /// ```dart
@@ -293,7 +293,7 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// changing the return type of the override to match the type of the returned
   /// value provides more type safety.
   ///
-  /// For instance, if your override if `invoke` returns an `int`, then define
+  /// For instance, if your override of `invoke` returns an `int`, then define
   /// it like so:
   ///
   /// ```dart
