@@ -85,7 +85,7 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
 }
 
-String generatePluralMethod(Message message) {
+String generatePluralMethod(Message message, AppResourceBundle bundle) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
       'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
@@ -96,7 +96,7 @@ String generatePluralMethod(Message message) {
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = message.value;
+  String easyMessage = bundle.translationFor(message);
   for (final Placeholder placeholder in message.placeholders)
     easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
 
@@ -168,7 +168,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
   }
 
   if (message.isPlural) {
-    return generatePluralMethod(message);
+    return generatePluralMethod(message, bundle);
   }
 
   if (message.placeholdersRequireFormatting) {
