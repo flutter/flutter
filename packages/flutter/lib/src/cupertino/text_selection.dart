@@ -452,6 +452,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// Renders the content of the selection menu and maintains the page state.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
     Key key,
@@ -575,6 +576,9 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 }
 
+// The custom RenderObjectWidget that, together with
+// _CupertinoTextSelectionToolbarItemsRenderBox and
+// _CupertinoTextSelectionToolbarItemsElement, paginates the menu items.
 class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
     Key key,
@@ -617,6 +621,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItemsElement createElement() => _CupertinoTextSelectionToolbarItemsElement(this);
 }
 
+// The custom RenderObjectElement that helps paginate the menu items.
 class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   _CupertinoTextSelectionToolbarItemsElement(
     _CupertinoTextSelectionToolbarItems widget,
@@ -796,6 +801,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 }
 
+// The custom RenderBox that helps paginate the menu items.
 class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _CupertinoTextSelectionToolbarItemsRenderBox({
     @required double dividerWidth,
