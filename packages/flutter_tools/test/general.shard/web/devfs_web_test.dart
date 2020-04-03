@@ -10,7 +10,6 @@ import 'package:dwds/dwds.dart';
 import 'package:dwds/src/loaders/strategy.dart';
 import 'package:dwds/src/readers/asset_reader.dart';
 import 'package:dwds/src/services/expression_compiler.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
