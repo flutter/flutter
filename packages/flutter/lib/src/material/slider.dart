@@ -1340,8 +1340,6 @@ class _AdjustSliderIntent extends Intent {
     @required this.type
   }) : super(intentKey);
 
-  static const LocalKey intentKey = ValueKey<Type>(_AdjustSliderIntent);
-
   const _AdjustSliderIntent.increment() :
         type = _SliderAdjustmentType.increment,
         super(intentKey);
@@ -1349,6 +1347,8 @@ class _AdjustSliderIntent extends Intent {
   const _AdjustSliderIntent.decrement() :
         type = _SliderAdjustmentType.decrement,
         super(intentKey);
+
+  static const LocalKey intentKey = ValueKey<Type>(_AdjustSliderIntent);
 
   final _SliderAdjustmentType type;
 }

@@ -1257,7 +1257,7 @@ void main() {
       semantics,
       hasSemantics(
         TestSemantics.root(
-          children: [
+          children: <TestSemantics>[
             TestSemantics.rootChild(
               id: 3,
             )
