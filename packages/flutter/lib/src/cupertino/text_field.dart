@@ -268,6 +268,7 @@ class CupertinoTextField extends StatefulWidget {
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
+    this.autofillHints,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -578,6 +579,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.material.textfield.onTap}
   final GestureTapCallback onTap;
+
+  /// {@macro flutter.iwdgets.editableText.autofillHints}
+  final Iterable<String> autofillHints;
 
   @override
   _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
@@ -947,6 +951,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
           enableInteractiveSelection: widget.enableInteractiveSelection,
+          autofillHints: widget.autofillHints,
         ),
       ),
     );

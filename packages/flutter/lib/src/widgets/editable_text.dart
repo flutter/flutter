@@ -7,12 +7,13 @@ import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
+import 'autofill.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -29,8 +30,8 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -408,6 +409,7 @@ class EditableText extends StatefulWidget {
       paste: true,
       selectAll: true,
     ),
+    this.autofillHints,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -1062,6 +1064,17 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
+  /// {@template flutter.iwdgets.editableText.autofillHints}
+  /// A list of strings that helps the autofill service identify the type of this
+  /// text input.
+  ///
+  /// When set to null, the text input will not participant in autofill triggered
+  /// by a different [AutofillClient], even if they're in the same [AutofillScope].
+  ///
+  /// {@macro flutter.services.autofill.autofillHints}
+  /// {@endtemplate}
+  final Iterable<String> autofillHints;
+
   @override
   EditableTextState createState() => EditableTextState();
 
@@ -1091,7 +1104,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextInputClient, TextSelectionDelegate {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, AutofillClientMixin implements TextSelectionDelegate, AutofillTrigger {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1193,6 +1206,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (oldWidget.readOnly && _hasFocus)
         _openInputConnection();
     }
+
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
@@ -1260,10 +1274,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _formatAndSetValue(value);
 
-    // To keep the cursor from blinking while typing, we want to restart the
-    // cursor timer every time a new character is typed.
-    _stopCursorTimer(resetCharTicks: false);
-    _startCursorTimer();
+    if (_hasInputConnection) {
+      // To keep the cursor from blinking while typing, we want to restart the
+      // cursor timer every time a new character is typed.
+      _stopCursorTimer(resetCharTicks: false);
+      _startCursorTimer();
+    }
   }
 
   @override
@@ -1447,26 +1463,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(
-        this,
-        TextInputConfiguration(
-          inputType: widget.keyboardType,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
-          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
-          enableSuggestions: widget.enableSuggestions,
-          inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
-              ? TextInputAction.newline
-              : TextInputAction.done
-          ),
-          textCapitalization: widget.textCapitalization,
-          keyboardAppearance: widget.keyboardAppearance,
-        ),
-      );
+
+      _textInputConnection = widget.autofillHints == null
+        ? currentAutofillScope?.attach(this, textInputConfiguration) ?? TextInput.attach(this, textInputConfiguration)
+        : TextInput.attach(this, textInputConfiguration);
+      _updateSizeAndTransform();
       _textInputConnection.show();
 
-      _updateSizeAndTransform();
       final TextStyle style = widget.style;
       _textInputConnection
         ..setStyle(
@@ -1881,6 +1884,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
+  }
+
+  @override
+  TextInputConfiguration get textInputConfiguration {
+    return TextInputConfiguration(inputType: widget.keyboardType,
+      obscureText: widget.obscureText,
+      autocorrect: widget.autocorrect,
+      smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+      smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+      enableSuggestions: widget.enableSuggestions,
+      inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
+        ? TextInputAction.newline
+        : TextInputAction.done
+      ),
+      textCapitalization: widget.textCapitalization,
+      keyboardAppearance: widget.keyboardAppearance,
+      autofillConfiguration: (widget.autofillHints?.isEmpty ?? true) ? null : AutofillConfiguration(
+        uniqueIdentifier: toStringShort(),
+        autofillHints: widget.autofillHints.toList(growable: false),
+        currentEditingValue: currentTextEditingValue,
+      )
+    );
+  }
+
+  @override
+  AutofillScope get currentAutofillScope {
+    return widget.autofillHints == null
+      ? null
+      : AutofillGroup.of(context);
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
