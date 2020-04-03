@@ -32,7 +32,7 @@ class GitHubTemplateCreator {
   final FlutterProjectFactory _flutterProjectFactory;
   final HttpClient _client;
 
-  static Future<String> toolCrashSimilarIssuesURL(String errorString) async {
+  static String toolCrashSimilarIssuesURL(String errorString) {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
