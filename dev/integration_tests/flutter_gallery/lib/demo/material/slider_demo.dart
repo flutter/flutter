@@ -242,6 +242,7 @@ class _SlidersState extends State<_Sliders> {
 
   @override
   Widget build(BuildContext context) {
+  print(Theme.of(context).colorScheme.onSurface.withOpacity(.38));
     final ThemeData theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -274,19 +275,40 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               SliderTheme(
-                data: const SliderThemeData(
+                data:  SliderThemeData(
                   showValueIndicator: ShowValueIndicator.always,
+                  thumbShape:  const RoundSliderThumbShape(
+                    disabledThumbRadius: 10.0,
+                    enabledThumbRadius: 10.0,
+                  ),
+//trackShape: const RoundedRectSliderTrackShape(),
+//trackShape: const RectangularSliderTrackShape(),
+//disabled
+                disabledThumbColor: Color.alphaBlend(Colors.grey.withOpacity(0.5), Colors.grey),
+//                disabledThumbColor: Color.alphaBlend(Colors.grey.withOpacity(1), Colors.black),
+//                disabledActiveTrackColor: Colors.black,
+                disabledInactiveTrackColor: Colors.grey,
+//                disabledInactiveTrackColor: Colors.grey.withOpacity(0.5),
+
+//disabledThumbColor: Color.fromRGBO(100 , 100, 100, 1.0),
+//                  disabledThumbColor:  Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), Color(0xffffff)),
+//                  thumbColor: Color(0xFFFF773D),
+                  thumbColor: Color(0xFFFF773D),
+
+
                 ),
-                child: Slider.adaptive(
-                  label: _continuousValue.toStringAsFixed(6).toString(),
-                  value: _continuousValue,
+                child: const Slider(
+//                  label: _continuousValue.toStringAsFixed(6).toString(),
+//                  value: _continuousValue,
+                value: 0,
                   min: 0.0,
                   max: 100.0,
-                  onChanged: (double value) {
-                    setState(() {
-                      _continuousValue = value;
-                    });
-                  },
+                  onChanged: null,
+//                  onChanged: (double value) {
+//                    setState(() {
+//                      _continuousValue = value;
+//                    });
+//                  },
                 ),
               ),
               const Text('Continuous with Editable Numerical Value'),
