@@ -89,7 +89,7 @@ class BuildIOSCommand extends BuildSubCommand {
     );
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result);
+      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger);
       throwToolExit('Encountered error while building for $logTarget.');
     }
 

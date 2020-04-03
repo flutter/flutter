@@ -342,6 +342,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (e.toString().contains('timed out')) {
       BuildEvent('xcode-show-build-settings-timeout',
         command: showBuildSettingsCommand.join(' '),
+        flutterUsage: globals.flutterUsage,
       ).send();
     }
     rethrow;
@@ -447,13 +448,14 @@ return result.exitCode != 0 &&
     result.stdout.contains('there are two concurrent builds running');
 }
 
-Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
+Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
     BuildEvent('xcode-bitcode-failure',
       command: result.xcodeBuildExecution.buildCommands.toString(),
       settings: result.xcodeBuildExecution.buildSettings.toString(),
+      flutterUsage: flutterUsage,
     ).send();
   }
 
@@ -463,11 +465,11 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.stdout?.contains('Building for iOS') == true
       && result.stdout?.contains('but the linked and embedded framework') == true
       && result.stdout?.contains('was built for iOS') == true) {
-    globals.printError('');
-    globals.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
-    globals.printError('');
-    globals.printError('You can temporarily work around this issue by running:');
-    globals.printError('  rm -rf ios/Flutter/App.framework');
+    logger.printError('');
+    logger.printError('Your Xcode project requires migration. See https://flutter.dev/docs/development/ios-project-migration for details.');
+    logger.printError('');
+    logger.printError('You can temporarily work around this issue by running:');
+    logger.printError('  rm -rf ios/Flutter/App.framework');
     return;
   }
 
@@ -476,7 +478,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       result.stdout?.contains('BCEROR') == true &&
       // May need updating if Xcode changes its outputs.
       result.stdout?.contains("Xcode couldn't find a provisioning profile matching") == true) {
-    globals.printError(noProvisioningProfileInstruction, emphasis: true);
+    logger.printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
   // Make sure the user has specified one of:
@@ -486,26 +488,26 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
         result.xcodeBuildExecution.buildSettings.containsKey)) {
-    globals.printError(noDevelopmentTeamInstruction, emphasis: true);
+    logger.printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
-    globals.printError('');
-    globals.printError('It appears that your application still contains the default signing identifier.');
-    globals.printError("Try replacing 'com.example' with your signing id in Xcode:");
-    globals.printError('  open ios/Runner.xcworkspace');
+    logger.printError('');
+    logger.printError('It appears that your application still contains the default signing identifier.');
+    logger.printError("Try replacing 'com.example' with your signing id in Xcode:");
+    logger.printError('  open ios/Runner.xcworkspace');
     return;
   }
   if (result.stdout?.contains('Code Sign error') == true) {
-    globals.printError('');
-    globals.printError('It appears that there was a problem signing your application prior to installation on the device.');
-    globals.printError('');
-    globals.printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
-    globals.printError('  open ios/Runner.xcworkspace');
-    globals.printError('');
-    globals.printError("Also try selecting 'Product > Build' to fix the problem:");
+    logger.printError('');
+    logger.printError('It appears that there was a problem signing your application prior to installation on the device.');
+    logger.printError('');
+    logger.printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
+    logger.printError('  open ios/Runner.xcworkspace');
+    logger.printError('');
+    logger.printError("Also try selecting 'Product > Build' to fix the problem:");
     return;
   }
 }
