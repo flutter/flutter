@@ -1,4 +1,4 @@
-Signature: 9d9bbbc53975fe3640278f517c6d165c
+Signature: 6955ae4ede67f0b8724b26a9ff9344f6
 
 UNUSED LICENSES:
 
@@ -3629,7 +3629,6 @@ FILE: ../../../third_party/skia/modules/skottie/gm/ExternalProperties.cpp
 FILE: ../../../third_party/skia/modules/skottie/gm/SkottieGM.cpp
 FILE: ../../../third_party/skia/modules/skottie/include/Skottie.h
 FILE: ../../../third_party/skia/modules/skottie/src/Skottie.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGDraw.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGEffectNode.h
@@ -5602,13 +5601,14 @@ FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Animator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Animator.h
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Keyframe.h
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Scalar.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Shape.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Vector.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/animator/Vector.h
+FILE: ../../../third_party/skia/modules/skottie/src/animator/KeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/KeyframeAnimator.h
+FILE: ../../../third_party/skia/modules/skottie/src/animator/ScalarKeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/ShapeKeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/TextKeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2KeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
