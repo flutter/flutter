@@ -2,14 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
+import 'package:dwds/data/build_result.dart';
+import 'package:dwds/dwds.dart';
+import 'package:dwds/src/loaders/strategy.dart';
+import 'package:dwds/src/readers/asset_reader.dart';
+import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
+import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
 // ignore: deprecated_member_use
@@ -432,7 +439,43 @@ void main() {
 
     await webDevFS.destroy();
   }));
+
+  test('Launches DWDS with the correct arguments', () => testbed.run(() async {
+    final WebAssetServer server = await WebAssetServer.start(
+      'localhost',
+      8123,
+      (String url) => null,
+      BuildMode.debug,
+      true,
+      Uri.file('test.dart'),
+      null,
+      dwdsLauncher: ({
+        AssetReader assetReader,
+        Stream<BuildResult> buildResults,
+        ConnectionProvider chromeConnection,
+        bool enableDebugExtension,
+        bool enableDebugging,
+        ExpressionCompiler expressionCompiler,
+        String hostname,
+        LoadStrategy loadStrategy,
+        void Function(Level, String) logWriter,
+        bool serveDevTools,
+        UrlEncoder urlEncoder,
+        bool useSseForDebugProxy,
+        bool verbose,
+      }) async {
+        expect(serveDevTools, false);
+        expect(verbose, null);
+        expect(enableDebugging, true);
+        expect(enableDebugExtension, true);
+
+        return MockDwds();
+      });
+
+      await server.dispose();
+  }));
 }
 
 class MockHttpServer extends Mock implements HttpServer {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
+class MockDwds extends Mock implements Dwds {}

@@ -40,8 +40,10 @@ bool _isRadioSelected(int index) =>
 List<Radio<Location>> get _radios => List<Radio<Location>>.from(
     _radioFinder.evaluate().map<Widget>((Element e) => e.widget));
 
-// [find.byType] and [find.widgetWithText] do not match subclasses; `Radio` is not sufficient to find a `Radio<_Location>`.
-// Another approach is to grab the `runtimeType` of a dummy instance; see packages/flutter/test/material/control_list_tile_test.dart.
+// [find.byType] and [find.widgetWithText] do not match subclasses; `Radio` is
+// not sufficient to find a `Radio<_Location>`. Another approach is to grab the
+// `runtimeType` of a dummy instance; see
+// packages/flutter/test/material/radio_list_tile_test.dart.
 Finder get _radioFinder =>
     find.byWidgetPredicate((Widget w) => w is Radio<Location>);
 

@@ -57,6 +57,7 @@ void main() {
       'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
 
+    print('Step 1');
     // Step 1. Clone the dev branch of flutter into the test directory.
     exitCode = await processUtils.stream(<String>[
       'git',
@@ -65,6 +66,7 @@ void main() {
     ], workingDirectory: parentDirectory.path, trace: true);
     expect(exitCode, 0);
 
+    print('Step 2');
     // Step 2. Switch to the dev branch.
     exitCode = await processUtils.stream(<String>[
       'git',
@@ -76,6 +78,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
+    print('Step 3');
     // Step 3. Revert to a prior version.
     exitCode = await processUtils.stream(<String>[
       'git',
@@ -85,7 +88,8 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
-    // Step 4. Upgrade to the newest dev. This should update the persistent
+    print('Step 4');
+    // Step 4. Upgrade to the newest stable. This should update the persistent
     // tool state with the sha for v1.14.3
     exitCode = await processUtils.stream(<String>[
       flutterBin,
@@ -95,6 +99,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
+    print('Step 5');
     // Step 5. Verify that the version is different.
     final RunResult versionResult = await processUtils.run(<String>[
       'git',
@@ -107,6 +112,7 @@ void main() {
     ], workingDirectory: testDirectory.path);
     expect(versionResult.stdout, isNot(contains(_kInitialVersion)));
 
+    print('Step 6');
     // Step 6. Downgrade back to initial version.
     exitCode = await processUtils.stream(<String>[
        flutterBin,
@@ -116,6 +122,7 @@ void main() {
     ], workingDirectory: testDirectory.path, trace: true);
     expect(exitCode, 0);
 
+    print('Step 7');
     // Step 7. Verify downgraded version matches original version.
     final RunResult oldVersionResult = await processUtils.run(<String>[
       'git',
