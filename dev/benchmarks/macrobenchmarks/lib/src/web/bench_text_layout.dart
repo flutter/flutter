@@ -192,7 +192,7 @@ class BenchTextCachedLayout extends RawRecorder {
 int _counter = 0;
 
 /// Which mode to run [BenchBuildColorsGrid] in.
-enum BenchBuildColorsGridMode {
+enum _TestMode {
   /// Uses the HTML rendering backend with the canvas 2D text layout.
   useCanvasTextLayout,
 
@@ -209,25 +209,28 @@ enum BenchBuildColorsGridMode {
 /// colors. Each color's description is made of several [Text] nodes.
 class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvas()
-      : mode = BenchBuildColorsGridMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
+      : mode = _TestMode.useCanvasTextLayout, super(name: canvasBenchmarkName);
   BenchBuildColorsGrid.dom()
-      : mode = BenchBuildColorsGridMode.useDomTextLayout, super(name: domBenchmarkName);
+      : mode = _TestMode.useDomTextLayout, super(name: domBenchmarkName);
   BenchBuildColorsGrid.canvasKit()
-      : mode = BenchBuildColorsGridMode.useCanvasKit, super(name: canvasKitBenchmarkName);
+      : mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
   static const String domBenchmarkName = 'text_dom_color_grid';
   static const String canvasBenchmarkName = 'text_canvas_color_grid';
   static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
 
   /// Whether to use the new canvas-based text measurement implementation.
-  final BenchBuildColorsGridMode mode;
+  final _TestMode mode;
 
   num _textLayoutMicros = 0;
 
   @override
   Future<void> setUpAll() async {
-    if (mode == BenchBuildColorsGridMode.useCanvasTextLayout) {
+    if (mode == _TestMode.useCanvasTextLayout) {
       _useCanvasText(true);
+    }
+    if (mode == _TestMode.useDomTextLayout) {
+      _useCanvasText(false);
     }
     _onBenchmark((String name, num value) {
       _textLayoutMicros += value;
@@ -250,7 +253,8 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   void frameDidDraw() {
     // We need to do this before calling [super.frameDidDraw] because the latter
     // updates the value of [showWidget] in preparation for the next frame.
-    if (showWidget && mode != BenchBuildColorsGridMode.useCanvasKit) {
+    // TODO(yjbanov): https://github.com/flutter/flutter/issues/53877
+    if (showWidget && mode != _TestMode.useCanvasKit) {
       profile.addDataPoint(
         'text_layout',
         Duration(microseconds: _textLayoutMicros.toInt()),

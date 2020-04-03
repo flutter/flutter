@@ -10,6 +10,12 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+/// The number of samples used to extract metrics, such as noise, means,
+/// max/min values.
+///
+/// Keep this constant in sync with the same constant defined in `dev/benchmarks/macrobenchmarks/lib/src/web/recorder.dart`.
+const int _kMeasuredSampleCount = 10;
+
 /// Options passed to Chrome when launching it.
 class ChromeOptions {
   ChromeOptions({
@@ -145,6 +151,11 @@ class Chrome {
         _tracingSubscription.cancel();
         _tracingSubscription = null;
       } else if (event.method == 'Tracing.dataCollected') {
+        final dynamic value = event.params['value'];
+        if (value is! List) {
+          throw FormatException('"Tracing.dataCollected" returned malformed data. '
+              'Expected a List but got: ${value.runtimeType}');
+        }
         _tracingData.addAll((event.params['value'] as List<dynamic>).cast<Map<String, dynamic>>());
       }
     });
@@ -227,7 +238,8 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
       return line;
     })
     .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
-      throw Exception('Failed to spawn stderr');
+      throw Exception('Expected Chrome to print "DevTools listening" string '
+          'with DevTools URL, but the string was never printed.');
     });
 
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
@@ -237,7 +249,9 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
     return tab.url.startsWith('http://localhost');
   });
   final ChromeTab tab = tabs.single;
-  return tab.connect();
+  final WipConnection debugConnection = await tab.connect();
+  print('Connected to Chrome tab: ${tab.title} (${tab.url})');
+  return debugConnection;
 }
 
 /// Gets the Chrome debugger URL for the web page being benchmarked.
@@ -269,9 +283,7 @@ class BlinkTraceSummary {
 
       // Filter out data from unrelated processes
       final BlinkTraceEvent processLabel = events
-        .where((BlinkTraceEvent event) {
-          return event.name == 'thread_name' && event.args['name'] == 'CrRendererMain';
-        })
+        .where((BlinkTraceEvent event) => event.isCrRendererMain)
         .single;
       final int tabPid = processLabel.pid;
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
@@ -281,9 +293,9 @@ class BlinkTraceSummary {
       int skipCount = 0;
       BlinkFrame frame = BlinkFrame();
       for (final BlinkTraceEvent event in events) {
-        if (event.ph == 'X' && event.name == 'WebViewImpl::beginFrame') {
+        if (event.isBeginFrame) {
           frame.beginFrame = event;
-        } else if (event.ph == 'X' && event.name == 'WebViewImpl::updateAllLifecyclePhases') {
+        } else if (event.isUpdateAllLifecyclePhases) {
           frame.updateAllLifecyclePhases = event;
           if (frame.endMeasuredFrame != null) {
             frames.add(frame);
@@ -291,9 +303,9 @@ class BlinkTraceSummary {
             skipCount += 1;
           }
           frame = BlinkFrame();
-        } else if (event.ph == 'b' && event.name == 'measured_frame') {
+        } else if (event.isBeginMeasuredFrame) {
           frame.beginMeasuredFrame = event;
-        } else if (event.ph == 'e' && event.name == 'measured_frame') {
+        } else if (event.isEndMeasuredFrame) {
           frame.endMeasuredFrame = event;
         }
       }
@@ -363,16 +375,17 @@ class BlinkFrame {
 /// Takes a list of events that have non-null [BlinkTraceEvent.tdur] computes
 /// their average as a [Duration] value.
 Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
-  final double total = events
-    .skip(math.max(events.length - 10, 0))
+  // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
+  final double sum = events
+    .skip(math.max(events.length - _kMeasuredSampleCount, 0))
     .fold(0.0, (double previousValue, BlinkTraceEvent event) {
       if (event.tdur == null) {
-        throw event;
+        throw FormatException('Trace event lacks "tdur" field: $event');
       }
       return previousValue + event.tdur;
     });
-  final int sampleCount = math.min(events.length, 10);
-  return Duration(microseconds: total ~/ sampleCount);
+  final int sampleCount = math.min(events.length, _kMeasuredSampleCount);
+  return Duration(microseconds: sum ~/ sampleCount);
 }
 
 /// An event collected by the Blink tracer (in Chrome accessible using chrome://tracing).
@@ -393,6 +406,29 @@ class BlinkTraceEvent {
   });
 
   /// Parses an event from its JSON representation.
+  ///
+  /// Sample event encoded as JSON (the data is bogus, this just shows the format):
+  ///
+  /// ```
+  /// {
+  ///   "name": "myName",
+  ///   "cat": "category,list",
+  ///   "ph": "B",
+  ///   "ts": 12345,
+  ///   "pid": 123,
+  ///   "tid": 456,
+  ///   "args": {
+  ///     "someArg": 1,
+  ///     "anotherArg": {
+  ///       "value": "my value"
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// For detailed documentation of the format see:
+  ///
+  /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
   static BlinkTraceEvent fromJson(Map<String, dynamic> json) {
     return BlinkTraceEvent._(
       args: json['args'] as Map<String, dynamic>,
@@ -433,6 +469,49 @@ class BlinkTraceEvent {
 
   /// Event duration in microseconds.
   final int tdur;
+
+  /// A "begin frame" event contains all of the scripting time of an animation
+  /// frame (JavaScript, WebAssembly), plus a negligible amount of internal
+  /// browser overhead.
+  ///
+  /// This event does not include non-UI thread scripting, such as web workers,
+  /// service workers, and CSS Paint paintlets.
+  ///
+  /// This event is a duration event that has its `tdur` populated.
+  bool get isBeginFrame => ph == 'X' && name == 'WebViewImpl::beginFrame';
+
+  /// An "update all lifecycle phases" event contains UI thread computations
+  /// related to an animation frame that's outside the scripting phase.
+  ///
+  /// This event includes style recalculation, layer tree update, layout,
+  /// painting, and parts of compositing work.
+  ///
+  /// This event is a duration event that has its `tdur` populated.
+  bool get isUpdateAllLifecyclePhases => ph == 'X' && name == 'WebViewImpl::updateAllLifecyclePhases';
+
+  /// A "CrRendererMain" event contains information about the browser's UI
+  /// thread.
+  ///
+  /// This event's [pid] field identifies the process that performs web page
+  /// rendering. The [isBeginFrame] and [isUpdateAllLifecyclePhases] events
+  /// with the same [pid] as this event all belong to the same web page.
+  bool get isCrRendererMain => name == 'thread_name' && args['name'] == 'CrRendererMain';
+
+  /// Whether this is the beginning of a "measured_frame" event.
+  ///
+  /// This event is a custom event emitted by our benchmark test harness.
+  ///
+  /// See also:
+  ///  * `recorder.dart`, which emits this event.
+  bool get isBeginMeasuredFrame => ph == 'b' && name == 'measured_frame';
+
+  /// Whether this is the end of a "measured_frame" event.
+  ///
+  /// This event is a custom event emitted by our benchmark test harness.
+  ///
+  /// See also:
+  ///  * `recorder.dart`, which emits this event.
+  bool get isEndMeasuredFrame => ph == 'e' && name == 'measured_frame';
 
   @override
   String toString() => '$BlinkTraceEvent('

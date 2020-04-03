@@ -29,6 +29,8 @@ const int kMaxSampleCount = 10 * kMinSampleCount;
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
+///
+/// Keep this constant in sync with the same constant defined in `dev/devicelab/lib/framework/browser.dart`.
 const int _kMeasuredSampleCount = 10;
 
 /// Maximum tolerated noise level.
@@ -66,7 +68,7 @@ class Runner {
   /// The recorder that will run and record the benchmark.
   final Recorder recorder;
 
-  /// Called immediately after [Recorder.setUpAll] is called.
+  /// Called immediately after [Recorder.setUpAll] future is resolved.
   ///
   /// This is useful, for example, to kick off a profiler or a tracer such that
   /// the "set up" computations are not included in the metrics.
@@ -205,26 +207,36 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Profile profile = Profile(name: name);
 
     window.onBeginFrame = (_) {
-      startMeasureFrame();
-      onBeginFrame();
+      try {
+        startMeasureFrame();
+        onBeginFrame();
+      } catch (error, stackTrace) {
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
+      }
     };
     window.onDrawFrame = () {
-      profile.record('drawFrameDuration', () {
-        final SceneBuilder sceneBuilder = SceneBuilder();
-        onDrawFrame(sceneBuilder);
-        profile.record('sceneBuildDuration', () {
-          final Scene scene = sceneBuilder.build();
-          profile.record('windowRenderDuration', () {
-            window.render(scene);
+      try {
+        profile.record('drawFrameDuration', () {
+          final SceneBuilder sceneBuilder = SceneBuilder();
+          onDrawFrame(sceneBuilder);
+          profile.record('sceneBuildDuration', () {
+            final Scene scene = sceneBuilder.build();
+            profile.record('windowRenderDuration', () {
+              window.render(scene);
+            });
           });
         });
-      });
-      endMeasureFrame();
+        endMeasureFrame();
 
-      if (profile.shouldContinue()) {
-        window.scheduleFrame();
-      } else {
-        profileCompleter.complete(profile);
+        if (profile.shouldContinue()) {
+          window.scheduleFrame();
+        } else {
+          profileCompleter.complete(profile);
+        }
+      } catch (error, stackTrace) {
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
       }
     };
     window.scheduleFrame();
@@ -398,8 +410,8 @@ abstract class WidgetBuildRecorder extends Recorder
   void frameWillDraw() {
     if (showWidget) {
       startMeasureFrame();
+      _drawFrameStopwatch = Stopwatch()..start();
     }
-    _drawFrameStopwatch = Stopwatch()..start();
   }
 
   @override
@@ -470,7 +482,9 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 /// calculations will only apply to the latest [_kMeasuredSampleCount] data
 /// points.
 class Timeseries {
-  Timeseries();
+  Timeseries(this.name);
+
+  final String name;
 
   /// List of all the values that have been recorded.
   ///
@@ -487,14 +501,28 @@ class Timeseries {
   /// because of the sample size limit.
   int get count => _allValues.length;
 
-  double get average => _computeMean(_measuredValues);
+  /// Computes the average value of the measured values.
+  double get average => _computeAverage(name, _measuredValues);
 
+  /// Computes the standard deviation of the measured values.
   double get standardDeviation =>
-      _computeStandardDeviationForPopulation(_measuredValues);
+      _computeStandardDeviationForPopulation(name, _measuredValues);
 
+  /// Computes noise as a multiple of the [average] value.
+  ///
+  /// This value can be multiplied by 100.0 to get noise as a percentage of
+  /// the average.
+  ///
+  /// If [average] is zero, treats the result as perfect score, returns zero.
   double get noise => average > 0.0 ? standardDeviation / average : 0.0;
 
+  /// Adds a value to this timeseries.
   void add(num value) {
+    if (value < 0.0) {
+      throw StateError(
+        'Timeseries $name: negative metric values are not supported. Got: $value',
+      );
+    }
     _measuredValues.add(value);
     _allValues.add(value);
     // Don't let the [_measuredValues] list grow beyond [_kMeasuredSampleCount].
@@ -525,7 +553,7 @@ class Profile {
   }
 
   void addDataPoint(String key, Duration duration) {
-    scoreData.putIfAbsent(key, () => Timeseries()).add(duration.inMicroseconds);
+    scoreData.putIfAbsent(key, () => Timeseries(key)).add(duration.inMicroseconds);
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -636,10 +664,11 @@ class Profile {
 }
 
 /// Computes the arithmetic mean (or average) of given [values].
-double _computeMean(Iterable<num> values) {
+double _computeAverage(String label, Iterable<num> values) {
   if (values.isEmpty) {
-    throw StateError('Attempted to compute an average of an empty value list.');
+    throw StateError('$label: attempted to compute an average of an empty value list.');
   }
+
   final num sum = values.reduce((num a, num b) => a + b);
   return sum / values.length;
 }
@@ -651,11 +680,11 @@ double _computeMean(Iterable<num> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double _computeStandardDeviationForPopulation(Iterable<num> population) {
+double _computeStandardDeviationForPopulation(String label, Iterable<num> population) {
   if (population.isEmpty) {
-    throw StateError('Attempted to compute the standard deviation of empty population.');
+    throw StateError('$label: attempted to compute the standard deviation of empty population.');
   }
-  final double mean = _computeMean(population);
+  final double mean = _computeAverage(label, population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
     (double previous, num value) => previous += math.pow(value - mean, 2),
@@ -719,15 +748,19 @@ class _RecordingWidgetsBinding extends BindingBase
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
     FlutterError.onError = (FlutterErrorDetails details) {
-      if (_hasErrored) {
-        return;
-      }
-      _listener._onError(details.exception, details.stack);
-      _hasErrored = true;
+      _haltBenchmarkWithError(details.exception, details.stack);
       originalOnError(details);
     };
     _listener = recorder;
     runApp(widget);
+  }
+
+  void _haltBenchmarkWithError(dynamic error, StackTrace stackTrace) {
+    if (_hasErrored) {
+      return;
+    }
+    _listener._onError(error, stackTrace);
+    _hasErrored = true;
   }
 
   /// To avoid calling [Profile.shouldContinue] every time [scheduleFrame] is
@@ -740,8 +773,13 @@ class _RecordingWidgetsBinding extends BindingBase
     if (_hasErrored) {
       return;
     }
-    _benchmarkStopped = !_listener.profile.shouldContinue();
-    super.handleBeginFrame(rawTimeStamp);
+    try {
+      _benchmarkStopped = !_listener.profile.shouldContinue();
+      super.handleBeginFrame(rawTimeStamp);
+    } catch (error, stackTrace) {
+      _haltBenchmarkWithError(error, stackTrace);
+      rethrow;
+    }
   }
 
   @override
@@ -758,9 +796,14 @@ class _RecordingWidgetsBinding extends BindingBase
     if (_hasErrored) {
       return;
     }
-    _listener.frameWillDraw();
-    super.handleDrawFrame();
-    _listener.frameDidDraw();
+    try {
+      _listener.frameWillDraw();
+      super.handleDrawFrame();
+      _listener.frameDidDraw();
+    } catch (error, stackTrace) {
+      _haltBenchmarkWithError(error, stackTrace);
+      rethrow;
+    }
   }
 }
 
