@@ -13224,7 +13224,7 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountTwo => null;
 
   @override
-  String get remainingTextFieldCharacterCountZero => null;
+  String get remainingTextFieldCharacterCountZero => 'TBD';
 
   @override
   String get reorderItemDown => 'Flytt ned';

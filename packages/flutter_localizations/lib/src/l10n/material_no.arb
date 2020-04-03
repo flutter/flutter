@@ -49,6 +49,7 @@
   "reorderItemRight": "Flytt til høyre",
   "expandedIconTapHint": "Skjul",
   "collapsedIconTapHint": "Vis",
+  "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 tegn gjenstår",
   "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår",
   "refreshIndicatorSemanticLabel": "Laster inn på nytt"
