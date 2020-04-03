@@ -716,7 +716,8 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  }, skip: isBrowser); // Reference needed
+  }, skip: isBrowser); // Compilation trace is Dart VM specific and not
+  // supported in browsers.
 
   test('Service extensions - fastReassemble', () async {
     Map<String, dynamic> result;
