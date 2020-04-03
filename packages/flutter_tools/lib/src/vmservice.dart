@@ -346,25 +346,25 @@ class VMService implements vm_service.VmService {
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
+    // Create an instance of the package:vm_service API in addition to the flutter
+    // tool's to allow gradual migration.
+    final Completer<void> streamClosedCompleter = Completer<void>();
+
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
     final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
     final StreamController<dynamic> primary = StreamController<dynamic>();
     final StreamController<dynamic> secondary = StreamController<dynamic>();
-
     channel.listen((dynamic data) {
       primary.add(data);
       secondary.add(data);
     }, onDone: ()  {
       primary.close();
       secondary.close();
+      streamClosedCompleter.complete();
     }, onError: (dynamic error, StackTrace stackTrace) {
       primary.addError(error, stackTrace);
       secondary.addError(error, stackTrace);
     });
-
-    // Create an instance of the package:vm_service API in addition to the flutter
-    // tool's to allow gradual migration.
-    final Completer<void> streamClosedCompleter = Completer<void>();
 
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
