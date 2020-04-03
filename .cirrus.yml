@@ -97,9 +97,11 @@ task:
       - which flutter
   matrix:
     - name: analyze-linux # linux-only
-      # environment:
+      environment:
         # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
-        # CPU and 4G RAM as of October 2019. It fails with less than 4G though.
+        # CPU.  We noticed OOM failures with 4GB 3/2020, so we increased the memory.
+        CPU: 1
+        MEMORY: 6G
       script:
         - dart --enable-asserts ./dev/bots/analyze.dart
 

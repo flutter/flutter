@@ -212,7 +212,7 @@ void main() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
-    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+    when(globals.buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       final Environment environment = invocation.positionalArguments[1] as Environment;
       expect(environment.defines, <String, String>{
         kTargetFile: globals.fs.path.join('lib', 'main.dart'),

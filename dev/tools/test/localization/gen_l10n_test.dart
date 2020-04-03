@@ -58,11 +58,11 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   MemoryFileSystem fs;
 
-  setUp(() async {
+  setUp(() {
     fs = MemoryFileSystem(
       style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
     );
-    await precacheLanguageAndRegionTags();
+    precacheLanguageAndRegionTags();
   });
 
   group('Setters', () {

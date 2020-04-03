@@ -135,10 +135,14 @@ class PubResultEvent extends UsageEvent {
 /// An event that reports something about a build.
 class BuildEvent extends UsageEvent {
   BuildEvent(String label, {
-    this.command,
-    this.settings,
-    this.eventError,
-  }) : super(
+    String command,
+    String settings,
+    String eventError,
+    @required Usage flutterUsage,
+  }) : _command = command,
+  _settings = settings,
+  _eventError = eventError,
+      super(
     // category
     'build',
     // parameter
@@ -146,22 +150,22 @@ class BuildEvent extends UsageEvent {
       ? 'unspecified'
       : FlutterCommand.current.name,
     label: label,
-    flutterUsage: globals.flutterUsage,
+    flutterUsage: flutterUsage,
   );
 
-  final String command;
-  final String settings;
-  final String eventError;
+  final String _command;
+  final String _settings;
+  final String _eventError;
 
   @override
   void send() {
     final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
-      if (command != null)
-        CustomDimensions.buildEventCommand: command,
-      if (settings != null)
-        CustomDimensions.buildEventSettings: settings,
-      if (eventError != null)
-        CustomDimensions.buildEventError: eventError,
+      if (_command != null)
+        CustomDimensions.buildEventCommand: _command,
+      if (_settings != null)
+        CustomDimensions.buildEventSettings: _settings,
+      if (_eventError != null)
+        CustomDimensions.buildEventError: _eventError,
     });
     flutterUsage.sendEvent(
       category,

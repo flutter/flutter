@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -209,13 +211,20 @@ void main() {
   group('xcdevice', () {
     XCDevice xcdevice;
     MockXcode mockXcode;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
 
     setUp(() {
       mockXcode = MockXcode();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
       xcdevice = XCDevice(
         processManager: processManager,
         logger: logger,
         xcode: mockXcode,
+        platform: null,
+        artifacts: mockArtifacts,
+        cache: mockCache,
       );
     });
 
@@ -260,8 +269,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getAvailableTetheredIOSDevices(), isEmpty);
       });
@@ -365,7 +374,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(3));
@@ -427,7 +436,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
         expect(devices, hasLength(1));
@@ -454,8 +463,8 @@ void main() {
         when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
             .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
-            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '1']));
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+            .thenThrow(const ProcessException('xcrun', <String>['xcdevice', 'list', '--timeout', '2']));
 
         expect(await xcdevice.getDiagnostics(), isEmpty);
       });
@@ -487,7 +496,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         await xcdevice.getAvailableTetheredIOSDevices();
         final List<String> errors = await xcdevice.getDiagnostics();
@@ -589,7 +598,7 @@ void main() {
 ]
 ''';
 
-        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '1']))
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
             .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
         final List<String> errors = await xcdevice.getDiagnostics();
         expect(errors, hasLength(4));
@@ -608,3 +617,5 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockPlatform extends Mock implements Platform {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}

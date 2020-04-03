@@ -429,6 +429,13 @@ abstract class FlutterCommand extends Command<void> {
       );
   }
 
+  void usesExtraFrontendOptions() {
+    argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      splitCommas: true,
+      hide: true,
+    );
+  }
+
   void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
@@ -803,7 +810,7 @@ abstract class FlutterCommand extends Command<void> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
+        final String error = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).checkValid();
         if (error != null) {
           throw ToolExit(error);
         }

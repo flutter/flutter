@@ -60,7 +60,10 @@ class ChromeDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
@@ -138,7 +141,7 @@ class ChromeDevice extends Device {
     if (launchChrome) {
       _chrome = await globals.chromeLauncher.launch(
         url,
-        dataDir: globals.fs.currentDirectory
+        cacheDir: globals.fs.currentDirectory
             .childDirectory('.dart_tool')
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
@@ -221,7 +224,10 @@ class WebServerDevice extends Device {
   DeviceLogReader _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 

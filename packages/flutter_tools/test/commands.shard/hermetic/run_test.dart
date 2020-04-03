@@ -105,7 +105,7 @@ void main() {
         ]);
         fail('Expect exception');
       } on Exception catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
       }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(bufferLogger.statusText, contains(
@@ -162,7 +162,7 @@ void main() {
         ]);
         fail('Expect exception');
       } on Exception catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         expect(e.toString(), contains('No pubspec.yaml file found'));
       }
     }, overrides: <Type, Generator>{
@@ -633,7 +633,10 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value('');
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
     return FakeDeviceLogReader();
   }
 

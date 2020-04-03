@@ -83,13 +83,15 @@ class IOSDevice extends Device {
     @required Platform platform,
     @required Artifacts artifacts,
     @required IOSDeploy iosDeploy,
+    @required IMobileDevice iMobileDevice,
     @required Logger logger,
   })
-      : _sdkVersion = sdkVersion,
-        _iosDeploy = iosDeploy,
-        _fileSystem = fileSystem,
-        _logger = logger,
-        _platform = platform,
+    : _sdkVersion = sdkVersion,
+      _iosDeploy = iosDeploy,
+      _iMobileDevice = iMobileDevice,
+      _fileSystem = fileSystem,
+      _logger = logger,
+      _platform = platform,
         super(
           id,
           category: Category.mobile,
@@ -113,6 +115,7 @@ class IOSDevice extends Device {
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
+  final IMobileDevice _iMobileDevice;
 
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {
@@ -239,7 +242,7 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult);
+        await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, _logger);
         _logger.printError('');
         return LaunchResult.failed();
       }
@@ -335,6 +338,7 @@ class IOSDevice extends Device {
         mDnsObservatoryDiscovery: MDnsObservatoryDiscovery.instance,
         portForwarder: portForwarder,
         protocolDiscovery: observatoryDiscovery,
+        flutterUsage: globals.flutterUsage,
       );
       final Uri localUri = await fallbackDiscovery.discover(
         assumedDevicePort: assumedObservatoryPort,
@@ -369,9 +373,17 @@ class IOSDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
 
   @override
-  DeviceLogReader getLogReader({ IOSApp app }) {
+  DeviceLogReader getLogReader({
+    IOSApp app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on iOS devices.');
     _logReaders ??= <IOSApp, DeviceLogReader>{};
-    return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader.create(
+      device: this,
+      app: app,
+      iMobileDevice: _iMobileDevice,
+    ));
   }
 
   @visibleForTesting
@@ -398,11 +410,11 @@ class IOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  bool get supportsScreenshot => globals.iMobileDevice.isInstalled;
+  bool get supportsScreenshot => _iMobileDevice.isInstalled;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    await globals.iMobileDevice.takeScreenshot(outputFile);
+    await _iMobileDevice.takeScreenshot(outputFile);
   }
 
   @override
@@ -481,7 +493,13 @@ String decodeSyslog(String line) {
 
 @visibleForTesting
 class IOSDeviceLogReader extends DeviceLogReader {
-  IOSDeviceLogReader(this.device, IOSApp app) {
+  IOSDeviceLogReader._(
+    this._iMobileDevice,
+    this._majorSdkVersion,
+    this._deviceId,
+    this.name,
+    String appName,
+  ) {
     _linesController = StreamController<String>.broadcast(
       onListen: _listenToSysLog,
       onCancel: dispose,
@@ -491,7 +509,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
     //
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(Flutter)[297] <Notice>:
-    final String appName = app == null ? '' : app.name.replaceAll('.app', '');
     _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
     // Similar to above, but allows ~arbitrary components instead of "Runner"
     // and "Flutter". The regex tries to strike a balance between not producing
@@ -500,7 +517,36 @@ class IOSDeviceLogReader extends DeviceLogReader {
     _loggingSubscriptions = <StreamSubscription<ServiceEvent>>[];
   }
 
-  final IOSDevice device;
+  /// Create a new [IOSDeviceLogReader].
+  factory IOSDeviceLogReader.create({
+    @required IOSDevice device,
+    @required IOSApp app,
+    @required IMobileDevice iMobileDevice,
+  }) {
+    final String appName = app == null ? '' : app.name.replaceAll('.app', '');
+    return IOSDeviceLogReader._(
+      iMobileDevice,
+      device.majorSdkVersion,
+      device.id,
+      device.name,
+      appName,
+    );
+  }
+
+  /// Create an [IOSDeviceLogReader] for testing.
+  factory IOSDeviceLogReader.test({
+    @required IMobileDevice iMobileDevice,
+    bool useSyslog = true,
+  }) {
+    return IOSDeviceLogReader._(
+      iMobileDevice, useSyslog ? 12 : 13, '1234', 'test', 'Runner');
+  }
+
+  @override
+  final String name;
+  final int _majorSdkVersion;
+  final String _deviceId;
+  final IMobileDevice _iMobileDevice;
 
   // Matches a syslog line from the runner.
   RegExp _runnerLineRegex;
@@ -512,9 +558,6 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines => _linesController.stream;
-
-  @override
-  String get name => device.name;
 
   @override
   VMService get connectedVMService => _connectedVMService;
@@ -529,7 +572,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   static const int _minimumUniversalLoggingSdkVersion = 13;
 
   Future<void> _listenToUnifiedLoggingEvents(VMService connectedVmService) async {
-    if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
     // The VM service will not publish logging events unless the debug stream is being listened to.
@@ -545,10 +588,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   void _listenToSysLog () {
     // syslog is not written on iOS 13+.
-    if (device.majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
+    if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    globals.iMobileDevice.startLogger(device.id).then<void>((Process process) {
+    _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {

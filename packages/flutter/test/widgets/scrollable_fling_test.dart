@@ -119,7 +119,7 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 21', 'tap 35']));
-  }, skip: isBrowser);
+  });
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -148,5 +148,5 @@ void main() {
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 21', 'tap 48']));
-  }, skip: isBrowser);
+  });
 }

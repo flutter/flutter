@@ -43,6 +43,10 @@ void main() {
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
         },
+        artifacts: artifacts,
+        processManager: processManager,
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       androidEnvironment.buildDir.createSync(recursive: true);
       iosEnvironment = Environment.test(
@@ -51,6 +55,10 @@ void main() {
           kBuildMode: getNameForBuildMode(BuildMode.profile),
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
         },
+        artifacts: artifacts,
+        processManager: processManager,
+        fileSystem: globals.fs,
+        logger: globals.logger,
       );
       iosEnvironment.buildDir.createSync(recursive: true);
       artifacts = CachedArtifacts(
@@ -69,7 +77,7 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
     expect(
       const KernelSnapshot().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('KernelSnapshot handles null result from kernel compilation', () => testbed.run(() async {
@@ -126,6 +134,68 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment);
+
+    expect(processManager.hasRemainingExpectations, false);
+  }));
+
+  test('KernelSnapshot correctly handles an empty string in ExtraFrontEndOptions', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final String build = androidEnvironment.buildDir.path;
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        '--sdk-root',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
+        '--target=flutter',
+        '-Ddart.developer.causal_async_stacks=false',
+        ...buildModeOptions(BuildMode.profile),
+        '--aot',
+        '--tfa',
+        '--packages',
+        '/.packages',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        '/lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+    ]);
+
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = '');
+
+    expect(processManager.hasRemainingExpectations, false);
+  }));
+
+  test('KernelSnapshot correctly forwards ExtraFrontEndOptions', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final String build = androidEnvironment.buildDir.path;
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(command: <String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+        '--sdk-root',
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) + '/',
+        '--target=flutter',
+        '-Ddart.developer.causal_async_stacks=false',
+        ...buildModeOptions(BuildMode.profile),
+        '--aot',
+        '--tfa',
+        '--packages',
+        '/.packages',
+        '--output-dill',
+        '$build/app.dill',
+        '--depfile',
+        '$build/kernel_snapshot.d',
+        'foo',
+        'bar',
+        '/lib/main.dart',
+      ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+    ]);
+
+    await const KernelSnapshot()
+      .build(androidEnvironment..defines[kExtraFrontEndOptions] = 'foo,bar');
 
     expect(processManager.hasRemainingExpectations, false);
   }));
@@ -199,6 +269,10 @@ void main() {
         kBuildMode: getNameForBuildMode(BuildMode.debug),
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
+      processManager: processManager,
+      artifacts: artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
     );
     final String build = testEnvironment.buildDir.path;
     processManager = FakeProcessManager.list(<FakeCommand>[
@@ -254,33 +328,33 @@ void main() {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(const AotElfProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotElfProfile throws error if missing target platform', () => testbed.run(() async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotElfProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing build mode', () => testbed.run(() async {
     iosEnvironment.defines.remove(kBuildMode);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if missing target platform', () => testbed.run(() async {
     iosEnvironment.defines.remove(kTargetPlatform);
 
     expect(const AotAssemblyProfile().build(iosEnvironment),
-      throwsA(isInstanceOf<MissingDefineException>()));
+      throwsA(isA<MissingDefineException>()));
   }));
 
   test('AotAssemblyProfile throws error if built for non-iOS platform', () => testbed.run(() async {
     expect(const AotAssemblyProfile().build(androidEnvironment),
-      throwsA(isInstanceOf<Exception>()));
+      throwsA(isA<Exception>()));
   }));
 
   test('AotAssemblyProfile generates multiple arches and lipos together', () => testbed.run(() async {

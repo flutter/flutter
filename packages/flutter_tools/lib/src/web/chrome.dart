@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 /// An environment variable used to override the location of chrome.
 const String kChromeEnvironment = 'CHROME_EXECUTABLE';
@@ -115,27 +116,17 @@ class ChromeLauncher {
   /// port is picked automatically.
   ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
-  Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory dataDir }) async {
+  Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir }) async {
     if (_currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
     }
 
-    // This is a JSON file which contains configuration from the
-    // browser session, such as window position. It is located
-    // under the Chrome data-dir folder.
-    final String preferencesPath = _fileSystem.path.join('Default', 'preferences');
-
     final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
-    final Directory activeDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tool.');
-    // Seed data dir with previous state.
+    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
 
-    final File savedPreferencesFile = _fileSystem.file(_fileSystem.path.join(dataDir?.path ?? '', preferencesPath));
-    final File destinationFile = _fileSystem.file(_fileSystem.path.join(activeDataDir.path, preferencesPath));
-    if (dataDir != null) {
-      if (savedPreferencesFile.existsSync()) {
-        destinationFile.parent.createSync(recursive: true);
-        savedPreferencesFile.copySync(destinationFile.path);
-      }
+    if (cacheDir != null) {
+      // Seed data dir with previous state.
+      _restoreUserSessionInformation(cacheDir, userDataDir);
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
@@ -143,7 +134,7 @@ class ChromeLauncher {
       chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
-      '--user-data-dir=${activeDataDir.path}',
+      '--user-data-dir=${userDataDir.path}',
       '--remote-debugging-port=$port',
       // When the DevTools has focus we don't want to slow down the application.
       '--disable-background-timer-throttling',
@@ -163,18 +154,10 @@ class ChromeLauncher {
 
     final Process process = await _processManager.start(args);
 
-    // When the process exits, copy the user settings back to the provided
-    // data-dir.
-    if (dataDir != null) {
+    // When the process exits, copy the user settings back to the provided data-dir.
+    if (cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {
-        if (destinationFile.existsSync()) {
-          savedPreferencesFile.parent.createSync(recursive: true);
-          // If the file contains a crash string, remove it to hide
-          // the popup on next run.
-          final String contents = destinationFile.readAsStringSync();
-          savedPreferencesFile.writeAsStringSync(contents
-            .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
-        }
+        _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
     }
 
@@ -204,6 +187,57 @@ class ChromeLauncher {
       process: process,
       remoteDebuggerUri: remoteDebuggerUri,
     ), skipCheck);
+  }
+
+  // This is a JSON file which contains configuration from the browser session,
+  // such as window position. It is located under the Chrome data-dir folder.
+  String get _preferencesPath => _fileSystem.path.join('Default', 'preferences');
+
+  // The directory that Chrome uses to store local storage information for web apps.
+  String get _localStoragePath => _fileSystem.path.join('Default', 'Local Storage');
+
+  /// Copy Chrome user information from a Chrome session into a per-project
+  /// cache.
+  ///
+  /// Note: more detailed docs of the Chrome user preferences store exists here:
+  /// https://www.chromium.org/developers/design-documents/preferences.
+  void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
+    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir?.path ?? '', _preferencesPath));
+    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
+    final Directory targetLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(cacheDir?.path ?? '', _localStoragePath));
+    final Directory sourceLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _localStoragePath));
+
+    if (sourcePreferencesFile.existsSync()) {
+      targetPreferencesFile.parent.createSync(recursive: true);
+      // If the file contains a crash string, remove it to hide the popup on next run.
+      final String contents = sourcePreferencesFile.readAsStringSync();
+      targetPreferencesFile.writeAsStringSync(contents
+          .replaceFirst('"exit_type":"Crashed"', '"exit_type":"Normal"'));
+    }
+
+    if (sourceLocalStorageDir.existsSync()) {
+      targetLocalStorageDir.createSync(recursive: true);
+      globals.fsUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+    }
+  }
+
+  /// Restore Chrome user information from a per-project cache into Chrome's
+  /// user data directory.
+  void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
+    final File sourcePreferencesFile = _fileSystem.file(_fileSystem.path.join(cacheDir.path ?? '', _preferencesPath));
+    final File targetPreferencesFile = _fileSystem.file(_fileSystem.path.join(userDataDir.path, _preferencesPath));
+    final Directory sourceLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(cacheDir.path ?? '', _localStoragePath));
+    final Directory targetLocalStorageDir = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _localStoragePath));
+
+    if (sourcePreferencesFile.existsSync()) {
+      targetPreferencesFile.parent.createSync(recursive: true);
+      sourcePreferencesFile.copySync(targetPreferencesFile.path);
+    }
+
+    if (sourceLocalStorageDir.existsSync()) {
+      targetLocalStorageDir.createSync(recursive: true);
+      globals.fsUtils.copyDirectorySync(sourceLocalStorageDir, targetLocalStorageDir);
+    }
   }
 
   static Future<Chrome> _connect(Chrome chrome, bool skipCheck) async {

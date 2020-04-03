@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:uuid/uuid.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
@@ -439,7 +440,7 @@ class AppDomain extends Domain {
 
   static final Uuid _uuidGenerator = Uuid();
 
-  static String _getNewAppId() => _uuidGenerator.generateV4();
+  static String _getNewAppId() => _uuidGenerator.v4();
 
   final List<AppInstance> _apps = <AppInstance>[];
 
@@ -587,7 +588,9 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        globals.fs.currentDirectory = cwd;
+        // If the full directory is used instead of the path then this causes
+        // a TypeError with the ErrorHandlingFileSystem.
+        globals.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });

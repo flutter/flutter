@@ -188,15 +188,18 @@ class GridDemoPhotoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget image = GestureDetector(
-      onTap: () { showPhoto(context); },
-      child: Hero(
-        key: Key(photo.assetName),
-        tag: photo.tag,
-        child: Image.asset(
-          photo.assetName,
-          package: photo.assetPackage,
-          fit: BoxFit.cover,
+    final Widget image = Semantics(
+      label: '${photo.title} - ${photo.caption}',
+      child: GestureDetector(
+        onTap: () { showPhoto(context); },
+        child: Hero(
+          key: Key(photo.assetName),
+          tag: photo.tag,
+          child: Image.asset(
+            photo.assetName,
+            package: photo.assetPackage,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

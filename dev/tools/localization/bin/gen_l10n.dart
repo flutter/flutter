@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
@@ -13,7 +12,7 @@ import '../gen_l10n.dart';
 import '../gen_l10n_types.dart';
 import '../localizations_utils.dart';
 
-Future<void> main(List<String> arguments) async {
+void main(List<String> arguments) {
   final argslib.ArgParser parser = argslib.ArgParser();
   parser.addFlag(
     'help',
@@ -80,7 +79,7 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  await precacheLanguageAndRegionTags();
+  precacheLanguageAndRegionTags();
 
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;

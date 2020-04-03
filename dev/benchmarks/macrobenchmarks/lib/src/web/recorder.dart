@@ -17,14 +17,14 @@ import 'package:flutter/widgets.dart';
 
 /// Minimum number of samples collected by a benchmark irrespective of noise
 /// levels.
-const int _kMinSampleCount = 50;
+const int kMinSampleCount = 50;
 
 /// Maximum number of samples collected by a benchmark irrespective of noise
 /// levels.
 ///
 /// If the noise doesn't settle down before we reach the max we'll report noisy
 /// results assuming the benchmarks is simply always noisy.
-const int _kMaxSampleCount = 10 * _kMinSampleCount;
+const int kMaxSampleCount = 10 * kMinSampleCount;
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
@@ -268,12 +268,14 @@ abstract class WidgetRecorder extends Recorder
   Stopwatch _drawFrameStopwatch;
 
   @override
-  void _frameWillDraw() {
+  @mustCallSuper
+  void frameWillDraw() {
     _drawFrameStopwatch = Stopwatch()..start();
   }
 
   @override
-  void _frameDidDraw() {
+  @mustCallSuper
+  void frameDidDraw() {
     profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
 
     if (profile.shouldContinue()) {
@@ -321,6 +323,18 @@ abstract class WidgetBuildRecorder extends Recorder
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
+  /// Called once before all runs of this benchmark recorder.
+  ///
+  /// This is useful for doing one-time setup work that's needed for the
+  /// benchmark.
+  void setUpAll() {}
+
+  /// Called once after all runs of this benchmark recorder.
+  ///
+  /// This is useful for doing one-time clean up work after the benchmark is
+  /// complete.
+  void tearDownAll() {}
+
   @override
   Profile profile;
 
@@ -331,13 +345,13 @@ abstract class WidgetBuildRecorder extends Recorder
   /// Whether in this frame we should call [createWidget] and render it.
   ///
   /// If false, then this frame will clear the screen.
-  bool _showWidget = true;
+  bool showWidget = true;
 
   /// The state that hosts the widget under test.
   _WidgetBuildRecorderHostState _hostState;
 
   Widget _getWidgetForFrame() {
-    if (_showWidget) {
+    if (showWidget) {
       return createWidget();
     } else {
       return null;
@@ -345,19 +359,21 @@ abstract class WidgetBuildRecorder extends Recorder
   }
 
   @override
-  void _frameWillDraw() {
+  @mustCallSuper
+  void frameWillDraw() {
     _drawFrameStopwatch = Stopwatch()..start();
   }
 
   @override
-  void _frameDidDraw() {
+  @mustCallSuper
+  void frameDidDraw() {
     // Only record frames that show the widget.
-    if (_showWidget) {
+    if (showWidget) {
       profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
     }
 
     if (profile.shouldContinue()) {
-      _showWidget = !_showWidget;
+      showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
       _profileCompleter.complete(profile);
@@ -372,11 +388,13 @@ abstract class WidgetBuildRecorder extends Recorder
   @override
   Future<Profile> run() {
     profile = Profile(name: name);
+    setUpAll();
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     binding._beginRecording(this, _WidgetBuildRecorderHost(this));
 
     _profileCompleter.future.whenComplete(() {
+      tearDownAll();
       profile = null;
     });
     return _profileCompleter.future;
@@ -495,7 +513,7 @@ class Profile {
       final Timeseries timeseries = scoreData[key];
 
       // Collect enough data points before considering to stop.
-      if (timeseries.count < _kMinSampleCount) {
+      if (timeseries.count < kMinSampleCount) {
         return true;
       }
 
@@ -504,11 +522,11 @@ class Profile {
         // If the timeseries has enough data, stop it, even if it's noisy under
         // the assumption that this benchmark is always noisy and there's nothing
         // we can do about it.
-        if (timeseries.count > _kMaxSampleCount) {
+        if (timeseries.count > kMaxSampleCount) {
           buffer.writeln(
             'WARNING: Noise of benchmark "$name.$key" did not converge below '
             '${_ratioToPercent(_kNoiseThreshold)}. Stopping because it reached the '
-            'maximum number of samples $_kMaxSampleCount. Noise level is '
+            'maximum number of samples $kMaxSampleCount. Noise level is '
             '${_ratioToPercent(timeseries.noise)}.',
           );
           return false;
@@ -518,7 +536,7 @@ class Profile {
       }
 
       buffer.writeln(
-        'SUCCESS: Benchmark converged below ${_ratioToPercent(_kNoiseThreshold)}. '
+        'SUCCESS: Benchmark "$name.$key" converged below ${_ratioToPercent(_kNoiseThreshold)}. '
         'Noise level is ${_ratioToPercent(timeseries.noise)}.',
       );
       return false;
@@ -561,7 +579,7 @@ class Profile {
     buffer.writeln('name: $name');
     for (final String key in scoreData.keys) {
       final Timeseries timeseries = scoreData[key];
-      buffer.writeln('$key:');
+      buffer.writeln('$key: (samples=${timeseries.count})');
       buffer.writeln(' | average: ${timeseries.average} μs');
       buffer.writeln(' | noise: ${_ratioToPercent(timeseries.noise)}');
     }
@@ -613,10 +631,10 @@ abstract class RecordingWidgetsBindingListener {
   Profile profile;
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
-  void _frameWillDraw();
+  void frameWillDraw();
 
   /// Called immediately after calling [SchedulerBinding.handleDrawFrame].
-  void _frameDidDraw();
+  void frameDidDraw();
 
   /// Reports an error.
   ///
@@ -697,8 +715,8 @@ class _RecordingWidgetsBinding extends BindingBase
     if (_hasErrored) {
       return;
     }
-    _listener._frameWillDraw();
+    _listener.frameWillDraw();
     super.handleDrawFrame();
-    _listener._frameDidDraw();
+    _listener.frameDidDraw();
   }
 }

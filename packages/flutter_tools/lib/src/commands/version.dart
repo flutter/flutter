@@ -45,14 +45,14 @@ class VersionCommand extends FlutterCommand {
     RunResult runResult;
     try {
       runResult = await processUtils.run(
-        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        <String>['git', 'tag', '-l', '*.*.*', '--sort=-creatordate'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to get the tags. '
-        'This might be due to git not being installed or an internal error'
+        'This is likely due to an internal git error.'
         '\nError: $error.'
       );
     }
@@ -88,8 +88,14 @@ class VersionCommand extends FlutterCommand {
     }
 
     final String version = argResults.rest[0].replaceFirst('v', '');
-    if (!tags.contains('v$version')) {
+    final List<String> matchingTags = tags.where((String tag) => tag.contains(version)).toList();
+    String matchingTag;
+    // TODO(fujino): make this a tool exit and fix tests
+    if (matchingTags.isEmpty) {
       globals.printError('There is no version: $version');
+      matchingTag = version;
+    } else {
+      matchingTag = matchingTags.first.trim();
     }
 
     // check min supported version
@@ -113,7 +119,7 @@ class VersionCommand extends FlutterCommand {
 
     try {
       await processUtils.run(
-        <String>['git', 'checkout', 'v$version'],
+        <String>['git', 'checkout', matchingTag],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
       );

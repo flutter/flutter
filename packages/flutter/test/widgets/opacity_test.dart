@@ -191,5 +191,5 @@ void main() {
     // empty opacity layer is sent.
     final OffsetLayer offsetLayer = element.renderObject.debugLayer as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52856
 }

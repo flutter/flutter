@@ -460,7 +460,7 @@ class HotRunner extends ResidentRunner {
   ) {
     return Future.wait(<Future<void>>[
       for (final FlutterView view in device.views)
-        view.runFromSource(entryUri, packagesUri, assetsDirectoryUri),
+        view.runFromSource(entryUri, assetsDirectoryUri),
     ]);
   }
 
