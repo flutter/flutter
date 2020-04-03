@@ -73,6 +73,8 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
     "framework/Source/FlutterViewController_Internal.h",
+    "framework/Source/SemanticsObject.h",
+    "framework/Source/SemanticsObject.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/accessibility_text_entry.h",
