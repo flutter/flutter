@@ -116,6 +116,9 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onStderrEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
