@@ -812,6 +812,16 @@ class TextInputConnection {
     TextInput._instance._show();
   }
 
+  /// Requests the platform autofill UI to appear.
+  ///
+  /// The call has no effect unless the currently attached client supports
+  /// autofill, and the platform have a standalone autofill UI (i.e. this call
+  /// has no effect on iOS since its autofill UI is part of the software keyboard).
+  void requestAutofill() {
+    assert(attached);
+    TextInput._instance._requestAutofill();
+  }
+
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
@@ -1144,6 +1154,10 @@ class TextInput {
 
   void _show() {
     _channel.invokeMethod<void>('TextInput.show');
+  }
+
+  void _requestAutofill() {
+    _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
   void _setEditableSizeAndTransform(Map<String, dynamic> args) {

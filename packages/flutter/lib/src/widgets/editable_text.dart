@@ -1467,8 +1467,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = widget.autofillHints == null
         ? currentAutofillScope?.attach(this, textInputConfiguration) ?? TextInput.attach(this, textInputConfiguration)
         : TextInput.attach(this, textInputConfiguration);
-      _updateSizeAndTransform();
       _textInputConnection.show();
+      _updateSizeAndTransform();
+      // Request autofill AFTER the size and the transform have been sent to the
+      // platform side.
+      _textInputConnection.requestAutofill();
 
       final TextStyle style = widget.style;
       _textInputConnection
