@@ -19,6 +19,8 @@
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
 #include "flutter/shell/common/surface.h"
+#include "fml/time/time_delta.h"
+#include "fml/time/time_point.h"
 
 namespace flutter {
 
@@ -67,6 +69,10 @@ class Rasterizer final : public SnapshotDelegate {
 
     /// Time limit for a smooth frame. See `Engine::GetDisplayRefreshRate`.
     virtual fml::Milliseconds GetFrameBudget() = 0;
+
+    /// Target time for the latest frame. See also `Shell::OnAnimatorBeginFrame`
+    /// for when this time gets updated.
+    virtual fml::TimePoint GetLatestFrameTargetTime() const = 0;
   };
 
   // TODO(dnfield): remove once embedders have caught up.
@@ -74,6 +80,11 @@ class Rasterizer final : public SnapshotDelegate {
     void OnFrameRasterized(const FrameTiming&) override {}
     fml::Milliseconds GetFrameBudget() override {
       return fml::kDefaultFrameBudget;
+    }
+    // Returning a time in the past so we don't add additional trace
+    // events when exceeding the frame budget for other embedders.
+    fml::TimePoint GetLatestFrameTargetTime() const override {
+      return fml::TimePoint::FromEpochDelta(fml::TimeDelta::Zero());
     }
   };
 

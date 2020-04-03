@@ -6,6 +6,7 @@
 #define SHELL_COMMON_SHELL_H_
 
 #include <functional>
+#include <mutex>
 #include <string_view>
 #include <unordered_map>
 
@@ -32,6 +33,7 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/common/surface.h"
+#include "fml/time/time_point.h"
 
 namespace flutter {
 
@@ -368,6 +370,8 @@ class Shell final : public PlatformView::Delegate,
   const TaskRunners task_runners_;
   const Settings settings_;
   DartVMRef vm_;
+  mutable std::mutex time_recorder_mutex_;
+  std::optional<fml::TimePoint> latest_frame_target_time_;
   std::unique_ptr<PlatformView> platform_view_;  // on platform task runner
   std::unique_ptr<Engine> engine_;               // on UI task runner
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
@@ -478,7 +482,7 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) override;
 
   // |Animator::Delegate|
-  void OnAnimatorBeginFrame(fml::TimePoint frame_time) override;
+  void OnAnimatorBeginFrame(fml::TimePoint frame_target_time) override;
 
   // |Animator::Delegate|
   void OnAnimatorNotifyIdle(int64_t deadline) override;
@@ -516,6 +520,9 @@ class Shell final : public PlatformView::Delegate,
 
   // |Rasterizer::Delegate|
   fml::Milliseconds GetFrameBudget() override;
+
+  // |Rasterizer::Delegate|
+  fml::TimePoint GetLatestFrameTargetTime() const override;
 
   // |ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(

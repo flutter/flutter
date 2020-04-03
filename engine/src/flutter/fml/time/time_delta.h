@@ -55,6 +55,10 @@ class TimeDelta {
     return FromNanoseconds(seconds * (1000.0 * 1000.0 * 1000.0));
   }
 
+  static constexpr TimeDelta FromMillisecondsF(double millis) {
+    return FromNanoseconds(millis * (1000.0 * 1000.0));
+  }
+
   constexpr int64_t ToNanoseconds() const { return delta_; }
   constexpr int64_t ToMicroseconds() const { return ToNanoseconds() / 1000; }
   constexpr int64_t ToMilliseconds() const { return ToMicroseconds() / 1000; }

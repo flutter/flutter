@@ -116,6 +116,14 @@ void TraceSetWhitelist(const std::vector<std::string>& whitelist);
 
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,
+                        int64_t timestamp_micros,
+                        TraceIDArg id,
+                        Dart_Timeline_Event_Type type,
+                        const std::vector<const char*>& names,
+                        const std::vector<std::string>& values);
+
+void TraceTimelineEvent(TraceArg category_group,
+                        TraceArg name,
                         TraceIDArg id,
                         Dart_Timeline_Event_Type type,
                         const std::vector<const char*>& names,
@@ -209,10 +217,40 @@ void TraceEvent2(TraceArg category_group,
 
 void TraceEventEnd(TraceArg name);
 
+template <typename... Args>
 void TraceEventAsyncComplete(TraceArg category_group,
                              TraceArg name,
                              TimePoint begin,
-                             TimePoint end);
+                             TimePoint end,
+                             Args... args) {
+  auto identifier = TraceNonce();
+  const auto split = SplitArguments(args...);
+
+  if (begin > end) {
+    std::swap(begin, end);
+  }
+
+  const int64_t begin_micros = begin.ToEpochDelta().ToMicroseconds();
+  const int64_t end_micros = end.ToEpochDelta().ToMicroseconds();
+
+  TraceTimelineEvent(category_group,                   // group
+                     name,                             // name
+                     begin_micros,                     // timestamp_micros
+                     identifier,                       // identifier
+                     Dart_Timeline_Event_Async_Begin,  // type
+                     split.first,                      // names
+                     split.second                      // values
+  );
+
+  TraceTimelineEvent(category_group,                 // group
+                     name,                           // name
+                     end_micros,                     // timestamp_micros
+                     identifier,                     // identifier
+                     Dart_Timeline_Event_Async_End,  // type
+                     split.first,                    // names
+                     split.second                    // values
+  );
+}
 
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
