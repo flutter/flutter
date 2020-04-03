@@ -281,11 +281,26 @@ class BlinkTraceSummary {
         .toList()
         ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts - b.ts);
 
+      // Use the pid from the first "measured_frame" event since the event is
+      // emitted by the script running on the process we're interested in.
+      //
+      // We previously tried using the "CrRendererMain" event. However, for
+      // reasons unknown, Chrome in the devicelab refuses to emit this event
+      // sometimes, causing to flakes.
+      final BlinkTraceEvent firstMeasuredFrameEvent = events.firstWhere(
+        (BlinkTraceEvent event) => event.isBeginMeasuredFrame,
+        orElse: () => null,
+      );
+
+      if (firstMeasuredFrameEvent == null) {
+        // This happens in benchmarks that do not measure frames, such as some
+        // of the text layout benchmarks.
+        return null;
+      }
+
+      final int tabPid = firstMeasuredFrameEvent.pid;
+
       // Filter out data from unrelated processes
-      final BlinkTraceEvent processLabel = events
-        .where((BlinkTraceEvent event) => event.isCrRendererMain)
-        .single;
-      final int tabPid = processLabel.pid;
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
@@ -488,14 +503,6 @@ class BlinkTraceEvent {
   ///
   /// This event is a duration event that has its `tdur` populated.
   bool get isUpdateAllLifecyclePhases => ph == 'X' && name == 'WebViewImpl::updateAllLifecyclePhases';
-
-  /// A "CrRendererMain" event contains information about the browser's UI
-  /// thread.
-  ///
-  /// This event's [pid] field identifies the process that performs web page
-  /// rendering. The [isBeginFrame] and [isUpdateAllLifecyclePhases] events
-  /// with the same [pid] as this event all belong to the same web page.
-  bool get isCrRendererMain => name == 'thread_name' && args['name'] == 'CrRendererMain';
 
   /// Whether this is the beginning of a "measured_frame" event.
   ///
