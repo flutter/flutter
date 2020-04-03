@@ -131,7 +131,6 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
     if (alreadyUpToDate) {
@@ -215,34 +214,6 @@ class UpgradeCommandRunner {
         'Unable to upgrade Flutter: no origin repository configured. '
         "Run 'git remote add origin "
         "https://github.com/flutter/flutter' in $workingDirectory",
-      );
-    }
-  }
-
-  /// Attempts to reset to the last non-hotfix tag.
-  ///
-  /// If the git history is on a hotfix, doing a fast forward will not pick up
-  /// major or minor version upgrades. By resetting to the point before the
-  /// hotfix, doing a git fast forward should succeed.
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    String tag;
-    if (gitTagVersion == const GitTagVersion.unknown()) {
-      tag = 'v0.0.0';
-    } else {
-      tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
-    }
-    try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', tag],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
-    } on ProcessException catch (error) {
-      throwToolExit(
-        'Unable to upgrade Flutter: The tool could not update to the version $tag. '
-        'This may be due to git not being installed or an internal error. '
-        'Please ensure that git is installed on your computer and retry again.'
-        '\nError: $error.'
       );
     }
   }
