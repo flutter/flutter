@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,6 +42,22 @@ class PushRouteObserver with WidgetsBindingObserver {
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
+  });
+
+  testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
+    imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(ImageInfo(
+        image: FakeImage(),
+        scale: 1.0,
+      ),
+    )));
+
+    await tester.idle();
+    expect(imageCache.currentSize, 1);
+    final ByteData message = const JSONMessageCodec().encodeMessage(
+      <String, dynamic>{'type': 'memoryPressure'});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache.currentSize, 0);
   });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
@@ -222,4 +239,20 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
   Widget build(BuildContext context) {
     return widget.child;
   }
+}
+
+class FakeImage implements ui.Image {
+  @override
+  void dispose() {}
+
+  @override
+  int get height => 10;
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get width => 10;
 }

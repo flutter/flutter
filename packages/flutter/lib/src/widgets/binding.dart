@@ -658,12 +658,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Called when the operating system notifies the application of a memory
   /// pressure situation.
   ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didHaveMemoryPressure].
+  /// Clears the [PaintingBinding.imageCache] and notifies all the observers
+  /// using [WidgetsBindingObserver.didHaveMemoryPressure].
   ///
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
+    PaintingBinding.instance.imageCache.clear();
     for (final WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
   }
