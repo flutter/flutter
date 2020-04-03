@@ -73,22 +73,16 @@ def ProcessCIPDPackage(upload, cipd_yaml, engine_version, out_dir, target_arch):
       if tries == num_tries - 1:
         raise
 
-# Recursively hardlinks contents from one directory to another,
-# skipping over collisions.
-def HardlinkContents(dirA, dirB):
-  for src_dir, _, filenames in os.walk(dirA):
-    for filename in filenames:
-      src = os.path.join(src_dir, filename)
-      dest_dir = os.path.join(dirB, os.path.relpath(src_dir, dirA))
-      os.makedirs(dest_dir)
-      dest = os.path.join(dest_dir, filename)
-      if os.path.exists(dest):
-        # The last two path components provide a content address for a .build-id entry.
-        tokens = os.path.split(dest)
-        name = os.path.join(tokens[-2], tokens[-1])
-        print('%s already exists in destination; skipping linking' % name)
-        continue
-      os.link(src, dest)
+def CreateTarFile(folder_path, base_dir):
+  archive_name = os.path.basename(folder_path)
+  tar_file_path = os.path.join(base_dir, archive_name + '.tar.bz2')
+  with tarfile.open(tar_file_path, "w:bz2") as archive:
+    for root, dirs, _ in os.walk(folder_path):
+      for dir_name in dirs:
+        dir_path = os.path.join(root, dir_name)
+        archive.add(dir_path, arcname=dir_name)
+  return tar_file_path
+
 
 def main():
   parser = argparse.ArgumentParser()
@@ -120,17 +114,18 @@ def main():
   for symbol_dir in symbol_dirs:
     assert os.path.exists(symbol_dir) and os.path.isdir(symbol_dir)
 
-  out_dir = args.out_dir
-
+  arch = args.target_arch
+  out_dir = os.path.join(args.out_dir,
+                         'flutter-fuchsia-debug-symbols-%s' % arch)
   if os.path.exists(out_dir):
     print 'Directory: %s is not empty, deleting it.' % out_dir
     shutil.rmtree(out_dir)
   os.makedirs(out_dir)
 
   for symbol_dir in symbol_dirs:
-    HardlinkContents(symbol_dir, out_dir)
+    archive_path = CreateTarFile(symbol_dir, out_dir)
+    print('Created archive: ' + archive_path)
 
-  arch = args.target_arch
   cipd_def = WriteCIPDDefinition(arch, out_dir)
   ProcessCIPDPackage(args.upload, cipd_def, args.engine_version, out_dir, arch)
   return 0
