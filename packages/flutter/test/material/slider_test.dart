@@ -1047,10 +1047,10 @@ void main() {
       ),
     );
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));
 
     // 5 tick marks and a thumb.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+    expect(slider, paintsExactlyCountTimes(#drawCircle, 6));
 
     // 200 divisions will produce a tick interval off less than 6,
     // which would be too dense to draw.
@@ -1062,7 +1062,7 @@ void main() {
 
     // No tick marks are drawn because they are too dense, but the thumb is
     // still drawn.
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(slider, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
@@ -1104,7 +1104,7 @@ void main() {
     }
 
     Future<void> testReparenting(bool reparent) async {
-      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+      final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));
       final Offset center = tester.getCenter(find.byType(Slider));
       // Move to 0.0.
       TestGesture gesture = await tester.startGesture(Offset.zero);
@@ -1113,7 +1113,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
-        sliderBox,
+        slider,
         paints
           ..circle(x: 25.0, y: 24.0, radius: 1.0)
           ..circle(x: 212.5, y: 24.0, radius: 1.0)
@@ -1129,7 +1129,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 25));
       expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
       expect(
-        sliderBox,
+        slider,
         paints
           ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
           ..circle(x: 25.0, y: 24.0, radius: 1.0)
@@ -1149,7 +1149,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 10));
       expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
       expect(
-        sliderBox,
+        slider,
         paints
           ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
           ..circle(x: 25.0, y: 24.0, radius: 1.0)
@@ -1163,7 +1163,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
-        sliderBox,
+        slider,
         paints
           ..circle(x: 400.0, y: 24.0, radius: 24.0)
           ..circle(x: 25.0, y: 24.0, radius: 1.0)
@@ -1177,7 +1177,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
-        sliderBox,
+        slider,
         paints
           ..circle(x: 25.0, y: 24.0, radius: 1.0)
           ..circle(x: 212.5, y: 24.0, radius: 1.0)
@@ -1622,9 +1622,10 @@ void main() {
       // Wait for value indicator animation to finish.
       await tester.pumpAndSettle();
 
-      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+      final MaterialInkController slider = Material.of(tester.element(find.byType(Slider)));R
+
       expect(
-        sliderBox,
+        slider,
         isVisible
             ? (paints..path(color: theme.valueIndicatorColor))
             : isNot(paints..path(color: theme.valueIndicatorColor)),
