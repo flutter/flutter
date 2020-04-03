@@ -461,22 +461,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.increment(),
     };
     _actionMap = <LocalKey, ActionFactory>{
-//      _AdjustSliderAction.key: () => _AdjustSliderAction(),
-      _AdjustSliderIntent.intentKey: () => CallbackAction(
-          _AdjustSliderIntent.intentKey,
-        onInvoke: (FocusNode node, Intent intent) {
-          final _AdjustSliderIntent sliderIntent = intent as _AdjustSliderIntent;
-          final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
-          switch (sliderIntent.type) {
-            case _SliderAdjustmentType.increment:
-              renderSlider.increaseAction();
-              break;
-            case _SliderAdjustmentType.decrement:
-              renderSlider.decreaseAction();
-              break;
-          }
-        }
-      ),
+      _AdjustSliderIntent.intentKey: _adjustActionFactory,
     };
   }
 
@@ -498,6 +483,33 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
   }
 
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(_lerp(value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(_lerp(value));
+  }
+
+  Action _adjustActionFactory() {
+    return CallbackAction(
+      _AdjustSliderIntent.intentKey,
+      onInvoke: (FocusNode node, Intent intent) {
+        final _AdjustSliderIntent sliderIntent = intent as _AdjustSliderIntent;
+        final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
+        switch (sliderIntent.type) {
+          case _SliderAdjustmentType.increment:
+            renderSlider.increaseAction();
+            break;
+          case _SliderAdjustmentType.decrement:
+            renderSlider.decreaseAction();
+            break;
+        }
+      }
+    );
+  }
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     print('_handleFocusHighlightChanged');
@@ -512,16 +524,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     if (hovering != _hovering) {
       setState(() { _hovering = hovering; });
     }
-  }
-
-  void _handleDragStart(double value) {
-    assert(widget.onChangeStart != null);
-    widget.onChangeStart(_lerp(value));
-  }
-
-  void _handleDragEnd(double value) {
-    assert(widget.onChangeEnd != null);
-    widget.onChangeEnd(_lerp(value));
   }
 
   // Returns a number between min and max, proportional to value, which must
@@ -1354,17 +1356,6 @@ class _AdjustSliderIntent extends Intent {
 
   final _SliderAdjustmentType type;
 }
-
-//class _AdjustSliderAction extends Action {
-//  _AdjustSliderAction() : super(key);
-//
-//  static const LocalKey key = ValueKey<Type>(_AdjustSliderAction);
-//
-//  @override
-//  void invoke(FocusNode node, Intent intent) {
-//
-//  }
-//}
 
 enum _SliderAdjustmentType {
   increment,
