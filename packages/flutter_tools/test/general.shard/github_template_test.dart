@@ -24,31 +24,11 @@ void main() {
   });
 
   group('GitHub template creator', () {
-    testWithoutContext('similar issues URL', () async {
-      final GitHubTemplateCreator creator = GitHubTemplateCreator(
-        fileSystem: fs,
-        logger: logger,
-        client: SuccessShortenURLFakeHttpClient(),
-        flutterProjectFactory: FlutterProjectFactory(),
-      );
+    testWithoutContext('similar issues URL', () {
       expect(
-        await creator.toolCrashSimilarIssuesGitHubURL('this is a 100% error'),
-        _kShortURL
+        GitHubTemplateCreator.toolCrashSimilarIssuesURL('this is a 100% error'),
+        'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error',
       );
-    });
-
-    testWithoutContext('similar issues URL with network failure', () async {
-      final GitHubTemplateCreator creator = GitHubTemplateCreator(
-        fileSystem: fs,
-        logger: logger,
-        client: FakeHttpClient(),
-        flutterProjectFactory: FlutterProjectFactory(),
-      );
-      expect(
-        await creator.toolCrashSimilarIssuesGitHubURL('this is a 100% error'),
-        'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error'
-      );
-      expect(logger.traceText, contains('Failed to shorten GitHub template URL'));
     });
 
     group('new issue template URL', () {
