@@ -20,14 +20,12 @@ Future<void> main() async {
 
   group('MotionEvents tests ', () {
     test('recomposition', () async {
-      if (Platform.isAndroid) {
-        final SerializableFinder motionEventsListTile =
-        find.byValueKey('MotionEventsListTile');
-        await driver.tap(motionEventsListTile);
-        await driver.waitFor(find.byValueKey('PlatformView'));
-        final String errorMessage = await driver.requestData('run test');
-        expect(errorMessage, '');
-      }
+      final SerializableFinder motionEventsListTile =
+      find.byValueKey('MotionEventsListTile');
+      await driver.tap(motionEventsListTile);
+      await driver.waitFor(find.byValueKey('PlatformView'));
+      final String errorMessage = await driver.requestData('run test');
+      expect(errorMessage, '');
     });
   });
 }
