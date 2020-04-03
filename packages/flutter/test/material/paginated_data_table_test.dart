@@ -727,7 +727,7 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
-  testWidgets("PaginatedDataTable with optional column checkbox",
+  testWidgets('PaginatedDataTable with optional column checkbox',
       (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
 
