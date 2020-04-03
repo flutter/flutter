@@ -11,6 +11,7 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
@@ -19,7 +20,6 @@
 #include "flutter/testing/elf_loader.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
-#include "fml/time/time_point.h"
 
 namespace flutter {
 namespace testing {
