@@ -36,6 +36,22 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
+typedef DwdsLauncher = Future<Dwds> Function({
+    @required AssetReader assetReader,
+    @required Stream<BuildResult> buildResults,
+    @required ConnectionProvider chromeConnection,
+    @required LoadStrategy loadStrategy,
+    @required bool enableDebugging,
+    bool enableDebugExtension,
+    String hostname,
+    bool useSseForDebugProxy,
+    bool serveDevTools,
+    void Function(Level, String) logWriter,
+    bool verbose,
+    UrlEncoder urlEncoder,
+    ExpressionCompiler expressionCompiler,
+});
+
 /// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
@@ -54,7 +70,6 @@ class WebAssetServer implements AssetReader {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   final Map<String, String> _modules;
-
   final Map<String, String> _digests;
 
   void performRestart(List<String> modules) {
@@ -87,6 +102,7 @@ class WebAssetServer implements AssetReader {
     bool enableDwds,
     Uri entrypoint, {
     bool testMode = false,
+    DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
@@ -150,7 +166,7 @@ class WebAssetServer implements AssetReader {
       }
 
       // In debug builds, spin up DWDS and the full asset server.
-      final Dwds dwds = await Dwds.start(
+      final Dwds dwds = await dwdsLauncher(
         assetReader: server,
         enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
