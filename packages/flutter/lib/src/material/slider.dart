@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -124,6 +125,8 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.focusNode,
+    this.autofocus = false,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -153,6 +156,8 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.focusNode,
+    this.autofocus = false,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -374,7 +379,13 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
 
-  final _SliderType _sliderType ;
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  final _SliderType _sliderType;
 
   @override
   _SliderState createState() => _SliderState();
@@ -393,6 +404,8 @@ class Slider extends StatefulWidget {
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
+    properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
+    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
   }
 }
 
@@ -412,6 +425,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // and the next on a discrete slider.
   AnimationController positionController;
   Timer interactionTimer;
+  final GlobalKey _renderObjectKey = GlobalKey();
+  // Keyboard mapping for a focused slider.
+  Map<LogicalKeySet, Intent> _shortcutMap;
+  // Action mapping for a focused slider.
+  Map<LocalKey, ActionFactory> _actionMap;
+
+  bool get _enabled => widget.onChanged != null;
 
   @override
   void initState() {
@@ -434,6 +454,30 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     );
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
+    _shortcutMap = <LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.increment(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.decrement(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.decrement(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.increment(),
+    };
+    _actionMap = <LocalKey, ActionFactory>{
+//      _AdjustSliderAction.key: () => _AdjustSliderAction(),
+      _AdjustSliderIntent.intentKey: () => CallbackAction(
+          _AdjustSliderIntent.intentKey,
+        onInvoke: (FocusNode node, Intent intent) {
+          final _AdjustSliderIntent sliderIntent = intent as _AdjustSliderIntent;
+          final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
+          switch (sliderIntent.type) {
+            case _SliderAdjustmentType.increment:
+              renderSlider.increaseAction();
+              break;
+            case _SliderAdjustmentType.decrement:
+              renderSlider.decreaseAction();
+              break;
+          }
+        }
+      ),
+    };
   }
 
   @override
@@ -451,6 +495,22 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged(lerpValue);
+    }
+  }
+
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    print('_handleFocusHighlightChanged');
+    if (focused != _focused) {
+      print('setState');
+      setState(() { _focused = focused; });
+    }
+  }
+
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
     }
   }
 
@@ -550,17 +610,29 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
 
-    return _SliderRenderObjectWidget(
-      value: _unlerp(widget.value),
-      divisions: widget.divisions,
-      label: widget.label,
-      sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context),
-      onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
-      state: this,
-      semanticFormatterCallback: widget.semanticFormatterCallback,
+    return FocusableActionDetector(
+      actions: _actionMap,
+      shortcuts: _shortcutMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: _enabled,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: _SliderRenderObjectWidget(
+        key: _renderObjectKey,
+        value: _unlerp(widget.value),
+        divisions: widget.divisions,
+        label: widget.label,
+        sliderTheme: sliderTheme,
+        mediaQueryData: MediaQuery.of(context),
+        onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+        onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+        onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+        state: this,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+        hasFocus: _focused,
+        hovering: _hovering,
+      ),
     );
   }
 
@@ -597,6 +669,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
+    this.hasFocus,
+    this.hovering,
   }) : super(key: key);
 
   final double value;
@@ -609,6 +683,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChangeEnd;
   final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
+  final bool hasFocus;
+  final bool hovering;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -625,6 +701,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      hasFocus: hasFocus,
+      hovering: hovering,
     );
   }
 
@@ -642,7 +720,9 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
-      ..platform = Theme.of(context).platform;
+      ..platform = Theme.of(context).platform
+      ..hasFocus = hasFocus
+      ..hovering = hovering;
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -662,6 +742,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
+    bool hasFocus,
+    bool hovering,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
@@ -674,7 +756,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
-       _textDirection = textDirection {
+       _textDirection = textDirection,
+       _hasFocus = hasFocus,
+       _hovering = hovering {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -869,6 +953,38 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     }
     _textDirection = value;
     _updateLabelPainter();
+  }
+
+  /// True if this toggleable has the input focus.
+  bool get hasFocus => _hasFocus;
+  bool _hasFocus;
+  set hasFocus(bool value) {
+    assert(value != null);
+    if (value == _hasFocus)
+      return;
+    _hasFocus = value;
+    if (_hasFocus) {
+      _state.overlayController.forward();
+    } else {
+      _state.overlayController.reverse();
+    }
+    markNeedsPaint();
+  }
+
+  /// True if this toggleable is being hovered over by a pointer.
+  bool get hovering => _hovering;
+  bool _hovering;
+  set hovering(bool value) {
+    assert(value != null);
+    if (value == _hovering)
+      return;
+    _hovering = value;
+    if (_hovering) {
+      _state.overlayController.forward();
+    } else {
+      _state.overlayController.reverse();
+    }
+    markNeedsPaint();
   }
 
   bool get showValueIndicator {
@@ -1192,8 +1308,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
       config.textDirection = textDirection;
-      config.onIncrease = _increaseAction;
-      config.onDecrease = _decreaseAction;
+      config.onIncrease = increaseAction;
+      config.onDecrease = decreaseAction;
       if (semanticFormatterCallback != null) {
         config.value = semanticFormatterCallback(_state._lerp(value));
         config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
@@ -1208,15 +1324,49 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _adjustmentUnit;
 
-  void _increaseAction() {
+  void increaseAction() {
     if (isInteractive) {
       onChanged((value + _semanticActionUnit).clamp(0.0, 1.0) as double);
     }
   }
 
-  void _decreaseAction() {
+  void decreaseAction() {
     if (isInteractive) {
       onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
     }
   }
+}
+
+class _AdjustSliderIntent extends Intent {
+  _AdjustSliderIntent({
+    @required this.type
+  }) : super(intentKey);
+
+  static const LocalKey intentKey = ValueKey<Type>(_AdjustSliderIntent);
+
+  const _AdjustSliderIntent.increment() :
+        type = _SliderAdjustmentType.increment,
+        super(intentKey);
+
+  const _AdjustSliderIntent.decrement() :
+        type = _SliderAdjustmentType.decrement,
+        super(intentKey);
+
+  final _SliderAdjustmentType type;
+}
+
+//class _AdjustSliderAction extends Action {
+//  _AdjustSliderAction() : super(key);
+//
+//  static const LocalKey key = ValueKey<Type>(_AdjustSliderAction);
+//
+//  @override
+//  void invoke(FocusNode node, Intent intent) {
+//
+//  }
+//}
+
+enum _SliderAdjustmentType {
+  increment,
+  decrement,
 }

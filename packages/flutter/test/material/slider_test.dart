@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -622,57 +623,58 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+//    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final slider = Material.of(tester.element(find.byType(Slider)));
 
     // Check default theme for enabled widget.
-    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
-    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+    expect(slider, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(slider, paints..circle(color: sliderTheme.thumbColor));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
     // Test setting only the activeColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveTrackColor));
-    expect(sliderBox, paints..circle(color: customColor1));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(slider, paints..circle(color: customColor1));
+    expect(slider, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting only the inactiveColor.
     await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: customColor1));
-    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: customColor1));
+    expect(slider, paints..circle(color: sliderTheme.thumbColor));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting both activeColor and inactiveColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
-    expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
-    expect(sliderBox, paints..circle(color: customColor1));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(slider, paints..circle(color: customColor1));
+    expect(slider, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider.
     await tester.pumpWidget(buildApp(divisions: 3));
-    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(slider, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
     expect(
-        sliderBox,
+        slider,
         paints
           ..circle(color: sliderTheme.activeTickMarkColor)
           ..circle(color: sliderTheme.activeTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
           ..circle(color: sliderTheme.thumbColor));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider with inactiveColor and activeColor set.
     await tester.pumpWidget(buildApp(
@@ -680,46 +682,46 @@ void main() {
       inactiveColor: customColor2,
       divisions: 3,
     ));
-    expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(slider, paints..rect(color: customColor1)..rect(color: customColor2));
     expect(
-        sliderBox,
+        slider,
         paints
           ..circle(color: customColor2)
           ..circle(color: customColor2)
           ..circle(color: customColor1)
           ..circle(color: customColor1)
           ..circle(color: customColor1));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(slider, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
     // Test default theme for disabled widget.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
     expect(
-        sliderBox,
+        slider,
         paints
           ..rect(color: sliderTheme.disabledActiveTrackColor)
           ..rect(color: sliderTheme.disabledInactiveTrackColor));
-    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(slider, paints..circle(color: sliderTheme.disabledThumbColor));
+    expect(slider, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
 
     // Test setting the activeColor and inactiveColor for disabled widget.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
-        sliderBox,
+        slider,
         paints
           ..rect(color: sliderTheme.disabledActiveTrackColor)
           ..rect(color: sliderTheme.disabledInactiveTrackColor));
-    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
-    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(slider, paints..circle(color: sliderTheme.disabledThumbColor));
+    expect(slider, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
+    expect(slider, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
 
     // Test that the default value indicator has the right colors.
     await tester.pumpWidget(buildApp(divisions: 3));
@@ -729,7 +731,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(2.0 / 3.0));
     expect(
-      sliderBox,
+      slider,
       paints
         ..rect(color: sliderTheme.activeTrackColor)
         ..rect(color: sliderTheme.inactiveTrackColor)
@@ -757,7 +759,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(2.0 / 3.0));
     expect(
-      sliderBox,
+      slider,
       paints
         ..rect(color: customColor1) // active track
         ..rect(color: customColor2) // inactive track
@@ -1210,22 +1212,35 @@ void main() {
       ),
     ));
 
+    await tester.pumpAndSettle();
+
+    debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
     expect(
-        semantics,
-        hasSemantics(
-          TestSemantics.root(children: <TestSemantics>[
-            TestSemantics.rootChild(
+      semantics,
+      hasSemantics(
+        TestSemantics(
+          id: 0,
+          children: <TestSemantics>[
+            TestSemantics(
               id: 1,
-              value: '50%',
-              increasedValue: '55%',
-              decreasedValue: '45%',
-              textDirection: TextDirection.ltr,
-              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-            ),
-          ]),
-          ignoreRect: true,
-          ignoreTransform: true,
-        ));
+              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  value: '50%',
+                  increasedValue: '55%',
+                  decreasedValue: '45%',
+                  textDirection: TextDirection.ltr,
+                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                ),
+              ],
+            )
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     // Disable slider
     await tester.pumpWidget(Directionality(
@@ -1331,6 +1346,162 @@ void main() {
           ignoreTransform: true,
         ));
     semantics.dispose();
+  });
+
+  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double value = 0.5;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return SliderTheme(
+                data: SliderThemeData(
+                  overlayColor: Colors.orange[500],
+                ),
+                child: Slider(
+                  value: value,
+                  onChanged: enabled ? (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                  autofocus: true,
+                  focusNode: focusNode,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Check that the overlay shows when focused.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: Colors.orange[500]),
+    );
+
+    // Check that the overlay does not show when focused and disabled.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: Colors.orange[500])),
+    );
+  });
+
+  testWidgets('Switch can be hovered and has correct hover color', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double value = 0.5;
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return SliderTheme(
+                data: SliderThemeData(
+                  overlayColor: Colors.orange[500],
+                ),
+                child: Slider(
+                  value: value,
+                  onChanged: enabled ? (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                ),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not have overlay when enabled and not hovered.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: Colors.orange[500])),
+    );
+
+    // Start hovering.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+
+    // Slider has overlay when enabled and hovering.
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: Colors.orange[500]),
+    );
+
+    // Slider does not have an overlay when disabled and hovering.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: Colors.orange[500])),
+    );
+  });
+
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double value = 0.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: value,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                autofocus: true,
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
+    expect(value, 0.55);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
+    expect(value, 0.5);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
+    expect(value, 0.55);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pumpAndSettle();
+    expect(value, 0.5);
   });
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
