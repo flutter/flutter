@@ -19,6 +19,7 @@
 #include "flutter/testing/elf_loader.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
+#include "fml/time/time_point.h"
 
 namespace flutter {
 namespace testing {
@@ -36,6 +37,8 @@ class ShellTest : public ThreadTest {
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell, TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();
+
+  fml::TimePoint GetLatestFrameTargetTime(Shell* shell) const;
 
   void SendEnginePlatformMessage(Shell* shell,
                                  fml::RefPtr<PlatformMessage> message);
