@@ -174,8 +174,7 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   final String command = _crashCommand(args);
   final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
     command,
-    errorString,
-    _crashException(error),
+    error,
     stackTrace,
     doctorText
   );
