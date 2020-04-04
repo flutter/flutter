@@ -116,7 +116,7 @@ void main() {
       testWithoutContext('String', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
-            'May have PII, very long string, 0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb47'
+            'May have non-tool-internal info, very long string, 0b8abb4724aa590dd0f429683339b'
               '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
               '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
               '24aa590dd0f429683339b1e045a1594d0b8abb4724aa590dd0f429683339b1e045a1594d0b8abb'
@@ -137,7 +137,7 @@ void main() {
       testWithoutContext('Exception', () {
         expect(
           GitHubTemplateCreator.sanitizedCrashException(
-            Exception('May have PII')
+            Exception('May have non-tool-internal info')
           ),
           '_Exception',
         );

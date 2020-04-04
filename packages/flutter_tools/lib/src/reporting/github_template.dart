@@ -41,8 +41,7 @@ class GitHubTemplateCreator {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
-  /// Sanitize personally identifiable information (PII) from error string before
-  /// sending to GitHub URL shortener service.
+  /// Restricts exception object strings to contain only information about tool internals.
   static String sanitizedCrashException(dynamic error) {
     if (error is ProcessException) {
       // Suppress args.
@@ -65,7 +64,7 @@ class GitHubTemplateCreator {
       || error is StateError
       || error is ProcessExit
       || error is OSError) {
-      // No PII, print the entire error.
+      // These exception objects only reference tool internals, print the whole error.
       return '${error.runtimeType}: $error';
     } else if (error is Error) {
       return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
