@@ -119,7 +119,7 @@ class AutofillGroup extends StatefulWidget {
        super(key: key);
 
   /// Returns the closest [AutofillScope] which encloses the given context.
-  static _AutofillScopeState of(BuildContext context) {
+  static _AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
@@ -132,10 +132,10 @@ class AutofillGroup extends StatefulWidget {
   final Widget child;
 
   @override
-  _AutofillScopeState createState() => _AutofillScopeState();
+  _AutofillGroupState createState() => _AutofillGroupState();
 }
 
-class _AutofillScopeState extends State<AutofillGroup> with AutofillScopeMixin {
+class _AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   @override
   Iterable<AutofillClient> get autofillClients {
     final List<AutofillClient> clients = <AutofillClient>[];
@@ -168,11 +168,11 @@ class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
     Key key,
     Widget child,
-    _AutofillScopeState autofillScopeState,
+    _AutofillGroupState autofillScopeState,
   }) : _scope = autofillScopeState,
        super(key: key, child: child);
 
-  final _AutofillScopeState _scope;
+  final _AutofillGroupState _scope;
 
   AutofillGroup get client => _scope.widget;
 

@@ -711,7 +711,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollController}
   final ScrollController scrollController;
 
-  /// {@macro flutter.iwdgets.editableText.autofillHints}
+  /// {@macro flutter.widgets.editableText.autofillHints}
   final Iterable<String> autofillHints;
 
   @override

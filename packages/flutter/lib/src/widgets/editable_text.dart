@@ -1064,11 +1064,11 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
 
-  /// {@template flutter.iwdgets.editableText.autofillHints}
+  /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
   /// text input.
   ///
-  /// When set to null, the text input will not participant in autofill triggered
+  /// When set to null, the text input will not participate in autofill triggered
   /// by a different [AutofillClient], even if they're in the same [AutofillScope].
   ///
   /// {@macro flutter.services.autofill.autofillHints}
@@ -1892,7 +1892,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   TextInputConfiguration get textInputConfiguration {
-    return TextInputConfiguration(inputType: widget.keyboardType,
+    return TextInputConfiguration(
+      inputType: widget.keyboardType,
       obscureText: widget.obscureText,
       autocorrect: widget.autocorrect,
       smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -1905,10 +1906,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       textCapitalization: widget.textCapitalization,
       keyboardAppearance: widget.keyboardAppearance,
       autofillConfiguration: (widget.autofillHints?.isEmpty ?? true) ? null : AutofillConfiguration(
-        uniqueIdentifier: toStringShort(),
+        uniqueIdentifier: 'EditableText-$hashCode',
         autofillHints: widget.autofillHints.toList(growable: false),
-        currentEditingValue: currentTextEditingValue,
-      )
+        currentEditingValue: currentTextEditingValue
+      ),
     );
   }
 

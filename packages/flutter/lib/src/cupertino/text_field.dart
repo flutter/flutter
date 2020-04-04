@@ -580,7 +580,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.onTap}
   final GestureTapCallback onTap;
 
-  /// {@macro flutter.iwdgets.editableText.autofillHints}
+  /// {@macro flutter.widgets.editableText.autofillHints}
   final Iterable<String> autofillHints;
 
   @override

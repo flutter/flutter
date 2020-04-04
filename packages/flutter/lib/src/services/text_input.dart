@@ -769,7 +769,6 @@ abstract class TextInputClient {
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
   void connectionClosed();
-
 }
 
 /// An interface for interacting with a text input control.
@@ -815,8 +814,9 @@ class TextInputConnection {
   /// Requests the platform autofill UI to appear.
   ///
   /// The call has no effect unless the currently attached client supports
-  /// autofill, and the platform have a standalone autofill UI (i.e. this call
-  /// has no effect on iOS since its autofill UI is part of the software keyboard).
+  /// autofill, and the platform has a standalone autofill UI (for example, this
+  /// call has no effect on iOS since its autofill UI is part of the software
+  /// keyboard).
   void requestAutofill() {
     assert(attached);
     TextInput._instance._requestAutofill();
