@@ -655,30 +655,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       observer.didChangeAppLifecycleState(state);
   }
 
-  /// Called when the operating system notifies the application of a memory
-  /// pressure situation.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didHaveMemoryPressure].
-  ///
-  /// This method exposes the `memoryPressure` notification from
-  /// [SystemChannels.system].
+  @override
   void handleMemoryPressure() {
+    super.handleMemoryPressure();
     for (final WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
-  }
-
-  @override
-  Future<void> handleSystemMessage(Object systemMessage) async {
-    await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
-    final String type = message['type'] as String;
-    switch (type) {
-      case 'memoryPressure':
-        handleMemoryPressure();
-        break;
-    }
-    return;
   }
 
   bool _needToReportFirstFrame = true;
