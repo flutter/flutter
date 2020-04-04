@@ -180,7 +180,7 @@ Match parseFullTag(String version) {
 
 String getVersionFromParts(List<int> parts) {
   assert(parts.length == 5);
-  StringBuffer buf = StringBuffer()
+  final StringBuffer buf = StringBuffer()
     ..write(parts.take(3).join('.'))
     ..write('-dev.')
     ..write(parts.skip(3).join('.'));
