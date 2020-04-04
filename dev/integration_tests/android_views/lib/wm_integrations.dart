@@ -102,4 +102,3 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     });
   }
 }
-
