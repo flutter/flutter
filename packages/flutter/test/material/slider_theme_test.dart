@@ -689,7 +689,9 @@ void main() {
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
-    expect(material, paintsNothing);
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the track', (WidgetTester tester) async {
@@ -838,7 +840,9 @@ void main() {
 
     // Nothing to paint at scale 0.
     await tester.pump();
-    expect(material, paintsNothing);
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
 
     // Painting a path for the value indicator.
     await tester.pump(const Duration(milliseconds: 16));

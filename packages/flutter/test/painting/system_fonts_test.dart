@@ -191,7 +191,8 @@ void main() {
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData data) { },
     );
-    final RenderObject renderObject = tester.renderObject(find.byType(Slider));
+    // _RenderSlider is the last render object.
+    final RenderObject renderObject = tester.allRenderObjects.last;
     expect(renderObject.debugNeedsLayout, isTrue);
   });
 
