@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:io' hide Platform;
 
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 import '../test.dart';
-import 'common.dart';
 
 class MockFile extends Mock implements File {}
 

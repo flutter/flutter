@@ -10,9 +10,9 @@ import 'dart:typed_data';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show FakePlatform;
+import 'package:test/test.dart';
 
 import '../prepare_package.dart';
-import 'common.dart';
 import 'fake_process_manager.dart';
 
 void main() {
@@ -341,5 +341,16 @@ void main() {
         expect(contents, equals(encoder.convert(jsonData)));
       });
     });
+  }
+}
+
+void tryToDelete(Directory directory) {
+  // This should not be necessary, but it turns out that
+  // on Windows it's common for deletions to fail due to
+  // bogus (we think) "access denied" errors.
+  try {
+    directory.deleteSync(recursive: true);
+  } on FileSystemException catch (error) {
+    print('Failed to delete ${directory.path}: $error');
   }
 }

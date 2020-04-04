@@ -6,10 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:process/process.dart';
 import 'package:mockito/mockito.dart';
-
-import 'common.dart';
+import 'package:process/process.dart';
+import 'package:test/test.dart';
 
 /// A mock that can be used to fake a process manager that runs commands
 /// and returns results.

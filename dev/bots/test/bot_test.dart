@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'common.dart';
+import 'package:test/test.dart';
 
 void main() {
   test('BOT variable is set on bots', () {

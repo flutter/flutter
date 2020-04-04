@@ -5,10 +5,10 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 import '../analyze.dart';
 import '../utils.dart';
-import 'common.dart';
 
 typedef AsyncVoidCallback = Future<void> Function();
 
