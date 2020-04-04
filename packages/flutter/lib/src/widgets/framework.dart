@@ -1190,8 +1190,8 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// You can determine whether it is legal to call this method by checking
   /// whether the [mounted] property is true.
   @protected
-  void setState(VoidCallback fn) {
-    assert(fn != null);
+  void setState([VoidCallback fn]) {
+    //assert(fn != null);
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1230,7 +1230,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
       }
       return true;
     }());
-    final dynamic result = fn() as dynamic;
+    final dynamic result = fn?.call() as dynamic;
     assert(() {
       if (result is Future) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
