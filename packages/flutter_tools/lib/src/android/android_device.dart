@@ -564,6 +564,8 @@ class AndroidDevice extends Device {
         ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null)
         ...<String>['--es', 'route', route],
+      if (debuggingOptions.androidUser.isNotEmpty) 
+        ...<String>['--user', debuggingOptions.androidUser],
       if (debuggingOptions.enableSoftwareRendering)
         ...<String>['--ez', 'enable-software-rendering', 'true'],
       if (debuggingOptions.skiaDeterministicRendering)
