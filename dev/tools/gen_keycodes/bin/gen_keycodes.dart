@@ -18,8 +18,7 @@ import 'package:gen_keycodes/utils.dart';
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
 Future<String> getChromiumConversions() async {
-  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/dom_code_data.inc');
-  return await http.read(keyCodeMapUri);
+  return File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'chromium_code_download.inc')).readAsStringSync();
 }
 
 /// Get contents of the file that contains the key codes in Android source.
@@ -162,6 +161,10 @@ Future<void> main(List<String> rawArguments) async {
     } else {
       hidCodes = File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
     }
+
+print('=====');
+ print(hidCodes);
+print('=====');
 
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     hidCodes = '$hidCodes\n$supplementalHidCodes';
