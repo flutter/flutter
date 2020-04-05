@@ -565,6 +565,7 @@ class DebuggingOptions {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
     this.dartFlags = '',
+    this.androidUser = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
@@ -600,6 +601,7 @@ class DebuggingOptions {
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
+      androidUser = '',
       disableServiceAuthCodes = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
@@ -618,6 +620,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
+  final String androidUser;
   final bool disableServiceAuthCodes;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
