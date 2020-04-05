@@ -140,6 +140,12 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
+  CommandHelpOption _v;
+  CommandHelpOption get v => _v ??= _makeOption(
+    'v',
+    'Launch DevTools.',
+  );
+
   CommandHelpOption _w;
   CommandHelpOption get w => _w ??= _makeOption(
     'w',
