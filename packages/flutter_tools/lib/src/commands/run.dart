@@ -157,6 +157,11 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify the project root directory.',
       )
+      ..addOption(
+        'android-user',
+        hide: !verboseHelp,
+        help: 'If needed specify the android user.',
+      )
       ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -359,6 +364,7 @@ class RunCommand extends RunCommandBase {
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: boolArg('start-paused'),
+        androidUser: stringArg('android-user'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: boolArg('use-test-fonts'),
