@@ -25,6 +25,8 @@ Future<void> main() async {
       await driver.waitFor(find.byValueKey('PlatformView'));
       final String errorMessage = await driver.requestData('run test');
       expect(errorMessage, '');
-    });
+    },
+    // TODO(amirh): enable this test https://github.com/flutter/flutter/issues/54022
+    skip: true);
   });
 }
