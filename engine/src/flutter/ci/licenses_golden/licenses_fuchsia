@@ -1,4 +1,4 @@
-Signature: 61ee89d822a3643c5a211be303cdf1f4
+Signature: 28f48ca1c8f88cfe6fda84f9889514d4
 
 UNUSED LICENSES:
 
@@ -3273,6 +3273,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/night_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
