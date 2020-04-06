@@ -233,7 +233,7 @@ class FlutterDevice {
         : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() => vmService.getVMOld();
+  Future<void> getVMs() => vmService.getVM();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {

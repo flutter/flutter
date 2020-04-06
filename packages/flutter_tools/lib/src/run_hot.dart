@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:platform/platform.dart';
+import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'base/async_guard.dart';
@@ -108,10 +110,9 @@ class HotRunner extends ResidentRunner {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pause: pause);
     if (!result.isOk) {
-      throw vm_service.RPCError(
+      throw rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
         'Unable to reload sources',
-        RPCErrorCodes.kInternalError,
-        '',
       );
     }
   }
@@ -120,10 +121,9 @@ class HotRunner extends ResidentRunner {
     final OperationResult result =
       await restart(fullRestart: true, pause: pause);
     if (!result.isOk) {
-      throw vm_service.RPCError(
+      throw rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
         'Unable to restart',
-        RPCErrorCodes.kInternalError,
-        '',
       );
     }
   }
@@ -564,15 +564,16 @@ class HotRunner extends ResidentRunner {
     if (benchmarkMode) {
       final List<Future<void>> isolateNotifications = <Future<void>>[];
       for (final FlutterDevice device in flutterDevices) {
-        try {
-          await device.vmService.streamListen('Isolate');
-        } on vm_service.RPCError {
-          // Do nothing, we're already subcribed.
-        }
         for (final FlutterView view in device.views) {
           isolateNotifications.add(
-            view.owner.vm.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-              return event.kind == vm_service.EventKind.kServiceExtensionAdded;
+            view.owner.vm.vmService.onIsolateEvent
+              .then((Stream<ServiceEvent> serviceEvents) async {
+              await for (final ServiceEvent serviceEvent in serviceEvents) {
+                if (serviceEvent.owner.name.contains('_spawn')
+                  && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                  return;
+                }
+              }
             }),
           );
         }
@@ -719,12 +720,9 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
-    } on vm_service.SentinelException catch (err, st) {
+    } on rpc.RpcException {
       restartEvent = 'exception';
-      return OperationResult(1, 'hot restart failed to complete: $err\n$st', fatal: true);
-    } on vm_service.RPCError  catch (err, st) {
-      restartEvent = 'exception';
-      return OperationResult(1, 'hot restart failed to complete: $err\n$st', fatal: true);
+      return OperationResult(1, 'hot restart failed to complete', fatal: true);
     } finally {
       HotEvent(restartEvent,
         targetPlatform: targetPlatform,
@@ -766,7 +764,7 @@ class HotRunner extends ResidentRunner {
           );
         },
       );
-    } on vm_service.RPCError {
+    } on rpc.RpcException {
       HotEvent('exception',
         targetPlatform: targetPlatform,
         sdkName: sdkName,
