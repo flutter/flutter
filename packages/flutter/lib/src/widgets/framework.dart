@@ -1191,7 +1191,6 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// whether the [mounted] property is true.
   @protected
   void setState([VoidCallback fn]) {
-    //assert(fn != null);
     assert(() {
       if (_debugLifecycleState == _StateLifecycle.defunct) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
