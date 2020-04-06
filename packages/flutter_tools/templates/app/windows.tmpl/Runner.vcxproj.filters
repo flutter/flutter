@@ -18,16 +18,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="runner\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="runner\run_loop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="runner\flutter_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="runner\win32_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="runner\window_configuration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="flutter\generated_plugin_registrant.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="win32_window.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="window_configuration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\engine_method_result.cc">
@@ -41,16 +47,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="runner\run_loop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner\flutter_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner\win32_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner\window_configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="runner\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="flutter\generated_plugin_registrant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="win32_window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="window_configuration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
