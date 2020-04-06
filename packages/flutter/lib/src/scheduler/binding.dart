@@ -201,6 +201,7 @@ mixin SchedulerBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
+    readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
@@ -291,6 +292,17 @@ mixin SchedulerBinding on BindingBase {
     }
   }
 
+  /// Whether the application is visible, and if so, whether it is currently
+  /// interactive.
+  ///
+  /// This is set by [handleAppLifecycleStateChanged] when the
+  /// [SystemChannels.lifecycle] notification is dispatched.
+  ///
+  /// The preferred way to watch for changes to this value is using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  AppLifecycleState get lifecycleState => _lifecycleState;
+  AppLifecycleState _lifecycleState;
+
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
@@ -301,6 +313,7 @@ mixin SchedulerBinding on BindingBase {
   @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     assert(state != null);
+    _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
       case AppLifecycleState.inactive:
@@ -310,6 +323,27 @@ mixin SchedulerBinding on BindingBase {
       case AppLifecycleState.detached:
         _setFramesEnabledState(false);
         break;
+    }
+  }
+
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
+  /// window.
+  ///
+  /// Once the [lifecycleState] is populated through any means (including this
+  /// method), this method will do nothing. This is because the
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
+  /// to use the initial state at dart vm startup as the current state anymore.
+  ///
+  /// The latest state should be obtained by subscribing to
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  @protected
+  void readInitialLifecycleStateFromNativeWindow() {
+    final AppLifecycleState parsedValue = AppLifecycleState.values.firstWhere(
+      (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
+      orElse: () => null,
+    );
+    if (_lifecycleState == null && parsedValue != null) {
+      handleAppLifecycleStateChanged(parsedValue);
     }
   }
 

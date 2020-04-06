@@ -28,7 +28,6 @@ mixin ServicesBinding on BindingBase {
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -171,17 +170,6 @@ mixin ServicesBinding on BindingBase {
 
   // App life cycle
 
-  /// Whether the application is visible, and if so, whether it is currently
-  /// interactive.
-  ///
-  /// This is set by [handleAppLifecycleStateChanged] when the
-  /// [SystemChannels.lifecycle] notification is dispatched.
-  ///
-  /// The preferred way to watch for changes to this value is using
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  ui.AppLifecycleState get lifecycleState => _lifecycleState;
-  ui.AppLifecycleState _lifecycleState;
-
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
@@ -191,24 +179,7 @@ mixin ServicesBinding on BindingBase {
   @protected
   @mustCallSuper
   void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
-    _lifecycleState = state;
-  }
 
-  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
-  /// window.
-  ///
-  /// Once the [lifecycleState] is populated through any means (including this
-  /// method), this method will do nothing. This is because the
-  /// [initialLifecycleState] may already be stale and it no longer makes sense
-  /// to use the initial state at dart vm startup as the current state anymore.
-  ///
-  /// The latest state should be obtained by subscribing to
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @protected
-  void readInitialLifecycleStateFromNativeWindow() {
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
-    }
   }
 
   Future<String> _handleLifecycleMessage(String message) async {
