@@ -17,16 +17,29 @@ Future<void> main() async {
     driver.close();
   });
 
-  group('MotionEvents tests ', () {
-    test('recomposition', () async {
-      final SerializableFinder motionEventsListTile =
-      find.byValueKey('MotionEventsListTile');
-      await driver.tap(motionEventsListTile);
-      await driver.waitFor(find.byValueKey('PlatformView'));
-      final String errorMessage = await driver.requestData('run test');
-      expect(errorMessage, '');
-    },
-    // TODO(amirh): enable this test https://github.com/flutter/flutter/issues/54022
-    skip: true);
-  });
+  test('MotionEvent recomposition', () async {
+    final SerializableFinder motionEventsListTile =
+    find.byValueKey('MotionEventsListTile');
+    await driver.tap(motionEventsListTile);
+    await driver.waitFor(find.byValueKey('PlatformView'));
+    final String errorMessage = await driver.requestData('run test');
+    expect(errorMessage, '');
+  },
+  // TODO(amirh): enable this test https://github.com/flutter/flutter/issues/54022
+  skip: true);
+
+  test('AlertDialog from platform view context', () async {
+    final SerializableFinder wmListTile =
+    find.byValueKey('WmIntegrationsListTile');
+    await driver.tap(wmListTile);
+
+    final SerializableFinder showAlertDialog = find.byValueKey('ShowAlertDialog');
+    await driver.waitFor(showAlertDialog);
+    await driver.tap(showAlertDialog);
+    final String status = await driver.getText(find.byValueKey('Status'));
+    expect(status, 'Success');
+  },
+    // TODO(amirh): enable this test when https://github.com/flutter/flutter/issues/34248 is fixed.
+    skip: true,
+  );
 }
