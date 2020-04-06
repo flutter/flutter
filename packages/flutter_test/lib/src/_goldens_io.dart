@@ -102,7 +102,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     );
 
     if (!result.passed) {
-      generateFailureOutput(result, golden, basedir);
+      await generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
   }
