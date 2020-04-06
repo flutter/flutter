@@ -455,10 +455,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
     _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.increment(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.decrement(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.decrement(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.increment(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
+      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
     };
     _actionMap = <LocalKey, ActionFactory>{
       _AdjustSliderIntent.intentKey: _adjustActionFactory,
@@ -499,11 +499,32 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onInvoke: (FocusNode node, Intent intent) {
         final _AdjustSliderIntent sliderIntent = intent as _AdjustSliderIntent;
         final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
+        final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext);
         switch (sliderIntent.type) {
-          case _SliderAdjustmentType.increment:
+          case _SliderAdjustmentType.right:
+            switch (textDirection) {
+              case TextDirection.rtl:
+                renderSlider.decreaseAction();
+                break;
+              case TextDirection.ltr:
+                renderSlider.increaseAction();
+                break;
+            }
+            break;
+          case _SliderAdjustmentType.left:
+            switch (textDirection) {
+              case TextDirection.rtl:
+                renderSlider.increaseAction();
+                break;
+              case TextDirection.ltr:
+                renderSlider.decreaseAction();
+                break;
+            }
+            break;
+          case _SliderAdjustmentType.up:
             renderSlider.increaseAction();
             break;
-          case _SliderAdjustmentType.decrement:
+          case _SliderAdjustmentType.down:
             renderSlider.decreaseAction();
             break;
         }
@@ -1340,12 +1361,20 @@ class _AdjustSliderIntent extends Intent {
     @required this.type
   }) : super(intentKey);
 
-  const _AdjustSliderIntent.increment() :
-        type = _SliderAdjustmentType.increment,
+  const _AdjustSliderIntent.right() :
+        type = _SliderAdjustmentType.right,
         super(intentKey);
 
-  const _AdjustSliderIntent.decrement() :
-        type = _SliderAdjustmentType.decrement,
+  const _AdjustSliderIntent.left() :
+        type = _SliderAdjustmentType.left,
+        super(intentKey);
+
+  const _AdjustSliderIntent.up() :
+        type = _SliderAdjustmentType.up,
+        super(intentKey);
+
+  const _AdjustSliderIntent.down() :
+        type = _SliderAdjustmentType.down,
         super(intentKey);
 
   static const LocalKey intentKey = ValueKey<Type>(_AdjustSliderIntent);
@@ -1354,6 +1383,8 @@ class _AdjustSliderIntent extends Intent {
 }
 
 enum _SliderAdjustmentType {
-  increment,
-  decrement,
+  right,
+  left,
+  up,
+  down,
 }
