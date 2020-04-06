@@ -82,7 +82,7 @@ void main() {
 
     testUsingContext('GitHub issue template', () async {
       const String templateURL = 'https://example.com/2';
-      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any, any))
+      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any))
         .thenAnswer((_) async => templateURL);
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
