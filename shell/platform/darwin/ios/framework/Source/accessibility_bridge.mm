@@ -7,6 +7,8 @@
 
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+#pragma GCC diagnostic error "-Wundeclared-selector"
+
 FLUTTER_ASSERT_NOT_ARC
 
 namespace flutter {
