@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
@@ -233,7 +234,7 @@ class FlutterDevice {
         : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() => vmService.getVM();
+  Future<void> getVMs() => vmService.getVMOld();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -651,6 +652,8 @@ abstract class ResidentRunner {
 
   final CommandHelp commandHelp;
 
+  io.HttpServer _devtoolsServer;
+
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
@@ -759,9 +762,11 @@ abstract class ResidentRunner {
       'flutter',
       'sksl',
     );
+    final Device device = flutterDevices.first.device;
     final Map<String, Object> manifest = <String, Object>{
-      'device': getNameForTargetPlatform(await flutterDevices.first.device.targetPlatform),
-      'version': globals.flutterVersion.engineRevision,
+      'platform': getNameForTargetPlatform(await flutterDevices.first.device.targetPlatform),
+      'name': device.name,
+      'engineRevision': globals.flutterVersion.engineRevision,
       'data': data,
     };
     outputFile.writeAsStringSync(json.encode(manifest));
@@ -800,12 +805,14 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
   }
 
   Future<void> detach() async {
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     appFinished();
@@ -1013,6 +1020,31 @@ abstract class ResidentRunner {
     }
   }
 
+  Future<void> launchDevTools() async {
+    try {
+      assert(supportsServiceProtocol);
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+      await devtools_server.launchDevTools(
+        <String, dynamic>{
+          'reuseWindows': true,
+        },
+        flutterDevices.first.vmService.httpAddress,
+        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
+        false,  // headless mode,
+        false,  // machine mode
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to launch DevTools: $e\n$st');
+    }
+  }
+
+  Future<void> shutdownDevtools() async {
+    await _devtoolsServer?.close();
+    _devtoolsServer = null;
+  }
+
   Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
   }
@@ -1098,6 +1130,7 @@ abstract class ResidentRunner {
       if (supportsWriteSkSL) {
         commandHelp.M.print();
       }
+      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1336,6 +1369,12 @@ class TerminalHandler {
       case 'U':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+          return true;
+        }
+        return false;
+      case 'v':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.launchDevTools();
           return true;
         }
         return false;

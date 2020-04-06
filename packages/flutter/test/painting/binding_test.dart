@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data' show Uint8List;
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -11,21 +10,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart';
 
-import 'image_data.dart';
-import 'painting_utils.dart';
 
 void main() {
-  final PaintingBindingSpy binding = PaintingBindingSpy();
+  testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
+    imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(ImageInfo(
+        image: FakeImage(),
+        scale: 1.0,
+      ),
+    )));
 
-  test('instantiateImageCodec used for loading images', () async {
-    expect(binding.instantiateImageCodecCalledCount, 0);
-
-    final Uint8List bytes = Uint8List.fromList(kTransparentImage);
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    memoryImage.load(memoryImage, (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
-      return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
-    });
-    expect(binding.instantiateImageCodecCalledCount, 1);
+    await tester.idle();
+    expect(imageCache.currentSize, 1);
+    final ByteData message = const JSONMessageCodec().encodeMessage(
+      <String, dynamic>{'type': 'memoryPressure'});
+    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    expect(imageCache.currentSize, 0);
   });
 
   test('evict clears live references', () async {
@@ -84,7 +84,7 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  Window get window => throw UnimplementedError();
+  ui.Window get window => throw UnimplementedError();
 }
 
 class TestPaintingBinding extends TestBindingBase with ServicesBinding, PaintingBinding {
@@ -111,4 +111,20 @@ class FakeImageCache extends ImageCache {
     liveClearCount += 1;
     super.clearLiveImages();
   }
+}
+
+class FakeImage implements ui.Image {
+  @override
+  void dispose() {}
+
+  @override
+  int get height => 10;
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  int get width => 10;
 }

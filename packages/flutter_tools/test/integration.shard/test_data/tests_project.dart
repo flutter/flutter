@@ -49,6 +49,7 @@ class TestsProject extends Project {
   String get testFilePath => globals.fs.path.join(dir.path, 'test', 'test.dart');
 
   Uri get breakpointUri => Uri.file(testFilePath);
+  Uri get breakpointAppUri => Uri.parse('org-dartlang-app:///test.dart');
 
   int get breakpointLine => lineContaining(testContent, '// BREAKPOINT');
 }

@@ -32,6 +32,8 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchSimpleLazyTextScroll.benchmarkName: () => BenchSimpleLazyTextScroll(),
   BenchBuildMaterialCheckbox.benchmarkName: () => BenchBuildMaterialCheckbox(),
   BenchDynamicClipOnStaticPicture.benchmarkName: () => BenchDynamicClipOnStaticPicture(),
+  if (isCanvasKit)
+    BenchBuildColorsGrid.canvasKitBenchmarkName: () => BenchBuildColorsGrid.canvasKit(),
 
   // Benchmarks that we don't want to run using CanvasKit.
   if (!isCanvasKit) ...<String, RecorderFactory>{
@@ -39,37 +41,23 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
     BenchTextLayout.canvasBenchmarkName: () => BenchTextLayout(useCanvas: true),
     BenchTextCachedLayout.domBenchmarkName: () => BenchTextCachedLayout(useCanvas: false),
     BenchTextCachedLayout.canvasBenchmarkName: () => BenchTextCachedLayout(useCanvas: true),
-    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid(useCanvas: false),
-    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid(useCanvas: true),
+    BenchBuildColorsGrid.domBenchmarkName: () => BenchBuildColorsGrid.dom(),
+    BenchBuildColorsGrid.canvasBenchmarkName: () => BenchBuildColorsGrid.canvas(),
   }
 };
 
-/// Whether we fell back to manual mode.
-///
-/// This happens when you run benchmarks using plain `flutter run` rather than
-/// devicelab test harness. The test harness spins up a special server that
-/// provides API for automatically picking the next benchmark to run.
-bool isInManualMode = false;
+final LocalBenchmarkServerClient _client = LocalBenchmarkServerClient();
 
 Future<void> main() async {
   // Check if the benchmark server wants us to run a specific benchmark.
-  final html.HttpRequest request = await requestXhr(
-    '/next-benchmark',
-    method: 'POST',
-    mimeType: 'application/json',
-    sendData: json.encode(benchmarks.keys.toList()),
-  );
+  final String nextBenchmark = await _client.requestNextBenchmark();
 
-  // 404 is expected in the following cases:
-  // - The benchmark is ran using plain `flutter run`, which does not provide "next-benchmark" handler.
-  // - We ran all benchmarks and the benchmark is telling us there are no more benchmarks to run.
-  if (request.status == 404) {
+  if (nextBenchmark == LocalBenchmarkServerClient.kManualFallback) {
     _fallbackToManual('The server did not tell us which benchmark to run next.');
     return;
   }
 
-  final String benchmarkName = request.responseText;
-  await _runBenchmark(benchmarkName);
+  await _runBenchmark(nextBenchmark);
   html.window.location.reload();
 }
 
@@ -81,44 +69,36 @@ Future<void> _runBenchmark(String benchmarkName) async {
     return;
   }
 
-  final Recorder recorder = recorderFactory();
-
   try {
-    final Profile profile = await recorder.run();
-    if (!isInManualMode) {
-      final html.HttpRequest request = await html.HttpRequest.request(
-        '/profile-data',
-        method: 'POST',
-        mimeType: 'application/json',
-        sendData: json.encode(profile.toJson()),
-      );
-      if (request.status != 200) {
-        throw Exception(
-          'Failed to report profile data to benchmark server. '
-          'The server responded with status code ${request.status}.'
-        );
-      }
+    final Runner runner = Runner(
+      recorder: recorderFactory(),
+      setUpAllDidRun: () async {
+        if (!_client.isInManualMode) {
+          await _client.startPerformanceTracing(benchmarkName);
+        }
+      },
+      tearDownAllWillRun: () async {
+        if (!_client.isInManualMode) {
+          await _client.stopPerformanceTracing();
+        }
+      },
+    );
+
+    final Profile profile = await runner.run();
+    if (!_client.isInManualMode) {
+      await _client.sendProfileData(profile);
     } else {
       print(profile);
     }
   } catch (error, stackTrace) {
-    if (isInManualMode) {
+    if (_client.isInManualMode) {
       rethrow;
     }
-    await html.HttpRequest.request(
-      '/on-error',
-      method: 'POST',
-      mimeType: 'application/json',
-      sendData: json.encode(<String, dynamic>{
-        'error': '$error',
-        'stackTrace': '$stackTrace',
-      }),
-    );
+    await _client.reportError(error, stackTrace);
   }
 }
 
 void _fallbackToManual(String error) {
-  isInManualMode = true;
   html.document.body.appendHtml('''
     <div id="manual-panel">
       <h3>$error</h3>
@@ -146,50 +126,157 @@ void _fallbackToManual(String error) {
   }
 }
 
-Future<html.HttpRequest> requestXhr(
-  String url, {
-  String method,
-  bool withCredentials,
-  String responseType,
-  String mimeType,
-  Map<String, String> requestHeaders,
-  dynamic sendData,
-}) {
-  final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
-  final html.HttpRequest xhr = html.HttpRequest();
+/// Implements the client REST API for the local benchmark server.
+///
+/// The local server is optional. If it is not available the benchmark UI must
+/// implement a manual fallback. This allows debugging benchmarks using plain
+/// `flutter run`.
+class LocalBenchmarkServerClient {
+  /// This value is returned by [requestNextBenchmark].
+  static const String kManualFallback = '__manual_fallback__';
 
-  method ??= 'GET';
-  xhr.open(method, url, async: true);
+  /// Whether we fell back to manual mode.
+  ///
+  /// This happens when you run benchmarks using plain `flutter run` rather than
+  /// devicelab test harness. The test harness spins up a special server that
+  /// provides API for automatically picking the next benchmark to run.
+  bool isInManualMode;
 
-  if (withCredentials != null) {
-    xhr.withCredentials = withCredentials;
+  /// Asks the local server for the name of the next benchmark to run.
+  ///
+  /// Returns [kManualFallback] if local server is not available (uses 404 as a
+  /// signal).
+  Future<String> requestNextBenchmark() async {
+    final html.HttpRequest request = await _requestXhr(
+      '/next-benchmark',
+      method: 'POST',
+      mimeType: 'application/json',
+      sendData: json.encode(benchmarks.keys.toList()),
+    );
+
+    // 404 is expected in the following cases:
+    // - The benchmark is ran using plain `flutter run`, which does not provide "next-benchmark" handler.
+    // - We ran all benchmarks and the benchmark is telling us there are no more benchmarks to run.
+    if (request.status == 404) {
+      isInManualMode = true;
+      return kManualFallback;
+    }
+
+    isInManualMode = false;
+    return request.responseText;
   }
 
-  if (responseType != null) {
-    xhr.responseType = responseType;
+  void _checkNotManualMode() {
+    if (isInManualMode) {
+      throw StateError('Operation not supported in manual fallback mode.');
+    }
   }
 
-  if (mimeType != null) {
-    xhr.overrideMimeType(mimeType);
+  /// Asks the local server to begin tracing performance.
+  ///
+  /// This uses the chrome://tracing tracer, which is not available from within
+  /// the page itself, and therefore must be controlled from outside using the
+  /// DevTools Protocol.
+  Future<void> startPerformanceTracing(String benchmarkName) async {
+    _checkNotManualMode();
+    await html.HttpRequest.request(
+      '/start-performance-tracing?label=$benchmarkName',
+      method: 'POST',
+      mimeType: 'application/json',
+    );
   }
 
-  if (requestHeaders != null) {
-    requestHeaders.forEach((String header, String value) {
-      xhr.setRequestHeader(header, value);
+  /// Stops the performance tracing session started by [startPerformanceTracing].
+  Future<void> stopPerformanceTracing() async {
+    _checkNotManualMode();
+    await html.HttpRequest.request(
+      '/stop-performance-tracing',
+      method: 'POST',
+      mimeType: 'application/json',
+    );
+  }
+
+  /// Sends the profile data collected by the benchmark to the local benchmark
+  /// server.
+  Future<void> sendProfileData(Profile profile) async {
+    _checkNotManualMode();
+    final html.HttpRequest request = await html.HttpRequest.request(
+      '/profile-data',
+      method: 'POST',
+      mimeType: 'application/json',
+      sendData: json.encode(profile.toJson()),
+    );
+    if (request.status != 200) {
+      throw Exception(
+        'Failed to report profile data to benchmark server. '
+        'The server responded with status code ${request.status}.'
+      );
+    }
+  }
+
+  /// Reports an error to the benchmark server.
+  ///
+  /// The server will halt the devicelab task and log the error.
+  Future<void> reportError(dynamic error, StackTrace stackTrace) async {
+    _checkNotManualMode();
+    await html.HttpRequest.request(
+      '/on-error',
+      method: 'POST',
+      mimeType: 'application/json',
+      sendData: json.encode(<String, dynamic>{
+        'error': '$error',
+        'stackTrace': '$stackTrace',
+      }),
+    );
+  }
+
+  /// This is the same as calling [html.HttpRequest.request] but it doesn't
+  /// crash on 404, which we use to detect `flutter run`.
+  Future<html.HttpRequest> _requestXhr(
+    String url, {
+    String method,
+    bool withCredentials,
+    String responseType,
+    String mimeType,
+    Map<String, String> requestHeaders,
+    dynamic sendData,
+  }) {
+    final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
+    final html.HttpRequest xhr = html.HttpRequest();
+
+    method ??= 'GET';
+    xhr.open(method, url, async: true);
+
+    if (withCredentials != null) {
+      xhr.withCredentials = withCredentials;
+    }
+
+    if (responseType != null) {
+      xhr.responseType = responseType;
+    }
+
+    if (mimeType != null) {
+      xhr.overrideMimeType(mimeType);
+    }
+
+    if (requestHeaders != null) {
+      requestHeaders.forEach((String header, String value) {
+        xhr.setRequestHeader(header, value);
+      });
+    }
+
+    xhr.onLoad.listen((html.ProgressEvent e) {
+      completer.complete(xhr);
     });
+
+    xhr.onError.listen(completer.completeError);
+
+    if (sendData != null) {
+      xhr.send(sendData);
+    } else {
+      xhr.send();
+    }
+
+    return completer.future;
   }
-
-  xhr.onLoad.listen((html.ProgressEvent e) {
-    completer.complete(xhr);
-  });
-
-  xhr.onError.listen(completer.completeError);
-
-  if (sendData != null) {
-    xhr.send(sendData);
-  } else {
-    xhr.send();
-  }
-
-  return completer.future;
 }

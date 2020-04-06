@@ -27,7 +27,7 @@ class _Page {
 }
 
 final List<_Page> _allPages = <_Page>[
-  _Page(label: 'Blue', colors: Colors.indigo, icon: Icons.add),
+  _Page(label: 'Pink', colors: Colors.pink, icon: Icons.add),
   _Page(label: 'Eco', colors: Colors.green, icon: Icons.create),
   _Page(label: 'No'),
   _Page(label: 'Teal', colors: Colors.teal, icon: Icons.add),

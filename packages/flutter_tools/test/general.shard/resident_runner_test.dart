@@ -24,8 +24,8 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -223,7 +223,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
@@ -328,7 +328,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
@@ -410,6 +410,7 @@ void main() {
           commandHelp.o,
           commandHelp.z,
           commandHelp.M,
+          commandHelp.v,
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
@@ -432,10 +433,11 @@ void main() {
     expect(testLogger.statusText, contains('No data was receieved'));
   }));
 
-  test('ResidentRunner can write SkSL data to a unique file with engine version and target platform', () => testbed.run(() async {
+  test('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
     when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
       return TargetPlatform.android_arm;
     });
+    when(mockDevice.name).thenReturn('test device');
     when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
       return <String, Object>{
         'A': 'B',
@@ -446,8 +448,9 @@ void main() {
     expect(testLogger.statusText, contains('flutter_01.sksl'));
     expect(globals.fs.file('flutter_01.sksl'), exists);
     expect(json.decode(globals.fs.file('flutter_01.sksl').readAsStringSync()), <String, Object>{
-      'device': 'android-arm',
-      'version': '42.2', // From FakeFlutterVersion
+      'platform': 'android-arm',
+      'name': 'test device',
+      'engineRevision': '42.2', // From FakeFlutterVersion
       'data': <String, Object>{'A': 'B'}
     });
   }));
