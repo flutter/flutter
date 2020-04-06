@@ -85,8 +85,6 @@ void main(List<String> args) {
     exit(1);
   }
 
-  runGit('checkout master', 'switch to master branch');
-
   if (getGitOutput('status --porcelain', 'check status of your local checkout') != '') {
     print('Your git repository is not clean. Try running "git clean -fd". Warning, this ');
     print('will delete files! Run with -n to find out which ones.');
@@ -94,7 +92,7 @@ void main(List<String> args) {
   }
 
   runGit('fetch $origin', 'fetch $origin');
-  runGit('reset $commit --hard', 'check out master branch');
+  runGit('reset $commit --hard', 'reset to the release commit');
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
