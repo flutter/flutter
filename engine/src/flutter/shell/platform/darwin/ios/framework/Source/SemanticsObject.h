@@ -14,6 +14,7 @@
 
 constexpr int32_t kRootNodeId = 0;
 
+@class FlutterCustomAccessibilityAction;
 @class FlutterPlatformViewSemanticsContainer;
 
 /**
@@ -92,6 +93,7 @@ constexpr int32_t kRootNodeId = 0;
 - (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node;
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges;
 - (NSString*)routeName;
+- (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action;
 
 @end
 
