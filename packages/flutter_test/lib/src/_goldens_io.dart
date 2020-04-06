@@ -210,8 +210,8 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final ByteData invertedMasterRgba = await invert(masterImageRgba);
-  final ByteData invertedTestRgba = await invert(testImageRgba);
+  final ByteData invertedMasterRgba = invert(masterImageRgba);
+  final ByteData invertedTestRgba = invert(testImageRgba);
 
   final Map<String, ByteData> diffs = <String, ByteData>{
     'masterImage' : masterImageRgba,
@@ -255,7 +255,7 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.
-Future<ByteData> invert(ByteData imageBytes) async {
+ByteData invert(ByteData imageBytes) {
   final ByteData bytes = ByteData(imageBytes.lengthInBytes);
   // Invert the RGB data (but not A).
   for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
