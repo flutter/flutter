@@ -871,10 +871,23 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
+/// The `barrierDismissible` argument is used to indicate whether tapping on the
+/// barrier will dismiss the dialog. It is `true` by default and can not be `null`.
+///
+/// The `barrierColor` argument is used to specify the color of the modal
+/// barrier that darkens everything the dialog. If `null` the default color
+/// `Colors.black54` is used.
+///
+/// The `useSafeArea` argument is used to indicate if the dialog should only
+/// display in 'safe' areas of the screen not used by the operating system
+/// (see [SafeArea] for more details). It is `true` by default which will mean
+/// the dialog will not overlap operating system areas. If it is set to `false`
+/// the dialog will only be constrained by the screen size. It can not be 'null`.
+//
 /// The `useRootNavigator` argument is used to determine whether to push the
 /// dialog to the [Navigator] furthest from or nearest to the given `context`.
 /// By default, `useRootNavigator` is `true` and the dialog route created by
-/// this method is pushed to the root navigator.
+/// this method is pushed to the root navigator. It can not be `null`.
 ///
 /// The `routeSettings` argument is passed to [showGeneralDialog],
 /// see [RouteSettings] for details.
@@ -897,7 +910,12 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * <https://material.io/design/components/dialogs.html>
 Future<T> showDialog<T>({
   @required BuildContext context,
+  WidgetBuilder builder,
   bool barrierDismissible = true,
+  Color barrierColor,
+  bool useSafeArea = true,
+  bool useRootNavigator = true,
+  RouteSettings routeSettings,
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
     'provided to the "builder" argument. This will ensure that the BuildContext '
@@ -905,11 +923,10 @@ Future<T> showDialog<T>({
     'This feature was deprecated after v0.2.3.'
   )
   Widget child,
-  WidgetBuilder builder,
-  bool useRootNavigator = true,
-  RouteSettings routeSettings,
 }) {
   assert(child == null || builder == null);
+  assert(barrierDismissible != null);
+  assert(useSafeArea != null);
   assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -918,19 +935,21 @@ Future<T> showDialog<T>({
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final Widget pageChild = child ?? Builder(builder: builder);
-      return SafeArea(
-        child: Builder(
-          builder: (BuildContext context) {
-            return theme != null
-                ? Theme(data: theme, child: pageChild)
-                : pageChild;
-          }
-        ),
+      Widget dialog = Builder(
+        builder: (BuildContext context) {
+          return theme != null
+            ? Theme(data: theme, child: pageChild)
+            : pageChild;
+        }
       );
+      if (useSafeArea) {
+        dialog = SafeArea(child: dialog);
+      }
+      return dialog;
     },
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: Colors.black54,
+    barrierColor: barrierColor ?? Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
     useRootNavigator: useRootNavigator,
