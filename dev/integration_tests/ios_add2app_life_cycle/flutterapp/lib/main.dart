@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 
 VoidCallback originalSemanticsListener;
 
@@ -48,7 +49,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _actualLifeCycleSequence =  <AppLifecycleState>[
-      SchedulerBinding.instance.lifecycleState
+      ServicesBinding.instance.lifecycleState
     ];
   }
 
