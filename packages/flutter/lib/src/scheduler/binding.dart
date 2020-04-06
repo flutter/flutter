@@ -316,7 +316,7 @@ mixin SchedulerBinding on BindingBase {
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
     final AppLifecycleState parsedValue = AppLifecycleState.values.firstWhere(
-          (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
+      (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
       orElse: () => null,
     );
     if (_lifecycleState == null && parsedValue != null) {
