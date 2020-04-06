@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:macrobenchmarks/src/color_filter_and_fade.dart';
+import 'package:macrobenchmarks/src/complex_raster.dart';
 import 'package:macrobenchmarks/src/large_images.dart';
 import 'package:macrobenchmarks/src/picture_cache.dart';
 
@@ -40,6 +41,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kTextRouteName: (BuildContext context) => TextPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => AnimatedPlaceholderPage(),
         kColorFilterAndFadeRouteName: (BuildContext context) => ColorFilterAndFadePage(),
+        kComplexRaster: (BuildContext context) => ComplexRasterPage(),
       },
     );
   }
@@ -122,6 +124,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Color Filter and Fade'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterAndFadeRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kComplexRaster),
+            child: const Text('Complex Raster'),
+            onPressed: () {
+              Navigator.pushNamed(context, kComplexRaster);
             },
           ),
         ],
