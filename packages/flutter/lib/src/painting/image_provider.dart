@@ -674,6 +674,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   }
 }
 
+@immutable
 class _SizeAwareCacheKey {
   const _SizeAwareCacheKey(this.providerCacheKey, this.width, this.height);
 
@@ -818,6 +819,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 /// See also:
 ///
 ///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
+@immutable
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
@@ -890,6 +892,7 @@ class FileImage extends ImageProvider<FileImage> {
 /// See also:
 ///
 ///  * [Image.memory] for a shorthand of an [Image] widget backed by [MemoryImage].
+@immutable
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -1008,6 +1011,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 ///
 ///  * [Image.asset] for a shorthand of an [Image] widget backed by
 ///    [ExactAssetImage] when using a scale.
+@immutable
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///

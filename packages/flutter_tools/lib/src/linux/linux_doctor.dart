@@ -37,7 +37,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (clangResult == null || clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('clang++ is not installed'));
+      messages.add(const ValidationMessage.error('clang++ is not installed'));
     } else {
       final String firstLine = (clangResult.stdout as String).split('\n').first.trim();
       final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
@@ -64,7 +64,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (makeResult == null || makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('make is not installed'));
+      messages.add(const ValidationMessage.error('make is not installed'));
     } else {
       final String firstLine = (makeResult.stdout as String).split('\n').first.trim();
       messages.add(ValidationMessage(firstLine));

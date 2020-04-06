@@ -31,7 +31,7 @@ void main() {
       const String emulatorID = '1234';
       final AndroidEmulator emulator = AndroidEmulator(
         emulatorID,
-        <String, String>{'name': 'test'},
+        const <String, String>{'name': 'test'},
       );
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, true);
