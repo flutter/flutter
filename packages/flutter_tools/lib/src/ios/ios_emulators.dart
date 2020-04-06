@@ -22,7 +22,7 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';

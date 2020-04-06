@@ -240,27 +240,27 @@ void main() {
   test('isSameColorAs', () {
     expect(
       const Color(0x87654321),
-      isSameColorAs(_CustomColor(0x87654321)),
+      isSameColorAs(const _CustomColor(0x87654321)),
     );
 
     expect(
-      _CustomColor(0x87654321),
+      const _CustomColor(0x87654321),
       isSameColorAs(const Color(0x87654321)),
     );
 
     expect(
       const Color(0x12345678),
-      isNot(isSameColorAs(_CustomColor(0x87654321))),
+      isNot(isSameColorAs(const _CustomColor(0x87654321))),
     );
 
     expect(
-      _CustomColor(0x87654321),
+      const _CustomColor(0x87654321),
       isNot(isSameColorAs(const Color(0x12345678))),
     );
 
     expect(
-      _CustomColor(0xFF123456),
-      isSameColorAs(_CustomColor(0xFF123456)..isEqual = false),
+      const _CustomColor(0xFF123456),
+      isSameColorAs(const _CustomColor(0xFF123456, isEqual: false)),
     );
   });
 
@@ -704,9 +704,10 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData getSemanticsData() => data;
 }
 
+@immutable
 class _CustomColor extends Color {
-  _CustomColor(int value) : super(value);
-  bool isEqual;
+  const _CustomColor(int value, {this.isEqual}) : super(value);
+  final bool isEqual;
 
   @override
   bool operator ==(Object other) => isEqual ?? super == other;

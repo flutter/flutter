@@ -368,6 +368,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 // We box the return value so that the return value can be null. Otherwise,
 // canceling the route (which returns null) would get confused with actually
 // returning a real null value.
+@immutable
 class _DropdownRouteResult<T> {
   const _DropdownRouteResult(this.result);
 

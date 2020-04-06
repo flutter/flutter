@@ -305,6 +305,7 @@ enum Thumb {
 /// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 /// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+@immutable
 class SliderThemeData with Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values. All the values
   /// must be specified.
@@ -2866,6 +2867,7 @@ typedef RangeThumbSelector = Thumb Function(
 /// This object is passed into [RangeSlider.values] to set its values, and it
 /// is emitted in [RangeSlider.onChange], [RangeSlider.onChangeStart], and
 /// [RangeSlider.onChangeEnd] when the values change.
+@immutable
 class RangeValues {
   /// Creates pair of start and end values.
   const RangeValues(this.start, this.end);
@@ -2905,6 +2907,7 @@ class RangeValues {
 ///
 /// Used in combination with [RangeSlider.showValueIndicator] to display
 /// labels above the thumbs.
+@immutable
 class RangeLabels {
   /// Creates pair of start and end labels.
   const RangeLabels(this.start, this.end);

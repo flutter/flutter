@@ -273,8 +273,9 @@ class _ManifestAssetBundle implements AssetBundle {
   List<File> additionalDependencies = <File>[];
 }
 
+@immutable
 class _Asset {
-  _Asset({ this.baseDir, this.relativeUri, this.entryUri });
+  const _Asset({ this.baseDir, this.relativeUri, this.entryUri });
 
   final String baseDir;
 
