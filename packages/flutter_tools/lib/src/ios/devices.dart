@@ -7,11 +7,11 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:process/process.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -514,7 +514,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // and "Flutter". The regex tries to strike a balance between not producing
     // false positives and not producing false negatives.
     _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
-    _loggingSubscriptions = <StreamSubscription<void>>[];
+    _loggingSubscriptions = <StreamSubscription<ServiceEvent>>[];
   }
 
   /// Create a new [IOSDeviceLogReader].
@@ -554,7 +554,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   StreamController<String> _linesController;
-  List<StreamSubscription<void>> _loggingSubscriptions;
+  List<StreamSubscription<ServiceEvent>> _loggingSubscriptions;
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -575,20 +575,18 @@ class IOSDeviceLogReader extends DeviceLogReader {
     if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    try {
-      await connectedVmService.streamListen('Stdout');
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
-    }
-    _loggingSubscriptions.add(connectedVmService.onStdoutEvent.listen((vm_service.Event event) {
-      final String message = utf8.decode(base64.decode(event.bytes));
-      if (message.isNotEmpty) {
-        _linesController.add(message);
+    // The VM service will not publish logging events unless the debug stream is being listened to.
+    // onDebugEvent listens to this stream as a side effect.
+    unawaited(connectedVmService.onDebugEvent);
+    _loggingSubscriptions.add((await connectedVmService.onStdoutEvent).listen((ServiceEvent event) {
+      final String logMessage = event.message;
+      if (logMessage.isNotEmpty) {
+        _linesController.add(logMessage);
       }
     }));
   }
 
-  void _listenToSysLog() {
+  void _listenToSysLog () {
     // syslog is not written on iOS 13+.
     if (_majorSdkVersion >= _minimumUniversalLoggingSdkVersion) {
       return;
@@ -643,7 +641,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   void dispose() {
-    for (final StreamSubscription<void> loggingSubscription in _loggingSubscriptions) {
+    for (final StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
