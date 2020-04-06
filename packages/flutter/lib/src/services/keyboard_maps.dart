@@ -2022,7 +2022,7 @@ const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKe
 };
 
 /// Maps Windows KeyboardEvent codes to the matching [LogicalKeyboardKey].
-const Map<String, LogicalKeyboardKey> kWindowsToLogicalKey = <String, LogicalKeyboardKey>{
+const Map<int, LogicalKeyboardKey> kWindowsToLogicalKey = <int, LogicalKeyboardKey>{
   95: LogicalKeyboardKey.sleep,
   65: LogicalKeyboardKey.keyA,
   66: LogicalKeyboardKey.keyB,
@@ -2138,7 +2138,7 @@ const Map<String, LogicalKeyboardKey> kWindowsToLogicalKey = <String, LogicalKey
 };
 
 /// Maps Windows KeyboardEvent codes to the matching [PhysicalKeyboardKey].
-const Map<String, PhysicalKeyboardKey> kWindowsToPhysicalKey = <String, PhysicalKeyboardKey>{
+const Map<int, PhysicalKeyboardKey> kWindowsToPhysicalKey = <int, PhysicalKeyboardKey>{
   0x0000e05f: PhysicalKeyboardKey.sleep,
   0x0000e063: PhysicalKeyboardKey.wakeUp,
   0x000000ff: PhysicalKeyboardKey.usbErrorRollOver,
@@ -2301,22 +2301,21 @@ const Map<String, PhysicalKeyboardKey> kWindowsToPhysicalKey = <String, Physical
 /// A map of Windows KeyboardEvent codes which have printable representations, but appear
 /// on the number pad. Used to provide different key objects for keys like
 /// KEY_EQUALS and NUMPAD_EQUALS.
-const Map<String, LogicalKeyboardKey> kWindowsNumPadMap = <String, LogicalKeyboardKey>{
-  0x0000e035: LogicalKeyboardKey.numpadDivide,
-  0x00000037: LogicalKeyboardKey.numpadMultiply,
-  0x0000004a: LogicalKeyboardKey.numpadSubtract,
-  0x0000004e: LogicalKeyboardKey.numpadAdd,
-  0x0000004f: LogicalKeyboardKey.numpad1,
-  0x00000050: LogicalKeyboardKey.numpad2,
-  0x00000051: LogicalKeyboardKey.numpad3,
-  0x0000004b: LogicalKeyboardKey.numpad4,
-  0x0000004c: LogicalKeyboardKey.numpad5,
-  0x0000004d: LogicalKeyboardKey.numpad6,
-  0x00000047: LogicalKeyboardKey.numpad7,
-  0x00000048: LogicalKeyboardKey.numpad8,
-  0x00000049: LogicalKeyboardKey.numpad9,
-  0x00000052: LogicalKeyboardKey.numpad0,
-  0x00000053: LogicalKeyboardKey.numpadDecimal,
-  0x00000059: LogicalKeyboardKey.numpadEqual,
-  0x0000007e: LogicalKeyboardKey.numpadComma,
+const Map<int, LogicalKeyboardKey> kWindowsNumPadMap = <int, LogicalKeyboardKey>{
+  111: LogicalKeyboardKey.numpadDivide,
+  106: LogicalKeyboardKey.numpadMultiply,
+  109: LogicalKeyboardKey.numpadSubtract,
+  107: LogicalKeyboardKey.numpadAdd,
+  97: LogicalKeyboardKey.numpad1,
+  98: LogicalKeyboardKey.numpad2,
+  99: LogicalKeyboardKey.numpad3,
+  100: LogicalKeyboardKey.numpad4,
+  101: LogicalKeyboardKey.numpad5,
+  102: LogicalKeyboardKey.numpad6,
+  103: LogicalKeyboardKey.numpad7,
+  104: LogicalKeyboardKey.numpad8,
+  105: LogicalKeyboardKey.numpad9,
+  96: LogicalKeyboardKey.numpad0,
+  110: LogicalKeyboardKey.numpadDecimal,
+  146: LogicalKeyboardKey.numpadEqual,
 };

@@ -14,6 +14,7 @@ import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_linux.dart';
 import 'raw_keyboard_macos.dart';
 import 'raw_keyboard_web.dart';
+import 'raw_keyboard_windows.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -294,6 +295,14 @@ abstract class RawKeyEvent with Diagnosticable {
           code: message['code'] as String,
           key: message['key'] as String,
           metaState: message['metaState'] as int,
+        );
+        break;
+      case 'windows':
+        data = RawKeyEventDataWindows(
+          keyCode: message['keyCode'] as int,
+          scanCode: message['scanCode'] as int,
+          characterCodePoint: message['characterCodePoint'] as int,
+          modifiers: message['modifiers'] as int,
         );
         break;
       default:

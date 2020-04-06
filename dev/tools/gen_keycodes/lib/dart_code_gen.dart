@@ -240,9 +240,11 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   String get windowsNumpadMap {
     final StringBuffer windowsNumPadMap = StringBuffer();
     for (final Key entry in numpadKeyData) {
-      if (entry.windowsScanCode != null) {
-        windowsNumPadMap.writeln('  ${toHex(entry.windowsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
-      }
+      if (entry.windowsKeyCodes != null){
+        for (final int code in entry.windowsKeyCodes) {
+          windowsNumPadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+    }
     }
     return windowsNumPadMap.toString().trimRight();
   }
