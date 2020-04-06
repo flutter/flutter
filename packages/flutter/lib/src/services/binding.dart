@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
@@ -18,7 +19,7 @@ import 'system_channels.dart';
 /// the licenses found in the `LICENSE` file stored at the root of the asset
 /// bundle, and implements the `ext.flutter.evict` service extension (see
 /// [evict]).
-mixin ServicesBinding on BindingBase {
+mixin ServicesBinding on BindingBase, SchedulerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -27,6 +28,7 @@ mixin ServicesBinding on BindingBase {
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
+    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -161,6 +163,11 @@ mixin ServicesBinding on BindingBase {
   @mustCallSuper
   void evict(String asset) {
     rootBundle.evict(asset);
+  }
+
+  Future<String> _handleLifecycleMessage(String message) async {
+    handleAppLifecycleStateChanged(SchedulerBinding.parseAppLifecycleMessage(message));
+    return null;
   }
 }
 

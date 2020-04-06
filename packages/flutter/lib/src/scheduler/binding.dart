@@ -9,7 +9,6 @@ import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallbac
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -197,12 +196,11 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-mixin SchedulerBinding on BindingBase, ServicesBinding {
+mixin SchedulerBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
@@ -317,8 +315,13 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
+    if (_lifecycleState != null) {
+      return;
+    }
+
+    final AppLifecycleState parsedState = parseAppLifecycleMessage(window.initialLifecycleState);
+    if (parsedState != null) {
+      handleAppLifecycleStateChanged(parsedState);
     }
   }
 
@@ -345,12 +348,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     }
   }
 
-  Future<String> _handleLifecycleMessage(String message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
-    return null;
-  }
-
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
+  @protected
+  static AppLifecycleState parseAppLifecycleMessage(String message) {
     switch (message) {
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
