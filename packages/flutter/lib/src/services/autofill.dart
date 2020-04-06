@@ -7,10 +7,14 @@ import 'text_input.dart';
 
 // TODO(LongCatIsLooong): expand the list to include every predefined value.
 /// A collection of commonly used autofill hint strings on different platforms.
+///
+/// Each hint may not be supported on every platform, and may get translated to
+/// different strings on different platforms. Please refer to their documentation
+/// for what they corresponds to on each platform.
 class AutofillHints {
   AutofillHints._();
 
-  /// The client represents an input field that expects a credit card number.
+  /// The input field expects a credit card number.
   ///
   /// Translates to [UITextContentType.creditCardNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype/1778267-creditcardnumber)
   /// on iOS, [.AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_NUMBER)
@@ -18,16 +22,14 @@ class AutofillHints {
   /// on web.
   static const String creditCardNumber = 'creditCardNumber';
 
-  /// The client represents an input field that expects the a credit card security
-  /// code.
+  /// The input field expects a credit card security code.
   ///
   /// Translates to [.AUTOFILL_HINT_CREDIT_SECURITY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
   /// on Android, and [cc-csc](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
   /// on web.
   static const String creditCardSecurityCode = 'creditCardSecurityCode';
 
-  /// The client represents an input field that takes a newly created password for
-  /// save/update.
+  /// The input field takes a newly created password for save/update.
   ///
   /// Translates to [UITextContentType.username](https://developer.apple.com/documentation/uikit/uitextcontenttype/2980929-newpassword),
   /// on iOS, [.AUTOFILL_HINT_NEW_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_PASSWORD)
@@ -35,7 +37,7 @@ class AutofillHints {
   /// on web.
   static const String newPassword = 'newPassword';
 
-  /// The client represents an input field that expects a telephone number.
+  /// The input field expects a telephone number.
   ///
   /// Translates to [UITextContentType.telephoneNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649664-telephonenumber),
   /// on iOS, [.AUTOFILL_HINT_PHONE_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PHONE_NUMBER)
@@ -43,8 +45,7 @@ class AutofillHints {
   /// on web.
   static const String telephoneNumber = 'telephoneNumber';
 
-  /// The client represents an input field that expects the first line of a street
-  /// address.
+  /// The input field expects the first line of a street address.
   ///
   /// Translates to [UITextContentType.streetAddressLine1](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649663-streetaddressline1),
   /// on iOS, [.AUTOFILL_HINT_POSTAL_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS)
@@ -52,8 +53,7 @@ class AutofillHints {
   /// on web.
   static const String streetAddressLine1 = 'streetAddressLine1';
 
-  /// The client represents an input field that expects the second line of a street
-  /// address.
+  /// The input field expects the second line of a street address.
   ///
   /// Translates to [UITextContentType.streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649658-streetaddressline2),
   /// on iOS, [.AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_ADDRESS)
@@ -61,7 +61,7 @@ class AutofillHints {
   /// on web.
   static const String streetAddressLine2 = 'streetAddressLine2';
 
-  /// The client represents a password field.
+  /// The input field expects a password.
   ///
   /// Translates to [UITextContentType.password](https://developer.apple.com/documentation/uikit/uitextcontenttype/2865813-password),
   /// on iOS, [.AUTOFILL_HINT_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PASSWORD)
@@ -69,7 +69,7 @@ class AutofillHints {
   /// on web.
   static const String password = 'password';
 
-  /// The client represents a username field or an account name.
+  /// The input field expects a username or an account name.
   ///
   /// Translates to [UITextContentType.username](https://developer.apple.com/documentation/uikit/uitextcontenttype/2866088-username),
   /// on iOS, [.AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME)
@@ -146,12 +146,14 @@ class AutofillConfiguration {
   }
 }
 
-/// A client that represents an autofillable input field in the autofill workflow.
+/// An object that represents an autofillable input field in the autofill workflow.
+///
+/// An [AutofillClient] provides autofill-related information of the input field
+/// it represents to the platform, and consumes autofill inputs from the platform.
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// This [AutofillClient] will not participate in autofill until the [autofillId]
-  /// becomes non-null.
+  /// Must not be null;
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
@@ -173,6 +175,10 @@ abstract class AutofillTrigger extends TextInputClient {
   AutofillScope get currentAutofillScope;
 }
 
+// Generic mixin for [AutofillClient]s.
+//
+// Provides a default implementation for [AutofillClient.autofillId] that extracts
+// the unique identifier from [AutofillClient.textInputConfiguration].
 mixin AutofillClientMixin implements AutofillClient {
   @override
   String get autofillId {
@@ -183,7 +189,7 @@ mixin AutofillClientMixin implements AutofillClient {
   }
 }
 
-/// An ordered group of [AutofillClient]s that are logically connected.
+/// An ordered group within which [AutofillClient]s that are logically connected.
 ///
 /// {@template flutter.services.autofill.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
@@ -195,10 +201,11 @@ mixin AutofillClientMixin implements AutofillClient {
 /// platform to the [AutofillClient] with the given identifier, by calling
 /// [getAutofillClient].
 ///
-/// An [AutofillClient] not tied to any [AutofillScope] will only participate in
-/// autofill if the autofill is directly triggered by its own [AutofillTrigger].
+/// An [AutofillClient] that's not tied to any [AutofillScope] will only
+/// participate in autofill if the autofill is directly triggered by its own
+/// [AutofillTrigger].
 /// {@endtemplate}
-mixin AutofillScope {
+abstract class AutofillScope {
   /// Gets the [AutofillScope] associated with the given [uniqueIdentifier], in
   /// this [AutofillScope].
   ///
@@ -266,8 +273,8 @@ mixin AutofillScopeMixin implements AutofillScope {
     assert(trigger != null);
     // Caches clients on attach.
     _clients.clear();
-    for (final AutofillClient c in autofillClients)
-      _clients[c.autofillId] = c;
+    for (final AutofillClient client in autofillClients)
+      _clients[client.autofillId] = client;
     return TextInput.attach(
       trigger,
       _AutofillScopeTextInputConfiguration(

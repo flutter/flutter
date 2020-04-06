@@ -7,7 +7,8 @@ import 'framework.dart';
 
 export 'package:flutter/services.dart' show AutofillHints;
 
-/// An [AutofillScope] widget that defines a group of [AutofillClient]s.
+/// An [AutofillScope] widget that groups [AutofillClient]s together.
+/// [AutofillClient]s within the same [AutofillScope] will be autofilled together.
 ///
 /// {@macro flutter.services.autofill.AutofillScope}
 ///
@@ -119,15 +120,15 @@ class AutofillGroup extends StatefulWidget {
        super(key: key);
 
   /// Returns the closest [AutofillScope] which encloses the given context.
+  ///
+  /// In order to interact with the platform's autofill mechanism,
+  /// [AutofillTrigger]s need to call [AutofillScope.attach] on their closest
+  /// [AutofillScope], instead of calling [TextInputClient.attach].
   static _AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
 
-  /// The widget below this widget in the tree.
-  ///
-  /// This is the root of the widget hierarchy that contains this form.
-  ///
   /// {@macro flutter.widgets.child}
   final Widget child;
 
@@ -177,5 +178,5 @@ class _AutofillScope extends InheritedWidget {
   AutofillGroup get client => _scope.widget;
 
   @override
-  bool updateShouldNotify(_AutofillScope old) => false;
+  bool updateShouldNotify(_AutofillScope old) => _scope != old._scope;
 }
