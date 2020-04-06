@@ -303,6 +303,27 @@ mixin SchedulerBinding on BindingBase {
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
 
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
+  /// window.
+  ///
+  /// Once the [lifecycleState] is populated through any means (including this
+  /// method), this method will do nothing. This is because the
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
+  /// to use the initial state at dart vm startup as the current state anymore.
+  ///
+  /// The latest state should be obtained by subscribing to
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  @protected
+  void readInitialLifecycleStateFromNativeWindow() {
+    final AppLifecycleState parsedValue = AppLifecycleState.values.firstWhere(
+          (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
+      orElse: () => null,
+    );
+    if (_lifecycleState == null && parsedValue != null) {
+      handleAppLifecycleStateChanged(parsedValue);
+    }
+  }
+
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
@@ -323,27 +344,6 @@ mixin SchedulerBinding on BindingBase {
       case AppLifecycleState.detached:
         _setFramesEnabledState(false);
         break;
-    }
-  }
-
-  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
-  /// window.
-  ///
-  /// Once the [lifecycleState] is populated through any means (including this
-  /// method), this method will do nothing. This is because the
-  /// [initialLifecycleState] may already be stale and it no longer makes sense
-  /// to use the initial state at dart vm startup as the current state anymore.
-  ///
-  /// The latest state should be obtained by subscribing to
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @protected
-  void readInitialLifecycleStateFromNativeWindow() {
-    final AppLifecycleState parsedValue = AppLifecycleState.values.firstWhere(
-      (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
-      orElse: () => null,
-    );
-    if (_lifecycleState == null && parsedValue != null) {
-      handleAppLifecycleStateChanged(parsedValue);
     }
   }
 
