@@ -166,7 +166,7 @@ abstract class _BaseAdapter {
   /// Remove all active event listeners.
   void clearListeners() {
     _listeners.forEach((String eventName, html.EventListener listener) {
-        glassPaneElement.removeEventListener(eventName, listener, true);
+        html.window.removeEventListener(eventName, listener, true);
     });
     // For native listener, we will need to remove it through native javascript
     // api.
@@ -183,8 +183,23 @@ abstract class _BaseAdapter {
     _nativeListeners.clear();
   }
 
-  void addEventListener(String eventName, html.EventListener handler) {
+  /// Adds a listener to the given [eventName].
+  ///
+  /// The event listener is attached to [html.window] but only events that have
+  /// [glassPaneElement] as a target will be let through by default.
+  ///
+  /// If [acceptOutsideGlasspane] is set to true, events outside of the
+  /// glasspane will also invoke the [handler].
+  void addEventListener(
+    String eventName,
+    html.EventListener handler, {
+    bool acceptOutsideGlasspane = false,
+  }) {
     final html.EventListener loggedHandler = (html.Event event) {
+      if (!acceptOutsideGlasspane && event.target != glassPaneElement) {
+        return;
+      }
+
       if (_debugLogPointerEvents) {
         print(event.type);
       }
@@ -196,8 +211,11 @@ abstract class _BaseAdapter {
       }
     };
     _listeners[eventName] = loggedHandler;
-    glassPaneElement
-        .addEventListener(eventName, loggedHandler, true);
+    // We have to attach the event listener on the window instead of the
+    // glasspane element. That's because "up" events that occur outside the
+    // browser are only reported on window, not on DOM elements.
+    // See: https://github.com/flutter/flutter/issues/52827
+    html.window.addEventListener(eventName, loggedHandler, true);
   }
 
   /// Converts a floating number timestamp (in milliseconds) to a [Duration] by
@@ -412,11 +430,15 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     }
   }
 
-  void _addPointerEventListener(String eventName, _PointerEventListener handler) {
+  void _addPointerEventListener(
+    String eventName,
+    _PointerEventListener handler, {
+    bool acceptOutsideGlasspane = false,
+  }) {
     addEventListener(eventName, (html.Event event) {
       final html.PointerEvent pointerEvent = event;
       return handler(pointerEvent);
-    });
+    }, acceptOutsideGlasspane: acceptOutsideGlasspane);
   }
 
   @override
@@ -444,7 +466,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
       }
       _callback(pointerData);
-    });
+    }, acceptOutsideGlasspane: true);
 
     _addPointerEventListener('pointerup', (html.PointerEvent event) {
       final int device = event.pointerId;
@@ -455,7 +477,7 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _convertEventsToPointerData(data: pointerData, event: event, details: details);
       }
       _callback(pointerData);
-    });
+    }, acceptOutsideGlasspane: true);
 
     // A browser fires cancel event if it concludes the pointer will no longer
     // be able to generate events (example: device is deactivated)
@@ -706,11 +728,15 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
 
   final _ButtonSanitizer _sanitizer = _ButtonSanitizer();
 
-  void _addMouseEventListener(String eventName, _MouseEventListener handler) {
+  void _addMouseEventListener(
+    String eventName,
+    _MouseEventListener handler, {
+    bool acceptOutsideGlasspane = false,
+  }) {
     addEventListener(eventName, (html.Event event) {
       final html.MouseEvent mouseEvent = event;
       return handler(mouseEvent);
-    });
+    }, acceptOutsideGlasspane: acceptOutsideGlasspane);
   }
 
   @override
@@ -731,7 +757,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
       final _SanitizedDetails sanitizedDetails = _sanitizer.sanitizeMoveEvent(buttons: event.buttons);
       _convertEventsToPointerData(data: pointerData, event: event, details: sanitizedDetails);
       _callback(pointerData);
-    });
+    }, acceptOutsideGlasspane: true);
 
     _addMouseEventListener('mouseup', (html.MouseEvent event) {
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
@@ -741,7 +767,7 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
         _sanitizer.sanitizeMoveEvent(buttons: event.buttons);
       _convertEventsToPointerData(data: pointerData, event: event, details: sanitizedDetails);
       _callback(pointerData);
-    });
+    }, acceptOutsideGlasspane: true);
 
     _addWheelEventListener((html.Event event) {
       assert(event is html.WheelEvent);
