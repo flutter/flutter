@@ -637,6 +637,11 @@ class TextPainter {
   // of the character upstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
+  // TODO(justinmc): Rather than searching for grapheme clusters manually, use
+  // the characters package to simplify this code, and remove Gary's comment
+  // above.  Do the same for _getRectFromDownstream.
+  // This would fix cursor position problems such as
+  // https://github.com/flutter/flutter/issues/31818.
   Rect _getRectFromUpstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text.toPlainText(includePlaceholders: false);
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
