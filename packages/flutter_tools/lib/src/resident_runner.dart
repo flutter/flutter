@@ -280,6 +280,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
+      osUtils: globals.os,
     );
     return devFS.create();
   }
