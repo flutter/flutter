@@ -171,8 +171,9 @@ class Chrome {
       //   to find frames that the benchmark cares to measure.
       // gpu:
       //   provides tracing data from the GPU data
+      //   disabled due to https://bugs.chromium.org/p/chromium/issues/detail?id=1068259
       // TODO(yjbanov): extract useful GPU data
-      'categories': 'blink,blink.user_timing,gpu',
+      'categories': 'blink,blink.user_timing',
       'transferMode': 'SendAsStream',
     });
   }
