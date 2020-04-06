@@ -293,7 +293,7 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// [Action] bound to the [Intent] that the key press maps to, or null, if the
   /// key press didn't match any intent.
   @protected
-  Object handleKeypress(
+  bool handleKeypress(
     BuildContext context,
     RawKeyEvent event, {
     LogicalKeySet keysPressed,
@@ -323,9 +323,10 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus?.context;
       assert (primaryContext != null);
-      return Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      return true;
     }
-    return null;
+    return false;
   }
 
   @override
