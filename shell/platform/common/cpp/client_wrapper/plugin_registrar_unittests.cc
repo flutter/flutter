@@ -33,28 +33,36 @@ class TestApi : public testing::StubFlutterApi {
     return message_engine_result;
   }
 
-  // Called for FlutterDesktopMessengerSetCallback.
   void MessengerSetCallback(const char* channel,
                             FlutterDesktopMessageCallback callback,
                             void* user_data) override {
-    last_callback_set_ = callback;
+    last_message_callback_set_ = callback;
+  }
+
+  void RegistrarSetDestructionHandler(
+      FlutterDesktopOnRegistrarDestroyed callback) override {
+    last_destruction_callback_set_ = callback;
   }
 
   const uint8_t* last_data_sent() { return last_data_sent_; }
-  FlutterDesktopMessageCallback last_callback_set() {
-    return last_callback_set_;
+  FlutterDesktopMessageCallback last_message_callback_set() {
+    return last_message_callback_set_;
+  }
+  FlutterDesktopOnRegistrarDestroyed last_destruction_callback_set() {
+    return last_destruction_callback_set_;
   }
 
  private:
   const uint8_t* last_data_sent_ = nullptr;
-  FlutterDesktopMessageCallback last_callback_set_ = nullptr;
+  FlutterDesktopMessageCallback last_message_callback_set_ = nullptr;
+  FlutterDesktopOnRegistrarDestroyed last_destruction_callback_set_ = nullptr;
 };
 
 }  // namespace
 
 // Tests that the registrar returns a messenger that passes Send through to the
 // C API.
-TEST(MethodCallTest, MessengerSend) {
+TEST(PluginRegistrarTest, MessengerSend) {
   testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
   auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
 
@@ -70,7 +78,7 @@ TEST(MethodCallTest, MessengerSend) {
 
 // Tests that the registrar returns a messenger that passes callback
 // registration and unregistration through to the C API.
-TEST(MethodCallTest, MessengerSetMessageHandler) {
+TEST(PluginRegistrarTest, MessengerSetMessageHandler) {
   testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
   auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
 
@@ -85,11 +93,60 @@ TEST(MethodCallTest, MessengerSetMessageHandler) {
                                            const size_t message_size,
                                            BinaryReply reply) {};
   messenger->SetMessageHandler(channel_name, std::move(binary_handler));
-  EXPECT_NE(test_api->last_callback_set(), nullptr);
+  EXPECT_NE(test_api->last_message_callback_set(), nullptr);
 
   // Unregister.
   messenger->SetMessageHandler(channel_name, nullptr);
-  EXPECT_EQ(test_api->last_callback_set(), nullptr);
+  EXPECT_EQ(test_api->last_message_callback_set(), nullptr);
+}
+
+// Tests that the registrar manager returns the same instance when getting
+// the wrapper for the same reference.
+TEST(PluginRegistrarTest, ManagerSameInstance) {
+  testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
+
+  auto dummy_registrar_handle =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+
+  PluginRegistrarManager* manager = PluginRegistrarManager::GetInstance();
+  EXPECT_EQ(manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle),
+            manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle));
+}
+
+// Tests that the registrar manager returns different objects for different
+// references.
+TEST(PluginRegistrarTest, ManagerDifferentInstances) {
+  testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
+
+  auto dummy_registrar_handle_a =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+  auto dummy_registrar_handle_b =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(2);
+
+  PluginRegistrarManager* manager = PluginRegistrarManager::GetInstance();
+  EXPECT_NE(manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle_a),
+            manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle_b));
+}
+
+// Tests that the registrar manager deletes wrappers when the underlying
+// reference is destroyed.
+TEST(PluginRegistrarTest, ManagerRemovesOnDestruction) {
+  testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
+  auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
+
+  auto dummy_registrar_handle =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+  PluginRegistrarManager* manager = PluginRegistrarManager::GetInstance();
+  auto* first_wrapper =
+      manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle);
+
+  // Simulate destruction of the reference.
+  EXPECT_NE(test_api->last_destruction_callback_set(), nullptr);
+  test_api->last_destruction_callback_set()(dummy_registrar_handle);
+
+  // Requesting the wrapper should now create a new object.
+  EXPECT_NE(manager->GetRegistrar<PluginRegistrar>(dummy_registrar_handle),
+            first_wrapper);
 }
 
 }  // namespace flutter

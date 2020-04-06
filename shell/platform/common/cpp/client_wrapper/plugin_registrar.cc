@@ -138,7 +138,7 @@ void BinaryMessengerImpl::SetMessageHandler(const std::string& channel,
                                      ForwardToHandler, message_handler);
 }
 
-// PluginRegistrar:
+// ===== PluginRegistrar =====
 
 PluginRegistrar::PluginRegistrar(FlutterDesktopPluginRegistrarRef registrar)
     : registrar_(registrar) {
@@ -155,6 +155,22 @@ void PluginRegistrar::AddPlugin(std::unique_ptr<Plugin> plugin) {
 void PluginRegistrar::EnableInputBlockingForChannel(
     const std::string& channel) {
   FlutterDesktopRegistrarEnableInputBlocking(registrar_, channel.c_str());
+}
+
+// ===== PluginRegistrarManager =====
+
+// static
+PluginRegistrarManager* PluginRegistrarManager::GetInstance() {
+  static PluginRegistrarManager* instance = new PluginRegistrarManager();
+  return instance;
+}
+
+PluginRegistrarManager::PluginRegistrarManager() = default;
+
+// static
+void PluginRegistrarManager::OnRegistrarDestroyed(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  GetInstance()->registrars()->erase(registrar);
 }
 
 }  // namespace flutter

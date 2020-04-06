@@ -65,4 +65,6 @@ executable("client_wrapper_unittests") {
     # https://github.com/flutter/flutter/issues/41414.
     "//third_party/dart/runtime:libdart_jit",
   ]
+
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 }
