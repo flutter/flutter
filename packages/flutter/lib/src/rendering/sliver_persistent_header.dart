@@ -178,7 +178,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     }());
     double stretchOffset = 0.0;
     if (stretchConfiguration != null && childMainAxisPosition(child) == 0.0)
-      stretchOffset += constraints.overlap.abs();
+      stretchOffset += constraints.overlap.abs();//.floorToDouble();
 
     child?.layout(
       constraints.asBoxConstraints(
