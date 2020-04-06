@@ -161,6 +161,15 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri, int line, int column, Map<String, String> jsModules,
+    Map<String, String> jsFrameValues, String moduleName, String expression
+  ) {
+    return _residentCompiler.compileExpressionToJs(
+      libraryUri, line, column, jsModules, jsFrameValues, moduleName, expression);
+  }
+
+  @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {

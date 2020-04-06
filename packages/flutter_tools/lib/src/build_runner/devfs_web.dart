@@ -36,6 +36,55 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
+typedef DwdsLauncher = Future<Dwds> Function({
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool serveDevTools,
+  void Function(Level, String) logWriter,
+  bool verbose,
+  UrlEncoder urlEncoder,
+  ExpressionCompiler expressionCompiler,
+});
+
+/// An expression compiler connecting to FrontendServer
+///
+/// This is only used in development mode
+class WebExpressionCompiler implements ExpressionCompiler {
+  WebExpressionCompiler(this._generator);
+
+  final ResidentCompiler _generator;
+
+  @override
+  Future<ExpressionCompilationResult> compileExpressionToJs(
+    String isolateId,
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) async {
+    final CompilerOutput compilerOutput = await _generator.compileExpressionToJs(libraryUri,
+        line, column, jsModules, jsFrameValues, moduleName, expression);
+
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      final String content = utf8.decode(
+          globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+      return ExpressionCompilationResult(
+          content, compilerOutput.errorCount > 0);
+    }
+
+    throw Exception('Failed to compile $expression');
+  }
+}
+
 /// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
@@ -54,7 +103,6 @@ class WebAssetServer implements AssetReader {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   final Map<String, String> _modules;
-
   final Map<String, String> _digests;
 
   void performRestart(List<String> modules) {
@@ -85,8 +133,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint, {
+    Uri entrypoint,
+    ExpressionCompiler expressionCompiler, {
     bool testMode = false,
+    DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
@@ -150,8 +200,9 @@ class WebAssetServer implements AssetReader {
       }
 
       // In debug builds, spin up DWDS and the full asset server.
-      final Dwds dwds = await Dwds.start(
+      final Dwds dwds = await dwdsLauncher(
         assetReader: server,
+        enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
@@ -170,6 +221,7 @@ class WebAssetServer implements AssetReader {
           serverPathForModule,
           serverPathForAppUri,
         ),
+        expressionCompiler: expressionCompiler
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
@@ -501,6 +553,7 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    @required this.expressionCompiler,
     this.testMode = false,
   });
 
@@ -512,6 +565,7 @@ class WebDevFS implements DevFS {
   final BuildMode buildMode;
   final bool enableDwds;
   final bool testMode;
+  final ExpressionCompiler expressionCompiler;
 
   WebAssetServer webAssetServer;
 
@@ -572,6 +626,7 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
+      expressionCompiler,
       testMode: testMode,
     );
     _baseUri = Uri.parse('http://$hostname:$port');

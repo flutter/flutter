@@ -254,17 +254,20 @@ class XcodeProjectInterpreter {
     @required Logger logger,
     @required FileSystem fileSystem,
     @required Terminal terminal,
+    @required Usage usage,
   }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _terminal = terminal,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+      _fileSystem = fileSystem,
+      _terminal = terminal,
+      _logger = logger,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _usage = usage;
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
   final Terminal _terminal;
   final Logger _logger;
+  final Usage _usage;
 
   static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
@@ -359,6 +362,7 @@ class XcodeProjectInterpreter {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),
+          flutterUsage: _usage,
         ).send();
       }
       _logger.printTrace('Unexpected failure to get the build settings: $error.');

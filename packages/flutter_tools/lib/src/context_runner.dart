@@ -220,6 +220,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         terminal: globals.terminal,
+        usage: globals.flutterUsage,
       ),
     },
   );

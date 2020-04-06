@@ -9,11 +9,23 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'globals.dart' as globals;
 
+/// Constant for 'pluginClass' key in plugin maps.
+const String kPluginClass = 'pluginClass';
+
+/// Constant for 'pluginClass' key in plugin maps.
+const String kDartPluginClass = 'dartPluginClass';
+
 /// Marker interface for all platform specific plugin config impls.
 abstract class PluginPlatform {
   const PluginPlatform();
 
   Map<String, dynamic> toMap();
+}
+
+abstract class NativeOrDartPlugin {
+  /// Determines whether the plugin has a native implementation or if it's a
+  /// Dart-only plugin.
+  bool isNative();
 }
 
 /// Contains parameters to template an Android plugin.
@@ -191,19 +203,21 @@ class IOSPlugin extends PluginPlatform {
 
 /// Contains the parameters to template a macOS plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
-class MacOSPlugin extends PluginPlatform {
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
+class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const MacOSPlugin({
     @required this.name,
-    @required this.pluginClass,
+    this.pluginClass,
+    this.dartPluginClass,
   });
 
   factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -211,38 +225,45 @@ class MacOSPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
   }
 
   static const String kConfigKey = 'macos';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
+
+  @override
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
+      if (pluginClass != null) 'class': pluginClass,
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }
 
 /// Contains the parameters to template a Windows plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
-class WindowsPlugin extends PluginPlatform {
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
+class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin{
   const WindowsPlugin({
     @required this.name,
-    @required this.pluginClass,
-  });
+    this.pluginClass,
+    this.dartPluginClass,
+  }) : assert(pluginClass != null || dartPluginClass != null);
 
   factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -250,39 +271,46 @@ class WindowsPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return yaml[kDartPluginClass] is String || yaml[kPluginClass] is String;
   }
 
   static const String kConfigKey = 'windows';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
+
+  @override
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
-      'filename': _filenameForCppClass(pluginClass),
+      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }
 
 /// Contains the parameters to template a Linux plugin.
 ///
-/// The required fields include: [name] of the plugin, and [pluginClass] that will
-/// be the entry point to the plugin's native code.
-class LinuxPlugin extends PluginPlatform {
+/// The [name] of the plugin is required. Either [dartPluginClass] or [pluginClass] are required.
+/// [pluginClass] will be the entry point to the plugin's native code.
+class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   const LinuxPlugin({
     @required this.name,
-    @required this.pluginClass,
-  });
+    this.pluginClass,
+    this.dartPluginClass,
+  }) : assert(pluginClass != null || dartPluginClass != null);
 
   factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'] as String,
+      pluginClass: yaml[kPluginClass] as String,
+      dartPluginClass: yaml[kDartPluginClass] as String,
     );
   }
 
@@ -290,20 +318,25 @@ class LinuxPlugin extends PluginPlatform {
     if (yaml == null) {
       return false;
     }
-    return yaml['pluginClass'] is String;
+    return yaml[kPluginClass] is String || yaml[kDartPluginClass] is String;
   }
 
   static const String kConfigKey = 'linux';
 
   final String name;
   final String pluginClass;
+  final String dartPluginClass;
+
+  @override
+  bool isNative() => pluginClass != null;
 
   @override
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
-      'class': pluginClass,
-      'filename': _filenameForCppClass(pluginClass),
+      if (pluginClass != null) 'class': pluginClass,
+      if (pluginClass != null) 'filename': _filenameForCppClass(pluginClass),
+      if (dartPluginClass != null) 'dartPluginClass': dartPluginClass,
     };
   }
 }

@@ -871,7 +871,8 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 }
 
 Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(plugins, LinuxPlugin.kConfigKey);
+  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, LinuxPlugin.kConfigKey);
+  final List<Map<String, dynamic>> linuxPlugins = _extractPlatformMaps(nativePlugins, LinuxPlugin.kConfigKey);
   // The generated makefile is checked in, so can't use absolute paths. It is
   // included by the main makefile, so relative paths must be relative to that
   // file's directory.
@@ -901,7 +902,8 @@ Future<void> _writeLinuxPluginMakefile(Directory destination, Map<String, dynami
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(plugins, MacOSPlugin.kConfigKey);
+  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, MacOSPlugin.kConfigKey);
+  final List<Map<String, dynamic>> macosPlugins = _extractPlatformMaps(nativePlugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',
     'framework': 'FlutterMacOS',
@@ -915,8 +917,25 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   );
 }
 
+/// Filters out Dart-only plugins, which shouldn't be added to the native generated registrants.
+List<Plugin> _filterNativePlugins(List<Plugin> plugins, String platformKey) {
+  return plugins.where((Plugin element) {
+    final PluginPlatform plugin = element.platforms[platformKey];
+    if (plugin == null) {
+      return false;
+    }
+    if (plugin is NativeOrDartPlugin) {
+      return (plugin as NativeOrDartPlugin).isNative();
+    }
+    // Not all platforms have the ability to create Dart-only plugins. Therefore, any plugin that doesn't
+    // implement NativeOrDartPlugin is always native.
+    return true;
+  }).toList();
+}
+
 Future<void> _writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(plugins, WindowsPlugin.kConfigKey);
+  final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+  final List<Map<String, dynamic>> windowsPlugins = _extractPlatformMaps(nativePlugins, WindowsPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': windowsPlugins,
   };
@@ -1092,7 +1111,9 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   }
   if (featureFlags.isWindowsEnabled && project.windows.existsSync()) {
     await _writeWindowsPluginFiles(project, plugins);
-    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(plugins);
+
+    final List<Plugin>nativePlugins = _filterNativePlugins(plugins, WindowsPlugin.kConfigKey);
+    await VisualStudioSolutionUtils(project: project.windows, fileSystem: globals.fs).updatePlugins(nativePlugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
     if (!project.isModule && (!checkProjects || subproject.existsSync())) {
