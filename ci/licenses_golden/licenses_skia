@@ -1,4 +1,4 @@
-Signature: 1d3e051c6ddd101b0625007dc5354da8
+Signature: 8a3301ac1f44f6d24dca6cb80e9896fa
 
 UNUSED LICENSES:
 
@@ -3889,6 +3889,8 @@ FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrManagedResource.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DBuffer.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCaps.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DCommandList.cpp
@@ -5607,6 +5609,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/TextKeyframeAnimato
 FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2KeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
