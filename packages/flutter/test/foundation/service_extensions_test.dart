@@ -16,9 +16,9 @@ import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
-  with ServicesBinding,
+  with SchedulerBinding,
+       ServicesBinding,
        GestureBinding,
-       SchedulerBinding,
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,

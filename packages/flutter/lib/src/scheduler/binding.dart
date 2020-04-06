@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
+import 'dart:ui' show FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -197,13 +196,11 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-mixin SchedulerBinding on BindingBase, ServicesBinding {
+mixin SchedulerBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
@@ -292,76 +289,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         },
       );
     }
-  }
-
-  /// Whether the application is visible, and if so, whether it is currently
-  /// interactive.
-  ///
-  /// This is set by [handleAppLifecycleStateChanged] when the
-  /// [SystemChannels.lifecycle] notification is dispatched.
-  ///
-  /// The preferred way to watch for changes to this value is using
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  AppLifecycleState get lifecycleState => _lifecycleState;
-  AppLifecycleState _lifecycleState;
-
-  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
-  /// window.
-  ///
-  /// Once the [lifecycleState] is populated through any means (including this
-  /// method), this method will do nothing. This is because the
-  /// [initialLifecycleState] may already be stale and it no longer makes sense
-  /// to use the initial state at dart vm startup as the current state anymore.
-  ///
-  /// The latest state should be obtained by subscribing to
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @protected
-  void readInitialLifecycleStateFromNativeWindow() {
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
-    }
-  }
-
-  /// Called when the application lifecycle state changes.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  ///
-  /// This method exposes notifications from [SystemChannels.lifecycle].
-  @protected
-  @mustCallSuper
-  void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    assert(state != null);
-    _lifecycleState = state;
-    switch (state) {
-      case AppLifecycleState.resumed:
-      case AppLifecycleState.inactive:
-        _setFramesEnabledState(true);
-        break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-        _setFramesEnabledState(false);
-        break;
-    }
-  }
-
-  Future<String> _handleLifecycleMessage(String message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
-    return null;
-  }
-
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
   }
 
   /// The strategy to use when deciding whether to run a task or not.
@@ -711,7 +638,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   bool get framesEnabled => _framesEnabled;
 
   bool _framesEnabled = true;
-  void _setFramesEnabledState(bool enabled) {
+
+  @protected
+  void setFramesEnabledState(bool enabled) {
     if (_framesEnabled == enabled)
       return;
     _framesEnabled = enabled;

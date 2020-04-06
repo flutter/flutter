@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
@@ -18,7 +19,7 @@ import 'system_channels.dart';
 /// the licenses found in the `LICENSE` file stored at the root of the asset
 /// bundle, and implements the `ext.flutter.evict` service extension (see
 /// [evict]).
-mixin ServicesBinding on BindingBase {
+mixin ServicesBinding on BindingBase, SchedulerBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -27,6 +28,8 @@ mixin ServicesBinding on BindingBase {
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
+    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -161,6 +164,76 @@ mixin ServicesBinding on BindingBase {
   @mustCallSuper
   void evict(String asset) {
     rootBundle.evict(asset);
+  }
+
+  /// Whether the application is visible, and if so, whether it is currently
+  /// interactive.
+  ///
+  /// This is set by [handleAppLifecycleStateChanged] when the
+  /// [SystemChannels.lifecycle] notification is dispatched.
+  ///
+  /// The preferred way to watch for changes to this value is using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ui.AppLifecycleState get lifecycleState => _lifecycleState;
+  ui.AppLifecycleState _lifecycleState;
+
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
+  /// window.
+  ///
+  /// Once the [lifecycleState] is populated through any means (including this
+  /// method), this method will do nothing. This is because the
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
+  /// to use the initial state at dart vm startup as the current state anymore.
+  ///
+  /// The latest state should be obtained by subscribing to
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  @protected
+  void readInitialLifecycleStateFromNativeWindow() {
+    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
+      _handleLifecycleMessage(window.initialLifecycleState);
+    }
+  }
+
+  /// Called when the application lifecycle state changes.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
+  @protected
+  @mustCallSuper
+  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
+    assert(state != null);
+    _lifecycleState = state;
+    switch (state) {
+      case ui.AppLifecycleState.resumed:
+      case ui.AppLifecycleState.inactive:
+        setFramesEnabledState(true);
+        break;
+      case ui.AppLifecycleState.paused:
+      case ui.AppLifecycleState.detached:
+        setFramesEnabledState(false);
+        break;
+    }
+  }
+
+  Future<String> _handleLifecycleMessage(String message) async {
+    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
+    return null;
+  }
+
+  static ui.AppLifecycleState _parseAppLifecycleMessage(String message) {
+    switch (message) {
+      case 'AppLifecycleState.paused':
+        return ui.AppLifecycleState.paused;
+      case 'AppLifecycleState.resumed':
+        return ui.AppLifecycleState.resumed;
+      case 'AppLifecycleState.inactive':
+        return ui.AppLifecycleState.inactive;
+      case 'AppLifecycleState.detached':
+        return ui.AppLifecycleState.detached;
+    }
+    return null;
   }
 }
 
