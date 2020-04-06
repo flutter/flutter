@@ -84,7 +84,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
       });
     }
     try {
-      await viewChannel.invokeMethod<void>('showAndHideAlertDialog');
+      await viewChannel.invokeMethod<void>('showAlertDialog');
       setState(() {
         lastTestStatus = _LastTestStatus.success;
       });
