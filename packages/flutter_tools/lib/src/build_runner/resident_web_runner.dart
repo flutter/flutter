@@ -420,6 +420,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           port: hostPort,
           packagesFilePath: packagesFilePath,
           urlTunneller: urlTunneller,
+          useSseForDebugProxy: !debuggingOptions.webForceWsVmService,
           buildMode: debuggingOptions.buildInfo.mode,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,

@@ -168,6 +168,12 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
+    argParser.addFlag('web-force-ws',
+      defaultsTo: false,
+      help: 'Forces use of WebSockets (instead of SSE) for the VM Service Debug Proxy '
+      ' when using the debug extension.',
+      hide: hide,
+    );
     argParser.addFlag('web-allow-expose-url',
       defaultsTo: false,
       help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
