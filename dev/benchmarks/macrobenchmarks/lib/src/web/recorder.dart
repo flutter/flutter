@@ -758,7 +758,11 @@ class _RecordingWidgetsBinding extends BindingBase
   bool _benchmarkStopped = false;
 
   void _beginRecording(FrameRecorder recorder, Widget widget) {
-    assert(_recorder == null);
+    if (_recorder != null) {
+      throw Exception(
+        'Cannot call _RecordingWidgetsBinding._beginRecording more than once',
+      );
+    }
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
 
     recorder.didStop = () {
