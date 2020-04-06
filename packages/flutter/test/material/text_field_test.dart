@@ -16,9 +16,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
 import '../rendering/mock_canvas.dart';
+import '../text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
-import 'text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
