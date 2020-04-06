@@ -8,6 +8,8 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 
+#pragma GCC diagnostic error "-Woverriding-method-mismatch"
+
 static NSString* kUIBackgroundMode = @"UIBackgroundModes";
 static NSString* kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* kBackgroundFetchCapatibility = @"fetch";
@@ -201,7 +203,7 @@ static NSString* kBackgroundFetchCapatibility = @"fetch";
 
 #pragma mark - Selectors handling
 
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate {
+- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
   [_lifeCycleDelegate addDelegate:delegate];
 }
 
