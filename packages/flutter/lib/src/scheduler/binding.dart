@@ -315,11 +315,14 @@ mixin SchedulerBinding on BindingBase {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
+    if (_lifecycleState != null) {
+      return;
+    }
     final AppLifecycleState parsedValue = AppLifecycleState.values.firstWhere(
       (AppLifecycleState state) => state.toString() == window.initialLifecycleState,
       orElse: () => null,
     );
-    if (_lifecycleState == null && parsedValue != null) {
+    if (parsedValue != null) {
       handleAppLifecycleStateChanged(parsedValue);
     }
   }
