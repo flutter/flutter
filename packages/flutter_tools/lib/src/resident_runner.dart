@@ -1298,7 +1298,7 @@ class TerminalHandler {
           return true;
         }
         return false;
-    case 'M':
+      case 'M':
         if (residentRunner.supportsWriteSkSL) {
           await residentRunner.writeSkSL();
           return true;
