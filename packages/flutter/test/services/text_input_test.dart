@@ -170,7 +170,7 @@ void main() {
 
     test('TextInputClient showAutocorrectionPromptRect method is called', () async {
       // Assemble a TextInputConnection so we can verify its change in state.
-      final FakeTextInputClient client = FakeTextInputClient();
+      final FakeTextInputClient client = FakeTextInputClient(null);
       const TextInputConfiguration configuration = TextInputConfiguration();
       TextInput.attach(client, configuration);
 

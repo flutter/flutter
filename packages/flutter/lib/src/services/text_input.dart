@@ -1085,7 +1085,7 @@ class TextInput {
         _currentConnection._client.connectionClosed();
         break;
       case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection._client.showAutocorrectionPromptRect(args[1], args[2]);
+        _currentConnection._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       default:
         throw MissingPluginException();

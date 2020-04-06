@@ -1436,14 +1436,14 @@ void main() {
             return paints..something(((Symbol method, List<dynamic> arguments) {
               if (method != #drawRect)
                 return false;
-              final Paint paint = arguments[1];
+              final Paint paint = arguments[1] as Paint;
               return paint.color == rectColor;
             }));
           } else {
             return paints..everything(((Symbol method, List<dynamic> arguments) {
               if (method != #drawRect)
                 return true;
-              final Paint paint = arguments[1];
+              final Paint paint = arguments[1] as Paint;
               if (paint.color != rectColor)
                 return true;
               throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
@@ -1462,7 +1462,7 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          style: Typography(platform: TargetPlatform.android).black.subhead,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
           cursorColor: Colors.blue,
           autocorrect: true,
           autocorrectionTextRectColor: rectColor,

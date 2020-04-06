@@ -2012,7 +2012,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       ),
     );
 
-    for (TextBox box in boxes) {
+    for (final TextBox box in boxes) {
       canvas.drawRect(box.toRect().shift(effectiveOffset), _promptRectPaint);
     }
   }
