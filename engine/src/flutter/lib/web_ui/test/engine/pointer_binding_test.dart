@@ -1446,6 +1446,67 @@ void main() {
     },
   );
 
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly detects up event outside of glasspane',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen when the up event occurs while the mouse is outside the
+      // browser window.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press and drag around.
+      glassPane.dispatchEvent(context.primaryDown(
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      glassPane.dispatchEvent(context.primaryMove(
+        clientX: 12.0,
+        clientY: 10.0,
+      ));
+      glassPane.dispatchEvent(context.primaryMove(
+        clientX: 15.0,
+        clientY: 10.0,
+      ));
+      glassPane.dispatchEvent(context.primaryMove(
+        clientX: 20.0,
+        clientY: 10.0,
+      ));
+      packets.clear();
+
+      // Move outside the glasspane.
+      html.window.dispatchEvent(context.primaryMove(
+        clientX: 900.0,
+        clientY: 1900.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].physicalX, equals(900.0));
+      expect(packets[0].data[0].physicalY, equals(1900.0));
+      packets.clear();
+
+      // Release outside the glasspane.
+      html.window.dispatchEvent(context.primaryUp(
+        clientX: 1000.0,
+        clientY: 2000.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].physicalX, equals(1000.0));
+      expect(packets[0].data[0].physicalY, equals(2000.0));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[1].physicalX, equals(1000.0));
+      expect(packets[0].data[1].physicalY, equals(2000.0));
+      packets.clear();
+    },
+  );
+
   // MULTIPOINTER ADAPTERS
 
   _testEach<_MultiPointerEventMixin>(
