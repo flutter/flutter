@@ -160,7 +160,8 @@ class RunCommand extends RunCommandBase {
       ..addOption(
         'android-user',
         hide: !verboseHelp,
-        help: 'If needed specify the android user.',
+        help: 'The user_id of the user to pass to "adb"\'s "--user\n\n'
+              'user_id | current: Specify which user to run as; if not specified, then run as the current user.',
       )
       ..addFlag('machine',
         hide: !verboseHelp,
