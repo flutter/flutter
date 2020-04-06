@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
-import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
@@ -96,7 +96,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       );
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    final ComparisonResult result = GoldenFileComparator.compareLists(
+    final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
     );
@@ -125,26 +125,31 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  void generateFailureOutput(
+  Future<void> generateFailureOutput(
     ComparisonResult result,
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) {
+  }) async {
     String additionalFeedback = '';
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs.cast<String, Image>();
-      diffs.forEach((String name, Image image) {
+      final Map<String, ByteData> diffs =
+          result.diffs.cast<String, ByteData>();
+      for (final MapEntry<String, ByteData> entry in diffs.entries) {
         final File output = getFailureFile(
-          key.isEmpty ? name : name + '_' + key,
+          key.isEmpty ? entry.key : entry.key + '_' + key,
           golden,
           basedir,
         );
         output.parent.createSync(recursive: true);
-        output.writeAsBytesSync(encodePng(image));
-      });
+        final Codec codec = await instantiateImageCodec(
+            Uint8List.sublistView(entry.value));
+        final Image image = (await codec.getNextFrame()).image;
+        output.writeAsBytesSync(Uint8List.sublistView(
+            await image.toByteData(format: ImageByteFormat.png)));
+      }
     }
     throw test_package.TestFailure(
       'Golden "$golden": ${result.error}$additionalFeedback'
@@ -167,7 +172,7 @@ class LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-ComparisonResult compareLists(List<int> test, List<int> master) {
+Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   if (identical(test, master))
     return ComparisonResult(passed: true);
 
@@ -178,8 +183,15 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
     );
   }
 
-  final Image testImage = decodePng(test);
-  final Image masterImage = decodePng(master);
+  final Codec testImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(test));
+  final Image testImage = (await testImageCodec.getNextFrame()).image;
+  final ByteData testImageRgba = await testImage.toByteData();
+
+  final Codec masterImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(master));
+  final Image masterImage = (await masterImageCodec.getNextFrame()).image;
+  final ByteData masterImageRgba = await masterImage.toByteData();
 
   assert(testImage != null);
   assert(masterImage != null);
@@ -198,32 +210,33 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final Image invertedMaster = invert(Image.from(masterImage));
-  final Image invertedTest = invert(Image.from(testImage));
+  final ByteData invertedMasterRgba = await invert(masterImage);
+  final ByteData invertedTestRgba = await invert(testImage);
 
-  final Map<String, Image> diffs = <String, Image>{
-    'masterImage' : masterImage,
-    'testImage' : testImage,
-    'maskedDiff' : Image.from(testImage),
-    'isolatedDiff' : Image(width, height),
+  final Map<String, ByteData> diffs = <String, ByteData>{
+    'masterImage' : masterImageRgba,
+    'testImage' : testImageRgba,
+    'maskedDiff' : await testImage.toByteData(),
+    'isolatedDiff' : ByteData(width * height * 4),
   };
 
   for (int x = 0; x < width; x++) {
     for (int y =0; y < height; y++) {
-      final int testPixel = testImage.getPixel(x, y);
-      final int masterPixel = masterImage.getPixel(x, y);
+      final int byteOffset = (width * y + x) * 4;
+      final int testPixel = testImageRgba.getUint32(byteOffset);
+      final int masterPixel = masterImageRgba.getUint32(byteOffset);
 
-      final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
-        + (getGreen(testPixel) - getGreen(masterPixel)).abs()
-        + (getBlue(testPixel) - getBlue(masterPixel)).abs()
-        + (getAlpha(testPixel) - getAlpha(masterPixel)).abs();
+      final int diffPixel = (readRed(testPixel) - readRed(masterPixel)).abs()
+        + (readGreen(testPixel) - readGreen(masterPixel)).abs()
+        + (readBlue(testPixel) - readBlue(masterPixel)).abs()
+        + (readAlpha(testPixel) - readAlpha(masterPixel)).abs();
 
       if (diffPixel != 0 ) {
-        final int invertedMasterPixel = invertedMaster.getPixel(x, y);
-        final int invertedTestPixel = invertedTest.getPixel(x, y);
+        final int invertedMasterPixel = invertedMasterRgba.getUint32(byteOffset);
+        final int invertedTestPixel = invertedTestRgba.getUint32(byteOffset);
         final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
-        diffs['maskedDiff'].setPixel(x, y, maskPixel);
-        diffs['isolatedDiff'].setPixel(x, y, maskPixel);
+        diffs['maskedDiff'].setUint32(byteOffset, maskPixel);
+        diffs['isolatedDiff'].setUint32(byteOffset, maskPixel);
         pixelDiffCount++;
       }
     }
@@ -241,6 +254,18 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
   return ComparisonResult(passed: true);
 }
 
+/// Inverts [image], returning a new image.
+Future<ByteData> invert(Image image) async {
+  final ByteData bytes = await image.toByteData();
+  // Invert the RGB data (but not A).
+  for (int i = 0; i < bytes.elementSizeInBytes; i+= 4) {
+    bytes.setUint8(i, 255 - bytes.getUint8(i));
+    bytes.setUint8(i + 1, 255 - bytes.getUint8(i + 1));
+    bytes.setUint8(i + 2, 255 - bytes.getUint8(i + 2));
+  }
+  return bytes;
+}
+
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   @override
@@ -253,3 +278,15 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }
+
+/// Reads the red value out of a 32 bit rgba pixel.
+int readRed(int pixel) => pixel >> 24 & 0xff;
+
+/// Reads the green value out of a 32 bit rgba pixel.
+int readGreen(int pixel) => pixel >> 16 & 0xff;
+
+/// Reads the blue value out of a 32 bit rgba pixel.
+int readBlue(int pixel) => pixel >> 8 & 0xff;
+
+/// Reads the alpha value out of a 32 bit rgba pixel.
+int readAlpha(int pixel) => pixel & 0xff;
