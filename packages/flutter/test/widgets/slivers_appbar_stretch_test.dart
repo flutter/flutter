@@ -46,6 +46,42 @@ void main() {
       expect(header.child.size.height, equals(200.0));
     });
 
+    testWidgets('fills overscroll precision error', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/53823
+      const Key anchor = Key('drag');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              const SliverAppBar(
+                stretch: true,
+                expandedHeight: 100.0,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  key: anchor,
+                  height: 800,
+                )
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 800,
+                )
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverScrollingPersistentHeader header = tester.renderObject(
+        find.byType(SliverAppBar)
+      );
+      expect(header.child.size.height, equals(100.0));
+      await slowDrag(tester, anchor, const Offset(0.0, 100.5));
+      expect(header.child.size.height, equals(200));
+    });
+
     testWidgets('does not stretch without overscroll physics', (WidgetTester tester) async {
       const Key anchor = Key('drag');
       await tester.pumpWidget(
