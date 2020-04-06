@@ -463,7 +463,7 @@ class _ShortcutsState extends State<Shortcuts> {
     if (node.context == null) {
       return false;
     }
-    return manager.handleKeypress(node.context, event) != null || manager.modal;
+    return manager.handleKeypress(node.context, event) || manager.modal;
   }
 
   @override

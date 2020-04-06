@@ -35,6 +35,13 @@ BuildContext _getParent(BuildContext context) {
 class Intent with Diagnosticable {
   /// A const constructor for an [Intent].
   const Intent();
+
+  /// An intent that can't be mapped to an action.
+  ///
+  /// This Intent is mapped to an action in the [WidgetsApp] that does nothing,
+  /// so that it can be bound to a key in a [Shortcuts] widget in order to
+  /// disable a key binding made above it in the hierarchy.
+  static const DoNothingIntent doNothing = DoNothingIntent._();
 }
 
 /// The kind of callback that an [Action] uses to notify of changes to the
@@ -1083,20 +1090,29 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 ///
 /// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
 /// a keyboard shortcut defined by a widget higher in the widget hierarchy.
+///
+/// This intent cannot be subclassed.
 class DoNothingIntent extends Intent {
-  /// Creates a const [DoNothingIntent] so subclasses can be const.
-  const DoNothingIntent();
+  /// Creates a const [DoNothingIntent].
+  factory DoNothingIntent() => const DoNothingIntent._();
+
+  // Make DoNothingIntent constructor private so it can't be subclassed.
+  const DoNothingIntent._();
 }
 
 /// An [Action], that, as the name implies, does nothing.
 ///
-/// Attaching a [DoNothingIntent] to a [Shortcuts] mapping is one way to disable
-/// a keyboard shortcut defined by a widget higher in the widget hierarchy.
+/// Attaching a [DoNothingAction] to an [Actions] mapping is one way to disable
+/// an action defined by a widget higher in the widget hierarchy.
 ///
-/// This can only be bound to the intent type [DoNothingIntent].
-class DoNothingAction extends Action<DoNothingIntent> {
+/// This action can be bound to any intent.
+///
+/// See also:
+///  - [DoNothingIntent], which is an intent that can be bound to a keystroke in
+///    a [Shortcuts] widget to do nothing.
+class DoNothingAction extends Action<Intent> {
   @override
-  void invoke(DoNothingIntent intent) {}
+  void invoke(Intent intent) {}
 }
 
 /// An intent that activates the currently focused control.

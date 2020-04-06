@@ -211,7 +211,7 @@ void main() {
             TestIntent: TestAction(
               onInvoke: (Intent intent) {
                 invoked = true;
-                return invoked;
+                return true;
               },
             ),
           },
@@ -255,7 +255,7 @@ void main() {
             },
             child: Shortcuts(
               shortcuts: <LogicalKeySet, Intent>{
-                LogicalKeySet(LogicalKeyboardKey.keyA): const DoNothingIntent(),
+                LogicalKeySet(LogicalKeyboardKey.keyA): Intent.doNothing,
               },
               child: Focus(
                 autofocus: true,
@@ -294,7 +294,7 @@ void main() {
               },
               child: Shortcuts(
                 shortcuts: <LogicalKeySet, Intent>{
-                  LogicalKeySet(LogicalKeyboardKey.shift): const DoNothingIntent(),
+                  LogicalKeySet(LogicalKeyboardKey.shift): Intent.doNothing,
                 },
                 child: Focus(
                   autofocus: true,
