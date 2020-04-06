@@ -14,9 +14,9 @@ dependencies:
   test_api: 0.2.15
   test_core: 0.3.3
 
-  build_runner: 1.8.0
+  build_runner: 1.8.1
   build_test: 1.0.0
-  build_runner_core: 4.5.3
+  build_runner_core: 5.0.0
   dart_style: 1.3.3
   code_builder: 3.2.1
   build: 1.2.2
@@ -95,4 +95,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: e267
+# PUBSPEC CHECKSUM: 7c61

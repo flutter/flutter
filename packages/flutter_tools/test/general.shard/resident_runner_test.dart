@@ -23,8 +23,8 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -222,7 +222,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
@@ -327,7 +327,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
