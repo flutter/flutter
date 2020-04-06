@@ -355,8 +355,12 @@ class VMService implements vm_service.VmService {
       primary.add(data);
       secondary.add(data);
     }, onDone: ()  {
-      primary.close();
-      secondary.close();
+      if (!primary.isClosed) {
+        primary.close();
+      }
+      if (!secondary.isClosed) {
+        secondary.close();
+      }
     }, onError: (dynamic error, StackTrace stackTrace) {
       primary.addError(error, stackTrace);
       secondary.addError(error, stackTrace);
@@ -371,7 +375,9 @@ class VMService implements vm_service.VmService {
       channel.add,
       log: null,
       disposeHandler: () async {
-        streamClosedCompleter.complete();
+        if (streamClosedCompleter.isCompleted) {
+          streamClosedCompleter.complete();
+        }
       },
     );
 
