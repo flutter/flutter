@@ -4286,15 +4286,15 @@ void main() {
     expect(formatter.formatCallCount, 2);
     state.updateEditingValue(const TextEditingValue(text: '0123')); // Text change causes reformat
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format, but passes through formatter to verify.
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // No text change, does not format
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // No text change, does not format
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Selection change does not reformat
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // No text change, does not format
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // No text change, does not format
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change does not reformat
     expect(formatter.formatCallCount, 3);
