@@ -5,7 +5,9 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
+import 'package:flutter_tools/src/convert.dart';
+import 'package:package_config/package_config.dart';
+import 'package:package_config/package_config_types.dart';
 
 import '../src/common.dart';
 
@@ -246,7 +248,7 @@ void main() {
     licenseCollector = LicenseCollector(fileSystem: fileSystem);
   });
 
-  testWithoutContext('processes dependant licenses according to instructions', () {
+  testWithoutContext('processes dependent licenses according to instructions', () async {
     fileSystem.file('foo/LICENSE')
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense);
@@ -257,13 +259,34 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync(_kMitLicense); // intentionally a duplicate
 
-    final PackageMap packageMap = PackageMap.test(<String, Uri>{
-      'foo': Uri.parse('file:///foo/lib/'),
-      'bar': Uri.parse('file:///bar/lib/'),
-      'fizz': Uri.parse('file:///fizz/lib/'),
-    }, fileSystem: fileSystem);
-
-    final LicenseResult result = licenseCollector.obtainLicenses(packageMap);
+    final File packageConfigFile = fileSystem.file('package_config.json')
+      ..writeAsStringSync(json.encode(
+        <String, Object>{
+          'configVersion': 2,
+          'packages': <Object>[
+            <String, Object>{
+              'name': 'foo',
+              'rootUri': 'file:///foo/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
+            <String, Object>{
+              'name': 'bar',
+              'rootUri': 'file:///bar/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
+            <String, Object>{
+              'name': 'fizz',
+              'rootUri': 'file:///fizz/',
+              'packageUri': 'lib/',
+              'languageVersion': '2.2'
+            },
+          ],
+        }
+      ));
+    final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
+    final LicenseResult result = licenseCollector.obtainLicenses(packageConfig);
 
     // All included licenses are combined in the result.
     expect(result.combinedLicenses, contains(_kApacheLicense));
