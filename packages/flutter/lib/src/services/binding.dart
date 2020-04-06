@@ -178,9 +178,7 @@ mixin ServicesBinding on BindingBase {
   /// This method exposes notifications from [SystemChannels.lifecycle].
   @protected
   @mustCallSuper
-  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) {
-
-  }
+  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) { }
 
   Future<String> _handleLifecycleMessage(String message) async {
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
