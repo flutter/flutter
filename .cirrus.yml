@@ -99,9 +99,9 @@ task:
     - name: analyze-linux # linux-only
       environment:
         # Empirically, the analyze-linux shard runs surprisingly fast (under 15 minutes) with just 1
-        # CPU.  We noticed OOM failures with 4GB 3/2020, so we increased the memory.
+        # CPU.  We noticed OOM failures with 6GB 4/2020, so we increased the memory.
         CPU: 1
-        MEMORY: 6G
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/analyze.dart
 
