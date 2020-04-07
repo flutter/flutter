@@ -184,6 +184,8 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldPopulation(1, 101)}',
               '${localizations.helloWorldPopulation(2, 102)}',
               '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
               '${localizations.singleQuote}',
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
@@ -381,6 +383,19 @@ void main() {
     }
   },
 
+  "dollarSign": "$!",
+  "@dollarSign": {
+    "description": "A message with a dollar sign."
+  },
+
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
+  "@dollarSignPlural": {
+    "description": "A plural message with a dollar sign.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "singleQuote": "Flutter's amazing!",
   "@singleQuote": {
     "description": "A message with a single quote."
@@ -444,6 +459,8 @@ void main() {
   "helloWorldPopulation": "{count,plural, =1{Hello World of {population} citizens} =2{Hello two worlds with {population} total citizens} many{Hello all {count} worlds, with a total of {population} citizens} other{Hello other {count} worlds, with a total of {population} citizens}}",
   "helloWorldInterpolation": "[{hello}] #{world}#",
   "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
+  "dollarSign": "$!",
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
   "singleQuote": "Flutter's amazing!",
   "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}",
   "doubleQuote": "Flutter is \"amazing\"!",
