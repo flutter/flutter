@@ -2,9 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("framework_shared.gni")
 
 source_set("common") {
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
+
   sources = [
     "buffer_conversions.h",
     "buffer_conversions.mm",
@@ -34,6 +38,9 @@ config("framework_relative_headers") {
 
 # Framework code shared between iOS and macOS.
 source_set("framework_shared") {
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
+
   sources = [
     "framework/Source/FlutterChannels.mm",
     "framework/Source/FlutterCodecs.mm",
