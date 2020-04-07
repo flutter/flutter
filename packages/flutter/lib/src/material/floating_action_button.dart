@@ -144,6 +144,7 @@ class FloatingActionButton extends StatelessWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape,
+    this.mouseCursor,
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
@@ -183,6 +184,7 @@ class FloatingActionButton extends StatelessWidget {
     this.disabledElevation,
     @required this.onPressed,
     this.shape,
+    this.mouseCursor,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
@@ -376,6 +378,12 @@ class FloatingActionButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// The cursor of the mouse pointer when it is on this button.
+  ///
+  /// By default it is [SystemMouseCursors.click]. If it is null, then the
+  /// cursor is decided by the next widget behind it.
+  final MouseCursor mouseCursor;
+
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.none], and must not be null.
@@ -484,6 +492,7 @@ class FloatingActionButton extends StatelessWidget {
 
     Widget result = RawMaterialButton(
       onPressed: onPressed,
+      mouseCursor: mouseCursor,
       elevation: elevation,
       focusElevation: focusElevation,
       hoverElevation: hoverElevation,

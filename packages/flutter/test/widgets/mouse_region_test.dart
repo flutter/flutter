@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
@@ -534,6 +536,41 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
+  });
+
+  testWidgets('applies mouse cursor', (WidgetTester tester) async {
+    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    _setMockCursorHandlers(logCursors: logCursors);
+    addTearDown(_clearMockCursorHandlers);
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: MouseRegion(
+        cursor: SystemMouseCursors.text,
+        child: Container(width: 10, height: 10),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+
+    await tester.pump();
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
+    ]);
+    logCursors.clear();
+
+    await gesture.moveTo(const Offset(5, 5));
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
+    ]);
+    logCursors.clear();
+
+    await gesture.moveTo(const Offset(100, 100));
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
+    ]);
+    logCursors.clear();
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -1358,7 +1395,7 @@ void main() {
     expect(logs, <String>['hover2']);
     logs.clear();
 
-    // Compare: It repaints if the MouseRegion is unactivated.
+    // Compare: It repaints if the MouseRegion is deactivated.
     await tester.pumpWidget(_Scaffold(
       topLeft: Container(
         height: 10,
@@ -1419,6 +1456,148 @@ void main() {
 
     expect(logs, <String>['paint', 'hover-enter']);
   });
+
+  testWidgets("Changing MouseRegion.cursor is effective and doesn't repaint", (WidgetTester tester) async {
+    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    _setMockCursorHandlers(logCursors: logCursors);
+    addTearDown(_clearMockCursorHandlers);
+
+    final List<String> logPaints = <String>[];
+    final List<String> logEnters = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+    logCursors.clear();
+
+    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+    await gesture.moveTo(const Offset(5, 5));
+
+    expect(logPaints, <String>['paint']);
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.forbidden.shapeCode),
+    ]);
+    expect(logEnters, <String>['enter']);
+    logPaints.clear();
+    logCursors.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.text,
+          onEnter: (_) { logEnters.add('enter'); },
+          opaque: true,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+
+    expect(logPaints, isEmpty);
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
+    ]);
+    expect(logEnters, isEmpty);
+    logPaints.clear();
+    logCursors.clear();
+    logEnters.clear();
+  });
+
+  testWidgets('Changing whether MouseRegion.cursor is null is effective and repaints', (WidgetTester tester) async {
+    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
+    _setMockCursorHandlers(logCursors: logCursors);
+    addTearDown(_clearMockCursorHandlers);
+
+    final List<String> logEnters = <String>[];
+    final List<String> logPaints = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
+    logCursors.clear();
+
+    final VoidCallback onPaintChild = () { logPaints.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.text,
+          onEnter: (_) { logEnters.add('enter'); },
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+    await gesture.moveTo(const Offset(5, 5));
+
+    expect(logPaints, <String>['paint']);
+    expect(logEnters, <String>['enter']);
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
+    ]);
+    logPaints.clear();
+    logCursors.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: null,
+          onEnter: (_) { logEnters.add('enter'); },
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+
+    expect(logPaints, <String>['paint']);
+    expect(logEnters, isEmpty);
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
+    ]);
+    logPaints.clear();
+    logCursors.clear();
+    logEnters.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.text,
+          opaque: true,
+          child: CustomPaint(painter: _DelegatedPainter(onPaint: onPaintChild)),
+        ),
+      ),
+    ));
+
+    expect(logPaints, <String>['paint']);
+    expect(logCursors, <_CursorUpdateDetails>[
+      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
+    ]);
+    expect(logEnters, isEmpty);
+    logPaints.clear();
+    logCursors.clear();
+    logEnters.clear();
+  });
+
 
   testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -1562,4 +1741,55 @@ class _ColumnContainer extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _CursorUpdateDetails extends MethodCall {
+  const _CursorUpdateDetails(String method, Map<String, dynamic> arguments)
+    : assert(arguments != null),
+      super(method, arguments);
+
+  _CursorUpdateDetails.wrap(MethodCall call)
+    : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
+
+  _CursorUpdateDetails.activateSystemCursor({int device, int shapeCode})
+    : this('activateSystemCursor', <String, dynamic>{'device': device, 'shapeCode': shapeCode});
+
+  @override
+  Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(other, this))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is _CursorUpdateDetails
+        && other.method == method
+        && other.arguments.length == arguments.length
+        && other.arguments.entries.every(
+          (MapEntry<String, dynamic> entry) =>
+            arguments.containsKey(entry.key) && arguments[entry.key] == entry.value,
+        );
+  }
+
+  @override
+  int get hashCode => hashValues(method, arguments);
+
+  @override
+  String toString() {
+    return '_CursorUpdateDetails(method: $method, arguments: $arguments)';
+  }
+}
+
+void _setMockCursorHandlers({
+  List<_CursorUpdateDetails> logCursors,
+}) {
+  SystemChannels.mouseCursor.setMockMethodCallHandler((MethodCall call) async {
+    logCursors.add(_CursorUpdateDetails.wrap(call));
+    return;
+  });
+}
+void _clearMockCursorHandlers() {
+  SystemChannels.mouseCursor.setMockMethodCallHandler(null);
 }

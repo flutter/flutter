@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -834,10 +835,13 @@ mixin _PlatformViewGestureMixin on RenderBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
-      if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
-    });
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+      cursor: SystemMouseCursors.uncontrolled,
+    );
   }
 
   @override

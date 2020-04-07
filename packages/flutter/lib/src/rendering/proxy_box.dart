@@ -11,12 +11,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
+import 'mouse_cursor.dart';
 import 'mouse_tracking.dart';
 import 'object.dart';
 
@@ -2659,7 +2661,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 ///
 ///  * [MouseRegion], a widget that listens to hover events using
 ///    [RenderMouseRegion].
-class RenderMouseRegion extends RenderProxyBox {
+class RenderMouseRegion extends RenderProxyBox with MouseTrackedRenderObjectMixin {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
   /// All parameters are optional. By default this method creates an opaque
@@ -2668,20 +2670,17 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
+    PreparedMouseCursor cursor,
     bool opaque = true,
     RenderBox child,
   }) : assert(opaque != null),
-       _onEnter = onEnter,
-       _onHover = onHover,
-       _onExit = onExit,
        _opaque = opaque,
        _annotationIsActive = false,
        super(child) {
-    _hoverAnnotation = MouseTrackerAnnotation(
-      onEnter: _handleEnter,
-      onHover: _handleHover,
-      onExit: _handleExit,
-    );
+    this.onEnter = onEnter;
+    this.onHover = onHover;
+    this.onExit = onExit;
+    this.cursor = cursor;
   }
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
@@ -2715,32 +2714,18 @@ class RenderMouseRegion extends RenderProxyBox {
   /// See also:
   ///
   ///  * [MouseRegion.onEnter], which uses this callback.
-  PointerEnterEventListener get onEnter => _onEnter;
+  @override
   set onEnter(PointerEnterEventListener value) {
-    if (_onEnter != value) {
-      _onEnter = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
-  PointerEnterEventListener _onEnter;
-  void _handleEnter(PointerEnterEvent event) {
-    if (_onEnter != null)
-      _onEnter(event);
+    super.onEnter = value;
+    _markPropertyUpdated(mustRepaint: false);
   }
 
   /// Called when a pointer changes position without buttons pressed and the end
   /// position is within the region.
-  PointerHoverEventListener get onHover => _onHover;
+  @override
   set onHover(PointerHoverEventListener value) {
-    if (_onHover != value) {
-      _onHover = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
-  PointerHoverEventListener _onHover;
-  void _handleHover(PointerHoverEvent event) {
-    if (_onHover != null)
-      _onHover(event);
+    super.onHover = value;
+    _markPropertyUpdated(mustRepaint: false);
   }
 
   /// Called when a pointer is no longer contained by the region (with or
@@ -2752,28 +2737,45 @@ class RenderMouseRegion extends RenderProxyBox {
   ///
   ///  * [MouseRegion.onExit], which uses this callback, but is not triggered in
   ///    certain cases and does not always match its earier [MouseRegion.onEnter].
-  PointerExitEventListener get onExit => _onExit;
+  @override
   set onExit(PointerExitEventListener value) {
-    if (_onExit != value) {
-      _onExit = value;
-      _markPropertyUpdated(mustRepaint: false);
-    }
-  }
-  PointerExitEventListener _onExit;
-  void _handleExit(PointerExitEvent event) {
-    if (_onExit != null)
-      _onExit(event);
+    super.onExit = value;
+    _markPropertyUpdated(mustRepaint: false);
   }
 
-  // Object used for annotation of the layer used for hover hit detection.
-  MouseTrackerAnnotation _hoverAnnotation;
+  /// The mouse cursor for a pointer if it enters or is hovering over this
+  /// region.
+  /// 
+  /// This cursor will be set to a mouse pointer if this region is the
+  /// front-most region that contains the pointer.
+  /// 
+  /// The [cursor] must be a prepared cursor, i.e. one that contains all 
+  /// resources and immediately usable by the engine. To use a general
+  /// [MouseCursor], see [MouseRegion.cursor].
+  /// 
+  /// This defaults to null, which means the choice is deferred to the next
+  /// region behind this one with a non-null [cursor], or
+  /// [MouseTrackerCursorMixin.defaultCursor] if it can't find any.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursors] for a general introduction to the mouse cursor system.
+  ///  * [SystemMouseCursors], which is a collection of system cursors of all
+  ///    platforms.
+  ///  * [MouseRegion.cursor], which is the widget-layer counterpart, and 
+  ///    allows general (unprepared) mouse cursors.
+  @override
+  set cursor(PreparedMouseCursor value) {
+    super.cursor = value;
+    _markPropertyUpdated(mustRepaint: false);
+  }
 
   /// Object used for annotation of the layer used for hover hit detection.
   ///
   /// This is only public to allow for testing of Listener widgets. Do not call
   /// in other contexts.
   @visibleForTesting
-  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+  MouseTrackerAnnotation get hoverAnnotation => this;
 
   // Call this method when a property has changed and might affect the
   // `_annotationIsActive` bit.
@@ -2787,9 +2789,10 @@ class RenderMouseRegion extends RenderProxyBox {
   void _markPropertyUpdated({@required bool mustRepaint}) {
     assert(owner == null || !owner.debugDoingPaint);
     final bool newAnnotationIsActive = (
-        _onEnter != null ||
-        _onHover != null ||
-        _onExit != null ||
+        onEnter != null ||
+        onHover != null ||
+        onExit != null ||
+        cursor != null ||
         opaque
       ) && RendererBinding.instance.mouseTracker.mouseIsConnected;
     _setAnnotationIsActive(newAnnotationIsActive);
@@ -2797,6 +2800,7 @@ class RenderMouseRegion extends RenderProxyBox {
       markNeedsPaint();
   }
 
+  bool _annotationIsActive = false;
   void _setAnnotationIsActive(bool value) {
     final bool annotationWasActive = _annotationIsActive;
     _annotationIsActive = value;
@@ -2824,8 +2828,6 @@ class RenderMouseRegion extends RenderProxyBox {
     super.detach();
   }
 
-  bool _annotationIsActive;
-
   @override
   bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
@@ -2834,7 +2836,7 @@ class RenderMouseRegion extends RenderProxyBox {
     if (_annotationIsActive) {
       // Annotated region layers are not retained because they do not create engine layers.
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        _hoverAnnotation,
+        this,
         size: size,
         offset: offset,
         opaque: opaque,
@@ -2862,6 +2864,7 @@ class RenderMouseRegion extends RenderProxyBox {
       },
       ifEmpty: '<none>',
     ));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }

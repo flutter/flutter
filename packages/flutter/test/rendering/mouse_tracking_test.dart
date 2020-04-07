@@ -72,13 +72,25 @@ void main() {
     RendererBinding.instance.initMouseTracker(mouseTracker);
   }
 
-  // Set up a trivial test environment that includes one annotation, which adds
-  // the enter, hover, and exit events it received to [logEvents].
+  // Set up a trivial test environment that includes one annotation.
+  // This annotation records the enter, hover, and exit events it receives to
+  // `logEvents`.
+  // This annotation also contains a cursor with a value of `testCursor`.
+  // The mouse tracker records the cursor requests it receives to `logCursors`.
   MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-      onEnter: (PointerEnterEvent event) => logEvents.add(event),
-      onHover: (PointerHoverEvent event) => logEvents.add(event),
-      onExit: (PointerExitEvent event) => logEvents.add(event),
+      onEnter: (PointerEnterEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
+      onHover: (PointerHoverEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
+      onExit: (PointerExitEvent event) {
+        if (logEvents != null)
+          logEvents.add(event);
+      },
     );
     _setUpMouseAnnotationFinder(
       (Offset position) sync* {
@@ -126,6 +138,7 @@ void main() {
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
+
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
     ]));
@@ -141,7 +154,7 @@ void main() {
       const PointerHoverEvent(position: Offset(1.0, 101.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
-    expect(listenerLogs, <bool>[]);
+    expect(listenerLogs, isEmpty);
     events.clear();
 
     // Pointer is removed while on the annotation.
@@ -489,7 +502,6 @@ void main() {
 
     isInHitRegionOne = false;
     isInHitRegionTwo = true;
-
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),

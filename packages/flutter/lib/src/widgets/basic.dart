@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
@@ -5870,11 +5871,15 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///    have buttons pressed.
 class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
+  ///
+  /// By default, all callbacks are empty, `cursor` is unset, and `opaque` is
+  /// `true`.
   const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor,
     this.opaque = true,
     this.child,
   }) : assert(opaque != null),
@@ -6086,9 +6091,33 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
+  /// The mouse cursor for a pointer if it enters or is hovering over this
+  /// region.
+  ///
+  /// This cursor will be set to a mouse pointer if this region is the
+  /// front-most region that contains the pointer.
+  /// 
+  /// The [cursor] can be a prepared or unprepared cursor. If the cursor is
+  /// unprepared, [MouseRegion] will handle the preparation when a mouse pointer
+  /// enters the region for the first time. It will use
+  /// [MouseTrackerCursorMixin.defaultCursor] before completing the preparation,
+  /// then switch to the prepared value while also update the hovering pointers'
+  /// cursors.
+  ///
+  /// The [cursor] defaults to null, which means the choice is deferred to the
+  /// next region behind this one with a non-null [cursor], or
+  /// [MouseTrackerCursorMixin.defaultCursor] if it can't find any.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseCursors] for a general introduction to the mouse cursor system.
+  final MouseCursor cursor;
+
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
-  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
-  /// and [onExit] behave.
+  /// from detecting the pointer.
+  ///
+  /// This changes the list of regions that a pointer hovers, thus affecting how
+  /// their [onHover], [onEnter], [onExit], and [cursor] behave.
   ///
   /// If [opaque] is true, this widget will absorb the mouse pointer and
   /// prevent this widget's siblings (or any other widgets that are not
@@ -6121,6 +6150,7 @@ class MouseRegion extends StatefulWidget {
     if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
   }
 }
@@ -6129,6 +6159,15 @@ class _MouseRegionState extends State<MouseRegion> {
   void handleExit(PointerExitEvent event) {
     if (widget.onExit != null && mounted)
       widget.onExit(event);
+  }
+
+  PreparedMouseCursor get cursor {
+    if (widget.cursor == null)
+      return null;
+    // Although MouseRegion only supports prepared mouse cursors for now.
+    assert(widget.cursor is PreparedMouseCursor,
+      'Unsupported mouse cursor type ${widget.cursor.runtimeType}.');
+    return widget.cursor as PreparedMouseCursor;
   }
 
   PointerExitEventListener getHandleExit() {
@@ -6153,6 +6192,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       onEnter: widget.onEnter,
       onHover: widget.onHover,
       onExit: owner.getHandleExit(),
+      cursor: owner.cursor,
       opaque: widget.opaque,
     );
   }
@@ -6164,6 +6204,7 @@ class _RawMouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = widget.onEnter
       ..onHover = widget.onHover
       ..onExit = owner.getHandleExit()
+      ..cursor = owner.cursor
       ..opaque = widget.opaque;
   }
 }
