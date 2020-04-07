@@ -103,6 +103,9 @@ abstract class ResidentWebRunner extends ResidentRunner {
   /// WebServer device is debuggable when running with --start-paused.
   bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
 
+  @override
+  bool get supportsWriteSkSL => false;
+
   bool get _enableDwds => debuggingEnabled;
 
   ConnectionResult _connectionResult;

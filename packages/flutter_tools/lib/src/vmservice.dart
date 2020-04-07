@@ -1530,6 +1530,16 @@ class FlutterView extends ServiceObject {
         });
   }
 
+  Future<Map<String, Object>> getSkSLs() async {
+    final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
+      '_flutter.getSkSLs',
+      params: <String, dynamic>{
+        'viewId': id,
+      },
+    );
+    return response['SkSLs'] as Map<String, Object>;
+  }
+
   bool get hasIsolate => _uiIsolate != null;
 
   Future<void> flushUIThreadTasks() async {
