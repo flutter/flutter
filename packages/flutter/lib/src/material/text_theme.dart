@@ -398,7 +398,6 @@ class TextTheme with Diagnosticable {
     TextStyle caption,
     TextStyle button,
     TextStyle overline,
-    TextHeightBehavior defaultTextHeightBehavior,
     @Deprecated(
       'This is the term used in the 2014 version of material design. The modern term is headline1. '
       'This feature was deprecated after v1.13.8.'
