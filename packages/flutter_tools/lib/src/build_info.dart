@@ -24,6 +24,7 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     this.dartDefines = const <String>[],
+    this.bundleSkSLPath,
     @required this.treeShakeIcons,
   });
 
@@ -72,6 +73,9 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
+
+  /// An optional path to a JSON containing precompiled SkSL shaders
+  final String bundleSkSLPath;
 
   /// Additional constant values to be made available in the Dart program.
   ///
