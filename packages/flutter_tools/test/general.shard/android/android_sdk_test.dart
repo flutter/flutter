@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -59,7 +60,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('returns sdkmanager path under cmdline tools', () {
+    testUsingContext('returns sdkmanager path under cmdline tools on Linux/macOS', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       globals.config.setValue('android-sdk', sdkDir.path);
 
@@ -72,6 +73,24 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+    });
+
+    testUsingContext('returns sdkmanager.bat path under cmdline tools for windows', () {
+      sdkDir = MockAndroidSdk.createSdkDirectory();
+      globals.config.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      globals.fs.file(
+        globals.fs.path.join(sdk.directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat')
+      ).createSync(recursive: true);
+
+      expect(sdk.sdkManagerPath,
+        globals.fs.path.join(sdk.directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager.bat'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('returns sdkmanager path under tools if cmdline doesnt exist', () {

@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -56,6 +57,8 @@ void main() {
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
+      final Directory macosManagedDirectory = flutterProject.directory.childDirectory('macos').childDirectory('Flutter');
+      when(macosProject.managedDirectory).thenReturn(macosManagedDirectory);
       when(macosProject.pluginConfigKey).thenReturn('macos');
       when(macosProject.existsSync()).thenReturn(false);
       androidProject = MockAndroidProject();
@@ -128,7 +131,6 @@ void main() {
           package: AndroidPackage
   ''');
     }
-
 
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
@@ -879,6 +881,33 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
+        when(macosProject.existsSync()).thenReturn(true);
+        when(featureFlags.isMacOSEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(true);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      macos:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Injecting creates generated Linux registrant', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
@@ -893,6 +922,33 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -940,6 +996,36 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      windows:
+        dartPluginClass: SomePlugin
+    ''');
+
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 
 import 'application_package.dart';
@@ -650,6 +651,8 @@ abstract class ResidentRunner {
 
   final CommandHelp commandHelp;
 
+  io.HttpServer _devtoolsServer;
+
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
   bool hotMode;
@@ -769,12 +772,14 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
   }
 
   Future<void> detach() async {
+    await shutdownDevtools();
     await stopEchoingDeviceLog();
     await preExit();
     appFinished();
@@ -982,6 +987,31 @@ abstract class ResidentRunner {
     }
   }
 
+  Future<void> launchDevTools() async {
+    try {
+      assert(supportsServiceProtocol);
+      _devtoolsServer ??= await devtools_server.serveDevTools(
+        enableStdinCommands: false,
+      );
+      await devtools_server.launchDevTools(
+        <String, dynamic>{
+          'reuseWindows': true,
+        },
+        flutterDevices.first.vmService.httpAddress,
+        'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
+        false,  // headless mode,
+        false,  // machine mode
+      );
+    } on Exception catch (e, st) {
+      globals.printTrace('Failed to launch DevTools: $e\n$st');
+    }
+  }
+
+  Future<void> shutdownDevtools() async {
+    await _devtoolsServer?.close();
+    _devtoolsServer = null;
+  }
+
   Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
   }
@@ -1064,6 +1094,7 @@ abstract class ResidentRunner {
       if (supportsCanvasKit){
         commandHelp.k.print();
       }
+      commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
       commandHelp.a.print();
@@ -1296,6 +1327,12 @@ class TerminalHandler {
       case 'U':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+          return true;
+        }
+        return false;
+      case 'v':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.launchDevTools();
           return true;
         }
         return false;

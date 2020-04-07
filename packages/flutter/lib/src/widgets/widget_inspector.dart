@@ -2426,6 +2426,7 @@ class _RenderInspectorOverlay extends RenderBox {
   }
 }
 
+@immutable
 class _TransformedRect {
   _TransformedRect(RenderObject object)
     : rect = object.semanticBounds,
@@ -2451,8 +2452,9 @@ class _TransformedRect {
 ///
 /// The equality operator can be used to determine whether the overlay needs to
 /// be rendered again.
+@immutable
 class _InspectorOverlayRenderState {
-  _InspectorOverlayRenderState({
+  const _InspectorOverlayRenderState({
     @required this.overlayRect,
     @required this.selected,
     @required this.candidates,

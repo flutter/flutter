@@ -129,6 +129,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
         actions: <Widget>[
           MaterialDemoDocumentationButton(ScrollableTabsDemo.routeName),
           IconButton(
+            tooltip: 'Custom Indicator',
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() {
@@ -137,6 +138,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             },
           ),
           PopupMenuButton<TabsDemoStyle>(
+            tooltip: 'Popup Menu',
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(

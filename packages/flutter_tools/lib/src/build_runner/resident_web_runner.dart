@@ -107,6 +107,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  StreamSubscription<vmservice.Event> _stdErrSub;
   bool _exited = false;
   WipConnection _wipConnection;
 
@@ -143,6 +144,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
       return;
     }
     await _stdOutSub?.cancel();
+    await _stdErrSub?.cancel();
     await device.device.stopApp(null);
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
@@ -652,16 +654,14 @@ class _ResidentWebRunner extends ResidentWebRunner {
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-      // Cleanup old subscriptions. These will throw if there isn't anything
-      // listening, which is fine because that is what we want to ensure.
       try {
-        await _vmService.streamCancel(vmservice.EventStreams.kStdout);
+        await _vmService.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen(vmservice.EventStreams.kStdout);
+        await _vmService.streamListen(vmservice.EventStreams.kStderr);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
@@ -674,7 +674,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes));
-        globals.printStatus(message);
+        globals.printStatus(message, newline: false);
+      });
+      _stdErrSub = _vmService.onStderrEvent.listen((vmservice.Event log) {
+        final String message = utf8.decode(base64.decode(log.bytes));
+        globals.printStatus(message, newline: false);
       });
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       _vmService.registerServiceCallback('reloadSources', (Map<String, Object> params) async {

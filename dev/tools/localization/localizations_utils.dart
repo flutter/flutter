@@ -18,8 +18,9 @@ int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
 }
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
+@immutable
 class LocaleInfo implements Comparable<LocaleInfo> {
-  LocaleInfo({
+  const LocaleInfo({
     this.languageCode,
     this.scriptCode,
     this.countryCode,

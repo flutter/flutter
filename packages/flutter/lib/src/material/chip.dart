@@ -2157,6 +2157,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 }
 
+@immutable
 class _ChipRenderTheme {
   const _ChipRenderTheme({
     @required this.avatar,

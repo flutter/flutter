@@ -406,6 +406,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.v,
           commandHelp.P,
           commandHelp.a,
           'An Observatory debugger and profiler on null is available at: null',
