@@ -327,8 +327,8 @@ String _generateLookupBody(
   String fileName,
 ) {
   final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
-    return  (useDeferredLoading ?
-    switchClauseDeferredLoadingTemplate : switchClauseTemplate)
+    return (useDeferredLoading ?
+      switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
   };
