@@ -36,6 +36,9 @@
 @end
 
 /** A range of text in the buffer of a Flutter text editing widget. */
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+FLUTTER_EXPORT
+#endif
 @interface FlutterTextRange : UITextRange <NSCopying>
 
 @property(nonatomic, readonly) NSRange range;
@@ -44,4 +47,32 @@
 
 @end
 
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+FLUTTER_EXPORT
+#endif
+@interface FlutterTextInputView : UIView <UITextInput>
+
+// UITextInput
+@property(nonatomic, readonly) NSMutableString* text;
+@property(nonatomic, readonly) NSMutableString* markedText;
+@property(readwrite, copy) UITextRange* selectedTextRange;
+@property(nonatomic, strong) UITextRange* markedTextRange;
+@property(nonatomic, copy) NSDictionary* markedTextStyle;
+@property(nonatomic, assign) id<UITextInputDelegate> inputDelegate;
+
+// UITextInputTraits
+@property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
+@property(nonatomic) UITextAutocorrectionType autocorrectionType;
+@property(nonatomic) UITextSpellCheckingType spellCheckingType;
+@property(nonatomic) BOOL enablesReturnKeyAutomatically;
+@property(nonatomic) UIKeyboardAppearance keyboardAppearance;
+@property(nonatomic) UIKeyboardType keyboardType;
+@property(nonatomic) UIReturnKeyType returnKeyType;
+@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
+@property(nonatomic) UITextSmartQuotesType smartQuotesType API_AVAILABLE(ios(11.0));
+@property(nonatomic) UITextSmartDashesType smartDashesType API_AVAILABLE(ios(11.0));
+
+@property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
+
+@end
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
