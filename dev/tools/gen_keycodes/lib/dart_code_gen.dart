@@ -244,12 +244,12 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         for (final int code in entry.windowsKeyCodes) {
           windowsNumPadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
-    }
+      }
     }
     return windowsNumPadMap.toString().trimRight();
   }
 
-  /// This generates the map of Android key codes to logical keys.
+  /// This generates the map of Windows key codes to logical keys.
   String get windowsKeyCodeMap {
     final StringBuffer windowsKeyCodeMap = StringBuffer();
     for (final Key entry in keyData.data) {

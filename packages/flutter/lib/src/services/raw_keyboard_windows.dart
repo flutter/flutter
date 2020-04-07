@@ -121,7 +121,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     return false;
   }
 
-    @override
+  @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     bool result;
     switch (key) {
