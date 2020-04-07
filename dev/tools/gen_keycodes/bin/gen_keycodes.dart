@@ -18,6 +18,7 @@ import 'package:gen_keycodes/utils.dart';
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
 Future<String> getChromiumConversions() async {
+  // TODO(franciscojma): Change back to URL download when/if available. https://github.com/flutter/flutter/issues/54165
   return File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'chromium_code_download.inc')).readAsStringSync();
 }
 
