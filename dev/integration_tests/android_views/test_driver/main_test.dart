@@ -38,8 +38,5 @@ Future<void> main() async {
     await driver.tap(showAlertDialog);
     final String status = await driver.getText(find.byValueKey('Status'));
     expect(status, 'Success');
-  },
-    // TODO(amirh): enable this test when https://github.com/flutter/flutter/issues/34248 is fixed.
-    skip: true,
-  );
+  });
 }
