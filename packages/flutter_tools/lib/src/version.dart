@@ -778,10 +778,10 @@ class GitTagVersion {
     );
   }
 
-  /// Check for the release tag format from v1.17.0 on
+  /// Check for the release tag format of the form x.y.z-m.n.pre
   static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
+      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9]+\.[0-9]+\.pre)?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       return const GitTagVersion.unknown();
@@ -790,7 +790,7 @@ class GitTagVersion {
       (String source) => source == null ? null : int.tryParse(source)).toList();
     List<int> devParts = <int>[null, null];
     if (parts[3] != null) {
-      devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
+      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
         .matchAsPrefix(parts[3])
         ?.groups(<int>[1, 2])
         ?.map<int>(
@@ -805,7 +805,7 @@ class GitTagVersion {
       devPatch: devParts[1],
       commits: parsedParts[4],
       hash: parts[5],
-      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
+      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-m.n.pre
     );
   }
 
@@ -836,7 +836,7 @@ class GitTagVersion {
       return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      return '$x.$y.$z-dev.${devVersion + 1}.0-pre.$commits';
+      return '$x.$y.$z-${devVersion + 1}.0-pre.$commits';
     }
     return '$x.$y.${z + 1}-pre.$commits';
   }

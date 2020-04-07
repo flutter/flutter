@@ -409,9 +409,9 @@ void main() {
     expect(gitTagVersion.devPatch, null);
 
     // new tag release format, master channel
-    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-dev.5.0-pre.13');
-    expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
+    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0-pre.13');
+    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
@@ -422,9 +422,9 @@ void main() {
     expect(gitTagVersion.devPatch, null);
 
     // new tag release format, dev channel
-    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-0-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-dev.4.5');
-    expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
+    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-0-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
+    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
