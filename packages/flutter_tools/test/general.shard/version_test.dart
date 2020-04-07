@@ -394,21 +394,41 @@ void main() {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
 
-    // legacy tag release format
+    // legacy tag format, master channel
     gitTagVersion = GitTagVersion.parse('v1.2.3-4-g$hash');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.4');
     expect(gitTagVersion.gitTag, 'v1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
-    // new dev tag release format
+    // legacy tag format, dev channel
+    gitTagVersion = GitTagVersion.parse('v1.2.3-0-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), 'v1.2.3');
+    expect(gitTagVersion.gitTag, 'v1.2.3');
+    expect(gitTagVersion.devVersion, null);
+    expect(gitTagVersion.devPatch, null);
+
+    // new tag release format, master channel
     gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-dev.5.0-pre.13');
     expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
-    // new stable tag release format
+    gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    expect(gitTagVersion.gitTag, '1.2.3');
+    expect(gitTagVersion.devVersion, null);
+    expect(gitTagVersion.devPatch, null);
+
+    // new tag release format, dev channel
+    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-0-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-dev.4.5');
+    expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
+    // new tag release format, stable channel
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
     expect(gitTagVersion.gitTag, '1.2.3');
