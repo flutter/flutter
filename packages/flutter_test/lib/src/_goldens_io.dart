@@ -144,11 +144,9 @@ class LocalComparisonOutput {
           basedir,
         );
         output.parent.createSync(recursive: true);
-        final Codec codec = await instantiateImageCodec(
-            Uint8List.sublistView(entry.value));
-        final Image image = (await codec.getNextFrame()).image;
-        output.writeAsBytesSync(Uint8List.sublistView(
-            await image.toByteData(format: ImageByteFormat.png)));
+        // TODO(jakemac): convert the rgba pixels in `entry.value` into png
+        // format and write to `output`.
+        // output.writeAsBytesSync();
       }
     }
     throw test_package.TestFailure(
