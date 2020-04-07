@@ -791,7 +791,7 @@ class GitTagVersion {
   /// Check for the release tag format of the form x.y.z-m.n.pre
   static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9]+\.[0-9]+\.pre)?-([0-9]+)-g([a-f0-9]+)$');
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       return const GitTagVersion.unknown();
