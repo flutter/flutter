@@ -32,6 +32,7 @@ import 'theme.dart';
 typedef SemanticFormatterCallback = String Function(double value);
 
 /// [Slider] uses this callback to paint the value indicator on the overlay.
+///
 /// Since the value indicator is painted on the Overlay; this method paints the
 /// value indicator in a [RenderBox] that appears in the [Overlay].
 typedef PaintValueIndicator = void Function(PaintingContext context, Offset offset);
@@ -384,6 +385,7 @@ class Slider extends StatefulWidget {
   final SemanticFormatterCallback semanticFormatterCallback;
 
   /// Whether to use the updated Material spec version of the [Slider].
+  ///
   /// * The v2 Slider has an updated value indicator that matches the latest specs.
   /// * The value indicator is painted on the Overlay.
   /// * The active track is bigger than the inactive track.
