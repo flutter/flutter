@@ -44,6 +44,14 @@ FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
   return reinterpret_cast<FlutterDesktopMessengerRef>(1);
 }
 
+void FlutterDesktopRegistrarSetDestructionHandler(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterDesktopOnRegistrarDestroyed callback) {
+  if (s_stub_implementation) {
+    s_stub_implementation->RegistrarSetDestructionHandler(callback);
+  }
+}
+
 void FlutterDesktopRegistrarEnableInputBlocking(
     FlutterDesktopPluginRegistrarRef registrar,
     const char* channel) {

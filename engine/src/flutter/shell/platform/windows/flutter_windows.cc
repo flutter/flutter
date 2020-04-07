@@ -248,6 +248,12 @@ FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
   return registrar->messenger.get();
 }
 
+void FlutterDesktopRegistrarSetDestructionHandler(
+    FlutterDesktopPluginRegistrarRef registrar,
+    FlutterDesktopOnRegistrarDestroyed callback) {
+  registrar->destruction_handler = callback;
+}
+
 FlutterDesktopViewRef FlutterDesktopRegistrarGetView(
     FlutterDesktopPluginRegistrarRef registrar) {
   return registrar->window;
