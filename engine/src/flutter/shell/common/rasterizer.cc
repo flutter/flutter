@@ -242,7 +242,6 @@ RasterStatus Rasterizer::DoDraw(
   }
 
   FrameTiming timing;
-  const fml::TimePoint frame_target_time = layer_tree->target_time();
   timing.Set(FrameTiming::kBuildStart, layer_tree->build_start());
   timing.Set(FrameTiming::kBuildFinish, layer_tree->build_finish());
   timing.Set(FrameTiming::kRasterStart, fml::TimePoint::Now());
@@ -271,32 +270,6 @@ RasterStatus Rasterizer::DoDraw(
   const auto raster_finish_time = fml::TimePoint::Now();
   timing.Set(FrameTiming::kRasterFinish, raster_finish_time);
   delegate_.OnFrameRasterized(timing);
-
-  if (raster_finish_time > frame_target_time) {
-    fml::TimePoint latest_frame_target_time =
-        delegate_.GetLatestFrameTargetTime();
-    const auto frame_budget_millis = delegate_.GetFrameBudget().count();
-    if (latest_frame_target_time < raster_finish_time) {
-      latest_frame_target_time =
-          latest_frame_target_time +
-          fml::TimeDelta::FromMillisecondsF(frame_budget_millis);
-    }
-    const auto frame_lag =
-        (latest_frame_target_time - frame_target_time).ToMillisecondsF();
-    const int vsync_transitions_missed = round(frame_lag / frame_budget_millis);
-    fml::tracing::TraceEventAsyncComplete(
-        "flutter",                    // category
-        "SceneDisplayLag",            // name
-        frame_target_time,            // begin_time
-        raster_finish_time,           // end_time
-        "frame_target_time",          // arg_key_1
-        frame_target_time,            // arg_val_1
-        "current_frame_target_time",  // arg_key_2
-        latest_frame_target_time,     // arg_val_2
-        "vsync_transitions_missed",   // arg_key_3
-        vsync_transitions_missed      // arg_val_3
-    );
-  }
 
   // Pipeline pressure is applied from a couple of places:
   // rasterizer: When there are more items as of the time of Consume.
