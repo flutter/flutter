@@ -304,6 +304,7 @@ abstract class RawKeyEvent with Diagnosticable {
           characterCodePoint: message['characterCodePoint'] as int,
           modifiers: message['modifiers'] as int,
         );
+        print('Modifiers framework ${message['modifiers']}');
         break;
       default:
         // Raw key events are not yet implemented  on iOS or other platforms,
