@@ -1,4 +1,4 @@
-Signature: 1f4f76e288d7a69844dd6193c60b2cb3
+Signature: 6ff2f5c3f9547985386c5d29d4246044
 
 UNUSED LICENSES:
 
@@ -7796,9 +7796,11 @@ FILE: ../../../third_party/dart/runtime/vm/visitor.cc
 FILE: ../../../third_party/dart/samples/ffi/async/async_test.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_async_callback.dart
 FILE: ../../../third_party/dart/samples/ffi/async/sample_native_port_call.dart
+FILE: ../../../third_party/dart/sdk/lib/_http/embedder_config.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/vm/lib/ffi_struct_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_http/embedder_config.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/vm/lib/ffi_struct_patch.dart
