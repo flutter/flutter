@@ -244,6 +244,43 @@ TEST(PointerDataPacketConverterTest, CanUpdatePointerIdentifier) {
   ASSERT_EQ(result[6].synthesized, 0);
 }
 
+TEST(PointerDataPacketConverterTest, AlwaysForwardMoveEvent) {
+  PointerDataPacketConverter converter;
+  auto packet = std::make_unique<PointerDataPacket>(4);
+  PointerData data;
+  CreateSimulatedPointerData(data, PointerData::Change::kAdd, 0, 0.0, 0.0);
+  packet->SetPointerData(0, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kDown, 0, 0.0, 0.0);
+  packet->SetPointerData(1, data);
+  // Creates a move event without a location change.
+  CreateSimulatedPointerData(data, PointerData::Change::kMove, 0, 0.0, 0.0);
+  packet->SetPointerData(2, data);
+  CreateSimulatedPointerData(data, PointerData::Change::kUp, 0, 0.0, 0.0);
+  packet->SetPointerData(3, data);
+
+  auto converted_packet = converter.Convert(std::move(packet));
+
+  std::vector<PointerData> result;
+  UnpackPointerPacket(result, std::move(converted_packet));
+
+  ASSERT_EQ(result.size(), (size_t)4);
+  ASSERT_EQ(result[0].change, PointerData::Change::kAdd);
+  ASSERT_EQ(result[0].synthesized, 0);
+
+  ASSERT_EQ(result[1].change, PointerData::Change::kDown);
+  ASSERT_EQ(result[1].pointer_identifier, 1);
+  ASSERT_EQ(result[1].synthesized, 0);
+
+  // Does not filter out the move event.
+  ASSERT_EQ(result[2].change, PointerData::Change::kMove);
+  ASSERT_EQ(result[2].pointer_identifier, 1);
+  ASSERT_EQ(result[2].synthesized, 0);
+
+  ASSERT_EQ(result[3].change, PointerData::Change::kUp);
+  ASSERT_EQ(result[3].pointer_identifier, 1);
+  ASSERT_EQ(result[3].synthesized, 0);
+}
+
 TEST(PointerDataPacketConverterTest, CanWorkWithDifferentDevices) {
   PointerDataPacketConverter converter;
   auto packet = std::make_unique<PointerDataPacket>(12);
