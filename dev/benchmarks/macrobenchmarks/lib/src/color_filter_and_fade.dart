@@ -24,9 +24,9 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
       width: 24,
       height: 24,
       useColorFilter: _useColorFilter,
-      shadow: ui.Shadow(
+      shadow: const ui.Shadow(
         color: Colors.black45,
-        offset: const Offset(0.0, 2.0),
+        offset: Offset(0.0, 2.0),
         blurRadius: 4.0,
       ),
     );

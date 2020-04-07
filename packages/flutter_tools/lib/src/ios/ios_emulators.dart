@@ -72,5 +72,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }
