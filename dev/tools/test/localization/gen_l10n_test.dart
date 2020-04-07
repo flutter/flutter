@@ -792,6 +792,67 @@ void main() {
       expect(englishLocalizationsFile, contains('class AppLocalizationsEn extends AppLocalizations'));
     });
 
+    test('language imports are sorted when preferredSupportedLocaleString is given', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString)
+        ..childFile('app_zh.arb').writeAsStringSync(singleZhMessageArbFileString)
+        ..childFile('app_es.arb').writeAsStringSync(singleEsMessageArbFileString);
+
+      const String preferredSupportedLocaleString = '["zh"]';
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          preferredSupportedLocaleString: preferredSupportedLocaleString,
+        );
+        generator.loadResources();
+        generator.writeOutputFile();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        path.join('lib', 'l10n', defaultOutputFileString),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(
+'''
+import '${defaultOutputFileString}_en.dart';
+import '${defaultOutputFileString}_es.dart';
+import '${defaultOutputFileString}_zh.dart';
+'''));
+    });
+
+    test('imports are deferred when useDeferredImports are set', () {
+      fs.currentDirectory.childDirectory('lib').childDirectory('l10n')..createSync(recursive: true)
+        ..childFile(defaultTemplateArbFileName).writeAsStringSync(singleMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          useDeferredLoading: true,
+        );
+        generator.loadResources();
+        generator.writeOutputFile();
+      } on Exception catch (e) {
+        fail('Generating output files should not fail: $e');
+      }
+
+      final String localizationsFile = fs.file(
+        path.join('lib', 'l10n', defaultOutputFileString),
+      ).readAsStringSync();
+      expect(localizationsFile, contains(
+'''
+import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileString}_en;
+'''));
+    });
+
     group('DateTime tests', () {
       test('throws an exception when improperly formatted date is passed in', () {
         const String singleDateMessageArbFileString = '''

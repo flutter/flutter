@@ -81,6 +81,12 @@ void main(List<String> arguments) {
       'Alternatively, see the `header` option to pass in a string '
       'for a simpler header.'
   );
+  parser.addFlag(
+    'use-deferred-loading',
+    defaultsTo: false,
+    help: 'Whether to generate localizations file with deferred loading, to'
+      ' allow for loading of localizations as needed in Flutter web.',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -98,6 +104,7 @@ void main(List<String> arguments) {
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
   final String headerString = results['header'] as String;
   final String headerFile = results['header-file'] as String;
+  final bool useDeferredLoading = results['use-deferred-loading'] as bool;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -112,6 +119,7 @@ void main(List<String> arguments) {
         preferredSupportedLocaleString: preferredSupportedLocaleString,
         headerString: headerString,
         headerFile: headerFile,
+        useDeferredLoading: useDeferredLoading,
       )
       ..loadResources()
       ..writeOutputFile()

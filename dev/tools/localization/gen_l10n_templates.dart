@@ -6,6 +6,7 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
+// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -104,26 +105,7 @@ abstract class @(class) {
 
 @(methods)}
 
-class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
-  const _@(class)Delegate();
-
-  @override
-  Future<@(class)> load(Locale locale) {
-    return SynchronousFuture<@(class)>(@(lookupName)(locale));
-  }
-
-  @override
-  bool isSupported(Locale locale) => <String>[@(supportedLanguageCodes)].contains(locale.languageCode);
-
-  @override
-  bool shouldReload(_@(class)Delegate old) => false;
-}
-
-@(class) @(lookupName)(Locale locale) {
-  @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
-}
+@(delegateClass)
 ''';
 
 const String numberFormatTemplate = '''
@@ -205,7 +187,38 @@ const String baseClassMethodTemplate = '''
   String @(name)(@(parameters));
 ''';
 
+// DELEGATE CLASS TEMPLATES
+
+const String delegateClassTemplate = '''
+class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
+  const _@(class)Delegate();
+
+  @override
+  Future<@(class)> load(Locale locale) {
+    @(loadBody)
+  }
+
+  @override
+  bool isSupported(Locale locale) => <String>[@(supportedLanguageCodes)].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_@(class)Delegate old) => false;
+}
+
+@(lookupFunction)''';
+
+const String loadBodyTemplate = '''return SynchronousFuture<@(class)>(@(lookupName)(locale));''';
+
+const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);''';
+
 // DELEGATE LOOKUP TEMPLATES
+
+const String lookupFunctionTemplate = '''
+@(return) @(lookupName)(Locale locale) {
+  @(lookupBody)
+  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  return null;
+}''';
 
 const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupScriptCodeSpecified)
@@ -213,6 +226,8 @@ const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupLanguageCodeSpecified)''';
 
 const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
+
+const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(class)());''';
 
 const String nestedSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.@(code)) {

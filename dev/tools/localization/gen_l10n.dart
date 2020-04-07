@@ -206,7 +206,11 @@ String generateBaseClassMethod(Message message) {
     .replaceAll('@(name)', message.resourceId);
 }
 
-String _generateLookupByAllCodes(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupByAllCodes(
+  AppResourceBundleCollection allBundles,
+  String className,
+  String Function(LocaleInfo) generateSwitchClauseTemplate,
+) {
   final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((LocaleInfo locale) {
     return locale.scriptCode != null && locale.countryCode != null;
   });
@@ -216,9 +220,8 @@ String _generateLookupByAllCodes(AppResourceBundleCollection allBundles, String 
   }
 
   final Iterable<String> switchClauses = localesWithAllCodes.map<String>((LocaleInfo locale) {
-    return switchClauseTemplate
-      .replaceAll('@(case)', locale.toString())
-      .replaceAll('@(class)', '$className${locale.camelCase()}');
+    return generateSwitchClauseTemplate(locale)
+      .replaceAll('@(case)', locale.toString());
   });
 
   return allCodesLookupTemplate.replaceAll(
@@ -227,7 +230,11 @@ String _generateLookupByAllCodes(AppResourceBundleCollection allBundles, String 
   );
 }
 
-String _generateLookupByScriptCode(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupByScriptCode(
+  AppResourceBundleCollection allBundles,
+  String className,
+  String Function(LocaleInfo) generateSwitchClauseTemplate,
+) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
     final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
@@ -240,11 +247,9 @@ String _generateLookupByScriptCode(AppResourceBundleCollection allBundles, Strin
     return nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(code)', 'scriptCode')
-      .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
       .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
-          return switchClauseTemplate
-            .replaceAll('@(case)', locale.scriptCode)
-            .replaceAll('@(class)', '$className${locale.camelCase()}');
+          return generateSwitchClauseTemplate(locale)
+            .replaceAll('@(case)', locale.scriptCode);
         }).join('\n        '));
   }).where((String switchClause) => switchClause != null);
 
@@ -258,7 +263,11 @@ String _generateLookupByScriptCode(AppResourceBundleCollection allBundles, Strin
   );
 }
 
-String _generateLookupByCountryCode(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupByCountryCode(
+  AppResourceBundleCollection allBundles,
+  String className,
+  String Function(LocaleInfo) generateSwitchClauseTemplate,
+) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
     final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
@@ -271,11 +280,9 @@ String _generateLookupByCountryCode(AppResourceBundleCollection allBundles, Stri
     return nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
       .replaceAll('@(code)', 'countryCode')
-      .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
       .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
-          return switchClauseTemplate
-            .replaceAll('@(case)', locale.countryCode)
-            .replaceAll('@(class)', '$className${locale.camelCase()}');
+          return generateSwitchClauseTemplate(locale)
+            .replaceAll('@(case)', locale.countryCode);
         }).join('\n        '));
   }).where((String switchClause) => switchClause != null);
 
@@ -288,7 +295,11 @@ String _generateLookupByCountryCode(AppResourceBundleCollection allBundles, Stri
     .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
 }
 
-String _generateLookupByLanguageCode(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupByLanguageCode(
+  AppResourceBundleCollection allBundles,
+  String className,
+  String Function(LocaleInfo) generateSwitchClauseTemplate,
+) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
     final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((LocaleInfo locale) {
@@ -299,9 +310,8 @@ String _generateLookupByLanguageCode(AppResourceBundleCollection allBundles, Str
       return null;
 
     return localesWithLanguageCode.map((LocaleInfo locale) {
-      return switchClauseTemplate
-        .replaceAll('@(case)', locale.languageCode)
-        .replaceAll('@(class)', '$className${locale.camelCase()}');
+      return generateSwitchClauseTemplate(locale)
+        .replaceAll('@(case)', locale.languageCode);
     }).join('\n        ');
   }).where((String switchClause) => switchClause != null);
 
@@ -314,12 +324,71 @@ String _generateLookupByLanguageCode(AppResourceBundleCollection allBundles, Str
     .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
 }
 
-String _generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupBody(
+  AppResourceBundleCollection allBundles,
+  String className,
+  bool useDeferredLoading,
+  String fileName,
+) {
+  final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
+    return  (useDeferredLoading ? switchClauseDeferredLoadingTemplate : switchClauseTemplate)
+      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
+  };
   return lookupBodyTemplate
-    .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(allBundles, className))
-    .replaceAll('@(lookupScriptCodeSpecified)', _generateLookupByScriptCode(allBundles, className))
-    .replaceAll('@(lookupCountryCodeSpecified)', _generateLookupByCountryCode(allBundles, className))
-    .replaceAll('@(lookupLanguageCodeSpecified)', _generateLookupByLanguageCode(allBundles, className));
+    .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
+      allBundles,
+      className,
+      generateSwitchClauseTemplate,
+    ))
+    .replaceAll('@(lookupScriptCodeSpecified)', _generateLookupByScriptCode(
+      allBundles,
+      className,
+      generateSwitchClauseTemplate,
+    ))
+    .replaceAll('@(lookupCountryCodeSpecified)', _generateLookupByCountryCode(
+      allBundles,
+      className,
+      generateSwitchClauseTemplate,
+    ))
+    .replaceAll('@(lookupLanguageCodeSpecified)', _generateLookupByLanguageCode(
+      allBundles,
+      className,
+      generateSwitchClauseTemplate,
+    ));
+}
+
+String _generateDelegateClass({
+  AppResourceBundleCollection allBundles,
+  String className,
+  Set<String> supportedLanguageCodes,
+  bool useDeferredLoading,
+  String fileName,
+}) {
+
+  final String lookupBody = _generateLookupBody(
+    allBundles,
+    className,
+    useDeferredLoading,
+    fileName,
+  );
+  final String loadBody = (
+    useDeferredLoading ? loadBodyDeferredLoadingTemplate : loadBodyTemplate
+  )
+    .replaceAll('@(class)', className)
+    .replaceAll('@(lookupName)', '_lookup$className');
+  final String lookupFunction = lookupFunctionTemplate
+    .replaceAll('@(class)', className)
+    .replaceAll('@(lookupName)', '_lookup$className')
+    .replaceAll('@(return)',
+      useDeferredLoading ? 'Future<$className>' : className
+    )
+    .replaceAll('@(lookupBody)', lookupBody);
+  return delegateClassTemplate
+    .replaceAll('@(class)', className)
+    .replaceAll('@(loadBody)', loadBody)
+    .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
+    .replaceAll('@(lookupFunction)', lookupFunction);
 }
 
 class LocalizationsGenerator {
@@ -397,6 +466,11 @@ class LocalizationsGenerator {
 
   final Map<LocaleInfo, List<String>> _unimplementedMessages = <LocaleInfo, List<String>>{};
 
+  /// Whether to generate localizations file with deferred loading, to allow for
+  /// loading of localizations as needed in Flutter web.
+  bool get useDeferredLoading => _useDeferredLoading;
+  bool _useDeferredLoading;
+
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
@@ -412,12 +486,14 @@ class LocalizationsGenerator {
     String preferredSupportedLocaleString,
     String headerString,
     String headerFile,
+    bool useDeferredLoading = false,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
     _setHeader(headerString, headerFile);
+    _useDeferredLoading = useDeferredLoading;
     className = classNameString;
   }
 
@@ -746,13 +822,26 @@ class LocalizationsGenerator {
       }
     }
 
-    final Iterable<String> localeImports = supportedLocales
+    final List<String> sortedClassImports = supportedLocales
       .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
       .map((LocaleInfo locale) {
-        return "import '${fileName}_${locale.toString()}.dart';";
-      });
+        final String library = '${fileName}_${locale.toString()}';
+        if (useDeferredLoading) {
+          return "import '$library.dart' deferred as $library;";
+        } else {
+          return "import '$library.dart';";
+        }
+      })
+      .toList()
+      ..sort();
 
-    final String lookupBody = _generateLookupBody(_allBundles, className);
+    final String delegateClass = _generateDelegateClass(
+      allBundles: _allBundles,
+      className: className,
+      supportedLanguageCodes: supportedLanguageCodes,
+      useDeferredLoading: useDeferredLoading,
+      fileName: fileName,
+    );
 
     return fileTemplate
       .replaceAll('@(header)', header)
@@ -761,9 +850,8 @@ class LocalizationsGenerator {
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
-      .replaceAll('@(messageClassImports)', localeImports.join('\n'))
-      .replaceAll('@(lookupName)', '_lookup$className')
-      .replaceAll('@(lookupBody)', lookupBody);
+      .replaceAll('@(messageClassImports)', sortedClassImports.join('\n'))
+      .replaceAll('@(delegateClass)', delegateClass);
   }
 
   void writeOutputFile() {
