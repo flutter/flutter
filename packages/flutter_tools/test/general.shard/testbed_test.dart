@@ -95,7 +95,7 @@ void main() {
         ProcessUtils: () => null,
       });
 
-      expect(() => testbed.run(() {}), throwsA(isInstanceOf<StateError>()));
+      expect(() => testbed.run(() {}), throwsA(isA<StateError>()));
     });
   });
 }

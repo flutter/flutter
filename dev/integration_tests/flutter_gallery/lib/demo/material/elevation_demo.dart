@@ -54,6 +54,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
         actions: <Widget>[
           MaterialDemoDocumentationButton(ElevationDemo.routeName),
           IconButton(
+            tooltip: 'Toggle elevation',
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() => _showElevation = !_showElevation);

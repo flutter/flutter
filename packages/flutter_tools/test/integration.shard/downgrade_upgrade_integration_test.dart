@@ -12,8 +12,8 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 
-const String _kInitialVersion = 'v1.9.1+hotfix.6';
-const String _kBranch = 'stable';
+const String _kInitialVersion = 'v1.9.1';
+const String _kBranch = 'dev';
 const FileSystem fileSystem = LocalFileSystem();
 const ProcessManager processManager = LocalProcessManager();
 final Stdio stdio = Stdio();
@@ -50,20 +50,25 @@ void main() {
     final Directory testDirectory = parentDirectory.childDirectory('flutter');
     testDirectory.createSync(recursive: true);
 
+    int exitCode = 0;
+
     // Enable longpaths for windows integration test.
     await processManager.run(<String>[
       'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
 
+    print('Step 1');
     // Step 1. Clone the dev branch of flutter into the test directory.
-    await processUtils.stream(<String>[
+    exitCode = await processUtils.stream(<String>[
       'git',
       'clone',
       'https://github.com/flutter/flutter.git',
     ], workingDirectory: parentDirectory.path, trace: true);
+    expect(exitCode, 0);
 
+    print('Step 2');
     // Step 2. Switch to the dev branch.
-    await processUtils.stream(<String>[
+    exitCode = await processUtils.stream(<String>[
       'git',
       'checkout',
       '--track',
@@ -71,23 +76,30 @@ void main() {
       _kBranch,
       'origin/$_kBranch',
     ], workingDirectory: testDirectory.path, trace: true);
+    expect(exitCode, 0);
 
+    print('Step 3');
     // Step 3. Revert to a prior version.
-    await processUtils.stream(<String>[
+    exitCode = await processUtils.stream(<String>[
       'git',
       'reset',
       '--hard',
       _kInitialVersion,
     ], workingDirectory: testDirectory.path, trace: true);
+    expect(exitCode, 0);
 
-    // Step 4. Upgrade to the newest dev. This should update the persistent
+    print('Step 4');
+    // Step 4. Upgrade to the newest stable. This should update the persistent
     // tool state with the sha for v1.14.3
-    await processUtils.stream(<String>[
+    exitCode = await processUtils.stream(<String>[
       flutterBin,
       'upgrade',
+      '--verbose',
       '--working-directory=${testDirectory.path}'
     ], workingDirectory: testDirectory.path, trace: true);
+    expect(exitCode, 0);
 
+    print('Step 5');
     // Step 5. Verify that the version is different.
     final RunResult versionResult = await processUtils.run(<String>[
       'git',
@@ -100,14 +112,17 @@ void main() {
     ], workingDirectory: testDirectory.path);
     expect(versionResult.stdout, isNot(contains(_kInitialVersion)));
 
+    print('Step 6');
     // Step 6. Downgrade back to initial version.
-    await processUtils.stream(<String>[
+    exitCode = await processUtils.stream(<String>[
        flutterBin,
       'downgrade',
       '--no-prompt',
       '--working-directory=${testDirectory.path}'
     ], workingDirectory: testDirectory.path, trace: true);
+    expect(exitCode, 0);
 
+    print('Step 7');
     // Step 7. Verify downgraded version matches original version.
     final RunResult oldVersionResult = await processUtils.run(<String>[
       'git',

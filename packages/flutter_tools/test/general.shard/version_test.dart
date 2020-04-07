@@ -392,24 +392,44 @@ void main() {
 
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';
-    expect(GitTagVersion.parse('v1.2.3-4-g$hash').frameworkVersionFor(hash), '1.2.4-pre.4');
-    expect(GitTagVersion.parse('v98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
-    expect(GitTagVersion.parse('v10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
+    GitTagVersion gitTagVersion;
+
+    // legacy tag release format
+    gitTagVersion = GitTagVersion.parse('v1.2.3-4-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.4');
+    expect(gitTagVersion.devVersion, null);
+    expect(gitTagVersion.devPatch, null);
+
+    // new dev tag release format
+    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
+    // new stable tag release format
+    gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    expect(gitTagVersion.devVersion, null);
+    expect(gitTagVersion.devPatch, null);
+
+    expect(GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
+    expect(GitTagVersion.parse('10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
     expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3+hotfix.2-pre.4');
-    expect(GitTagVersion.parse('v7.2.4+hotfix.8-0-g$hash').frameworkVersionFor(hash), '7.2.4+hotfix.8');
     expect(testLogger.traceText, '');
+    expect(GitTagVersion.parse('1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
-    expect(GitTagVersion.parse('v1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('beta-1-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
-    expect(GitTagVersion.parse('v1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(testLogger.statusText, '');
     expect(testLogger.errorText, '');
     expect(
       testLogger.traceText,
+      'Could not interpret results of "git describe": 1.2.3+hotfix.1-4-gabcdef\n'
       'Could not interpret results of "git describe": x1.2.3-4-gabcdef\n'
-      'Could not interpret results of "git describe": v1.0.0-unknown-0-gabcdef\n'
+      'Could not interpret results of "git describe": 1.0.0-unknown-0-gabcdef\n'
       'Could not interpret results of "git describe": beta-1-gabcdef\n'
-      'Could not interpret results of "git describe": v1.2.3-4-gxabcdef\n',
+      'Could not interpret results of "git describe": 1.2.3-4-gxabcdef\n',
     );
   });
 
@@ -421,7 +441,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -439,7 +459,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -458,7 +478,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -476,7 +496,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -495,7 +515,7 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(110, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
@@ -513,7 +533,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -634,7 +654,7 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(105, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags'],
+    <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''));

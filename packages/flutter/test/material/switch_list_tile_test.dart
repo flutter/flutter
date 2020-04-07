@@ -8,7 +8,113 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
+import '../widgets/semantics_tester.dart';
+
+Widget wrap({ Widget child }) {
+  return MediaQuery(
+    data: const MediaQueryData(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
+  );
+}
+
 void main() {
+  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+    final List<dynamic> log = <dynamic>[];
+    await tester.pumpWidget(wrap(
+      child: SwitchListTile(
+        value: true,
+        onChanged: (bool value) { log.add(value); },
+        title: const Text('Hello'),
+      ),
+    ));
+    await tester.tap(find.text('Hello'));
+    log.add('-');
+    await tester.tap(find.byType(Switch));
+    expect(log, equals(<dynamic>[false, '-', false]));
+  });
+
+  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(wrap(
+      child: Column(
+        children: <Widget>[
+          SwitchListTile(
+            value: true,
+            onChanged: (bool value) { },
+            title: const Text('AAA'),
+            secondary: const Text('aaa'),
+          ),
+          CheckboxListTile(
+            value: true,
+            onChanged: (bool value) { },
+            title: const Text('BBB'),
+            secondary: const Text('bbb'),
+          ),
+          RadioListTile<bool>(
+            value: true,
+            groupValue: false,
+            onChanged: (bool value) { },
+            title: const Text('CCC'),
+            secondary: const Text('ccc'),
+          ),
+        ],
+      ),
+    ));
+
+    // This test verifies that the label and the control get merged.
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          id: 1,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: null,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+            SemanticsFlag.isToggled,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'aaa\nAAA',
+        ),
+        TestSemantics.rootChild(
+          id: 3,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 56.0, 0.0),
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'bbb\nBBB',
+        ),
+        TestSemantics.rootChild(
+          id: 5,
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 112.0, 0.0),
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
+          ],
+          actions: SemanticsAction.tap.index,
+          label: 'CCC\nccc',
+        ),
+      ],
+    )));
+
+    semantics.dispose();
+  });
+
   testWidgets('SwitchListTile has the right colors', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(

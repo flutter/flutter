@@ -30,7 +30,7 @@ class VsCode {
 
     // If the extensions directory doesn't exist at all, the listSync()
     // below will fail, so just bail out early.
-    final ValidationMessage notInstalledMessage = ValidationMessage.error(
+    const ValidationMessage notInstalledMessage = ValidationMessage.error(
           'Flutter extension not installed; install from\n$extensionMarketplaceUrl');
     if (!globals.fs.isDirectorySync(extensionDirectory)) {
       _validationMessages.add(notInstalledMessage);

@@ -82,6 +82,7 @@ enum SmartQuotesType {
 /// This class stays as close to [Enum] interface as possible, and allows
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
+@immutable
 class TextInputType {
   const TextInputType._(this.index)
     : signed = null,
