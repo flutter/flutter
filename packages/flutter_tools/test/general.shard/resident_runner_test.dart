@@ -111,6 +111,7 @@ void main() {
       });
     when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
+    when(mockFlutterDevice.getVMs()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
         'type': 'ReloadReport',

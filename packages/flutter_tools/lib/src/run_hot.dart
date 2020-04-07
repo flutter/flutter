@@ -798,6 +798,7 @@ class HotRunner extends ResidentRunner {
 
     if (!_isPaused()) {
       globals.printTrace('Refreshing active FlutterViews before reloading.');
+      await refreshVM();
       await refreshViews();
     }
 
