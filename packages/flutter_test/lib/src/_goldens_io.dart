@@ -135,18 +135,18 @@ class LocalComparisonOutput {
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
-      final Map<String, ByteData> diffs =
-          result.diffs.cast<String, ByteData>();
-      for (final MapEntry<String, ByteData> entry in diffs.entries) {
+      final Map<String, Image> diffs =
+          result.diffs.cast<String, Image>();
+      for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
           key.isEmpty ? entry.key : entry.key + '_' + key,
           golden,
           basedir,
         );
         output.parent.createSync(recursive: true);
-        // TODO(jakemac): convert the rgba pixels in `entry.value` into png
-        // format and write to `output`.
-        // output.writeAsBytesSync();
+        final ByteData pngBytes =
+            await entry.value.toByteData(format: ImageByteFormat.png);
+        output.writeAsBytesSync(Uint8List.sublistView(pngBytes));
       }
     }
     throw test_package.TestFailure(
@@ -211,12 +211,8 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   final ByteData invertedMasterRgba = invert(masterImageRgba);
   final ByteData invertedTestRgba = invert(testImageRgba);
 
-  final Map<String, ByteData> diffs = <String, ByteData>{
-    'masterImage' : masterImageRgba,
-    'testImage' : testImageRgba,
-    'maskedDiff' : await testImage.toByteData(),
-    'isolatedDiff' : ByteData(width * height * 4),
-  };
+  final ByteData maskedDiffRgba = await testImage.toByteData();
+  final ByteData isolatedDiffRgba = ByteData(width * height * 4);
 
   for (int x = 0; x < width; x++) {
     for (int y =0; y < height; y++) {
@@ -233,8 +229,8 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
         final int invertedMasterPixel = invertedMasterRgba.getUint32(byteOffset);
         final int invertedTestPixel = invertedTestRgba.getUint32(byteOffset);
         final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
-        diffs['maskedDiff'].setUint32(byteOffset, maskPixel);
-        diffs['isolatedDiff'].setUint32(byteOffset, maskPixel);
+        maskedDiffRgba.setUint32(byteOffset, maskPixel);
+        isolatedDiffRgba.setUint32(byteOffset, maskPixel);
         pixelDiffCount++;
       }
     }
@@ -246,7 +242,12 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
       error: 'Pixel test failed, '
         '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
         'diff detected.',
-      diffs: diffs,
+      diffs:  <String, Image>{
+        'masterImage' : masterImage,
+        'testImage' : testImage,
+        'maskedDiff' : await _createImage(maskedDiffRgba, width, height),
+        'isolatedDiff' : await _createImage(isolatedDiffRgba, width, height),
+      },
     );
   }
   return ComparisonResult(passed: true);
@@ -288,3 +289,12 @@ int readBlue(int pixel) => pixel >> 8 & 0xff;
 
 /// Reads the alpha value out of a 32 bit rgba pixel.
 int readAlpha(int pixel) => pixel & 0xff;
+
+/// Convenience wrapper around [decodeImageFromPixels].
+Future<Image> _createImage(ByteData bytes, int width, int height) {
+  final Completer<Image> completer = Completer<Image>();
+  decodeImageFromPixels(
+      Uint8List.sublistView(bytes), width, height, PixelFormat.rgba8888,
+      completer.complete);
+  return completer.future;
+}
