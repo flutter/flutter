@@ -22,6 +22,7 @@ export 'src/services/message_codec.dart';
 export 'src/services/message_codecs.dart';
 export 'src/services/platform_channel.dart';
 export 'src/services/platform_messages.dart';
+export 'src/services/platform_network.dart';
 export 'src/services/platform_views.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/raw_keyboard_android.dart';
