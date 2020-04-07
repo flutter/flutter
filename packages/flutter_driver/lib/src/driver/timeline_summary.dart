@@ -150,15 +150,19 @@ class TimelineSummary {
     Duration extractor(TimelineEvent beginEvent, TimelineEvent endEvent),
   ) {
     final List<Duration> result = <Duration>[];
+    final List<TimelineEvent> events = _extractNamedEvents(name);
 
     // Timeline does not guarantee that the first event is the "begin" event.
-    final Iterator<TimelineEvent> events = _extractNamedEvents(name)
-        .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
-    while (events.moveNext()) {
-      final TimelineEvent beginEvent = events.current;
-      if (events.moveNext()) {
-        final TimelineEvent endEvent = events.current;
-        result.add(extractor(beginEvent, endEvent));
+    TimelineEvent begin;
+    for (final TimelineEvent event in events) {
+      if (event.phase == 'B') {
+        begin = event;
+      } else {
+        if (begin != null) {
+          result.add(extractor(begin, event));
+          // each begin only gets used once.
+          begin = null;
+        }
       }
     }
 
