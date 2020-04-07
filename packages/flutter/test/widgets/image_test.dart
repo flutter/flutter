@@ -1623,34 +1623,12 @@ void main() {
   });
 
   Future<void> _testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
-    // Construct a PNG of 100x100 blue pixels as Image widget doesn't support raw RGBA.
-    Uint8List bytes;
-    await tester.runAsync(() async {
-      const int imageWidth = 100;
-      const int imageHeight = 100;
-      final Uint8List pixels = Uint8List.fromList(List<int>.generate(
-        imageWidth * imageHeight * 4,
-            (int i) => i % 4 < 2 ? 0x00 : 0xFF, // opaque blue
-      ));
-      final Completer<void> completer = Completer<void>();
-      ui.decodeImageFromPixels(
-        pixels, imageWidth, imageHeight, ui.PixelFormat.rgba8888,
-            (ui.Image image) async {
-          final ByteData byteData = await image.toByteData(
-              format: ui.ImageByteFormat.png);
-          bytes = byteData.buffer.asUint8List();
-          completer.complete();
-        },
-      );
-      await completer.future;
-    });
-
     final Key key = UniqueKey();
     await tester.pumpWidget(RepaintBoundary(
       key: key,
       child: Transform.rotate(
         angle: math.pi / 180,
-        child: Image.memory(bytes, isAntiAlias: isAntiAlias),
+        child: Image.memory(Uint8List.fromList(kBlueRectPng), isAntiAlias: isAntiAlias),
       ),
     ));
 
