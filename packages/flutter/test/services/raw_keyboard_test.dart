@@ -891,8 +891,8 @@ void main() {
       final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'windows',
-        'keyCode': 160, // keyCode for ShiftLeft.
-        'scanCode': 0x0000002a,  // scanCode for ShiftLeft.
+        'keyCode': 160, // keyCode for left shift.
+        'scanCode': 0x0000002a,  // scanCode for left shift.
         'characterCodePoint': 0,
         'modifiers': RawKeyEventDataWindows.modifierLeftShift,
       });
@@ -905,8 +905,8 @@ void main() {
       final RawKeyEvent leftArrowKey = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'windows',
-        'keyCode': 0,
-        'scanCode': 0x0000e04b,
+        'keyCode': 37, // keyCode for left arrow.
+        'scanCode': 0x0000e04b, // scanCode for left arrow.
         'characterCodePoint': 0,
         'modifiers': 0,
       });
