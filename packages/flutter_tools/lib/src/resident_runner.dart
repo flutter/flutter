@@ -825,6 +825,13 @@ abstract class ResidentRunner {
     await Future.wait(futures);
   }
 
+  Future<void> refreshVM() async {
+    final List<Future<void>> futures = <Future<void>>[
+      for (final FlutterDevice device in flutterDevices) device.getVMs(),
+    ];
+    await Future.wait(futures);
+  }
+
   Future<void> debugDumpApp() async {
     await refreshViews();
     for (final FlutterDevice device in flutterDevices) {
