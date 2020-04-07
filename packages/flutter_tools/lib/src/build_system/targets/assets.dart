@@ -40,10 +40,10 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
   final IconTreeShaker iconTreeShaker = IconTreeShaker(
     environment,
     assetBundle.entries[kFontManifestJson] as DevFSStringContent,
-    processManager: environment.processManager,
-    logger: environment.logger,
-    fileSystem: environment.fileSystem,
-    artifacts: environment.artifacts,
+    processManager: globals.processManager,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    artifacts: globals.artifacts,
   );
 
   await Future.wait<void>(
