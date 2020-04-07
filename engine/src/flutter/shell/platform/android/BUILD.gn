@@ -255,15 +255,24 @@ action("flutter_shell_java") {
     source_jar_path,
     source_jar_path + ".md5.stamp",
   ]
-  inputs = [ android_sdk_jar ] + embedding_dependencies_jars
+
+  lambda_jar = "$android_sdk_build_tools/core-lambda-stubs.jar"
+  inputs = [
+             android_sdk_jar,
+             lambda_jar,
+           ] + embedding_dependencies_jars
 
   _rebased_current_path = rebase_path(".")
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
   _rebased_source_jar_path = rebase_path(source_jar_path, root_build_dir)
   _rebased_depfile = rebase_path(depfile, root_build_dir)
   _rebased_android_sdk_jar = rebase_path(android_sdk_jar, root_build_dir)
-  _rebased_classpath = [ _rebased_android_sdk_jar ] +
-                       rebase_path(embedding_dependencies_jars, root_build_dir)
+  _rebased_lambda_jar = rebase_path(lambda_jar, root_build_dir)
+  _rebased_classpath =
+      [
+        _rebased_android_sdk_jar,
+        _rebased_lambda_jar,
+      ] + rebase_path(embedding_dependencies_jars, root_build_dir)
 
   args = [
     "--depfile=$_rebased_depfile",
