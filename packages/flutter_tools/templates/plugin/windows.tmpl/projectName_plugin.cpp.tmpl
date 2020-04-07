@@ -83,13 +83,7 @@ void {{pluginClass}}::HandleMethodCall(
 
 void {{pluginClass}}RegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
-  // The plugin registrar wrappers owns the plugins, registered callbacks, etc.,
-  // so must remain valid for the life of the application.
-  static auto *plugin_registrars =
-      new std::map<FlutterDesktopPluginRegistrarRef,
-                   std::unique_ptr<flutter::PluginRegistrarWindows>>;
-  auto insert_result = plugin_registrars->emplace(
-      registrar, std::make_unique<flutter::PluginRegistrarWindows>(registrar));
-
-  {{pluginClass}}::RegisterWithRegistrar(insert_result.first->second.get());
+  {{pluginClass}}::RegisterWithRegistrar(
+      flutter::PluginRegistrarManager::GetInstance()
+          ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }
