@@ -581,7 +581,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
-    this.webForceWsVmService = false,
+    this.webUseSseForDebugProxy = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.vmserviceOutFile,
@@ -593,7 +593,7 @@ class DebuggingOptions {
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
-      this.webForceWsVmService = false,
+      this.webUseSseForDebugProxy = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -638,7 +638,7 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
-  final bool webForceWsVmService;
+  final bool webUseSseForDebugProxy;
 
   /// Whether to run the browser in headless mode.
   ///
