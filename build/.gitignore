@@ -1,2 +1,3 @@
 # Generated file containing information about the VS toolchain on Windows
 win_toolchain.json
+/linux/debian_*-sysroot/
