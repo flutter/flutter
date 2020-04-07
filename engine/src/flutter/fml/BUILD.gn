@@ -120,6 +120,9 @@ source_set("fml") {
   }
 
   if (is_ios || is_mac) {
+    cflags_objc = flutter_cflags_objc
+    cflags_objcc = flutter_cflags_objcc
+
     sources += [
       "platform/darwin/cf_utils.cc",
       "platform/darwin/cf_utils.h",
