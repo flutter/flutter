@@ -889,8 +889,7 @@ class ScrollIntent extends Intent {
     @required this.direction,
     this.type = ScrollIncrementType.line,
   })  : assert(direction != null),
-        assert(type != null),
-        super(ScrollAction.key);
+        assert(type != null);
 
   /// The direction in which to scroll the scrollable containing the focused
   /// widget.
@@ -898,11 +897,6 @@ class ScrollIntent extends Intent {
 
   /// The type of scrolling that is intended.
   final ScrollIncrementType type;
-
-  @override
-  bool isEnabled(BuildContext context) {
-    return Scrollable.of(context) != null;
-  }
 }
 
 /// An [Action] that scrolls the [Scrollable] that encloses the current
@@ -912,12 +906,15 @@ class ScrollIntent extends Intent {
 /// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
 /// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
 /// pixels.
-class ScrollAction extends Action {
-  /// Creates a const [ScrollAction].
-  ScrollAction() : super(key);
-
+class ScrollAction extends Action<ScrollIntent> {
   /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
   static const LocalKey key = ValueKey<Type>(ScrollAction);
+
+  @override
+  bool get enabled {
+    final FocusNode focus = primaryFocus;
+    return focus != null && focus.context != null && Scrollable.of(focus.context) != null;
+  }
 
   // Returns the scroll increment for a single scroll request, for use when
   // scrolling using a hardware keyboard.
@@ -1013,8 +1010,8 @@ class ScrollAction extends Action {
   }
 
   @override
-  void invoke(FocusNode node, ScrollIntent intent) {
-    final ScrollableState state = Scrollable.of(node.context);
+  void invoke(ScrollIntent intent) {
+    final ScrollableState state = Scrollable.of(primaryFocus.context);
     assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
     assert(state.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
     assert(state.position.viewportDimension != null);

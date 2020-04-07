@@ -92,7 +92,8 @@ enum TraversalDirection {
 /// [FocusTraversalGroup] widget.
 ///
 /// The focus traversal policy is what determines which widget is "next",
-/// "previous", or in a direction from the currently focused [FocusNode].
+/// "previous", or in a direction from the widget associated with the currently
+/// focused [FocusNode] (usually a [Focus] widget).
 ///
 /// One of the pre-defined subclasses may be used, or define a custom policy to
 /// create a unique focus order.
@@ -1713,88 +1714,94 @@ class _FocusTraversalGroupMarker extends InheritedWidget {
   bool updateShouldNotify(InheritedWidget oldWidget) => false;
 }
 
-// A base class for all of the default actions that request focus for a node.
-class _RequestFocusActionBase extends Action {
-  _RequestFocusActionBase(LocalKey name) : super(name);
+/// An intent for use with the [RequestFocusAction], which supplies the
+/// [FocusNode] that should be focused.
+class RequestFocusIntent extends Intent {
+  /// A const constructor for a [RequestFocusIntent], so that subclasses may be
+  /// const.
+  const RequestFocusIntent(this.focusNode)
+      : assert(focusNode != null);
 
-  FocusNode _previousFocus;
-
-  @override
-  void invoke(FocusNode node, Intent intent) {
-    _previousFocus = primaryFocus;
-    node.requestFocus();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<FocusNode>('previous', _previousFocus));
-  }
+  /// The [FocusNode] that is to be focused.
+  final FocusNode focusNode;
 }
 
-/// An [Action] that requests the focus on the node it is invoked on.
+/// An [Action] that requests the focus on the node it is given in its
+/// [RequestFocusIntent].
 ///
 /// This action can be used to request focus for a particular node, by calling
 /// [Action.invoke] like so:
 ///
 /// ```dart
-/// Actions.invoke(context, const Intent(RequestFocusAction.key), focusNode: _focusNode);
+/// Actions.invoke(context, const RequestFocusIntent(focusNode));
 /// ```
 ///
-/// Where the `_focusNode` is the node for which the focus will be requested.
+/// Where the `focusNode` is the node for which the focus will be requested.
 ///
 /// The difference between requesting focus in this way versus calling
-/// [_focusNode.requestFocus] directly is that it will use the [Action]
-/// registered in the nearest [Actions] widget associated with [key] to make the
-/// request, rather than just requesting focus directly. This allows the action
-/// to have additional side effects, like logging, or undo and redo
-/// functionality.
+/// [FocusNode.requestFocus] directly is that it will use the [Action]
+/// registered in the nearest [Actions] widget associated with
+/// [RequestFocusIntent] to make the request, rather than just requesting focus
+/// directly. This allows the action to have additional side effects, like
+/// logging, or undo and redo functionality.
 ///
-/// However, this [RequestFocusAction] is the default action associated with the
-/// [key] in the [WidgetsApp], and it simply requests focus and has no side
-/// effects.
-class RequestFocusAction extends _RequestFocusActionBase {
-  /// Creates a [RequestFocusAction] with a fixed [key].
-  RequestFocusAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action to an [Intent].
-  static const LocalKey key = ValueKey<Type>(RequestFocusAction);
-
+/// This [RequestFocusAction] class is the default action associated with the
+/// [RequestFocusIntent] in the [WidgetsApp], and it simply requests focus. You
+/// can redefine the associated action with your own [Actions] widget.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
+class RequestFocusAction extends Action<RequestFocusIntent> {
   @override
-  void invoke(FocusNode node, Intent intent) => _focusAndEnsureVisible(node);
+  void invoke(RequestFocusIntent intent) {
+    _focusAndEnsureVisible(intent.focusNode);
+  }
+}
+
+/// An [Intent] bound to [NextFocusAction], which moves the focus to the next
+/// focusable node in the focus traversal order.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
+class NextFocusIntent extends Intent {
+  /// Creates a const [NextFocusIntent] so subclasses can be const.
+  const NextFocusIntent();
 }
 
 /// An [Action] that moves the focus to the next focusable node in the focus
 /// order.
 ///
-/// This action is the default action registered for the [key], and by default
-/// is bound to the [LogicalKeyboardKey.tab] key in the [WidgetsApp].
-class NextFocusAction extends _RequestFocusActionBase {
-  /// Creates a [NextFocusAction] with a fixed [key];
-  NextFocusAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action to an [Intent].
-  static const LocalKey key = ValueKey<Type>(NextFocusAction);
-
+/// This action is the default action registered for the [NextFocusIntent], and
+/// by default is bound to the [LogicalKeyboardKey.tab] key in the [WidgetsApp].
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
+class NextFocusAction extends Action<NextFocusIntent> {
   @override
-  void invoke(FocusNode node, Intent intent) => node.nextFocus();
+  void invoke(NextFocusIntent intent) {
+    primaryFocus.nextFocus();
+  }
+}
+
+/// An [Intent] bound to [PreviousFocusAction], which moves the focus to the
+/// previous focusable node in the focus traversal order.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
+class PreviousFocusIntent extends Intent {
+  /// Creates a const [PreviousFocusIntent] so subclasses can be const.
+  const PreviousFocusIntent();
 }
 
 /// An [Action] that moves the focus to the previous focusable node in the focus
 /// order.
 ///
-/// This action is the default action registered for the [key], and by default
-/// is bound to a combination of the [LogicalKeyboardKey.tab] key and the
-/// [LogicalKeyboardKey.shift] key in the [WidgetsApp].
-class PreviousFocusAction extends _RequestFocusActionBase {
-  /// Creates a [PreviousFocusAction] with a fixed [key];
-  PreviousFocusAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action to an [Intent].
-  static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
-
+/// This action is the default action registered for the [PreviousFocusIntent],
+/// and by default is bound to a combination of the [LogicalKeyboardKey.tab] key
+/// and the [LogicalKeyboardKey.shift] key in the [WidgetsApp].
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
+class PreviousFocusAction extends Action<PreviousFocusIntent> {
   @override
-  void invoke(FocusNode node, Intent intent) => node.previousFocus();
+  void invoke(PreviousFocusIntent intent) {
+    primaryFocus.previousFocus();
+  }
 }
 
 /// An [Intent] that represents moving to the next focusable node in the given
@@ -1804,12 +1811,13 @@ class PreviousFocusAction extends _RequestFocusActionBase {
 /// [LogicalKeyboardKey.arrowDown], [LogicalKeyboardKey.arrowLeft], and
 /// [LogicalKeyboardKey.arrowRight] keys in the [WidgetsApp], with the
 /// appropriate associated directions.
+///
+/// See [FocusTraversalPolicy] for more information about focus traversal.
 class DirectionalFocusIntent extends Intent {
-  /// Creates a [DirectionalFocusIntent] with a fixed [key], and the given
-  /// [direction].
+  /// Creates a [DirectionalFocusIntent] intending to move the focus in the
+  /// given [direction].
   const DirectionalFocusIntent(this.direction, {this.ignoreTextFields = true})
-      : assert(ignoreTextFields != null),
-        super(DirectionalFocusAction.key);
+      : assert(ignoreTextFields != null);
 
   /// The direction in which to look for the next focusable node when the
   /// associated [DirectionalFocusAction] is invoked.
@@ -1826,21 +1834,15 @@ class DirectionalFocusIntent extends Intent {
 /// An [Action] that moves the focus to the focusable node in the direction
 /// configured by the associated [DirectionalFocusIntent.direction].
 ///
-/// This is the [Action] associated with the [key] and bound by default to the
-/// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
+/// This is the [Action] associated with [DirectionalFocusIntent] and bound by
+/// default to the [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
 /// [LogicalKeyboardKey.arrowLeft], and [LogicalKeyboardKey.arrowRight] keys in
 /// the [WidgetsApp], with the appropriate associated directions.
-class DirectionalFocusAction extends _RequestFocusActionBase {
-  /// Creates a [DirectionalFocusAction] with a fixed [key];
-  DirectionalFocusAction() : super(key);
-
-  /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
-  static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
-
+class DirectionalFocusAction extends Action<DirectionalFocusIntent> {
   @override
-  void invoke(FocusNode node, DirectionalFocusIntent intent) {
-    if (!intent.ignoreTextFields || node.context.widget is! EditableText) {
-      node.focusInDirection(intent.direction);
+  void invoke(DirectionalFocusIntent intent) {
+    if (!intent.ignoreTextFields || primaryFocus.context.widget is! EditableText) {
+      primaryFocus.focusInDirection(intent.direction);
     }
   }
 }

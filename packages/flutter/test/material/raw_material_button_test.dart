@@ -47,8 +47,8 @@ void main() {
     await tester.pumpWidget(
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+          LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
+          LogicalKeySet(LogicalKeyboardKey.space): const ActivateIntent(),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,

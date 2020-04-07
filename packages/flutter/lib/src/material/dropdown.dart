@@ -158,7 +158,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.enter): const ActivateIntent(),
   };
 
   @override
@@ -1080,7 +1080,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus = false;
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
   FocusHighlightMode _focusHighlightMode;
 
   // Only used if needed to create _internalNode.
@@ -1095,8 +1095,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.focusNode == null) {
       _internalNode ??= _createFocusNode();
     }
-    _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(
+        onInvoke: (ActivateIntent intent) => _handleTap(),
+      ),
     };
     focusNode.addListener(_handleFocusChanged);
     final FocusManager focusManager = WidgetsBinding.instance.focusManager;
@@ -1223,15 +1225,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.onTap != null) {
       widget.onTap();
     }
-  }
-
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke: (FocusNode node, Intent intent) {
-        _handleTap();
-      },
-    );
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to

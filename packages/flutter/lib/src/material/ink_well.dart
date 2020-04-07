@@ -559,27 +559,20 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
-  void _handleAction(FocusNode node, Intent intent) {
-    _startSplash(context: node.context);
-    _handleTap(node.context);
-  }
-
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke:  _handleAction,
-    );
+  void _handleAction(ActivateIntent intent) {
+    _startSplash(context: context);
+    _handleTap(context);
   }
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleAction),
     };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }

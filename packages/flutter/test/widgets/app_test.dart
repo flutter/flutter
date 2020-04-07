@@ -8,15 +8,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestAction extends Action {
-  TestAction() : super(key);
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class TestAction extends Action<Intent> {
+  TestAction();
 
   static const LocalKey key = ValueKey<Type>(TestAction);
 
   int calls = 0;
 
   @override
-  void invoke(FocusNode node, Intent intent) {
+  void invoke(Intent intent) {
     calls += 1;
   }
 }
@@ -67,11 +71,11 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
-        actions: <LocalKey, ActionFactory>{
-          TestAction.key: () => action,
+        actions: <Type, Action<Intent>>{
+          TestIntent: action,
         },
         shortcuts: <LogicalKeySet, Intent> {
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(TestAction.key),
+          LogicalKeySet(LogicalKeyboardKey.space): const TestIntent(),
         },
         builder: (BuildContext context, Widget child) {
           return Material(

@@ -132,7 +132,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
   static final Set<Element> _debugIllFatedElements = HashSet<Element>();
-  // This map keeps track which child reserve the global key with the parent.
+  // This map keeps track which child reserves the global key with the parent.
   // Parent, child -> global key.
   // This provides us a way to remove old reservation while parent rebuilds the
   // child in the same slot.
