@@ -201,6 +201,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  complex_raster_perf__timeline_summary:
+    description: >
+      Complex raster perf
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.

@@ -189,6 +189,15 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
+TaskFunction createComplexRasterPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/complex_raster_perf.dart',
+    'complex_raster_perf',
+  ).run;
+}
+
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
