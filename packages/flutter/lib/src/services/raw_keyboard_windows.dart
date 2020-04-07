@@ -124,17 +124,16 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     bool result;
     switch (key) {
       case ModifierKey.controlModifier:
-        result = _isLeftRightModifierPressed(side, modifiers & modifierControl, modifierLeftControl, modifierRightControl);
+        result = _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
         break;
       case ModifierKey.shiftModifier:
-        result = _isLeftRightModifierPressed(side, modifiers & modifierShift, modifierLeftShift, modifierRightShift);
+        result = _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
         break;
       case ModifierKey.altModifier:
-        result = _isLeftRightModifierPressed(side, modifiers & modifierAlt, modifierLeftAlt, modifierRightAlt);
+        result = _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
         break;
       case ModifierKey.metaModifier:
-        // There is no keycode for an "Any" windows key.
-        result = _isLeftRightModifierPressed(side, 0, modifierLeftMeta, modifierRightMeta);
+        result = _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
         break;
       case ModifierKey.capsLockModifier:
         result = modifiers & modifierCaps != 0;
@@ -201,87 +200,93 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   // of the message from the embedder. Embedders should map these values to the native key codes.
   // Keep this in sync with https://github.com/flutter/engine/blob/master/shell/platform/windows/key_event_handler.cc
 
-  /// This mask is used to check the [modifiers] field to test whether one of the
-  /// SHIFT modifier keys is pressed.
-  ///
-  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierShift = 1 << 0;
-
   /// This mask is used to check the [modifiers] field to test whether the left
   /// SHIFT modifier key is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierLeftShift = 1 << 1;
+  static const int modifierLeftShift = 1 << 0;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// SHIFT modifier key is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierRightShift = 1 << 2;
+  static const int modifierRightShift = 1 << 1;
+
+  /// This mask is used to check the [modifiers] field to test whether one of the
+  /// SHIFT modifier keys is pressed.
+  ///
+  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
+  static const int modifierShift = modifierLeftShift | modifierRightShift;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// CTRL modifier key is pressed.
+  ///
+  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
+  static const int modifierLeftControl = 1 << 2;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// CTRL modifier key is pressed.
+  ///
+  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
+  static const int modifierRightControl = 1 << 3;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierControl = 1 << 3;
+  static const int modifierControl = modifierLeftControl | modifierRightControl;
 
   /// This mask is used to check the [modifiers] field to test whether the left
-  /// CTRL modifier key is pressed.
+  /// ALT modifier key is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierLeftControl = 1 << 4;
+  static const int modifierLeftAlt = 1 << 4;
 
   /// This mask is used to check the [modifiers] field to test whether the right
-  /// CTRL modifier key is pressed.
+  /// ALT modifier key is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierRightControl = 1 << 5;
+  static const int modifierRightAlt = 1 << 5;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierAlt = 1 << 6;
+  static const int modifierAlt = modifierLeftAlt | modifierRightAlt;
 
   /// This mask is used to check the [modifiers] field to test whether the left
-  /// ALT modifier key is pressed.
+  /// WIN modifier keys is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierLeftAlt = 1 << 7;
+  static const int modifierLeftMeta = 1 << 6;
 
   /// This mask is used to check the [modifiers] field to test whether the right
-  /// ALT modifier key is pressed.
+  /// WIN modifier keys is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierRightAlt = 1 << 8;
+  static const int modifierRightMeta = 1 << 7;
 
-  /// This mask is used to check the [modifiers] field to test whether the left
-  /// CMD modifier keys is pressed.
+  /// This mask is used to check the [modifiers] field to test whether one of the
+  /// WIN modifier keys is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierLeftMeta = 1 << 9;
-
-  /// This mask is used to check the [modifiers] field to test whether the right
-  /// CMD modifier keys is pressed.
-  ///
-  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierRightMeta = 1 << 10;
+  static const int modifierMeta = modifierLeftMeta | modifierRightMeta;
 
   /// This mask is used to check the [modifiers] field to test whether the CAPS LOCK key
   /// is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierCaps = 1 << 11;
+  static const int modifierCaps = 1 << 8;
 
   /// This mask is used to check the [modifiers] field to test whether the NUM LOCK key
   /// is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierNumLock = 1 << 12;
+  static const int modifierNumLock = 1 << 9;
 
     /// This mask is used to check the [modifiers] field to test whether the SCROLL LOCK key
   /// is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
-  static const int modifierScrollLock = 1 << 13;
+  static const int modifierScrollLock = 1 << 10;
 }

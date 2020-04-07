@@ -15,7 +15,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
-      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
@@ -70,8 +70,8 @@ void main() {
         );
         await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
-        // The Fn key isn't mapped on linux.
-        if (platform != 'linux') {
+        // The Fn key isn't mapped on linux or Windows.
+        if (platform != 'linux' && platform != 'windows') {
           await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
           expect(
               RawKeyboard.instance.keysPressed,
