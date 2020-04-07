@@ -31,6 +31,12 @@ import 'theme.dart';
 ///  * [Slider.semanticFormatterCallback], which shows an example use case.
 typedef SemanticFormatterCallback = String Function(double value);
 
+/// [Slider] uses this callback to paint the value indicator on the overlay.
+///
+/// Since the value indicator is painted on the Overlay; this method paints the
+/// value indicator in a [RenderBox] that appears in the [Overlay].
+typedef PaintValueIndicator = void Function(PaintingContext context, Offset offset);
+
 enum _SliderType { material, adaptive }
 
 /// A Material Design slider.
@@ -124,6 +130,7 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.useV2Slider = false,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -131,6 +138,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(useV2Slider != null),
        super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
@@ -153,6 +161,7 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.useV2Slider = false,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -160,6 +169,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(useV2Slider != null),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -374,6 +384,20 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
 
+  /// Whether to use the updated Material spec version of the [Slider].
+  ///
+  /// * The v2 Slider has an updated value indicator that matches the latest specs.
+  /// * The value indicator is painted on the Overlay.
+  /// * The active track is bigger than the inactive track.
+  /// * The thumb that is activated has elevation.
+  /// * Updated value indicators in case they overlap with each other.
+  /// * <https://groups.google.com/g/flutter-announce/c/69dmlKUL5Ew/m/tQh-ajiEAAAJl>
+  ///
+  /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
+  /// unexpected breaking changes, this value should be set to true. Setting
+  /// this to false is considered deprecated.
+  final bool useV2Slider;
+
   final _SliderType _sliderType ;
 
   @override
@@ -392,6 +416,7 @@ class Slider extends StatefulWidget {
     properties.add(StringProperty('label', label));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -412,6 +437,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // and the next on a discrete slider.
   AnimationController positionController;
   Timer interactionTimer;
+  // Value Indicator Animation that appears on the Overlay.
+  PaintValueIndicator paintValueIndicator;
 
   @override
   void initState() {
@@ -479,14 +506,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
-  static const double _defaultTrackHeight = 2;
-  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
-  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
-  static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
-  static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -525,6 +544,28 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
+
+    final bool useV2Slider = widget.useV2Slider;
+    final double _defaultTrackHeight = useV2Slider ? 4 : 2;
+    final SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape(useV2Slider: useV2Slider);
+    final SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape(useV2Slider: useV2Slider);
+    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+    final SliderComponentShape _defaultThumbShape = RoundSliderThumbShape(useV2Slider: useV2Slider);
+    final SliderComponentShape _defaultValueIndicatorShape = useV2Slider ? const RectangularSliderValueIndicatorShape() : const PaddleSliderValueIndicatorShape();
+    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+
+    // The value indicator's color is not the same as the thumb and active track
+    // (which can be defined by activeColor) if the
+    // RectangularSliderValueIndicatorShape is used. In all other cases, the
+    // value indicator is assumed to be the same as the active color.
+    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape;
+    Color valueIndicatorColor;
+    if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
+      valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
+    } else {
+      valueIndicatorColor = widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary;
+    }
+
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
@@ -536,31 +577,41 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
       disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
       thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
-      disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
+      disabledThumbColor: sliderTheme.disabledThumbColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(.38), theme.colorScheme.surface),
       overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
-      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      valueIndicatorColor: valueIndicatorColor,
       trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
       tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
       thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
-      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
+      valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
       valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.bodyText1.copyWith(
         color: theme.colorScheme.onPrimary,
       ),
     );
 
-    return _SliderRenderObjectWidget(
-      value: _unlerp(widget.value),
-      divisions: widget.divisions,
-      label: widget.label,
-      sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context),
-      onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
-      state: this,
-      semanticFormatterCallback: widget.semanticFormatterCallback,
+    // This size is used as the max bounds for the painting of the value
+    // indicators It must be kept in sync with the function with the same name
+    // in range_slider.dart.
+    Size _screenSize() => MediaQuery.of(context).size;
+
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: _SliderRenderObjectWidget(
+        value: _unlerp(widget.value),
+        divisions: widget.divisions,
+        label: widget.label,
+        sliderTheme: sliderTheme,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
+        screenSize: _screenSize(),
+        onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+        onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+        onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+        state: this,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+        useV2Slider: widget.useV2Slider,
+      ),
     );
   }
 
@@ -582,7 +633,27 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ),
     );
   }
+  final LayerLink _layerLink = LayerLink();
+
+  OverlayEntry overlayEntry;
+
+  void showValueIndicator() {
+    if (overlayEntry == null) {
+      overlayEntry = OverlayEntry(
+        builder: (BuildContext context) {
+          return CompositedTransformFollower(
+            link: _layerLink,
+            child: _ValueIndicatorRenderObjectWidget(
+              state: this,
+            ),
+          );
+        },
+      );
+      Overlay.of(context).insert(overlayEntry);
+    }
+  }
 }
+
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
@@ -591,24 +662,28 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.sliderTheme,
-    this.mediaQueryData,
+    this.textScaleFactor,
+    this.screenSize,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
+    this.useV2Slider,
   }) : super(key: key);
 
   final double value;
   final int divisions;
   final String label;
   final SliderThemeData sliderTheme;
-  final MediaQueryData mediaQueryData;
+  final double textScaleFactor;
+  final Size screenSize;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
   final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
+  final bool useV2Slider;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -617,7 +692,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
-      mediaQueryData: mediaQueryData,
+      textScaleFactor: textScaleFactor,
+      screenSize: screenSize,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
@@ -625,6 +701,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      useV2Slider: useV2Slider,
     );
   }
 
@@ -636,7 +713,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..mediaQueryData = mediaQueryData
+      ..textScaleFactor = textScaleFactor
+      ..screenSize = screenSize
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
@@ -654,7 +732,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     int divisions,
     String label,
     SliderThemeData sliderTheme,
-    MediaQueryData mediaQueryData,
+    double textScaleFactor,
+    Size screenSize,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
     SemanticFormatterCallback semanticFormatterCallback,
@@ -662,19 +741,22 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
+    bool useV2Slider,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       assert(state != null),
-       assert(textDirection != null),
-       _platform = platform,
-       _semanticFormatterCallback = semanticFormatterCallback,
-       _label = label,
-       _value = value,
-       _divisions = divisions,
-       _sliderTheme = sliderTheme,
-       _mediaQueryData = mediaQueryData,
-       _onChanged = onChanged,
-       _state = state,
-       _textDirection = textDirection {
+        assert(state != null),
+        assert(textDirection != null),
+        _platform = platform,
+        _semanticFormatterCallback = semanticFormatterCallback,
+        _label = label,
+        _value = value,
+        _divisions = divisions,
+        _sliderTheme = sliderTheme,
+        _textScaleFactor = textScaleFactor,
+        _screenSize = screenSize,
+        _onChanged = onChanged,
+        _state = state,
+        _textDirection = textDirection,
+        _useV2Slider = useV2Slider {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -695,7 +777,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _valueIndicatorAnimation = CurvedAnimation(
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
-    );
+    )..addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.dismissed && _state.overlayEntry != null) {
+        _state.overlayEntry.remove();
+        _state.overlayEntry = null;
+      }
+    });
     _enableAnimation = CurvedAnimation(
       parent: _state.enableController,
       curve: Curves.easeInOut,
@@ -826,16 +913,24 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsPaint();
   }
 
-  MediaQueryData get mediaQueryData => _mediaQueryData;
-  MediaQueryData _mediaQueryData;
-  set mediaQueryData(MediaQueryData value) {
-    if (value == _mediaQueryData) {
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    if (value == _textScaleFactor) {
       return;
     }
-    _mediaQueryData = value;
-    // Media query data includes the textScaleFactor, so we need to update the
-    // label painter.
+    _textScaleFactor = value;
     _updateLabelPainter();
+  }
+
+  Size get screenSize => _screenSize;
+  Size _screenSize;
+  set screenSize(Size value) {
+    if (value == _screenSize) {
+      return;
+    }
+    _screenSize = value;
+    markNeedsPaint();
   }
 
   ValueChanged<double> get onChanged => _onChanged;
@@ -870,6 +965,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textDirection = value;
     _updateLabelPainter();
   }
+
+  final bool _useV2Slider;
 
   bool get showValueIndicator {
     bool showValueIndicator;
@@ -915,7 +1012,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           text: label,
         )
         ..textDirection = textDirection
-        ..textScaleFactor = _mediaQueryData.textScaleFactor
+        ..textScaleFactor = textScaleFactor
         ..layout();
     } else {
       _labelPainter.text = null;
@@ -975,6 +1072,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _startInteraction(Offset globalPosition) {
+    _state.showValueIndicator();
     if (isInteractive) {
       _active = true;
       // We supply the *current* value as the start location, so that if we have
@@ -1008,6 +1106,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
+
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }
@@ -1130,7 +1229,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      final double padding = _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1138,7 +1238,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
@@ -1156,31 +1256,36 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     if (isInteractive && label != null && !_valueIndicatorAnimation.isDismissed) {
       if (showValueIndicator) {
-        _sliderTheme.valueIndicatorShape.paint(
-          context,
-          thumbCenter,
-          activationAnimation: _valueIndicatorAnimation,
-          enableAnimation: _enableAnimation,
-          isDiscrete: isDiscrete,
-          labelPainter: _labelPainter,
-          parentBox: this,
-          sliderTheme: _sliderTheme,
-          textDirection: _textDirection,
-          value: _value,
-        );
+        _state.paintValueIndicator = (PaintingContext context, Offset offset) {
+          _sliderTheme.valueIndicatorShape.paint(
+            context,
+            offset + thumbCenter,
+            activationAnimation: _valueIndicatorAnimation,
+            enableAnimation: _enableAnimation,
+            isDiscrete: isDiscrete,
+            labelPainter: _labelPainter,
+            parentBox: this,
+            sliderTheme: _sliderTheme,
+            textDirection: _textDirection,
+            value: _value,
+            textScaleFactor: textScaleFactor,
+            sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
+          );
+        };
       }
     }
 
     _sliderTheme.thumbShape.paint(
       context,
       thumbCenter,
-      activationAnimation: _valueIndicatorAnimation,
+      activationAnimation: _overlayAnimation,
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,
       parentBox: this,
       sliderTheme: _sliderTheme,
       textDirection: _textDirection,
+      sizeWithOverflow: screenSize.isEmpty ? size : screenSize,
       value: _value,
     );
   }
@@ -1217,6 +1322,62 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _decreaseAction() {
     if (isInteractive) {
       onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
+    }
+  }
+}
+
+class _ValueIndicatorRenderObjectWidget extends LeafRenderObjectWidget {
+  const _ValueIndicatorRenderObjectWidget({
+    this.state,
+  });
+
+  final _SliderState state;
+
+  @override
+  _RenderValueIndicator createRenderObject(BuildContext context) {
+    return _RenderValueIndicator(
+      state: state,
+    );
+  }
+  @override
+  void updateRenderObject(BuildContext context, _RenderValueIndicator renderObject) {
+    renderObject._state = state;
+  }
+}
+
+class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
+  _RenderValueIndicator({
+    _SliderState state,
+  }) : _state = state {
+    _valueIndicatorAnimation = CurvedAnimation(
+      parent: _state.valueIndicatorController,
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+  Animation<double> _valueIndicatorAnimation;
+  _SliderState _state;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _valueIndicatorAnimation.addListener(markNeedsPaint);
+    _state.positionController.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _valueIndicatorAnimation.removeListener(markNeedsPaint);
+    _state.positionController.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_state.paintValueIndicator != null) {
+      _state.paintValueIndicator(context, offset);
     }
   }
 }
