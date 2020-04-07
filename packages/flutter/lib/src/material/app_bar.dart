@@ -543,6 +543,7 @@ class _AppBarState extends State<AppBar> {
       }
 
       title = DefaultTextStyle(
+        textHeightBehavior: theme.typography.defaultTextHeightBehavior,
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
@@ -589,6 +590,7 @@ class _AppBarState extends State<AppBar> {
         child: IconTheme.merge(
           data: overallIconTheme,
           child: DefaultTextStyle(
+            textHeightBehavior: theme.typography.defaultTextHeightBehavior,
             style: sideStyle,
             child: toolbar,
           ),

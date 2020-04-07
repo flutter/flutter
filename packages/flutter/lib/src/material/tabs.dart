@@ -193,6 +193,7 @@ class _TabStyle extends AnimatedWidget {
       : Color.lerp(unselectedColor, selectedColor, animation.value);
 
     return DefaultTextStyle(
+      textHeightBehavior: themeData.typography.defaultTextHeightBehavior,
       style: textStyle.copyWith(color: color),
       child: IconTheme.merge(
         data: IconThemeData(

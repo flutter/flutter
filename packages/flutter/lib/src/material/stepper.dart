@@ -485,6 +485,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         AnimatedDefaultTextStyle(
+          textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
           style: _titleStyle(index),
           duration: kThemeAnimationDuration,
           curve: Curves.fastOutSlowIn,
@@ -494,6 +495,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           Container(
             margin: const EdgeInsets.only(top: 2.0),
             child: AnimatedDefaultTextStyle(
+              textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
               style: _subtitleStyle(index),
               duration: kThemeAnimationDuration,
               curve: Curves.fastOutSlowIn,

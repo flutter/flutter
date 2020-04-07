@@ -849,6 +849,7 @@ class ListTile extends StatelessWidget {
 
     final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
     final Widget titleText = AnimatedDefaultTextStyle(
+      textHeightBehavior: theme.typography.defaultTextHeightBehavior,
       style: titleStyle,
       duration: kThemeChangeDuration,
       child: title ?? const SizedBox(),
@@ -859,6 +860,7 @@ class ListTile extends StatelessWidget {
     if (subtitle != null) {
       subtitleStyle = _subtitleTextStyle(theme, tileTheme);
       subtitleText = AnimatedDefaultTextStyle(
+        textHeightBehavior: theme.typography.defaultTextHeightBehavior,
         style: subtitleStyle,
         duration: kThemeChangeDuration,
         child: subtitle,

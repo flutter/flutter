@@ -94,6 +94,7 @@ class DefaultTextStyle extends InheritedTheme {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
+    TextHeightBehavior textHeightBehavior,
     TextWidthBasis textWidthBasis,
     @required Widget child,
   }) {
@@ -108,6 +109,7 @@ class DefaultTextStyle extends InheritedTheme {
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
+          textHeightBehavior: textHeightBehavior ?? parent.textHeightBehavior,
           textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           child: child,
         );

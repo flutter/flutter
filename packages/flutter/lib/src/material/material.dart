@@ -351,6 +351,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     Widget contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
+        textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
         style: widget.textStyle ?? Theme.of(context).textTheme.bodyText2,
         duration: widget.animationDuration,
         child: contents,

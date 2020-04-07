@@ -303,6 +303,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       style = style.copyWith(color: theme.disabledColor);
 
     Widget item = AnimatedDefaultTextStyle(
+      textHeightBehavior: theme.typography.defaultTextHeightBehavior,
       style: style,
       duration: kThemeChangeDuration,
       child: Container(

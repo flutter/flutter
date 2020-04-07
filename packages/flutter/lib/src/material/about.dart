@@ -570,6 +570,7 @@ class _LicensePageState extends State<LicensePage> {
         locale: const Locale('en', 'US'),
         context: context,
         child: DefaultTextStyle(
+          textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
           style: Theme.of(context).textTheme.caption,
           child: SafeArea(
             bottom: false,

@@ -436,6 +436,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               Semantics(
                 container: true,
                 child: DefaultTextStyle(
+                  textHeightBehavior: themeData.typography.defaultTextHeightBehavior,
                   // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
                   // list and then tweak them appropriately.
                   // See https://material.io/design/components/data-tables.html#tables-within-cards
@@ -479,6 +480,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 ),
               ),
               DefaultTextStyle(
+                textHeightBehavior: themeData.typography.defaultTextHeightBehavior,
                 style: footerTextStyle,
                 child: IconTheme.merge(
                   data: const IconThemeData(

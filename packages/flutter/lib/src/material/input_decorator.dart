@@ -1714,6 +1714,7 @@ class _AffixText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
+      textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
       style: style,
       child: AnimatedOpacity(
         duration: _kTransitionDuration,
@@ -2162,6 +2163,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         curve: _kTransitionCurve,
         opacity: _shouldShowLabel ? 1.0 : 0.0,
         child: AnimatedDefaultTextStyle(
+          textHeightBehavior: themeData.typography.defaultTextHeightBehavior,
           duration:_kTransitionDuration,
           curve: _kTransitionCurve,
           style: widget._labelShouldWithdraw

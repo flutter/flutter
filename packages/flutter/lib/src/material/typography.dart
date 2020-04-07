@@ -39,6 +39,14 @@ enum ScriptCategory {
   tall,
 }
 
+// The default [TextHeightBehavior] in material apps. This behavior means that
+// text widgets inside of a material app will apply line height above and below
+// the first and last lines of paragraphs of text.
+const TextHeightBehavior _defaultMaterialTextHeightBehavior = TextHeightBehavior(
+  applyHeightToFirstAscent: true,
+  applyHeightToLastDescent: true,
+);
+
 /// The color and geometry [TextThemes] for Material apps.
 ///
 /// The text themes provided by the overall [Theme], like
@@ -102,6 +110,7 @@ class Typography with Diagnosticable {
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
+    TextHeightBehavior defaultTextHeightBehavior,
   }) = Typography.material2014;
 
   /// Creates a typography instance using material design's 2014 defaults.
@@ -121,6 +130,7 @@ class Typography with Diagnosticable {
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
+    TextHeightBehavior defaultTextHeightBehavior,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -129,6 +139,7 @@ class Typography with Diagnosticable {
       englishLike ?? englishLike2014,
       dense ?? dense2014,
       tall ?? tall2014,
+      defaultTextHeightBehavior ?? _defaultMaterialTextHeightBehavior,
     );
   }
 
@@ -149,6 +160,7 @@ class Typography with Diagnosticable {
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
+    TextHeightBehavior defaultTextHeightBehavior,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -157,6 +169,7 @@ class Typography with Diagnosticable {
       englishLike ?? englishLike2018,
       dense ?? dense2018,
       tall ?? tall2018,
+      defaultTextHeightBehavior ?? _defaultMaterialTextHeightBehavior,
     );
   }
 
@@ -167,11 +180,13 @@ class Typography with Diagnosticable {
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
+    TextHeightBehavior defaultTextHeightBehavior,
   ) {
     assert(platform != null || (black != null && white != null));
     assert(englishLike != null);
     assert(dense != null);
     assert(tall != null);
+    assert(defaultTextHeightBehavior != null);
     switch (platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -192,15 +207,22 @@ class Typography with Diagnosticable {
         white ??= whiteHelsinki;
         break;
     }
-    return Typography._(black, white, englishLike, dense, tall);
+    return Typography._(black, white, englishLike, dense, tall, defaultTextHeightBehavior);
   }
 
-  const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall)
-    : assert(black != null),
+  const Typography._(
+    this.black,
+    this.white,
+    this.englishLike,
+    this.dense,
+    this.tall,
+    this.defaultTextHeightBehavior,
+  ) : assert(black != null),
       assert(white != null),
       assert(englishLike != null),
       assert(dense != null),
-      assert(tall != null);
+      assert(tall != null),
+      assert(defaultTextHeightBehavior != null);
 
   /// A material design text theme with dark glyphs.
   ///
@@ -256,6 +278,10 @@ class Typography with Diagnosticable {
   /// example: `Theme.of(context).textTheme`.
   final TextTheme tall;
 
+  /// The default [TextHeightBehavior] that all [Text] in the material library
+  /// will fall back on.
+  final TextHeightBehavior defaultTextHeightBehavior;
+
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
     assert(category != null);
@@ -278,6 +304,7 @@ class Typography with Diagnosticable {
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
+    TextHeightBehavior defaultTextHeightBehavior,
   }) {
     return Typography._(
       black ?? this.black,
@@ -285,6 +312,7 @@ class Typography with Diagnosticable {
       englishLike ?? this.englishLike,
       dense ?? this.dense,
       tall ?? this.tall,
+      defaultTextHeightBehavior ?? this.defaultTextHeightBehavior,
     );
   }
 
@@ -298,6 +326,7 @@ class Typography with Diagnosticable {
       TextTheme.lerp(a.englishLike, b.englishLike, t),
       TextTheme.lerp(a.dense, b.dense, t),
       TextTheme.lerp(a.tall, b.tall, t),
+      t < .5 ? a.defaultTextHeightBehavior : b.defaultTextHeightBehavior,
     );
   }
 
@@ -312,7 +341,8 @@ class Typography with Diagnosticable {
         && other.white == white
         && other.englishLike == englishLike
         && other.dense == dense
-        && other.tall == tall;
+        && other.tall == tall
+        && other.defaultTextHeightBehavior == defaultTextHeightBehavior;
   }
 
   @override
@@ -323,6 +353,7 @@ class Typography with Diagnosticable {
       englishLike,
       dense,
       tall,
+      defaultTextHeightBehavior,
     );
   }
 
@@ -335,6 +366,7 @@ class Typography with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('englishLike', englishLike, defaultValue: defaultTypography.englishLike));
     properties.add(DiagnosticsProperty<TextTheme>('dense', dense, defaultValue: defaultTypography.dense));
     properties.add(DiagnosticsProperty<TextTheme>('tall', tall, defaultValue: defaultTypography.tall));
+    properties.add(DiagnosticsProperty<TextHeightBehavior>('defaultTextHeightBehavior', defaultTextHeightBehavior, defaultValue: defaultTypography.defaultTextHeightBehavior));
   }
 
   /// A material design text theme with dark glyphs based on Roboto.

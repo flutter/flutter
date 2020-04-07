@@ -604,6 +604,7 @@ class _Label extends StatelessWidget {
       animation.value,
     );
     Widget text = DefaultTextStyle.merge(
+      textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
       style: customStyle.copyWith(
         fontSize: selectedFontSize,
         color: colorTween.evaluate(animation),
@@ -845,6 +846,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   Widget _createContainer(List<Widget> tiles) {
     return DefaultTextStyle.merge(
+      textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
       overflow: TextOverflow.ellipsis,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

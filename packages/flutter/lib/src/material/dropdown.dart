@@ -1326,6 +1326,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
       hintIndex = items.length;
       items.add(DefaultTextStyle(
+        textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
           ignoringSemantics: false,
@@ -1359,6 +1360,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
 
     Widget result = DefaultTextStyle(
+      textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
       style: _textStyle,
       child: Container(
         decoration: _showHighlight

@@ -93,12 +93,14 @@ class GridTileBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       DefaultTextStyle(
+                        textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                         style: darkTheme.textTheme.subtitle1,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         child: title,
                       ),
                       DefaultTextStyle(
+                        textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                         style: darkTheme.textTheme.caption,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
@@ -110,6 +112,7 @@ class GridTileBar extends StatelessWidget {
               else if (title != null || subtitle != null)
                 Expanded(
                   child: DefaultTextStyle(
+                    textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                     style: darkTheme.textTheme.subtitle1,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,

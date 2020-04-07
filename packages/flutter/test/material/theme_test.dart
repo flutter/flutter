@@ -414,6 +414,54 @@ void main() {
     expect(theme.textTheme.headline1.debugLabel, '(englishLike display4 2014).merge(blackMountainView headline1)');
   });
 
+  testWidgets('Default Theme provides default textHeightBehavior', (WidgetTester tester) async {
+    ThemeData theme;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Builder(
+        builder: (BuildContext context) {
+          theme = Theme.of(context);
+          return const Text('A');
+        },
+      ),
+    ));
+
+
+    expect(
+      theme.typography.defaultTextHeightBehavior,
+      const TextHeightBehavior(
+        applyHeightToFirstAscent: true,
+        applyHeightToLastDescent: true,
+      ),
+    );
+  });
+
+  testWidgets('Custom Theme provides uses custom textHeightBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light().copyWith(
+        typography: ThemeData.light().typography.copyWith(
+          defaultTextHeightBehavior: const TextHeightBehavior(
+            applyHeightToLastDescent: false,
+            applyHeightToFirstAscent: false,
+          ),
+        ),
+      ),
+      home: const Scaffold(
+        body: Center(
+          child: Text('A'),
+        ),
+      ),
+    ));
+
+    expect(
+      tester.renderObject<RenderParagraph>(find.byType(Text)).textHeightBehavior,
+      const TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+      ),
+    );
+  });
+
   group('Cupertino theme', () {
     int buildCount;
     CupertinoThemeData actualTheme;

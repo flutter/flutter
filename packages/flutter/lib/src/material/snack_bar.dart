@@ -384,6 +384,7 @@ class _SnackBarState extends State<SnackBar> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
               child: DefaultTextStyle(
+                textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                 style: contentTextStyle,
                 child: widget.content,
               ),

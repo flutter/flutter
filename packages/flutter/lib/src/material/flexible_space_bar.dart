@@ -393,6 +393,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 child: Align(
                   alignment: titleAlignment,
                   child: DefaultTextStyle(
+                    textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
                     style: titleStyle,
                     child: LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {

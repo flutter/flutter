@@ -477,6 +477,7 @@ class AlertDialog extends StatelessWidget {
      titleWidget = Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
+          textHeightBehavior: theme.typography.defaultTextHeightBehavior,
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.headline6,
           child: Semantics(
             child: title,
@@ -490,6 +491,7 @@ class AlertDialog extends StatelessWidget {
       contentWidget = Padding(
         padding: contentPadding,
         child: DefaultTextStyle(
+          textHeightBehavior: theme.typography.defaultTextHeightBehavior,
           style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subtitle1,
           child: content,
         ),
@@ -814,6 +816,7 @@ class SimpleDialog extends StatelessWidget {
               Padding(
                 padding: titlePadding,
                 child: DefaultTextStyle(
+                  textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                   style: theme.textTheme.headline6,
                   child: Semantics(namesRoute: true, child: title),
                 ),

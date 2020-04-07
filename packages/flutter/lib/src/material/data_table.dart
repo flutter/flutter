@@ -542,6 +542,7 @@ class DataTable extends StatelessWidget {
       height: headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
+        textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
         style: TextStyle(
           // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
@@ -595,6 +596,7 @@ class DataTable extends StatelessWidget {
       height: dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
+        textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
         style: TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
           fontSize: 13.0,

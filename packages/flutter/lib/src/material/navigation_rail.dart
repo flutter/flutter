@@ -620,6 +620,7 @@ class _RailDestination extends StatelessWidget {
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
+      textHeightBehavior: Theme.of(context).typography.defaultTextHeightBehavior,
       style: labelTextStyle,
       child: label,
     );

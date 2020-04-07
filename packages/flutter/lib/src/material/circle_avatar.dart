@@ -227,6 +227,7 @@ class CircleAvatar extends StatelessWidget {
                 child: IconTheme(
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(
+                    textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                     style: textStyle,
                     child: child,
                   ),

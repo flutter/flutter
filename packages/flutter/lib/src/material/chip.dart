@@ -1874,6 +1874,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
             _ChipRenderWidget(
               theme: _ChipRenderTheme(
                 label: DefaultTextStyle(
+                  textHeightBehavior: theme.typography.defaultTextHeightBehavior,
                   overflow: TextOverflow.fade,
                   textAlign: TextAlign.start,
                   maxLines: 1,
