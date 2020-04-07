@@ -757,24 +757,34 @@ class GitTagVersion {
   }
 
   // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
-  /// Check for the release tag format pre-v1.17.0
+  /// Check for the release tag format of the form x.y.z-dev.m.n
   static GitTagVersion parseLegacyVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
-
+      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final List<int> parsedParts = parts.take(5).map<int>(
+      (String source) => source == null ? null : int.tryParse(source)).toList();
+    List<int> devParts = <int>[null, null];
+    if (parts[3] != null) {
+      devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
+        .matchAsPrefix(parts[3])
+        ?.groups(<int>[1, 2])
+        ?.map<int>(
+          (String source) => source == null ? null : int.tryParse(source)
+        )?.toList() ?? <int>[null, null];
+    }
     return GitTagVersion(
       x: parsedParts[0],
       y: parsedParts[1],
       z: parsedParts[2],
-      hotfix: parsedParts[3],
+      devVersion: devParts[0],
+      devPatch: devParts[1],
       commits: parsedParts[4],
       hash: parts[5],
-      gitTag: 'v${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z
+      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
     );
   }
 
