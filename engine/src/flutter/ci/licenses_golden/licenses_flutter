@@ -868,6 +868,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginA
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPluginTest.m
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterUmbrellaImport.m
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterView.mm

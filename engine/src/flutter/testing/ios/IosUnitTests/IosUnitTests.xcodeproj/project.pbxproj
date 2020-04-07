@@ -20,6 +20,7 @@
 		0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D6AB72C22BC339F00EEE540 /* libOCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D6AB72522BC336100EEE540 /* libOCMock.a */; };
 		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
+		3D8AF6182384C5420033B95F /* FlutterTextInputPluginTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D8AF6172384C5420033B95F /* FlutterTextInputPluginTest.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +95,7 @@
 		0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
 		0D6AB71722BC336100EEE540 /* OCMock.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCMock.xcodeproj; path = ../../../../../third_party/ocmock/Source/OCMock.xcodeproj; sourceTree = "<group>"; };
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
+		3D8AF6172384C5420033B95F /* FlutterTextInputPluginTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterTextInputPluginTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 			children = (
 				0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */,
 				0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */,
+				3D8AF6172384C5420033B95F /* FlutterTextInputPluginTest.m */,
 				0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.m */,
 				0D4C3FAF22DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m */,
 			);
@@ -387,6 +390,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */,
+				3D8AF6182384C5420033B95F /* FlutterTextInputPluginTest.m in Sources */,
 				0D17A5C022D78FCD0057279F /* FlutterViewControllerTest.m in Sources */,
 				0D1CE5D8233430F400E5D880 /* FlutterChannelsTest.m in Sources */,
 				0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */,
