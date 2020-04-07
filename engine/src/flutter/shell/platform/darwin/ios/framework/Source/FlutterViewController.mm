@@ -953,13 +953,23 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (void)keyboardWillChangeFrame:(NSNotification*)notification {
   NSDictionary* info = [notification userInfo];
-  CGFloat bottom = CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
-  CGFloat scale = [UIScreen mainScreen].scale;
+  CGRect keyboardFrame = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
 
-  // The keyboard is treated as an inset since we want to effectively reduce the window size by the
-  // keyboard height. The Dart side will compute a value accounting for the keyboard-consuming
-  // bottom padding.
-  _viewportMetrics.physical_view_inset_bottom = bottom * scale;
+  // Considering the iPad's split keyboard, Flutter needs to check if the keyboard frame is present
+  // in the screen to see if the keyboard is visible.
+  if (CGRectIntersectsRect(keyboardFrame, screenRect)) {
+    CGFloat bottom = CGRectGetHeight(keyboardFrame);
+    CGFloat scale = [UIScreen mainScreen].scale;
+
+    // The keyboard is treated as an inset since we want to effectively reduce the window size by
+    // the keyboard height. The Dart side will compute a value accounting for the keyboard-consuming
+    // bottom padding.
+    _viewportMetrics.physical_view_inset_bottom = bottom * scale;
+  } else {
+    _viewportMetrics.physical_view_inset_bottom = 0;
+  }
+
   [self updateViewportMetrics];
 }
 
