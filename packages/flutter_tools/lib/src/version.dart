@@ -703,6 +703,7 @@ class GitTagVersion {
     this.devPatch,
     this.commits,
     this.hash,
+    this.gitTag,
   });
   const GitTagVersion.unknown()
     : x = null,
@@ -712,7 +713,8 @@ class GitTagVersion {
       commits = 0,
       devVersion = null,
       devPatch = null,
-      hash = '';
+      hash = '',
+      gitTag = '';
 
   /// The X in vX.Y.Z.
   final int x;
@@ -737,6 +739,9 @@ class GitTagVersion {
 
   /// The M in X.Y.Z-dev.N.M
   final int devPatch;
+
+  /// The git tag that is this version's closest ancestor.
+  final String gitTag;
 
   static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
     if (fetchTags) {
@@ -769,6 +774,7 @@ class GitTagVersion {
       hotfix: parsedParts[3],
       commits: parsedParts[4],
       hash: parts[5],
+      gitTag: 'v${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z
     );
   }
 
@@ -780,7 +786,8 @@ class GitTagVersion {
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final List<int> parsedParts = parts.take(5).map<int>(
+      (String source) => source == null ? null : int.tryParse(source)).toList();
     List<int> devParts = <int>[null, null];
     if (parts[3] != null) {
       devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
@@ -798,6 +805,7 @@ class GitTagVersion {
       devPatch: devParts[1],
       commits: parsedParts[4],
       hash: parts[5],
+      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
     );
   }
 
@@ -821,12 +829,10 @@ class GitTagVersion {
       return '0.0.0-unknown';
     }
     if (commits == 0) {
-      if (hotfix != null) {
-        return '$x.$y.$z+hotfix.$hotfix';
-      }
-      return '$x.$y.$z';
+      return gitTag;
     }
     if (hotfix != null) {
+      // This is an unexpected state where untagged commits exist past a hotfix
       return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
     }
     return '$x.$y.${z + 1}-pre.$commits';
