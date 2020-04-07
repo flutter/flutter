@@ -123,7 +123,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = match.group(2);
+      String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
@@ -131,7 +131,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
-      pluralLogicArgs.add("      ${pluralIds[pluralKey]}: '$argValue'");
+      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
@@ -155,7 +155,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
 
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
-    String messageValue = bundle.translationFor(message);
+    String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
@@ -164,7 +164,7 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    return generateString(messageValue, escapeDollar: false);
+    return messageValue;
   }
 
   if (message.isPlural) {

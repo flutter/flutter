@@ -165,6 +165,12 @@ class CommandHelp {
     'Toggle CanvasKit rendering.',
   );
 
+  CommandHelpOption _M;
+  CommandHelpOption get M => _M ??= _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
+  );
+
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
   ]) {
