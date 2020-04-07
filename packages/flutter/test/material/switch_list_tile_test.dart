@@ -254,4 +254,48 @@ void main() {
     expect(tester.getTopLeft(find.byType(Switch)).dx, 20.0); // contentPadding.end = 20
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
+
+  testWidgets('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (_) {},
+                title: Text('A', key: childKey),
+                autofocus: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: null,
+                title: Text('A', key: childKey),
+                autofocus: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+  });
 }

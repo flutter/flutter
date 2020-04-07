@@ -318,12 +318,14 @@ class RadioListTile<T> extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.autofocus = false,
 
   }) : assert(toggleable != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// The value represented by this radio button.
@@ -464,6 +466,9 @@ class RadioListTile<T> extends StatelessWidget {
   /// Where to place the control relative to the text.
   final ListTileControlAffinity controlAffinity;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// Whether this radio button is checked.
   ///
   /// To control this value, set [value] and [groupValue] appropriately.
@@ -478,6 +483,7 @@ class RadioListTile<T> extends StatelessWidget {
       toggleable: toggleable,
       activeColor: activeColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      autofocus: autofocus,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -512,6 +518,7 @@ class RadioListTile<T> extends StatelessWidget {
             }
           } : null,
           selected: selected,
+          autofocus: autofocus,
         ),
       ),
     );
