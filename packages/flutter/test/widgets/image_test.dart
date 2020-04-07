@@ -1633,14 +1633,16 @@ void main() {
     ));
 
     // precacheImage is needed, or the image in the golden file will be empty.
-    final Finder allImages = find.byType(Image);
-    for (final Element e in allImages.evaluate()) {
-      await tester.runAsync(() async {
-        final Image image = e.widget as Image;
-        await precacheImage(image.image, e);
-      });
+    if (!kIsWeb) {
+      final Finder allImages = find.byType(Image);
+      for (final Element e in allImages.evaluate()) {
+        await tester.runAsync(() async {
+          final Image image = e.widget as Image;
+          await precacheImage(image.image, e);
+        });
+      }
+      await tester.pumpAndSettle();
     }
-    await tester.pumpAndSettle();
 
     await expectLater(
       find.byKey(key),
