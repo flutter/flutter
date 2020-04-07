@@ -254,7 +254,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     final StringBuffer windowsKeyCodeMap = StringBuffer();
     for (final Key entry in keyData.data) {
       if (entry.windowsKeyCodes != null) {
-        for (final int code in entry.windowsKeyCodes.cast<int>()) {
+        for (final int code in entry.windowsKeyCodes) {
           windowsKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }

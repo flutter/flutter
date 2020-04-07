@@ -48,7 +48,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   /// If there is no Unicode code point, this value is zero.
   final int characterCodePoint;
 
-  /// A mask of the current modifiers. The modifier values have to be in sync with
+  /// A mask of the current modifiers. The modifier values must be in sync with
   /// the ones defined in https://github.com/flutter/engine/blob/master/shell/platform/windows/key_event_handler.cc
   final int modifiers;
 
@@ -225,7 +225,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
   static const int modifierControl = 1 << 3;
 
-  /// This mask is used to check the [modifiers] field to test whether the right
+  /// This mask is used to check the [modifiers] field to test whether the left
   /// CTRL modifier key is pressed.
   ///
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
@@ -267,14 +267,10 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
   static const int modifierRightMeta = 1 << 10;
 
-  /// This mask is used to check the [modifiers] field to test whether the CAPS
-  /// LOCK modifier key is on.
+  /// This mask is used to check the [modifiers] field to test whether the CAPS LOCK key
+  /// is pressed.
   ///
-  /// {@template flutter.services.rawKeyEventDataWindows.modifiers}
-  /// Use this value if you need to decode the [modifiers] field yourself, but
-  /// it's much easier to use [isModifierPressed] if you just want to know if
-  /// a modifier is pressed.
-  /// {@endtemplate}
+  /// {@macro flutter.services.rawKeyEventDataWindows.modifiers}
   static const int modifierCaps = 1 << 11;
 
   /// This mask is used to check the [modifiers] field to test whether the NUM LOCK key

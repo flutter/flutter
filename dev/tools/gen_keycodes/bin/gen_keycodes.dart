@@ -162,10 +162,6 @@ Future<void> main(List<String> rawArguments) async {
       hidCodes = File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
     }
 
-print('=====');
- print(hidCodes);
-print('=====');
-
     final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     hidCodes = '$hidCodes\n$supplementalHidCodes';
 
