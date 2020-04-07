@@ -1123,7 +1123,7 @@ String get gitHash {
 Future<String> verifyVersion(File file) async {
   // 1.18.0-5.0-pre.8
   final RegExp pattern = RegExp(
-    r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+)?(-pre\.\d+)?$');
+    r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+)?(\.pre\.\d+)?$');
   final String version = await file.readAsString();
   if (!file.existsSync())
     return 'The version logic failed to create the Flutter version file.';

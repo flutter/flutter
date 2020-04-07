@@ -843,12 +843,12 @@ class GitTagVersion {
     }
     if (hotfix != null) {
       // This is an unexpected state where untagged commits exist past a hotfix
-      return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
+      return '$x.$y.$z+hotfix.${hotfix + 1}.pre.$commits';
     }
     if (devPatch != null && devVersion != null) {
-      return '$x.$y.$z-${devVersion + 1}.0-pre.$commits';
+      return '$x.$y.$z-${devVersion + 1}.0.pre.$commits';
     }
-    return '$x.$y.${z + 1}-pre.$commits';
+    return '$x.$y.${z + 1}.pre.$commits';
   }
 }
 
