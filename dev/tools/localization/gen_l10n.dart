@@ -208,7 +208,6 @@ String generateBaseClassMethod(Message message) {
 
 String _generateLookupByAllCodes(
   AppResourceBundleCollection allBundles,
-  String className,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
   final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((LocaleInfo locale) {
@@ -232,7 +231,6 @@ String _generateLookupByAllCodes(
 
 String _generateLookupByScriptCode(
   AppResourceBundleCollection allBundles,
-  String className,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
@@ -265,7 +263,6 @@ String _generateLookupByScriptCode(
 
 String _generateLookupByCountryCode(
   AppResourceBundleCollection allBundles,
-  String className,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
@@ -297,7 +294,6 @@ String _generateLookupByCountryCode(
 
 String _generateLookupByLanguageCode(
   AppResourceBundleCollection allBundles,
-  String className,
   String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
@@ -331,29 +327,26 @@ String _generateLookupBody(
   String fileName,
 ) {
   final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
-    return  (useDeferredLoading ? switchClauseDeferredLoadingTemplate : switchClauseTemplate)
+    return  (useDeferredLoading ?
+    switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(class)', '$className${locale.camelCase()}')
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
   };
   return lookupBodyTemplate
     .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(
       allBundles,
-      className,
       generateSwitchClauseTemplate,
     ))
     .replaceAll('@(lookupScriptCodeSpecified)', _generateLookupByScriptCode(
       allBundles,
-      className,
       generateSwitchClauseTemplate,
     ))
     .replaceAll('@(lookupCountryCodeSpecified)', _generateLookupByCountryCode(
       allBundles,
-      className,
       generateSwitchClauseTemplate,
     ))
     .replaceAll('@(lookupLanguageCodeSpecified)', _generateLookupByLanguageCode(
       allBundles,
-      className,
       generateSwitchClauseTemplate,
     ));
 }
