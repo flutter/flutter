@@ -387,21 +387,8 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo\\nbar => 'foo\\\\nbar'
 /// foo\\bar => 'foo\\\\bar'
 /// foo\ bar => 'foo\\ bar'
-/// ```
-///
-/// When [shouldEscapeDollar] is set to true, the '$' characters in the
-/// input will be replaced by '$' in the returned string:
-/// ```
 /// foo$bar = 'foo\$bar'
 /// ```
-///
-/// When [shouldEscapeDollar] is set to false, '$' will be replaced
-/// by '\$' in the returned string:
-/// ```
-/// foo$bar => 'foo\\\$bar'
-/// ```
-///
-/// [shouldEscapeDollar] is true by default.
 String generateString(String value) {
   const String backslash = '__BACKSLASH__';
   assert(
