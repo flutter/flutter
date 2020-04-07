@@ -357,6 +357,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         final PackageConfig packageConfig = await loadPackageConfigUri(
           globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+          onError: (dynamic error) {
+            // Errors indicate the automatic detection will fail, but are not
+            // fatal.
+          },
           loader: (Uri uri) {
             final File file = globals.fs.file(uri);
             if (!file.existsSync()) {
