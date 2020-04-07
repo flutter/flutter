@@ -68,3 +68,11 @@ if (is_fuchsia) {
 if ((is_ios || is_mac) && defined(enable_bitcode)) {
   flutter_enable_bitcode = enable_bitcode
 }
+
+if (is_ios || is_mac) {
+  flutter_cflags_objc = [
+    "-Werror=overriding-method-mismatch",
+    "-Werror=undeclared-selector",
+  ]
+  flutter_cflags_objcc = flutter_cflags_objc
+}
