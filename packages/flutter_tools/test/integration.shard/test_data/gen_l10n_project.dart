@@ -185,7 +185,9 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldPopulation(2, 102)}',
               '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
               '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
             ]);
           },
         ),
@@ -384,9 +386,25 @@ void main() {
     "description": "A message with a single quote."
   },
 
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}}",
+  "@singleQuotePlural": {
+    "description": "A plural message with a single quote.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "doubleQuote": "Flutter is \"amazing\"!",
   "@doubleQuote": {
     "description": "A message with double quotes."
+  },
+
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!}}",
+  "@doubleQuotePlural": {
+    "description": "A plural message with double quotes.",
+    "placeholders": {
+      "count": {}
+    }
   }
 }
 ''';
@@ -427,7 +445,9 @@ void main() {
   "helloWorldInterpolation": "[{hello}] #{world}#",
   "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
   "singleQuote": "Flutter's amazing!",
-  "doubleQuote": "Flutter is \"amazing\"!"
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}",
+  "doubleQuote": "Flutter is \"amazing\"!",
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!"
 }
 ''';
 

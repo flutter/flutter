@@ -131,7 +131,7 @@ String generatePluralMethod(Message message, AppResourceBundle bundle) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
-      pluralLogicArgs.add("      ${pluralIds[pluralKey]}: '$argValue'");
+      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: ${generateString(argValue, escapeDollar: false)}');
     }
   }
 
