@@ -21,10 +21,12 @@ import 'system_channels.dart';
 mixin ServicesBinding on BindingBase {
   @override
   void initInstances() {
-    super.initInstances();
-    _instance = this;
+    // TODO(goderbauer): Move the next two lines to after `_instance = this` once
+    //   the dependency reversal of services/scheduler layer is complete.
     _defaultBinaryMessenger = createBinaryMessenger();
     window.onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    super.initInstances();
+    _instance = this;
     initLicenses();
     SystemChannels.system.setMessageHandler(handleSystemMessage);
   }
