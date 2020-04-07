@@ -55,9 +55,6 @@ struct FlutterDesktopPluginRegistrar {
 
   // The handle for the window associated with this registrar.
   FlutterDesktopView* window;
-
-  // Callback to be called on registrar destruction.
-  FlutterDesktopOnRegistrarDestroyed destruction_handler;
 };
 
 // State associated with the messenger used to communicate with the engine.

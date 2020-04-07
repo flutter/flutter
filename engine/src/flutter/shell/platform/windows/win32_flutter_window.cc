@@ -15,9 +15,6 @@ Win32FlutterWindow::Win32FlutterWindow(int width, int height) {
 
 Win32FlutterWindow::~Win32FlutterWindow() {
   DestroyRenderSurface();
-  if (plugin_registrar_ && plugin_registrar_->destruction_handler) {
-    plugin_registrar_->destruction_handler(plugin_registrar_.get());
-  }
 }
 
 FlutterDesktopViewControllerRef Win32FlutterWindow::CreateWin32FlutterWindow(
