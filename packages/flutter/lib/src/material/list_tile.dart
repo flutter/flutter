@@ -638,9 +638,11 @@ class ListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.selected = false,
+    this.autofocus = false,
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
+       assert(autofocus != null),
        assert(!isThreeLine || subtitle != null),
        super(key: key);
 
@@ -723,6 +725,9 @@ class ListTile extends StatelessWidget {
   /// By default the selected color is the theme's primary color. The selected color
   /// can be overridden with a [ListTileTheme].
   final bool selected;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -883,6 +888,7 @@ class ListTile extends StatelessWidget {
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
       canRequestFocus: enabled,
+      autofocus: autofocus,
       child: Semantics(
         selected: selected,
         enabled: enabled,
