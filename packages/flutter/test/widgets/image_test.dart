@@ -1633,9 +1633,6 @@ void main() {
     ));
 
     // precacheImage is needed, or the image in the golden file will be empty.
-    //
-    // TODO(hterkelson): figure out why web timed out with `await precacheImage`.
-    // https://github.com/flutter/flutter/issues/54292.
     if (!kIsWeb) {
       final Finder allImages = find.byType(Image);
       for (final Element e in allImages.evaluate()) {
@@ -1653,10 +1650,18 @@ void main() {
     );
   }
 
-  testWidgets('Rotated images', (WidgetTester tester) async {
-    await _testRotatedImage(tester, true);
-    await _testRotatedImage(tester, false);
-  });
+  testWidgets(
+    'Rotated images',
+    (WidgetTester tester) async {
+      await _testRotatedImage(tester, true);
+      await _testRotatedImage(tester, false);
+    },
+    // TODO(hterkelson): figure out why web timed out with `await precacheImage`
+    // so we can enable this test on web.
+    //
+    // See https://github.com/flutter/flutter/issues/54292.
+    skip: kIsWeb,
+  );
 }
 
 class ImagePainter extends CustomPainter {
