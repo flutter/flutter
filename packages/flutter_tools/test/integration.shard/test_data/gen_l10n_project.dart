@@ -18,6 +18,10 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     return super.setUpIn(dir);
   }
 
@@ -117,6 +121,41 @@ class Home extends StatelessWidget {
           },
         ),
         LocaleBuilder(
+          locale: Locale('zh'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- zh ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context).helloWorlds(0));
+            results.add(AppLocalizations.of(context).helloWorlds(1));
+            results.add(AppLocalizations.of(context).helloWorlds(2));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode: zh_Hans ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant_TW ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
           locale: Locale('en'),
           test: 'General formatting',
           callback: (BuildContext context) {
@@ -124,6 +163,7 @@ class Home extends StatelessWidget {
             final AppLocalizations localizations = AppLocalizations.of(context);
             results.addAll(<String>[
               '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
               '${localizations.hello("World")}',
               '${localizations.greeting("Hello", "World")}',
               '${localizations.helloWorldOn(DateTime(1960))}',
@@ -144,8 +184,12 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldPopulation(1, 101)}',
               '${localizations.helloWorldPopulation(2, 102)}',
               '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
               '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
             ]);
           },
         ),
@@ -154,7 +198,9 @@ class Home extends StatelessWidget {
             try {
               int n = 0;
               for (final String result in results) {
-                print('#l10n $n ($result)');
+                // Newline character replacement is necessary because
+                // the stream breaks up stdout by new lines.
+                print('#l10n $n (${result.replaceAll('\n', '_NEWLINE_')})');
                 n += 1;
               }
             }
@@ -186,6 +232,11 @@ void main() {
   "helloWorld": "Hello World",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
+  },
+
+  "helloNewlineWorld": "Hello \n World",
+  "@helloNewlineWorld": {
+    "description": "The JSON decoder should convert backslash-n to a newline character in the generated Dart string."
   },
 
   "hello": "Hello {world}",
@@ -332,14 +383,43 @@ void main() {
     }
   },
 
+  "dollarSign": "$!",
+  "@dollarSign": {
+    "description": "A message with a dollar sign."
+  },
+
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
+  "@dollarSignPlural": {
+    "description": "A plural message with a dollar sign.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "singleQuote": "Flutter's amazing!",
   "@singleQuote": {
     "description": "A message with a single quote."
   },
 
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}}",
+  "@singleQuotePlural": {
+    "description": "A plural message with a single quote.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "doubleQuote": "Flutter is \"amazing\"!",
   "@doubleQuote": {
     "description": "A message with double quotes."
+  },
+
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!}}",
+  "@doubleQuotePlural": {
+    "description": "A plural message with double quotes.",
+    "placeholders": {
+      "count": {}
+    }
   }
 }
 ''';
@@ -355,6 +435,57 @@ void main() {
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
+}
+''';
+
+  // Only tests `helloWorld` and `helloWorlds`. The rest of the messages
+  // are added out of necessity since every base class requires an
+  // override for every message.
+  final String appZh = r'''
+{
+  "@@locale": "zh",
+  "helloWorld": "你好世界",
+  "helloWorlds": "{count,plural, =0{你好} =1{你好世界} other{你好{count}个其他世界}}",
+  "helloNewlineWorld": "Hello \n World",
+  "hello": "Hello {world}",
+  "greeting": "{hello} {world}",
+  "helloWorldOn": "Hello World on {date}",
+  "helloWorldDuring": "Hello World from {startDate} to {endDate}",
+  "helloOn": "Hello {world} on {date} at {time}",
+  "helloFor": "Hello for {value}",
+  "helloCost": "Hello for {price} {value}",
+  "helloAdjectiveWorlds": "{count,plural, =0{Hello} =1{Hello {adjective} World} =2{Hello two {adjective} worlds} other{Hello other {count} {adjective} worlds}}",
+  "helloWorldsOn": "{count,plural, =0{Hello on {date}} =1{Hello World, on {date}} =2{Hello two worlds, on {date}} other{Hello other {count} worlds, on {date}}}",
+  "helloWorldPopulation": "{count,plural, =1{Hello World of {population} citizens} =2{Hello two worlds with {population} total citizens} many{Hello all {count} worlds, with a total of {population} citizens} other{Hello other {count} worlds, with a total of {population} citizens}}",
+  "helloWorldInterpolation": "[{hello}] #{world}#",
+  "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
+  "dollarSign": "$!",
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
+  "singleQuote": "Flutter's amazing!",
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}",
+  "doubleQuote": "Flutter is \"amazing\"!",
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!"
+}
+''';
+
+  final String appZhHans = r'''
+{
+  "@@locale": "zh_Hans",
+  "helloWorld": "简体你好世界"
+}
+  ''';
+
+  final String appZhHant = r'''
+{
+  "@@locale": "zh_Hant",
+  "helloWorld": "繁體你好世界"
+}
+  ''';
+
+  final String appZhHantTw = r'''
+{
+  "@@locale": "zh_Hant_TW",
+  "helloWorld": "台灣繁體你好世界"
 }
 ''';
 }

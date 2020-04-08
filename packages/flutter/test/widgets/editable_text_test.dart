@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
@@ -1421,6 +1422,86 @@ void main() {
     // These callbacks shouldn't have been triggered.
     assert(!onSubmittedCalled);
     assert(!onEditingCompleteCalled);
+  });
+
+  testWidgets(
+    'iOS autocorrection rectangle should appear on demand'
+    'and dismiss when the text changes or when focus is lost',
+    (WidgetTester tester) async {
+      const Color rectColor = Color(0xFFFF0000);
+
+      void verifyAutocorrectionRectVisibility({ bool expectVisible }) {
+        PaintPattern evaluate() {
+          if (expectVisible) {
+            return paints..something(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return false;
+              final Paint paint = arguments[1] as Paint;
+              return paint.color == rectColor;
+            }));
+          } else {
+            return paints..everything(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return true;
+              final Paint paint = arguments[1] as Paint;
+              if (paint.color != rectColor)
+                return true;
+              throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
+            }));
+          }
+        }
+
+        expect(findRenderEditable(tester), evaluate());
+      }
+
+      final FocusNode focusNode = FocusNode();
+      final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
+
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+          cursorColor: Colors.blue,
+          autocorrect: true,
+          autocorrectionTextRectColor: rectColor,
+          showCursor: false,
+          onEditingComplete: () { },
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      assert(focusNode.hasFocus);
+
+      // The prompt rect should be invisible initially.
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      // Show prompt rect when told to.
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Text changed, prompt rect goes away.
+      controller.text = '12345';
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Unfocus, prompt rect should go away.
+      focusNode.unfocus();
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
@@ -4311,6 +4392,49 @@ void main() {
     ];
 
     expect(formatter.log, referenceLog);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/53612
+  testWidgets('formatter logic handles initial repeat edge case', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    expect(formatter.formatCallCount, 0);
+    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(const TextEditingValue(text: '', composing: TextRange(start: 1, end: 2)));
+    state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
+    expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
+    expect(formatter.lastOldValue.text, '');
   });
 
   testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {

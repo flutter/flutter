@@ -89,7 +89,11 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BuildSystem: () => const BuildSystem(),
+      BuildSystem: () => BuildSystem(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       Cache: () => Cache(
         fileSystem: globals.fs,
         logger: globals.logger,
@@ -216,6 +220,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         terminal: globals.terminal,
+        usage: globals.flutterUsage,
       ),
     },
   );

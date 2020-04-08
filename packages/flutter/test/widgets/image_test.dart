@@ -1622,6 +1622,7 @@ void main() {
   });
 }
 
+@immutable
 class ConfigurationAwareKey {
   const ConfigurationAwareKey(this.provider, this.configuration)
     : assert(provider != null),

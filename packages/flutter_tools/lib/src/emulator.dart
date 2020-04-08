@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'base/context.dart';
@@ -214,8 +216,9 @@ abstract class EmulatorDiscovery {
   Future<List<Emulator>> get emulators;
 }
 
+@immutable
 abstract class Emulator {
-  Emulator(this.id, this.hasConfig);
+  const Emulator(this.id, this.hasConfig);
 
   final String id;
   final bool hasConfig;

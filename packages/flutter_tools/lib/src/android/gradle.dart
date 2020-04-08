@@ -206,9 +206,9 @@ Future<void> buildGradleApp({
 
   final bool usesAndroidX = project.android.isAppUsingAndroidX();
   if (usesAndroidX) {
-    BuildEvent('app-using-android-x').send();
+    BuildEvent('app-using-android-x', flutterUsage: globals.flutterUsage).send();
   } else if (!usesAndroidX) {
-    BuildEvent('app-not-using-android-x').send();
+    BuildEvent('app-not-using-android-x', flutterUsage: globals.flutterUsage).send();
     globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
     globals.printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
@@ -368,7 +368,7 @@ Future<void> buildGradleApp({
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle-unkown-failure').send();
+      BuildEvent('gradle-unkown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -394,7 +394,7 @@ Future<void> buildGradleApp({
               shouldBuildPluginAsAar: shouldBuildPluginAsAar,
               retries: retries - 1,
             );
-            BuildEvent(successEventLabel).send();
+            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
             return;
           case GradleBuildStatus.retryWithAarPlugins:
             await buildGradleApp(
@@ -406,13 +406,13 @@ Future<void> buildGradleApp({
               shouldBuildPluginAsAar: true,
               retries: retries - 1,
             );
-            BuildEvent(successEventLabel).send();
+            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
             return;
           case GradleBuildStatus.exit:
             // noop.
         }
       }
-      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure').send();
+      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -688,7 +688,7 @@ String _calculateSha(File file) {
 }
 
 void _exitWithUnsupportedProjectMessage() {
-  BuildEvent('unsupported-project', eventError: 'gradle-plugin').send();
+  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark Your app is using an unsupported Gradle project. '
     'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
@@ -697,7 +697,7 @@ void _exitWithUnsupportedProjectMessage() {
 }
 
 void _exitWithProjectNotUsingGradleMessage() {
-  BuildEvent('unsupported-project', eventError: 'app-not-using-gradle').send();
+  BuildEvent('unsupported-project', eventError: 'app-not-using-gradle', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark The build process for Android has changed, and the '
     'current project configuration is no longer valid. Please consult\n\n'
@@ -750,7 +750,7 @@ Future<void> buildPluginsAsAar(
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
       // includes the plugin name and the version.
-      BuildEvent('gradle-plugin-aar-failure', eventError: plugin).send();
+      BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: globals.flutterUsage).send();
       throwToolExit('The plugin $pluginName could not be built due to the issue above.');
     }
   }
@@ -826,12 +826,13 @@ void _exitWithExpectedFileNotFound({
   assert(fileExtension != null);
 
   final String androidGradlePluginVersion =
-      getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
+  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
   BuildEvent('gradle-expected-file-not-found',
     settings:
-      'androidGradlePluginVersion: $androidGradlePluginVersion, '
-      'fileExtension: $fileExtension'
-    ).send();
+    'androidGradlePluginVersion: $androidGradlePluginVersion, '
+      'fileExtension: $fileExtension',
+    flutterUsage: globals.flutterUsage,
+  ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
     "It's likely that this file was generated under ${project.android.buildDirectory.path}, "

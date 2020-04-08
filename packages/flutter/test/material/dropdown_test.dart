@@ -34,6 +34,7 @@ Widget buildFrame({
   Key buttonKey,
   String value = 'two',
   ValueChanged<String> onChanged,
+  VoidCallback onTap,
   Widget icon,
   Color iconDisabledColor,
   Color iconEnabledColor,
@@ -52,6 +53,7 @@ Widget buildFrame({
   FocusNode focusNode,
   bool autofocus = false,
   Color focusColor,
+  Color dropdownColor,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -66,6 +68,7 @@ Widget buildFrame({
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
+            onTap: onTap,
             icon: icon,
             iconSize: iconSize,
             iconDisabledColor: iconDisabledColor,
@@ -76,6 +79,7 @@ Widget buildFrame({
             focusNode: focusNode,
             autofocus: autofocus,
             focusColor: focusColor,
+            dropdownColor: dropdownColor,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -169,6 +173,41 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
       ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
       ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
       ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
+  );
+}
+
+Future<void> checkDropdownColor(WidgetTester tester, {Color color}) async {
+  const String text = 'foo';
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: DropdownButton<String>(
+          dropdownColor: color,
+          value: text,
+          items: const <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              value: text,
+              child: Text(text),
+            ),
+          ],
+          onChanged: (_) { },
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(text));
+  await tester.pump();
+
+  expect(
+    find.ancestor(
+      of: find.text(text).last,
+      matching: find.byType(CustomPaint)).at(2),
+    paints
+      ..save()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false)
   );
 }
 
@@ -1772,6 +1811,14 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
+  testWidgets('DropdownButton uses default color when expanded', (WidgetTester tester) async {
+    await checkDropdownColor(tester);
+  });
+
+  testWidgets('DropdownButton uses dropdownColor when expanded when given', (WidgetTester tester) async {
+    await checkDropdownColor(tester, color: const Color.fromRGBO(120, 220, 70, 0.8));
+  });
+
   testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42340
     final List<String> items = <String>['1', '2', '3'];
@@ -2314,4 +2361,134 @@ void main() {
     // tree, causing it to lose focus.
     expect(Focus.of(tester.element(find.byKey(const ValueKey<int>(91)).last)).hasPrimaryFocus, isFalse);
   }, skip: kIsWeb);
+
+  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+    int dropdownButtonTapCounter = 0;
+    String value = 'one';
+
+    void onChanged(String newValue) { value = newValue; }
+    void onTap() { dropdownButtonTapCounter += 1; }
+
+    Widget build() => buildFrame(
+      value: value,
+      onChanged: onChanged,
+      onTap: onTap,
+    );
+    await tester.pumpWidget(build());
+
+    expect(dropdownButtonTapCounter, 0);
+
+    // Tap dropdown button.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('one'));
+    expect(dropdownButtonTapCounter, 1); // Should update counter.
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 1); // Should not change.
+
+    // Tap dropdown button again.
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('three'));
+    expect(dropdownButtonTapCounter, 2); // Should update counter.
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+
+    expect(value, equals('two'));
+    expect(dropdownButtonTapCounter, 2); // Should not change.
+  });
+
+  testWidgets('DropdownMenuItem onTap callback is called when defined', (WidgetTester tester) async {
+    String value = 'one';
+    final List<int> menuItemTapCounters = <int>[0, 0, 0, 0];
+    void onChanged(String newValue) { value = newValue; }
+
+    final List<VoidCallback> onTapCallbacks = <VoidCallback>[
+      () { menuItemTapCounters[0] += 1; },
+      () { menuItemTapCounters[1] += 1; },
+      () { menuItemTapCounters[2] += 1; },
+      () { menuItemTapCounters[3] += 1; },
+    ];
+
+    int currentIndex = -1;
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: DropdownButton<String>(
+              value: value,
+              onChanged: onChanged,
+              items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                currentIndex += 1;
+                return DropdownMenuItem<String>(
+                  value: item,
+                  onTap: onTapCallbacks[currentIndex],
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap dropdown button.
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+
+    expect(value, equals('one'));
+    // Counters should still be zero.
+    expect(menuItemTapCounters, <int>[0, 0, 0, 0]);
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    // Should update the counter for the third item (second index).
+    expect(value, equals('three'));
+    expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
+
+    // Tap dropdown button again.
+    await tester.tap(find.text('three'));
+    await tester.pumpAndSettle();
+
+    // Should not change.
+    expect(value, equals('three'));
+    expect(menuItemTapCounters, <int>[0, 0, 1, 0]);
+
+    // Tap dropdown menu item.
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+
+    // Should update the counter for the second item (first index).
+    expect(value, equals('two'));
+    expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
+
+    // Tap dropdown button again.
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    // Should not change.
+    expect(value, equals('two'));
+    expect(menuItemTapCounters, <int>[0, 1, 1, 0]);
+
+    // Tap the already selected menu item
+    await tester.tap(find.text('two').last);
+    await tester.pumpAndSettle();
+
+    // Should update the counter for the second item (first index), even
+    // though it was already selected.
+    expect(value, equals('two'));
+    expect(menuItemTapCounters, <int>[0, 2, 1, 0]);
+  });
 }

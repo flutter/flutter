@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountOne": "1 teken resterend",
   "remainingTextFieldCharacterCountOther": "$remainingCount tekens resterend",
   "refreshIndicatorSemanticLabel": "Vernieuwen",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Meer"
 }

@@ -9,7 +9,6 @@ import 'package:vm_service/vm_service_io.dart' as vm_service_io;
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
@@ -42,12 +41,14 @@ class FallbackDiscovery {
     @required MDnsObservatoryDiscovery mDnsObservatoryDiscovery,
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
+    @required Usage flutterUsage,
     Future<VmService> Function(String wsUri, {Log log}) vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
+       _flutterUsage = flutterUsage,
        _vmServiceConnectUri = vmServiceConnectUri;
 
   static const String _kEventName = 'ios-handshake';
@@ -56,6 +57,7 @@ class FallbackDiscovery {
   final MDnsObservatoryDiscovery _mDnsObservatoryDiscovery;
   final Logger _logger;
   final ProtocolDiscovery _protocolDiscovery;
+  final Usage _flutterUsage;
   final Future<VmService> Function(String wsUri, {Log log}) _vmServiceConnectUri;
 
   /// Attempt to discover the observatory port.
@@ -87,7 +89,7 @@ class FallbackDiscovery {
         UsageEvent(
           _kEventName,
           'mdns-success',
-          flutterUsage: globals.flutterUsage,
+          flutterUsage: _flutterUsage,
         ).send();
         return result;
       }
@@ -98,7 +100,7 @@ class FallbackDiscovery {
     UsageEvent(
       _kEventName,
       'mdns-failure',
-      flutterUsage: globals.flutterUsage,
+      flutterUsage: _flutterUsage,
     ).send();
 
     try {
@@ -107,7 +109,7 @@ class FallbackDiscovery {
         UsageEvent(
           _kEventName,
           'fallback-success',
-          flutterUsage: globals.flutterUsage,
+          flutterUsage: _flutterUsage,
         ).send();
         return result;
       }
@@ -121,7 +123,7 @@ class FallbackDiscovery {
     UsageEvent(
       _kEventName,
       'fallback-failure',
-      flutterUsage: globals.flutterUsage,
+      flutterUsage: _flutterUsage,
     ).send();
     return null;
   }
@@ -167,7 +169,7 @@ class FallbackDiscovery {
             UsageEvent(
               _kEventName,
               'success',
-              flutterUsage: globals.flutterUsage,
+              flutterUsage: _flutterUsage,
             ).send();
             return Uri.parse('http://localhost:$hostPort');
           }
@@ -207,7 +209,7 @@ class FallbackDiscovery {
       _kEventName,
       eventAction,
       label: eventLabel,
-      flutterUsage: globals.flutterUsage,
+      flutterUsage: _flutterUsage,
     ).send();
   }
 }

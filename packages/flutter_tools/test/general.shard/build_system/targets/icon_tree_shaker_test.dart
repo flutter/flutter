@@ -113,6 +113,10 @@ void main() {
     return Environment.test(
       fs.directory('/icon_test')..createSync(recursive: true),
       defines: defines,
+      artifacts: mockArtifacts,
+      processManager: FakeProcessManager.any(),
+      fileSystem: fs,
+      logger: BufferLogger.test(),
     );
   }
 

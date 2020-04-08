@@ -383,7 +383,7 @@ class BufferLogger extends Logger {
        _stopwatchFactory = stopwatchFactory,
        _hasTerminal = false;
 
-  @visibleForTesting
+  /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal terminal,
     OutputPreferences outputPreferences,

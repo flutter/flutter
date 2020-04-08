@@ -60,6 +60,7 @@ class CupertinoScrollbar extends StatefulWidget {
   const CupertinoScrollbar({
     Key key,
     this.controller,
+    this.isAlwaysShown = false,
     @required this.child,
   }) : super(key: key);
 
@@ -125,6 +126,60 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@endtemplate}
   final ScrollController controller;
 
+  /// {@template flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
+  /// Indicates whether the [Scrollbar] should always be visible.
+  ///
+  /// When false, the scrollbar will be shown during scrolling
+  /// and will fade out otherwise.
+  ///
+  /// When true, the scrollbar will always be visible and never fade out.
+  ///
+  /// The [controller] property must be set in this case.
+  /// It should be passed the relevant [Scrollable]'s [ScrollController].
+  ///
+  /// Defaults to false.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final ScrollController _controllerOne = ScrollController();
+  /// final ScrollController _controllerTwo = ScrollController();
+  ///
+  /// build(BuildContext context) {
+  /// return Column(
+  ///   children: <Widget>[
+  ///     Container(
+  ///        height: 200,
+  ///        child: Scrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerOne,
+  ///          child: ListView.builder(
+  ///            controller: _controllerOne,
+  ///            itemCount: 120,
+  ///            itemBuilder: (BuildContext context, int index)
+  ///                => Text('item $index'),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///      Container(
+  ///        height: 200,
+  ///        child: CupertinoScrollbar(
+  ///          isAlwaysShown: true,
+  ///          controller: _controllerTwo,
+  ///          child: SingleChildScrollView(
+  ///            controller: _controllerTwo,
+  ///            child: SizedBox(height: 2000, width: 500,),
+  ///          ),
+  ///        ),
+  ///      ),
+  ///    ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  final bool isAlwaysShown;
+
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
 }
@@ -183,6 +238,28 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
         ..padding = MediaQuery.of(context).padding;
     }
+    WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+      if (widget.isAlwaysShown) {
+        assert(widget.controller != null);
+        // Wait one frame and cause an empty scroll event.  This allows the
+        // thumb to show immediately when isAlwaysShown is true.  A scroll
+        // event is required in order to paint the thumb.
+        widget.controller.position.didUpdateScrollPositionBy(0);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CupertinoScrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+      if (widget.isAlwaysShown == true) {
+        assert(widget.controller != null);
+        _fadeoutAnimationController.animateTo(1.0);
+      } else {
+        _fadeoutAnimationController.reverse();
+      }
+    }
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
@@ -228,11 +305,13 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _startFadeoutTimer() {
-    _fadeoutTimer?.cancel();
-    _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
-      _fadeoutAnimationController.reverse();
-      _fadeoutTimer = null;
-    });
+    if (!widget.isAlwaysShown) {
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
+        _fadeoutAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
+    }
   }
 
   bool _checkVertical() {
@@ -267,7 +346,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward().then<void>(
           (_) => HapticFeedback.mediumImpact(),
-        );
+    );
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {

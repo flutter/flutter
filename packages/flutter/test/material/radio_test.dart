@@ -66,6 +66,61 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final List<int> log = <int>[];
+
+    await tester.pumpWidget(Material(
+      child: Center(
+        child: Radio<int>(
+          key: key,
+          value: 1,
+          groupValue: 2,
+          onChanged: log.add,
+          toggleable: true,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, equals(<int>[1]));
+    log.clear();
+
+    await tester.pumpWidget(Material(
+      child: Center(
+        child: Radio<int>(
+          key: key,
+          value: 1,
+          groupValue: 1,
+          onChanged: log.add,
+          toggleable: true,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, equals(<int>[null]));
+    log.clear();
+
+    await tester.pumpWidget(Material(
+      child: Center(
+        child: Radio<int>(
+          key: key,
+          value: 1,
+          groupValue: null,
+          onChanged: log.add,
+          toggleable: true,
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(key));
+
+    expect(log, equals(<int>[1]));
+  });
+
   testWidgets('Radio size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
@@ -443,7 +498,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int groupValue = 1;
     const Key radioKey0 = Key('radio0');

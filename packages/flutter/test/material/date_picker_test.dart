@@ -136,6 +136,30 @@ void main() {
       });
     });
 
+    testWidgets('Switching to input mode resets input error state', (WidgetTester tester) async {
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        // Enter text input mode and type an invalid date to get error.
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsOneWidget);
+
+        // Toggle to calender mode and then back to input mode
+        await tester.tap(find.byIcon(Icons.calendar_today));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsNothing);
+
+        // Edit the text, the error should not be showing until ok is tapped
+        await tester.enterText(find.byType(TextField), '1234567');
+        await tester.pumpAndSettle();
+        expect(find.text('Invalid format.'), findsNothing);
+      });
+    });
+
     testWidgets('builder parameter', (WidgetTester tester) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
@@ -223,6 +247,77 @@ void main() {
       expect(nestedObserver.datePickerCount, 1);
     });
 
+    testWidgets('honors DialogTheme for shape and elevation', (WidgetTester tester) async {
+      // Test that the defaults work
+      const DialogTheme datePickerDefaultDialogTheme = DialogTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0))
+        ),
+        elevation: 24,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      final Material defaultDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      expect(defaultDialogMaterial.shape, datePickerDefaultDialogTheme.shape);
+      expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
+
+      // Test that it honors ThemeData.dialogTheme settings
+      const DialogTheme customDialogTheme = DialogTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(40.0))
+        ),
+        elevation: 50,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.fallback().copyWith(dialogTheme: customDialogTheme),
+          home: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+      final Material themeDialogMaterial = tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
+      expect(themeDialogMaterial.shape, customDialogTheme.shape);
+      expect(themeDialogMaterial.elevation, customDialogTheme.elevation);
+    });
+
   });
 
   group('Calendar mode', () {
@@ -251,6 +346,20 @@ void main() {
         await tester.tap(find.text('2018'));
         await tester.pump();
         expect(find.text('January 2018'), findsOneWidget);
+      });
+    });
+
+    testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
+      initialDate = DateTime(2020, DateTime.march, 15);
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        await tester.tap(nextMonthIcon);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        expect(find.text('April 2020'), findsOneWidget);
+        await tester.tap(find.text('25'));
+        await tester.pumpAndSettle();
+        expect(find.text('April 2020'), findsOneWidget);
+        // There isn't a 31 in April so there shouldn't be one if it is showing April
+        expect(find.text('31'), findsNothing);
       });
     });
 

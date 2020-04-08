@@ -57,5 +57,5 @@
   "remainingTextFieldCharacterCountOne": "Մնացել է 1 նիշ",
   "remainingTextFieldCharacterCountOther": "Մնացել է $remainingCount նիշ",
   "refreshIndicatorSemanticLabel": "Թարմացնել",
-  "moreButtonTooltip": "TBD"
+  "moreButtonTooltip": "Այլ"
 }

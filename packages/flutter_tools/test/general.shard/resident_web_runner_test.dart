@@ -116,6 +116,9 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onStderrEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
@@ -249,19 +252,29 @@ void main() {
     expect(await residentWebRunner.run(), 0);
   }));
 
-  test('Listens to stdout streams before running main', () => testbed.run(() async {
+  test('Listens to stdout and stderr streams before running main', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    final StreamController<Event> stdoutController = StreamController<Event>.broadcast();
+    final StreamController<Event> stderrController = StreamController<Event>.broadcast();
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
-      return controller.stream;
+      return stdoutController.stream;
+    });
+    when(mockVmService.onStderrEvent).thenAnswer((Invocation _) {
+      return stderrController.stream;
     });
     when(mockAppConnection.runMain()).thenAnswer((Invocation invocation) {
-      controller.add(Event.parse(<String, Object>{
+      stdoutController.add(Event.parse(<String, Object>{
         'type': 'Event',
         'kind': 'WriteEvent',
         'timestamp': 1569473488296,
         'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits),
+      }));
+       stderrController.add(Event.parse(<String, Object>{
+        'type': 'Event',
+        'kind': 'WriteEvent',
+        'timestamp': 1569473488296,
+        'bytes': base64.encode('SO IS THIS'.codeUnits),
       }));
     });
     unawaited(residentWebRunner.run(
@@ -270,6 +283,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     expect(testLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
+    expect(testLogger.statusText, contains('SO IS THIS'));
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
@@ -478,6 +492,30 @@ void main() {
     verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Faithfully displays stdout messages with leading/trailing spaces', () => testbed.run(() async {
+    _setupMocks();
+    final StreamController<Event> stdoutController = StreamController<Event>();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation invocation) {
+      return stdoutController.stream;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    stdoutController.add(Event(
+      timestamp: 0,
+      kind: 'Stdout',
+      bytes: base64.encode(utf8.encode('    This is a message with 4 leading and trailing spaces    '))),
+    );
+    // Wait one event loop for the stream listener to fire.
+    await null;
+
+    expect(testLogger.statusText,
+      contains('    This is a message with 4 leading and trailing spaces    '));
   }));
 
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
