@@ -299,6 +299,20 @@ android {
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
+  Future<void> introducePubspecError() async {
+    final File pubspec = File(
+      path.join(parent.path, 'hello', 'pubspec.yaml')
+    );
+    final String contents = pubspec.readAsStringSync();
+    final String newContents = contents.replaceFirst('# The following section is specific to Flutter.\nflutter:\n', '''
+flutter:
+  assets:
+    - lib/gallery/example_code.dart
+
+''');
+    pubspec.writeAsStringSync(newContents);
+  }
+
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: androidPath, task: task, options: options);
   }

@@ -881,6 +881,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
+            logging.captureStandardError LogLevel.ERROR
             executable flutterExecutable.absolutePath
             workingDir sourceDir
             if (localEngine != null) {

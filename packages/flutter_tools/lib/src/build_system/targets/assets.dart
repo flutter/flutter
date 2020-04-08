@@ -16,14 +16,19 @@ import 'icon_tree_shaker.dart';
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
+/// Throws [Exception] if [AssetBundle.build] returns a non-zero exit code.
+///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) async {
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-  await assetBundle.build(
+  final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
   );
+  if (resultCode != 0) {
+    throw Exception('Failed to bundle asset files.');
+  }
   final Pool pool = Pool(kMaxOpenFiles);
   final List<File> inputs = <File>[
     // An asset manifest with no assets would have zero inputs if not
