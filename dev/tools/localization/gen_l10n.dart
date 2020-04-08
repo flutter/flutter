@@ -773,13 +773,13 @@ class LocalizationsGenerator {
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
     if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
       _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-        stdout.write(
-          '"$locale": ${messages.length} untranslated messages\n\n'
-          'To see a detailed report, use the unimplemented_messages_file \n'
-          'option in the tool to generate a JSON format file containing \n'
-          'all messages that need to be translated.'
-        );
+        stdout.writeln('"$locale": ${messages.length} untranslated message(s).');
       });
+      stdout.writeln(
+        'To see a detailed report, use the unimplemented_messages_file \n'
+        'option in the tool to generate a JSON format file containing \n'
+        'all messages that need to be translated.'
+      );
     } else {
       _writeUnimplementedMessagesFile(untranslatedMessagesFile);
     }
