@@ -414,6 +414,75 @@ void main() {
     },
   );
 
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly detects events on the semantics placeholder',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      final html.Element semanticsPlaceholder =
+          html.Element.tag('flt-semantics-placeholder');
+      glassPane.append(semanticsPlaceholder);
+
+      // Press on the semantics placeholder.
+      semanticsPlaceholder.dispatchEvent(context.primaryDown(
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].physicalX, equals(10.0));
+      expect(packets[0].data[1].physicalY, equals(10.0));
+      packets.clear();
+
+      // Drag on the semantics placeholder.
+      semanticsPlaceholder.dispatchEvent(context.primaryMove(
+        clientX: 12.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].physicalX, equals(12.0));
+      expect(packets[0].data[0].physicalY, equals(10.0));
+      packets.clear();
+
+      // Keep dragging.
+      semanticsPlaceholder.dispatchEvent(context.primaryMove(
+        clientX: 15.0,
+        clientY: 10.0,
+      ));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].physicalX, equals(15.0));
+      expect(packets[0].data[0].physicalY, equals(10.0));
+      packets.clear();
+
+      // Release the pointer on the semantics placeholder.
+      html.window.dispatchEvent(context.primaryUp(
+        clientX: 100.0,
+        clientY: 200.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].physicalX, equals(100.0));
+      expect(packets[0].data[0].physicalY, equals(200.0));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[1].physicalX, equals(100.0));
+      expect(packets[0].data[1].physicalY, equals(200.0));
+      packets.clear();
+
+      semanticsPlaceholder.remove();
+    },
+  );
+
   // BUTTONED ADAPTERS
 
   _testEach<_ButtonedEventMixin>(

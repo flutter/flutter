@@ -196,7 +196,7 @@ abstract class _BaseAdapter {
     bool acceptOutsideGlasspane = false,
   }) {
     final html.EventListener loggedHandler = (html.Event event) {
-      if (!acceptOutsideGlasspane && event.target != glassPaneElement) {
+      if (!acceptOutsideGlasspane && !glassPaneElement.contains(event.target)) {
         return;
       }
 
