@@ -589,22 +589,28 @@ Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
 /// Launches the device log reader process on the host and parses unified logging.
 @visibleForTesting
 Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName) async {
-  final StringBuffer predicate = StringBuffer('eventType = logEvent AND ');
+  // Make NSPredicate concatenation easier to read.
+  String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
+  String andP(List<String> clauses) => '${clauses.join(" AND ")}';
+  String notP(String clause) => 'NOT($clause)';
 
-  // Either from Flutter or Swift (maybe assertion or fatal error) or from the app itself.
-  predicate.write('(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND ');
-  if (appName != null) {
-    predicate.write('processImagePath ENDSWITH "$appName" AND ');
-  }
-
-  // Filter out some messages that clearly aren't related to Flutter.
-  predicate.write('NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND ');
-
-  // assertion failed: 15G1212 13E230: libxpc.dylib + 57882 [66C28065-C9DB-3C8E-926F-5A40210A6D1B]: 0x7d
-  predicate.write('NOT(eventMessage BEGINSWITH "assertion failed: " AND eventMessage CONTAINS " libxpc.dylib ")');
+  final String predicate = andP(<String>[
+    'eventType = logEvent',
+    if (appName != null) 'processImagePath ENDSWITH "$appName"',
+    // Either from Flutter or Swift (maybe assertion or fatal error) or from the app itself.
+    orP(<String>[
+      'senderImagePath ENDSWITH "/Flutter"',
+      'senderImagePath ENDSWITH "/libswiftCore.dylib"',
+      'processImageUUID == senderImageUUID',
+    ]),
+    // Filter out some messages that clearly aren't related to Flutter.
+    notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
+    notP('eventMessage BEGINSWITH "assertion failed: "'),
+    notP('eventMessage CONTAINS " libxpc.dylib "'),
+  ]);
 
   return processUtils.start(<String>[
-    _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate.toString(),
+    _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate,
   ]);
 }
 

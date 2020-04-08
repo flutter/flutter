@@ -451,10 +451,27 @@ void main() {
         xcode: mockXcode,
       );
       await launchDeviceUnifiedLogging(device, 'Runner');
+
+      const String expectedPredicate = 'eventType = logEvent AND '
+        'processImagePath ENDSWITH "Runner" AND '
+        '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+        'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+        'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+        'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+
       final List<String> command = verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single as List<String>;
-      expect(command, contains('spawn'));
-      expect(command, contains('x'));
-      expect(command.last, contains('processImagePath ENDSWITH "Runner"'));
+      expect(command, <String>[
+        '/usr/bin/xcrun',
+        'simctl',
+        'spawn',
+        'x',
+        'log',
+        'stream',
+        '--style',
+        'json',
+        '--predicate',
+        expectedPredicate
+      ]);
     },
       overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -470,11 +487,26 @@ void main() {
         xcode: mockXcode,
       );
       await launchDeviceUnifiedLogging(device, null);
+
+      const String expectedPredicate = 'eventType = logEvent AND '
+        '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+        'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+        'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+        'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+
       final List<String> command = verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single as List<String>;
-      expect(command, contains('spawn'));
-      expect(command, contains('x'));
-      expect(command.last, contains('(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND NOT(eventMessage'));
-      expect(command.last.contains('processImagePath ENDSWITH'), isFalse);
+      expect(command, <String>[
+        '/usr/bin/xcrun',
+        'simctl',
+        'spawn',
+        'x',
+        'log',
+        'stream',
+        '--style',
+        'json',
+        '--predicate',
+        expectedPredicate
+      ]);
     },
       overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
@@ -618,7 +650,6 @@ void main() {
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Multi line message\\n  continues...\\n  continues..."
-},{
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message, not the part of the above",
