@@ -24,7 +24,7 @@ void main() {
         '1.2.3',
         '12.34.56',
         '1.2.3.pre.1',
-        '1.2.3-4.5',
+        '1.2.3-4.5.pre',
         '1.2.3-5.0.pre.12',
       ];
       for (final String version in valid_versions) {
