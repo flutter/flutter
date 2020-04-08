@@ -1,4 +1,4 @@
-// Copyright 2020 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,5 +22,6 @@ import 'dart:async';
 /// Best Practices:
 /// - Do not wrap your entire app with [allowHttp]. Wrap *exactly* what you need and nothing more.
 /// - Avoid libraries that require accessing HTTP URLs.
-T allowHttp<T>(T action()) =>
-    runZoned<T>(action, zoneValues: {#dart.library.io.allow_http: true});
+T allowHttp<T>(T action()) {
+  return runZoned<T>(action, zoneValues: {#dart.library.io.allow_http: true});
+}
