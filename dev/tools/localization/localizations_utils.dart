@@ -387,24 +387,9 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo\\nbar => 'foo\\\\nbar'
 /// foo\\bar => 'foo\\\\bar'
 /// foo\ bar => 'foo\\ bar'
-/// ```
-///
-/// When [shouldEscapeDollar] is set to true, the '$' characters in the
-/// input will be replaced by '$' in the returned string:
-/// ```
 /// foo$bar = 'foo\$bar'
 /// ```
-///
-/// When [shouldEscapeDollar] is set to false, '$' will be replaced
-/// by '\$' in the returned string:
-/// ```
-/// foo$bar => 'foo\\\$bar'
-/// ```
-///
-/// [shouldEscapeDollar] is true by default.
-String generateString(String value, { bool escapeDollar = true }) {
-  assert(escapeDollar != null);
-
+String generateString(String value) {
   const String backslash = '__BACKSLASH__';
   assert(
     !value.contains(backslash),
@@ -412,12 +397,12 @@ String generateString(String value, { bool escapeDollar = true }) {
     '"__BACKSLASH__", as it is used as part of '
     'backslash character processing.'
   );
-  value = value.replaceAll('\\', backslash);
-
-  if (escapeDollar)
-    value = value.replaceAll('\$', '\\\$');
 
   value = value
+    // Replace backslashes with a placeholder for now to properly parse
+    // other special characters.
+    .replaceAll('\\', backslash)
+    .replaceAll('\$', '\\\$')
     .replaceAll("'", "\\'")
     .replaceAll('"', '\\"')
     .replaceAll('\n', '\\n')
@@ -425,6 +410,7 @@ String generateString(String value, { bool escapeDollar = true }) {
     .replaceAll('\t', '\\t')
     .replaceAll('\r', '\\r')
     .replaceAll('\b', '\\b')
+    // Reintroduce escaped backslashes into generated Dart string.
     .replaceAll(backslash, '\\\\');
 
   return "'$value'";
