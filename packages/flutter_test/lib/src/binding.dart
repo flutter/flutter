@@ -155,8 +155,8 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
 /// `HttpClient` to the code making the call, so that it can appropriately mock
 /// or fake responses.
 abstract class TestWidgetsFlutterBinding extends BindingBase
-  with ServicesBinding,
-       SchedulerBinding,
+  with SchedulerBinding,
+       ServicesBinding,
        GestureBinding,
        SemanticsBinding,
        RendererBinding,
