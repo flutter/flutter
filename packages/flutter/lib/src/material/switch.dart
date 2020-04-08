@@ -230,29 +230,22 @@ class Switch extends StatefulWidget {
 }
 
 class _SwitchState extends State<Switch> with TickerProviderStateMixin {
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _actionHandler),
     };
   }
 
-  void _actionHandler(FocusNode node, Intent intent){
+  void _actionHandler(ActivateIntent intent) {
     if (widget.onChanged != null) {
       widget.onChanged(!widget.value);
     }
-    final RenderObject renderObject = node.context.findRenderObject();
+    final RenderObject renderObject = context.findRenderObject();
     renderObject.sendSemanticsEvent(const TapSemanticEvent());
-  }
-
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke: _actionHandler,
-    );
   }
 
   bool _focused = false;

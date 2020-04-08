@@ -281,6 +281,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
+      osUtils: globals.os,
     );
     return devFS.create();
   }
@@ -821,6 +822,13 @@ abstract class ResidentRunner {
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[
       for (final FlutterDevice device in flutterDevices) device.refreshViews(),
+    ];
+    await Future.wait(futures);
+  }
+
+  Future<void> refreshVM() async {
+    final List<Future<void>> futures = <Future<void>>[
+      for (final FlutterDevice device in flutterDevices) device.getVMs(),
     ];
     await Future.wait(futures);
   }
