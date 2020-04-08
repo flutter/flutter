@@ -596,7 +596,7 @@ void main() {
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
-      when(vmService.getVM())
+      when(vmService.getVMOld())
           .thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.refreshViews())
           .thenAnswer((Invocation invocation) => Future<void>.value(null));
