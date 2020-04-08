@@ -78,7 +78,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             RaisedButton(
               child: const Text('RECORD'),
