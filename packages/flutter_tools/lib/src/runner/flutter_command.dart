@@ -168,12 +168,12 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
-    argParser.addOption('web-debug-protocol',
+    argParser.addOption('web-server-debug-protocol',
       allowed: <String>['sse', 'ws'],
       defaultsTo: 'sse',
-      help: 'The protocol (SSE or WebSockets) to use for the debug service proxy when '
-      'using the Web Server device and Dart Debugger extension. Chrome will always '
-      'use WebSockets. This is useful for editors/debug adapters that do not support debugging '
+      help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
+      'when using the Web Server device and Dart Debugger extension. '
+      'This is useful for editors/debug adapters that do not support debugging '
       'over SSE (the default protocol for Web Server/Dart Debugger extension).',
       hide: hide,
     );
