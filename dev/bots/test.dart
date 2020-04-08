@@ -1121,7 +1121,6 @@ String get gitHash {
 /// Returns null if the contents are good. Returns a string if they are bad.
 /// The string is an error message.
 Future<String> verifyVersion(File file) async {
-  // 1.18.0-5.0-pre.8
   final RegExp pattern = RegExp(
     r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+)?(\.pre\.\d+)?$');
   final String version = await file.readAsString();
