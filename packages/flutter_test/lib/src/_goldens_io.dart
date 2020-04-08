@@ -208,8 +208,8 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final ByteData invertedMasterRgba = invert(masterImageRgba);
-  final ByteData invertedTestRgba = invert(testImageRgba);
+  final ByteData invertedMasterRgba = _invert(masterImageRgba);
+  final ByteData invertedTestRgba = _invert(testImageRgba);
 
   final ByteData maskedDiffRgba = await testImage.toByteData();
   final ByteData isolatedDiffRgba = ByteData(width * height * 4);
@@ -220,10 +220,10 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
       final int testPixel = testImageRgba.getUint32(byteOffset);
       final int masterPixel = masterImageRgba.getUint32(byteOffset);
 
-      final int diffPixel = (readRed(testPixel) - readRed(masterPixel)).abs()
-        + (readGreen(testPixel) - readGreen(masterPixel)).abs()
-        + (readBlue(testPixel) - readBlue(masterPixel)).abs()
-        + (readAlpha(testPixel) - readAlpha(masterPixel)).abs();
+      final int diffPixel = (_readRed(testPixel) - _readRed(masterPixel)).abs()
+        + (_readGreen(testPixel) - _readGreen(masterPixel)).abs()
+        + (_readBlue(testPixel) - _readBlue(masterPixel)).abs()
+        + (_readAlpha(testPixel) - _readAlpha(masterPixel)).abs();
 
       if (diffPixel != 0 ) {
         final int invertedMasterPixel = invertedMasterRgba.getUint32(byteOffset);
@@ -254,7 +254,7 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.
-ByteData invert(ByteData imageBytes) {
+ByteData _invert(ByteData imageBytes) {
   final ByteData bytes = ByteData(imageBytes.lengthInBytes);
   // Invert the RGB data (but not A).
   for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
@@ -279,16 +279,16 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
 }
 
 /// Reads the red value out of a 32 bit rgba pixel.
-int readRed(int pixel) => pixel >> 24 & 0xff;
+int _readRed(int pixel) => pixel >> 24 & 0xff;
 
 /// Reads the green value out of a 32 bit rgba pixel.
-int readGreen(int pixel) => pixel >> 16 & 0xff;
+int _readGreen(int pixel) => pixel >> 16 & 0xff;
 
 /// Reads the blue value out of a 32 bit rgba pixel.
-int readBlue(int pixel) => pixel >> 8 & 0xff;
+int _readBlue(int pixel) => pixel >> 8 & 0xff;
 
 /// Reads the alpha value out of a 32 bit rgba pixel.
-int readAlpha(int pixel) => pixel & 0xff;
+int _readAlpha(int pixel) => pixel & 0xff;
 
 /// Convenience wrapper around [decodeImageFromPixels].
 Future<Image> _createImage(ByteData bytes, int width, int height) {
