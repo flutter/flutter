@@ -279,7 +279,7 @@ void main() {
       '   direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
       '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-      '     text direction)\n'
+      '     text direction, 1.0)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
