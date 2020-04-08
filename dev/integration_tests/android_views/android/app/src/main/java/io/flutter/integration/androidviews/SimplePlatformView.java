@@ -63,7 +63,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         Context context = view.getContext();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         TextView textView = new TextView(context);
-        textView.setText("This alert dialog will close in 1 seconds");
+        textView.setText("This alert dialog will close in 1 second");
         builder.setView(textView);
         final AlertDialog alertDialog = builder.show();
         result.success(null);
