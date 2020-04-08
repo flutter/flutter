@@ -65,15 +65,14 @@ Future<TaskResult> runWebBenchmark({ @required bool useCanvasKit }) async {
             server.close();
           }
 
-          final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(latestPerformanceTrace);
-
-          // Trace summary can be null if the benchmark is not frame-based, such as RawRecorder.
-          if (traceSummary != null) {
+          // Trace data is null when the benchmark is not frame-based, such as RawRecorder.
+          if (latestPerformanceTrace != null) {
+            final BlinkTraceSummary traceSummary = BlinkTraceSummary.fromJson(latestPerformanceTrace);
             profile['totalUiFrame.average'] = traceSummary.averageTotalUIFrameTime.inMicroseconds;
             profile['scoreKeys'] ??= <dynamic>[]; // using dynamic for consistency with JSON
             profile['scoreKeys'].add('totalUiFrame.average');
+            latestPerformanceTrace = null;
           }
-          latestPerformanceTrace = null;
           collectedProfiles.add(profile);
           return Response.ok('Profile received');
         } else if (request.requestedUri.path.endsWith('/start-performance-tracing')) {

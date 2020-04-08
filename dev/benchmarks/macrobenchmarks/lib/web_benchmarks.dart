@@ -70,19 +70,14 @@ Future<void> _runBenchmark(String benchmarkName) async {
   }
 
   try {
-    final Runner runner = Runner(
-      recorder: recorderFactory(),
-      setUpAllDidRun: () async {
-        if (!_client.isInManualMode) {
-          await _client.startPerformanceTracing(benchmarkName);
-        }
-      },
-      tearDownAllWillRun: () async {
-        if (!_client.isInManualMode) {
-          await _client.stopPerformanceTracing();
-        }
-      },
-    );
+    final Recorder recorder = recorderFactory();
+    final Runner runner = recorder.isTracingEnabled && !_client.isInManualMode
+      ? Runner(
+          recorder: recorder,
+          setUpAllDidRun: () => _client.startPerformanceTracing(benchmarkName),
+          tearDownAllWillRun: _client.stopPerformanceTracing,
+        )
+      : Runner(recorder: recorder);
 
     final Profile profile = await runner.run();
     if (!_client.isInManualMode) {
