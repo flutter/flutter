@@ -455,10 +455,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
     _shortcutMap = <LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
-      LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const _AdjustSliderIntent.up(),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const _AdjustSliderIntent.down(),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
     };
     _actionMap = <LocalKey, ActionFactory>{
       _AdjustSliderIntent.intentKey: _adjustActionFactory,
