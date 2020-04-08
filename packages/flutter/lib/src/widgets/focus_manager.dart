@@ -1398,7 +1398,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     _updateHighlightMode();
   }
 
-  static FocusHighlightMode get _highlightModeForPlatform {
+  static FocusHighlightMode get _defaultModeForPlatform {
     // Assume that if we're on one of the mobile platforms, and there's no mouse
     // connected, that the initial interaction will be touch-based, and that
     // it's traditional mouse and keyboard on all other platforms.
@@ -1433,7 +1433,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
   /// draw their focus highlight whenever they are focused.
-  FocusHighlightMode get highlightMode => _highlightMode ?? _highlightModeForPlatform;
+  // Don't want to set _highlightMode here, since it's possible for the target
+  // platform to change (especially in tests).
+  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
   FocusHighlightMode _highlightMode;
 
   // If set, indicates if the last interaction detected was touch or not.
@@ -1449,7 +1451,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         if (_lastInteractionWasTouch == null) {
           // If we don't have any information about the last interaction yet,
           // then just rely on the default value for the platform, which will be
-          // determined based on the target platform if not set.
+          // determined based on the target platform if _highlightMode is not
+          // set.
           return;
         }
         if (_lastInteractionWasTouch) {
@@ -1465,6 +1468,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
         newMode = FocusHighlightMode.traditional;
         break;
     }
+    // We can't just compare newMode with _highlightMode here, since
+    // _highlightMode could be null, so we want to compare with the return value
+    // for the getter, since that's what clients will be looking at.
     final FocusHighlightMode oldMode = highlightMode;
     _highlightMode = newMode;
     if (highlightMode != oldMode) {
