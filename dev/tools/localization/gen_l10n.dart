@@ -496,7 +496,7 @@ class LocalizationsGenerator {
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
     _setHeader(headerString, headerFile);
-    _useDeferredLoading = useDeferredLoading;
+    _setUseDeferredLoading(useDeferredLoading);
     className = classNameString;
   }
 
@@ -627,6 +627,13 @@ class LocalizationsGenerator {
         );
       }
     }
+  }
+
+  void _setUseDeferredLoading(bool useDeferredLoading) {
+    if (useDeferredLoading == null) {
+      throw L10nException('useDeferredLoading argument cannot be null.');
+    }
+    _useDeferredLoading = useDeferredLoading;
   }
 
   static bool _isValidGetterAndMethodName(String name) {

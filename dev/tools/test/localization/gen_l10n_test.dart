@@ -380,6 +380,28 @@ void main() {
     fail('Setting headerFile that does not exist should fail');
   });
 
+  test('setting useDefferedLoading to null should fail', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator.initialize(
+        l10nDirectoryPath: defaultArbPathString,
+        templateArbFileName: defaultTemplateArbFileName,
+        outputFileString: defaultOutputFileString,
+        classNameString: defaultClassNameString,
+        headerString: '/// Sample header',
+        useDeferredLoading: null,
+      );
+    } on L10nException catch (e) {
+      expect(e.message, contains('useDeferredLoading argument cannot be null.'));
+      return;
+    }
+
+    fail('Setting useDefferedLoading to null should fail');
+  });
+
   group('loadResources', () {
     test('correctly initializes supportedLocales and supportedLanguageCodes properties', () {
       _standardFlutterDirectoryL10nSetup(fs);
