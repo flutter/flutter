@@ -984,11 +984,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (value == _hasFocus)
       return;
     _hasFocus = value;
-    if (_hasFocus) {
-      _state.overlayController.forward();
-    } else {
-      _state.overlayController.reverse();
-    }
+    _updateForFocusOrHover(_hasFocus);
   }
 
   /// True if this slider is being hovered over by a pointer.
@@ -999,10 +995,20 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (value == _hovering)
       return;
     _hovering = value;
-    if (_hovering) {
+    _updateForFocusOrHover(_hovering);
+  }
+
+  void _updateForFocusOrHover(bool hasFocusOrIsHovering) {
+    if (hasFocusOrIsHovering) {
       _state.overlayController.forward();
+      if (showValueIndicator) {
+        _state.valueIndicatorController.forward();
+      }
     } else {
       _state.overlayController.reverse();
+      if (showValueIndicator) {
+        _state.valueIndicatorController.reverse();
+      }
     }
   }
 
