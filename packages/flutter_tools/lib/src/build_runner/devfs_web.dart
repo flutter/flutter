@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
@@ -27,6 +26,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
