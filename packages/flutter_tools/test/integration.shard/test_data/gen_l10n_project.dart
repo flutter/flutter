@@ -19,6 +19,7 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
@@ -229,6 +230,20 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'es', countryCode: '419'),
+          test: 'countryCode - es_419',
+          callback: (BuildContext context) {
+            results.add('--- es_419 ---');
+            final AppLocalizations localizations = AppLocalizations.of(context);
+            results.addAll([
+              '${localizations.helloWorld}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
             ]);
           },
         ),
@@ -504,6 +519,14 @@ void main() {
   "singleQuotePlural": "{count,plural, =1{ES - Flutter's amazing, times 1!} other{ES - Flutter's amazing, times {count}!}}",
   "doubleQuote": "ES - Flutter is \"amazing\"!",
   "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}"
+}
+''';
+
+  final String appEs419 = r'''
+{
+  "@@locale": "es_419",
+  "helloWorld": "ES 419 - Hello World",
+  "helloWorlds": "{count,plural, =0{ES 419 - Hello} =1{ES 419 - Hello World} =2{ES 419 - Hello two worlds} few{ES 419 - Hello {count} worlds} many{ES 419 - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
 }
 ''';
 
