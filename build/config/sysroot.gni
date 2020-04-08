@@ -10,6 +10,10 @@ declare_args() {
   # the target toolchain.
   target_sysroot = ""
 
+  # Whether to use the default sysroot when building for Linux, if an explicit
+  # sysroot isn't set.
+  use_default_linux_sysroot = true
+
   # The absolute path to the Xcode toolchain. This is used to look for headers
   # that usually ship with the toolchain like c++/v1.
   xcode_toolchain = ""
@@ -23,6 +27,11 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
 } else if (is_linux && !is_chromeos) {
   if (current_cpu == "mipsel") {
     sysroot = rebase_path("//mipsel-sysroot/sysroot")
+  } else if (use_default_linux_sysroot && !is_fuchsia && current_cpu == "x64") {
+    sysroot = rebase_path("//build/linux/debian_sid_amd64-sysroot")
+    assert(
+        exec_script("//build/dir_exists.py", [ sysroot ], "string") == "True",
+        "Missing sysroot ($sysroot). To fix, run: build/linux/sysroot_scripts/install-sysroot.py --arch=$current_cpu")
   } else {
     sysroot = ""
   }
