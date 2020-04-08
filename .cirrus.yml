@@ -115,7 +115,7 @@ task:
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
         # We use 3 CPUs because that's the minimum required to get framework_tests-widgets-linux
-        # running fast enough that it is not the long pole, as of OCtober 2019.
+        # running fast enough that it is not the long pole, as of October 2019.
         CPU: 3
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
