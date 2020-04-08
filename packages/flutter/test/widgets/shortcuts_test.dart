@@ -9,13 +9,13 @@ import 'package:flutter/src/services/keyboard_key.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef PostInvokeCallback = void Function({Action action, Intent intent, FocusNode focusNode, ActionDispatcher dispatcher});
+typedef PostInvokeCallback = void Function({Action<Intent> action, Intent intent, BuildContext context, ActionDispatcher dispatcher});
 
-class TestAction extends CallbackAction {
-  const TestAction({
+class TestAction extends CallbackAction<TestIntent> {
+  TestAction({
     @required OnInvokeCallback onInvoke,
   })  : assert(onInvoke != null),
-        super(key, onInvoke: onInvoke);
+        super(onInvoke: onInvoke);
 
   static const LocalKey key = ValueKey<Type>(TestAction);
 }
@@ -26,15 +26,15 @@ class TestDispatcher extends ActionDispatcher {
   final PostInvokeCallback postInvoke;
 
   @override
-  bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
-    final bool result = super.invokeAction(action, intent, focusNode: focusNode);
-    postInvoke?.call(action: action, intent: intent, focusNode: focusNode, dispatcher: this);
+  Object invokeAction(Action<TestIntent> action, Intent intent, [BuildContext context]) {
+    final Object result = super.invokeAction(action, intent, context);
+    postInvoke?.call(action: action, intent: intent, context: context, dispatcher: this);
     return result;
   }
 }
 
 class TestIntent extends Intent {
-  const TestIntent() : super(TestAction.key);
+  const TestIntent();
 }
 
 class TestShortcutManager extends ShortcutManager {
@@ -68,6 +68,7 @@ void main() {
         LogicalKeyboardKey.keyC,
         LogicalKeyboardKey.keyD,
       );
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet setFromSet = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyA,
         LogicalKeyboardKey.keyB,
@@ -123,6 +124,7 @@ void main() {
         LogicalKeyboardKey.keyB,
         LogicalKeyboardKey.keyA,
       );
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
       final LogicalKeySet set4 = LogicalKeySet.fromSet(<LogicalKeyboardKey>{
         LogicalKeyboardKey.keyD,
         LogicalKeyboardKey.keyC,
@@ -138,6 +140,7 @@ void main() {
       expect(map.containsKey(LogicalKeySet(LogicalKeyboardKey.keyA)), isTrue);
       expect(
           set2,
+          // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2026
           equals(LogicalKeySet.fromSet(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
@@ -207,10 +210,11 @@ void main() {
       bool invoked = false;
       await tester.pumpWidget(
         Actions(
-          actions: <LocalKey, ActionFactory>{
-            TestAction.key: () => TestAction(
-              onInvoke: (FocusNode node, Intent intent) {
+          actions: <Type, Action<Intent>>{
+            TestIntent: TestAction(
+              onInvoke: (Intent intent) {
                 invoked = true;
+                return true;
               },
             ),
           },
@@ -244,10 +248,11 @@ void main() {
             LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
           },
           child: Actions(
-            actions: <LocalKey, ActionFactory>{
-              TestAction.key: () => TestAction(
-                onInvoke: (FocusNode node, Intent intent) {
+            actions: <Type, Action<Intent>>{
+              TestIntent: TestAction(
+                onInvoke: (Intent intent) {
                   invoked = true;
+                  return invoked;
                 },
               ),
             },
@@ -282,10 +287,11 @@ void main() {
               LogicalKeySet(LogicalKeyboardKey.shift): const TestIntent(),
             },
             child: Actions(
-              actions: <LocalKey, ActionFactory>{
-                TestAction.key: () => TestAction(
-                  onInvoke: (FocusNode node, Intent intent) {
+              actions: <Type, Action<Intent>>{
+                TestIntent: TestAction(
+                  onInvoke: (Intent intent) {
                     invoked = true;
+                    return invoked;
                   },
                 ),
               },
@@ -314,7 +320,7 @@ void main() {
       Shortcuts(shortcuts: <LogicalKeySet, Intent>{LogicalKeySet(
         LogicalKeyboardKey.shift,
         LogicalKeyboardKey.keyA,
-      ) : const Intent(ActivateAction.key),
+      ) : const ActivateIntent(),
         LogicalKeySet(
         LogicalKeyboardKey.shift,
         LogicalKeyboardKey.arrowRight,
@@ -331,7 +337,7 @@ void main() {
       expect(
           description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {{Shift + Key A}: Intent#00000(key: [<ActivateAction>]), {Shift + Arrow Right}: DirectionalFocusIntent#00000(key: [<DirectionalFocusAction>])}'));
+              'shortcuts: {{Shift + Key A}: ActivateIntent#00000, {Shift + Arrow Right}: DirectionalFocusIntent#00000}'));
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -342,7 +348,7 @@ void main() {
           LogicalKeySet(
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
-          ): const Intent(ActivateAction.key)
+          ): const ActivateIntent(),
         },
       ).debugFillProperties(builder);
 
@@ -365,7 +371,7 @@ void main() {
           LogicalKeySet(
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
-          ): const Intent(ActivateAction.key)
+          ): const ActivateIntent(),
         },
       ).debugFillProperties(builder);
 
@@ -378,7 +384,7 @@ void main() {
 
       expect(description.length, equals(2));
       expect(description[0], equalsIgnoringHashCodes('manager: ShortcutManager#00000(shortcuts: {})'));
-      expect(description[1], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: Intent#00000(key: [<ActivateAction>])}'));
+      expect(description[1], equalsIgnoringHashCodes('shortcuts: {{Key A + Key B}: ActivateIntent#00000}'));
     });
   });
 }

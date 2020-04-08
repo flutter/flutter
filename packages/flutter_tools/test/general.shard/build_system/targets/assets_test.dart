@@ -97,6 +97,26 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
     Platform: () => platform,
   });
+
+  testUsingContext('Throws exception if pubspec contains missing files', () async {
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: example
+
+flutter:
+  assets:
+    - assets/foo/bar2.png
+
+''');
+
+    expect(() async => await const CopyAssets().build(environment),
+      throwsA(isA<Exception>()));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Platform: () => platform,
+  });
 }
 
 class MockArtifacts extends Mock implements Artifacts {}

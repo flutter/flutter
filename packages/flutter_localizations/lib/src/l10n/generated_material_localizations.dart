@@ -12631,7 +12631,7 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
-class MaterialLocalizationNb extends GlobalMaterialLocalizations {
+class MaterialLocalizationNb extends MaterialLocalizationNo {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
@@ -12658,189 +12658,6 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
-
-  @override
-  String get aboutListTileTitleRaw => 'Om \$applicationName';
-
-  @override
-  String get alertDialogLabel => 'Varsel';
-
-  @override
-  String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get backButtonTooltip => 'Tilbake';
-
-  @override
-  String get cancelButtonLabel => 'AVBRYT';
-
-  @override
-  String get closeButtonLabel => 'LUKK';
-
-  @override
-  String get closeButtonTooltip => 'Lukk';
-
-  @override
-  String get collapsedIconTapHint => 'Vis';
-
-  @override
-  String get continueButtonLabel => 'FORTSETT';
-
-  @override
-  String get copyButtonLabel => 'KOPIÉR';
-
-  @override
-  String get cutButtonLabel => 'KLIPP UT';
-
-  @override
-  String get deleteButtonTooltip => 'Slett';
-
-  @override
-  String get dialogLabel => 'Dialogboks';
-
-  @override
-  String get drawerLabel => 'Navigasjonsmeny';
-
-  @override
-  String get expandedIconTapHint => 'Skjul';
-
-  @override
-  String get hideAccountsLabel => 'Skjul kontoer';
-
-  @override
-  String get licensesPageTitle => 'Lisenser';
-
-  @override
-  String get modalBarrierDismissLabel => 'Avvis';
-
-  @override
-  String get moreButtonTooltip => 'Mer';
-
-  @override
-  String get nextMonthTooltip => 'Neste måned';
-
-  @override
-  String get nextPageTooltip => 'Neste side';
-
-  @override
-  String get okButtonLabel => 'OK';
-
-  @override
-  String get openAppDrawerTooltip => 'Åpne navigasjonsmenyen';
-
-  @override
-  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow av \$rowCount';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow av omtrent \$rowCount';
-
-  @override
-  String get pasteButtonLabel => 'LIM INN';
-
-  @override
-  String get popupMenuLabel => 'Forgrunnsmeny';
-
-  @override
-  String get postMeridiemAbbreviation => 'PM';
-
-  @override
-  String get previousMonthTooltip => 'Forrige måned';
-
-  @override
-  String get previousPageTooltip => 'Forrige side';
-
-  @override
-  String get refreshIndicatorSemanticLabel => 'Laster inn på nytt';
-
-  @override
-  String get remainingTextFieldCharacterCountFew => null;
-
-  @override
-  String get remainingTextFieldCharacterCountMany => null;
-
-  @override
-  String get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => '\$remainingCount tegn gjenstår';
-
-  @override
-  String get remainingTextFieldCharacterCountTwo => null;
-
-  @override
-  String get remainingTextFieldCharacterCountZero => 'TBD';
-
-  @override
-  String get reorderItemDown => 'Flytt ned';
-
-  @override
-  String get reorderItemLeft => 'Flytt til venstre';
-
-  @override
-  String get reorderItemRight => 'Flytt til høyre';
-
-  @override
-  String get reorderItemToEnd => 'Flytt til slutten';
-
-  @override
-  String get reorderItemToStart => 'Flytt til starten';
-
-  @override
-  String get reorderItemUp => 'Flytt opp';
-
-  @override
-  String get rowsPerPageTitle => 'Rader per side:';
-
-  @override
-  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
-
-  @override
-  String get searchFieldLabel => 'Søk';
-
-  @override
-  String get selectAllButtonLabel => 'VELG ALLE';
-
-  @override
-  String get selectedRowCountTitleFew => null;
-
-  @override
-  String get selectedRowCountTitleMany => null;
-
-  @override
-  String get selectedRowCountTitleOne => '1 element er valgt';
-
-  @override
-  String get selectedRowCountTitleOther => '\$selectedRowCount elementer er valgt';
-
-  @override
-  String get selectedRowCountTitleTwo => null;
-
-  @override
-  String get selectedRowCountTitleZero => null;
-
-  @override
-  String get showAccountsLabel => 'Vis kontoer';
-
-  @override
-  String get showMenuTooltip => 'Vis meny';
-
-  @override
-  String get signedInLabel => 'Pålogget';
-
-  @override
-  String get tabLabelRaw => 'Fane \$tabIndex av \$tabCount';
-
-  @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
-
-  @override
-  String get timePickerHourModeAnnouncement => 'Angi timer';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => 'Angi minutter';
-
-  @override
-  String get viewLicensesButtonLabel => 'SE LISENSER';
 }
 
 /// The translations for Nepali (`ne`).
@@ -13267,6 +13084,219 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => 'LICENTIES BEKIJKEN';
+}
+
+/// The translations for Norwegian (`no`).
+class MaterialLocalizationNo extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Norwegian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationNo({
+    String localeName = 'no',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat compactDateFormat,
+    @required intl.DateFormat shortDateFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.DateFormat shortMonthDayFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    compactDateFormat: compactDateFormat,
+    shortDateFormat: shortDateFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    shortMonthDayFormat: shortMonthDayFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => 'Om \$applicationName';
+
+  @override
+  String get alertDialogLabel => 'Varsel';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get backButtonTooltip => 'Tilbake';
+
+  @override
+  String get cancelButtonLabel => 'AVBRYT';
+
+  @override
+  String get closeButtonLabel => 'LUKK';
+
+  @override
+  String get closeButtonTooltip => 'Lukk';
+
+  @override
+  String get collapsedIconTapHint => 'Vis';
+
+  @override
+  String get continueButtonLabel => 'FORTSETT';
+
+  @override
+  String get copyButtonLabel => 'KOPIÉR';
+
+  @override
+  String get cutButtonLabel => 'KLIPP UT';
+
+  @override
+  String get deleteButtonTooltip => 'Slett';
+
+  @override
+  String get dialogLabel => 'Dialogboks';
+
+  @override
+  String get drawerLabel => 'Navigasjonsmeny';
+
+  @override
+  String get expandedIconTapHint => 'Skjul';
+
+  @override
+  String get hideAccountsLabel => 'Skjul kontoer';
+
+  @override
+  String get licensesPageTitle => 'Lisenser';
+
+  @override
+  String get modalBarrierDismissLabel => 'Avvis';
+
+  @override
+  String get moreButtonTooltip => 'Mer';
+
+  @override
+  String get nextMonthTooltip => 'Neste måned';
+
+  @override
+  String get nextPageTooltip => 'Neste side';
+
+  @override
+  String get okButtonLabel => 'OK';
+
+  @override
+  String get openAppDrawerTooltip => 'Åpne navigasjonsmenyen';
+
+  @override
+  String get pageRowsInfoTitleRaw => '\$firstRow–\$lastRow av \$rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => '\$firstRow–\$lastRow av omtrent \$rowCount';
+
+  @override
+  String get pasteButtonLabel => 'LIM INN';
+
+  @override
+  String get popupMenuLabel => 'Forgrunnsmeny';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get previousMonthTooltip => 'Forrige måned';
+
+  @override
+  String get previousPageTooltip => 'Forrige side';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Laster inn på nytt';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => '1 tegn gjenstår';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => '\$remainingCount tegn gjenstår';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => 'TBD';
+
+  @override
+  String get reorderItemDown => 'Flytt ned';
+
+  @override
+  String get reorderItemLeft => 'Flytt til venstre';
+
+  @override
+  String get reorderItemRight => 'Flytt til høyre';
+
+  @override
+  String get reorderItemToEnd => 'Flytt til slutten';
+
+  @override
+  String get reorderItemToStart => 'Flytt til starten';
+
+  @override
+  String get reorderItemUp => 'Flytt opp';
+
+  @override
+  String get rowsPerPageTitle => 'Rader per side:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Søk';
+
+  @override
+  String get selectAllButtonLabel => 'VELG ALLE';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => '1 element er valgt';
+
+  @override
+  String get selectedRowCountTitleOther => '\$selectedRowCount elementer er valgt';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => null;
+
+  @override
+  String get showAccountsLabel => 'Vis kontoer';
+
+  @override
+  String get showMenuTooltip => 'Vis meny';
+
+  @override
+  String get signedInLabel => 'Pålogget';
+
+  @override
+  String get tabLabelRaw => 'Fane \$tabIndex av \$tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Angi timer';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Angi minutter';
+
+  @override
+  String get viewLicensesButtonLabel => 'SE LISENSER';
 }
 
 /// The translations for Oriya (`or`).
@@ -19258,6 +19288,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'nb', // Norwegian Bokmål
   'ne', // Nepali
   'nl', // Dutch Flemish
+  'no', // Norwegian
   'or', // Oriya
   'pa', // Panjabi Punjabi
   'pl', // Polish
@@ -19344,9 +19375,10 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `my` - Burmese
-///  * `nb` - Norwegian Bokmål
+///  * `nb` - Norwegian Bokmål, which, in this library, is a synonym of `no`
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
+///  * `no` - Norwegian
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
@@ -19559,12 +19591,12 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationMs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'my':
       return MaterialLocalizationMy(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'nb':
-      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ne':
       return MaterialLocalizationNe(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'nl':
       return MaterialLocalizationNl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'no':
+      return MaterialLocalizationNo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'or':
       return MaterialLocalizationOr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'pa':
@@ -19650,6 +19682,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
     }
     case 'zu':
       return MaterialLocalizationZu(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'nb':
+      return MaterialLocalizationNb(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
   }
   assert(false, 'getMaterialTranslation() called for unsupported locale "$locale"');
   return null;

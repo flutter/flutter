@@ -26,6 +26,7 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class CardTheme with Diagnosticable {
 
   /// Creates a theme that can be used for [ThemeData.cardTheme].

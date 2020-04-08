@@ -37,23 +37,35 @@ void main() {
     });
 
     test('escapes dollar when escapeDollar is true', () {
-      expect(generateString(r'ab$c', escapeDollar: true), "'ab\\\$c'");
-    });
-
-    test('does not escape dollar when escapeDollar  is false', () {
-      expect(generateString(r'ab$c', escapeDollar: false), "'ab\$c'");
+      expect(generateString(r'ab$c'), "'ab\\\$c'");
     });
 
     test('handles backslash', () {
-      expect(generateString(r'ab\c'), "'ab\\\\c'");
+      expect(generateString(r'ab\c'), r"'ab\\c'");
     });
 
     test('handles backslash followed by "n" character', () {
-      expect(generateString(r'ab\nc'), "'ab\\\\nc'");
+      expect(generateString(r'ab\nc'), r"'ab\\nc'");
     });
 
-    test('does not support multiline strings', () {
-      expect(() => generateString('ab\nc'), throwsA(isA<AssertionError>()));
+    test('supports newline escaping', () {
+      expect(generateString('ab\nc'), "'ab\\nc'");
+    });
+
+    test('supports form feed escaping', () {
+      expect(generateString('ab\fc'), "'ab\\fc'");
+    });
+
+    test('supports tab escaping', () {
+      expect(generateString('ab\tc'), "'ab\\tc'");
+    });
+
+    test('supports carriage return escaping', () {
+      expect(generateString('ab\rc'), "'ab\\rc'");
+    });
+
+    test('supports backspace escaping', () {
+      expect(generateString('ab\bc'), "'ab\\bc'");
     });
   });
 }

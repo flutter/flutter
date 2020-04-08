@@ -82,4 +82,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(getCheckboxListTileRenderer(), paints..rrect(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (params)
   });
+
+  testWidgets('CheckboxListTile can autofocus unless disabled.', (WidgetTester tester) async {
+    final GlobalKey childKey = GlobalKey();
+
+    await tester.pumpWidget(
+      wrap(
+        child: CheckboxListTile(
+          value: true,
+          onChanged: (_) {},
+          title: Text('Hello', key: childKey),
+          autofocus: true,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isTrue);
+
+    await tester.pumpWidget(
+      wrap(
+        child: CheckboxListTile(
+          value: true,
+          onChanged: null,
+          title: Text('Hello', key: childKey),
+          autofocus: true,
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(Focus.of(childKey.currentContext, nullOk: true).hasPrimaryFocus, isFalse);
+  });
+
 }

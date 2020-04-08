@@ -53,6 +53,7 @@ Widget buildFrame({
   FocusNode focusNode,
   bool autofocus = false,
   Color focusColor,
+  Color dropdownColor,
 }) {
   return TestApp(
     textDirection: textDirection,
@@ -78,6 +79,7 @@ Widget buildFrame({
             focusNode: focusNode,
             autofocus: autofocus,
             focusColor: focusColor,
+            dropdownColor: dropdownColor,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -171,6 +173,41 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
       ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
       ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
       ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
+  );
+}
+
+Future<void> checkDropdownColor(WidgetTester tester, {Color color}) async {
+  const String text = 'foo';
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: DropdownButton<String>(
+          dropdownColor: color,
+          value: text,
+          items: const <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              value: text,
+              child: Text(text),
+            ),
+          ],
+          onChanged: (_) { },
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(text));
+  await tester.pump();
+
+  expect(
+    find.ancestor(
+      of: find.text(text).last,
+      matching: find.byType(CustomPaint)).at(2),
+    paints
+      ..save()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false)
   );
 }
 
@@ -1772,6 +1809,14 @@ void main() {
     await tester.tap(find.text('Two'));
     await tester.pumpAndSettle();
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
+  });
+
+  testWidgets('DropdownButton uses default color when expanded', (WidgetTester tester) async {
+    await checkDropdownColor(tester);
+  });
+
+  testWidgets('DropdownButton uses dropdownColor when expanded when given', (WidgetTester tester) async {
+    await checkDropdownColor(tester, color: const Color.fromRGBO(120, 220, 70, 0.8));
   });
 
   testWidgets('DropdownButton hint displays properly when selectedItemBuilder is defined', (WidgetTester tester) async {

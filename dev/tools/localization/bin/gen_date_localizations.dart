@@ -172,6 +172,14 @@ Set<String> _supportedLocales() {
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath))
       supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
   }
+
+  // See https://github.com/flutter/flutter/issues/53036 for context on why
+  // 'no' is being used as a synonym for 'nb'. It only uses this synonym
+  // if 'nb' is not detected as a valid arb file.
+  if (supportedLocales.contains('no') && !supportedLocales.contains('nb')) {
+    supportedLocales.add('nb');
+  }
+
   return supportedLocales;
 }
 
