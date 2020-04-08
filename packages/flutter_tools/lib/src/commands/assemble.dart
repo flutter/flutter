@@ -64,6 +64,13 @@ class AssembleCommand extends FlutterCommand {
       abbr: 'd',
       help: 'Allows passing configuration to a target with --define=target=key=value.',
     );
+    argParser.addMultiOption(
+      'input',
+      abbr: 'i',
+      help: 'Allows passing additional inputs with --input=key=value. Unlike '
+      'defines, additional inputs do not generate a new configuration, instead '
+      'they are treated as dependencies of the targets that use them.'
+    );
     argParser.addOption('depfile', help: 'A file path where a depfile will be written. '
       'This contains all build inputs and outputs in a make style syntax'
     );
@@ -99,7 +106,7 @@ class AssembleCommand extends FlutterCommand {
       return const <CustomDimensions, String>{};
     }
     try {
-      final Environment localEnvironment = environment;
+      final Environment localEnvironment = createEnvironment();
       return <CustomDimensions, String>{
         CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
         CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
@@ -111,7 +118,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   /// The target(s) we are building.
-  List<Target> get targets {
+  List<Target> createTargets() {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
@@ -132,7 +139,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   /// The environmental configuration for a build invocation.
-  Environment get environment {
+  Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
     String output = stringArg('output');
     if (output == null) {
@@ -149,6 +156,7 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(stringsArg('define')),
+      inputs: _parseDefines(stringsArg('input')),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
       artifacts: globals.artifacts,
@@ -179,13 +187,17 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<Target> targets = this.targets;
+    final List<Target> targets = createTargets();
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await globals.buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: argResults.wasParsed('resource-pool-size')
-        ? int.tryParse(stringArg('resource-pool-size'))
-        : null,
-    ));
+    final BuildResult result = await globals.buildSystem.build(
+      target,
+      createEnvironment(),
+      buildSystemConfig: BuildSystemConfig(
+        resourcePoolSize: argResults.wasParsed('resource-pool-size')
+          ? int.tryParse(stringArg('resource-pool-size'))
+          : null,
+        ),
+      );
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
