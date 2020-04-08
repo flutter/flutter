@@ -1232,7 +1232,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54221
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(
