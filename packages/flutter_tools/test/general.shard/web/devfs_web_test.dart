@@ -376,6 +376,7 @@ void main() {
       port: 0,
       packagesFilePath: '.packages',
       urlTunneller: null,
+      useSseForDebugProxy: true,
       buildMode: BuildMode.debug,
       enableDwds: false,
       entrypoint: Uri.base,
@@ -445,6 +446,7 @@ void main() {
       'localhost',
       8123,
       (String url) => null,
+      true,
       BuildMode.debug,
       true,
       Uri.file('test.dart'),
@@ -468,11 +470,12 @@ void main() {
         expect(verbose, null);
         expect(enableDebugging, true);
         expect(enableDebugExtension, true);
+        expect(useSseForDebugProxy, true);
 
         return MockDwds();
       });
 
-      await server.dispose();
+    await server.dispose();
   }));
 }
 
