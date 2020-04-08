@@ -804,7 +804,5 @@ class LocalizationsGenerator {
 
     resultingFile += '}\n';
     unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
-    print(json.decode(resultingFile));
-
   }
 }

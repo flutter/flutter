@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -315,6 +316,12 @@ void main() {
       path.join('lib', 'l10n', 'unimplemented_message_translations.txt'),
     );
     final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
+    try {
+      // Since ARB file is essentially JSON, decoding it should not fail.
+      json.decode(unimplementedOutputString);
+    } on Exception {
+      fail('Parsing arb file should not fail');
+    }
     expect(unimplementedOutputString, contains('es'));
     expect(unimplementedOutputString, contains('subtitle'));
   });
