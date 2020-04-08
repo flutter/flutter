@@ -52,6 +52,9 @@ abstract class OperatingSystemUtils {
         processManager: processManager,
       );
 
+  @visibleForTesting
+  static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
+
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
@@ -97,6 +100,11 @@ abstract class OperatingSystemUtils {
 
   /// Returns true if the gzip is not corrupt (does not check tar).
   bool verifyGzip(File gzippedFile);
+
+  /// Compresses a stream using gzip level 1 (faster but larger).
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
+    return stream.cast<List<int>>().transform<List<int>>(gzipLevel1.encoder);
+  }
 
   /// Returns a pretty name string for the current operating system.
   ///

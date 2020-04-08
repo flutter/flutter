@@ -86,6 +86,10 @@ void main() {
       expect(result[1].path, kPath2);
     });
   });
+
+  testWithoutContext('stream compression level', () {
+    expect(OperatingSystemUtils.gzipLevel1.level, equals(1));
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

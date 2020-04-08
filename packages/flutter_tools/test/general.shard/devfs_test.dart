@@ -11,6 +11,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -96,6 +97,7 @@ void main() {
   group('mocked http client', () {
     HttpOverrides savedHttpOverrides;
     HttpClient httpClient;
+    OperatingSystemUtils osUtils;
 
     setUpAll(() {
       tempDir = _newTempDir(fs);
@@ -103,6 +105,7 @@ void main() {
       savedHttpOverrides = HttpOverrides.current;
       httpClient = MockOddlyFailingHttpClient();
       HttpOverrides.global = MyHttpOverrides(httpClient);
+      osUtils = MockOperatingSystemUtils();
     });
 
     tearDownAll(() async {
@@ -147,7 +150,12 @@ void main() {
           return Future<HttpClientResponse>.value(httpClientResponse);
         });
 
-        final DevFS devFS = DevFS(vmService, 'test', tempDir);
+        final DevFS devFS = DevFS(
+          vmService,
+          'test',
+          tempDir,
+          osUtils: osUtils,
+        );
         await devFS.create();
 
         final MockResidentCompiler residentCompiler = MockResidentCompiler();
@@ -163,6 +171,7 @@ void main() {
         expect(report.success, isTrue);
         verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
         verify(httpRequest.close()).called(kFailedAttempts + 1);
+        verify(osUtils.gzipLevel1Stream(any)).called(kFailedAttempts + 1);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         HttpClientFactory: () => () => httpClient,
@@ -185,7 +194,12 @@ void main() {
 
     setUp(() {
       vmService.resetState();
-      devFS = DevFS(vmService, 'test', tempDir);
+      devFS = DevFS(
+        vmService,
+        'test',
+        tempDir,
+        osUtils: FakeOperatingSystemUtils(),
+      );
     });
 
     tearDownAll(() async {
@@ -477,3 +491,4 @@ class MockOddlyFailingHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
