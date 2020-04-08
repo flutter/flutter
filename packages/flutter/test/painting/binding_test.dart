@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
@@ -85,9 +86,15 @@ class TestBindingBase implements BindingBase {
 
   @override
   ui.Window get window => throw UnimplementedError();
+
+  @override
+  ui.AppLifecycleState get lifecycleState => null;
+
+  @override
+  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) { }
 }
 
-class TestPaintingBinding extends TestBindingBase with ServicesBinding, PaintingBinding {
+class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {
 
   @override
   final FakeImageCache imageCache = FakeImageCache();
