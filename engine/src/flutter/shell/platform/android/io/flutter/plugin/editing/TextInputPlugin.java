@@ -322,6 +322,10 @@ public class TextInputPlugin {
     }
     // Always apply state to selection which handles updating the selection if needed.
     applyStateToSelection(state);
+    InputConnection connection = getLastInputConnection();
+    if (connection != null && connection instanceof InputConnectionAdaptor) {
+      ((InputConnectionAdaptor) connection).markDirty();
+    }
     // Use updateSelection to update imm on selection if it is not neccessary to restart.
     if (!restartAlwaysRequired && !mRestartInputPending) {
       mImm.updateSelection(

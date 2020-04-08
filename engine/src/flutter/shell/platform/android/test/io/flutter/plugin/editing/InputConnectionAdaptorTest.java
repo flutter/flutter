@@ -270,6 +270,49 @@ public class InputConnectionAdaptorTest {
     assertEquals(extractedText.selectionEnd, selStart);
   }
 
+  @Test
+  public void inputConnectionAdaptor_RepeatFilter() throws NullPointerException {
+    View testView = new View(RuntimeEnvironment.application);
+    FlutterJNI mockFlutterJni = mock(FlutterJNI.class);
+    DartExecutor dartExecutor = spy(new DartExecutor(mockFlutterJni, mock(AssetManager.class)));
+    int inputTargetId = 0;
+    TestTextInputChannel textInputChannel = new TestTextInputChannel(dartExecutor);
+    Editable mEditable = Editable.Factory.getInstance().newEditable("");
+    Editable spyEditable = spy(mEditable);
+    EditorInfo outAttrs = new EditorInfo();
+    outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+
+    InputConnectionAdaptor inputConnectionAdaptor =
+        new InputConnectionAdaptor(
+            testView, inputTargetId, textInputChannel, spyEditable, outAttrs);
+
+    inputConnectionAdaptor.beginBatchEdit();
+    assertEquals(textInputChannel.updateEditingStateInvocations, 0);
+    inputConnectionAdaptor.setComposingText("I do not fear computers. I fear the lack of them.", 1);
+    assertEquals(textInputChannel.text, null);
+    assertEquals(textInputChannel.updateEditingStateInvocations, 0);
+    inputConnectionAdaptor.endBatchEdit();
+    assertEquals(textInputChannel.updateEditingStateInvocations, 1);
+    assertEquals(textInputChannel.text, "I do not fear computers. I fear the lack of them.");
+
+    inputConnectionAdaptor.beginBatchEdit();
+    assertEquals(textInputChannel.updateEditingStateInvocations, 1);
+    inputConnectionAdaptor.endBatchEdit();
+    assertEquals(textInputChannel.updateEditingStateInvocations, 1);
+
+    inputConnectionAdaptor.beginBatchEdit();
+    assertEquals(textInputChannel.text, "I do not fear computers. I fear the lack of them.");
+    assertEquals(textInputChannel.updateEditingStateInvocations, 1);
+    inputConnectionAdaptor.setSelection(3, 4);
+    assertEquals(textInputChannel.updateEditingStateInvocations, 1);
+    assertEquals(textInputChannel.selectionStart, 49);
+    assertEquals(textInputChannel.selectionEnd, 49);
+    inputConnectionAdaptor.endBatchEdit();
+    assertEquals(textInputChannel.updateEditingStateInvocations, 2);
+    assertEquals(textInputChannel.selectionStart, 3);
+    assertEquals(textInputChannel.selectionEnd, 4);
+  }
+
   private static final String SAMPLE_TEXT =
       "Lorem ipsum dolor sit amet," + "\nconsectetur adipiscing elit.";
 
@@ -284,5 +327,36 @@ public class InputConnectionAdaptorTest {
     int client = 0;
     TextInputChannel textInputChannel = mock(TextInputChannel.class);
     return new InputConnectionAdaptor(testView, client, textInputChannel, editable, null);
+  }
+
+  private class TestTextInputChannel extends TextInputChannel {
+    public TestTextInputChannel(DartExecutor dartExecutor) {
+      super(dartExecutor);
+    }
+
+    public int inputClientId;
+    public String text;
+    public int selectionStart;
+    public int selectionEnd;
+    public int composingStart;
+    public int composingEnd;
+    public int updateEditingStateInvocations = 0;
+
+    @Override
+    public void updateEditingState(
+        int inputClientId,
+        String text,
+        int selectionStart,
+        int selectionEnd,
+        int composingStart,
+        int composingEnd) {
+      this.inputClientId = inputClientId;
+      this.text = text;
+      this.selectionStart = selectionStart;
+      this.selectionEnd = selectionEnd;
+      this.composingStart = composingStart;
+      this.composingEnd = composingEnd;
+      updateEditingStateInvocations++;
+    }
   }
 }
