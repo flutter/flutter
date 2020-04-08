@@ -375,6 +375,31 @@ void main() {
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
   });
 
+  testWithoutContext('Additional inputs do not change the build configuration',  () async {
+    final Environment environmentA = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      inputs: <String, String>{
+        'C': 'D',
+      }
+    );
+    final Environment environmentB = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: MockArtifacts(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      inputs: <String, String>{
+        'A': 'B',
+      }
+    );
+
+    expect(environmentA.buildDir.path, equals(environmentB.buildDir.path));
+  });
+
   testWithoutContext('A target with depfile dependencies can delete stale outputs on the first run',  () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
