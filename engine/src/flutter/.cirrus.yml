@@ -60,7 +60,7 @@ task:
         cd $ENGINE_PATH/src/out/host_release/
         ./txt_benchmarks --benchmark_format=json > txt_benchmarks.json
         ./fml_benchmarks --benchmark_format=json > fml_benchmarks.json
-        ./fml_benchmarks --benchmark_format=json > shell_benchmarks.json
+        ./shell_benchmarks --benchmark_format=json > shell_benchmarks.json
         cd $ENGINE_PATH/src/flutter/testing/benchmark
         pub get
         dart bin/parse_and_send.dart ../../../out/host_release/txt_benchmarks.json
