@@ -42,7 +42,7 @@ void main(List<String> arguments) {
   );
   parser.addOption(
     'untranslated-messages-file',
-    help: 'The location of generate the file describing which localization\n'
+    help: 'The location of a file that describes the localization\n'
       'messages have not been translated yet. Using this option will create\n'
       'a JSON file at the target location, in the following format:\n\n'
       '"locale": ["message_1", "message_2" ... "message_n"]\n\n'
