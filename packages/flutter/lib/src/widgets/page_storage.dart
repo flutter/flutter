@@ -9,7 +9,7 @@ import 'framework.dart';
 /// A key can be used to persist the widget state in storage after
 /// the destruction and will be restored when recreated.
 ///
-/// Each key with its value plus the ancestor chain of other PageStorageKeys need to 
+/// Each key with its value plus the ancestor chain of other PageStorageKeys need to
 /// be unique within the widget's closest ancestor [PageStorage]. To make it possible for a
 /// saved value to be found when a widget is recreated, the key's value must
 /// not be objects whose identity will change each time the widget is created.
@@ -119,9 +119,9 @@ class PageStorageBucket {
 /// [PageStorage] is used to save and restore values that can outlive the widget.
 /// For example, when multiple pages are grouped in tabs, when a page is
 /// switched out, its widget is destroyed and its state is lost. By adding a
-/// [PageStorage] at the root and adding a [PageStorageKey] to each page, some of the 
+/// [PageStorage] at the root and adding a [PageStorageKey] to each page, some of the
 /// page's state (e.g. the scroll position of a [Scrollable] widget) will be stored
-/// automatically in its closest ancestor [PageStorage], and restored when it's 
+/// automatically in its closest ancestor [PageStorage], and restored when it's
 /// switched back.
 ///
 /// Usually you don't need to explicitly use a [PageStorage], since it's already
