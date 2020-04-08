@@ -425,6 +425,7 @@ class HSLColor {
 ///    primary and accent color swatches.
 ///  * [material.Colors], which defines all of the standard material design
 ///    colors.
+@immutable
 class ColorSwatch<T> extends Color {
   /// Creates a color that has a small table of related colors called a "swatch".
   ///

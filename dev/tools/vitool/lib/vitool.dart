@@ -260,6 +260,7 @@ List<Point<double>> parsePoints(String points) {
 }
 
 /// Data for a single animation frame.
+@immutable
 class FrameData {
   const FrameData(this.size, this.paths);
 
@@ -285,6 +286,7 @@ class FrameData {
 }
 
 /// Represents an SVG path element.
+@immutable
 class SvgPath {
   const SvgPath(this.id, this.commands, {this.opacity = 1.0});
 
@@ -348,6 +350,7 @@ class SvgPath {
 ///   * "Z" => SvgPathCommand('Z', [])
 ///   * "C 1.0, 1.0 2.0, 2.0 3.0, 3.0" SvgPathCommand('C', [Point(1.0, 1.0),
 ///      Point(2.0, 2.0), Point(3.0, 3.0)])
+@immutable
 class SvgPathCommand {
   const SvgPathCommand(this.type, this.points);
 

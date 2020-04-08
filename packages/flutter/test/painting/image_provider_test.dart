@@ -553,7 +553,7 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
 // This version of MemoryImage guarantees obtainKey returns a future that has not been
 // completed synchronously.
 class AsyncKeyMemoryImage extends MemoryImage {
-  AsyncKeyMemoryImage(Uint8List bytes) : super(bytes);
+  const AsyncKeyMemoryImage(Uint8List bytes) : super(bytes);
 
   @override
   Future<MemoryImage> obtainKey(ImageConfiguration configuration) {

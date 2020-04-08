@@ -480,10 +480,14 @@ abstract class Device {
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
+  @nonVirtual
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   int get hashCode => id.hashCode;
 
+  @nonVirtual
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
@@ -581,6 +585,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
+    this.webUseSseForDebugProxy = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.vmserviceOutFile,
@@ -592,6 +597,7 @@ class DebuggingOptions {
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
+      this.webUseSseForDebugProxy = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -636,6 +642,7 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
+  final bool webUseSseForDebugProxy;
 
   /// Whether to run the browser in headless mode.
   ///

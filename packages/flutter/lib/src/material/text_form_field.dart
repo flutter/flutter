@@ -78,7 +78,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///         shortcuts: <LogicalKeySet, Intent>{
 ///           // Pressing enter on the field will now move to the next field.
 ///           LogicalKeySet(LogicalKeyboardKey.enter):
-///               Intent(NextFocusAction.key),
+///               NextFocusIntent(),
 ///         },
 ///         child: FocusTraversalGroup(
 ///           child: Form(

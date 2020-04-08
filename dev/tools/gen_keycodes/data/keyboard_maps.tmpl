@@ -92,3 +92,20 @@ const Map<String, PhysicalKeyboardKey> kWebToPhysicalKey = <String, PhysicalKeyb
 const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKey>{
 @@@WEB_NUMPAD_MAP@@@
 };
+
+/// Maps Windows KeyboardEvent codes to the matching [LogicalKeyboardKey].
+const Map<int, LogicalKeyboardKey> kWindowsToLogicalKey = <int, LogicalKeyboardKey>{
+@@@WINDOWS_LOGICAL_KEY_MAP@@@
+};
+
+/// Maps Windows KeyboardEvent codes to the matching [PhysicalKeyboardKey].
+const Map<int, PhysicalKeyboardKey> kWindowsToPhysicalKey = <int, PhysicalKeyboardKey>{
+@@@WINDOWS_PHYSICAL_KEY_MAP@@@
+};
+
+/// A map of Windows KeyboardEvent codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<int, LogicalKeyboardKey> kWindowsNumPadMap = <int, LogicalKeyboardKey>{
+@@@WINDOWS_NUMPAD_MAP@@@
+};

@@ -1636,8 +1636,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   }
 }
 
+@immutable
 class _IdentityThemeDataCacheKey {
-  _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
+  const _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
 
   final ThemeData baseTheme;
   final TextTheme localTextGeometry;
@@ -1713,6 +1714,7 @@ class _FifoCache<K, V> {
 ///  * [ThemeData.visualDensity], where this property is used to specify the base
 ///    horizontal density of Material components.
 ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+@immutable
 class VisualDensity with Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///

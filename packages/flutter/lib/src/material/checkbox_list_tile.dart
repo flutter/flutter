@@ -266,11 +266,13 @@ class CheckboxListTile extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
+    this.autofocus = false,
   }) : assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
        assert(controlAffinity != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Whether this checkbox is checked.
@@ -351,6 +353,9 @@ class CheckboxListTile extends StatelessWidget {
   /// Where to place the control relative to the text.
   final ListTileControlAffinity controlAffinity;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   @override
   Widget build(BuildContext context) {
     final Widget control = Checkbox(
@@ -359,6 +364,7 @@ class CheckboxListTile extends StatelessWidget {
       activeColor: activeColor,
       checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      autofocus: autofocus,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -385,6 +391,7 @@ class CheckboxListTile extends StatelessWidget {
           enabled: onChanged != null,
           onTap: onChanged != null ? () { onChanged(!value); } : null,
           selected: selected,
+          autofocus: autofocus,
         ),
       ),
     );
