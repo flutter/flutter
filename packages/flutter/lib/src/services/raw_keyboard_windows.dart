@@ -11,7 +11,7 @@ import 'raw_keyboard.dart';
 /// Platform-specific key event data for Windows.
 ///
 /// This object contains information about key events obtained from Windows's
-/// `NSEvent` interface.
+/// win32 API.
 ///
 /// See also:
 ///
