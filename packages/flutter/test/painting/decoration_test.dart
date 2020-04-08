@@ -583,4 +583,15 @@ void main() {
       expect(call.positionalArguments[2].center, outputRect.center);
     }
   });
+
+  test('scale cannot be null in DecorationImage', () {
+    try {
+      DecorationImage(scale: null, image: SynchronousTestImageProvider());
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('scale != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('DecorationImage didnot throw AssertionError when scale was null');
+  });
 }
