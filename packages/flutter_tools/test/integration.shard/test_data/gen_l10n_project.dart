@@ -130,7 +130,7 @@ class Home extends StatelessWidget {
             results.add(AppLocalizations.of(context).helloWorlds(1));
             results.add(AppLocalizations.of(context).helloWorlds(2));
             // Should use the fallback language, in this case,
-            // "Hello 世界"
+            // "Hello 世界" should be displayed.
             results.add(AppLocalizations.of(context).hello("世界"));
           },
         ),
