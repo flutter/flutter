@@ -350,6 +350,9 @@ class VMService implements vm_service.VmService {
     final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
     final StreamController<dynamic> primary = StreamController<dynamic>();
     final StreamController<dynamic> secondary = StreamController<dynamic>();
+    // Create an instance of the package:vm_service API in addition to the flutter
+    // tool's to allow gradual migration.
+    final Completer<void> streamClosedCompleter = Completer<void>();
 
     channel.listen((dynamic data) {
       primary.add(data);
@@ -357,14 +360,13 @@ class VMService implements vm_service.VmService {
     }, onDone: ()  {
       primary.close();
       secondary.close();
+      if (!streamClosedCompleter.isCompleted) {
+        streamClosedCompleter.complete();
+      }
     }, onError: (dynamic error, StackTrace stackTrace) {
       primary.addError(error, stackTrace);
       secondary.addError(error, stackTrace);
     });
-
-    // Create an instance of the package:vm_service API in addition to the flutter
-    // tool's to allow gradual migration.
-    final Completer<void> streamClosedCompleter = Completer<void>();
 
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
