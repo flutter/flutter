@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -844,15 +845,13 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
     testWidgets('Mouse events change initial focus highlight mode.', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      RendererBinding.instance.initMouseTracker();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(Offset.zero);
-      await gesture.moveBy(const Offset(10, 10));
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
     testWidgets('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
-      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     }, variant: TargetPlatformVariant.all());
