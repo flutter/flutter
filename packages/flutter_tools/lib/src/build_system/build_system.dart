@@ -295,6 +295,7 @@ class Environment {
     @required ProcessManager processManager,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    Map<String, String> inputs = const <String, String>{},
   }) {
     // Compute a unique hash of this build's particular environment.
     // Sort the keys by key so that the result is stable. We always
@@ -325,6 +326,7 @@ class Environment {
       logger: logger,
       artifacts: artifacts,
       processManager: processManager,
+      inputs: inputs,
     );
   }
 
@@ -338,6 +340,7 @@ class Environment {
     Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    Map<String, String> inputs = const <String, String>{},
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
@@ -350,6 +353,7 @@ class Environment {
       flutterRootDir: flutterRootDir ?? testDirectory,
       buildDir: buildDir,
       defines: defines,
+      inputs: inputs,
       fileSystem: fileSystem,
       logger: logger,
       artifacts: artifacts,
@@ -369,6 +373,7 @@ class Environment {
     @required this.logger,
     @required this.fileSystem,
     @required this.artifacts,
+    @required this.inputs,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -419,6 +424,16 @@ class Environment {
   /// Setting values here forces a unique build directory to be chosen
   /// which prevents the config from leaking into different builds.
   final Map<String, String> defines;
+
+  /// Additional input files passed to the build targets.
+  ///
+  /// Unlike [defines], values set here do not force a new build configuration.
+  /// This is useful for passing file inputs that may have changing paths
+  /// without running builds from scratch.
+  ///
+  /// It is the responsibility of the [Target] to declare that an input was
+  /// used in an output depfile.
+  final Map<String, String> inputs;
 
   /// The root build directory shared by all builds.
   final Directory rootBuildDir;

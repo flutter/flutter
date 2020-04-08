@@ -17,7 +17,7 @@ import '../flutter_test_alternative.dart';
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class _TestGestureFlutterBinding extends BindingBase
-    with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
+    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
