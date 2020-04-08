@@ -1067,6 +1067,8 @@ plugin1=${plugin1.path}
       mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
 
+      when(mockAndroidSdk.directory).thenReturn('irrelevant');
+
       final Directory rootDirectory = fileSystem.currentDirectory;
       cache = Cache(
         rootOverride: rootDirectory,
@@ -2446,7 +2448,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2498,7 +2500,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2537,7 +2539,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2577,7 +2579,7 @@ plugin1=${plugin1.path}
           "            url 'build/'\n"
           '        }\n'
           '        maven {\n'
-          "            url 'http://download.flutter.io'\n"
+          "            url 'https://storage.googleapis.com/download.flutter.io'\n"
           '        }\n'
           '      }\n'
           '\n'
@@ -2653,5 +2655,4 @@ class MockFlutterProject extends Mock implements FlutterProject {}
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
-class MockitoAndroidSdk extends Mock implements AndroidSdk {}
 class MockUsage extends Mock implements Usage {}

@@ -238,7 +238,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     List<int> bytes;
     try {
       bytes = await content.contentsAsBytes();
-    } catch (e) {
+    } on Exception catch (e) {
       return e;
     }
     final String fileContents = base64.encode(bytes);
@@ -251,7 +251,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
           'fileContents': fileContents,
         },
       );
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printTrace('DevFS: Failed to write $deviceUri: $error');
     }
   }
@@ -319,7 +319,12 @@ class _DevFSHttpWriter {
             onError: (dynamic error) { globals.printTrace('error: $error'); },
             cancelOnError: true);
         break;
-      } catch (error, trace) {
+      } catch (error, trace) { // ignore: avoid_catches_without_on_clauses
+        // We treat OSError as an Exception.
+        // See: https://github.com/dart-lang/sdk/issues/40934
+        if (error is! Exception && error is! OSError) {
+          rethrow;
+        }
         if (!_completer.isCompleted) {
           globals.printTrace('Error writing "$deviceUri" to DevFS: $error');
           if (retry > 0) {
@@ -527,7 +532,7 @@ class DevFS {
       } on SocketException catch (socketException, stackTrace) {
         globals.printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);
-      } catch (exception, stackTrace) {
+      } on Exception catch (exception, stackTrace) {
         globals.printError('Could not update files on device: $exception');
         throw DevFSException('Sync failed', exception, stackTrace);
       }

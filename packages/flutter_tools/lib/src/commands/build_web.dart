@@ -19,7 +19,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
-    usesDartDefines();
+    usesDartDefineOption();
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
@@ -65,8 +65,7 @@ class BuildWebCommand extends BuildSubCommand {
       target,
       buildInfo,
       boolArg('web-initialize-platform'),
-      dartDefines,
-      boolArg('csp')
+      boolArg('csp'),
     );
     return FlutterCommandResult.success();
   }

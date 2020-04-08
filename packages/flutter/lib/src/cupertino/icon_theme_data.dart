@@ -8,7 +8,7 @@ import 'colors.dart';
 
 /// An [IconThemeData] subclass that automatically resolves its [color] when retrieved
 /// using [IconTheme.of].
-class CupertinoIconThemeData extends IconThemeData with DiagnosticableMixin implements Diagnosticable {
+class CupertinoIconThemeData extends IconThemeData with Diagnosticable {
   /// Creates a [CupertinoIconThemeData].
   ///
   /// The opacity applies to both explicit and default icon colors. The value

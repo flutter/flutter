@@ -145,11 +145,11 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices();
+    final String text = await fuchsiaSdk.listDevices(timeout: timeout);
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
@@ -190,7 +190,7 @@ class FuchsiaDevice extends Device {
       id,
       platformType: PlatformType.fuchsia,
       category: null,
-      ephemeral: false,
+      ephemeral: true,
   );
 
   @override
@@ -271,7 +271,7 @@ class FuchsiaDevice extends Device {
         packageRepo.deleteSync(recursive: true);
       }
       packageRepo.createSync(recursive: true);
-    } catch (e) {
+    } on Exception catch (e) {
       globals.printError('Failed to create Fuchisa package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
@@ -384,7 +384,7 @@ class FuchsiaDevice extends Device {
       globals.printTrace("Removing the tool's package repo: at ${packageRepo.path}");
       try {
         packageRepo.deleteSync(recursive: true);
-      } catch (e) {
+      } on Exception catch (e) {
         globals.printError('Failed to remove Fuchsia package repo directory '
                    'at ${packageRepo.path}: $e.');
       }
@@ -423,11 +423,18 @@ class FuchsiaDevice extends Device {
   TargetPlatform _targetPlatform;
 
   Future<TargetPlatform> _queryTargetPlatform() async {
+    const TargetPlatform defaultTargetPlatform = TargetPlatform.fuchsia_arm64;
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
+      globals.printTrace('Could not determine Fuchsia target platform because '
+                 'Fuchsia ssh configuration is missing.\n'
+                 'Defaulting to arm64.');
+      return defaultTargetPlatform;
+    }
     final RunResult result = await shell('uname -m');
     if (result.exitCode != 0) {
       globals.printError('Could not determine Fuchsia target platform type:\n$result\n'
                  'Defaulting to arm64.');
-      return TargetPlatform.fuchsia_arm64;
+      return defaultTargetPlatform;
     }
     final String machine = result.stdout.trim();
     switch (machine) {
@@ -438,7 +445,7 @@ class FuchsiaDevice extends Device {
       default:
         globals.printError('Unknown Fuchsia target platform "$machine". '
                    'Defaulting to arm64.');
-        return TargetPlatform.fuchsia_arm64;
+        return defaultTargetPlatform;
     }
   }
 
@@ -467,9 +474,9 @@ class FuchsiaDevice extends Device {
             'Failed to delete screenshot.ppm from the device:\n$deleteResult'
           );
         }
-      } catch (_) {
+      } on Exception catch (e) {
         globals.printError(
-          'Failed to delete screenshot.ppm from the device'
+          'Failed to delete screenshot.ppm from the device: $e'
         );
       }
     }
@@ -480,23 +487,34 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
+    const String defaultName = 'Fuchsia';
+    if (!globals.fuchsiaArtifacts.hasSshConfig) {
+      globals.printTrace('Could not determine Fuchsia sdk name or version '
+                 'because Fuchsia ssh configuration is missing.');
+      return defaultName;
+    }
     const String versionPath = '/pkgfs/packages/build-info/0/data/version';
     final RunResult catResult = await shell('cat $versionPath');
     if (catResult.exitCode != 0) {
       globals.printTrace('Failed to cat $versionPath: ${catResult.stderr}');
-      return 'Fuchsia';
+      return defaultName;
     }
     final String version = catResult.stdout.trim();
     if (version.isEmpty) {
       globals.printTrace('$versionPath was empty');
-      return 'Fuchsia';
+      return defaultName;
     }
     return 'Fuchsia $version';
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) =>
-      _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    assert(!includePastLogs, 'Past log reading not supported on Fuchsia.');
+    return _logReader ??= _FuchsiaLogReader(this, app);
+  }
   _FuchsiaLogReader _logReader;
 
   @override
@@ -558,14 +576,14 @@ class FuchsiaDevice extends Device {
 
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
-    if (fuchsiaArtifacts.sshConfig == null) {
+    if (globals.fuchsiaArtifacts.sshConfig == null) {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
     return await processUtils.run(<String>[
       'ssh',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       id, // Device's IP address.
       command,
     ]);
@@ -573,14 +591,14 @@ class FuchsiaDevice extends Device {
 
   /// Transfer the file [origin] from the device to [destination].
   Future<RunResult> scp(String origin, String destination) async {
-    if (fuchsiaArtifacts.sshConfig == null) {
+    if (globals.fuchsiaArtifacts.sshConfig == null) {
       throwToolExit('Cannot interact with device. No ssh config.\n'
                     'Try setting FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR.');
     }
     return await processUtils.run(<String>[
       'scp',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '$id:$origin',
       destination,
     ]);
@@ -742,7 +760,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       'ssh',
       '-6',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '-nNT',
       '-vvv',
       '-f',
@@ -774,7 +792,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     final List<String> command = <String>[
       'ssh',
       '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
+      globals.fuchsiaArtifacts.sshConfig.absolute.path,
       '-O',
       'cancel',
       '-vvv',

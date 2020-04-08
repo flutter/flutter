@@ -20,8 +20,10 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/pub.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../features.dart';
@@ -48,7 +50,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
-    @required List<String> dartDefines,
     @required UrlTunneller urlTunneller,
   }) {
     return _ResidentWebRunner(
@@ -58,7 +59,6 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       debuggingOptions: debuggingOptions,
       ipv6: ipv6,
       stayResident: stayResident,
-      dartDefines: dartDefines,
       urlTunneller: urlTunneller,
     );
   }
@@ -77,7 +77,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required this.dartDefines,
   }) : super(
           <FlutterDevice>[device],
           target: target ?? globals.fs.path.join('lib', 'main.dart'),
@@ -88,7 +87,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
 
   FlutterDevice get device => flutterDevices.first;
   final FlutterProject flutterProject;
-  final List<String> dartDefines;
   DateTime firstBuildTime;
 
   // Used with the new compiler to generate a bootstrap file containing plugins
@@ -105,10 +103,14 @@ abstract class ResidentWebRunner extends ResidentRunner {
   /// WebServer device is debuggable when running with --start-paused.
   bool get deviceIsDebuggable => device.device is! WebServerDevice || debuggingOptions.startPaused;
 
+  @override
+  bool get supportsWriteSkSL => false;
+
   bool get _enableDwds => debuggingEnabled;
 
   ConnectionResult _connectionResult;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  StreamSubscription<vmservice.Event> _stdErrSub;
   bool _exited = false;
   WipConnection _wipConnection;
 
@@ -145,6 +147,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
       return;
     }
     await _stdOutSub?.cancel();
+    await _stdErrSub?.cancel();
     await device.device.stopApp(null);
     try {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
@@ -358,7 +361,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     bool stayResident = true,
-    @required List<String> dartDefines,
     @required this.urlTunneller,
   }) : super(
           device,
@@ -367,7 +369,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
           stayResident: stayResident,
-          dartDefines: dartDefines,
         );
 
   final UrlTunneller urlTunneller;
@@ -409,6 +410,14 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     try {
       return await asyncGuard(() async {
+        // Ensure dwds resources are cached. If the .packages file is missing then
+        // the client.js script cannot be located by the injected handler in dwds.
+        // This will result in a NoSuchMethodError thrown by injected_handler.darts
+        await pub.get(
+          context: PubContext.pubGet,
+          directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools')
+        );
+
         device.devFS = WebDevFS(
           hostname: effectiveHostname,
           port: hostPort,
@@ -417,6 +426,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           buildMode: debuggingOptions.buildInfo.mode,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
+          expressionCompiler: WebExpressionCompiler(device.generator),
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -432,7 +442,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
             target,
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
-            dartDefines,
             false,
           );
         }
@@ -477,7 +486,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
       progressId: 'hot.restart',
     );
 
-    String reloadModules;
     if (debuggingOptions.buildInfo.isDebug) {
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS(fullRestart: false);
@@ -488,9 +496,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await device.generator.reject();
         return OperationResult(1, 'Failed to recompile application.');
       }
-      reloadModules = report.invalidatedModules
-        .map((String module) => '"$module"')
-        .join(',');
     } else {
       try {
         await buildWeb(
@@ -498,7 +503,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
           target,
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
-          dartDefines,
           false,
         );
       } on ToolExit {
@@ -506,29 +510,22 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
     }
 
-    Duration transferMarker;
     try {
       if (!deviceIsDebuggable) {
         globals.printStatus('Recompile complete. Page requires refresh.');
-      } else if (!debuggingOptions.buildInfo.isDebug) {
+      } else if (isRunningDebug) {
+        await _vmService.callMethod('hotRestart');
+      } else {
         // On non-debug builds, a hard refresh is required to ensure the
         // up to date sources are loaded.
         await _wipConnection?.sendCommand('Page.reload', <String, Object>{
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
-      } else {
-        transferMarker = timer.elapsed;
-        await _wipConnection?.debugger?.sendCommand(
-          'Runtime.evaluate', params: <String, Object>{
-            'expression': 'window.\$hotReloadHook([$reloadModules])',
-            'awaitPromise': true,
-            'returnByValue': true,
-          },
-        );
       }
+    } on Exception catch (err) {
+      return OperationResult(1, err.toString(), fatal: true);
     } on WipError catch (err) {
-      globals.printError(err.toString());
-      return OperationResult(1, err.toString());
+      return OperationResult(1, err.toString(), fatal: true);
     } finally {
       status.stop();
     }
@@ -538,7 +535,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
 
     // Don't track restart times for dart2js builds or web-server devices.
     if (debuggingOptions.buildInfo.isDebug && deviceIsDebuggable) {
-      flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
+      globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', timer.elapsed);
       HotEvent(
         'restart',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.web_javascript),
@@ -547,7 +544,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         fullRestart: true,
         reason: reason,
         overallTimeInMs: timer.elapsed.inMilliseconds,
-        transferTimeInMs: timer.elapsed.inMilliseconds - transferMarker.inMilliseconds
       ).send();
     }
     return OperationResult.ok;
@@ -661,23 +657,31 @@ class _ResidentWebRunner extends ResidentWebRunner {
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult.debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-      // Cleanup old subscriptions. These will throw if there isn't anything
-      // listening, which is fine because that is what we want to ensure.
       try {
-        await _vmService.streamCancel('Stdout');
+        await _vmService.streamListen(vmservice.EventStreams.kStdout);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       try {
-        await _vmService.streamListen('Stdout');
+        await _vmService.streamListen(vmservice.EventStreams.kStderr);
+      } on vmservice.RPCError {
+        // It is safe to ignore this error because we expect an error to be
+        // thrown if we're not already subscribed.
+      }
+      try {
+        await _vmService.streamListen(vmservice.EventStreams.kIsolate);
       } on vmservice.RPCError {
         // It is safe to ignore this error because we expect an error to be
         // thrown if we're not already subscribed.
       }
       _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-        final String message = utf8.decode(base64.decode(log.bytes)).trim();
-        globals.printStatus(message);
+        final String message = utf8.decode(base64.decode(log.bytes));
+        globals.printStatus(message, newline: false);
+      });
+      _stdErrSub = _vmService.onStderrEvent.listen((vmservice.Event log) {
+        final String message = utf8.decode(base64.decode(log.bytes));
+        globals.printStatus(message, newline: false);
       });
       unawaited(_vmService.registerService('reloadSources', 'FlutterTools'));
       _vmService.registerServiceCallback('reloadSources', (Map<String, Object> params) async {
@@ -685,8 +689,6 @@ class _ResidentWebRunner extends ResidentWebRunner {
         await restart(benchmarkMode: false, pause: pause, fullRestart: false);
         return <String, Object>{'type': 'Success'};
       });
-      // Note: can't register our own hot restart hook. Would be fixed by moving
-      // to DWDS digests.
 
       websocketUri = Uri.parse(_connectionResult.debugConnection.uri);
       // Always run main after connecting because start paused doesn't work yet.
@@ -716,6 +718,17 @@ class _ResidentWebRunner extends ResidentWebRunner {
     }
     await cleanupAtFinish();
     return 0;
+  }
+
+  @override
+  bool get supportsCanvasKit => supportsServiceProtocol;
+
+  @override
+  Future<bool> toggleCanvaskit() async {
+    final WebDevFS webDevFS = device.devFS as WebDevFS;
+    webDevFS.webAssetServer.canvasKitRendering = !webDevFS.webAssetServer.canvasKitRendering;
+    await _wipConnection?.sendCommand('Page.reload');
+    return webDevFS.webAssetServer.canvasKitRendering;
   }
 
   @override

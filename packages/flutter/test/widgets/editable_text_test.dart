@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
@@ -1421,6 +1422,86 @@ void main() {
     // These callbacks shouldn't have been triggered.
     assert(!onSubmittedCalled);
     assert(!onEditingCompleteCalled);
+  });
+
+  testWidgets(
+    'iOS autocorrection rectangle should appear on demand'
+    'and dismiss when the text changes or when focus is lost',
+    (WidgetTester tester) async {
+      const Color rectColor = Color(0xFFFF0000);
+
+      void verifyAutocorrectionRectVisibility({ bool expectVisible }) {
+        PaintPattern evaluate() {
+          if (expectVisible) {
+            return paints..something(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return false;
+              final Paint paint = arguments[1] as Paint;
+              return paint.color == rectColor;
+            }));
+          } else {
+            return paints..everything(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return true;
+              final Paint paint = arguments[1] as Paint;
+              if (paint.color != rectColor)
+                return true;
+              throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
+            }));
+          }
+        }
+
+        expect(findRenderEditable(tester), evaluate());
+      }
+
+      final FocusNode focusNode = FocusNode();
+      final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
+
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+          cursorColor: Colors.blue,
+          autocorrect: true,
+          autocorrectionTextRectColor: rectColor,
+          showCursor: false,
+          onEditingComplete: () { },
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      assert(focusNode.hasFocus);
+
+      // The prompt rect should be invisible initially.
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      // Show prompt rect when told to.
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Text changed, prompt rect goes away.
+      controller.text = '12345';
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Unfocus, prompt rect should go away.
+      focusNode.unfocus();
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
@@ -4238,21 +4319,367 @@ void main() {
 
     expect(formatter.log, referenceLog);
   });
+
+  testWidgets('formatter logic handles repeat filtering', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    expect(formatter.formatCallCount, 0);
+    state.updateEditingValue(const TextEditingValue(text: '01'));
+    expect(formatter.formatCallCount, 1);
+    state.updateEditingValue(const TextEditingValue(text: '012'));
+    expect(formatter.formatCallCount, 2);
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Text change causes reformat
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Selection change does not reformat
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    expect(formatter.formatCallCount, 3);
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change does not reformat
+    expect(formatter.formatCallCount, 3);
+    expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+    state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
+    expect(formatter.formatCallCount, 4);
+    expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+
+    const List<String> referenceLog = <String>[
+      '[1]: , 01',
+      '[1]: normal aa',
+      '[2]: aa, 012',
+      '[2]: normal aaaa',
+      '[3]: aaaa, 0123',
+      '[3]: normal aaaaaa',
+      '[4]: 0123, 01234',
+      '[4]: normal aaaaaaaa'
+    ];
+
+    expect(formatter.log, referenceLog);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/53612
+  testWidgets('formatter logic handles initial repeat edge case', (WidgetTester tester) async {
+    final MockTextFormatter formatter = MockTextFormatter();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+              inputFormatters: <TextInputFormatter>[formatter],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    expect(formatter.formatCallCount, 0);
+    state.updateEditingValue(const TextEditingValue(text: ''));
+    state.updateEditingValue(const TextEditingValue(text: '', composing: TextRange(start: 1, end: 2)));
+    state.updateEditingValue(const TextEditingValue(text: '0')); // pass to formatter once to check the values.
+    expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
+    expect(formatter.lastOldValue.text, '');
+  });
+
+  testWidgets('Whitespace directionality formatter input Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Simple mixed directional input.
+    state.updateEditingValue(const TextEditingValue(text: 'h'));
+    state.updateEditingValue(const TextEditingValue(text: 'he'));
+    state.updateEditingValue(const TextEditingValue(text: 'hel'));
+    state.updateEditingValue(const TextEditingValue(text: 'hell'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello'));
+    expect(state.currentTextEditingValue.text, equals('hello'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello ', composing: TextRange(start: 4, end: 5)));
+    expect(state.currentTextEditingValue.text, equals('hello '));
+    state.updateEditingValue(const TextEditingValue(text: 'hello ا', composing: TextRange(start: 4, end: 6)));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}ا'));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 7)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْ', composing: TextRange(start: 4, end: 7)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ', composing: TextRange(start: 4, end: 8)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ ', composing: TextRange(start: 4, end: 9)));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ \u{200F}'));
+    expect(state.currentTextEditingValue.composing, equals(const TextRange(start: 4, end: 10)));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello الْعَ بِيَّةُ '));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}الْعَ بِيَّةُ \u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter doesn\'t overwrite existing Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Does not overwrite existing RLM or LRM characters
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200F}ا \u{200E}ا ا '));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200F}ا \u{200E}ا ا \u{200F}'));
+
+    // Handles only directionality markers.
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200E}\u{200F}\u{200E}\u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}\u{200F}\u{200F}\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}\u{200F}\u{200F}\u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter is not leaky Arabic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Can be passed through formatter repeatedly without leaking/growing.
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: 'hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('hello \u{200E}عَ \u{200F}عَ \u{200F}عَ \u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Doesn't eat emojis
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
+
+  testWidgets('Whitespace directionality formatter emojis', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'testText');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.blue,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = '';
+    await tester.idle();
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    expect(tester.testTextInput.editingState['text'], equals(''));
+    expect(state.wantKeepAlive, true);
+
+    // Doesn't eat emojis
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}😀😁😂🤣😃 💑 👩‍❤️‍👩 👨‍❤️‍👨 💏 👩‍❤️‍💋‍👩 👨‍❤️‍💋‍👨 👪 👨‍👩‍👧 👨‍👩‍👧‍👦 👨‍👩‍👦‍👦 \u{200F}'));
+    state.updateEditingValue(const TextEditingValue(text: '\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ 🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+    expect(state.currentTextEditingValue.text, equals('\u{200E}🇧🇼🇧🇷🇮🇴 🇻🇬🇧🇳wahhh!🇧🇬🇧🇫 🇧🇮🇰🇭عَ عَ \u{200F}🇨🇲 🇨🇦🇮🇨 🇨🇻🇧🇶 🇰🇾🇨🇫 🇹🇩🇨🇱 🇨🇳🇨🇽\u{200F}'));
+  });
 }
 
 class MockTextFormatter extends TextInputFormatter {
-  MockTextFormatter() : _counter = 0, log = <String>[];
+  MockTextFormatter() : formatCallCount = 0, log = <String>[];
 
-  int _counter;
+  int formatCallCount;
   List<String> log;
+  TextEditingValue lastOldValue;
+  TextEditingValue lastNewValue;
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    _counter++;
-    log.add('[$_counter]: ${oldValue.text}, ${newValue.text}');
+    lastOldValue = oldValue;
+    lastNewValue = newValue;
+    formatCallCount++;
+    log.add('[$formatCallCount]: ${oldValue.text}, ${newValue.text}');
     TextEditingValue finalValue;
     if (newValue.text.length < oldValue.text.length) {
       finalValue = _handleTextDeletion(oldValue, newValue);
@@ -4265,14 +4692,14 @@ class MockTextFormatter extends TextInputFormatter {
 
   TextEditingValue _handleTextDeletion(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    final String result = 'a' * (_counter - 2);
-    log.add('[$_counter]: deleting $result');
+    final String result = 'a' * (formatCallCount - 2);
+    log.add('[$formatCallCount]: deleting $result');
     return TextEditingValue(text: result);
   }
 
   TextEditingValue _formatText(TextEditingValue value) {
-    final String result = 'a' * _counter * 2;
-    log.add('[$_counter]: normal $result');
+    final String result = 'a' * formatCallCount * 2;
+    log.add('[$formatCallCount]: normal $result');
     return TextEditingValue(text: result);
   }
 }

@@ -36,16 +36,89 @@ import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 
+typedef DwdsLauncher = Future<Dwds> Function({
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool serveDevTools,
+  void Function(Level, String) logWriter,
+  bool verbose,
+  UrlEncoder urlEncoder,
+  ExpressionCompiler expressionCompiler,
+});
+
+/// An expression compiler connecting to FrontendServer
+///
+/// This is only used in development mode
+class WebExpressionCompiler implements ExpressionCompiler {
+  WebExpressionCompiler(this._generator);
+
+  final ResidentCompiler _generator;
+
+  @override
+  Future<ExpressionCompilationResult> compileExpressionToJs(
+    String isolateId,
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) async {
+    final CompilerOutput compilerOutput = await _generator.compileExpressionToJs(libraryUri,
+        line, column, jsModules, jsFrameValues, moduleName, expression);
+
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      final String content = utf8.decode(
+          globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+      return ExpressionCompilationResult(
+          content, compilerOutput.errorCount > 0);
+    }
+
+    throw Exception('Failed to compile $expression');
+  }
+}
+
 /// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
 class WebAssetServer implements AssetReader {
   @visibleForTesting
-  WebAssetServer(this._httpServer, this._packages, this.internetAddress);
+  WebAssetServer(
+    this._httpServer,
+    this._packages,
+    this.internetAddress,
+    this._modules,
+    this._digests,
+  );
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
   static const String _kDefaultMimeType = 'application/octet-stream';
+
+  final Map<String, String> _modules;
+  final Map<String, String> _digests;
+
+  void performRestart(List<String> modules) {
+    for (final String module in modules) {
+      // We skip computing the digest by using the hashCode of the underlying buffer.
+      // Whenever a file is updated, the corresponding Uint8List.view it corresponds
+      // to will change.
+      final String moduleName = module.startsWith('/')
+        ? module.substring(1)
+        : module;
+      final String name = moduleName.replaceAll('.lib.js', '');
+      final String path = moduleName.replaceAll('.js', '');
+      _modules[name] = path;
+      _digests[name] = _files[moduleName].hashCode.toString();
+    }
+  }
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -60,8 +133,10 @@ class WebAssetServer implements AssetReader {
     UrlTunneller urlTunneller,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint, {
+    Uri entrypoint,
+    ExpressionCompiler expressionCompiler, {
     bool testMode = false,
+    DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
@@ -70,7 +145,15 @@ class WebAssetServer implements AssetReader {
       // ignore: deprecated_member_use
       final Packages packages = await loadPackagesFile(
         Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
-      final WebAssetServer server = WebAssetServer(httpServer, packages, address);
+      final Map<String, String> digests = <String, String>{};
+      final Map<String, String> modules = <String, String>{};
+      final WebAssetServer server = WebAssetServer(
+        httpServer,
+        packages,
+        address,
+        modules,
+        digests,
+      );
       if (testMode) {
         return server;
       }
@@ -81,9 +164,45 @@ class WebAssetServer implements AssetReader {
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
+      // Return the set of all active modules. This is populated by the
+      // frontend_server update logic.
+      Future<Map<String, String>> moduleProvider(String path) async {
+        return modules;
+      }
+      // Return a version string for all active modules. This is populated
+      // along with the `moduleProvider` update logic.
+      Future<Map<String, String>> digestProvider(String path) async {
+        return digests;
+      }
+      // Return the module name for a given server path. These are the names
+      // used by the browser to request JavaScript files.
+      String moduleForServerPath(String serverPath) {
+        if (serverPath.endsWith('.lib.js')) {
+          serverPath = serverPath.startsWith('/')
+            ? serverPath.substring(1)
+            : serverPath;
+          return serverPath.replaceAll('.lib.js', '');
+        }
+        return null;
+      }
+      // Return the server path for modules. These are the JavaScript file names
+      // output by the frontend_server.
+      String serverPathForModule(String module) {
+        return '$module.lib.js';
+      }
+      // Return the server path for modules or resources that have an
+      // org-dartlang-app scheme.
+      String serverPathForAppUri(String appUri) {
+        if (appUri.startsWith('org-dartlang-app:')) {
+          return Uri.parse(appUri).path.substring(1);
+        }
+        return null;
+      }
+
       // In debug builds, spin up DWDS and the full asset server.
-      final Dwds dwds = await Dwds.start(
+      final Dwds dwds = await dwdsLauncher(
         assetReader: server,
+        enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
@@ -91,7 +210,18 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
-        logWriter: (Level logLevel, String message) => globals.printTrace(message)
+        serveDevTools: false,
+        logWriter: (Level logLevel, String message) => globals.printTrace(message),
+        loadStrategy: RequireStrategy(
+          ReloadConfiguration.none,
+          '.lib.js',
+          moduleProvider,
+          digestProvider,
+          moduleForServerPath,
+          serverPathForModule,
+          serverPathForAppUri,
+        ),
+        expressionCompiler: expressionCompiler
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
@@ -121,6 +251,7 @@ class WebAssetServer implements AssetReader {
   final Packages _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
+  Directory entrypointCacheDirectory;
 
   @visibleForTesting
   Uint8List getFile(String path) => _files[path];
@@ -131,6 +262,7 @@ class WebAssetServer implements AssetReader {
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
   Future<shelf.Response> handleRequest(shelf.Request request) async {
+    final String requestPath = request.url.path;
     final Map<String, String> headers = <String, String>{};
     // If the response is `/`, then we are requesting the index file.
     if (request.url.path == '/' || request.url.path.isEmpty) {
@@ -149,15 +281,11 @@ class WebAssetServer implements AssetReader {
     final String ifNoneMatch = request.headers[HttpHeaders.ifNoneMatchHeader];
     headers[HttpHeaders.cacheControlHeader] = 'max-age=0, must-revalidate';
 
-    // NOTE: shelf removes leading `/` for some reason.
-    final String requestPath = request.url.path.startsWith('/')
-      ?  request.url.path
-      : '/${request.url.path}';
-
     // If this is a JavaScript file, it must be in the in-memory cache.
     // Attempt to look up the file by URI.
-    if (_files.containsKey(requestPath)) {
-      final List<int> bytes = getFile(requestPath);
+    final String webServerPath = requestPath.replaceFirst('.dart.js', '.dart.lib.js');
+    if (_files.containsKey(requestPath) || _files.containsKey(webServerPath)) {
+      final List<int> bytes = getFile(requestPath)  ?? getFile(webServerPath);
       // Use the underlying buffer hashCode as a revision string. This buffer is
       // replaced whenever the frontend_server produces new output files, which
       // will also change the hashCode.
@@ -190,16 +318,23 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = globals.fs.directory(getAssetBuildDirectory())
-        .uri.resolve( requestPath.replaceFirst('/assets/', ''));
+        .uri.resolve(requestPath.replaceFirst('assets/', ''));
       file = globals.fs.file(potential);
+    }
+
+    if (!file.existsSync()) {
+      final String webPath = globals.fs.path.join(
+        globals.fs.currentDirectory.childDirectory('web').path, requestPath);
+      file = globals.fs.file(webPath);
     }
 
     if (!file.existsSync()) {
       return shelf.Response.notFound('');
     }
 
-    // For real files, use a serialized file stat as a revision
-    final String etag = file.lastModifiedSync().toIso8601String();
+    // For real files, use a serialized file stat plus path as a revision.
+    // This allows us to update between canvaskit and non-canvaskit SDKs.
+    final String etag = file.lastModifiedSync().toIso8601String() + file.path;
     if (ifNoneMatch == etag) {
       return shelf.Response.notModified();
     }
@@ -264,7 +399,10 @@ class WebAssetServer implements AssetReader {
         codeStart,
         codeEnd - codeStart,
       );
-      _files[filePath] = byteView;
+      final String fileName = filePath.startsWith('/')
+        ? filePath.substring(1)
+        : filePath;
+      _files[fileName] = byteView;
 
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
@@ -277,18 +415,30 @@ class WebAssetServer implements AssetReader {
         sourcemapStart,
         sourcemapEnd - sourcemapStart,
       );
-      _sourcemaps['$filePath.map'] = sourcemapView;
+      final String sourcemapName = '$fileName.map';
+      _sourcemaps[sourcemapName] = sourcemapView;
 
-      modules.add(filePath);
+      modules.add(fileName);
     }
     return modules;
   }
+
+  /// Whether to use the cavaskit SDK for rendering.
+  bool canvasKitRendering = false;
 
   @visibleForTesting
   final File dartSdk = globals.fs.file(globals.fs.path.join(
     globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
     'kernel',
     'amd',
+    'dart_sdk.js',
+  ));
+
+  @visibleForTesting
+  final File canvasKitDartSdk = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
     'dart_sdk.js',
   ));
 
@@ -300,15 +450,32 @@ class WebAssetServer implements AssetReader {
     'dart_sdk.js.map',
   ));
 
+  @visibleForTesting
+  final File canvasKitDartSdkSourcemap = globals.fs.file(globals.fs.path.join(
+    globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
+    'kernel',
+    'amd-canvaskit',
+    'dart_sdk.js.map',
+  ));
+
   // Attempt to resolve `path` to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
-      case '/dart_sdk.js':
-        return dartSdk;
-      case '.dart_sdk.js.map':
-        return dartSdkSourcemap;
+      case 'dart_sdk.js':
+        return canvasKitRendering
+          ? canvasKitDartSdk
+          : dartSdk;
+      case 'dart_sdk.js.map':
+        return canvasKitRendering
+          ? canvasKitDartSdkSourcemap
+          : dartSdkSourcemap;
     }
+    // This is the special generated entrypoint.
+    if (path == 'web_entrypoint.dart') {
+      return entrypointCacheDirectory.childFile('web_entrypoint.dart');
+    }
+
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. The tool doesn't currently
     // consider the case of Dart files as assets.
@@ -351,7 +518,7 @@ class WebAssetServer implements AssetReader {
   }
 
   @override
-  Future<String> dartSourceContents(String serverPath) {
+  Future<String> dartSourceContents(String serverPath) async {
     final File result = _resolveDartFile(serverPath);
     if (result.existsSync()) {
       return result.readAsString();
@@ -386,6 +553,7 @@ class WebDevFS implements DevFS {
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    @required this.expressionCompiler,
     this.testMode = false,
   });
 
@@ -397,8 +565,8 @@ class WebDevFS implements DevFS {
   final BuildMode buildMode;
   final bool enableDwds;
   final bool testMode;
+  final ExpressionCompiler expressionCompiler;
 
-  @visibleForTesting
   WebAssetServer webAssetServer;
 
   Dwds get dwds => webAssetServer.dwds;
@@ -458,6 +626,7 @@ class WebDevFS implements DevFS {
       buildMode,
       enableDwds,
       entrypoint,
+      expressionCompiler,
       testMode: testMode,
     );
     _baseUri = Uri.parse('http://$hostname:$port');
@@ -502,28 +671,27 @@ class WebDevFS implements DevFS {
     final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
 
     if (bundleFirstUpload) {
+      webAssetServer.entrypointCacheDirectory = globals.fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = globals.fs.path.basename(mainPath);
-      webAssetServer.writeFile('/$entrypoint', globals.fs.file(mainPath).readAsStringSync());
-      webAssetServer.writeFile('/manifest.json', '{"info":"manifest not generated in run mode."}');
-      webAssetServer.writeFile('/flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile(entrypoint, globals.fs.file(mainPath).readAsStringSync());
+      webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
+      webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
+      webAssetServer.writeFile('require.js', requireJS.readAsStringSync());
+      webAssetServer.writeFile('stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile(
-        '/main.dart.js',
+        'main.dart.js',
         generateBootstrapScript(
-          requireUrl: _filePathToUriFragment(requireJS.path),
-          mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-          entrypoint: '/$entrypoint.lib.js',
+          requireUrl: 'require.js',
+          mapperUrl: 'stack_trace_mapper.js',
         ),
       );
       webAssetServer.writeFile(
-        '/main_module.bootstrap.js',
+        'main_module.bootstrap.js',
         generateMainModule(
-          entrypoint: '/$entrypoint.lib.js',
+          entrypoint: entrypoint,
         ),
       );
-      // TODO(jonahwilliams): switch to DWDS provided APIs when they are ready.
-      webAssetServer.writeFile('/basic.digests', '{}');
-
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       if (bundle != null) {
@@ -570,7 +738,7 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-
+    webAssetServer.performRestart(modules);
     return UpdateFSReport(
       success: true,
       syncedBytes: codeFile.lengthSync(),
@@ -596,19 +764,6 @@ class WebDevFS implements DevFS {
     'web',
     'dart_stack_trace_mapper.js',
   ));
-}
-
-String _filePathToUriFragment(String path) {
-  if (globals.platform.isWindows) {
-    final bool startWithSlash = path.startsWith('/');
-    final String partial =
-        globals.fs.path.split(path).skip(startWithSlash ? 2 : 1).join('/');
-    if (partial.startsWith('/')) {
-      return partial;
-    }
-    return '/$partial';
-  }
-  return path;
 }
 
 class ReleaseAssetServer {

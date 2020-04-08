@@ -67,12 +67,19 @@ Future<void> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
-    AnalyzeCommand(verboseHelp: verboseHelp),
+    AnalyzeCommand(
+      verboseHelp: verboseHelp,
+      fileSystem: globals.fs,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      logger: globals.logger,
+      terminal: globals.terminal,
+    ),
     AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),
     ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(),
+    CleanCommand(verbose: verbose),
     ConfigCommand(verboseHelp: verboseHelp),
     CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),

@@ -76,13 +76,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  # TODO(jonahwilliams): re-enable with https://github.com/flutter/flutter/issues/39597
-  # codegen_integration_win:
-  #   description: >
-  #     Runs codegeneration and verifies that it can execute
-  #     correctly.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows/android"]
+  codegen_integration_win:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
 
   codegen_integration_mac:
     description: >
@@ -147,6 +146,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  platform_views_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -187,6 +192,12 @@ tasks:
   textfield_perf__timeline_summary:
     description: >
       Measures the runtime performance of textfield on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  color_filter_and_fade_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of color filter with fade on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -323,6 +334,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_defines_test:
+    description: >
+      Builds an APK with a --dart-define and verifies it can be used as a constant
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   android_obfuscate_test:
     description: >
       Builds an obfuscated APK and verifies a dart identifier cannot be found
@@ -355,6 +372,7 @@ tasks:
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    timeout_in_minutes: 20
 
   named_isolates_test:
     description: >
@@ -400,6 +418,12 @@ tasks:
 
   # iOS on-device tests
 
+  ios_defines_test:
+    description: >
+      Builds a Framework with a --dart-define and verifies it can be used as a constant
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+
   ios_content_validation_test:
     description: >
       Builds an obfuscated app and verifies contents and structure
@@ -417,6 +441,12 @@ tasks:
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
     stage: devicelab_ios
     # TODO(keyonghan): change with https://github.com/flutter/flutter/issues/50383
+    required_agent_capabilities: ["mac/ios"]
+
+  platform_views_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of platform views in the Complex Layout sample app on iPhone 6.
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_ios32__start_up:
@@ -546,11 +576,14 @@ tasks:
       The test makes sure that there is no regression while renderring an image with gl on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
-    #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
-    # Remove the flaky flag when we are sure the test is stable.
-    flaky: true
 
-  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
+  ios_platform_view_tests:
+    description: >
+      Runs end-to-end tests with platform views in the scene.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/43029
   # system_debug_ios:
   #   description: >
   #     Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
@@ -734,12 +767,14 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the HTML rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
+    flaky: true
 
   web_benchmarks_canvaskit:
     description: >
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
+    flaky: true
 
   # run_without_leak_linux:
   #   description: >

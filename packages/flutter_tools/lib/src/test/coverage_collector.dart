@@ -8,7 +8,6 @@ import 'package:coverage/coverage.dart' as coverage;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../dart/package_map.dart';
@@ -19,15 +18,27 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.libraryPredicate});
+  CoverageCollector({this.libraryPredicate, this.verbose = true});
 
+  final bool verbose;
   Map<String, Map<int, int>> _globalHitmap;
   bool Function(String) libraryPredicate;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
-    globals.printTrace('test ${event.childIndex}: collecting coverage');
+    _logMessage('test ${event.childIndex}: collecting coverage');
     await collectCoverage(event.process, event.observatoryUri);
+  }
+
+  void _logMessage(String line, { bool error = false }) {
+    if (!verbose) {
+      return;
+    }
+    if (error) {
+      globals.printError(line);
+    } else {
+      globals.printTrace(line);
+    }
   }
 
   void _addHitmap(Map<String, Map<int, int>> hitmap) {
@@ -46,16 +57,16 @@ class CoverageCollector extends TestWatcher {
   /// The returned [Future] completes when the coverage is collected.
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
-    print('collecting coverage data from $observatoryUri...');
+    _logMessage('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
     assert(data != null);
 
-    print('($observatoryUri): collected coverage data; merging...');
+    _logMessage('($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
-    print('($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -68,7 +79,7 @@ class CoverageCollector extends TestWatcher {
     assert(process != null);
     assert(observatoryUri != null);
     final int pid = process.pid;
-    globals.printTrace('pid $pid: collecting coverage data from $observatoryUri...');
+    _logMessage('pid $pid: collecting coverage data from $observatoryUri...');
 
     Map<String, dynamic> data;
     final Future<void> processComplete = process.exitCode
@@ -85,9 +96,9 @@ class CoverageCollector extends TestWatcher {
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
-    globals.printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
+    _logMessage('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage'] as List<Map<String, dynamic>>));
-    globals.printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
+    _logMessage('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -116,12 +127,10 @@ class CoverageCollector extends TestWatcher {
   }
 
   Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final Status status = globals.logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
     final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
-    status.stop();
-    globals.printTrace('coverage information collection complete');
+    _logMessage('coverage information collection complete');
     if (coverageData == null) {
       return false;
     }
@@ -129,12 +138,12 @@ class CoverageCollector extends TestWatcher {
     final File coverageFile = globals.fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
-    globals.printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
+    _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!globals.fs.isFileSync(baseCoverageData)) {
-        globals.printError('Missing "$baseCoverageData". Unable to merge coverage data.');
+        _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
@@ -145,7 +154,7 @@ class CoverageCollector extends TestWatcher {
         } else if (globals.platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
-        globals.printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
+        _logMessage('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage', error: true);
         return false;
       }
 

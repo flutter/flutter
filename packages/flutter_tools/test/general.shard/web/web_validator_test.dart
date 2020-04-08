@@ -63,7 +63,7 @@ void main() {
 
     final ValidationResult result = await webValidator.validate();
 
-    expect(result.messages, <ValidationMessage>[
+    expect(result.messages, const <ValidationMessage>[
       ValidationMessage.hint(
           'Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.'),
     ]);

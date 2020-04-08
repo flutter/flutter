@@ -285,7 +285,7 @@ import 'text_style.dart';
 /// {@end-tool}
 ///
 @immutable
-class StrutStyle extends Diagnosticable {
+class StrutStyle with Diagnosticable {
   /// Creates a strut style.
   ///
   /// The `package` argument must be non-null if the font family is defined in a

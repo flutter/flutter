@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -56,6 +57,8 @@ void main() {
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
+      final Directory macosManagedDirectory = flutterProject.directory.childDirectory('macos').childDirectory('Flutter');
+      when(macosProject.managedDirectory).thenReturn(macosManagedDirectory);
       when(macosProject.pluginConfigKey).thenReturn('macos');
       when(macosProject.existsSync()).thenReturn(false);
       androidProject = MockAndroidProject();
@@ -129,7 +132,6 @@ void main() {
   ''');
     }
 
-
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
               fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
@@ -159,7 +161,7 @@ flutter:
         );
     }
 
-    void createPluginWithInvalidAndroidPackage() {
+    Directory createPluginWithInvalidAndroidPackage() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
               fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
       pluginUsingJavaAndNewEmbeddingDir
@@ -187,6 +189,7 @@ flutter:
           'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginUsingJavaAndNewEmbeddingDir;
     }
 
     void createNewKotlinPlugin2() {
@@ -279,7 +282,7 @@ flutter:
         );
     }
 
-    void createPluginWithDependencies({
+    Directory createPluginWithDependencies({
       @required String name,
       @required List<String> dependencies,
     }) {
@@ -308,6 +311,7 @@ dependencies:
           '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
           mode: FileMode.append,
         );
+      return pluginDirectory;
     }
 
     // Creates the files that would indicate that pod install has run for the
@@ -389,9 +393,9 @@ EndGlobal''');
       });
 
       testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
-        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
-        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
-        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        final Directory pluginA = createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        final Directory pluginB = createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
         when(iosProject.existsSync()).thenReturn(true);
 
         final DateTime dateCreated = DateTime(1970, 1, 1);
@@ -410,9 +414,9 @@ EndGlobal''');
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
           '# This is a generated file; do not edit or check into version control.\n'
-          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
-          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
-          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          'plugin-a=${pluginA.path}/\n'
+          'plugin-b=${pluginB.path}/\n'
+          'plugin-c=${pluginC.path}/\n'
           ''
         );
 
@@ -424,7 +428,7 @@ EndGlobal''');
         final List<dynamic> expectedPlugins = <dynamic>[
           <String, dynamic> {
             'name': 'plugin-a',
-            'path': '/.tmp_rand0/plugin.rand0/',
+            'path': '${pluginA.path}/',
             'dependencies': <String>[
               'plugin-b',
               'plugin-c'
@@ -432,14 +436,14 @@ EndGlobal''');
           },
           <String, dynamic> {
             'name': 'plugin-b',
-            'path': '/.tmp_rand0/plugin.rand1/',
+            'path': '${pluginB.path}/',
             'dependencies': <String>[
               'plugin-c'
             ]
           },
           <String, dynamic> {
             'name': 'plugin-c',
-            'path': '/.tmp_rand0/plugin.rand2/',
+            'path': '${pluginC.path}/',
             'dependencies': <String>[]
           },
         ];
@@ -642,7 +646,7 @@ EndGlobal''');
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
-        createPluginWithInvalidAndroidPackage();
+        final Directory pluginDir = createPluginWithInvalidAndroidPackage();
 
         await expectLater(
           () async {
@@ -650,8 +654,8 @@ EndGlobal''');
           },
           throwsToolExit(
             message: "The plugin `plugin1` doesn't have a main class defined in "
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
-                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     '${pluginDir.path}/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '${pluginDir.path}/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
                      "This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin's pubspec.yaml.\n"
                      'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
                      'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
@@ -877,6 +881,33 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         FeatureFlags: () => featureFlags,
       });
 
+      testUsingContext('Injecting creates generated macos registrant, but does not include Dart-only plugins', () async {
+        when(macosProject.existsSync()).thenReturn(true);
+        when(featureFlags.isMacOSEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(true);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      macos:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantFile = macosProject.managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+        expect(registrantFile, exists);
+        expect(registrantFile, isNot(contains('SomePlugin')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
       testUsingContext('Injecting creates generated Linux registrant', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(featureFlags.isLinuxEnabled).thenReturn(true);
@@ -891,6 +922,33 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Linux registrant, but does not include Dart-only plugins', () async {
+        when(linuxProject.existsSync()).thenReturn(true);
+        when(featureFlags.isLinuxEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      linux:
+        dartPluginClass: SomePlugin
+    ''');
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = linuxProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -938,6 +996,36 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         expect(registrantHeader.existsSync(), isTrue);
         expect(registrantImpl.existsSync(), isTrue);
         expect(registrantImpl.readAsStringSync(), contains('SomePluginRegisterWithRegistrar'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+      });
+
+      testUsingContext('Injecting creates generated Windows registrant, but does not include Dart-only plugins', () async {
+        when(windowsProject.existsSync()).thenReturn(true);
+        when(featureFlags.isWindowsEnabled).thenReturn(true);
+        when(flutterProject.isModule).thenReturn(false);
+        // Create a plugin without a pluginClass.
+        dummyPackageDirectory.parent.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+flutter:
+  plugin:
+    platforms:
+      windows:
+        dartPluginClass: SomePlugin
+    ''');
+
+        createDummyWindowsSolutionFile();
+        createDummyPluginWindowsProjectFile();
+
+        await injectPlugins(flutterProject, checkProjects: true);
+
+        final File registrantImpl = windowsProject.managedDirectory.childFile('generated_plugin_registrant.cc');
+
+        expect(registrantImpl, exists);
+        expect(registrantImpl, isNot(contains('SomePlugin')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

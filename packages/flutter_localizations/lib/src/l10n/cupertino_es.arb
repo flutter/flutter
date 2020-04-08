@@ -5,8 +5,8 @@
   "datePickerMinuteSemanticsLabelOther": "$minute minutos",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
-  "anteMeridiemAbbreviation": "A.M.",
-  "postMeridiemAbbreviation": "P.M.",
+  "anteMeridiemAbbreviation": "a. m.",
+  "postMeridiemAbbreviation": "p. m.",
   "todayLabel": "Hoy",
   "alertDialogLabel": "Alerta",
   "timerPickerHourLabelOne": "hora",
@@ -18,5 +18,5 @@
   "cutButtonLabel": "Cortar",
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Pegar",
-  "selectAllButtonLabel": "Seleccionar todo"
+  "selectAllButtonLabel": "Seleccionar todos"
 }

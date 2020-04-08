@@ -85,7 +85,7 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
 }
 
-String generatePluralMethod(Message message) {
+String generatePluralMethod(Message message, AppResourceBundle bundle) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
       'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
@@ -96,7 +96,7 @@ String generatePluralMethod(Message message) {
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = message.value;
+  String easyMessage = bundle.translationFor(message);
   for (final Placeholder placeholder in message.placeholders)
     easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
 
@@ -123,7 +123,7 @@ String generatePluralMethod(Message message) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = match.group(2);
+      String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
@@ -131,7 +131,7 @@ String generatePluralMethod(Message message) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
-      pluralLogicArgs.add("      ${pluralIds[pluralKey]}: '$argValue'");
+      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
@@ -155,7 +155,7 @@ String generatePluralMethod(Message message) {
 
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
-    String messageValue = bundle.translationFor(message);
+    String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
@@ -164,15 +164,11 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    // Escape single and double quotes.
-    messageValue = messageValue.replaceAll("'", '\\\'');
-    messageValue = messageValue.replaceAll('"', '\\\"');
-
-    return "'$messageValue'";
+    return messageValue;
   }
 
   if (message.isPlural) {
-    return generatePluralMethod(message);
+    return generatePluralMethod(message, bundle);
   }
 
   if (message.placeholdersRequireFormatting) {
@@ -197,21 +193,43 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateClass(String className, AppResourceBundle bundle, Iterable<Message> messages) {
+String generateBaseClassFile(
+  String className,
+  String fileName,
+  String header,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+) {
   final LocaleInfo locale = bundle.locale;
+  final Iterable<String> methods = messages
+    .where((Message message) => bundle.translationFor(message) != null)
+    .map((Message message) => generateMethod(message, bundle));
 
-  String baseClassName = className;
-  if (locale.countryCode != null) {
-    baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
-  }
+  return classFileTemplate
+    .replaceAll('@(header)', header)
+    .replaceAll('@(language)', describeLocale(locale.toString()))
+    .replaceAll('@(baseClass)', className)
+    .replaceAll('@(fileName)', fileName)
+    .replaceAll('@(class)', '$className${locale.camelCase()}')
+    .replaceAll('@(localeName)', locale.toString())
+    .replaceAll('@(methods)', methods.join('\n\n'));
+}
+
+String generateSubclass({
+  String className,
+  AppResourceBundle bundle,
+  Iterable<Message> messages,
+}) {
+  final LocaleInfo locale = bundle.locale;
+  final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
   final Iterable<String> methods = messages
     .where((Message message) => bundle.translationFor(message) != null)
     .map((Message message) => generateMethod(message, bundle));
 
-  return classTemplate
+  return subclassTemplate
     .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', baseClassName)
+    .replaceAll('@(baseLanguageClassName)', baseClassName)
     .replaceAll('@(class)', '$className${locale.camelCase()}')
     .replaceAll('@(localeName)', locale.toString())
     .replaceAll('@(methods)', methods.join('\n\n'));
@@ -230,26 +248,120 @@ String generateBaseClassMethod(Message message) {
     .replaceAll('@(name)', message.resourceId);
 }
 
-String generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+String _generateLookupByAllCodes(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((LocaleInfo locale) {
+    return locale.scriptCode != null && locale.countryCode != null;
+  });
+
+  if (localesWithAllCodes.isEmpty) {
+    return '';
+  }
+
+  final Iterable<String> switchClauses = localesWithAllCodes.map<String>((LocaleInfo locale) {
+    return switchClauseTemplate
+      .replaceAll('@(case)', locale.toString())
+      .replaceAll('@(class)', '$className${locale.camelCase()}');
+  });
+
+  return allCodesLookupTemplate.replaceAll(
+    '@(allCodesSwitchClauses)',
+    switchClauses.join('\n    '),
+  );
+}
+
+String _generateLookupByScriptCode(AppResourceBundleCollection allBundles, String className) {
   final Iterable<String> switchClauses = allBundles.languages.map((String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    if (locales.length == 1) {
-      return switchClauseTemplate
-        .replaceAll('@(case)', language)
-        .replaceAll('@(class)', '$className${locales.first.camelCase()}');
-    }
+    final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
+      return locale.scriptCode != null && locale.countryCode == null;
+    });
 
-    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) => locale.countryCode != null);
-    return countryCodeSwitchTemplate
+    if (localesWithScriptCodes.isEmpty)
+      return null;
+
+    return nestedSwitchTemplate
       .replaceAll('@(languageCode)', language)
+      .replaceAll('@(code)', 'scriptCode')
+      .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
+      .replaceAll('@(switchClauses)', localesWithScriptCodes.map((LocaleInfo locale) {
+          return switchClauseTemplate
+            .replaceAll('@(case)', locale.scriptCode)
+            .replaceAll('@(class)', '$className${locale.camelCase()}');
+        }).join('\n        '));
+  }).where((String switchClause) => switchClause != null);
+
+  if (switchClauses.isEmpty) {
+    return '';
+  }
+
+  return languageCodeSwitchTemplate
+    .replaceAll('@(comment)', '// Lookup logic when language+script codes are specified.')
+    .replaceAll('@(switchClauses)', switchClauses.join('\n    '),
+  );
+}
+
+String _generateLookupByCountryCode(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
+      return locale.countryCode != null && locale.scriptCode == null;
+    });
+
+    if (localesWithCountryCodes.isEmpty)
+      return null;
+
+    return nestedSwitchTemplate
+      .replaceAll('@(languageCode)', language)
+      .replaceAll('@(code)', 'countryCode')
       .replaceAll('@(class)', '$className${LocaleInfo.fromString(language).camelCase()}')
       .replaceAll('@(switchClauses)', localesWithCountryCodes.map((LocaleInfo locale) {
           return switchClauseTemplate
             .replaceAll('@(case)', locale.countryCode)
             .replaceAll('@(class)', '$className${locale.camelCase()}');
         }).join('\n        '));
-  });
-  return switchClauses.join('\n    ');
+  }).where((String switchClause) => switchClause != null);
+
+  if (switchClauses.isEmpty) {
+    return '';
+  }
+
+  return languageCodeSwitchTemplate
+    .replaceAll('@(comment)', '// Lookup logic when language+country codes are specified.')
+    .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
+}
+
+String _generateLookupByLanguageCode(AppResourceBundleCollection allBundles, String className) {
+  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+    final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
+    final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((LocaleInfo locale) {
+      return locale.countryCode == null && locale.scriptCode == null;
+    });
+
+    if (localesWithLanguageCode.isEmpty)
+      return null;
+
+    return localesWithLanguageCode.map((LocaleInfo locale) {
+      return switchClauseTemplate
+        .replaceAll('@(case)', locale.languageCode)
+        .replaceAll('@(class)', '$className${locale.camelCase()}');
+    }).join('\n        ');
+  }).where((String switchClause) => switchClause != null);
+
+  if (switchClauses.isEmpty) {
+    return '';
+  }
+
+  return languageCodeSwitchTemplate
+    .replaceAll('@(comment)', '// Lookup logic when only language code is specified.')
+    .replaceAll('@(switchClauses)', switchClauses.join('\n    '));
+}
+
+String _generateLookupBody(AppResourceBundleCollection allBundles, String className) {
+  return lookupBodyTemplate
+    .replaceAll('@(lookupAllCodesSpecified)', _generateLookupByAllCodes(allBundles, className))
+    .replaceAll('@(lookupScriptCodeSpecified)', _generateLookupByScriptCode(allBundles, className))
+    .replaceAll('@(lookupCountryCodeSpecified)', _generateLookupByCountryCode(allBundles, className))
+    .replaceAll('@(lookupLanguageCodeSpecified)', _generateLookupByLanguageCode(allBundles, className));
 }
 
 class LocalizationsGenerator {
@@ -261,7 +373,6 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
-
 
   /// The reference to the project's l10n directory.
   ///
@@ -322,6 +433,9 @@ class LocalizationsGenerator {
   /// [l10nDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
 
+  /// The header to be prepended to the generated Dart localization file.
+  String header = '';
+
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
@@ -335,11 +449,14 @@ class LocalizationsGenerator {
     String outputFileString,
     String classNameString,
     String preferredSupportedLocaleString,
+    String headerString,
+    String headerFile,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     setPreferredSupportedLocales(preferredSupportedLocaleString);
+    _setHeader(headerString, headerFile);
     className = classNameString;
   }
 
@@ -443,8 +560,32 @@ class LocalizationsGenerator {
         if (localeString.runtimeType != String) {
           throw L10nException('Incorrect runtime type for $localeString');
         }
-        return LocaleInfo.fromString(localeString.toString());
+        return LocaleInfo.fromString(
+          localeString.toString(),
+        );
       }).toList();
+    }
+  }
+
+  void _setHeader(String headerString, String headerFile) {
+    if (headerString != null && headerFile != null) {
+      throw L10nException(
+        'Cannot accept both header and header file arguments. \n'
+        'Please make sure to define only one or the other. '
+      );
+    }
+
+    if (headerString != null) {
+      header = headerString;
+    } else if (headerFile != null) {
+      try {
+        header = _fs.file(path.join(l10nDirectory.path, headerFile)).readAsStringSync();
+      } on FileSystemException catch (error) {
+        throw L10nException (
+          'Failed to read header file: "$headerFile". \n'
+          'FileSystemException: ${error.message}'
+        );
+      }
     }
   }
 
@@ -498,39 +639,101 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
-  // Generate the AppLocalizations class, its LocalizationsDelegate subclass.
+  // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
+  // and all AppLocalizations subclasses for every locale.
   String generateCode() {
+    bool isBaseClassLocale(LocaleInfo locale, String language) {
+      return locale.languageCode == language
+          && locale.countryCode == null
+          && locale.scriptCode == null;
+    }
+
+    List<LocaleInfo> getLocalesForLanguage(String language) {
+      return _allBundles.bundles
+        // Return locales for the language specified, except for the base locale itself
+        .where((AppResourceBundle bundle) {
+          final LocaleInfo locale = bundle.locale;
+          return !isBaseClassLocale(locale, language) && locale.languageCode == language;
+        })
+        .map((AppResourceBundle bundle) => bundle.locale).toList();
+    }
+
     final String directory = path.basename(l10nDirectory.path);
     final String outputFileName = path.basename(outputFile.path);
 
     final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
-      final String country = locale.countryCode;
-      final String countryArg = country == null ? '' : ', $country';
-      return 'Locale(\'${locale.languageCode}$countryArg\')';
+      final String languageCode = locale.languageCode;
+      final String countryCode = locale.countryCode;
+      final String scriptCode = locale.scriptCode;
+
+      if (countryCode == null && scriptCode == null) {
+        return 'Locale(\'$languageCode\')';
+      } else if (countryCode != null && scriptCode == null) {
+        return 'Locale(\'$languageCode\', \'$countryCode\')';
+      } else if (countryCode != null && scriptCode != null) {
+        return 'Locale.fromSubtags(languageCode: \'$languageCode\', countryCode: \'$countryCode\', scriptCode: \'$scriptCode\')';
+      } else {
+        return 'Locale.fromSubtags(languageCode: \'$languageCode\', scriptCode: \'$scriptCode\')';
+      }
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
       _allBundles.locales.map<String>((LocaleInfo locale) => '\'${locale.languageCode}\'')
     );
 
-    final StringBuffer allMessagesClasses = StringBuffer();
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
+    final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
-      allMessagesClasses.writeln();
-      allMessagesClasses.writeln(
-        generateClass(className, _allBundles.bundleFor(locale), _allMessages)
-      );
+      if (isBaseClassLocale(locale, locale.languageCode)) {
+        final File localeMessageFile = _fs.file(
+          path.join(l10nDirectory.path, '${fileName}_$locale.dart'),
+        );
+
+        // Generate the template for the base class file. Further string
+        // interpolation will be done to determine if there are
+        // subclasses that extend the base class.
+        final String languageBaseClassFile = generateBaseClassFile(
+          className,
+          outputFileName,
+          header,
+          _allBundles.bundleFor(locale),
+          _allMessages,
+        );
+
+        // Every locale for the language except the base class.
+        final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
+
+        // Generate every subclass that is needed for the particular language
+        final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
+          return generateSubclass(
+            className: className,
+            bundle: _allBundles.bundleFor(locale),
+            messages: _allMessages,
+          );
+        });
+
+        localeMessageFile.writeAsStringSync(
+          languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join()),
+        );
+      }
     }
 
-    final String lookupBody = generateLookupBody(_allBundles, className);
+    final Iterable<String> localeImports = supportedLocales
+      .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
+      .map((LocaleInfo locale) {
+        return "import '${fileName}_${locale.toString()}.dart';";
+      });
+
+    final String lookupBody = _generateLookupBody(_allBundles, className);
 
     return fileTemplate
+      .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
-      .replaceAll('@(allMessagesClasses)', allMessagesClasses.toString().trim())
+      .replaceAll('@(messageClassImports)', localeImports.join('\n'))
       .replaceAll('@(lookupName)', '_lookup$className')
       .replaceAll('@(lookupBody)', lookupBody);
   }

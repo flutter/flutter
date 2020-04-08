@@ -236,7 +236,7 @@ abstract class RawKeyEventData {
 ///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
-abstract class RawKeyEvent extends Diagnosticable {
+abstract class RawKeyEvent with Diagnosticable {
   /// Initializes fields for subclasses, and provides a const constructor for
   /// const subclasses.
   const RawKeyEvent({
@@ -623,6 +623,7 @@ class RawKeyboard {
   void clearKeysPressed() => _keysPressed.clear();
 }
 
+@immutable
 class _ModifierSidePair extends Object {
   const _ModifierSidePair(this.modifier, this.side);
 

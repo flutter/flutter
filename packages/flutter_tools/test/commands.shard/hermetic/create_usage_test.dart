@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -23,6 +24,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
+        Cache.flutterRoot = 'flutter';
         final List<String> paths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
           globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
@@ -34,6 +36,13 @@ void main() {
         for (final String path in paths) {
           globals.fs.file(path).createSync(recursive: true);
         }
+        // Set up enough of the packages to satisfy the templating code.
+        final File packagesFile = globals.fs.file(
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', '.packages'));
+        final Directory templateImagesDirectory = globals.fs.directory('flutter_template_images');
+        templateImagesDirectory.createSync(recursive: true);
+        packagesFile.createSync(recursive: true);
+        packagesFile.writeAsStringSync('flutter_template_images:file:///${templateImagesDirectory.uri}');
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       });

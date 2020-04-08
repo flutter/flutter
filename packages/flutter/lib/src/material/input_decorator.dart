@@ -40,6 +40,7 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
@@ -51,6 +52,7 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   int get hashCode => hashValues(start, extent);
 }
 
@@ -489,6 +491,7 @@ enum _DecorationSlot {
 }
 
 // An analog of InputDecoration for the _Decorator widget.
+@immutable
 class _Decoration {
   const _Decoration({
     @required this.contentPadding,
@@ -2729,8 +2732,20 @@ class InputDecoration {
   /// [errorText], and [counterText].
   ///
   /// By default the `contentPadding` reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then `contentPadding` is
-  /// [EdgeInsets.zero].
+  /// [border].
+  ///
+  /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
+  ///
+  /// If `isOutline` property of [border] is false and if [filled] is true then
+  /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
+  /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false`.
+  /// If `isOutline` property of [border] is false and if [filled] is false then
+  /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
+  /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false`.
+  ///
+  /// If `isOutline` property of [border] is true then `contentPaddding` is
+  /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
+  /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry contentPadding;
 
   /// Whether the decoration is the same size as the input field.
@@ -3548,7 +3563,7 @@ class InputDecoration {
 /// The [InputDecoration.applyDefaults] method is used to combine a input
 /// decoration theme with an [InputDecoration] object.
 @immutable
-class InputDecorationTheme extends Diagnosticable {
+class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///

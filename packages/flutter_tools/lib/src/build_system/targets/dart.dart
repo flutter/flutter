@@ -204,9 +204,10 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = <String>[
-      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
-    ];
+    final String rawFrontEndOption = environment.defines[kExtraFrontEndOptions];
+    final List<String> extraFrontEndOptions = (rawFrontEndOption?.isNotEmpty ?? false)
+      ? rawFrontEndOption?.split(',')
+      : null;
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -260,8 +261,18 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
+  String get analyticsName => 'android_aot';
+
+  @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      xcode: globals.xcode,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts,
+    );
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
@@ -381,7 +392,7 @@ abstract class CopyFlutterAotBundle extends Target {
 
 /// Dart defines are encoded inside [Environment] as a JSON array.
 List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines)) {
+  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
     return const <String>[];
   }
 
@@ -389,7 +400,7 @@ List<String> parseDartDefines(Environment environment) {
   try {
     final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
-  } on FormatException catch (_) {
+  } on FormatException {
     throw Exception(
       'The value of -D$kDartDefines is not formatted correctly.\n'
       'The value must be a JSON-encoded list of strings but was:\n'

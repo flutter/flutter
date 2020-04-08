@@ -262,7 +262,7 @@ abstract class TextSelectionControls {
 /// The selection handles are displayed in the [Overlay] that most closely
 /// encloses the given [BuildContext].
 class TextSelectionOverlay {
-  /// Creates an object that manages overly entries for selection handles.
+  /// Creates an object that manages overlay entries for selection handles.
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({

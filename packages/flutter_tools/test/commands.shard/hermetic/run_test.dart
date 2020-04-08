@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -31,6 +32,7 @@ import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
@@ -76,7 +78,7 @@ void main() {
           '--show-test-device',
         ]);
         fail('Expect exception');
-      } catch (e) {
+      } on Exception catch (e) {
         expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
       }
     }, overrides: <Type, Generator>{
@@ -102,8 +104,8 @@ void main() {
           '--no-pub',
         ]);
         fail('Expect exception');
-      } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
       }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(bufferLogger.statusText, contains(
@@ -112,6 +114,38 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Fails with toolExit run in profile mode on emulator with machine flag', () async {
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').writeAsStringSync('\n');
+      globals.fs.file('lib/main.dart').createSync(recursive: true);
+      final FakeDevice device = FakeDevice(isLocalEmulator: true);
+      when(deviceManager.getAllConnectedDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) async {
+        return <Device>[device];
+      });
+      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+      when(deviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      await expectLater(createTestCommandRunner(command).run(<String>[
+        'run',
+        '--no-pub',
+        '--machine',
+        '--profile',
+      ]), throwsToolExit(message: 'not supported for emulators'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => MockDeviceManager(),
+      Stdio: () => MockStdio(),
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -127,8 +161,8 @@ void main() {
           '--no-pub',
         ]);
         fail('Expect exception');
-      } catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+      } on Exception catch (e) {
+        expect(e, isA<ToolExit>());
         expect(e.toString(), contains('No pubspec.yaml file found'));
       }
     }, overrides: <Type, Generator>{
@@ -221,8 +255,8 @@ void main() {
         } on ToolExit catch (e) {
           // We expect a ToolExit because no devices are attached
           expect(e.message, null);
-        } catch (e) {
-          fail('ToolExit expected');
+        } on Exception catch (e) {
+          fail('ToolExit expected, got $e');
         }
 
         verifyInOrder(<void>[
@@ -246,7 +280,7 @@ void main() {
         applyMocksToCommand(command);
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
-        when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
+        when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(FakeDeviceLogReader());
         when(mockDevice.supportsFastStart).thenReturn(true);
         when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('iOS 13'));
         // App fails to start because we're only interested in usage
@@ -293,8 +327,8 @@ void main() {
         } on ToolExit catch (e) {
           // We expect a ToolExit because app does not start
           expect(e.message, null);
-        } catch (e) {
-          fail('ToolExit expected');
+        } on Exception catch (e) {
+          fail('ToolExit expected, got $e');
         }
         final List<dynamic> captures = verify(mockUsage.sendCommand(
           captureAny,
@@ -572,15 +606,14 @@ class TestRunCommand extends RunCommand {
   }
 }
 
-class MockStableFlutterVersion extends MockFlutterVersion {
-  @override
-  bool get isMaster => false;
-}
-
 class FakeDevice extends Fake implements Device {
+  FakeDevice({bool isLocalEmulator = false})
+   : _isLocalEmulator = isLocalEmulator;
+
   static const int kSuccess = 1;
   static const int kFailure = -1;
   TargetPlatform _targetPlatform = TargetPlatform.ios;
+  final bool _isLocalEmulator;
 
   @override
   String get id => 'fake_device';
@@ -588,7 +621,7 @@ class FakeDevice extends Fake implements Device {
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
   @override
-  Future<bool> get isLocalEmulator => Future<bool>.value(false);
+  Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
   bool get supportsHotReload => false;
@@ -600,8 +633,11 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value('');
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
-    return MockDeviceLogReader();
+  DeviceLogReader getLogReader({
+    ApplicationPackage app,
+    bool includePastLogs = false,
+  }) {
+    return FakeDeviceLogReader();
   }
 
   @override
@@ -654,10 +690,9 @@ class MockWebRunnerFactory extends Mock implements WebRunnerFactory {
     FlutterProject flutterProject,
     bool ipv6,
     DebuggingOptions debuggingOptions,
-    List<String> dartDefines,
     UrlTunneller urlTunneller,
   }) {
-    _dartDefines = dartDefines;
+    _dartDefines = debuggingOptions.buildInfo.dartDefines;
     return MockWebRunner();
   }
 }

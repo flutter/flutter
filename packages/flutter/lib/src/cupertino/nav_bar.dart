@@ -52,6 +52,7 @@ const Border _kDefaultNavBarBorder = Border(
 // all transition between each other (per Navigator) via Hero transitions.
 const _HeroTag _defaultHeroTag = _HeroTag(null);
 
+@immutable
 class _HeroTag {
   const _HeroTag(this.navigator);
 

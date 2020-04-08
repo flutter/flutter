@@ -231,7 +231,7 @@ void main() {
           null,
         });
         fail('Mock thrown exception expected');
-      } catch (e) {
+      } on Exception {
         verify(artifact1.update());
         // Don't continue when retrieval fails.
         verifyNever(artifact2.update());
@@ -264,9 +264,9 @@ void main() {
 
   test('Unstable artifacts', () {
     expect(DevelopmentArtifact.web.unstable, false);
-    expect(DevelopmentArtifact.linux.unstable, true);
-    expect(DevelopmentArtifact.macOS.unstable, true);
-    expect(DevelopmentArtifact.windows.unstable, true);
+    expect(DevelopmentArtifact.linux.unstable, false);
+    expect(DevelopmentArtifact.macOS.unstable, false);
+    expect(DevelopmentArtifact.windows.unstable, false);
     expect(DevelopmentArtifact.fuchsia.unstable, true);
     expect(DevelopmentArtifact.flutterRunner.unstable, true);
   });
@@ -436,6 +436,24 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('verifies iproxy for usbmuxd in isUpToDateInner', () async {
+      final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('usbmuxd', mockCache);
+      when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
+      iosUsbArtifacts.location.createSync();
+      final File iproxy = iosUsbArtifacts.location.childFile('iproxy')
+        ..createSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), true);
+
+      iproxy.deleteSync();
+
+      expect(iosUsbArtifacts.isUpToDateInner(), false);
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('Does not verify executables for openssl in isUpToDateInner', () async {
       final IosUsbArtifacts iosUsbArtifacts = IosUsbArtifacts('openssl', mockCache);
       when(mockCache.getArtifactDirectory(any)).thenReturn(globals.fs.currentDirectory);
@@ -502,7 +520,7 @@ void main() {
     when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['linux-x64', 'linux-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform()..operatingSystem = 'linux',
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
   });
 
   testUsingContext('FontSubset artifacts on windows', () {
@@ -511,7 +529,7 @@ void main() {
     when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['windows-x64', 'windows-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform()..operatingSystem = 'windows',
+    Platform: () => FakePlatform(operatingSystem: 'windows'),
   });
 
   testUsingContext('FontSubset artifacts on macos', () {
@@ -520,7 +538,7 @@ void main() {
     when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
   }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform()..operatingSystem = 'macos',
+    Platform: () => FakePlatform(operatingSystem: 'macos'),
   });
 
   testUsingContext('FontSubset artifacts on fuchsia', () {
@@ -529,7 +547,7 @@ void main() {
     when(mockCache.includeAllPlatforms).thenReturn(false);
     expect(() => artifacts.getBinaryDirs(), throwsToolExit(message: 'Unsupported operating system: ${globals.platform.operatingSystem}'));
   }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
+    Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
   });
 
   testUsingContext('FontSubset artifacts for all platforms', () {
@@ -542,7 +560,40 @@ void main() {
         <String>['windows-x64', 'windows-x64/font-subset.zip'],
     ]);
   }, overrides: <Type, Generator> {
-    Platform: () => FakePlatform()..operatingSystem = 'fuchsia',
+    Platform: () => FakePlatform(operatingSystem: 'fuchsia'),
+  });
+
+  testUsingContext('macOS desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final MacOSEngineArtifacts artifacts = MacOSEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'macos'});
+
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('Windows desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final WindowsEngineArtifacts artifacts = WindowsEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'windows'});
+
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform(operatingSystem: 'linux'),
+  });
+
+  testUsingContext('Linux desktop artifacts ignore filtering when requested', () {
+    final MockCache mockCache = MockCache();
+    final LinuxEngineArtifacts artifacts = LinuxEngineArtifacts(mockCache);
+    when(mockCache.includeAllPlatforms).thenReturn(false);
+    when(mockCache.platformOverrideArtifacts).thenReturn(<String>{'linux'});
+
+    expect(artifacts.getBinaryDirs(), isNotEmpty);
+  }, overrides: <Type, Generator> {
+    Platform: () => FakePlatform(operatingSystem: 'macos'),
   });
 }
 

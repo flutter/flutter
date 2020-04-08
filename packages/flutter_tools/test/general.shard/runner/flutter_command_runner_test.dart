@@ -88,6 +88,18 @@ void main() {
         Platform: () => platform,
       }, initializeFlutterRoot: false);
 
+      testUsingContext('Fetches tags when --version is used', () async {
+        final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
+
+        await runner.run(<String>['--version']);
+
+        verify(version.fetchTagsAndUpdate()).called(1);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
       testUsingContext('throw tool exit if the version file cannot be written', () async {
         final MockFlutterVersion version = globals.flutterVersion as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
@@ -165,7 +177,9 @@ void main() {
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ar'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match v*.*.* --first-parent --long --tags'.split(' '),
+        when(processManager.runSync('git fetch https://github.com/flutter/flutter.git --tags'.split(' '),
+          workingDirectory: Cache.flutterRoot)).thenReturn(result);
+        when(processManager.runSync('git describe --match *.*.* --first-parent --long --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
         when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
@@ -277,7 +291,7 @@ class FakeFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    preferences = outputPreferences;
+    preferences = globals.outputPreferences;
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
 

@@ -156,9 +156,26 @@ class Dart2JSTarget extends Target {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = PackageMap.globalPackagesPath;
+    final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
+    final List<String> dartDefines = parseDartDefines(environment);
 
-    final ProcessResult result = await globals.processManager.run(<String>[
+    // Run the dart2js compilation in two stages, so that icon tree shaking can
+    // parse the kernel file for web builds.
+    final ProcessResult kernelResult = await globals.processManager.run(<String>[
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
+      '--libraries-spec=$specPath',
+      '-o',
+      outputKernel.path,
+      '--packages=$packageFile',
+      '--cfe-only',
+      environment.buildDir.childFile('main.dart').path,
+    ]);
+    if (kernelResult.exitCode != 0) {
+      throw Exception(kernelResult.stdout + kernelResult.stderr);
+    }
+    final ProcessResult javaScriptResult = await globals.processManager.run(<String>[
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
@@ -167,25 +184,24 @@ class Dart2JSTarget extends Target {
       else
         '-O4',
       if (buildMode == BuildMode.profile)
-        '--no-minify',
-      '-o',
-      outputFile.path,
-      '--packages=$packageFile',
-      if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      for (final String dartDefine in dartDefines)
+        '-D$dartDefine',
+      if (buildMode == BuildMode.profile)
+        '--no-minify',
       if (csp)
         '--csp',
-      for (final String dartDefine in parseDartDefines(environment))
-        '-D$dartDefine',
-      environment.buildDir.childFile('main.dart').path,
+      '-o',
+      outputFile.path,
+      environment.buildDir.childFile('app.dill').path,
     ]);
-    if (result.exitCode != 0) {
-      throw Exception(result.stdout + result.stderr);
+    if (javaScriptResult.exitCode != 0) {
+      throw Exception(javaScriptResult.stdout + javaScriptResult.stderr);
     }
     final File dart2jsDeps = environment.buildDir
-      .childFile('main.dart.js.deps');
+      .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       globals.printError('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
@@ -197,7 +213,7 @@ class Dart2JSTarget extends Target {
       platform: globals.platform,
     );
     final Depfile depfile = depfileService.parseDart2js(
-      environment.buildDir.childFile('main.dart.js.deps'),
+      environment.buildDir.childFile('app.dill.deps'),
       outputFile,
     );
     depfileService.writeToFile(
@@ -324,18 +340,30 @@ class WebServiceWorker extends Target {
       .where((File file) => !file.path.endsWith('flutter_service_worker.js')
         && !globals.fs.path.basename(file.path).startsWith('.'))
       .toList();
-    // TODO(jonahwilliams): determine whether this needs to be made more efficient.
-    final Map<String, String> uriToHash = <String, String>{
-      for (File file in contents)
-        // Do not force caching of source maps.
-        if (!file.path.endsWith('main.dart.js.map'))
-        '/${globals.fs.path.toUri(globals.fs.path.relative(file.path, from: environment.outputDir.path)).toString()}':
-          md5.convert(await file.readAsBytes()).toString(),
-    };
+
+    final Map<String, String> urlToHash = <String, String>{};
+    for (final File file in contents) {
+      // Do not force caching of source maps.
+      if (file.path.endsWith('main.dart.js.map')) {
+        continue;
+      }
+      final String url = globals.fs.path.toUri(
+        globals.fs.path.relative(
+          file.path,
+          from: environment.outputDir.path),
+        ).toString();
+      final String hash = md5.convert(await file.readAsBytes()).toString();
+      urlToHash[url] = hash;
+      // Add an additional entry for the base URL.
+      if (globals.fs.path.basename(url) == 'index.html') {
+        urlToHash['/'] = hash;
+      }
+    }
+
     final File serviceWorkerFile = environment.outputDir
       .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
-    final String serviceWorker = generateServiceWorker(uriToHash);
+    final String serviceWorker = generateServiceWorker(urlToHash);
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
     final DepfileService depfileService = DepfileService(

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1352,7 +1351,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1368,7 +1367,34 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
 
-  bool _lastInteractionWasTouch = true;
+  bool get _lastInteractionWasTouch {
+    // Assume that if we're on one of these mobile platforms, or if there's no
+    // mouse connected, that the initial interaction will be touch-based, and
+    // that it's traditional mouse and keyboard on all others.
+    //
+    // This only affects the initial value: the ongoing value is updated to a
+    // known correct value as soon as any pointer events are received.
+    if (_lastInteractionWasTouchValue == null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+          _lastInteractionWasTouchValue = !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          _lastInteractionWasTouchValue = false;
+          break;
+      }
+    }
+    return _lastInteractionWasTouchValue;
+  }
+  bool _lastInteractionWasTouchValue;
+  set _lastInteractionWasTouch(bool value) {
+    _lastInteractionWasTouchValue = value;
+  }
+
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1418,13 +1444,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    // Assume that if we're on one of these mobile platforms, or if there's no
-    // mouse connected, that the initial interaction will be touch-based, and
-    // that it's traditional mouse and keyboard on all others.
-    //
-    // This only affects the initial value: the ongoing value is updated as soon
-    // as any input events are received.
-    _lastInteractionWasTouch ??= Platform.isAndroid || Platform.isIOS || !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
@@ -1469,18 +1488,23 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
           listener(_highlightMode);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<FocusManager>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: collector,
         ));
       }
     }

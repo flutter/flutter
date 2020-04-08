@@ -212,6 +212,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
+    TextRange promptRectRange,
+    Color promptRectColor,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -272,10 +274,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
        _readOnly = readOnly,
-       _forceLine = forceLine {
+       _forceLine = forceLine,
+       _promptRectRange = promptRectRange {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     this.hasFocus = hasFocus ?? false;
+    if (promptRectColor != null)
+      _promptRectPaint.color = promptRectColor;
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -473,6 +478,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // string using Unicode scalar values, rather than using the number of
   // extended grapheme clusters (a.k.a. "characters" in the end user's mind).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
+    if(kIsWeb) {
+      // On web platform, we should ignore the key because it's processed already.
+      return;
+    }
+
     if (keyEvent is! RawKeyDownEvent || onSelectionChanged == null)
       return;
     final Set<LogicalKeyboardKey> keysPressed = LogicalKeyboardKey.collapseSynonyms(RawKeyboard.instance.keysPressed);
@@ -492,7 +502,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final bool isLineModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isAltPressed;
     final bool isShortcutModifierPressed = isMacOS ? keyEvent.isMetaPressed : keyEvent.isControlPressed;
     if (_movementKeys.contains(key)) {
-        _handleMovement(key, wordModifier: isWordModifierPressed, lineModifier: isLineModifierPressed, shift: keyEvent.isShiftPressed);
+      _handleMovement(key, wordModifier: isWordModifierPressed, lineModifier: isLineModifierPressed, shift: keyEvent.isShiftPressed);
     } else if (isShortcutModifierPressed && _shortcutKeys.contains(key)) {
       // _handleShortcuts depends on being started in the same stack invocation
       // as the _handleKeyEvent method
@@ -1149,6 +1159,40 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// {@endtemplate}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
+  }
+
+  /// The color used to paint the prompt rectangle.
+  ///
+  /// The prompt rectangle will only be requested on non-web iOS applications.
+  Color get promptRectColor => _promptRectPaint.color;
+  set promptRectColor(Color newValue) {
+    // Painter.color can not be null.
+    if (newValue == null) {
+      setPromptRectRange(null);
+      return;
+    }
+
+    if (promptRectColor == newValue)
+      return;
+
+    _promptRectPaint.color = newValue;
+    if (_promptRectRange != null)
+      markNeedsPaint();
+  }
+
+  TextRange _promptRectRange;
+  /// Dismisses the currently displayed prompt rectangle and displays a new prompt rectangle
+  /// over [newRange] in the given color [promptRectColor].
+  ///
+  /// The prompt rectangle will only be requested on non-web iOS applications.
+  ///
+  /// When set to null, the currently displayed prompt rectangle (if any) will be dismissed.
+  void setPromptRectRange(TextRange newRange) {
+    if (_promptRectRange == newRange)
+      return;
+
+    _promptRectRange = newRange;
+    markNeedsPaint();
   }
 
   /// The maximum amount the text is allowed to scroll.
@@ -1955,6 +1999,24 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
+  final Paint _promptRectPaint = Paint();
+  void _paintPromptRectIfNeeded(Canvas canvas, Offset effectiveOffset) {
+    if (_promptRectRange == null || promptRectColor == null) {
+      return;
+    }
+
+    final List<TextBox> boxes = _textPainter.getBoxesForSelection(
+      TextSelection(
+        baseOffset: _promptRectRange.start,
+        extentOffset: _promptRectRange.end,
+      ),
+    );
+
+    for (final TextBox box in boxes) {
+      canvas.drawRect(box.toRect().shift(effectiveOffset), _promptRectPaint);
+    }
+  }
+
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastMaxWidth == constraints.maxWidth &&
            _textLayoutLastMinWidth == constraints.minWidth,
@@ -1976,6 +2038,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       _selectionRects ??= _textPainter.getBoxesForSelection(_selection, boxHeightStyle: _selectionHeightStyle, boxWidthStyle: _selectionWidthStyle);
       _paintSelection(context.canvas, effectiveOffset);
     }
+
+    _paintPromptRectIfNeeded(context.canvas, effectiveOffset);
 
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.

@@ -298,7 +298,7 @@ void main() {
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.

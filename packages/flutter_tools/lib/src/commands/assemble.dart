@@ -104,7 +104,7 @@ class AssembleCommand extends FlutterCommand {
         CustomDimensions.commandBuildBundleTargetPlatform: localEnvironment.defines['TargetPlatform'],
         CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}',
       };
-    } catch (err) {
+    } on Exception {
       // We've failed to send usage.
     }
     return const <CustomDimensions, String>{};
@@ -151,6 +151,10 @@ class AssembleCommand extends FlutterCommand {
       defines: _parseDefines(stringsArg('define')),
       cacheDir: globals.cache.getRoot(),
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      artifacts: globals.artifacts,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     );
     return result;
   }
@@ -177,7 +181,7 @@ class AssembleCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = this.targets;
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
-    final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
+    final BuildResult result = await globals.buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults.wasParsed('resource-pool-size')
         ? int.tryParse(stringArg('resource-pool-size'))
         : null,

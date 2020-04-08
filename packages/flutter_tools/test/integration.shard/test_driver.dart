@@ -105,7 +105,8 @@ abstract class FlutterTestDriver {
         .followedBy(arguments)
         .toList(),
       workingDirectory: _projectFolder.path,
-      environment: <String, String>{'FLUTTER_TEST': 'true'},
+      // The web environment variable has the same effect as `flutter config --enable-web`.
+      environment: <String, String>{'FLUTTER_TEST': 'true', 'FLUTTER_WEB': 'true'},
     );
 
     // This class doesn't use the result of the future. It's made available
@@ -114,8 +115,8 @@ abstract class FlutterTestDriver {
       _debugPrint('Process exited ($code)');
       _hasExited = true;
     }));
-    transformToLines(_process.stdout).listen((String line) => _stdout.add(line));
-    transformToLines(_process.stderr).listen((String line) => _stderr.add(line));
+    transformToLines(_process.stdout).listen(_stdout.add);
+    transformToLines(_process.stderr).listen(_stderr.add);
 
     // Capture stderr to a buffer so we can show it all if any requests fail.
     _stderr.stream.listen(_errorBuffer.writeln);
@@ -194,7 +195,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId()) as Isolate;
+    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
   }
 
@@ -244,7 +245,7 @@ abstract class FlutterTestDriver {
         // But also check if the isolate was already paused (only after we've set
         // up the subscription) to avoid races. If it was paused, we don't need to wait
         // for the event.
-        final Isolate isolate = await _vmService.getIsolate(flutterIsolate) as Isolate;
+        final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
         if (isolate.pauseEvent.kind.startsWith('Pause')) {
           _debugPrint('Isolate was already paused (${isolate.pauseEvent.kind}).');
         } else {
@@ -433,20 +434,27 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool chrome = false,
     File pidFile,
+    String script,
   }) async {
     await _setupProcess(
       <String>[
         'run',
-        '--disable-service-auth-codes',
+        if (!chrome)
+          '--disable-service-auth-codes',
         '--machine',
         '-d',
-        'flutter-tester',
+        if (chrome)
+          ...<String>['chrome', '--web-run-headless']
+        else
+          'flutter-tester',
       ],
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
+      script: script,
     );
   }
 
@@ -528,7 +536,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // have already completed.
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(error, stackTrace);
       }
     }());
@@ -732,7 +740,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   Map<String, dynamic> _parseJsonResponse(String line) {
     try {
       return castStringKeyedMap(json.decode(line));
-    } catch (e) {
+    } on Exception {
       // Not valid JSON, so likely some other output.
       return null;
     }
@@ -771,7 +779,7 @@ Map<String, dynamic> parseFlutterResponse(String line) {
     try {
       final Map<String, dynamic> response = castStringKeyedMap(json.decode(line)[0]);
       return response;
-    } catch (e) {
+    } on Exception {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]
       return null;
     }

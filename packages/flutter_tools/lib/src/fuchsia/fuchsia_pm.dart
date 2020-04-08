@@ -107,14 +107,14 @@ class FuchsiaPM {
   /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
-    if (fuchsiaArtifacts.pm == null) {
+    if (globals.fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
     if (isIPv6Address(host.split('%').first)) {
       host = '[${host.replaceAll('%', '%25')}]';
     }
     final List<String> command = <String>[
-      fuchsiaArtifacts.pm.path,
+      globals.fuchsiaArtifacts.pm.path,
       'serve',
       '-repo',
       repoPath,
@@ -151,10 +151,10 @@ class FuchsiaPM {
   }
 
   Future<bool> _runPMCommand(List<String> args) async {
-    if (fuchsiaArtifacts.pm == null) {
+    if (globals.fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
+    final List<String> command = <String>[globals.fuchsiaArtifacts.pm.path, ...args];
     final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }

@@ -25,7 +25,7 @@ const bool kIconTreeShakerEnabledDefault = false;
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on CastError catch (_) {
+  } on TypeError catch (_) {
     throw IconTreeShakerException._(errorMessage);
   }
 }
@@ -188,7 +188,7 @@ class IconTreeShaker {
       await fontSubsetProcess.stdin.close();
     } on Exception catch (_) {
       // handled by checking the exit code.
-    } on OSError catch (_) {
+    } on OSError catch (_) {  // ignore: dead_code_on_catch_subtype
       // handled by checking the exit code.
     }
 
@@ -289,7 +289,7 @@ class IconTreeShaker {
     for (final Map<String, dynamic> iconDataMap in consts.constantInstances) {
       if ((iconDataMap['fontPackage'] ?? '') is! String || // Null is ok here.
            iconDataMap['fontFamily'] is! String ||
-           iconDataMap['codePoint'] is! int) {
+           iconDataMap['codePoint'] is! num) {
         throw IconTreeShakerException._(
           'Invalid ConstFinder result. Expected "fontPackage" to be a String, '
           '"fontFamily" to be a String, and "codePoint" to be an int, '
@@ -301,7 +301,7 @@ class IconTreeShaker {
         ? family
         : 'packages/$package/$family';
       result[key] ??= <int>[];
-      result[key].add(iconDataMap['codePoint'] as int);
+      result[key].add((iconDataMap['codePoint'] as num).round());
     }
     return result;
   }
