@@ -40,6 +40,7 @@ class KeyEventSimulator {
       case 'macos':
       case 'linux':
       case 'web':
+      case 'windows':
         return true;
     }
     return false;
@@ -61,6 +62,9 @@ class KeyEventSimulator {
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
+        break;
+      case 'windows':
+        map = kWindowsToPhysicalKey;
         break;
       case 'web':
       // web doesn't have int type code
@@ -94,6 +98,9 @@ class KeyEventSimulator {
         return null;
       case 'linux':
         map = kGlfwToLogicalKey;
+        break;
+      case 'windows':
+        map = kWindowsToLogicalKey;
         break;
     }
     for (final int code in map.keys) {
@@ -131,6 +138,9 @@ class KeyEventSimulator {
         break;
       case 'web':
         map = kWebToPhysicalKey;
+        break;
+      case 'windows':
+        map = kWindowsToPhysicalKey;
         break;
     }
     for (final PhysicalKeyboardKey physicalKey in map.values) {
@@ -195,6 +205,12 @@ class KeyEventSimulator {
         result['code'] = _getWebKeyCode(key);
         result['key'] = '';
         result['metaState'] = _getWebModifierFlags(key, isDown);
+        break;
+      case 'windows':
+        result['keyCode'] = keyCode;
+        result['scanCode'] = scanCode;
+        result['characterCodePoint'] = key.keyLabel?.codeUnitAt(0) ?? 0;
+        result['modifiers'] = _getWindowsModifierFlags(key, isDown);
     }
     return result;
   }
@@ -268,6 +284,59 @@ class KeyEventSimulator {
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
       result |= GLFWKeyHelper.modifierCapsLock;
+    }
+    return result;
+  }
+
+  static int _getWindowsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+    int result = 0;
+    final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+    if (isDown) {
+      pressed.add(newKey);
+    } else {
+      pressed.remove(newKey);
+    }
+    if (pressed.contains(LogicalKeyboardKey.shift)) {
+      result |= RawKeyEventDataWindows.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+      result |= RawKeyEventDataWindows.modifierRightShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+      result |= RawKeyEventDataWindows.modifierRightMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.control)) {
+      result |= RawKeyEventDataWindows.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+      result |= RawKeyEventDataWindows.modifierRightControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.alt)) {
+      result |= RawKeyEventDataWindows.modifierAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altRight)) {
+      result |= RawKeyEventDataWindows.modifierRightAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+      result |= RawKeyEventDataWindows.modifierCaps;
+    }
+    if (pressed.contains(LogicalKeyboardKey.numLock)) {
+      result |= RawKeyEventDataWindows.modifierNumLock;
+    }
+    if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
+      result |= RawKeyEventDataWindows.modifierScrollLock;
     }
     return result;
   }

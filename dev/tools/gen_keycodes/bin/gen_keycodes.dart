@@ -18,8 +18,8 @@ import 'package:gen_keycodes/utils.dart';
 /// Get contents of the file that contains the key code mapping in Chromium
 /// source.
 Future<String> getChromiumConversions() async {
-  final Uri keyCodeMapUri = Uri.parse('https://cs.chromium.org/codesearch/f/chromium/src/ui/events/keycodes/dom/dom_code_data.inc');
-  return await http.read(keyCodeMapUri);
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
+  return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the key codes in Android source.

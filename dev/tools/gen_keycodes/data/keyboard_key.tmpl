@@ -19,7 +19,7 @@ import 'package:flutter/foundation.dart';
 ///    that are returned from [RawKeyEvent.physicalKey].
 ///  * [LogicalKeyboardKey], a class with static values that describe the keys
 ///    that are returned from [RawKeyEvent.logicalKey].
-abstract class KeyboardKey extends Diagnosticable {
+abstract class KeyboardKey with Diagnosticable {
   /// A const constructor so that subclasses may be const.
   const KeyboardKey();
 }
