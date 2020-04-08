@@ -10,12 +10,7 @@ import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/discovery.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages.dart';
+import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 
@@ -31,6 +26,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
@@ -142,15 +138,21 @@ class WebAssetServer implements AssetReader {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-      // ignore: deprecated_member_use
-      final Packages packages = await loadPackagesFile(
-        Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
+      final PackageConfig packageConfig = await loadPackageConfigUri(
+        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+        loader: (Uri uri) {
+          final File file = globals.fs.file(uri);
+          if (!file.existsSync()) {
+            return null;
+          }
+          return file.readAsBytes();
+        }
+      );
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};
       final WebAssetServer server = WebAssetServer(
         httpServer,
-        packages,
+        packageConfig,
         address,
         modules,
         digests,
@@ -248,9 +250,7 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
-  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-  // ignore: deprecated_member_use
-  final Packages _packages;
+  final PackageConfig _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
   Directory entrypointCacheDirectory;
