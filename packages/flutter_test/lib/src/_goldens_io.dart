@@ -258,9 +258,9 @@ ByteData invert(ByteData imageBytes) {
   final ByteData bytes = ByteData(imageBytes.lengthInBytes);
   // Invert the RGB data (but not A).
   for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
-    bytes.setUint8(i, 255 - bytes.getUint8(i));
-    bytes.setUint8(i + 1, 255 - bytes.getUint8(i + 1));
-    bytes.setUint8(i + 2, 255 - bytes.getUint8(i + 2));
+    bytes.setUint8(i, 255 - imageBytes.getUint8(i));
+    bytes.setUint8(i + 1, 255 - imageBytes.getUint8(i + 1));
+    bytes.setUint8(i + 2, 255 - imageBytes.getUint8(i + 2));
   }
   return bytes;
 }
