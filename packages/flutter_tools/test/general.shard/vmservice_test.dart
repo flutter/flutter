@@ -3,362 +3,218 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
 
-class MockPeer implements rpc.Peer {
+final Map<String, Object> vm = <String, dynamic>{
+  'type': 'VM',
+  'name': 'vm',
+  'architectureBits': 64,
+  'targetCPU': 'x64',
+  'hostCPU': '      Intel(R) Xeon(R) CPU    E5-1650 v2 @ 3.50GHz',
+  'version': '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
+  '_profilerMode': 'Dart',
+  '_nativeZoneMemoryUsage': 0,
+  'pid': 103707,
+  'startTime': 1540426121876,
+  '_embedder': 'Flutter',
+  '_maxRSS': 312614912,
+  '_currentRSS': 33091584,
+  'isolates': <dynamic>[
+    <String, dynamic>{
+      'type': '@Isolate',
+      'fixedId': true,
+      'id': 'isolates/242098474',
+      'name': 'main.dart:main()',
+      'number': 242098474,
+    },
+  ],
+};
 
-  Function _versionFn = (dynamic _) => null;
-
-  @override
-  rpc.ErrorCallback get onUnhandledError => null;
-
-  @override
-  Future<dynamic> get done async {
-    throw 'unexpected call to done';
+final vm_service.Isolate isolate = vm_service.Isolate.parse(
+  <String, dynamic>{
+    'type': 'Isolate',
+    'fixedId': true,
+    'id': 'isolates/242098474',
+    'name': 'main.dart:main()',
+    'number': 242098474,
+    '_originNumber': 242098474,
+    'startTime': 1540488745340,
+    '_heaps': <String, dynamic>{
+      'new': <String, dynamic>{
+        'used': 0,
+        'capacity': 0,
+        'external': 0,
+        'collections': 0,
+        'time': 0.0,
+        'avgCollectionPeriodMillis': 0.0,
+      },
+      'old': <String, dynamic>{
+        'used': 0,
+        'capacity': 0,
+        'external': 0,
+        'collections': 0,
+        'time': 0.0,
+        'avgCollectionPeriodMillis': 0.0,
+      },
+    },
   }
+);
 
-  @override
-  bool get isClosed => _isClosed;
-
-  @override
-  Future<dynamic> close() async {
-    _isClosed = true;
-  }
-
-  @override
-  Future<dynamic> listen() async {
-    // this does get called
-  }
-
-  @override
-  void registerFallback(dynamic callback(rpc.Parameters parameters)) {
-    throw 'unexpected call to registerFallback';
-  }
-
-  @override
-  void registerMethod(String name, Function callback) {
-    registeredMethods.add(name);
-    if (name == 'flutterVersion') {
-      _versionFn = callback;
-    }
-  }
-
-  @override
-  void sendNotification(String method, [ dynamic parameters ]) {
-    // this does get called
-    sentNotifications.putIfAbsent(method, () => <dynamic>[]).add(parameters);
-  }
-
-  Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
-  List<String> registeredMethods = <String>[];
-
-  bool isolatesEnabled = false;
-  bool _isClosed = false;
-
-  Future<void> _getVMLatch;
-  Completer<void> _currentGetVMLatchCompleter;
-
-  void tripGetVMLatch() {
-    final Completer<void> lastCompleter = _currentGetVMLatchCompleter;
-    _currentGetVMLatchCompleter = Completer<void>();
-    _getVMLatch = _currentGetVMLatchCompleter.future;
-    lastCompleter?.complete();
-  }
-
-  int returnedFromSendRequest = 0;
-
-  @override
-  Future<dynamic> sendRequest(String method, [ dynamic parameters ]) async {
-    if (method == 'getVM') {
-      await _getVMLatch;
-    }
-    await Future<void>.delayed(Duration.zero);
-    returnedFromSendRequest += 1;
-    if (method == 'getVM') {
-      return <String, dynamic>{
-        'type': 'VM',
-        'name': 'vm',
-        'architectureBits': 64,
-        'targetCPU': 'x64',
-        'hostCPU': '      Intel(R) Xeon(R) CPU    E5-1650 v2 @ 3.50GHz',
-        'version': '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
-        '_profilerMode': 'Dart',
-        '_nativeZoneMemoryUsage': 0,
-        'pid': 103707,
-        'startTime': 1540426121876,
-        '_embedder': 'Flutter',
-        '_maxRSS': 312614912,
-        '_currentRSS': 33091584,
-        'isolates': isolatesEnabled ? <dynamic>[
-          <String, dynamic>{
-            'type': '@Isolate',
-            'fixedId': true,
-            'id': 'isolates/242098474',
-            'name': 'main.dart:main()',
-            'number': 242098474,
-          },
-        ] : <dynamic>[],
-      };
-    }
-    if (method == 'getIsolate') {
-      return <String, dynamic>{
-        'type': 'Isolate',
+final Map<String, Object> listViews = <String, dynamic>{
+  'type': 'FlutterViewList',
+  'views': <dynamic>[
+    <String, dynamic>{
+      'type': 'FlutterView',
+      'id': '_flutterView/0x4a4c1f8',
+      'isolate': <String, dynamic>{
+        'type': '@Isolate',
         'fixedId': true,
         'id': 'isolates/242098474',
         'name': 'main.dart:main()',
         'number': 242098474,
-        '_originNumber': 242098474,
-        'startTime': 1540488745340,
-        '_heaps': <String, dynamic>{
-          'new': <String, dynamic>{
-            'used': 0,
-            'capacity': 0,
-            'external': 0,
-            'collections': 0,
-            'time': 0.0,
-            'avgCollectionPeriodMillis': 0.0,
-          },
-          'old': <String, dynamic>{
-            'used': 0,
-            'capacity': 0,
-            'external': 0,
-            'collections': 0,
-            'time': 0.0,
-            'avgCollectionPeriodMillis': 0.0,
-          },
-        },
-      };
-    }
-    if (method == '_flutter.listViews') {
-      return <String, dynamic>{
-        'type': 'FlutterViewList',
-        'views': isolatesEnabled ? <dynamic>[
-          <String, dynamic>{
-            'type': 'FlutterView',
-            'id': '_flutterView/0x4a4c1f8',
-            'isolate': <String, dynamic>{
-              'type': '@Isolate',
-              'fixedId': true,
-              'id': 'isolates/242098474',
-              'name': 'main.dart:main()',
-              'number': 242098474,
-            },
-          },
-        ] : <dynamic>[],
-      };
-    }
-    if (method == 'flutterVersion') {
-      return _versionFn(parameters);
-    }
-    return null;
-  }
+      },
+    },
+  ]
+};
 
-  @override
-  dynamic withBatch(dynamic callback()) {
-    throw 'unexpected call to withBatch';
-  }
-}
+typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
-  MockStdio mockStdio;
-  final MockFlutterVersion mockVersion = MockFlutterVersion();
-  group('VMService', () {
+  testUsingContext('VMService can refreshViews', () async {
+    final MockVMService mockVmService = MockVMService();
+    final VMService vmService = VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockVmService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
-    setUp(() {
-      mockStdio = MockStdio();
+    verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
+
+    when(mockVmService.callServiceExtension('getVM',
+      args: anyNamed('args'), // Empty
+      isolateId: null
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(vm);
     });
+    await vmService.getVMOld();
 
-    testUsingContext('fails connection eagerly in the connect() method', () async {
-      FakeAsync().run((FakeAsync time) {
-        bool failed = false;
-        final Future<VMService> future = VMService.connect(Uri.parse('http://host.invalid:9999/'));
-        future.whenComplete(() {
-          failed = true;
-        });
-        time.elapse(const Duration(seconds: 5));
-        expect(failed, isFalse);
-        expect(mockStdio.writtenToStdout.join(''), '');
-        expect(mockStdio.writtenToStderr.join(''), '');
-        time.elapse(const Duration(seconds: 5));
-        expect(failed, isFalse);
-        expect(mockStdio.writtenToStdout.join(''), 'This is taking longer than expected...\n');
-        expect(mockStdio.writtenToStderr.join(''), '');
-      });
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(
-        outputPreferences: OutputPreferences.test(),
-        stdio: mockStdio,
-        terminal: AnsiTerminal(
-          stdio: mockStdio,
-          platform: const LocalPlatform(),
-        ),
-        timeoutConfiguration: const TimeoutConfiguration(),
-      ),
-      WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
+
+    when(mockVmService.callServiceExtension('_flutter.listViews',
+      args: anyNamed('args'),
+      isolateId: anyNamed('isolateId')
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(listViews);
     });
+    await vmService.refreshViews(waitForViews: true);
 
-    testUsingContext('closing VMService closes Peer', () async {
-      final MockPeer mockPeer = MockPeer();
-      final VMService vmService = VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
-      expect(mockPeer.isClosed, equals(false));
-      await vmService.close();
-      expect(mockPeer.isClosed, equals(true));
-    });
+    expect(vmService.vm.name, 'vm');
+    expect(vmService.vm.views.single.id, '_flutterView/0x4a4c1f8');
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
 
-    testUsingContext('refreshViews', () {
-      FakeAsync().run((FakeAsync time) {
-        bool done = false;
-        final MockPeer mockPeer = MockPeer();
-        expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null, null);
-        expect(mockPeer.sentNotifications, contains('registerService'));
-        final List<String> registeredServices =
-          mockPeer.sentNotifications['registerService']
-            .map((dynamic service) => (service as Map<String, String>)['service'])
-            .toList();
-        expect(registeredServices, contains('flutterVersion'));
-        vmService.getVM().then((void value) { done = true; });
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 0);
-        time.elapse(Duration.zero);
-        expect(done, isTrue);
-        expect(mockPeer.returnedFromSendRequest, 1);
+  testUsingContext('VmService registers reloadSources', () {
+    Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+    final MockVMService mockVMService = MockVMService();
+    VMService(
+      null,
+      null,
+      reloadSources,
+      null,
+      null,
+      null,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
-        done = false;
-        mockPeer.tripGetVMLatch(); // this blocks the upcoming getVM call
-        final Future<void> ready = vmService.refreshViews(waitForViews: true);
-        ready.then((void value) { done = true; });
-        expect(mockPeer.returnedFromSendRequest, 1);
-        time.elapse(Duration.zero); // this unblocks the listViews call which returns nothing
-        expect(mockPeer.returnedFromSendRequest, 2);
-        time.elapse(const Duration(milliseconds: 50)); // the last listViews had no views, so it waits 50ms, then calls getVM
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 2);
-        mockPeer.tripGetVMLatch(); // this unblocks the getVM call
-        expect(mockPeer.returnedFromSendRequest, 2);
-        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
-        expect(mockPeer.returnedFromSendRequest, 4);
-        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 4);
-        mockPeer.tripGetVMLatch(); // this unblocks the getVM call
-        expect(mockPeer.returnedFromSendRequest, 4);
-        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
-        expect(mockPeer.returnedFromSendRequest, 6);
-        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 6);
-        mockPeer.tripGetVMLatch(); // this unblocks the getVM call
-        expect(mockPeer.returnedFromSendRequest, 6);
-        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
-        expect(mockPeer.returnedFromSendRequest, 8);
-        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 8);
-        mockPeer.tripGetVMLatch(); // this unblocks the getVM call
-        expect(mockPeer.returnedFromSendRequest, 8);
-        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
-        expect(mockPeer.returnedFromSendRequest, 10);
-        const String message = 'Flutter is taking longer than expected to report its views. Still trying...\n';
-        expect(mockStdio.writtenToStdout.join(''), message);
-        expect(mockStdio.writtenToStderr.join(''), '');
-        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
-        expect(done, isFalse);
-        expect(mockPeer.returnedFromSendRequest, 10);
-        mockPeer.isolatesEnabled = true;
-        mockPeer.tripGetVMLatch(); // this unblocks the getVM call
-        expect(mockPeer.returnedFromSendRequest, 10);
-        time.elapse(Duration.zero); // now it returns an isolate and the listViews call returns views
-        expect(mockPeer.returnedFromSendRequest, 13);
-        expect(done, isTrue);
-        expect(mockStdio.writtenToStdout.join(''), message);
-        expect(mockStdio.writtenToStderr.join(''), '');
-      });
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(
-        outputPreferences: globals.outputPreferences,
-        terminal: AnsiTerminal(
-          stdio: mockStdio,
-          platform: const LocalPlatform(),
-        ),
-        stdio: mockStdio,
-        timeoutConfiguration: const TimeoutConfiguration(),
-      ),
-    });
+    verify(mockVMService.registerService('reloadSources', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
 
-    testUsingContext('registers hot UI method', () {
-      FakeAsync().run((FakeAsync time) {
-        final MockPeer mockPeer = MockPeer();
-        Future<void> reloadMethod({ String classId, String libraryId }) async {}
-        VMService(mockPeer, null, null, null, null, null, null, reloadMethod);
+  testUsingContext('VmService registers reloadMethod', () {
+    Future<void> reloadMethod({  String classId, String libraryId,}) async {}
+    final MockVMService mockVMService = MockVMService();
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      reloadMethod,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
-        expect(mockPeer.registeredMethods, contains('reloadMethod'));
-      });
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(
-        outputPreferences: globals.outputPreferences,
-        terminal: AnsiTerminal(
-          stdio: mockStdio,
-          platform: const LocalPlatform(),
-        ),
-        stdio: mockStdio,
-        timeoutConfiguration: const TimeoutConfiguration(),
-      ),
-    });
+    verify(mockVMService.registerService('reloadMethod', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
 
-    testUsingContext('registers flutterMemoryInfo service', () {
-      FakeAsync().run((FakeAsync time) {
-        final MockDevice mockDevice = MockDevice();
-        final MockPeer mockPeer = MockPeer();
-        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
-        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice, null);
+  testUsingContext('VmService registers flutterMemoryInfo service', () {
+    final MockDevice mockDevice = MockDevice();
+    final MockVMService mockVMService = MockVMService();
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockDevice,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
-        expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
-      });
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(
-        outputPreferences: globals.outputPreferences,
-        terminal: AnsiTerminal(
-          stdio: mockStdio,
-          platform: const LocalPlatform(),
-        ),
-        stdio: mockStdio,
-        timeoutConfiguration: const TimeoutConfiguration(),
-      ),
-    });
+    verify(mockVMService.registerService('flutterMemoryInfo', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
 
-    testUsingContext('returns correct FlutterVersion', () {
-      FakeAsync().run((FakeAsync time) async {
-        final MockPeer mockPeer = MockPeer();
-        VMService(mockPeer, null, null, null, null, null, MockDevice(), null);
+  testUsingContext('VMService returns correct FlutterVersion', () async {
+    final MockVMService mockVMService = MockVMService();
+    VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockVMService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
 
-        expect(mockPeer.registeredMethods, contains('flutterVersion'));
-        expect(await mockPeer.sendRequest('flutterVersion'), equals(mockVersion.toJson()));
-      });
-    }, overrides: <Type, Generator>{
-      FlutterVersion: () => mockVersion,
-    });
+    verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
+  }, overrides: <Type, Generator>{
+    FlutterVersion: () => MockFlutterVersion(),
   });
 }
 
 class MockDevice extends Mock implements Device {}
-
+class MockVMService extends Mock implements vm_service.VmService {}
 class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
   Map<String, Object> toJson() => const <String, Object>{'Mock': 'Version'};
