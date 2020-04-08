@@ -843,6 +843,19 @@ void main() {
           break;
       }
     }, variant: TargetPlatformVariant.all());
+    testWidgets('Mouse events change initial focus highlight mode.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(Offset.zero);
+      await gesture.moveBy(const Offset(10, 10));
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.all());
+    testWidgets('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.all());
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
       int callCount = 0;
