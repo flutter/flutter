@@ -50,6 +50,11 @@ Duration timeAction(VoidCallback action) {
 /// A function that performs asynchronous work.
 typedef AsyncVoidCallback = Future<void> Function();
 
+/// An [AsyncVoidCallback] that doesn't do anything.
+///
+/// This is used just so we don't have to deal with null all over the place.
+Future<void> _dummyAsyncVoidCallback() async {}
+
 /// Runs the benchmark using the given [recorder].
 ///
 /// Notifies about "set up" and "tear down" events via the [setUpAllDidRun]
@@ -61,8 +66,8 @@ class Runner {
   /// All arguments must not be null.
   Runner({
     @required this.recorder,
-    @required this.setUpAllDidRun,
-    @required this.tearDownAllWillRun,
+    this.setUpAllDidRun = _dummyAsyncVoidCallback,
+    this.tearDownAllWillRun = _dummyAsyncVoidCallback,
   });
 
   /// The recorder that will run and record the benchmark.
@@ -95,7 +100,11 @@ class Runner {
 ///
 /// Each benchmark recorder has a [name] and a [run] method at a minimum.
 abstract class Recorder {
-  Recorder._(this.name);
+  Recorder._(this.name, this.isTracingEnabled);
+
+  /// Whether this recorder requires tracing using Chrome's DevTools Protocol's
+  /// "Tracing" API.
+  final bool isTracingEnabled;
 
   /// The name of the benchmark.
   ///
@@ -143,7 +152,7 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({@required String name}) : super._(name);
+  RawRecorder({@required String name}) : super._(name, false);
 
   /// The body of the benchmark.
   ///
@@ -188,7 +197,7 @@ abstract class RawRecorder extends Recorder {
 /// }
 /// ```
 abstract class SceneBuilderRecorder extends Recorder {
-  SceneBuilderRecorder({@required String name}) : super._(name);
+  SceneBuilderRecorder({@required String name}) : super._(name, true);
 
   /// Called from [Window.onBeginFrame].
   @mustCallSuper
@@ -306,7 +315,7 @@ abstract class SceneBuilderRecorder extends Recorder {
 /// }
 /// ```
 abstract class WidgetRecorder extends Recorder implements FrameRecorder {
-  WidgetRecorder({@required String name}) : super._(name);
+  WidgetRecorder({@required String name}) : super._(name, true);
 
   /// Creates a widget to be benchmarked.
   ///
@@ -377,7 +386,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
 /// performance of frames that render the widget and ignoring the frames that
 /// clear the screen.
 abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
-  WidgetBuildRecorder({@required String name}) : super._(name);
+  WidgetBuildRecorder({@required String name}) : super._(name, true);
 
   /// Creates a widget to be benchmarked.
   ///
