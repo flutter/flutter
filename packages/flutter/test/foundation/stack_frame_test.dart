@@ -68,7 +68,9 @@ void main() {
       expect(frames.contains(StackFrame.stackOverFlowElision), true);
     }
     expect(overflowed, true);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // The VM test harness can handle a stack overflow, but
+  // the browser cannot - running this test in a browser will cause it to become
+  // unresponsive.
 }
 
 const String stackString = '''
