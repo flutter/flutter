@@ -9,7 +9,7 @@
 // Longer term there should be simpler configuration options for common
 // customizations like this, without requiring native code changes.
 
-extern const wchar_t *kFlutterWindowTitle;
+extern const wchar_t* kFlutterWindowTitle;
 extern const unsigned int kFlutterWindowOriginX;
 extern const unsigned int kFlutterWindowOriginY;
 extern const unsigned int kFlutterWindowWidth;

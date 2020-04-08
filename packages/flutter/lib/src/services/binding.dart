@@ -48,13 +48,32 @@ mixin ServicesBinding on BindingBase {
     return const _DefaultBinaryMessenger._();
   }
 
+
+  /// Called when the operating system notifies the application of a memory
+  /// pressure situation.
+  ///
+  /// This method exposes the `memoryPressure` notification from
+  /// [SystemChannels.system].
+  @protected
+  @mustCallSuper
+  void handleMemoryPressure() { }
+
   /// Handler called for messages received on the [SystemChannels.system]
   /// message channel.
   ///
   /// Other bindings may override this to respond to incoming system messages.
   @protected
   @mustCallSuper
-  Future<void> handleSystemMessage(Object systemMessage) async { }
+  Future<void> handleSystemMessage(Object systemMessage) async {
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
+    switch (type) {
+      case 'memoryPressure':
+        handleMemoryPressure();
+        break;
+    }
+    return;
+  }
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///

@@ -530,6 +530,7 @@ class ImageCache {
 ///
 /// To obtain an [ImageCacheStatus], use [ImageCache.statusForKey] or
 /// [ImageProvider.obtainCacheStatus].
+@immutable
 class ImageCacheStatus {
   const ImageCacheStatus._({
     this.pending = false,

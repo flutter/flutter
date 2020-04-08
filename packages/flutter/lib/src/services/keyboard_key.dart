@@ -121,6 +121,7 @@ abstract class KeyboardKey with Diagnosticable {
 ///    to keyboard events.
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
+@immutable
 class LogicalKeyboardKey extends KeyboardKey {
   /// Creates a LogicalKeyboardKey object with an optional key label and debug
   /// name.
@@ -2043,6 +2044,7 @@ class LogicalKeyboardKey extends KeyboardKey {
 ///    to keyboard events.
 ///  * [RawKeyboardListener], a widget used to listen to and supply handlers for
 ///    keyboard events.
+@immutable
 class PhysicalKeyboardKey extends KeyboardKey {
   /// Creates a PhysicalKeyboardKey object with an optional debug name.
   ///

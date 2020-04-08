@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
+@immutable
 class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
   factory Version(int major, int minor, int patch, {String text}) {

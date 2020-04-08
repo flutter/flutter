@@ -5,15 +5,20 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
+import '../build_system/exceptions.dart';
 import '../convert.dart';
+import '../devfs.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../project.dart';
+import '../version.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
@@ -36,16 +41,51 @@ class GitHubTemplateCreator {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
+  /// Restricts exception object strings to contain only information about tool internals.
+  static String sanitizedCrashException(dynamic error) {
+    if (error is ProcessException) {
+      // Suppress args.
+      return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
+    } else if (error is FileSystemException) {
+      // Suppress path.
+      return 'FileSystemException: ${error.message}, ${error.osError}';
+    } else if (error is SocketException) {
+      // Suppress address and port.
+      return 'SocketException: ${error.message}, ${error.osError}';
+    } else if (error is DevFSException) {
+      // Suppress underlying error.
+      return 'DevFSException: ${error.message}';
+    } else if (error is NoSuchMethodError
+      || error is ArgumentError
+      || error is VersionCheckError
+      || error is MissingDefineException
+      || error is UnsupportedError
+      || error is UnimplementedError
+      || error is StateError
+      || error is ProcessExit
+      || error is OSError) {
+      // These exception objects only reference tool internals, print the whole error.
+      return '${error.runtimeType}: $error';
+    } else if (error is Error) {
+      return '${error.runtimeType}: ${LineSplitter.split(error.stackTrace.toString()).take(1)}';
+    } else if (error is String) {
+      // Force comma separator to standardize.
+      return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
+    }
+    // Exception, other.
+    return error.runtimeType.toString();
+  }
+
   /// GitHub URL to present to the user containing encoded suggested template.
   ///
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
       String command,
-      String errorString,
-      String exception,
+      dynamic error,
       StackTrace stackTrace,
       String doctorText
     ) async {
+    final String errorString = sanitizedCrashException(error);
     final String title = '[tool_crash] $errorString';
     final String body = '''
 ## Command
@@ -59,9 +99,9 @@ $command
 3. ...
 
 ## Logs
-$exception
+$errorString
 ```
-${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+${LineSplitter.split(stackTrace.toString()).take(25).join('\n')}
 ```
 ```
 $doctorText

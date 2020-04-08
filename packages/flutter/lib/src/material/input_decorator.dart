@@ -40,6 +40,7 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
@@ -51,6 +52,7 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, this class is not used in collection
   int get hashCode => hashValues(start, extent);
 }
 
@@ -489,6 +491,7 @@ enum _DecorationSlot {
 }
 
 // An analog of InputDecoration for the _Decorator widget.
+@immutable
 class _Decoration {
   const _Decoration({
     @required this.contentPadding,
