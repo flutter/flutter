@@ -63,52 +63,60 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: <Widget>[
-        SizedBox(
-          height: 300.0,
-          child: AndroidView(
-              key: const ValueKey<String>('PlatformView'),
-              viewType: 'simple_view',
-              onPlatformViewCreated: onPlatformViewCreated),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemBuilder: buildEventTile,
-            itemCount: flutterViewEvents.length,
+        children: <Widget>[
+          SizedBox(
+            height: 300.0,
+            child: AndroidView(
+                key: const ValueKey<String>('PlatformView'),
+                viewType: 'simple_view',
+                onPlatformViewCreated: onPlatformViewCreated),
           ),
-        ),
-        Row(
-          children: <Widget>[
-            RaisedButton(
-              child: const Text('RECORD'),
-              onPressed: listenToFlutterViewEvents,
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: buildEventTile,
+              itemCount: flutterViewEvents.length,
             ),
-            RaisedButton(
-              child: const Text('CLEAR'),
-              onPressed: () {
-                setState(() {
-                  flutterViewEvents.clear();
-                  embeddedViewEvents.clear();
-                });
-              },
-            ),
-            RaisedButton(
-              child: const Text('SAVE'),
-              onPressed: () {
-                const StandardMessageCodec codec = StandardMessageCodec();
-                saveRecordedEvents(
-                    codec.encodeMessage(flutterViewEvents), context);
-              },
-            ),
-            RaisedButton(
-              key: const ValueKey<String>('play'),
-              child: const Text('PLAY FILE'),
-              onPressed: () { playEventsFile(); },
-            ),
-          ],
-        ),
-      ],
-    );
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                child: const Text('RECORD'),
+                onPressed: listenToFlutterViewEvents,
+              ),
+              RaisedButton(
+                child: const Text('CLEAR'),
+                onPressed: () {
+                  setState(() {
+                    flutterViewEvents.clear();
+                    embeddedViewEvents.clear();
+                  });
+                },
+              ),
+              RaisedButton(
+                child: const Text('SAVE'),
+                onPressed: () {
+                  const StandardMessageCodec codec = StandardMessageCodec();
+                  saveRecordedEvents(
+                      codec.encodeMessage(flutterViewEvents), context);
+                },
+              ),
+              RaisedButton(
+                key: const ValueKey<String>('play'),
+                child: const Text('PLAY FILE'),
+                onPressed: () { playEventsFile(); },
+              ),
+              Expanded(
+                  child: RaisedButton(
+                  key: const ValueKey<String>('back'),
+                  child: const Text('BACK'),
+                  onPressed: () { Navigator.pop(context); },
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
   }
 
   Future<String> playEventsFile() async {
