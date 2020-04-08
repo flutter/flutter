@@ -131,6 +131,7 @@ class WebAssetServer implements AssetReader {
     String hostname,
     int port,
     UrlTunneller urlTunneller,
+    bool useSseForDebugProxy,
     BuildMode buildMode,
     bool enableDwds,
     Uri entrypoint,
@@ -210,6 +211,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        useSseForDebugProxy: useSseForDebugProxy,
         serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
@@ -550,6 +552,7 @@ class WebDevFS implements DevFS {
     @required this.port,
     @required this.packagesFilePath,
     @required this.urlTunneller,
+    @required this.useSseForDebugProxy,
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
@@ -562,6 +565,7 @@ class WebDevFS implements DevFS {
   final int port;
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
+  final bool useSseForDebugProxy;
   final BuildMode buildMode;
   final bool enableDwds;
   final bool testMode;
@@ -623,6 +627,7 @@ class WebDevFS implements DevFS {
       hostname,
       port,
       urlTunneller,
+      useSseForDebugProxy,
       buildMode,
       enableDwds,
       entrypoint,
