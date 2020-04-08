@@ -1633,6 +1633,9 @@ void main() {
     ));
 
     // precacheImage is needed, or the image in the golden file will be empty.
+    //
+    // TODO(hterkelson): figure out why web timed out with `await precacheImage`.
+    // https://github.com/flutter/flutter/issues/54292.
     if (!kIsWeb) {
       final Finder allImages = find.byType(Image);
       for (final Element e in allImages.evaluate()) {
