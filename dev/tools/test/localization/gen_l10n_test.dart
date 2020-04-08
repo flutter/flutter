@@ -307,13 +307,13 @@ void main() {
         )
         ..loadResources()
         ..generateCode()
-        ..writeUnimplementedMessagesFile();
+        ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
     } on L10nException catch (e) {
       fail('Generating output should not fail: \n${e.message}');
     }
 
     final File unimplementedOutputFile = fs.file(
-      path.join('lib', 'l10n', 'unimplemented_message_translations.txt'),
+      path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
     );
     final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
     try {

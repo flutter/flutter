@@ -770,22 +770,34 @@ class LocalizationsGenerator {
     outputFile.writeAsStringSync(generateCode());
   }
 
-  void writeUnimplementedMessagesFile() {
+  void outputUnimplementedMessages(String untranslatedMessagesFile) {
+    if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
+      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+        stdout.write(
+          '"$locale": ${messages.length} untranslated messages\n\n'
+          'To see a detailed report, use the unimplemented_messages_file \n'
+          'option in the tool to generate a JSON format file containing \n'
+          'all messages that need to be translated.'
+        );
+      });
+    } else {
+      _writeUnimplementedMessagesFile(untranslatedMessagesFile);
+    }
+  }
+
+  void _writeUnimplementedMessagesFile(String untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       return;
     }
 
-    final File unimplementedMessageTranslationsFile = _fs.file(
-      path.join(l10nDirectory.path, 'unimplemented_message_translations.txt'),
-    );
+    final File unimplementedMessageTranslationsFile = _fs.file(untranslatedMessagesFile);
 
     String resultingFile = '{\n';
-
     int count = 0;
     final int numberOfLocales = _unimplementedMessages.length;
     _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
-      resultingFile += '''  "$locale": [
-''';
+      resultingFile += '  "$locale": [\n';
+
       for (int i = 0; i < messages.length; i += 1) {
         resultingFile += '    "${messages[i]}"';
         if (i != messages.length - 1) {
@@ -796,9 +808,9 @@ class LocalizationsGenerator {
 
       resultingFile += '  ]';
       count += 1;
-      if (count < numberOfLocales)
+      if (count < numberOfLocales) {
         resultingFile += ',\n';
-
+      }
       resultingFile += '\n';
     });
 
