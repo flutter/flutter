@@ -329,7 +329,8 @@ String _generateLookupBody(
   final String Function(LocaleInfo) generateSwitchClauseTemplate = (LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
-      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
+      .replaceAll('@(appClass)', className)
       .replaceAll('@(library)', '${fileName}_${locale.languageCode}');
   };
   return lookupBodyTemplate
@@ -370,12 +371,10 @@ String _generateDelegateClass({
   )
     .replaceAll('@(class)', className)
     .replaceAll('@(lookupName)', '_lookup$className');
-  final String lookupFunction = lookupFunctionTemplate
+  final String lookupFunction = (useDeferredLoading ?
+  lookupFunctionDeferredLoadingTemplate : lookupFunctionTemplate)
     .replaceAll('@(class)', className)
     .replaceAll('@(lookupName)', '_lookup$className')
-    .replaceAll('@(return)',
-      useDeferredLoading ? 'Future<$className>' : className
-    )
     .replaceAll('@(lookupBody)', lookupBody);
   return delegateClassTemplate
     .replaceAll('@(class)', className)

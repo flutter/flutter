@@ -214,7 +214,27 @@ const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);'
 // DELEGATE LOOKUP TEMPLATES
 
 const String lookupFunctionTemplate = '''
-@(return) @(lookupName)(Locale locale) {
+@(class) @(lookupName)(Locale locale) {
+  @(lookupBody)
+  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  return null;
+}''';
+
+const String lookupFunctionDeferredLoadingTemplate = '''
+/// Lazy load the library for web, on other platforms we return the
+/// localizations synchronously.
+Future<@(class)> _loadLibraryForWeb(
+  Future<dynamic> Function() loadLibrary,
+  @(class) Function() localizationClosure,
+) {
+  if (kIsWeb) {
+    return loadLibrary().then((dynamic _) => localizationClosure());
+  } else {
+    return SynchronousFuture<@(class)>(localizationClosure());
+  }
+}
+
+Future<@(class)> @(lookupName)(Locale locale) {
   @(lookupBody)
   assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
   return null;
@@ -225,9 +245,9 @@ const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupCountryCodeSpecified)
   @(lookupLanguageCodeSpecified)''';
 
-const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
+const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
 
-const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return @(library).loadLibrary().then((dynamic _) => @(library).@(class)());''';
+const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return _loadLibraryForWeb(@(library).loadLibrary, () => @(library).@(localeClass)());''';
 
 const String nestedSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.@(code)) {

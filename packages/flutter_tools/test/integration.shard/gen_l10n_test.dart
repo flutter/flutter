@@ -61,7 +61,7 @@ void main() {
     runCommand(<String>[dartPath, genL10nPath, args?.join(' ')]);
   }
 
-  Future<StringBuffer> listenToStdOut(void Function() command) async {
+  Future<StringBuffer> runApp() async {
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
     final Completer<void> l10nEnd = Completer<void>();
@@ -74,7 +74,7 @@ void main() {
         l10nEnd.complete();
       }
     });
-    command();
+    await _flutter.run();
     await l10nEnd.future;
     await subscription.cancel();
     return stdout;
@@ -143,21 +143,13 @@ void main() {
 
   test('generated l10n classes produce expected localized strings', () async {
     setUpAndRunGenL10n();
-    final StringBuffer stdout = await listenToStdOut(() {
-      _flutter.run();
-    });
+    final StringBuffer stdout = await runApp();
     expectOutput(stdout);
   });
 
   test('generated l10n classes produce expected localized strings with deferred loading', () async {
     setUpAndRunGenL10n(args: <String>['--use-deferred-loading']);
-    // When loading the localizations with deferred loading, we will not have
-    // the localizations the first build, thus we run the app and reload it once
-    // to get the output.
-    await _flutter.run();
-    final StringBuffer stdout = await listenToStdOut(() {
-      _flutter.hotReload();
-    });
+    final StringBuffer stdout = await runApp();
     expectOutput(stdout);
   });
 }
