@@ -435,27 +435,27 @@ void main() {
     expect(called, 2);
   });
 
-  testWithoutContext('trackSharedBuildDirectory handles a missing .last_config', () {
+  testWithoutContext('trackSharedBuildDirectory handles a missing .last_build_id', () {
     BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
-    expect(environment.outputDir.childFile('.last_config'), exists);
-    expect(environment.outputDir.childFile('.last_config').readAsStringSync(),
+    expect(environment.outputDir.childFile('.last_build_id'), exists);
+    expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
   });
 
-  testWithoutContext('trackSharedBuildDirectory does not modify .last_config when config is identical', () {
-    environment.outputDir.childFile('.last_config')
+  testWithoutContext('trackSharedBuildDirectory does not modify .last_build_id when config is identical', () {
+    environment.outputDir.childFile('.last_build_id')
       ..writeAsStringSync('6666cd76f96956469e7be39d750cc7d9')
       ..setLastModifiedSync(DateTime(1991, 8, 23));
     BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
-    expect(environment.outputDir.childFile('.last_config').lastModifiedSync(),
+    expect(environment.outputDir.childFile('.last_build_id').lastModifiedSync(),
       DateTime(1991, 8, 23));
   });
 
   testWithoutContext('trackSharedBuildDirectory does not delete files when outputs.json is missing', () {
     environment.outputDir
-      .childFile('.last_config')
+      .childFile('.last_build_id')
       .writeAsStringSync('foo');
     environment.buildDir.parent
       .childDirectory('foo')
@@ -465,14 +465,14 @@ void main() {
       .createSync();
     BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
-    expect(environment.outputDir.childFile('.last_config').readAsStringSync(),
+    expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
     expect(environment.outputDir.childFile('stale'), exists);
   });
 
   testWithoutContext('trackSharedBuildDirectory deletes files in outputs.json but not in current outputs', () {
     environment.outputDir
-      .childFile('.last_config')
+      .childFile('.last_build_id')
       .writeAsStringSync('foo');
     final Directory otherBuildDir = environment.buildDir.parent
       .childDirectory('foo')
@@ -484,7 +484,7 @@ void main() {
       .writeAsStringSync(json.encode(<String>[staleFile.absolute.path]));
     BuildSystem.trackSharedBuildDirectory(environment, fileSystem, <String, File>{});
 
-    expect(environment.outputDir.childFile('.last_config').readAsStringSync(),
+    expect(environment.outputDir.childFile('.last_build_id').readAsStringSync(),
       '6666cd76f96956469e7be39d750cc7d9');
     expect(environment.outputDir.childFile('stale'), isNot(exists));
   });
@@ -529,8 +529,8 @@ void main() {
     await buildSystem.build(releaseTarget, testEnvironmentProfle);
 
     // Last build config is updated properly
-    expect(testEnvironmentProfle.outputDir.childFile('.last_config'), exists);
-    expect(testEnvironmentProfle.outputDir.childFile('.last_config').readAsStringSync(),
+    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id'), exists);
+    expect(testEnvironmentProfle.outputDir.childFile('.last_build_id').readAsStringSync(),
       'c20b3747fb2aa148cc4fd39bfbbd894f');
 
     // Verify debug output removeds

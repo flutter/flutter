@@ -554,38 +554,42 @@ class BuildSystem {
     );
   }
 
-  /// Write the configuration of the last build into the output directory and
+  /// Write the identifier of the last build into the output directory and
   /// remove the previous build's output.
   ///
-  /// This is used to perform a targeted cleanup of the last output files, if
-  /// these were not already covered by the built-in cleanup. This is only
-  /// necessary when multiple different build configurations output to the same
-  /// directory.
+  /// The build identifier is the basename of the build directory where
+  /// outputs and intermediaries are written, under `.dart_tool/flutter_build`.
+  /// This is computed from a hash of the build's configuration.
+  ///
+  /// This identifier is used to perform a targeted cleanup of the last output
+  /// files, if these were not already covered by the built-in cleanup. This
+  /// cleanup is only necessary when multiple different build configurations
+  /// output to the same directory.
   @visibleForTesting
   static void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
     Map<String, File> currentOutputs,
   ) {
-    final String currentConfig = fileSystem.path.basename(environment.buildDir.path);
-    final File lastConfigFile = environment.outputDir.childFile('.last_config');
-    if (!lastConfigFile.existsSync()) {
-      lastConfigFile.writeAsStringSync(currentConfig);
+    final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
+    final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
+    if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.writeAsStringSync(currentBuildId);
       // No config file, either output was cleaned or this is the first build.
       return;
     }
-    final String lastConfig = lastConfigFile.readAsStringSync().trim();
-    if (lastConfig == currentConfig) {
+    final String lastBuildId = lastBuildIdFile.readAsStringSync().trim();
+    if (lastBuildId == currentBuildId) {
       // The last build was the same configuration as the current build
       return;
     }
     // Update the output dir with the latest config.
-    lastConfigFile
+    lastBuildIdFile
       ..createSync()
-      ..writeAsStringSync(currentConfig);
+      ..writeAsStringSync(currentBuildId);
     final File outputsFile = environment.buildDir
       .parent
-      .childDirectory(lastConfig)
+      .childDirectory(lastBuildId)
       .childFile('outputs.json');
 
     if (!outputsFile.existsSync()) {
