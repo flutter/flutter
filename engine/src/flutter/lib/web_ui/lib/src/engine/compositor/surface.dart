@@ -114,8 +114,12 @@ class Surface {
       ..position = 'absolute'
       ..width = '${logicalSize.width.ceil()}px'
       ..height = '${logicalSize.height.ceil()}px';
-    final int glContext = canvasKit
-        .callMethod('GetWebGLContext', <html.CanvasElement>[htmlCanvas]);
+    final int glContext = canvasKit.callMethod('GetWebGLContext', <dynamic>[
+      htmlCanvas,
+      // Default to no anti-aliasing. Paint commands can be explicitly
+      // anti-aliased by setting their `Paint` object's `antialias` property.
+      js.JsObject.jsify({'antialias': 0}),
+    ]);
     final js.JsObject grContext =
         canvasKit.callMethod('MakeGrContext', <dynamic>[glContext]);
     final js.JsObject skSurface =
