@@ -808,7 +808,7 @@ void main() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text(
                   'LEFT ALIGNED, PARENT',
                   textAlign: TextAlign.left,
