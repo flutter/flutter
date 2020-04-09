@@ -15,8 +15,8 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -403,7 +403,7 @@ class MockVM implements VM {
   Future<Map<String, dynamic>> createDevFS(String fsName) async {
     _service.messages.add('create $fsName');
     if (_devFSExists) {
-      throw rpc.RpcException(kFileSystemAlreadyExists, 'File system already exists');
+      throw vm_service.RPCError('File system already exists', kFileSystemAlreadyExists, '');
     }
     _devFSExists = true;
     return <String, dynamic>{'uri': '$_baseUri'};
