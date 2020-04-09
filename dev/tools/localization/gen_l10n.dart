@@ -193,48 +193,6 @@ String generateMethod(Message message, AppResourceBundle bundle) {
     .replaceAll('@(message)', generateMessage());
 }
 
-String generateBaseClassFile(
-  String className,
-  String fileName,
-  String header,
-  AppResourceBundle bundle,
-  Iterable<Message> messages,
-) {
-  final LocaleInfo locale = bundle.locale;
-  final Iterable<String> methods = messages
-    .where((Message message) => bundle.translationFor(message) != null)
-    .map((Message message) => generateMethod(message, bundle));
-
-  return classFileTemplate
-    .replaceAll('@(header)', header)
-    .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseClass)', className)
-    .replaceAll('@(fileName)', fileName)
-    .replaceAll('@(class)', '$className${locale.camelCase()}')
-    .replaceAll('@(localeName)', locale.toString())
-    .replaceAll('@(methods)', methods.join('\n\n'));
-}
-
-String generateSubclass({
-  String className,
-  AppResourceBundle bundle,
-  Iterable<Message> messages,
-}) {
-  final LocaleInfo locale = bundle.locale;
-  final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
-
-  final Iterable<String> methods = messages
-    .where((Message message) => bundle.translationFor(message) != null)
-    .map((Message message) => generateMethod(message, bundle));
-
-  return subclassTemplate
-    .replaceAll('@(language)', describeLocale(locale.toString()))
-    .replaceAll('@(baseLanguageClassName)', baseClassName)
-    .replaceAll('@(class)', '$className${locale.camelCase()}')
-    .replaceAll('@(localeName)', locale.toString())
-    .replaceAll('@(methods)', methods.join('\n\n'));
-}
-
 String generateBaseClassMethod(Message message) {
   final String comment = message.description ?? 'No description provided in @${message.resourceId}';
   if (message.placeholders.isNotEmpty) {
@@ -373,6 +331,7 @@ class LocalizationsGenerator {
   final file.FileSystem _fs;
   Iterable<Message> _allMessages;
   AppResourceBundleCollection _allBundles;
+  LocaleInfo _templateArbLocale;
 
   /// The reference to the project's l10n directory.
   ///
@@ -435,6 +394,8 @@ class LocalizationsGenerator {
 
   /// The header to be prepended to the generated Dart localization file.
   String header = '';
+
+  final Map<LocaleInfo, List<String>> _unimplementedMessages = <LocaleInfo, List<String>>{};
 
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   ///
@@ -609,6 +570,7 @@ class LocalizationsGenerator {
   // files in l10nDirectory. Also initialized: supportedLocales.
   void loadResources() {
     final AppResourceBundle templateBundle = AppResourceBundle(templateArbFile);
+    _templateArbLocale = templateBundle.locale;
     _allMessages = templateBundle.resourceIds.map((String id) => Message(templateBundle.resources, id));
     for (final String resourceId in templateBundle.resourceIds)
       if (!_isValidGetterAndMethodName(resourceId)) {
@@ -637,6 +599,71 @@ class LocalizationsGenerator {
       allLocales.insertAll(0, preferredSupportedLocales);
     }
     supportedLocales.addAll(allLocales);
+  }
+
+  void _addUnimplementedMessage(LocaleInfo locale, String message) {
+    if (_unimplementedMessages.containsKey(locale)) {
+      _unimplementedMessages[locale].add(message);
+    } else {
+      _unimplementedMessages.putIfAbsent(locale, () => <String>[message]);
+    }
+  }
+
+  String _generateBaseClassFile(
+    String className,
+    String fileName,
+    String header,
+    AppResourceBundle bundle,
+    AppResourceBundle templateBundle,
+    Iterable<Message> messages,
+  ) {
+    final LocaleInfo locale = bundle.locale;
+
+    final Iterable<String> methods = messages.map((Message message) {
+      if (bundle.translationFor(message) == null) {
+        _addUnimplementedMessage(locale, message.resourceId);
+      }
+
+      return generateMethod(
+        message,
+        bundle.translationFor(message) == null ? templateBundle : bundle,
+      );
+    });
+
+    return classFileTemplate
+      .replaceAll('@(header)', header)
+      .replaceAll('@(language)', describeLocale(locale.toString()))
+      .replaceAll('@(baseClass)', className)
+      .replaceAll('@(fileName)', fileName)
+      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(localeName)', locale.toString())
+      .replaceAll('@(methods)', methods.join('\n\n'));
+  }
+
+  String _generateSubclass(
+    String className,
+    AppResourceBundle bundle,
+    Iterable<Message> messages,
+  ) {
+    final LocaleInfo locale = bundle.locale;
+    final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+
+    messages
+      .where((Message message) => bundle.translationFor(message) == null)
+      .forEach((Message message) {
+        _addUnimplementedMessage(locale, message.resourceId);
+      });
+
+    final Iterable<String> methods = messages
+      .where((Message message) => bundle.translationFor(message) != null)
+      .map((Message message) => generateMethod(message, bundle));
+
+    return subclassTemplate
+      .replaceAll('@(language)', describeLocale(locale.toString()))
+      .replaceAll('@(baseLanguageClassName)', baseClassName)
+      .replaceAll('@(class)', '$className${locale.camelCase()}')
+      .replaceAll('@(localeName)', locale.toString())
+      .replaceAll('@(methods)', methods.join('\n\n'));
   }
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
@@ -692,11 +719,12 @@ class LocalizationsGenerator {
         // Generate the template for the base class file. Further string
         // interpolation will be done to determine if there are
         // subclasses that extend the base class.
-        final String languageBaseClassFile = generateBaseClassFile(
+        final String languageBaseClassFile = _generateBaseClassFile(
           className,
           outputFileName,
           header,
           _allBundles.bundleFor(locale),
+          _allBundles.bundleFor(_templateArbLocale),
           _allMessages,
         );
 
@@ -705,10 +733,10 @@ class LocalizationsGenerator {
 
         // Generate every subclass that is needed for the particular language
         final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
-          return generateSubclass(
-            className: className,
-            bundle: _allBundles.bundleFor(locale),
-            messages: _allMessages,
+          return _generateSubclass(
+            className,
+            _allBundles.bundleFor(locale),
+            _allMessages,
           );
         });
 
@@ -740,5 +768,53 @@ class LocalizationsGenerator {
 
   void writeOutputFile() {
     outputFile.writeAsStringSync(generateCode());
+  }
+
+  void outputUnimplementedMessages(String untranslatedMessagesFile) {
+    if (untranslatedMessagesFile == null || untranslatedMessagesFile == '') {
+      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+        stdout.writeln('"$locale": ${messages.length} untranslated message(s).');
+      });
+      stdout.writeln(
+        'To see a detailed report, use the --unimplemented-messages-file \n'
+        'option in the tool to generate a JSON format file containing \n'
+        'all messages that need to be translated.'
+      );
+    } else {
+      _writeUnimplementedMessagesFile(untranslatedMessagesFile);
+    }
+  }
+
+  void _writeUnimplementedMessagesFile(String untranslatedMessagesFile) {
+    if (_unimplementedMessages.isEmpty) {
+      return;
+    }
+
+    final File unimplementedMessageTranslationsFile = _fs.file(untranslatedMessagesFile);
+
+    String resultingFile = '{\n';
+    int count = 0;
+    final int numberOfLocales = _unimplementedMessages.length;
+    _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+      resultingFile += '  "$locale": [\n';
+
+      for (int i = 0; i < messages.length; i += 1) {
+        resultingFile += '    "${messages[i]}"';
+        if (i != messages.length - 1) {
+          resultingFile += ',';
+        }
+        resultingFile += '\n';
+      }
+
+      resultingFile += '  ]';
+      count += 1;
+      if (count < numberOfLocales) {
+        resultingFile += ',\n';
+      }
+      resultingFile += '\n';
+    });
+
+    resultingFile += '}\n';
+    unimplementedMessageTranslationsFile.writeAsStringSync(resultingFile);
   }
 }

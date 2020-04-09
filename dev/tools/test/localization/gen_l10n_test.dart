@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -23,6 +24,17 @@ const String singleMessageArbFileString = '''
   "title": "Title",
   "@title": {
     "description": "Title for the application"
+  }
+}''';
+const String twoMessageArbFileString = '''
+{
+  "title": "Title",
+  "@title": {
+    "description": "Title for the application"
+  },
+  "subtitle": "Subtitle",
+  "@subtitle": {
+    "description": "Subtitle for the application"
   }
 }''';
 const String esArbFileName = 'app_es.arb';
@@ -275,6 +287,43 @@ void main() {
     }
 
     expect(generator.header, '/// Sample header in a text file');
+  });
+
+  test('correctly creates an unimplemented messages file', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile(defaultTemplateArbFileName).writeAsStringSync(twoMessageArbFileString)
+      ..childFile(esArbFileName).writeAsStringSync(singleEsMessageArbFileString);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..generateCode()
+        ..outputUnimplementedMessages(path.join('lib', 'l10n', 'unimplemented_message_translations.json'));
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final File unimplementedOutputFile = fs.file(
+      path.join('lib', 'l10n', 'unimplemented_message_translations.json'),
+    );
+    final String unimplementedOutputString = unimplementedOutputFile.readAsStringSync();
+    try {
+      // Since ARB file is essentially JSON, decoding it should not fail.
+      json.decode(unimplementedOutputString);
+    } on Exception {
+      fail('Parsing arb file should not fail');
+    }
+    expect(unimplementedOutputString, contains('es'));
+    expect(unimplementedOutputString, contains('subtitle'));
   });
 
   test('setting both a headerString and a headerFile should fail', () {
