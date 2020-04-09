@@ -1,4 +1,4 @@
-Signature: 91431c0474883af27c1e7c0e3dee8955
+Signature: cf555339cd3f5572c9e165ed69278b0c
 
 UNUSED LICENSES:
 
@@ -1117,6 +1117,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-GCE-CPU-AVX2-x86_64-Release-All-Lottie.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-GCE-CPU-AVX2-x86_64-Release-All-TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-GCE-GPU-SwiftShader-x86_64-Debug-All-SwiftShader.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-ASAN_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-OpenCL.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86-Debug-All-Docker.json
@@ -3108,8 +3109,6 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRingBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRingBuffer.h
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingManager.cpp
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingManager.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.cpp
@@ -5630,7 +5629,11 @@ FILE: ../../../third_party/skia/src/core/SkVerticesPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDynamicAtlas.h
 FILE: ../../../third_party/skia/src/gpu/GrEagerVertexAllocator.h
+FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/GrStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrAutoMapVertexBuffer.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStagingBuffer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
