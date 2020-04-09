@@ -113,6 +113,9 @@ vars = {
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
 
+  # Checkout Linux dependencies only when building on Linux.
+  'download_linux_deps': 'host_os == "linux"',
+
   # An LLVM backend needs LLVM binaries and headers. To avoid build time
   # increases we can use prebuilts. We don't want to download this on every
   # CQ/CI bot nor do we want the average Dart developer to incur that cost.
@@ -136,7 +139,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3a27de1c5bb0f50be7d3efe3e00de4f6068c9f30',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '74eedc7f351b2b8c323468c4487b1b5e9b08f0aa',
 
    # Fuchsia compatibility
    #
@@ -621,5 +624,14 @@ hooks = [
       '-s',
       'src/third_party/dart/third_party/7zip.tar.gz.sha1',
     ],
+  },
+  {
+    'name': 'linux_sysroot',
+    'pattern': '.',
+    'condition': 'download_linux_deps',
+    'action': [
+      'python',
+      'src/build/linux/sysroot_scripts/install-sysroot.py',
+      '--arch=x64'],
   },
 ]
