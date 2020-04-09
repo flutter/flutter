@@ -44,6 +44,7 @@ class MacOSDevice extends DesktopDevice {
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
+      verboseLogging: globals.logger.isVerbose,
     );
   }
 
