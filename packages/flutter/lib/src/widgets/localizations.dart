@@ -20,7 +20,7 @@ import 'framework.dart';
 // Used by loadAll() to record LocalizationsDelegate.load() futures we're
 // waiting for.
 class _Pending {
-  _Pending(this.delegate, this.futureValue);
+  const _Pending(this.delegate, this.futureValue);
   final LocalizationsDelegate<dynamic> delegate;
   final Future<dynamic> futureValue;
 }
@@ -149,6 +149,9 @@ abstract class LocalizationsDelegate<T> {
 ///  * [DefaultWidgetsLocalizations], which implements this interface and
 ///    supports a variety of locales.
 abstract class WidgetsLocalizations {
+  /// Constructor is constant so that anyone who inherits from this can have
+  /// a const constructor also.
+  const WidgetsLocalizations();
   /// The reading direction for text in this locale.
   TextDirection get textDirection;
 

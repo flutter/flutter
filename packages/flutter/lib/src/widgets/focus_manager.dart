@@ -62,7 +62,7 @@ typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 class FocusAttachment {
   /// A private constructor, because [FocusAttachment]s are only to be created
   /// by [FocusNode.attach].
-  FocusAttachment._(this._node) : assert(_node != null);
+  const FocusAttachment._(this._node) : assert(_node != null);
 
   // The focus node that this attachment manages an attachment for. The node may
   // not yet have a parent, or may have been detached from this attachment, so

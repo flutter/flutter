@@ -1116,7 +1116,7 @@ abstract class SemanticsGestureDelegate {
 // Instead, a normal delegate will store callbacks as properties, and use them
 // in `assignSemantics`.
 class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
-  _DefaultSemanticsGestureDelegate(this.detectorState);
+  const _DefaultSemanticsGestureDelegate(this.detectorState);
 
   final RawGestureDetectorState detectorState;
 

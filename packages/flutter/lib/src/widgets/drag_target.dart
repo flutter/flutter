@@ -440,7 +440,7 @@ class DraggableDetails {
   /// If [wasAccepted] is not specified, it will default to `false`.
   ///
   /// The [velocity] or [offset] arguments must not be `null`.
-  DraggableDetails({
+  const DraggableDetails({
     this.wasAccepted = false,
     @required this.velocity,
     @required this.offset,

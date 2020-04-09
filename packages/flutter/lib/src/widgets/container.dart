@@ -486,7 +486,7 @@ class Container extends StatelessWidget {
 
 /// A clipper that uses [Decoration.getClipPath] to clip.
 class _DecorationClipper extends CustomClipper<Path> {
-  _DecorationClipper({
+  const _DecorationClipper({
     TextDirection textDirection,
     @required this.decoration
   }) : assert (decoration != null),

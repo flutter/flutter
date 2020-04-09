@@ -190,7 +190,7 @@ class Dismissible extends StatefulWidget {
 }
 
 class _DismissibleClipper extends CustomClipper<Rect> {
-  _DismissibleClipper({
+  const _DismissibleClipper({
     @required this.axis,
     @required this.moveAnimation,
   }) : assert(axis != null),

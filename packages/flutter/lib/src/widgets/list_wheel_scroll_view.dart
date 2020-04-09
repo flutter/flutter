@@ -39,6 +39,9 @@ import 'scrollable.dart';
 ///  * [ListWheelChildBuilderDelegate], a delegate that supplies children using
 ///    a builder callback.
 abstract class ListWheelChildDelegate {
+  /// Const constructor so that if anyone inherits from it, they can make their 
+  /// constructor const also.
+  const ListWheelChildDelegate();
   /// Return the child at the given index. If the child at the given
   /// index does not exist, return null.
   Widget build(BuildContext context, int index);
@@ -82,7 +85,7 @@ abstract class ListWheelChildDelegate {
 /// conditions.
 class ListWheelChildListDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a concrete list of children.
-  ListWheelChildListDelegate({@required this.children}) : assert(children != null);
+  const ListWheelChildListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supplied.
   final List<Widget> children;
@@ -125,7 +128,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 /// conditions.
 class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a concrete list of children.
-  ListWheelChildLoopingListDelegate({@required this.children}) : assert(children != null);
+  const ListWheelChildLoopingListDelegate({@required this.children}) : assert(children != null);
 
   /// The list containing all children that can be supplied.
   final List<Widget> children;
@@ -158,7 +161,7 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 /// not have to be built until they are displayed.
 class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a builder callback.
-  ListWheelChildBuilderDelegate({
+  const ListWheelChildBuilderDelegate({
     @required this.builder,
     this.childCount,
   }) : assert(builder != null);
