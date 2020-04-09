@@ -1537,42 +1537,87 @@ class FlutterView extends ServiceObject {
   }
 
   Future<void> setAssetDirectory(Uri assetsDirectory) async {
-    assert(assetsDirectory != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setAssetBundlePath',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false),
-        });
+    await owner.vm.vmService.setAssetDirectory(
+      viewId: id,
+      uiIsolateId: _uiIsolate.id,
+      assetsDirectory: assetsDirectory,
+    );
   }
 
   Future<void> setSemanticsEnabled(bool enabled) async {
-    assert(enabled != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'enabled': enabled,
-        });
+    await owner.vm.vmService.setSemanticsEnabled(
+      viewId: id,
+      uiIsolateId: _uiIsolate.id,
+      enabled: enabled,
+    );
   }
 
   Future<Map<String, Object>> getSkSLs() async {
-    final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
-      '_flutter.getSkSLs',
-      params: <String, dynamic>{
-        'viewId': id,
-      },
-    );
-    return response['SkSLs'] as Map<String, Object>;
+    return owner.vm.vmService.getSkSLs(viewId: id);
   }
 
   bool get hasIsolate => _uiIsolate != null;
 
   Future<void> flushUIThreadTasks() async {
-    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks',
-      params: <String, dynamic>{'isolateId': _uiIsolate.id});
+    await owner.vm.vmService.flushUIThreadTasks(uiIsolateId: _uiIsolate.id);
   }
 
   @override
   String toString() => id;
+}
+
+/// Flutter specific VM Service functionality.
+extension FlutterVmService on vm_service.VmService {
+  Future<void> setAssetDirectory({
+    @required Uri assetsDirectory,
+    @required String viewId,
+    @required String uiIsolateId,
+  }) async {
+    assert(assetsDirectory != null);
+    await callMethod('_flutter.setAssetBundlePath',
+      isolateId: uiIsolateId,
+      args: <String, dynamic>{
+        'viewId': viewId,
+        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+      });
+  }
+
+  Future<void> setSemanticsEnabled({
+    @required String uiIsolateId,
+    @required String viewId,
+    @required bool enabled,
+  }) async {
+    assert(enabled != null);
+    await callMethod(
+      '_flutter.setSemanticsEnabled',
+      isolateId: uiIsolateId,
+      args: <String, dynamic>{
+        'viewId': viewId,
+        'enabled': enabled,
+      },
+    );
+  }
+
+  Future<Map<String, Object>> getSkSLs({
+    @required String viewId,
+  }) async {
+    final vm_service.Response response = await callMethod(
+      '_flutter.getSkSLs',
+      args: <String, String>{
+        'viewId': viewId,
+      },
+    );
+    return response.json['SkSLs'] as Map<String, Object>;
+  }
+
+   Future<void> flushUIThreadTasks({
+     @required String uiIsolateId,
+   }) async {
+      await callMethod(
+        '_flutter.flushUIThreadTasks',
+        args: <String, String>{
+          'isolateId': uiIsolateId,
+        },
+      );
+   }
 }
