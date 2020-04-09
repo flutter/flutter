@@ -10,7 +10,6 @@ import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import 'common.dart';
 import 'environment.dart';
 
 class FilePath {
@@ -130,7 +129,8 @@ class ProcessException implements Exception {
     message
       ..writeln(description)
       ..writeln('Command: $executable ${arguments.join(' ')}')
-      ..writeln('Working directory: ${workingDirectory ?? io.Directory.current.path}')
+      ..writeln(
+          'Working directory: ${workingDirectory ?? io.Directory.current.path}')
       ..writeln('Exit code: $exitCode');
     return '$message';
   }
@@ -160,4 +160,43 @@ mixin ArgUtils<T> on Command<T> {
     }
     return value;
   }
+}
+
+/// There might be proccesses started during the tests.
+///
+/// Use this list to store those Processes, for cleaning up before shutdown.
+final List<io.Process> processesToCleanUp = List<io.Process>();
+
+/// There might be temporary directories created during the tests.
+///
+/// Use this list to store those directories and for deleteing them before
+/// shutdown.
+final List<io.Directory> temporaryDirectories = List<io.Directory>();
+
+typedef AsyncCallback = Future<void> Function();
+
+/// There might be additional cleanup needs to be done after the tools ran.
+///
+/// Add these operations here to make sure that they will run before felt
+/// exit.
+final List<AsyncCallback> cleanupCallbacks = List<AsyncCallback>();
+
+/// Cleanup the remaning processes, close open browsers, delete temp files.
+void cleanup() async {
+  // Cleanup remaining processes if any.
+  if (processesToCleanUp.length > 0) {
+    for (io.Process process in processesToCleanUp) {
+      process.kill();
+    }
+  }
+  // Delete temporary directories.
+  if (temporaryDirectories.length > 0) {
+    for (io.Directory directory in temporaryDirectories) {
+      directory.deleteSync(recursive: true);
+    }
+  }
+
+  cleanupCallbacks.forEach((element) {
+    element.call();
+  });
 }

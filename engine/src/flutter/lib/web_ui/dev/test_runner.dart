@@ -15,6 +15,7 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 
+import 'exceptions.dart';
 import 'integration_tests_manager.dart';
 import 'supported_browsers.dart';
 import 'test_platform.dart';
@@ -151,6 +152,26 @@ class TestCommand extends Command<bool> with ArgUtils {
     }
 
     await _buildTests(targets: targetFiles);
+
+    // Many tabs will be left open after Safari runs, quit Safari during
+    // cleanup.
+    if (browser == 'safari') {
+      cleanupCallbacks.add(() async {
+        // Only close Safari if felt is running in CI environments. Do not close
+        // Safari for the local testing.
+        if (io.Platform.environment['LUCI_CONTEXT'] != null || isCirrus) {
+          print('INFO: Safari tests ran. Quit Safari.');
+          await runProcess(
+            'sudo',
+            ['pkill', '-lf', 'Safari'],
+            workingDirectory: environment.webUiRootDir.path,
+          );
+        } else {
+          print('INFO: Safari tests ran. Please quit Safari tabs.');
+        }
+      });
+    }
+
     if (runAllTests) {
       await _runAllTests();
     } else {
@@ -179,7 +200,7 @@ class TestCommand extends Command<bool> with ArgUtils {
   bool get runAllTests => targets.isEmpty;
 
   /// The name of the browser to run tests in.
-  String get browser => stringArg('browser');
+  String get browser => (argResults != null) ? stringArg('browser') : 'chrome';
 
   /// Whether [browser] is set to "chrome".
   bool get isChrome => browser == 'chrome';
@@ -275,8 +296,7 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   void _checkExitCode() {
     if (io.exitCode != 0) {
-      io.stderr.writeln('Process exited with exit code ${io.exitCode}.');
-      io.exit(1);
+      throw ToolException('Process exited with exit code ${io.exitCode}.');
     }
   }
 
@@ -290,9 +310,8 @@ class TestCommand extends Command<bool> with ArgUtils {
     );
 
     if (exitCode != 0) {
-      io.stderr
-          .writeln('Failed to run pub get. Exited with exit code $exitCode');
-      io.exit(1);
+      throw ToolException(
+          'Failed to run pub get. Exited with exit code $exitCode');
     }
   }
 
@@ -333,9 +352,8 @@ class TestCommand extends Command<bool> with ArgUtils {
     );
 
     if (exitCode != 0) {
-      io.stderr.writeln(
-          'Failed to compile ${hostDartFile.path}. Compiler exited with exit code $exitCode');
-      io.exit(1);
+      throw ToolException('Failed to compile ${hostDartFile.path}. Compiler '
+          'exited with exit code $exitCode');
     }
 
     // Record the timestamp to avoid rebuilding unless the file changes.
@@ -363,9 +381,8 @@ class TestCommand extends Command<bool> with ArgUtils {
     );
 
     if (exitCode != 0) {
-      io.stderr.writeln(
+      throw ToolException(
           'Failed to compile tests. Compiler exited with exit code $exitCode');
-      io.exit(1);
     }
   }
 

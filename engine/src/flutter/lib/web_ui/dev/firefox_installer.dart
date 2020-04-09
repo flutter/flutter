@@ -12,6 +12,7 @@ import 'package:yaml/yaml.dart';
 
 import 'common.dart';
 import 'environment.dart';
+import 'exceptions.dart';
 
 class FirefoxArgParser extends BrowserArgParser {
   static final FirefoxArgParser _singletonInstance = FirefoxArgParser._();
