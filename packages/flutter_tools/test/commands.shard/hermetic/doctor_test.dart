@@ -801,11 +801,11 @@ class PassingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -814,12 +814,12 @@ class MissingValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return ValidationResult(ValidationType.missing, messages);
+    return const ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -828,12 +828,12 @@ class NotAvailableValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
       ValidationMessage('A message that is not an error'),
       ValidationMessage.hint('A hint message'),
     ];
-    return ValidationResult(ValidationType.notAvailable, messages);
+    return const ValidationResult(ValidationType.notAvailable, messages);
   }
 }
 
@@ -842,12 +842,12 @@ class PartialValidatorWithErrors extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('An error message indicating partial installation'),
       ValidationMessage.hint('Maybe a hint will help the user'),
       ValidationMessage('An extra message with some verbose details'),
     ];
-    return ValidationResult(ValidationType.partial, messages);
+    return const ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -856,11 +856,11 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.hint('There is a hint here'),
       ValidationMessage('But there is no error'),
     ];
-    return ValidationResult(ValidationType.partial, messages);
+    return const ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1006,10 +1006,10 @@ class PassingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
-    return ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.installed, messages);
   }
 }
 
@@ -1018,10 +1018,10 @@ class MissingGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('A useful error message'),
     ];
-    return ValidationResult(ValidationType.missing, messages);
+    return const ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -1030,10 +1030,10 @@ class PartialGroupedValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage.error('An error message for partial installation'),
     ];
-    return ValidationResult(ValidationType.partial, messages);
+    return const ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -1042,10 +1042,10 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[
+    const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
-    return ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
   }
 }
 

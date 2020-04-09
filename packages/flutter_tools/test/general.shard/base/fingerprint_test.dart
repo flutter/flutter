@@ -64,10 +64,10 @@ void main() {
         },
       );
       final Fingerprint fingerprint = fingerprinter.buildFingerprint();
-      expect(fingerprint, Fingerprint.fromBuildInputs(<String, String>{
+      expect(fingerprint, Fingerprint.fromBuildInputs(const <String, String>{
         'foo': 'bar',
         'wibble': 'wobble',
-      }, <String>['a.dart']));
+      }, const <String>['a.dart']));
     }, overrides: contextOverrides);
 
     testUsingContext('creates fingerprint with file checksums', () {
@@ -85,10 +85,10 @@ void main() {
         },
       );
       final Fingerprint fingerprint = fingerprinter.buildFingerprint();
-      expect(fingerprint, Fingerprint.fromBuildInputs(<String, String>{
+      expect(fingerprint, Fingerprint.fromBuildInputs(const <String, String>{
         'bar': 'baz',
         'wobble': 'womble',
-      }, <String>['a.dart', 'b.dart']));
+      }, const <String>['a.dart', 'b.dart']));
     }, overrides: contextOverrides);
 
     testUsingContext('fingerprint does not match if not present', () {
@@ -248,7 +248,7 @@ void main() {
       testUsingContext('throws if any input file does not exist', () {
         globals.fs.file('a.dart').createSync();
         expect(
-          () => Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
+          () => Fingerprint.fromBuildInputs(const <String, String>{}, const <String>['a.dart', 'b.dart']),
           throwsException,
         );
       }, overrides: <Type, Generator>{
@@ -259,7 +259,7 @@ void main() {
       testUsingContext('populates checksums for valid files', () {
         globals.fs.file('a.dart').writeAsStringSync('This is a');
         globals.fs.file('b.dart').writeAsStringSync('This is b');
-        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(const <String, String>{}, const <String>['a.dart', 'b.dart']);
 
         final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['files'], hasLength(2));
@@ -271,14 +271,14 @@ void main() {
       });
 
       testUsingContext('includes framework version', () {
-        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(const <String, String>{}, const <String>[]);
 
         final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['version'], mockVersion.frameworkRevision);
       }, overrides: <Type, Generator>{FlutterVersion: () => mockVersion});
 
       testUsingContext('includes provided properties', () {
-        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(const <String, String>{'a': 'A', 'b': 'B'}, const <String>[]);
 
         final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['properties'], hasLength(2));
@@ -347,7 +347,7 @@ void main() {
         final String jsonString = json.encode(<String, dynamic>{
           'version': kVersion,
         });
-        expect(Fingerprint.fromJson(jsonString), Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
+        expect(Fingerprint.fromJson(jsonString), Fingerprint.fromBuildInputs(const <String, String>{}, const <String>[]));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });

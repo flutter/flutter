@@ -105,7 +105,7 @@ void main() {
         ]);
         fail('Expect exception');
       } on Exception catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
       }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(bufferLogger.statusText, contains(
@@ -162,7 +162,7 @@ void main() {
         ]);
         fail('Expect exception');
       } on Exception catch (e) {
-        expect(e, isInstanceOf<ToolExit>());
+        expect(e, isA<ToolExit>());
         expect(e.toString(), contains('No pubspec.yaml file found'));
       }
     }, overrides: <Type, Generator>{

@@ -140,6 +140,12 @@ class CommandHelp {
     'debugDumpRenderTree',
   );
 
+  CommandHelpOption _v;
+  CommandHelpOption get v => _v ??= _makeOption(
+    'v',
+    'Launch DevTools.',
+  );
+
   CommandHelpOption _w;
   CommandHelpOption get w => _w ??= _makeOption(
     'w',
@@ -157,6 +163,12 @@ class CommandHelp {
   CommandHelpOption get k => _k ??= _makeOption(
     'k',
     'Toggle CanvasKit rendering.',
+  );
+
+  CommandHelpOption _M;
+  CommandHelpOption get M => _M ??= _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
   );
 
   CommandHelpOption _makeOption(String key, String description, [

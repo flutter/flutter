@@ -28,10 +28,10 @@ class ProxyValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     if (_httpProxy.isNotEmpty) {
-      messages.add(ValidationMessage('HTTP_PROXY is set'));
+      messages.add(const ValidationMessage('HTTP_PROXY is set'));
 
       if (_noProxy.isEmpty) {
-        messages.add(ValidationMessage.hint('NO_PROXY is not set'));
+        messages.add(const ValidationMessage.hint('NO_PROXY is not set'));
       } else {
         messages.add(ValidationMessage('NO_PROXY is $_noProxy'));
         for (final String host in const <String>['127.0.0.1', 'localhost']) {

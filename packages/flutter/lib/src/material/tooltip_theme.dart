@@ -23,6 +23,7 @@ import 'theme.dart';
 ///    subtree.
 ///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
+@immutable
 class TooltipThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
   const TooltipThemeData({

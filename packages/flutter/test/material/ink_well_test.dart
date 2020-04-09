@@ -323,7 +323,7 @@ void main() {
     semantics.dispose();
   });
   testWidgets("ink response doesn't focus when disabled", (WidgetTester tester) async {
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
@@ -359,7 +359,7 @@ void main() {
   });
 
   testWidgets("ink response doesn't hover when disabled", (WidgetTester tester) async {
-    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     final GlobalKey childKey = GlobalKey();
     bool hovering = false;

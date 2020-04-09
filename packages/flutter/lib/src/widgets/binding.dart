@@ -655,30 +655,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       observer.didChangeAppLifecycleState(state);
   }
 
-  /// Called when the operating system notifies the application of a memory
-  /// pressure situation.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didHaveMemoryPressure].
-  ///
-  /// This method exposes the `memoryPressure` notification from
-  /// [SystemChannels.system].
+  @override
   void handleMemoryPressure() {
+    super.handleMemoryPressure();
     for (final WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
-  }
-
-  @override
-  Future<void> handleSystemMessage(Object systemMessage) async {
-    await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
-    final String type = message['type'] as String;
-    switch (type) {
-      case 'memoryPressure':
-        handleMemoryPressure();
-        break;
-    }
-    return;
   }
 
   bool _needToReportFirstFrame = true;
@@ -1185,7 +1166,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 /// A concrete binding for applications based on the Widgets framework.
 ///
 /// This is the glue that binds the framework to the Flutter engine.
-class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
+class WidgetsFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding, ServicesBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
 
   /// Returns an instance of the [WidgetsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a

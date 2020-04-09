@@ -83,6 +83,8 @@ abstract class Usage {
                       analyticsIOFactory: analyticsIOFactory,
                       runningOnBot: runningOnBot);
 
+  factory Usage.test() => _DefaultUsage.test();
+
   /// Uses the global [Usage] instance to send a 'command' to analytics.
   static void command(String command, {
     Map<CustomDimensions, String> parameters,
@@ -264,6 +266,10 @@ class _DefaultUsage implements Usage {
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
   }
+
+  _DefaultUsage.test() :
+      _suppressAnalytics = true,
+      _analytics = AnalyticsMock();
 
   Analytics _analytics;
 

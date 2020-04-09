@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -28,6 +29,8 @@ const int kMaxSampleCount = 10 * kMinSampleCount;
 
 /// The number of samples used to extract metrics, such as noise, means,
 /// max/min values.
+///
+/// Keep this constant in sync with the same constant defined in `dev/devicelab/lib/framework/browser.dart`.
 const int _kMeasuredSampleCount = 10;
 
 /// Maximum tolerated noise level.
@@ -44,11 +47,64 @@ Duration timeAction(VoidCallback action) {
   return stopwatch.elapsed;
 }
 
+/// A function that performs asynchronous work.
+typedef AsyncVoidCallback = Future<void> Function();
+
+/// An [AsyncVoidCallback] that doesn't do anything.
+///
+/// This is used just so we don't have to deal with null all over the place.
+Future<void> _dummyAsyncVoidCallback() async {}
+
+/// Runs the benchmark using the given [recorder].
+///
+/// Notifies about "set up" and "tear down" events via the [setUpAllDidRun]
+/// and [tearDownAllWillRun] callbacks.
+@sealed
+class Runner {
+  /// Creates a runner for the [recorder].
+  ///
+  /// All arguments must not be null.
+  Runner({
+    @required this.recorder,
+    this.setUpAllDidRun = _dummyAsyncVoidCallback,
+    this.tearDownAllWillRun = _dummyAsyncVoidCallback,
+  });
+
+  /// The recorder that will run and record the benchmark.
+  final Recorder recorder;
+
+  /// Called immediately after [Recorder.setUpAll] future is resolved.
+  ///
+  /// This is useful, for example, to kick off a profiler or a tracer such that
+  /// the "set up" computations are not included in the metrics.
+  final AsyncVoidCallback setUpAllDidRun;
+
+  /// Called just before calling [Recorder.tearDownAll].
+  ///
+  /// This is useful, for example, to stop a profiler or a tracer such that
+  /// the "tear down" computations are not included in the metrics.
+  final AsyncVoidCallback tearDownAllWillRun;
+
+  /// Runs the benchmark and reports the results.
+  Future<Profile> run() async {
+    await recorder.setUpAll();
+    await setUpAllDidRun();
+    final Profile profile = await recorder.run();
+    await tearDownAllWillRun();
+    await recorder.tearDownAll();
+    return profile;
+  }
+}
+
 /// Base class for benchmark recorders.
 ///
 /// Each benchmark recorder has a [name] and a [run] method at a minimum.
 abstract class Recorder {
-  Recorder._(this.name);
+  Recorder._(this.name, this.isTracingEnabled);
+
+  /// Whether this recorder requires tracing using Chrome's DevTools Protocol's
+  /// "Tracing" API.
+  final bool isTracingEnabled;
 
   /// The name of the benchmark.
   ///
@@ -56,8 +112,20 @@ abstract class Recorder {
   /// prefix.
   final String name;
 
+  /// Called once before all runs of this benchmark recorder.
+  ///
+  /// This is useful for doing one-time setup work that's needed for the
+  /// benchmark.
+  Future<void> setUpAll() async {}
+
   /// The implementation of the benchmark that will produce a [Profile].
   Future<Profile> run();
+
+  /// Called once after all runs of this benchmark recorder.
+  ///
+  /// This is useful for doing one-time clean up work after the benchmark is
+  /// complete.
+  Future<void> tearDownAll() async {}
 }
 
 /// A recorder for benchmarking raw execution of Dart code.
@@ -84,19 +152,7 @@ abstract class Recorder {
 /// }
 /// ```
 abstract class RawRecorder extends Recorder {
-  RawRecorder({@required String name}) : super._(name);
-
-  /// Called once before all runs of this benchmark recorder.
-  ///
-  /// This is useful for doing one-time setup work that's needed for the
-  /// benchmark.
-  void setUpAll() {}
-
-  /// Called once after all runs of this benchmark recorder.
-  ///
-  /// This is useful for doing one-time clean up work after the benchmark is
-  /// complete.
-  void tearDownAll() {}
+  RawRecorder({@required String name}) : super._(name, false);
 
   /// The body of the benchmark.
   ///
@@ -107,12 +163,10 @@ abstract class RawRecorder extends Recorder {
   @nonVirtual
   Future<Profile> run() async {
     final Profile profile = Profile(name: name);
-    setUpAll();
     do {
       await Future<void>.delayed(Duration.zero);
       body(profile);
     } while (profile.shouldContinue());
-    tearDownAll();
     return profile;
   }
 }
@@ -143,7 +197,7 @@ abstract class RawRecorder extends Recorder {
 /// }
 /// ```
 abstract class SceneBuilderRecorder extends Recorder {
-  SceneBuilderRecorder({@required String name}) : super._(name);
+  SceneBuilderRecorder({@required String name}) : super._(name, true);
 
   /// Called from [Window.onBeginFrame].
   @mustCallSuper
@@ -162,24 +216,36 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Profile profile = Profile(name: name);
 
     window.onBeginFrame = (_) {
-      onBeginFrame();
+      try {
+        startMeasureFrame();
+        onBeginFrame();
+      } catch (error, stackTrace) {
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
+      }
     };
     window.onDrawFrame = () {
-      profile.record('drawFrameDuration', () {
-        final SceneBuilder sceneBuilder = SceneBuilder();
-        onDrawFrame(sceneBuilder);
-        profile.record('sceneBuildDuration', () {
-          final Scene scene = sceneBuilder.build();
-          profile.record('windowRenderDuration', () {
-            window.render(scene);
+      try {
+        profile.record('drawFrameDuration', () {
+          final SceneBuilder sceneBuilder = SceneBuilder();
+          onDrawFrame(sceneBuilder);
+          profile.record('sceneBuildDuration', () {
+            final Scene scene = sceneBuilder.build();
+            profile.record('windowRenderDuration', () {
+              window.render(scene);
+            });
           });
         });
-      });
+        endMeasureFrame();
 
-      if (profile.shouldContinue()) {
-        window.scheduleFrame();
-      } else {
-        profileCompleter.complete(profile);
+        if (profile.shouldContinue()) {
+          window.scheduleFrame();
+        } else {
+          profileCompleter.complete(profile);
+        }
+      } catch (error, stackTrace) {
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
       }
     };
     window.scheduleFrame();
@@ -248,9 +314,8 @@ abstract class SceneBuilderRecorder extends Recorder {
 ///   }
 /// }
 /// ```
-abstract class WidgetRecorder extends Recorder
-    implements RecordingWidgetsBindingListener {
-  WidgetRecorder({@required String name}) : super._(name);
+abstract class WidgetRecorder extends Recorder implements FrameRecorder {
+  WidgetRecorder({@required String name}) : super._(name, true);
 
   /// Creates a widget to be benchmarked.
   ///
@@ -261,47 +326,55 @@ abstract class WidgetRecorder extends Recorder
   Widget createWidget();
 
   @override
-  Profile profile;
+  VoidCallback didStop;
 
-  final Completer<Profile> _profileCompleter = Completer<Profile>();
+  Profile profile;
+  Completer<void> _runCompleter;
 
   Stopwatch _drawFrameStopwatch;
 
   @override
   @mustCallSuper
   void frameWillDraw() {
+    startMeasureFrame();
     _drawFrameStopwatch = Stopwatch()..start();
   }
 
   @override
   @mustCallSuper
   void frameDidDraw() {
+    endMeasureFrame();
     profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
 
     if (profile.shouldContinue()) {
       window.scheduleFrame();
     } else {
-      _profileCompleter.complete(profile);
+      didStop();
+      _runCompleter.complete();
     }
   }
 
   @override
   void _onError(dynamic error, StackTrace stackTrace) {
-    _profileCompleter.completeError(error, stackTrace);
+    _runCompleter.completeError(error, stackTrace);
   }
 
   @override
-  Future<Profile> run() {
-    profile = Profile(name: name);
+  Future<Profile> run() async {
+    _runCompleter = Completer<void>();
+    final Profile localProfile = profile = Profile(name: name);
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     final Widget widget = createWidget();
     binding._beginRecording(this, widget);
 
-    _profileCompleter.future.whenComplete(() {
+    try {
+      await _runCompleter.future;
+      return localProfile;
+    } finally {
+      _runCompleter = null;
       profile = null;
-    });
-    return _profileCompleter.future;
+    }
   }
 }
 
@@ -312,9 +385,8 @@ abstract class WidgetRecorder extends Recorder
 /// another frame that clears the screen. It repeats this process, measuring the
 /// performance of frames that render the widget and ignoring the frames that
 /// clear the screen.
-abstract class WidgetBuildRecorder extends Recorder
-    implements RecordingWidgetsBindingListener {
-  WidgetBuildRecorder({@required String name}) : super._(name);
+abstract class WidgetBuildRecorder extends Recorder implements FrameRecorder {
+  WidgetBuildRecorder({@required String name}) : super._(name, true);
 
   /// Creates a widget to be benchmarked.
   ///
@@ -323,22 +395,11 @@ abstract class WidgetBuildRecorder extends Recorder
   /// consider using [WidgetRecorder].
   Widget createWidget();
 
-  /// Called once before all runs of this benchmark recorder.
-  ///
-  /// This is useful for doing one-time setup work that's needed for the
-  /// benchmark.
-  void setUpAll() {}
-
-  /// Called once after all runs of this benchmark recorder.
-  ///
-  /// This is useful for doing one-time clean up work after the benchmark is
-  /// complete.
-  void tearDownAll() {}
-
   @override
-  Profile profile;
+  VoidCallback didStop;
 
-  final Completer<Profile> _profileCompleter = Completer<Profile>();
+  Profile profile;
+  Completer<void> _runCompleter;
 
   Stopwatch _drawFrameStopwatch;
 
@@ -361,7 +422,10 @@ abstract class WidgetBuildRecorder extends Recorder
   @override
   @mustCallSuper
   void frameWillDraw() {
-    _drawFrameStopwatch = Stopwatch()..start();
+    if (showWidget) {
+      startMeasureFrame();
+      _drawFrameStopwatch = Stopwatch()..start();
+    }
   }
 
   @override
@@ -369,6 +433,7 @@ abstract class WidgetBuildRecorder extends Recorder
   void frameDidDraw() {
     // Only record frames that show the widget.
     if (showWidget) {
+      endMeasureFrame();
       profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed);
     }
 
@@ -376,28 +441,31 @@ abstract class WidgetBuildRecorder extends Recorder
       showWidget = !showWidget;
       _hostState._setStateTrampoline();
     } else {
-      _profileCompleter.complete(profile);
+      didStop();
+      _runCompleter.complete();
     }
   }
 
   @override
   void _onError(dynamic error, StackTrace stackTrace) {
-    _profileCompleter.completeError(error, stackTrace);
+    _runCompleter.completeError(error, stackTrace);
   }
 
   @override
-  Future<Profile> run() {
-    profile = Profile(name: name);
-    setUpAll();
+  Future<Profile> run() async {
+    _runCompleter = Completer<void>();
+    final Profile localProfile = profile = Profile(name: name);
     final _RecordingWidgetsBinding binding =
         _RecordingWidgetsBinding.ensureInitialized();
     binding._beginRecording(this, _WidgetBuildRecorderHost(this));
 
-    _profileCompleter.future.whenComplete(() {
-      tearDownAll();
+    try {
+      await _runCompleter.future;
+      return localProfile;
+    } finally {
+      _runCompleter = null;
       profile = null;
-    });
-    return _profileCompleter.future;
+    }
   }
 }
 
@@ -433,7 +501,9 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 /// calculations will only apply to the latest [_kMeasuredSampleCount] data
 /// points.
 class Timeseries {
-  Timeseries();
+  Timeseries(this.name);
+
+  final String name;
 
   /// List of all the values that have been recorded.
   ///
@@ -450,14 +520,28 @@ class Timeseries {
   /// because of the sample size limit.
   int get count => _allValues.length;
 
-  double get average => _computeMean(_measuredValues);
+  /// Computes the average value of the measured values.
+  double get average => _computeAverage(name, _measuredValues);
 
+  /// Computes the standard deviation of the measured values.
   double get standardDeviation =>
-      _computeStandardDeviationForPopulation(_measuredValues);
+      _computeStandardDeviationForPopulation(name, _measuredValues);
 
-  double get noise => standardDeviation / average;
+  /// Computes noise as a multiple of the [average] value.
+  ///
+  /// This value can be multiplied by 100.0 to get noise as a percentage of
+  /// the average.
+  ///
+  /// If [average] is zero, treats the result as perfect score, returns zero.
+  double get noise => average > 0.0 ? standardDeviation / average : 0.0;
 
+  /// Adds a value to this timeseries.
   void add(num value) {
+    if (value < 0.0) {
+      throw StateError(
+        'Timeseries $name: negative metric values are not supported. Got: $value',
+      );
+    }
     _measuredValues.add(value);
     _allValues.add(value);
     // Don't let the [_measuredValues] list grow beyond [_kMeasuredSampleCount].
@@ -488,7 +572,7 @@ class Profile {
   }
 
   void addDataPoint(String key, Duration duration) {
-    scoreData.putIfAbsent(key, () => Timeseries()).add(duration.inMicroseconds);
+    scoreData.putIfAbsent(key, () => Timeseries(key)).add(duration.inMicroseconds);
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -599,7 +683,11 @@ class Profile {
 }
 
 /// Computes the arithmetic mean (or average) of given [values].
-double _computeMean(Iterable<num> values) {
+double _computeAverage(String label, Iterable<num> values) {
+  if (values.isEmpty) {
+    throw StateError('$label: attempted to compute an average of an empty value list.');
+  }
+
   final num sum = values.reduce((num a, num b) => a + b);
   return sum / values.length;
 }
@@ -611,8 +699,11 @@ double _computeMean(Iterable<num> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double _computeStandardDeviationForPopulation(Iterable<num> population) {
-  final double mean = _computeMean(population);
+double _computeStandardDeviationForPopulation(String label, Iterable<num> population) {
+  if (population.isEmpty) {
+    throw StateError('$label: attempted to compute the standard deviation of empty population.');
+  }
+  final double mean = _computeAverage(label, population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
     (double previous, num value) => previous += math.pow(value - mean, 2),
@@ -626,9 +717,10 @@ String _ratioToPercent(double value) {
 
 /// Implemented by recorders that use [_RecordingWidgetsBinding] to receive
 /// frame life-cycle calls.
-abstract class RecordingWidgetsBindingListener {
-  /// The profile where the benchmark is collecting metrics.
-  Profile profile;
+abstract class FrameRecorder {
+  /// Called by the recorder when it stops recording and doesn't need to collect
+  /// any more data.
+  set didStop(VoidCallback cb);
 
   /// Called just before calling [SchedulerBinding.handleDrawFrame].
   void frameWillDraw();
@@ -653,8 +745,8 @@ abstract class RecordingWidgetsBindingListener {
 class _RecordingWidgetsBinding extends BindingBase
     with
         GestureBinding,
-        ServicesBinding,
         SchedulerBinding,
+        ServicesBinding,
         PaintingBinding,
         SemanticsBinding,
         RendererBinding,
@@ -667,56 +759,105 @@ class _RecordingWidgetsBinding extends BindingBase
     return WidgetsBinding.instance as _RecordingWidgetsBinding;
   }
 
-  RecordingWidgetsBindingListener _listener;
+  FrameRecorder _recorder;
   bool _hasErrored = false;
 
-  void _beginRecording(
-      RecordingWidgetsBindingListener recorder, Widget widget) {
+  /// To short-circuit all frame lifecycle methods when the benchmark has
+  /// stopped collecting data.
+  bool _benchmarkStopped = false;
+
+  void _beginRecording(FrameRecorder recorder, Widget widget) {
+    if (_recorder != null) {
+      throw Exception(
+        'Cannot call _RecordingWidgetsBinding._beginRecording more than once',
+      );
+    }
     final FlutterExceptionHandler originalOnError = FlutterError.onError;
+
+    recorder.didStop = () {
+      _benchmarkStopped = true;
+    };
 
     // Fail hard and fast on errors. Benchmarks should not have any errors.
     FlutterError.onError = (FlutterErrorDetails details) {
-      if (_hasErrored) {
-        return;
-      }
-      _listener._onError(details.exception, details.stack);
-      _hasErrored = true;
+      _haltBenchmarkWithError(details.exception, details.stack);
       originalOnError(details);
     };
-    _listener = recorder;
+    _recorder = recorder;
     runApp(widget);
   }
 
-  /// To avoid calling [Profile.shouldContinue] every time [scheduleFrame] is
-  /// called, we cache this value at the beginning of the frame.
-  bool _benchmarkStopped = false;
-
-  @override
-  void handleBeginFrame(Duration rawTimeStamp) {
-    // Don't keep on truckin' if there's an error.
+  void _haltBenchmarkWithError(dynamic error, StackTrace stackTrace) {
     if (_hasErrored) {
       return;
     }
-    _benchmarkStopped = !_listener.profile.shouldContinue();
-    super.handleBeginFrame(rawTimeStamp);
+    _recorder._onError(error, stackTrace);
+    _hasErrored = true;
+  }
+
+  @override
+  void handleBeginFrame(Duration rawTimeStamp) {
+    // Don't keep on truckin' if there's an error or the benchmark has stopped.
+    if (_hasErrored || _benchmarkStopped) {
+      return;
+    }
+    try {
+      super.handleBeginFrame(rawTimeStamp);
+    } catch (error, stackTrace) {
+      _haltBenchmarkWithError(error, stackTrace);
+      rethrow;
+    }
   }
 
   @override
   void scheduleFrame() {
-    // Don't keep on truckin' if there's an error.
-    if (!_benchmarkStopped && !_hasErrored) {
-      super.scheduleFrame();
+    // Don't keep on truckin' if there's an error or the benchmark has stopped.
+    if (_hasErrored || _benchmarkStopped) {
+      return;
     }
+    super.scheduleFrame();
   }
 
   @override
   void handleDrawFrame() {
-    // Don't keep on truckin' if there's an error.
-    if (_hasErrored) {
+    // Don't keep on truckin' if there's an error or the benchmark has stopped.
+    if (_hasErrored || _benchmarkStopped) {
       return;
     }
-    _listener.frameWillDraw();
-    super.handleDrawFrame();
-    _listener.frameDidDraw();
+    try {
+      _recorder.frameWillDraw();
+      super.handleDrawFrame();
+      _recorder.frameDidDraw();
+    } catch (error, stackTrace) {
+      _haltBenchmarkWithError(error, stackTrace);
+      rethrow;
+    }
   }
+}
+
+int _currentFrameNumber = 1;
+
+/// Adds a marker indication the beginning of frame rendering.
+///
+/// This adds an event to the performance trace used to find measured frames in
+/// Chrome tracing data. The tracing data contains all frames, but some
+/// benchmarks are only interested in a subset of frames. For example,
+/// [WidgetBuildRecorder] only measures frames that build widgets, and ignores
+/// frames that clear the screen.
+void startMeasureFrame() {
+  html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
+}
+
+/// Signals the end of a measured frame.
+///
+/// See [startMeasureFrame] for details on what this instrumentation is used
+/// for.
+void endMeasureFrame() {
+  html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
+  html.window.performance.measure(
+    'measured_frame',
+    'measured_frame_start#$_currentFrameNumber',
+    'measured_frame_end#$_currentFrameNumber',
+  );
+  _currentFrameNumber += 1;
 }
