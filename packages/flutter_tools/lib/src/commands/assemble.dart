@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -155,7 +156,9 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
-      engineVersion: globals.flutterVersion.engineRevision
+      engineVersion: globals.artifacts is LocalEngineArtifacts
+        ? null
+        : globals.flutterVersion.engineRevision
     );
     return result;
   }

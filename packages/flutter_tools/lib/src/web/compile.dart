@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -59,7 +60,9 @@ Future<void> buildWeb(
       logger: globals.logger,
       processManager: globals.processManager,
       cacheDir: globals.cache.getRoot(),
-      engineVersion: globals.flutterVersion.engineRevision,
+      engineVersion: globals.artifacts is LocalEngineArtifacts
+        ? null
+        : globals.flutterVersion.engineRevision,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     ));
     if (!result.success) {

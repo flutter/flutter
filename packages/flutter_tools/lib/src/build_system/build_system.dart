@@ -284,6 +284,8 @@ abstract class Target {
 ///    }
 class Environment {
   /// Create a new [Environment] object.
+  ///
+  /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
     @required Directory projectDir,
     @required Directory outputDir,
