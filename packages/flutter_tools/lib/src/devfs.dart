@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vmservice;
 
 import 'asset.dart';
 import 'base/context.dart';
@@ -439,7 +439,7 @@ class DevFS {
     globals.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       _baseUri = await _operations.create(fsName);
-    } on rpc.RpcException catch (rpcException) {
+    } on vmservice.RPCError catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
         rethrow;

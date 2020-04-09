@@ -41,6 +41,15 @@ void main(List<String> arguments) {
       'delegate classes.',
   );
   parser.addOption(
+    'untranslated-messages-file',
+    help: 'The location of a file that describes the localization\n'
+      'messages have not been translated yet. Using this option will create\n'
+      'a JSON file at the target location, in the following format:\n\n'
+      '"locale": ["message_1", "message_2" ... "message_n"]\n\n'
+      'If this option is not specified, a summary of the messages that\n'
+      'have not been translated will be printed on the command line.'
+  );
+  parser.addOption(
     'output-class',
     defaultsTo: 'AppLocalizations',
     help: 'The Dart class name to use for the output localization and '
@@ -84,6 +93,7 @@ void main(List<String> arguments) {
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
+  final String untranslatedMessagesFile = results['untranslated-messages-file'] as String;
   final String classNameString = results['output-class'] as String;
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
   final String headerString = results['header'] as String;
@@ -104,7 +114,8 @@ void main(List<String> arguments) {
         headerFile: headerFile,
       )
       ..loadResources()
-      ..writeOutputFile();
+      ..writeOutputFile()
+      ..outputUnimplementedMessages(untranslatedMessagesFile);
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {

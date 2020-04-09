@@ -74,8 +74,8 @@ class TimelineSummary {
     return _percentileInMillis(_extractGpuRasterizerDrawDurations(), p);
   }
 
-  /// The number of frames that missed the [kBuildBudget] on the GPU and
-  /// therefore are in the danger of missing frames.
+  /// The number of frames that missed the [kBuildBudget] on the raster thread
+  /// and therefore are in the danger of missing frames.
   int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
       .where((Duration duration) => duration > kBuildBudget)
       .length;
