@@ -371,15 +371,17 @@ end
     final Status status = globals.logger.startProgress(
       ' ├─Assembling Flutter resources for App.framework...', timeout: timeoutConfiguration.slowOperation);
     try {
+      if (buildInfo.mode == BuildMode.debug) {
       await _bundleBuilder.build(
-        platform: TargetPlatform.ios,
-        buildInfo: buildInfo,
-        // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
-        mainPath: globals.fs.path.absolute(targetFile),
-        assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
-        precompiledSnapshot: buildInfo.mode != BuildMode.debug,
-        treeShakeIcons: boolArg('tree-shake-icons')
-      );
+          platform: TargetPlatform.ios,
+          buildInfo: buildInfo,
+          // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
+          mainPath: globals.fs.path.absolute(targetFile),
+          assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
+          precompiledSnapshot: buildInfo.mode != BuildMode.debug,
+          treeShakeIcons: boolArg('tree-shake-icons')
+        );
+      }
     } finally {
       status.stop();
     }
@@ -434,8 +436,8 @@ end
     );
     try {
       final Target target = buildInfo.isRelease
-        ? const AotAssemblyRelease()
-        : const AotAssemblyProfile();
+        ? const ReleaseIosApplicationBundle()
+        : const ProfileIosApplicationBundle();
       final Environment environment = Environment(
         projectDir: globals.fs.currentDirectory,
         outputDir: destinationDirectory,
