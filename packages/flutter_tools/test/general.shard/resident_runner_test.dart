@@ -426,7 +426,7 @@ void main() {
   }));
 
   test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
-    when(mockVMService.getSkSLs(viewId: any)).thenAnswer((Invocation invocation) async {
+    when(mockVMService.getSkSLs(viewId: anyNamed('viewId'))).thenAnswer((Invocation invocation) async {
       return <String, Object>{};
     });
     await residentRunner.writeSkSL();
@@ -439,7 +439,7 @@ void main() {
       return TargetPlatform.android_arm;
     });
     when(mockDevice.name).thenReturn('test device');
-    when(mockVMService.getSkSLs(viewId: any)).thenAnswer((Invocation invocation) async {
+    when(mockVMService.getSkSLs(viewId: anyNamed('viewId'))).thenAnswer((Invocation invocation) async {
       return <String, Object>{
         'A': 'B',
       };
