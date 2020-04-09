@@ -79,7 +79,8 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/51675,
+  // https://github.com/flutter/flutter/issues/44572
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(

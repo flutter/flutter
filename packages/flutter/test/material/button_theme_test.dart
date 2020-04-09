@@ -170,7 +170,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Theme buttonTheme ButtonTheme overrides', (WidgetTester tester) async {
     ButtonTextTheme textTheme;

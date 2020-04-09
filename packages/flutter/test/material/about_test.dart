@@ -91,7 +91,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Pirate license'), findsOneWidget);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -138,7 +138,7 @@ void main() {
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -199,7 +199,7 @@ void main() {
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
@@ -224,7 +224,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 287.0));
-  });
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54385
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
