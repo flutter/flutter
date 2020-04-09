@@ -77,6 +77,7 @@ class ButtonTheme extends InheritedTheme {
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     bool alignedDropdown = false,
+    Color textColor,
     Color buttonColor,
     Color disabledColor,
     Color focusColor,
@@ -99,6 +100,7 @@ class ButtonTheme extends InheritedTheme {
          shape: shape,
          alignedDropdown: alignedDropdown,
          layoutBehavior: layoutBehavior,
+         textColor: textColor,
          buttonColor: buttonColor,
          disabledColor: disabledColor,
          focusColor: focusColor,
@@ -268,6 +270,7 @@ class ButtonThemeData with Diagnosticable {
     ShapeBorder shape,
     this.layoutBehavior = ButtonBarLayoutBehavior.padded,
     this.alignedDropdown = false,
+    Color textColor,
     Color buttonColor,
     Color disabledColor,
     Color focusColor,
@@ -281,6 +284,7 @@ class ButtonThemeData with Diagnosticable {
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
+       _textColor = textColor,
        _buttonColor = buttonColor,
        _disabledColor = disabledColor,
        _focusColor = focusColor,
@@ -399,6 +403,18 @@ class ButtonThemeData with Diagnosticable {
   ///
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
+
+  /// The text color used by [getTextColor] to compute a text color
+  /// for all kinds of buttons.
+  ///
+  /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  /// * [getTextColor], which is used by [RaisedButton], [FlatButton], [MaterialButton],
+  /// [OutlineButton] to compute their text color.
+  final Color _textColor;
+
 
   /// The background fill color for [RaisedButton]s.
   ///
@@ -599,6 +615,7 @@ class ButtonThemeData with Diagnosticable {
   /// If [button] is not [MaterialButton.enabled], the value of
   /// [getDisabledTextColor] is returned. If the button is enabled and
   /// [buttonTextColor] is non-null, then [buttonTextColor] is returned.
+  /// If the textColor constructor paramater is given it is used.
   ///
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
@@ -616,6 +633,9 @@ class ButtonThemeData with Diagnosticable {
 
     if (button.textColor != null)
       return button.textColor;
+
+    if (_textColor != null)
+      return _textColor;
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
