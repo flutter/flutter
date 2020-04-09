@@ -233,7 +233,7 @@ void main() {
     const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
     fizzSource.accept(visitor);
 
-    expect(visitor.sources.single.path, '/bin/internal/engine.version');
+    expect(visitor.sources.single.path, contains('engine.version'));
     verifyNever(artifacts.getArtifactPath(
       any, platform: anyNamed('platform'), mode: anyNamed('mode')));
   }));
