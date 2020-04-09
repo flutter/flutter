@@ -11,14 +11,11 @@ ShellTestPlatformViewVulkan::ShellTestPlatformViewVulkan(
     PlatformView::Delegate& delegate,
     TaskRunners task_runners,
     std::shared_ptr<ShellTestVsyncClock> vsync_clock,
-    CreateVsyncWaiter create_vsync_waiter,
-    std::shared_ptr<ShellTestExternalViewEmbedder>
-        shell_test_external_view_embedder)
+    CreateVsyncWaiter create_vsync_waiter)
     : ShellTestPlatformView(delegate, std::move(task_runners)),
       create_vsync_waiter_(std::move(create_vsync_waiter)),
       vsync_clock_(vsync_clock),
-      proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()),
-      shell_test_external_view_embedder_(shell_test_external_view_embedder) {}
+      proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {}
 
 ShellTestPlatformViewVulkan::~ShellTestPlatformViewVulkan() = default;
 
@@ -32,8 +29,7 @@ void ShellTestPlatformViewVulkan::SimulateVSync() {
 
 // |PlatformView|
 std::unique_ptr<Surface> ShellTestPlatformViewVulkan::CreateRenderingSurface() {
-  return std::make_unique<OffScreenSurface>(proc_table_,
-                                            shell_test_external_view_embedder_);
+  return std::make_unique<OffScreenSurface>(proc_table_);
 }
 
 // |PlatformView|
@@ -48,12 +44,8 @@ PointerDataDispatcherMaker ShellTestPlatformViewVulkan::GetDispatcherMaker() {
 //              We need to merge this functionality back into //vulkan.
 //              https://github.com/flutter/flutter/issues/51132
 ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
-    fml::RefPtr<vulkan::VulkanProcTable> vk,
-    std::shared_ptr<ShellTestExternalViewEmbedder>
-        shell_test_external_view_embedder)
-    : valid_(false),
-      vk_(std::move(vk)),
-      shell_test_external_view_embedder_(shell_test_external_view_embedder) {
+    fml::RefPtr<vulkan::VulkanProcTable> vk)
+    : valid_(false), vk_(std::move(vk)) {
   if (!vk_ || !vk_->HasAcquiredMandatoryProcAddresses()) {
     FML_DLOG(ERROR) << "Proc table has not acquired mandatory proc addresses.";
     return;
@@ -176,11 +168,6 @@ SkMatrix ShellTestPlatformViewVulkan::OffScreenSurface::GetRootTransformation()
   SkMatrix matrix;
   matrix.reset();
   return matrix;
-}
-
-flutter::ExternalViewEmbedder*
-ShellTestPlatformViewVulkan::OffScreenSurface::GetExternalViewEmbedder() {
-  return shell_test_external_view_embedder_.get();
 }
 
 }  // namespace testing
