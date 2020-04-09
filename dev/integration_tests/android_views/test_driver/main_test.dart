@@ -17,6 +17,8 @@ Future<void> main() async {
     driver.close();
   });
 
+  // Each test below must return back to the home page after finishing.
+
   test('MotionEvent recomposition', () async {
     final SerializableFinder motionEventsListTile =
     find.byValueKey('MotionEventsListTile');
@@ -24,9 +26,8 @@ Future<void> main() async {
     await driver.waitFor(find.byValueKey('PlatformView'));
     final String errorMessage = await driver.requestData('run test');
     expect(errorMessage, '');
-  },
-  // TODO(amirh): enable this test https://github.com/flutter/flutter/issues/54022
-  skip: true);
+    await driver.tap(find.byValueKey('back'));
+  });
 
   test('AlertDialog from platform view context', () async {
     final SerializableFinder wmListTile =
@@ -38,5 +39,7 @@ Future<void> main() async {
     await driver.tap(showAlertDialog);
     final String status = await driver.getText(find.byValueKey('Status'));
     expect(status, 'Success');
+    await driver.waitFor(find.pageBack());
+    await driver.tap(find.pageBack());
   });
 }
