@@ -591,7 +591,7 @@ Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
 Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName) async {
   // Make NSPredicate concatenation easier to read.
   String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
-  String andP(List<String> clauses) => '${clauses.join(" AND ")}';
+  String andP(List<String> clauses) => clauses.join(' AND ');
   String notP(String clause) => 'NOT($clause)';
 
   final String predicate = andP(<String>[
