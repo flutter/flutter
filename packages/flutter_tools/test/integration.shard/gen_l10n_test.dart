@@ -48,7 +48,7 @@ void main() {
     }
   }
 
-  test('generated l10n classes produce expected localized strings', () async {
+  void setUpAndRunGenL10n({List<String> args}) {
     // Get the intl packages before running gen_l10n.
     final String flutterBin = globals.platform.isWindows ? 'flutter.bat' : 'flutter';
     final String flutterPath = globals.fs.path.join(getFlutterRoot(), 'bin', flutterBin);
@@ -58,8 +58,10 @@ void main() {
     final String genL10nPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart');
     final String dartBin = globals.platform.isWindows ? 'dart.exe' : 'dart';
     final String dartPath = globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', dartBin);
-    runCommand(<String>[dartPath, genL10nPath]);
+    runCommand(<String>[dartPath, genL10nPath, args?.join(' ')]);
+  }
 
+  Future<StringBuffer> runApp() async {
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
     final Completer<void> l10nEnd = Completer<void>();
@@ -75,6 +77,10 @@ void main() {
     await _flutter.run();
     await l10nEnd.future;
     await subscription.cancel();
+    return stdout;
+  }
+
+  void expectOutput(StringBuffer stdout) {
     expect(stdout.toString(),
       '#l10n 0 (--- supportedLocales tests ---)\n'
       '#l10n 1 (supportedLocales[0]: languageCode: en, countryCode: null, scriptCode: null)\n'
@@ -133,5 +139,17 @@ void main() {
       '#l10n 54 (Flutter is "amazing", times 2!)\n'
       '#l10n END\n'
     );
+  }
+
+  test('generated l10n classes produce expected localized strings', () async {
+    setUpAndRunGenL10n();
+    final StringBuffer stdout = await runApp();
+    expectOutput(stdout);
+  });
+
+  test('generated l10n classes produce expected localized strings with deferred loading', () async {
+    setUpAndRunGenL10n(args: <String>['--use-deferred-loading']);
+    final StringBuffer stdout = await runApp();
+    expectOutput(stdout);
   });
 }
