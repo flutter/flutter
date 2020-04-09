@@ -239,31 +239,6 @@ void main() {
     ]));
   });
 
-  testWithoutContext('setSemanticsEnabled forwards arguments correctly', () async {
-    final Completer<String> completer = Completer<String>();
-    final vm_service.VmService  vmService = vm_service.VmService(
-      const Stream<String>.empty(),
-      completer.complete,
-    );
-
-    unawaited(vmService.setSemanticsEnabled(
-      viewId: 'abc',
-      uiIsolateId: 'def',
-      enabled: true,
-    ));
-
-    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
-
-    expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', '_flutter.setSemanticsEnabled'),
-      containsPair('params', allOf(<Matcher>[
-        containsPair('viewId', 'abc'),
-        containsPair('enabled', true),
-        containsPair('isolateId', 'def'),
-      ]))
-    ]));
-  });
-
   testWithoutContext('getSkSLs forwards arguments correctly', () async {
     final Completer<String> completer = Completer<String>();
     final vm_service.VmService  vmService = vm_service.VmService(

@@ -443,6 +443,14 @@ class VMService implements vm_service.VmService {
     return _delegateService.onEvent(streamId);
   }
 
+  @override
+  Future<vm_service.Response> callMethod(String method, {
+    String isolateId,
+    Map<dynamic, dynamic> args,
+  }) {
+    return _delegateService.callMethod(method, isolateId: isolateId, args: args);
+  }
+
   StreamController<ServiceEvent> _getEventController(String eventName) {
     StreamController<ServiceEvent> controller = _eventControllers[eventName];
     if (controller == null) {
@@ -1536,31 +1544,7 @@ class FlutterView extends ServiceObject {
     await subscription.cancel();
   }
 
-  Future<void> setAssetDirectory(Uri assetsDirectory) async {
-    await owner.vm.vmService.setAssetDirectory(
-      viewId: id,
-      uiIsolateId: _uiIsolate.id,
-      assetsDirectory: assetsDirectory,
-    );
-  }
-
-  Future<void> setSemanticsEnabled(bool enabled) async {
-    await owner.vm.vmService.setSemanticsEnabled(
-      viewId: id,
-      uiIsolateId: _uiIsolate.id,
-      enabled: enabled,
-    );
-  }
-
-  Future<Map<String, Object>> getSkSLs() async {
-    return owner.vm.vmService.getSkSLs(viewId: id);
-  }
-
   bool get hasIsolate => _uiIsolate != null;
-
-  Future<void> flushUIThreadTasks() async {
-    await owner.vm.vmService.flushUIThreadTasks(uiIsolateId: _uiIsolate.id);
-  }
 
   @override
   String toString() => id;
@@ -1580,22 +1564,6 @@ extension FlutterVmService on vm_service.VmService {
         'viewId': viewId,
         'assetDirectory': assetsDirectory.toFilePath(windows: false),
       });
-  }
-
-  Future<void> setSemanticsEnabled({
-    @required String uiIsolateId,
-    @required String viewId,
-    @required bool enabled,
-  }) async {
-    assert(enabled != null);
-    await callMethod(
-      '_flutter.setSemanticsEnabled',
-      isolateId: uiIsolateId,
-      args: <String, dynamic>{
-        'viewId': viewId,
-        'enabled': enabled,
-      },
-    );
   }
 
   Future<Map<String, Object>> getSkSLs({
