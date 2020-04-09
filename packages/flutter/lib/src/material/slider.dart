@@ -455,7 +455,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   // Keyboard mapping for a focused slider.
   Map<LogicalKeySet, Intent> _shortcutMap;
   // Action mapping for a focused slider.
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   bool get _enabled => widget.onChanged != null;
   // Value Indicator Animation that appears on the Overlay.
@@ -488,8 +488,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const _AdjustSliderIntent.left(),
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const _AdjustSliderIntent.right(),
     };
-    _actionMap = <LocalKey, ActionFactory>{
-      _AdjustSliderIntent.intentKey: _adjustActionFactory,
+    _actionMap = <Type, Action<Intent>>{
+      _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(
+        onInvoke: _actionHandler,
+      ),
     };
   }
 
@@ -521,44 +523,39 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     widget.onChangeEnd(_lerp(value));
   }
 
-  Action _adjustActionFactory() {
-    return CallbackAction(
-      _AdjustSliderIntent.intentKey,
-      onInvoke: (FocusNode node, Intent intent) {
-        final _AdjustSliderIntent sliderIntent = intent as _AdjustSliderIntent;
-        final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
-        final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext);
-        switch (sliderIntent.type) {
-          case _SliderAdjustmentType.right:
-            switch (textDirection) {
-              case TextDirection.rtl:
-                renderSlider.decreaseAction();
-                break;
-              case TextDirection.ltr:
-                renderSlider.increaseAction();
-                break;
-            }
+  void _actionHandler (_AdjustSliderIntent intent) {
+    final _RenderSlider renderSlider = _renderObjectKey.currentContext.findRenderObject() as _RenderSlider;
+    final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext);
+    switch (intent.type) {
+      case _SliderAdjustmentType.right:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            renderSlider.decreaseAction();
             break;
-          case _SliderAdjustmentType.left:
-            switch (textDirection) {
-              case TextDirection.rtl:
-                renderSlider.increaseAction();
-                break;
-              case TextDirection.ltr:
-                renderSlider.decreaseAction();
-                break;
-            }
-            break;
-          case _SliderAdjustmentType.up:
+          case TextDirection.ltr:
             renderSlider.increaseAction();
             break;
-          case _SliderAdjustmentType.down:
+        }
+        break;
+      case _SliderAdjustmentType.left:
+        switch (textDirection) {
+          case TextDirection.rtl:
+            renderSlider.increaseAction();
+            break;
+          case TextDirection.ltr:
             renderSlider.decreaseAction();
             break;
         }
-      }
-    );
+        break;
+      case _SliderAdjustmentType.up:
+        renderSlider.increaseAction();
+        break;
+      case _SliderAdjustmentType.down:
+        renderSlider.decreaseAction();
+        break;
+    }
   }
+
   bool _focused = false;
   void _handleFocusHighlightChanged(bool focused) {
     if (focused != _focused) {
@@ -1469,27 +1466,17 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 }
 
 class _AdjustSliderIntent extends Intent {
-  _AdjustSliderIntent({
+  const _AdjustSliderIntent({
     @required this.type
-  }) : super(intentKey);
+  });
 
-  const _AdjustSliderIntent.right() :
-        type = _SliderAdjustmentType.right,
-        super(intentKey);
+  const _AdjustSliderIntent.right() : type = _SliderAdjustmentType.right;
 
-  const _AdjustSliderIntent.left() :
-        type = _SliderAdjustmentType.left,
-        super(intentKey);
+  const _AdjustSliderIntent.left() : type = _SliderAdjustmentType.left;
 
-  const _AdjustSliderIntent.up() :
-        type = _SliderAdjustmentType.up,
-        super(intentKey);
+  const _AdjustSliderIntent.up() : type = _SliderAdjustmentType.up;
 
-  const _AdjustSliderIntent.down() :
-        type = _SliderAdjustmentType.down,
-        super(intentKey);
-
-  static const LocalKey intentKey = ValueKey<Type>(_AdjustSliderIntent);
+  const _AdjustSliderIntent.down() : type = _SliderAdjustmentType.down;
 
   final _SliderAdjustmentType type;
 }

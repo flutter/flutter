@@ -991,9 +991,9 @@ void main() {
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.thumbColor)
-        ..path(color: sliderTheme.valueIndicatorColor),
+        ..circle(color: sliderTheme.thumbColor),
     );
+    expect(valueIndicatorBox, paints..path(color: sliderTheme.valueIndicatorColor));
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
@@ -1019,9 +1019,9 @@ void main() {
         ..circle(color: customColor2) // 2nd tick mark
         ..circle(color: customColor2) // 3rd tick mark
         ..circle(color: customColor1) // 4th tick mark
-        ..circle(color: customColor1) // thumb
-        ..path(color: customColor1), // indicator
+        ..circle(color: customColor1) // thumb,
     );
+    expect(valueIndicatorBox, paints..path(color: customColor1));
     await gesture.up();
   });
 
@@ -1785,18 +1785,30 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  value: '50%',
-                  increasedValue: '55%',
-                  decreasedValue: '45%',
-                  textDirection: TextDirection.ltr,
-                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          value: '50%',
+                          increasedValue: '55%',
+                          decreasedValue: '45%',
+                          textDirection: TextDirection.ltr,
+                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
-            )
+            ),
           ],
         ),
         ignoreRect: true,
@@ -1825,10 +1837,22 @@ void main() {
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics.rootChild(
-              id: 3,
-            )
-          ]
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 5,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
         ignoreRect: true,
         ignoreTransform: true,
@@ -1869,18 +1893,30 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  value: '50%',
-                  increasedValue: '60%',
-                  decreasedValue: '40%',
-                  textDirection: TextDirection.ltr,
-                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          value: '50%',
+                          increasedValue: '60%',
+                          decreasedValue: '40%',
+                          textDirection: TextDirection.ltr,
+                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
-            )
+            ),
           ],
         ),
         ignoreRect: true,
@@ -1919,18 +1955,30 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 1,
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+              textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
-                  value: '40',
-                  increasedValue: '60',
-                  decreasedValue: '20',
-                  textDirection: TextDirection.ltr,
-                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 4,
+                          value: '40',
+                          increasedValue: '60',
+                          decreasedValue: '20',
+                          textDirection: TextDirection.ltr,
+                          actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
-            )
+            ),
           ],
         ),
         ignoreRect: true,

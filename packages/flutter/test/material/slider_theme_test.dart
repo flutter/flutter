@@ -142,10 +142,10 @@ void main() {
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: true));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(color: customTheme.disabledActiveTrackColor)
         ..rrect(color: customTheme.disabledInactiveTrackColor),
@@ -266,7 +266,7 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     const Radius radius = Radius.circular(2);
     const Radius activatedRadius = Radius.circular(3);
@@ -274,7 +274,7 @@ void main() {
     // The enabled slider thumb has track segments that extend to and from
     // the center of the thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
@@ -285,7 +285,7 @@ void main() {
 
     // The disabled slider thumb is the same size as the enabled thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
@@ -821,11 +821,11 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Top and bottom are centerY (300) + and - trackRadius (8).
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
@@ -837,7 +837,7 @@ void main() {
     // The disabled thumb is smaller so the active track has to paint longer to
     // get to the edge.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
@@ -936,10 +936,10 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2, useV2Slider: true));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 26, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
@@ -950,7 +950,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 26, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
