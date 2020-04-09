@@ -580,20 +580,41 @@ class IOSSimulator extends Device {
   }
 }
 
-/// Launches the device log reader process on the host.
-Future<Process> launchDeviceLogTool(IOSSimulator device) async {
-  // Versions of iOS prior to iOS 11 log to the simulator syslog file.
-  if (await device.sdkMajorVersion < 11) {
-    return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
-  }
+/// Launches the device log reader process on the host and parses the syslog.
+@visibleForTesting
+Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
+  return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+}
 
-  // For iOS 11 and above, use /usr/bin/log to tail process logs.
-  // Run in interactive mode (via script), otherwise /usr/bin/log buffers in 4k chunks. (radar: 34420207)
+/// Launches the device log reader process on the host and parses unified logging.
+@visibleForTesting
+Future<Process> launchDeviceUnifiedLogging (IOSSimulator device, String appName) async {
+  // Make NSPredicate concatenation easier to read.
+  String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
+  String andP(List<String> clauses) => clauses.join(' AND ');
+  String notP(String clause) => 'NOT($clause)';
+
+  final String predicate = andP(<String>[
+    'eventType = logEvent',
+    if (appName != null) 'processImagePath ENDSWITH "$appName"',
+    // Either from Flutter or Swift (maybe assertion or fatal error) or from the app itself.
+    orP(<String>[
+      'senderImagePath ENDSWITH "/Flutter"',
+      'senderImagePath ENDSWITH "/libswiftCore.dylib"',
+      'processImageUUID == senderImageUUID',
+    ]),
+    // Filter out some messages that clearly aren't related to Flutter.
+    notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
+    notP('eventMessage BEGINSWITH "assertion failed: "'),
+    notP('eventMessage CONTAINS " libxpc.dylib "'),
+  ]);
+
   return processUtils.start(<String>[
-    'script', '/dev/null', '/usr/bin/log', 'stream', '--style', 'syslog', '--predicate', 'processImagePath CONTAINS "${device.id}"',
+    _xcrunPath, 'simctl', 'spawn', device.id, 'log', 'stream', '--style', 'json', '--predicate', predicate,
   ]);
 }
 
+@visibleForTesting
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
@@ -630,11 +651,18 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String get name => device.name;
 
   Future<void> _start() async {
-    // Device log.
-    await device.ensureLogsExists();
-    _deviceProcess = await launchDeviceLogTool(device);
-    _deviceProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onDeviceLine);
+    // Unified logging iOS 11 and greater (introduced in iOS 10).
+    if (await device.sdkMajorVersion >= 11) {
+      _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
+      _deviceProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onUnifiedLoggingLine);
+      _deviceProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onUnifiedLoggingLine);
+    } else {
+      // Fall back to syslog parsing.
+      await device.ensureLogsExists();
+      _deviceProcess = await launchDeviceSystemLogTool(device);
+      _deviceProcess.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSysLogDeviceLine);
+      _deviceProcess.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSysLogDeviceLine);
+    }
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
@@ -729,7 +757,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   String _lastLine;
 
-  void _onDeviceLine(String line) {
+  void _onSysLogDeviceLine(String line) {
     globals.printTrace('[DEVICE LOG] $line');
     final Match multi = _lastMessageMultipleRegex.matchAsPrefix(line);
 
@@ -748,6 +776,19 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
         _lastLineMatched = true;
       } else {
         _lastLineMatched = false;
+      }
+    }
+  }
+
+  //   "eventMessage" : "flutter: 21",
+  static final RegExp _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
+  void _onUnifiedLoggingLine(String line) {
+    // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
+    final Match eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);
+    if (eventMessageMatch != null) {
+      final dynamic decodedJson = jsonDecode(eventMessageMatch.group(1));
+      if (decodedJson is String) {
+        _linesController.add(decodedJson);
       }
     }
   }
