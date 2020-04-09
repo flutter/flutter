@@ -601,7 +601,6 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      skip: true # https://github.com/flutter/flutter/issues/54016
       environment:
         # Apple Fastlane password.
         FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
