@@ -432,12 +432,41 @@ end
       timeout: timeoutConfiguration.slowOperation,
     );
     try {
-      await _buildAotFrameworkWithAssemble(
-        buildInfo,
-        destinationDirectory,
-        targetFile,
-        true,
+      final Target target = buildInfo.isRelease
+        ? const AotAssemblyRelease()
+        : const AotAssemblyProfile();
+      final Environment environment = Environment(
+        projectDir: globals.fs.currentDirectory,
+        outputDir: destinationDirectory,
+        buildDir: _project.dartTool.childDirectory('flutter_build'),
+        cacheDir: null,
+        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+        defines: <String, String>{
+          kTargetFile: targetFile,
+          kBuildMode: getNameForBuildMode(buildInfo.mode),
+          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+          kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+          kDartDefines: jsonEncode(buildInfo.dartDefines),
+          kBitcodeFlag: 'true',
+          if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
+            kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
+          if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
+            kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
+          kIosArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64]
+            .map(getNameForDarwinArch).join(' '),
+        },
+        artifacts: globals.artifacts,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        processManager: globals.processManager,
       );
+      final BuildResult result = await _buildSystem.build(target, environment);
+      if (!result.success) {
+        for (final ExceptionMeasurement measurement in result.exceptions.values) {
+          globals.printError(measurement.exception.toString());
+        }
+        throwToolExit('The aot build failed.');
+      }
     } finally {
       status.stop();
     }
@@ -752,49 +781,6 @@ end
     if (xcframeworkResult.exitCode != 0) {
       throwToolExit(
           'Unable to create XCFramework: ${xcframeworkResult.stderr}');
-    }
-  }
-
-  Future<void> _buildAotFrameworkWithAssemble(
-    BuildInfo buildInfo,
-    Directory outputDirectory,
-    String mainDartFile,
-    bool bitcode,
-  ) async {
-    final Target target = buildInfo.isRelease
-      ? const AotAssemblyRelease()
-      : const AotAssemblyProfile();
-    final Environment environment = Environment(
-      projectDir: globals.fs.currentDirectory,
-      outputDir: outputDirectory,
-      buildDir: FlutterProject.current().dartTool.childDirectory('flutter_build'),
-      cacheDir: null,
-      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      defines: <String, String>{
-        kTargetFile: mainDartFile,
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        kDartDefines: jsonEncode(buildInfo.dartDefines),
-        kBitcodeFlag: bitcode.toString(),
-        if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
-          kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),
-        if (buildInfo?.extraFrontEndOptions?.isNotEmpty ?? false)
-          kExtraFrontEndOptions: buildInfo.extraFrontEndOptions.join(','),
-        kIosArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64]
-          .map(getNameForDarwinArch).join(' '),
-      },
-      artifacts: globals.artifacts,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-    );
-    final BuildResult result = await _buildSystem.build(target, environment);
-    if (!result.success) {
-      for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(measurement.exception.toString());
-      }
-      throwToolExit('The aot build failed.');
     }
   }
 }
