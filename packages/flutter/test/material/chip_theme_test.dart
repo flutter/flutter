@@ -164,7 +164,7 @@ void main() {
     expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
     expect(material.elevation, customTheme.elevation);
     expect(material.shadowColor, customTheme.shadowColor);
-  }, skip: isBrowser);
+  });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
