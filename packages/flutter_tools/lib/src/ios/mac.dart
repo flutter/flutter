@@ -236,8 +236,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     globals.printStatus('Watch companion app found. Adjusting build settings.');
     if (!buildForDevice && (deviceID == null || deviceID == '')) {
       globals.printError('No simulator device ID has been set.');
-      globals.printError('A device ID is required to build a flutter a flutter app with a companion watch app.');
-      globals.printError('Please run "flutter devices" to get a list of available device IDs.');
+      globals.printError('A device ID is required to build an app with a watchOS companion app.');
+      globals.printError('Please run "flutter devices" to get a list of available device IDs');
+      globals.printError('and specify one using the -d, --device-id flag.');
       return XcodeBuildResult(success: false);
     }
     if (!buildForDevice) {
