@@ -890,6 +890,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    if (kReleaseMode) {
+      final Iterable<_ErrorDiagnostic> errors = diagnostics.whereType<_ErrorDiagnostic>();
+      return errors.isNotEmpty ? errors.first.valueToString() : toStringShort();
+    }
     // Avoid wrapping lines.
     final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 4000000000);
     return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
