@@ -6,6 +6,8 @@
 import 'dart:io' as io;
 import 'package:path/path.dart' as pathlib;
 
+import 'exceptions.dart';
+
 /// Contains various environment variables, such as common file paths and command-line options.
 Environment get environment {
   _environment ??= Environment();
@@ -26,8 +28,7 @@ class Environment {
 
     for (io.Directory expectedDirectory in <io.Directory>[engineSrcDir, outDir, hostDebugUnoptDir, dartSdkDir, webUiRootDir]) {
       if (!expectedDirectory.existsSync()) {
-        io.stderr.writeln('$expectedDirectory does not exist.');
-        io.exit(1);
+        throw ToolException('$expectedDirectory does not exist.');
       }
     }
 

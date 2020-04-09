@@ -18,24 +18,6 @@ const int kMaxScreenshotWidth = 1024;
 const int kMaxScreenshotHeight = 1024;
 const double kMaxDiffRateFailure = 0.28 / 100; // 0.28%
 
-class BrowserInstallerException implements Exception {
-  BrowserInstallerException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-class DriverException implements Exception {
-  DriverException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
 abstract class PlatformBinding {
   static PlatformBinding get instance {
     if (_instance == null) {
@@ -250,14 +232,3 @@ class DevNull implements StringSink {
 }
 
 bool get isCirrus => io.Platform.environment['CIRRUS_CI'] == 'true';
-
-/// There might be proccesses started during the tests.
-///
-/// Use this list to store those Processes, for cleaning up before shutdown.
-final List<io.Process> processesToCleanUp = List<io.Process>();
-
-/// There might be temporary directories created during the tests.
-///
-/// Use this list to store those directories and for deleteing them before
-/// shutdown.
-final List<io.Directory> temporaryDirectories = List<io.Directory>();
