@@ -355,56 +355,46 @@ flutter:
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: FakePlatform(operatingSystem: 'linux'),
-      processManager: FakeProcessManager.any(),
+      processManager: mockProcessManager,
     );
     final DevicePortForwarder forwarder = device.portForwarder;
 
-    testUsingContext('returns the generated host port from stdout', () async {
+    testWithoutContext('returns the generated host port from stdout', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect((await forwarder.forward(123)).hostPort, equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('returns the supplied host port when stdout is empty', () async {
+    testWithoutContext('returns the supplied host port when stdout is empty', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       expect((await forwarder.forward(123, hostPort: 456)).hostPort, equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('returns the supplied host port when stdout is the host port', () async {
+    testWithoutContext('returns the supplied host port when stdout is the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect((await forwarder.forward(123, hostPort: 456)).hostPort, equals(456));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('throws an error when stdout is not blank nor the host port', () async {
+    testWithoutContext('throws an error when stdout is not blank nor the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
       expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('forwardedPorts returns empty list when forward failed', () {
+    testWithoutContext('forwardedPorts returns empty list when forward failed', () {
       when(mockProcessManager.runSync(argThat(contains('forward'))))
           .thenReturn(ProcessResult(0, 1, '', ''));
 
       expect(forwarder.forwardedPorts, equals(const <ForwardedPort>[]));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('disposing device disposes the portForwarder', () async {
+    testWithoutContext('disposing device disposes the portForwarder', () async {
       bool unforwardCalled = false;
       when(mockProcessManager.run(argThat(containsAll(<String>[
         'forward',
@@ -430,8 +420,6 @@ flutter:
       await device.dispose();
 
       expect(unforwardCalled, isTrue);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
     });
   });
 

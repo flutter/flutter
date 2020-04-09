@@ -380,7 +380,7 @@ void main() {
       when(device.portForwarder)
         .thenReturn(portForwarder);
       final ForwardedPort forwardedPort = ForwardedPort(hostPort, devicePort);
-      
+
       when(device.portForwarder).thenReturn(portForwarder);
       when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
         .thenAnswer((_) => mockLogReader);
