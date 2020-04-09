@@ -1837,28 +1837,29 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-testWidgets('Slider Semantics', (WidgetTester tester) async {
-  final SemanticsTester semantics = SemanticsTester(tester);
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-  await tester.pumpWidget(
-    MaterialApp(
-      home: Theme(
-        data: ThemeData.light(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: MediaQueryData.fromWindow(window),
-            child: Material(
-              child: Slider(
-                value: 100.0,
-                min: 0.0,
-                max: 200.0,
-                onChanged: (double v) { },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData.light(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Slider(
+                  value: 100.0,
+                  min: 0.0,
+                  max: 200.0,
+                  onChanged: (double v) { },
+                ),
               ),
             ),
           ),
         ),
-      ),
+      )
     );
 
     expect(
@@ -1888,36 +1889,6 @@ testWidgets('Slider Semantics', (WidgetTester tester) async {
     );
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
-
-  expect(
-    semantics,
-    hasSemantics(
-      TestSemantics.root(children: <TestSemantics>[
-        TestSemantics.rootChild(
-          id: 1,
-          textDirection: TextDirection.ltr,
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 2,
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-              children: <TestSemantics>[
-                TestSemantics(
-                  id: 3,
-                  actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
-                  value: '50%',
-                  increasedValue: '60%',
-                  decreasedValue: '40%',
-                ),
-              ],
-            ),
-          ],
-        ),
-      ]),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
-  semantics.dispose();
-}, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
