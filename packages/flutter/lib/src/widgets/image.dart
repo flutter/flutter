@@ -332,12 +332,14 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -393,6 +395,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
+    this.isAntiAlias = false,
     Map<String, String> headers,
     int cacheWidth,
     int cacheHeight,
@@ -402,6 +405,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -446,6 +450,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
@@ -457,6 +462,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
 
@@ -609,6 +615,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     String package,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
@@ -623,6 +630,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -668,6 +676,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
@@ -678,6 +687,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// The image to display.
@@ -994,6 +1004,11 @@ class Image extends StatefulWidget {
   /// application.
   final bool excludeFromSemantics;
 
+  /// Whether to paint the image with anti-aliasing.
+  ///
+  /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
+  final bool isAntiAlias;
+
   @override
   _ImageState createState() => _ImageState();
 
@@ -1196,6 +1211,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
       invertColors: _invertColors,
+      isAntiAlias: widget.isAntiAlias,
       filterQuality: widget.filterQuality,
     );
 
