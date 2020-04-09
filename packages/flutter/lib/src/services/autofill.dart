@@ -5,77 +5,619 @@
 import 'package:flutter/foundation.dart';
 import 'text_input.dart';
 
-// TODO(LongCatIsLooong): expand the list to include every predefined value.
 /// A collection of commonly used autofill hint strings on different platforms.
 ///
 /// Each hint may not be supported on every platform, and may get translated to
 /// different strings on different platforms. Please refer to their documentation
-/// for what they corresponds to on each platform.
+/// for what each value corresponds to on different platforms.
 class AutofillHints {
   AutofillHints._();
 
+  /// The input field expects an address locality (city/town).
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_LOCALITY](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [addressCity](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String addressCity = 'addressCity';
+
+  /// The input field expects a city name combined with a state name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [addressCityAndState](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String addressCityAndState = 'addressCityAndState';
+
+  /// The input field expects a region/state.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_REGION](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [addressState](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String addressState = 'addressState';
+
+  /// The input field expects a person's full birth date.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_BIRTH_DATE_FULL](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["bday"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String birthday = 'birthday';
+
+  /// The input field expects a person's birth day(of the month).
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_BIRTH_DATE_DAY](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["bday-day"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String birthdayDay = 'birthdayDay';
+
+  /// The input field expects a person's birth month.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_BIRTH_DATE_MONTH](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["bday-month"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String birthdayMonth = 'birthdayMonth';
+
+  /// The input field expects a person's birth year.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_BIRTH_DATE_YEAR](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["bday-year"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String birthdayYear = 'birthdayYear';
+
+  /// The input field expects an [ISO 3166-1-alpha-2](https://www.iso.org/standard/63545.html)
+  /// country code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["country"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String countryCode = 'countryCode';
+
+  /// The input field expects a country name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_COUNTRY](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [countryName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["country-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String countryName = 'countryName';
+
+  /// The input field expects a credit card expiration date.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["cc-exp"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardExpirationDate = 'creditCardExpirationDate';
+
+  /// The input field expects a credit card expiration day.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardExpirationDay = 'creditCardExpirationDay';
+
+  /// The input field expects a credit card expiration month.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["cc-exp-month"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardExpirationMonth = 'creditCardExpirationMonth';
+
+  /// The input field expects a credit card expiration year.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["cc-exp-year"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardExpirationYear = 'creditCardExpirationYear';
+
+  /// The input field expects the holder's last/family name as given on a credit
+  /// card.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["cc-family-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardFamilyName = 'creditCardFamilyName';
+
+  /// The input field expects the holder's first/given name as given on a credit
+  /// card.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["cc-given-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardGivenName = 'creditCardGivenName';
+
+  /// The input field expects the holder's middle name as given on a credit
+  /// card.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["cc-additional-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardMiddleName = 'creditCardMiddleName';
+
+  /// The input field expects the holder's full name as given on a credit card.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["cc-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardName = 'creditCardName';
+
   /// The input field expects a credit card number.
   ///
-  /// Translates to [UITextContentType.creditCardNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype/1778267-creditcardnumber)
-  /// on iOS, [.AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_NUMBER)
-  /// on Android, and [cc-number](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_CARD_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [creditCardNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["cc-number"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String creditCardNumber = 'creditCardNumber';
 
   /// The input field expects a credit card security code.
   ///
-  /// Translates to [.AUTOFILL_HINT_CREDIT_SECURITY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
-  /// on Android, and [cc-csc](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_CREDIT_SECURITY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [creditCardSecurityCode](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["cc-csc"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String creditCardSecurityCode = 'creditCardSecurityCode';
 
-  /// The input field takes a newly created password for save/update.
+  /// The input field expects the type of a credit card, for example "Visa".
   ///
-  /// Translates to [UITextContentType.username](https://developer.apple.com/documentation/uikit/uitextcontenttype/2980929-newpassword),
-  /// on iOS, [.AUTOFILL_HINT_NEW_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_PASSWORD)
-  /// on Android, and [new-password](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["cc-type"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String creditCardType = 'creditCardType';
+
+  /// The input field expects an email address.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_EMAIL_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [emailAddress](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["email"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String email = 'email';
+
+  /// The input field expects a person's last/family name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_FAMILY](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [familyName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["family-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String familyName = 'familyName';
+
+  /// The input field expects a street address that fully identifies a location.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_STREET_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [fullStreetAddress](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["street-address"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String fullStreetAddress = 'fullStreetAddress';
+
+  /// The input field expects a gender.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_GENDER](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["sex"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String gender = 'gender';
+
+  /// The input field expects a person's first/given name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_GIVEN](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [givenName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["given-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String givenName = 'givenName';
+
+  /// The input field expects a URL representing an instant messaging protocol
+  /// endpoint.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["impp"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String impp = 'impp';
+
+  /// The input field expects a job title.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [jobTitle](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["organization-title"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String jobTitle = 'jobTitle';
+
+  /// The input field expects the preferred language of the user.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["language"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String language = 'language';
+
+  /// The input field expects a location, such as a point of interest, an
+  /// address,or another way to identify a location.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [location](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String location = 'location';
+
+  /// The input field expects a person's middle initial.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_MIDDLE_INITIAL](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String middleInitial = 'middleInitial';
+
+  /// The input field expects a person's middle name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_MIDDLE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [middleName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["additional-name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String middleName = 'middleName';
+
+  /// The input field expects a person's full name.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [name](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["name"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String name = 'name';
+
+  /// The input field expects a person's name prefix or title, such as "Dr.".
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_PREFIX](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [namePrefix](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["honorific-prefix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String namePrefix = 'namePrefix';
+
+  /// The input field expects a person's name suffix, such as "Jr.".
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PERSON_NAME_SUFFIX](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [nameSuffix](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["honorific-suffix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String nameSuffix = 'nameSuffix';
+
+  /// The input field expects a newly created password for save/update.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_NEW_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [newPassword](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["new-password"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String newPassword = 'newPassword';
 
-  /// The input field expects a telephone number.
+  /// The input field expects a newly created username for save/update.
   ///
-  /// Translates to [UITextContentType.telephoneNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649664-telephonenumber),
-  /// on iOS, [.AUTOFILL_HINT_PHONE_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PHONE_NUMBER)
-  /// on Android, and [tel](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
-  static const String telephoneNumber = 'telephoneNumber';
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String newUsername = 'newUsername';
+
+  /// The input field expects a nickname.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [nickname](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["nickname"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String nickname = 'nickname';
+
+  /// The input field expects a single-factor SMS login code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_SMS_OTP](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [oneTimeCode](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["one-time-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String oneTimeCode = 'oneTimeCode';
+
+  /// The input field expects an organization name corresponding to the person,
+  /// address, or contact information in the other fields associated with this
+  /// field.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [organizationName](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["organization"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String organizationName = 'organizationName';
+
+  /// The input field expects a password.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [password](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["current-password"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String password = 'password';
+
+  /// The input field expects a photograph, icon, or other image corresponding
+  /// to the company, person, address, or contact information in the other
+  /// fields associated with this field.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["photo"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String photo = 'photo';
+
+  /// The input field expects a postal address.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String postalAddress = 'postalAddress';
+
+  /// The input field expects an auxiliary address details.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String postalAddressExtended = 'postalAddressExtended';
+
+  /// The input field expects an extended ZIP/POSTAL cdoe.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_POSTAL_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String postalAddressExtendedPostalCode = 'postalAddressExtendedPostalCode';
+
+  /// The input field expects a postal code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_POSTAL_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [postalCode](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["postal-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String postalCode = 'postalCode';
+
+  /// The first administrative level in the address. This is typically the
+  /// province in which the address is located. In the United States, this would
+  /// be the state. In Switzerland, the canton. In the United Kingdom, the post
+  /// town.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["address-level1"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String streetAddressLevel1 = 'streetAddressLevel1';
+
+  /// The second administrative level, in addresses with at least two of them.
+  /// In countries with two administrative levels, this would typically be the
+  /// city, town, village, or other locality in which the address is located.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["address-level2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String streetAddressLevel2 = 'streetAddressLevel2';
+
+  /// The third administrative level, in addresses with at least three
+  /// administrative levels.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["address-level3"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String streetAddressLevel3 = 'streetAddressLevel3';
+
+  /// The finest-grained administrative level, in addresses which have four
+  /// levels.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["address-level4"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String streetAddressLevel4 = 'streetAddressLevel4';
 
   /// The input field expects the first line of a street address.
   ///
-  /// Translates to [UITextContentType.streetAddressLine1](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649663-streetaddressline1),
-  /// on iOS, [.AUTOFILL_HINT_POSTAL_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS)
-  /// on Android, and [address-line1](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [streetAddressLine1](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["address-line1"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine1 = 'streetAddressLine1';
 
   /// The input field expects the second line of a street address.
   ///
-  /// Translates to [UITextContentType.streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype/1649658-streetaddressline2),
-  /// on iOS, [.AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_ADDRESS](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_POSTAL_ADDRESS_EXTENDED_ADDRESS)
-  /// on Android, and [address-line2](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [streetAddressLine2](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["address-line2"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String streetAddressLine2 = 'streetAddressLine2';
 
-  /// The input field expects a password.
+  /// The input field expects the third line of a street address.
   ///
-  /// Translates to [UITextContentType.password](https://developer.apple.com/documentation/uikit/uitextcontenttype/2865813-password),
-  /// on iOS, [.AUTOFILL_HINT_PASSWORD](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_PASSWORD)
-  /// on Android, and [current-password](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
-  static const String password = 'password';
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["address-line3"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String streetAddressLine3 = 'streetAddressLine3';
+
+  /// The input field expects a sublocality.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [sublocality](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String sublocality = 'sublocality';
+
+  /// The input field expects a telephone number.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PHONE_NUMBER](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [telephoneNumber](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["tel"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumber = 'telephoneNumber';
+
+  /// The input field expects a phone number's area code, with a contry
+  /// -internal prefix applied if applicable.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["tel-area-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberAreaCode = 'telephoneNumberAreaCode';
+
+  /// The input field expects a phone number's country code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PHONE_COUNTRY_CODE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["tel-country-code"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberCountryCode = 'telephoneNumberCountryCode';
+
+  /// The input field expects the current device's phone number, usually for
+  /// Sign Up / OTP flows.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PHONE_NUMBER_DEVICE](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberDevice = 'telephoneNumberDevice';
+
+  /// The input field expects a phone number without the country code and area
+  /// code components.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["tel-local"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberLocal = 'telephoneNumberLocal';
+
+  /// The input field expects the first part of the component of the telephone
+  /// number that follows the area code, when that component is split into two
+  /// components.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["tel-local-prefix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberLocalPrefix = 'telephoneNumberLocalPrefix';
+
+  /// The input field expects the second part of the component of the telephone
+  /// number that follows the area code, when that component is split into two
+  /// components.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["tel-local-suffix"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberLocalSuffix = 'telephoneNumberLocalSuffix';
+
+  /// The input field expects a phone number without country code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_PHONE_NATIONAL](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * web: ["tel-national"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberNational = 'telephoneNumberNational';
+
+  /// The amount that the user would like for the transaction (e.g. when
+  /// entering a bid or sale price).
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["transaction-amount"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String transactionAmount = 'transactionAmount';
+
+  /// The currency that the user would prefer the transaction to use, in [ISO
+  /// 4217 currency code](https://www.iso.org/iso-4217-currency-codes.html).
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["transaction-currency"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String transactionCurrency = 'transactionCurrency';
+
+  /// The input field expects a URL.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * iOS: [URL](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["url"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String url = 'url';
 
   /// The input field expects a username or an account name.
   ///
-  /// Translates to [UITextContentType.username](https://developer.apple.com/documentation/uikit/uitextcontenttype/2866088-username),
-  /// on iOS, [.AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME)
-  /// on Android, and [username] (https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete)
-  /// on web.
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants.html).
+  /// * iOS: [username](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  /// * web: ["username"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
   static const String username = 'username';
+
+  /// The input field expects a phone number's internal extension code.
+  ///
+  /// This hint will be translated to the below values on different platforms:
+  ///
+  /// * web: ["tel-extension"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
+  /// * Otherwise, the hint string will be used as-is.
+  static const String telephoneNumberExtension = 'telephoneNumberExtension';
 }
 
 /// A collection of autofill related information that represents an [AutofillClient].
@@ -110,26 +652,27 @@ class AutofillConfiguration {
   /// autofill hint type understood by its autofill services:
   ///
   /// * On iOS, only the first hint in the list is accounted for. The hint will
-  /// be translated to a [UITextContentType](https://developer.apple.com/documentation/uikit/uitextcontenttype).
+  ///   be translated to a
+  ///   [UITextContentType](https://developer.apple.com/documentation/uikit/uitextcontenttype).
   ///
   /// * On Android, all hints in the list are translated to Android hint strings.
   ///
   /// * On web, only the first hint is accounted for and will be translated to
-  /// an "autocomplete" string.
+  ///   an "autocomplete" string.
   ///
   /// See also:
   ///
   /// * [AutofillHints], a list of autofill hint strings that is predefined on at
-  /// least one platform.
+  ///   least one platform.
   ///
   /// * [UITextContentType](https://developer.apple.com/documentation/uikit/uitextcontenttype),
-  /// the iOS equivalent.
+  ///   the iOS equivalent.
   ///
   /// * Android [autofillHints](https://developer.android.com/reference/android/view/View#setAutofillHints(java.lang.String...)),
-  /// the Android equivalent.
+  ///   the Android equivalent.
   ///
   /// * The [autocomplete](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete) attribute,
-  /// the web equivalent.
+  ///   the web equivalent.
   /// {@endtemplate}
   final List<String> autofillHints;
 
@@ -175,10 +718,10 @@ abstract class AutofillTrigger extends TextInputClient {
   AutofillScope get currentAutofillScope;
 }
 
-// Generic mixin for [AutofillClient]s.
-//
-// Provides a default implementation for [AutofillClient.autofillId] that extracts
-// the unique identifier from [AutofillClient.textInputConfiguration].
+/// Generic mixin for [AutofillClient]s.
+///
+/// Provides a default implementation for [AutofillClient.autofillId] that extracts
+/// the unique identifier from [AutofillClient.textInputConfiguration].
 mixin AutofillClientMixin implements AutofillClient {
   @override
   String get autofillId {
