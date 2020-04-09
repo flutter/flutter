@@ -57,7 +57,7 @@ void main() {
         scope.attach(client1, client1.textInputConfiguration);
 
         final Map<String, dynamic> expectedConfiguration = client1.textInputConfiguration.toJson();
-        expectedConfiguration['allFields'] = <Map<String, dynamic>>[
+        expectedConfiguration['fields'] = <Map<String, dynamic>>[
           client1.textInputConfiguration.toJson(),
           client2.textInputConfiguration.toJson(),
         ];

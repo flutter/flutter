@@ -1465,8 +1465,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
 
-      _textInputConnection = widget.autofillHints == null
-        ? currentAutofillScope?.attach(this, textInputConfiguration) ?? TextInput.attach(this, textInputConfiguration)
+      _textInputConnection = widget.autofillHints != null && currentAutofillScope != null
+        ? currentAutofillScope.attach(this, textInputConfiguration)
         : TextInput.attach(this, textInputConfiguration);
       _textInputConnection.show();
       _updateSizeAndTransform();
@@ -1915,9 +1915,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   AutofillScope get currentAutofillScope {
-    return widget.autofillHints == null
-      ? null
-      : AutofillGroup.of(context);
+    return widget.autofillHints == null ? null : AutofillGroup.of(context);
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {

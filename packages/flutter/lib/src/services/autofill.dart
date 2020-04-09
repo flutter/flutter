@@ -732,7 +732,7 @@ mixin AutofillClientMixin implements AutofillClient {
   }
 }
 
-/// An ordered group within which [AutofillClient]s that are logically connected.
+/// An ordered group within which [AutofillClient]s are logically connected.
 ///
 /// {@template flutter.services.autofill.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
@@ -792,7 +792,7 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   @override
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = super.toJson();
-    result['allFields'] = allConfigurations
+    result['fields'] = allConfigurations
       .map((TextInputConfiguration configuration) => configuration.toJson())
       .toList(growable: false);
     return result;

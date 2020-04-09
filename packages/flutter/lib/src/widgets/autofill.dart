@@ -124,7 +124,7 @@ class AutofillGroup extends StatefulWidget {
   /// In order to interact with the platform's autofill mechanism,
   /// [AutofillTrigger]s need to call [AutofillScope.attach] on their closest
   /// [AutofillScope], instead of calling [TextInputClient.attach].
-  static _AutofillGroupState of(BuildContext context) {
+  static AutofillScope of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
