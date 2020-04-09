@@ -215,6 +215,9 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvasKit()
       : mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
+  @override
+  bool get isTracingEnabled => false;
+
   static const String domBenchmarkName = 'text_dom_color_grid';
   static const String canvasBenchmarkName = 'text_canvas_color_grid';
   static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
