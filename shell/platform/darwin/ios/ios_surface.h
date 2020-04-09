@@ -83,9 +83,6 @@ class IOSSurface : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   void FinishFrame() override;
 
-  // |ExternalViewEmbedder|
-  void EndFrame(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) override;
-
  public:
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
