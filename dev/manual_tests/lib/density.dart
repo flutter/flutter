@@ -445,12 +445,14 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان طويل نسبيا' : 'This is a relatively long title'),
+                onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
                 subtitle:
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 trailing: Icon(Icons.check_box),
+                onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
@@ -458,6 +460,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 leading: Icon(Icons.check_box),
                 dense: true,
+                onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
@@ -466,6 +469,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 dense: true,
                 leading: Icon(Icons.add_box),
                 trailing: Icon(Icons.check_box),
+                onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
@@ -474,6 +478,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 isThreeLine: true,
                 leading: Icon(Icons.add_box),
                 trailing: Icon(Icons.check_box),
+                onTap: () {},
               ),
             ],
           ),
