@@ -191,6 +191,8 @@ if (enable_unittests) {
       "pipeline_unittests.cc",
       "shell_test.cc",
       "shell_test.h",
+      "shell_test_external_view_embedder.cc",
+      "shell_test_external_view_embedder.h",
       "shell_test_platform_view.cc",
       "shell_test_platform_view.h",
       "shell_unittests.cc",
