@@ -55,7 +55,7 @@ TEST_F(ShellTest, VSyncTargetTime) {
           return ShellTestPlatformView::Create(
               shell, shell.GetTaskRunners(), vsync_clock,
               std::move(create_vsync_waiter),
-              ShellTestPlatformView::BackendType::kDefaultBackend);
+              ShellTestPlatformView::BackendType::kDefaultBackend, nullptr);
         },
         [](Shell& shell) {
           return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());

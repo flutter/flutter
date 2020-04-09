@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_VULKAN_H_
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_VULKAN_H_
 
+#include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
 #include "flutter/vulkan/vulkan_application.h"
@@ -18,7 +19,9 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
   ShellTestPlatformViewVulkan(PlatformView::Delegate& delegate,
                               TaskRunners task_runners,
                               std::shared_ptr<ShellTestVsyncClock> vsync_clock,
-                              CreateVsyncWaiter create_vsync_waiter);
+                              CreateVsyncWaiter create_vsync_waiter,
+                              std::shared_ptr<ShellTestExternalViewEmbedder>
+                                  shell_test_external_view_embedder);
 
   ~ShellTestPlatformViewVulkan() override;
 
@@ -27,7 +30,9 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
  private:
   class OffScreenSurface : public flutter::Surface {
    public:
-    OffScreenSurface(fml::RefPtr<vulkan::VulkanProcTable> vk);
+    OffScreenSurface(fml::RefPtr<vulkan::VulkanProcTable> vk,
+                     std::shared_ptr<ShellTestExternalViewEmbedder>
+                         shell_test_external_view_embedder);
 
     ~OffScreenSurface() override;
 
@@ -42,9 +47,13 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
     // |Surface|
     GrContext* GetContext() override;
 
+    flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+
    private:
     bool valid_;
     fml::RefPtr<vulkan::VulkanProcTable> vk_;
+    std::shared_ptr<ShellTestExternalViewEmbedder>
+        shell_test_external_view_embedder_;
     std::unique_ptr<vulkan::VulkanApplication> application_;
     std::unique_ptr<vulkan::VulkanDevice> logical_device_;
     sk_sp<GrContext> context_;
@@ -60,6 +69,9 @@ class ShellTestPlatformViewVulkan : public ShellTestPlatformView {
   std::shared_ptr<ShellTestVsyncClock> vsync_clock_;
 
   fml::RefPtr<vulkan::VulkanProcTable> proc_table_;
+
+  std::shared_ptr<ShellTestExternalViewEmbedder>
+      shell_test_external_view_embedder_;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
