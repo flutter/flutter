@@ -494,11 +494,11 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       return false;
     }
     for (final String target in targets) {
-      // Create path to Info.plist file of the target.
-      final String infoFile = globals.fs.path.join(hostAppRoot.path, target, 'Info.plist');
+      // Create Info.plist file of the target.
+      final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
       // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
       // if it is a watchOS companion app.
-      if (PlistParser.instance.getValueFromFile(infoFile, 'WKCompanionAppBundleIdentifier') == bundleIdentifier) {
+      if (infoFile.existsSync() && PlistParser.instance.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier') == bundleIdentifier) {
         return true;
       }
     }
