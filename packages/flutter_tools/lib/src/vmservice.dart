@@ -18,7 +18,7 @@ import 'globals.dart' as globals;
 import 'version.dart';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
-const String kSetAssetBundlePathmMethod = '_flutter.setAssetBundlePath';
+const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
 const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
@@ -1563,7 +1563,7 @@ extension FlutterVmService on vm_service.VmService {
     @required String uiIsolateId,
   }) async {
     assert(assetsDirectory != null);
-    await callMethod(kSetAssetBundlePathmMethod,
+    await callMethod(kSetAssetBundlePathMethod,
       isolateId: uiIsolateId,
       args: <String, dynamic>{
         'viewId': viewId,

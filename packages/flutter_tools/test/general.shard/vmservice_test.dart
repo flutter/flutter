@@ -230,7 +230,7 @@ void main() {
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
     expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', kSetAssetBundlePathmMethod),
+      containsPair('method', kSetAssetBundlePathMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
         containsPair('assetDirectory', '/abc'),
