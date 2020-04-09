@@ -646,8 +646,15 @@ class AutofillConfiguration {
   /// [AutofillClient].
   ///
   /// {@template flutter.services.autofill.autofillHints}
-  /// The common values of each hint can be found in [AutofillHints]. Using a custom
-  /// string value is not recommended as it may not be understood by the platform.
+  /// For the best results, hint strings need to be understood by the platform's
+  /// autofill service. The common values of hint strings can be found in
+  /// [AutofillHints], as well as the platforms that understand each of them.
+  ///
+  /// If an autofillable input field needs to use a custom hint that translate to
+  /// different strings on different platforms, the easiest way to achieve that
+  /// is to return different hint strings based on the value of
+  /// [defaultTargetPlatform].
+  ///
   /// Each hint in the list, if not ignored, will be translated to the platform's
   /// autofill hint type understood by its autofill services:
   ///

@@ -143,13 +143,21 @@ class _AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
     void visit(Element element) {
       if (element is AutofillScope)
         return;
+
       if (element is AutofillClient) {
         clients.add(element as AutofillClient);
-      } else if (element is StatefulElement && element.state is AutofillClient) {
-        clients.add(element.state as AutofillClient);
-      } else {
-        element.visitChildElements(visit);
+        return;
       }
+
+      if (element is StatefulElement) {
+        if (element.state is AutofillScope)
+          return;
+        if (element.state is AutofillClient)
+          clients.add(element.state as AutofillClient);
+          return;
+      }
+
+      element.visitChildElements(visit);
     }
 
     context.visitChildElements(visit);
