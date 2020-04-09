@@ -234,7 +234,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         scheme: 'package',
         pathSegments: request.requestedUri.pathSegments.skip(1),
       ));
-      print('URI: $fileUri');
       final String dirname = p.dirname(fileUri.toFilePath());
       final String basename = p.basename(fileUri.toFilePath());
       final shelf.Handler handler = createStaticHandler(dirname);
