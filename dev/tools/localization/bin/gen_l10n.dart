@@ -85,16 +85,19 @@ void main(List<String> arguments) {
     'use-deferred-loading',
     defaultsTo: false,
     help: 'Whether to generate the Dart localization file with locales imported'
-      ' as deferred, to allow for lazy loading of localizations in Flutter web.'
-      '\n\nThis can reduce a web app’s initial startup time by decreasing the '
-      'size of the JavaScript bundle. When the localizations are used, they '
-      'will be downloaded and loaded. For projects with a lot of different '
+      ' as deferred, allowing for lazy loading of each locale in Flutter web.\n'
+      '\n'
+      'This can reduce a web app’s initial startup time by decreasing the '
+      'size of the JavaScript bundle. When this flag is set to true, the '
+      'messages for a particular locale are only downloaded and loaded by the '
+      'Flutter app as they are needed. For projects with a lot of different '
       'locales and many localization strings, it can be an performance '
       'improvement to have deferred loading. For projects with a small number '
       'of locales, the difference is negligible, and might slow down the start '
       'up compared to bundling the localizations with the rest of the '
-      'application.\n\nNote that this flag does not affect other platforms such'
-      ' as mobile or desktop.',
+      'application.\n\n'
+      'Note that this flag does not affect other platforms such as mobile or '
+      'desktop.',
   );
 
   final argslib.ArgResults results = parser.parse(arguments);

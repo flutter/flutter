@@ -459,15 +459,16 @@ class LocalizationsGenerator {
   final Map<LocaleInfo, List<String>> _unimplementedMessages = <LocaleInfo, List<String>>{};
 
   /// Whether to generate the Dart localization file with locales imported as
-  /// deferred, to allow for lazy loading of localizations in Flutter web.
+  /// deferred, allowing for lazy loading of each locale in Flutter web.
   ///
   /// This can reduce a web app’s initial startup time by decreasing the size of
-  /// the JavaScript bundle. When the localizations are used, they will be
-  /// downloaded and loaded. For projects with a lot of different locales and
-  /// many localization strings, it can be an performance improvement to have
-  /// deferred loading. For projects with a small number of locales, the
-  /// difference is negligible, and might slow down the start up compared to
-  /// bundling the localizations with the rest of the application.
+  /// the JavaScript bundle. When [_useDeferredLoading] is set to true, the
+  /// messages for a particular locale are only downloaded and loaded by the
+  /// Flutter app as they are needed. For projects with a lot of different
+  /// locales and many localization strings, it can be an performance
+  /// improvement to have deferred loading. For projects with a small number of
+  /// locales, the difference is negligible, and might slow down the start up
+  /// compared to bundling the localizations with the rest of the application.
   ///
   /// Note that this flag does not affect other platforms such as mobile or
   /// desktop.
