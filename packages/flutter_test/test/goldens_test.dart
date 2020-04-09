@@ -52,8 +52,8 @@ void main() {
   }
 
   void test(String description, FutureOr<void> body()) {
-    test_package.test(description, () {
-      io.IOOverrides.runZoned<FutureOr<void>>(
+    test_package.test(description, () async {
+      await io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -180,7 +180,7 @@ void main() {
           comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
           fs.file(fix('subdir/golden.png'))
             ..createSync(recursive:true)
-            ..writeAsBytes(_kColorFailurePngBytes);
+            ..writeAsBytesSync(_kColorFailurePngBytes);
           try {
             await doComparison('subdir/golden.png');
             fail('TestFailure expected but not thrown.');

@@ -168,6 +168,7 @@ class ChipTheme extends InheritedTheme {
 ///  * [Theme] widget, which performs a similar function to [ChipTheme],
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [ChipThemeData].
+@immutable
 class ChipThemeData with Diagnosticable {
   /// Create a [ChipThemeData] given a set of exact values. All the values
   /// must be specified except for [shadowColor], [selectedShadowColor],

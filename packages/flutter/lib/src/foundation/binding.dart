@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui' as ui show AppLifecycleState, saveCompilationTrace, Window, window;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -551,6 +551,29 @@ abstract class BindingBase {
       }
     });
   }
+
+  // TODO(goderbauer): Remove the next two members after the service/scheduler dependencies
+  //  have been turned around.
+
+  /// Whether the application is visible, and if so, whether it is currently
+  /// interactive.
+  ///
+  /// This is set by [handleAppLifecycleStateChanged] when the
+  /// [SystemChannels.lifecycle] notification is dispatched.
+  ///
+  /// The preferred way to watch for changes to this value is using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ui.AppLifecycleState get lifecycleState => null;
+
+  /// Called when the application lifecycle state changes.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
+  @protected
+  @mustCallSuper
+  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) { }
 
   @override
   String toString() => '<${objectRuntimeType(this, 'BindingBase')}>';

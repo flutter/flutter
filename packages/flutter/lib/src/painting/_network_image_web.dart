@@ -13,6 +13,7 @@ import 'image_stream.dart';
 /// The dart:html implementation of [image_provider.NetworkImage].
 ///
 /// NetworkImage on the web does not support decoding to a specified size.
+@immutable
 class NetworkImage
     extends image_provider.ImageProvider<image_provider.NetworkImage>
     implements image_provider.NetworkImage {

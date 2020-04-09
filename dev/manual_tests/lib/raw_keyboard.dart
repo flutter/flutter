@@ -109,6 +109,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('scanCode: ${data.scanCode}'));
             dataText.add(Text('unicodeScalarValues: ${data.unicodeScalarValues}'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
+          } else if (data is RawKeyEventDataWindows) {
+            dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
+            dataText.add(Text('scanCode: ${data.scanCode}'));
+            dataText.add(Text('characterCodePoint: ${data.characterCodePoint}'));
+            dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
           }
           dataText.add(Text('logical: ${_event.logicalKey}'));
           dataText.add(Text('physical: ${_event.physicalKey}'));

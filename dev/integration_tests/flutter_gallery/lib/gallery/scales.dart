@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+@immutable
 class GalleryTextScaleValue {
   const GalleryTextScaleValue(this.scale, this.label);
 
@@ -37,6 +38,7 @@ const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScale
   GalleryTextScaleValue(2.0, 'Huge'),
 ];
 
+@immutable
 class GalleryVisualDensityValue {
   const GalleryVisualDensityValue(this.visualDensity, this.label);
 

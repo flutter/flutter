@@ -22,7 +22,7 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';
@@ -72,5 +72,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }
