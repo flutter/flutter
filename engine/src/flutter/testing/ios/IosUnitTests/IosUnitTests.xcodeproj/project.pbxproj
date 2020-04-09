@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D17A5C022D78FCD0057279F /* FlutterViewControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		0D17A5C022D78FCD0057279F /* FlutterViewControllerTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.mm */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D1CE5D8233430F400E5D880 /* FlutterChannelsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D1CE5D7233430F400E5D880 /* FlutterChannelsTest.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D4C3FB022DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D4C3FAF22DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -76,7 +76,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerTest.m; sourceTree = "<group>"; };
+		0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewControllerTest.mm; sourceTree = "<group>"; };
 		0D1CE5D7233430F400E5D880 /* FlutterChannelsTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterChannelsTest.m; sourceTree = "<group>"; };
 		0D4C3FAF22DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterPluginAppLifeCycleDelegateTest.m; sourceTree = "<group>"; };
 		0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterBinaryMessengerRelayTest.mm; sourceTree = "<group>"; };
@@ -179,7 +179,7 @@
 				0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */,
 				0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */,
 				3D8AF6172384C5420033B95F /* FlutterTextInputPluginTest.m */,
-				0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.m */,
+				0D17A5BF22D78FCD0057279F /* FlutterViewControllerTest.mm */,
 				0D4C3FAF22DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m */,
 			);
 			name = Source;
@@ -391,7 +391,7 @@
 			files = (
 				0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */,
 				3D8AF6182384C5420033B95F /* FlutterTextInputPluginTest.m in Sources */,
-				0D17A5C022D78FCD0057279F /* FlutterViewControllerTest.m in Sources */,
+				0D17A5C022D78FCD0057279F /* FlutterViewControllerTest.mm in Sources */,
 				0D1CE5D8233430F400E5D880 /* FlutterChannelsTest.m in Sources */,
 				0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */,
 				0D4C3FB022DF9F5300A67C70 /* FlutterPluginAppLifeCycleDelegateTest.m in Sources */,

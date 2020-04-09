@@ -6,6 +6,7 @@
 #import <XCTest/XCTest.h>
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 #include "FlutterBinaryMessenger.h"
 
@@ -344,67 +345,67 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
                           currentOrientation:UIInterfaceOrientationPortrait
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
                           currentOrientation:UIInterfaceOrientationPortraitUpsideDown
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
                           currentOrientation:UIInterfaceOrientationLandscapeLeft
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAll
                           currentOrientation:UIInterfaceOrientationLandscapeRight
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
                           currentOrientation:UIInterfaceOrientationPortrait
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
                           currentOrientation:UIInterfaceOrientationLandscapeLeft
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskAllButUpsideDown
                           currentOrientation:UIInterfaceOrientationLandscapeRight
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortrait
                           currentOrientation:UIInterfaceOrientationPortrait
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskPortraitUpsideDown
                           currentOrientation:UIInterfaceOrientationPortraitUpsideDown
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
                           currentOrientation:UIInterfaceOrientationLandscapeLeft
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscape
                           currentOrientation:UIInterfaceOrientationLandscapeRight
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeLeft
                           currentOrientation:UIInterfaceOrientationLandscapeLeft
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 
   [self orientationTestWithOrientationUpdate:UIInterfaceOrientationMaskLandscapeRight
                           currentOrientation:UIInterfaceOrientationLandscapeRight
                         didChangeOrientation:NO
-                        resultingOrientation:0];
+                        resultingOrientation:static_cast<UIInterfaceOrientation>(0)];
 }
 
 // Perform an orientation update test that fails when the expected outcome
@@ -465,8 +466,6 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testDoesntLoadViewInInit {
-  XCTestExpectation* expectation =
-      [[XCTestExpectation alloc] initWithDescription:@"notification called"];
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine createShell:@"" libraryURI:@""];
@@ -474,6 +473,19 @@ typedef enum UIAccessibilityContrast : NSInteger {
                                                                         nibName:nil
                                                                          bundle:nil];
   XCTAssertFalse([realVC isViewLoaded], @"shouldn't have loaded since it hasn't been shown");
+}
+
+- (void)testHideOverlay {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine createShell:@"" libraryURI:@""];
+  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
+                                                                        nibName:nil
+                                                                         bundle:nil];
+  XCTAssertFalse(realVC.prefersHomeIndicatorAutoHidden, @"");
+  [[NSNotificationCenter defaultCenter] postNotificationName:FlutterViewControllerHideHomeIndicator
+                                                      object:nil];
+  XCTAssertTrue(realVC.prefersHomeIndicatorAutoHidden, @"");
 }
 
 @end
