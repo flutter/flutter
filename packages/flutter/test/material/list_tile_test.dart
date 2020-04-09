@@ -1270,11 +1270,13 @@ void main() {
       Material.of(tester.element(find.byKey(tileKey))),
       paints
         ..rect(
-            color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          color: Colors.orange[500],
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        )
         ..rect(
-            color: const Color(0xffffffff),
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
+          color: const Color(0xffffffff),
+          rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+        ),
     );
 
     // Check when the list tile is disabled.

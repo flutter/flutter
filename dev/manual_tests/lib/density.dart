@@ -253,7 +253,9 @@ class _OptionsState extends State<Options> {
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
                             widget.model.density = widget.model.density.copyWith(
-                                horizontal: value, vertical: widget.model.density.vertical);
+                              horizontal: value,
+                              vertical: widget.model.density.vertical,
+                            );
                           },
                           value: widget.model.density.horizontal,
                         ),
@@ -280,7 +282,9 @@ class _OptionsState extends State<Options> {
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
                             widget.model.density = widget.model.density.copyWith(
-                                horizontal: widget.model.density.horizontal, vertical: value);
+                              horizontal: widget.model.density.horizontal,
+                              vertical: value,
+                            );
                           },
                           value: widget.model.density.vertical,
                         ),
@@ -379,8 +383,12 @@ class _ControlTile extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Align(
-                alignment: AlignmentDirectional.topStart,
-                child: Text(label, textAlign: TextAlign.start)),
+              alignment: AlignmentDirectional.topStart,
+              child: Text(
+                label,
+                textAlign: TextAlign.start,
+              ),
+            ),
             child,
           ],
         ),
