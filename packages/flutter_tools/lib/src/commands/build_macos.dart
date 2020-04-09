@@ -54,6 +54,7 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
+      verboseLogging: globals.logger.isVerbose,
     );
     return FlutterCommandResult.success();
   }

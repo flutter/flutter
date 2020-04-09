@@ -703,6 +703,7 @@ class GitTagVersion {
     this.devPatch,
     this.commits,
     this.hash,
+    this.gitTag,
   });
   const GitTagVersion.unknown()
     : x = null,
@@ -712,7 +713,8 @@ class GitTagVersion {
       commits = 0,
       devVersion = null,
       devPatch = null,
-      hash = '';
+      hash = '',
+      gitTag = '';
 
   /// The X in vX.Y.Z.
   final int x;
@@ -738,6 +740,9 @@ class GitTagVersion {
   /// The M in X.Y.Z-dev.N.M
   final int devPatch;
 
+  /// The git tag that is this version's closest ancestor.
+  final String gitTag;
+
   static GitTagVersion determine(ProcessUtils processUtils, {String workingDirectory, bool fetchTags = false}) {
     if (fetchTags) {
       final String channel = _runGit('git rev-parse --abbrev-ref HEAD', processUtils, workingDirectory);
@@ -752,35 +757,16 @@ class GitTagVersion {
   }
 
   // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
-  /// Check for the release tag format pre-v1.17.0
+  /// Check for the release tag format of the form x.y.z-dev.m.n
   static GitTagVersion parseLegacyVersion(String version) {
-    final RegExp versionPattern = RegExp(
-      r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
-
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
-    if (parts == null) {
-      return const GitTagVersion.unknown();
-    }
-    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
-    return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      hotfix: parsedParts[3],
-      commits: parsedParts[4],
-      hash: parts[5],
-    );
-  }
-
-  /// Check for the release tag format from v1.17.0 on
-  static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    final List<int> parsedParts = parts.take(5).map<int>(
+      (String source) => source == null ? null : int.tryParse(source)).toList();
     List<int> devParts = <int>[null, null];
     if (parts[3] != null) {
       devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
@@ -798,6 +784,38 @@ class GitTagVersion {
       devPatch: devParts[1],
       commits: parsedParts[4],
       hash: parts[5],
+      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
+    );
+  }
+
+  /// Check for the release tag format of the form x.y.z-m.n.pre
+  static GitTagVersion parseVersion(String version) {
+    final RegExp versionPattern = RegExp(
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
+    if (parts == null) {
+      return const GitTagVersion.unknown();
+    }
+    final List<int> parsedParts = parts.take(5).map<int>(
+      (String source) => source == null ? null : int.tryParse(source)).toList();
+    List<int> devParts = <int>[null, null];
+    if (parts[3] != null) {
+      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
+        .matchAsPrefix(parts[3])
+        ?.groups(<int>[1, 2])
+        ?.map<int>(
+          (String source) => source == null ? null : int.tryParse(source)
+        )?.toList() ?? <int>[null, null];
+    }
+    return GitTagVersion(
+      x: parsedParts[0],
+      y: parsedParts[1],
+      z: parsedParts[2],
+      devVersion: devParts[0],
+      devPatch: devParts[1],
+      commits: parsedParts[4],
+      hash: parts[5],
+      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-m.n.pre
     );
   }
 
@@ -821,15 +839,16 @@ class GitTagVersion {
       return '0.0.0-unknown';
     }
     if (commits == 0) {
-      if (hotfix != null) {
-        return '$x.$y.$z+hotfix.$hotfix';
-      }
-      return '$x.$y.$z';
+      return gitTag;
     }
     if (hotfix != null) {
-      return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
+      // This is an unexpected state where untagged commits exist past a hotfix
+      return '$x.$y.$z+hotfix.${hotfix + 1}.pre.$commits';
     }
-    return '$x.$y.${z + 1}-pre.$commits';
+    if (devPatch != null && devVersion != null) {
+      return '$x.$y.$z-${devVersion + 1}.0.pre.$commits';
+    }
+    return '$x.$y.${z + 1}.pre.$commits';
   }
 }
 

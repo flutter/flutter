@@ -18,12 +18,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/discovery.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages.dart';
+import 'package:package_config/package_config.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
@@ -43,14 +38,12 @@ void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
   Platform linux;
-  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-  // ignore: deprecated_member_use
-  Packages packages;
+  PackageConfig packages;
   Platform windows;
   MockHttpServer mockHttpServer;
 
   setUpAll(() async {
-    packages = await loadPackagesFile(Uri.base.resolve('.packages'));
+    packages = await loadPackageConfigUri(Uri.base.resolve('.packages'));
   });
 
   setUp(() {
@@ -354,6 +347,7 @@ void main() {
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -442,6 +436,7 @@ void main() {
   }));
 
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
       'localhost',
       8123,

@@ -570,13 +570,6 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
 
-  flutter_driver_screenshot_test_ios:
-    description: >
-      Screenshot tests running on a specifc iPhone 6.
-      The test makes sure that there is no regression while renderring an image with gl on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
-
   ios_platform_view_tests:
     description: >
       Runs end-to-end tests with platform views in the scene.
@@ -795,4 +788,14 @@ tasks:
   #     Runs end-to-end test of Flutter's Android splash behavior.
   #   stage: devicelab
   #   required_agent_capabilities: ["linux/android"]
+  #   flaky: true
+
+  # TODO(cyanglaz): Enable this test when we know how to test gold in device labs
+  # Or completely remove this test to LUCI when LUCI supports physical iOS devices.
+  # flutter_driver_screenshot_test_ios:
+  #   description: >
+  #     Screenshot tests running on a specifc iPhone 6.
+  #     The test makes sure that there is no regression while renderring an image with gl on iOS.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
   #   flaky: true
