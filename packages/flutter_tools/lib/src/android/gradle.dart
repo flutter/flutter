@@ -25,7 +25,6 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_sdk.dart';
-import 'apk_locator.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 
@@ -40,7 +39,7 @@ Directory getApkDirectory(FlutterProject project) {
     : project.android.buildDirectory
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('apk');
+        .childDirectory('flutter-apk');
 }
 
 /// The directory where the app bundle artifact is generated.
@@ -436,33 +435,7 @@ Future<void> buildGradleApp({
   final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
 
-  // If there is more than one produced APK, ask the user which one to run
-  // if there is a terminal attached. Otherwise automatically run the first.
-  File apkFile;
-  if (apkFiles.length == 1) {
-    apkFile = apkFiles.first;
-  } else if (!globals.logger.hasTerminal) {
-    globals.logger.printStatus(
-      'Automatically selected apk at ${apkFiles.first.path}. To select a '
-      'different file, use "flutter run --use-application=binary=path/to/app.apk".'
-    );
-    apkFile = apkFiles.first;
-  } else {
-    // We can only accept single characters, so display a maximum of 10 apks.
-    final List<File> possibleFiles = apkFiles.take(10).toList();
-    final StringBuffer prompt = StringBuffer('Select the APK to run: \n');
-    for (int i = 0; i < possibleFiles.length; i+= 1) {
-      final String relativePath = globals.fs.path.relative(possibleFiles[i].path, from: apkDirectory.path);
-      prompt.writeln('  $i : $relativePath');
-    }
-    globals.terminal.usesTerminalUi = true;
-    final String result = await globals.terminal.promptForCharInput(
-      List<String>.generate(possibleFiles.length, (int index) => index.toString()),
-      logger: globals.logger,
-      prompt: prompt.toString(),
-    );
-    apkFile = possibleFiles[int.tryParse(result) ?? 0];
-  }
+  final File apkFile = apkFiles.first;
 
   // Copy the first APK to app.apk, so `flutter run` can find it.
   // TODO(egarciad): Handle multiple APKs.
@@ -762,20 +735,15 @@ Iterable<File> findApkFiles(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
 ) {
-  final ApkLocator apkLocator = ApkLocator(fileSystem: globals.fs);
-  final List<File> results = apkLocator.locate(
-    getApkDirectory(project),
-    androidBuildInfo: androidBuildInfo,
-    // The result APK is copied to this path after being located.
-    excludePaths: <String>{ 'app.apk' },
-  );
-  if (results.isEmpty) {
-    _exitWithExpectedFileNotFound(
-      project: project,
-      fileExtension: '.apk',
-    );
-  }
-  return results;
+  // buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk
+  final String modeName = camelCase(androidBuildInfo.buildInfo.modeName);
+  final String apkName = <String>[
+    'app',
+    if (androidBuildInfo.buildInfo.flavor != null)
+      androidBuildInfo.buildInfo.flavor,
+    '$modeName.apk',
+  ].join('-');
+  return <File>[getApkDirectory(project).childFile(apkName)];
 }
 
 @visibleForTesting
