@@ -18,6 +18,7 @@ class ClipboardMessageHandler {
   void setDataMethodCall(
       MethodCall methodCall, ui.PlatformMessageResponseCallback callback) {
     const MethodCodec codec = JSONMethodCodec();
+    bool errorEnvelopeEncoded = false;
     _copyToClipboardStrategy
         .setData(methodCall.arguments['text'])
         .then((bool success) {
@@ -26,10 +27,15 @@ class ClipboardMessageHandler {
       } else {
         callback(codec.encodeErrorEnvelope(
             code: 'copy_fail', message: 'Clipboard.setData failed'));
+        errorEnvelopeEncoded = true;
       }
     }).catchError((dynamic _) {
-      callback(codec.encodeErrorEnvelope(
-          code: 'copy_fail', message: 'Clipboard.setData failed'));
+      // Don't encode a duplicate reply if we already failed and an error
+      // was already encoded.
+      if (!errorEnvelopeEncoded) {
+        callback(codec.encodeErrorEnvelope(
+            code: 'copy_fail', message: 'Clipboard.setData failed'));
+      }
     });
   }
 
