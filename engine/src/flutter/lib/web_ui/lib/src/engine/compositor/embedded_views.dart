@@ -69,11 +69,9 @@ class HtmlViewEmbedder {
     switch (decoded.method) {
       case 'create':
         _create(decoded, callback);
-        window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
         return;
       case 'dispose':
         _dispose(decoded, callback);
-        window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
         return;
     }
     callback(null);

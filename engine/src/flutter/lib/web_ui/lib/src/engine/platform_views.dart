@@ -50,11 +50,9 @@ void handlePlatformViewCall(
   switch (decoded.method) {
     case 'create':
       _createPlatformView(decoded, callback);
-      window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
       return;
     case 'dispose':
       _disposePlatformView(decoded, callback);
-      window._replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
       return;
   }
   callback(null);
