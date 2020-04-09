@@ -230,8 +230,10 @@ Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
         // We grab the max of the 0xAABBGGRR encoded bytes, and then convert
         // back to 0xRRGGBBAA for the actual pixel value, since this is how it
         // was historically done.
-        final int maskPixel = _toRGBA(
-            math.max(_toABGR(invertedMasterPixel), _toABGR(invertedTestPixel)));
+        final int maskPixel = _toRGBA(math.max(
+          _toABGR(invertedMasterPixel),
+          _toABGR(invertedTestPixel),
+        ));
         maskedDiffRgba.setUint32(byteOffset, maskPixel);
         isolatedDiffRgba.setUint32(byteOffset, maskPixel);
         pixelDiffCount++;
@@ -298,8 +300,12 @@ int _readAlpha(int pixel) => pixel & 0xff;
 Future<Image> _createImage(ByteData bytes, int width, int height) {
   final Completer<Image> completer = Completer<Image>();
   decodeImageFromPixels(
-      bytes.buffer.asUint8List(), width, height, PixelFormat.rgba8888,
-      completer.complete);
+    bytes.buffer.asUint8List(),
+    width,
+    height,
+    PixelFormat.rgba8888,
+    completer.complete,
+  );
   return completer.future;
 }
 
