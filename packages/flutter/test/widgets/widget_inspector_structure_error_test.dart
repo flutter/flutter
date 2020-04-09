@@ -10,11 +10,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widget_inspector_test.dart';
-
 void main() {
   StructureErrorTestWidgetInspectorService.runTests();
 }
+
+typedef InspectorServiceExtensionCallback = FutureOr<Map<String, Object>> Function(Map<String, String> parameters);
 
 class StructureErrorTestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
