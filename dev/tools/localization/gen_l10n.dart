@@ -85,7 +85,7 @@ String generateNumberFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join('');
 }
 
-String generatePluralMethod(Message message) {
+String generatePluralMethod(Message message, AppResourceBundle bundle) {
   if (message.placeholders.isEmpty) {
     throw L10nException(
       'Unable to find placeholders for the plural message: ${message.resourceId}.\n'
@@ -96,7 +96,7 @@ String generatePluralMethod(Message message) {
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String easyMessage = message.value;
+  String easyMessage = bundle.translationFor(message);
   for (final Placeholder placeholder in message.placeholders)
     easyMessage = easyMessage.replaceAll('{${placeholder.name}}', '#${placeholder.name}#');
 
@@ -123,7 +123,7 @@ String generatePluralMethod(Message message) {
     final RegExp expRE = RegExp('($pluralKey)\\s*{([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(easyMessage);
     if (match != null && match.groupCount == 2) {
-      String argValue = match.group(2);
+      String argValue = generateString(match.group(2));
       for (final Placeholder placeholder in message.placeholders) {
         if (placeholder != countPlaceholder && placeholder.requiresFormatting) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}String}');
@@ -131,7 +131,7 @@ String generatePluralMethod(Message message) {
           argValue = argValue.replaceAll('#${placeholder.name}#', '\${${placeholder.name}}');
         }
       }
-      pluralLogicArgs.add("      ${pluralIds[pluralKey]}: '$argValue'");
+      pluralLogicArgs.add('      ${pluralIds[pluralKey]}: $argValue');
     }
   }
 
@@ -155,7 +155,7 @@ String generatePluralMethod(Message message) {
 
 String generateMethod(Message message, AppResourceBundle bundle) {
   String generateMessage() {
-    String messageValue = bundle.translationFor(message);
+    String messageValue = generateString(bundle.translationFor(message));
     for (final Placeholder placeholder in message.placeholders) {
       if (placeholder.requiresFormatting) {
         messageValue = messageValue.replaceAll('{${placeholder.name}}', '\${${placeholder.name}String}');
@@ -164,11 +164,11 @@ String generateMethod(Message message, AppResourceBundle bundle) {
       }
     }
 
-    return generateString(messageValue, escapeDollar: false);
+    return messageValue;
   }
 
   if (message.isPlural) {
-    return generatePluralMethod(message);
+    return generatePluralMethod(message, bundle);
   }
 
   if (message.placeholdersRequireFormatting) {

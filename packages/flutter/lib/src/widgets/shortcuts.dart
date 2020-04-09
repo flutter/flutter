@@ -82,6 +82,7 @@ class KeySet<T extends KeyboardKey> {
   final HashSet<T> _keys;
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -99,6 +100,7 @@ class KeySet<T extends KeyboardKey> {
   int _hashCode;
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   int get hashCode {
     // Return cached hash code if available.
     if (_hashCode != null) {
@@ -284,6 +286,14 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// The optional `keysPressed` argument provides an override to keys that the
   /// [RawKeyboard] reports. If not specified, uses [RawKeyboard.keysPressed]
   /// instead.
+  ///
+  /// If a key mapping is found, then the associated action will be invoked
+  /// using the [Intent] that the [LogicalKeySet] maps to, and the currently
+  /// focused widget's context (from [FocusManager.primaryFocus]).
+  ///
+  /// The object returned is the result of [Action.invoke] being called on the
+  /// [Action] bound to the [Intent] that the key press maps to, or null, if the
+  /// key press didn't match any intent.
   @protected
   bool handleKeypress(
     BuildContext context,
@@ -314,10 +324,9 @@ class ShortcutManager extends ChangeNotifier with Diagnosticable {
     }
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus?.context;
-      if (primaryContext == null) {
-        return false;
-      }
-      return Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      assert (primaryContext != null);
+      Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      return true;
     }
     return false;
   }

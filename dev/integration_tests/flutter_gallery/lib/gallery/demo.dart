@@ -12,8 +12,9 @@ import 'demos.dart';
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
 
+@immutable
 class ComponentDemoTabData {
-  ComponentDemoTabData({
+  const ComponentDemoTabData({
     this.demoWidget,
     this.exampleCodeTag,
     this.description,

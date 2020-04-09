@@ -171,8 +171,9 @@ class Chrome {
       //   to find frames that the benchmark cares to measure.
       // gpu:
       //   provides tracing data from the GPU data
+      //   disabled due to https://bugs.chromium.org/p/chromium/issues/detail?id=1068259
       // TODO(yjbanov): extract useful GPU data
-      'categories': 'blink,blink.user_timing,gpu',
+      'categories': 'blink,blink.user_timing',
       'transferMode': 'SendAsStream',
     });
   }
@@ -281,11 +282,34 @@ class BlinkTraceSummary {
         .toList()
         ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts - b.ts);
 
+      Exception noMeasuredFramesFound() => Exception(
+        'No measured frames found in benchmark tracing data. This likely '
+        'indicates a bug in the benchmark. For example, the benchmark failed '
+        'to pump enough frames. It may also indicate a change in Chrome\'s '
+        'tracing data format. Check if Chrome version changed recently and '
+        'adjust the parsing code accordingly.',
+      );
+
+      // Use the pid from the first "measured_frame" event since the event is
+      // emitted by the script running on the process we're interested in.
+      //
+      // We previously tried using the "CrRendererMain" event. However, for
+      // reasons unknown, Chrome in the devicelab refuses to emit this event
+      // sometimes, causing to flakes.
+      final BlinkTraceEvent firstMeasuredFrameEvent = events.firstWhere(
+        (BlinkTraceEvent event) => event.isBeginMeasuredFrame,
+        orElse: () => throw noMeasuredFramesFound(),
+      );
+
+      if (firstMeasuredFrameEvent == null) {
+        // This happens in benchmarks that do not measure frames, such as some
+        // of the text layout benchmarks.
+        return null;
+      }
+
+      final int tabPid = firstMeasuredFrameEvent.pid;
+
       // Filter out data from unrelated processes
-      final BlinkTraceEvent processLabel = events
-        .where((BlinkTraceEvent event) => event.isCrRendererMain)
-        .single;
-      final int tabPid = processLabel.pid;
       events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
@@ -314,8 +338,7 @@ class BlinkTraceSummary {
       print('Skipped $skipCount non-measured frames.');
 
       if (frames.isEmpty) {
-        // The benchmark is not measuring frames.
-        return null;
+        throw noMeasuredFramesFound();
       }
 
       // Compute averages and summarize.
@@ -488,14 +511,6 @@ class BlinkTraceEvent {
   ///
   /// This event is a duration event that has its `tdur` populated.
   bool get isUpdateAllLifecyclePhases => ph == 'X' && name == 'WebViewImpl::updateAllLifecyclePhases';
-
-  /// A "CrRendererMain" event contains information about the browser's UI
-  /// thread.
-  ///
-  /// This event's [pid] field identifies the process that performs web page
-  /// rendering. The [isBeginFrame] and [isUpdateAllLifecyclePhases] events
-  /// with the same [pid] as this event all belong to the same web page.
-  bool get isCrRendererMain => name == 'thread_name' && args['name'] == 'CrRendererMain';
 
   /// Whether this is the beginning of a "measured_frame" event.
   ///

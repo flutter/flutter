@@ -481,14 +481,15 @@ class GroupedValidator extends DoctorValidator {
   }
 }
 
+@immutable
 class ValidationResult {
   /// [ValidationResult.type] should only equal [ValidationResult.installed]
   /// if no [messages] are hints or errors.
-  ValidationResult(this.type, this.messages, { this.statusInfo });
+  const ValidationResult(this.type, this.messages, { this.statusInfo });
 
   factory ValidationResult.crash(Object error, [StackTrace stackTrace]) {
     return ValidationResult(ValidationType.crash, <ValidationMessage>[
-      ValidationMessage.error(
+      const ValidationMessage.error(
           'Due to an error, the doctor check did not complete. '
           'If the error message below is not helpful, '
           'please let us know about this issue at https://github.com/flutter/flutter/issues.'),
@@ -555,10 +556,11 @@ class ValidationResult {
   }
 }
 
+@immutable
 class ValidationMessage {
-  ValidationMessage(this.message) : type = ValidationMessageType.information;
-  ValidationMessage.error(this.message) : type = ValidationMessageType.error;
-  ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
+  const ValidationMessage(this.message) : type = ValidationMessageType.information;
+  const ValidationMessage.error(this.message) : type = ValidationMessageType.error;
+  const ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
 
   final ValidationMessageType type;
   bool get isError => type == ValidationMessageType.error;
@@ -714,7 +716,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     if (pluginsPath == null) {
-      messages.add(ValidationMessage.error('Invalid IntelliJ version number.'));
+      messages.add(const ValidationMessage.error('Invalid IntelliJ version number.'));
     } else {
       messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 

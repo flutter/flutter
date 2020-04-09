@@ -38,8 +38,9 @@ class PageStorageKey<T> extends ValueKey<T> {
   const PageStorageKey(T value) : super(value);
 }
 
+@immutable
 class _StorageEntryIdentifier {
-  _StorageEntryIdentifier(this.keys)
+  const _StorageEntryIdentifier(this.keys)
     : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;

@@ -126,6 +126,9 @@ class Home extends StatelessWidget {
           callback: (BuildContext context) {
             results.add('--- zh ---');
             results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context).helloWorlds(0));
+            results.add(AppLocalizations.of(context).helloWorlds(1));
+            results.add(AppLocalizations.of(context).helloWorlds(2));
           },
         ),
         LocaleBuilder(
@@ -181,8 +184,12 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldPopulation(1, 101)}',
               '${localizations.helloWorldPopulation(2, 102)}',
               '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
               '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
             ]);
           },
         ),
@@ -376,14 +383,43 @@ void main() {
     }
   },
 
+  "dollarSign": "$!",
+  "@dollarSign": {
+    "description": "A message with a dollar sign."
+  },
+
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
+  "@dollarSignPlural": {
+    "description": "A plural message with a dollar sign.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "singleQuote": "Flutter's amazing!",
   "@singleQuote": {
     "description": "A message with a single quote."
   },
 
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}}",
+  "@singleQuotePlural": {
+    "description": "A plural message with a single quote.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "doubleQuote": "Flutter is \"amazing\"!",
   "@doubleQuote": {
     "description": "A message with double quotes."
+  },
+
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!}}",
+  "@doubleQuotePlural": {
+    "description": "A plural message with double quotes.",
+    "placeholders": {
+      "count": {}
+    }
   }
 }
 ''';
@@ -402,13 +438,14 @@ void main() {
 }
 ''';
 
-  // Only tests `helloWorld`. The rest of the messages are added out of
-  // necessity since every base class requires an override for every
-  // message.
+  // Only tests `helloWorld` and `helloWorlds`. The rest of the messages
+  // are added out of necessity since every base class requires an
+  // override for every message.
   final String appZh = r'''
 {
   "@@locale": "zh",
   "helloWorld": "你好世界",
+  "helloWorlds": "{count,plural, =0{你好} =1{你好世界} other{你好{count}个其他世界}}",
   "helloNewlineWorld": "Hello \n World",
   "hello": "Hello {world}",
   "greeting": "{hello} {world}",
@@ -417,14 +454,17 @@ void main() {
   "helloOn": "Hello {world} on {date} at {time}",
   "helloFor": "Hello for {value}",
   "helloCost": "Hello for {price} {value}",
-  "helloWorlds": "{count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}",
   "helloAdjectiveWorlds": "{count,plural, =0{Hello} =1{Hello {adjective} World} =2{Hello two {adjective} worlds} other{Hello other {count} {adjective} worlds}}",
   "helloWorldsOn": "{count,plural, =0{Hello on {date}} =1{Hello World, on {date}} =2{Hello two worlds, on {date}} other{Hello other {count} worlds, on {date}}}",
   "helloWorldPopulation": "{count,plural, =1{Hello World of {population} citizens} =2{Hello two worlds with {population} total citizens} many{Hello all {count} worlds, with a total of {population} citizens} other{Hello other {count} worlds, with a total of {population} citizens}}",
   "helloWorldInterpolation": "[{hello}] #{world}#",
   "helloWorldsInterpolation": "{count,plural, other {[{hello}] -{world}- #{count}#}}",
+  "dollarSign": "$!",
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
   "singleQuote": "Flutter's amazing!",
-  "doubleQuote": "Flutter is \"amazing\"!"
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}",
+  "doubleQuote": "Flutter is \"amazing\"!",
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!"
 }
 ''';
 
