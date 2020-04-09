@@ -105,13 +105,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
               child: const Text('PLAY FILE'),
               onPressed: () { playEventsFile(); },
             ),
-            Expanded(
-                child: RaisedButton(
-                  key: const ValueKey<String>('back'),
-                  child: const Text('BACK'),
-                  onPressed: () { Navigator.pop(context); },
-              ),
-            ),
           ],
         ),
       ],
