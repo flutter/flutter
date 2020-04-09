@@ -100,9 +100,6 @@ task:
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH
         git clone https://github.com/flutter/flutter.git
-      verify_framework_script:
-        - echo "Checking that the framework Cirrus test is not currently broken..."
-        - curl -s https://api.cirrus-ci.com/github/flutter/flutter.json | grep -q passing
       test_web_script: |
         cd $FRAMEWORK_PATH/flutter/dev/integration_tests/web
         ../../../bin/flutter config --local-engine=host_debug_unopt --no-analytics --enable-web
