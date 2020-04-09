@@ -34,9 +34,9 @@ Future<void> main() async {
   ));
   await SchedulerBinding.instance.endOfFrame;
 
-  /// Wait 50ms to allow the GPU thread to actually put up the frame. (The
-  /// endOfFrame future ends when we send the data to the engine, before the GPU
-  /// thread has had a chance to rasterize, etc.)
+  /// Wait 50ms to allow the raster thread to actually put up the frame. (The
+  /// endOfFrame future ends when we send the data to the engine, before
+  /// the raster thread has had a chance to rasterize, etc.)
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
