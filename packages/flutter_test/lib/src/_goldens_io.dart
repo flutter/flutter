@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
-import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
@@ -96,13 +96,13 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
       );
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    final ComparisonResult result = GoldenFileComparator.compareLists(
+    final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       goldenBytes,
     );
 
     if (!result.passed) {
-      generateFailureOutput(result, golden, basedir);
+      await generateFailureOutput(result, golden, basedir);
     }
     return result.passed;
   }
@@ -125,26 +125,28 @@ class LocalComparisonOutput {
   /// Writes out diffs from the [ComparisonResult] of a golden file test.
   ///
   /// Will throw an error if a null result is provided.
-  void generateFailureOutput(
+  Future<void> generateFailureOutput(
     ComparisonResult result,
     Uri golden,
     Uri basedir, {
     String key = '',
-  }) {
+  }) async {
     String additionalFeedback = '';
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
       final Map<String, Image> diffs = result.diffs.cast<String, Image>();
-      diffs.forEach((String name, Image image) {
+      for (final MapEntry<String, Image> entry in diffs.entries) {
         final File output = getFailureFile(
-          key.isEmpty ? name : name + '_' + key,
+          key.isEmpty ? entry.key : entry.key + '_' + key,
           golden,
           basedir,
         );
         output.parent.createSync(recursive: true);
-        output.writeAsBytesSync(encodePng(image));
-      });
+        final ByteData pngBytes =
+            await entry.value.toByteData(format: ImageByteFormat.png);
+        output.writeAsBytesSync(pngBytes.buffer.asUint8List());
+      }
     }
     throw test_package.TestFailure(
       'Golden "$golden": ${result.error}$additionalFeedback'
@@ -167,7 +169,7 @@ class LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-ComparisonResult compareLists(List<int> test, List<int> master) {
+Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   if (identical(test, master))
     return ComparisonResult(passed: true);
 
@@ -178,8 +180,15 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
     );
   }
 
-  final Image testImage = decodePng(test);
-  final Image masterImage = decodePng(master);
+  final Codec testImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(test));
+  final Image testImage = (await testImageCodec.getNextFrame()).image;
+  final ByteData testImageRgba = await testImage.toByteData();
+
+  final Codec masterImageCodec =
+      await instantiateImageCodec(Uint8List.fromList(master));
+  final Image masterImage = (await masterImageCodec.getNextFrame()).image;
+  final ByteData masterImageRgba = await masterImage.toByteData();
 
   assert(testImage != null);
   assert(masterImage != null);
@@ -198,32 +207,35 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
 
   int pixelDiffCount = 0;
   final int totalPixels = width * height;
-  final Image invertedMaster = invert(Image.from(masterImage));
-  final Image invertedTest = invert(Image.from(testImage));
+  final ByteData invertedMasterRgba = _invert(masterImageRgba);
+  final ByteData invertedTestRgba = _invert(testImageRgba);
 
-  final Map<String, Image> diffs = <String, Image>{
-    'masterImage' : masterImage,
-    'testImage' : testImage,
-    'maskedDiff' : Image.from(testImage),
-    'isolatedDiff' : Image(width, height),
-  };
+  final ByteData maskedDiffRgba = await testImage.toByteData();
+  final ByteData isolatedDiffRgba = ByteData(width * height * 4);
 
   for (int x = 0; x < width; x++) {
     for (int y =0; y < height; y++) {
-      final int testPixel = testImage.getPixel(x, y);
-      final int masterPixel = masterImage.getPixel(x, y);
+      final int byteOffset = (width * y + x) * 4;
+      final int testPixel = testImageRgba.getUint32(byteOffset);
+      final int masterPixel = masterImageRgba.getUint32(byteOffset);
 
-      final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
-        + (getGreen(testPixel) - getGreen(masterPixel)).abs()
-        + (getBlue(testPixel) - getBlue(masterPixel)).abs()
-        + (getAlpha(testPixel) - getAlpha(masterPixel)).abs();
+      final int diffPixel = (_readRed(testPixel) - _readRed(masterPixel)).abs()
+        + (_readGreen(testPixel) - _readGreen(masterPixel)).abs()
+        + (_readBlue(testPixel) - _readBlue(masterPixel)).abs()
+        + (_readAlpha(testPixel) - _readAlpha(masterPixel)).abs();
 
       if (diffPixel != 0 ) {
-        final int invertedMasterPixel = invertedMaster.getPixel(x, y);
-        final int invertedTestPixel = invertedTest.getPixel(x, y);
-        final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
-        diffs['maskedDiff'].setPixel(x, y, maskPixel);
-        diffs['isolatedDiff'].setPixel(x, y, maskPixel);
+        final int invertedMasterPixel = invertedMasterRgba.getUint32(byteOffset);
+        final int invertedTestPixel = invertedTestRgba.getUint32(byteOffset);
+        // We grab the max of the 0xAABBGGRR encoded bytes, and then convert
+        // back to 0xRRGGBBAA for the actual pixel value, since this is how it
+        // was historically done.
+        final int maskPixel = _toRGBA(math.max(
+          _toABGR(invertedMasterPixel),
+          _toABGR(invertedTestPixel),
+        ));
+        maskedDiffRgba.setUint32(byteOffset, maskPixel);
+        isolatedDiffRgba.setUint32(byteOffset, maskPixel);
         pixelDiffCount++;
       }
     }
@@ -235,10 +247,28 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
       error: 'Pixel test failed, '
         '${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% '
         'diff detected.',
-      diffs: diffs,
+      diffs:  <String, Image>{
+        'masterImage' : masterImage,
+        'testImage' : testImage,
+        'maskedDiff' : await _createImage(maskedDiffRgba, width, height),
+        'isolatedDiff' : await _createImage(isolatedDiffRgba, width, height),
+      },
     );
   }
   return ComparisonResult(passed: true);
+}
+
+/// Inverts [imageBytes], returning a new [ByteData] object.
+ByteData _invert(ByteData imageBytes) {
+  final ByteData bytes = ByteData(imageBytes.lengthInBytes);
+  // Invert the RGB data (but not A).
+  for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
+    bytes.setUint8(i, 255 - imageBytes.getUint8(i));
+    bytes.setUint8(i + 1, 255 - imageBytes.getUint8(i + 1));
+    bytes.setUint8(i + 2, 255 - imageBytes.getUint8(i + 2));
+    bytes.setUint8(i + 3, imageBytes.getUint8(i + 3));
+  }
+  return bytes;
 }
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
@@ -253,3 +283,40 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }
+
+/// Reads the red value out of a 32 bit rgba pixel.
+int _readRed(int pixel) => (pixel >> 24) & 0xff;
+
+/// Reads the green value out of a 32 bit rgba pixel.
+int _readGreen(int pixel) => (pixel >> 16) & 0xff;
+
+/// Reads the blue value out of a 32 bit rgba pixel.
+int _readBlue(int pixel) => (pixel >> 8) & 0xff;
+
+/// Reads the alpha value out of a 32 bit rgba pixel.
+int _readAlpha(int pixel) => pixel & 0xff;
+
+/// Convenience wrapper around [decodeImageFromPixels].
+Future<Image> _createImage(ByteData bytes, int width, int height) {
+  final Completer<Image> completer = Completer<Image>();
+  decodeImageFromPixels(
+    bytes.buffer.asUint8List(),
+    width,
+    height,
+    PixelFormat.rgba8888,
+    completer.complete,
+  );
+  return completer.future;
+}
+
+// Converts a 32 bit rgba pixel to a 32 bit abgr pixel
+int _toABGR(int rgba) =>
+    (_readAlpha(rgba) << 24) |
+    (_readBlue(rgba) << 16) |
+    (_readGreen(rgba) << 8) |
+    _readRed(rgba);
+
+// Converts a 32 bit abgr pixel to a 32 bit rgba pixel
+int _toRGBA(int abgr) =>
+  // This is just a mirror of the other conversion.
+  _toABGR(abgr);

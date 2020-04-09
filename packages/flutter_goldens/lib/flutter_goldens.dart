@@ -655,7 +655,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     for (final String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
-      result = GoldenFileComparator.compareLists(
+      result = await GoldenFileComparator.compareLists(
         imageBytes,
         goldenBytes,
       );
