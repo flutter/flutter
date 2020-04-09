@@ -100,6 +100,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   final BundleBuilder _bundleBuilder;
   final BuildSystem _buildSystem;
+  BuildSystem get buildSystem => _buildSystem ?? globals.buildSystem;
 
   Cache get _cache => _injectedCache ?? globals.cache;
   final Cache _injectedCache;
@@ -460,7 +461,7 @@ end
         logger: globals.logger,
         processManager: globals.processManager,
       );
-      final BuildResult result = await _buildSystem.build(target, environment);
+      final BuildResult result = await buildSystem.build(target, environment);
       if (!result.success) {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
           globals.printError(measurement.exception.toString());
