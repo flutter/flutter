@@ -87,7 +87,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
-  String deviceID = '',
+  String deviceID,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -234,13 +234,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     // The -sdk argument has to be omitted if a watchOS companion app exists.
     // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
     globals.printStatus('Watch companion app found. Adjusting build settings.');
-    if (! buildForDevice && deviceID == '') {
+    if (!buildForDevice && (deviceID == null || deviceID == '')) {
       globals.printError('No simulator device ID has been set.');
       globals.printError('A device ID is required to build a flutter a flutter app with a companion watch app.');
       globals.printError('Please run "flutter devices" to get a list of available device IDs.');
       return XcodeBuildResult(success: false);
     }
-    if (! buildForDevice) {
+    if (!buildForDevice) {
       buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
     }
   } else {
@@ -397,7 +397,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     // actual directory will end with 'iphonesimulator' for simulator builds.
     // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
     String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
-    if (hasWatchCompanion && ! buildForDevice) {
+    if (hasWatchCompanion && !buildForDevice) {
       targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
     }
     final String expectedOutputDirectory = globals.fs.path.join(
