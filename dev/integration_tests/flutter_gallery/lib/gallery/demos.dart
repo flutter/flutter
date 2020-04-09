@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../demo/all.dart';
 import 'icons.dart';
 
+@immutable
 class GalleryDemoCategory {
   const GalleryDemoCategory._({
     @required this.name,

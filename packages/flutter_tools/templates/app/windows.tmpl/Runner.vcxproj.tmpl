@@ -224,28 +224,32 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="runner\main.cpp" />
     <ClCompile Include="flutter\generated_plugin_registrant.cc" />
-    <ClCompile Include="window_configuration.cpp" />
-    <ClCompile Include="win32_window.cc" />
+    <ClCompile Include="runner\run_loop.cpp" />
+    <ClCompile Include="runner\window_configuration.cpp" />
+    <ClCompile Include="runner\win32_window.cpp" />
+    <ClCompile Include="runner\flutter_window.cpp" />
     <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\engine_method_result.cc" />
     <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\flutter_view_controller.cc" />
     <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\plugin_registrar.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flutter\generated_plugin_registrant.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="win32_window.h" />
-    <ClInclude Include="window_configuration.h" />
+    <ClInclude Include="runner\resource.h" />
+    <ClInclude Include="runner\run_loop.h" />
+    <ClInclude Include="runner\win32_window.h" />
+    <ClInclude Include="runner\flutter_window.h" />
+    <ClInclude Include="runner\window_configuration.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="runner.exe.manifest" />
+    <Manifest Include="runner\runner.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Runner.rc" />
+    <ResourceCompile Include="runner\Runner.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\app_icon.ico" />
+    <Image Include="runner\resources\app_icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

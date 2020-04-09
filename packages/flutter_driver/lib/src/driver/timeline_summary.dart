@@ -74,8 +74,8 @@ class TimelineSummary {
     return _percentileInMillis(_extractGpuRasterizerDrawDurations(), p);
   }
 
-  /// The number of frames that missed the [kBuildBudget] on the GPU and
-  /// therefore are in the danger of missing frames.
+  /// The number of frames that missed the [kBuildBudget] on the raster thread
+  /// and therefore are in the danger of missing frames.
   int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
       .where((Duration duration) => duration > kBuildBudget)
       .length;
@@ -103,6 +103,9 @@ class TimelineSummary {
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
         .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
+      'frame_begin_times': _extractBeginTimestamps('Frame')
+        .map<int>((Duration duration) => duration.inMicroseconds)
+        .toList()
     };
   }
 
@@ -142,10 +145,10 @@ class TimelineSummary {
       .toList();
   }
 
-  /// Extracts Duration list that are reported as a pair of begin/end events.
-  ///
-  /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
-  List<Duration> _extractBeginEndEvents(String name) {
+  List<Duration> _extractDurations(
+    String name,
+    Duration extractor(TimelineEvent beginEvent, TimelineEvent endEvent),
+  ) {
     final List<Duration> result = <Duration>[];
 
     // Timeline does not guarantee that the first event is the "begin" event.
@@ -155,10 +158,37 @@ class TimelineSummary {
       final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;
-        result.add(Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros));
+        result.add(extractor(beginEvent, endEvent));
       }
     }
 
+    return result;
+  }
+
+  /// Extracts Duration list that are reported as a pair of begin/end events.
+  ///
+  /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
+  List<Duration> _extractBeginEndEvents(String name) {
+    return _extractDurations(
+      name,
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: endEvent.timestampMicros - beginEvent.timestampMicros);
+      },
+    );
+  }
+
+  List<Duration> _extractBeginTimestamps(String name) {
+    final List<Duration> result = _extractDurations(
+      name,
+      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+        return Duration(microseconds: beginEvent.timestampMicros);
+      },
+    );
+
+    // Align timestamps so the first event is at 0.
+    for (int i = result.length - 1; i >= 0; i -= 1) {
+      result[i] = result[i] - result[0];
+    }
     return result;
   }
 

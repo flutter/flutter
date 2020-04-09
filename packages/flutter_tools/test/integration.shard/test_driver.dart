@@ -436,6 +436,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool pauseOnExceptions = false,
     bool chrome = false,
     File pidFile,
+    String script,
   }) async {
     await _setupProcess(
       <String>[
@@ -453,6 +454,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       pidFile: pidFile,
+      script: script,
     );
   }
 

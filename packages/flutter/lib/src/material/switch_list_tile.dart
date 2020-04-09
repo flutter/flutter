@@ -272,11 +272,13 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
+    this.autofocus = false,
   }) : _switchListTileType = _SwitchListTileType.material,
        assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Creates the wrapped switch with [Switch.adaptive].
@@ -304,11 +306,13 @@ class SwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
+    this.autofocus = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
        assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Whether this switch is checked.
@@ -419,6 +423,9 @@ class SwitchListTile extends StatelessWidget {
   /// Normally, this property is left to its default value, false.
   final bool selected;
 
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
   /// If adaptive, creates the switch with [Switch.adaptive].
   final _SwitchListTileType _switchListTileType;
 
@@ -437,6 +444,7 @@ class SwitchListTile extends StatelessWidget {
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
+          autofocus: autofocus,
         );
         break;
 
@@ -451,6 +459,7 @@ class SwitchListTile extends StatelessWidget {
           activeTrackColor: activeTrackColor,
           inactiveTrackColor: inactiveTrackColor,
           inactiveThumbColor: inactiveThumbColor,
+          autofocus: autofocus,
         );
     }
     return MergeSemantics(
@@ -467,6 +476,7 @@ class SwitchListTile extends StatelessWidget {
           enabled: onChanged != null,
           onTap: onChanged != null ? () { onChanged(!value); } : null,
           selected: selected,
+          autofocus: autofocus,
         ),
       ),
     );

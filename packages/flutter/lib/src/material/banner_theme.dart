@@ -23,6 +23,7 @@ import 'theme.dart';
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+@immutable
 class MaterialBannerThemeData with Diagnosticable {
 
   /// Creates a theme that can be used for [MaterialBannerTheme] or

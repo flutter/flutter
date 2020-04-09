@@ -646,6 +646,20 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   ) async {
     return null;
   }
+
+  @override
+  Future<CompilerOutput> compileExpressionToJs(
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) async {
+    return null;
+  }
+
   @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
     globals.fs.file(outputPath).createSync(recursive: true);

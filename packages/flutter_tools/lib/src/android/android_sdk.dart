@@ -380,7 +380,11 @@ class AndroidSdk {
   /// was marked as obsolete in 3.6.
   String get sdkManagerPath {
     final File cmdlineTool = globals.fs.file(
-      globals.fs.path.join(directory, 'cmdline-tools', 'latest', 'bin', 'sdkmanager')
+      globals.fs.path.join(directory, 'cmdline-tools', 'latest', 'bin',
+        globals.platform.isWindows
+          ? 'sdkmanager.bat'
+          : 'sdkmanager'
+      ),
     );
     if (cmdlineTool.existsSync()) {
       return cmdlineTool.path;

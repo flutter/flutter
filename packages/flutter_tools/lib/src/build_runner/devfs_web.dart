@@ -10,12 +10,7 @@ import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/discovery.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages.dart';
+import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf;
 
@@ -31,10 +26,60 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
+
+typedef DwdsLauncher = Future<Dwds> Function({
+  @required AssetReader assetReader,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  @required LoadStrategy loadStrategy,
+  @required bool enableDebugging,
+  bool enableDebugExtension,
+  String hostname,
+  bool useSseForDebugProxy,
+  bool serveDevTools,
+  void Function(Level, String) logWriter,
+  bool verbose,
+  UrlEncoder urlEncoder,
+  ExpressionCompiler expressionCompiler,
+});
+
+/// An expression compiler connecting to FrontendServer
+///
+/// This is only used in development mode
+class WebExpressionCompiler implements ExpressionCompiler {
+  WebExpressionCompiler(this._generator);
+
+  final ResidentCompiler _generator;
+
+  @override
+  Future<ExpressionCompilationResult> compileExpressionToJs(
+    String isolateId,
+    String libraryUri,
+    int line,
+    int column,
+    Map<String, String> jsModules,
+    Map<String, String> jsFrameValues,
+    String moduleName,
+    String expression,
+  ) async {
+    final CompilerOutput compilerOutput = await _generator.compileExpressionToJs(libraryUri,
+        line, column, jsModules, jsFrameValues, moduleName, expression);
+
+    if (compilerOutput != null && compilerOutput.outputFilename != null) {
+      final String content = utf8.decode(
+          globals.fs.file(compilerOutput.outputFilename).readAsBytesSync());
+      return ExpressionCompilationResult(
+          content, compilerOutput.errorCount > 0);
+    }
+
+    throw Exception('Failed to compile $expression');
+  }
+}
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -54,7 +99,6 @@ class WebAssetServer implements AssetReader {
   static const String _kDefaultMimeType = 'application/octet-stream';
 
   final Map<String, String> _modules;
-
   final Map<String, String> _digests;
 
   void performRestart(List<String> modules) {
@@ -83,23 +127,32 @@ class WebAssetServer implements AssetReader {
     String hostname,
     int port,
     UrlTunneller urlTunneller,
+    bool useSseForDebugProxy,
     BuildMode buildMode,
     bool enableDwds,
-    Uri entrypoint, {
+    Uri entrypoint,
+    ExpressionCompiler expressionCompiler, {
     bool testMode = false,
+    DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
     try {
       final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-      // ignore: deprecated_member_use
-      final Packages packages = await loadPackagesFile(
-        Uri.base.resolve('.packages'), loader: (Uri uri) => globals.fs.file(uri).readAsBytes());
+      final PackageConfig packageConfig = await loadPackageConfigUri(
+        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+        loader: (Uri uri) {
+          final File file = globals.fs.file(uri);
+          if (!file.existsSync()) {
+            return null;
+          }
+          return file.readAsBytes();
+        }
+      );
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};
       final WebAssetServer server = WebAssetServer(
         httpServer,
-        packages,
+        packageConfig,
         address,
         modules,
         digests,
@@ -150,8 +203,9 @@ class WebAssetServer implements AssetReader {
       }
 
       // In debug builds, spin up DWDS and the full asset server.
-      final Dwds dwds = await Dwds.start(
+      final Dwds dwds = await dwdsLauncher(
         assetReader: server,
+        enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
@@ -159,6 +213,7 @@ class WebAssetServer implements AssetReader {
         },
         urlEncoder: urlTunneller,
         enableDebugging: true,
+        useSseForDebugProxy: useSseForDebugProxy,
         serveDevTools: false,
         logWriter: (Level logLevel, String message) => globals.printTrace(message),
         loadStrategy: RequireStrategy(
@@ -170,6 +225,7 @@ class WebAssetServer implements AssetReader {
           serverPathForModule,
           serverPathForAppUri,
         ),
+        expressionCompiler: expressionCompiler
       );
       shelf.Pipeline pipeline = const shelf.Pipeline();
       if (enableDwds) {
@@ -194,9 +250,7 @@ class WebAssetServer implements AssetReader {
   // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
   final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
-  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-  // ignore: deprecated_member_use
-  final Packages _packages;
+  final PackageConfig _packages;
   final InternetAddress internetAddress;
   /* late final */ Dwds dwds;
   Directory entrypointCacheDirectory;
@@ -498,9 +552,11 @@ class WebDevFS implements DevFS {
     @required this.port,
     @required this.packagesFilePath,
     @required this.urlTunneller,
+    @required this.useSseForDebugProxy,
     @required this.buildMode,
     @required this.enableDwds,
     @required this.entrypoint,
+    @required this.expressionCompiler,
     this.testMode = false,
   });
 
@@ -509,9 +565,11 @@ class WebDevFS implements DevFS {
   final int port;
   final String packagesFilePath;
   final UrlTunneller urlTunneller;
+  final bool useSseForDebugProxy;
   final BuildMode buildMode;
   final bool enableDwds;
   final bool testMode;
+  final ExpressionCompiler expressionCompiler;
 
   WebAssetServer webAssetServer;
 
@@ -569,9 +627,11 @@ class WebDevFS implements DevFS {
       hostname,
       port,
       urlTunneller,
+      useSseForDebugProxy,
       buildMode,
       enableDwds,
       entrypoint,
+      expressionCompiler,
       testMode: testMode,
     );
     _baseUri = Uri.parse('http://$hostname:$port');

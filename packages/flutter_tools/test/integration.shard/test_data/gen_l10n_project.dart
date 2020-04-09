@@ -18,6 +18,10 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
     return super.setUpIn(dir);
   }
 
@@ -117,6 +121,44 @@ class Home extends StatelessWidget {
           },
         ),
         LocaleBuilder(
+          locale: Locale('zh'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- zh ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+            results.add(AppLocalizations.of(context).helloWorlds(0));
+            results.add(AppLocalizations.of(context).helloWorlds(1));
+            results.add(AppLocalizations.of(context).helloWorlds(2));
+            // Should use the fallback language, in this case,
+            // "Hello 世界" should be displayed.
+            results.add(AppLocalizations.of(context).hello("世界"));
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+          test: 'zh',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode: zh_Hans ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant'),
+          test: 'scriptCode - zh_TW_Hant',
+          callback: (BuildContext context) {
+            results.add('--- scriptCode - zh_Hant_TW ---');
+            results.add(AppLocalizations.of(context).helloWorld);
+          },
+        ),
+        LocaleBuilder(
           locale: Locale('en'),
           test: 'General formatting',
           callback: (BuildContext context) {
@@ -145,8 +187,12 @@ class Home extends StatelessWidget {
               '${localizations.helloWorldPopulation(1, 101)}',
               '${localizations.helloWorldPopulation(2, 102)}',
               '${localizations.helloWorldsInterpolation(123, "Hello", "World")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
               '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
             ]);
           },
         ),
@@ -340,14 +386,43 @@ void main() {
     }
   },
 
+  "dollarSign": "$!",
+  "@dollarSign": {
+    "description": "A message with a dollar sign."
+  },
+
+  "dollarSignPlural": "{count,plural, =1{One $} other{Many $}}",
+  "@dollarSignPlural": {
+    "description": "A plural message with a dollar sign.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "singleQuote": "Flutter's amazing!",
   "@singleQuote": {
     "description": "A message with a single quote."
   },
 
+  "singleQuotePlural": "{count,plural, =1{Flutter's amazing, times 1!} other{Flutter's amazing, times {count}!}}",
+  "@singleQuotePlural": {
+    "description": "A plural message with a single quote.",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
   "doubleQuote": "Flutter is \"amazing\"!",
   "@doubleQuote": {
     "description": "A message with double quotes."
+  },
+
+  "doubleQuotePlural": "{count,plural, =1{Flutter is \"amazing\", times 1!} other{Flutter is \"amazing\", times {count}!}}",
+  "@doubleQuotePlural": {
+    "description": "A plural message with double quotes.",
+    "placeholders": {
+      "count": {}
+    }
   }
 }
 ''';
@@ -363,6 +438,35 @@ void main() {
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
+}
+''';
+
+  final String appZh = r'''
+{
+  "@@locale": "zh",
+  "helloWorld": "你好世界",
+  "helloWorlds": "{count,plural, =0{你好} =1{你好世界} other{你好{count}个其他世界}}"
+}
+''';
+
+  final String appZhHans = r'''
+{
+  "@@locale": "zh_Hans",
+  "helloWorld": "简体你好世界"
+}
+  ''';
+
+  final String appZhHant = r'''
+{
+  "@@locale": "zh_Hant",
+  "helloWorld": "繁體你好世界"
+}
+  ''';
+
+  final String appZhHantTw = r'''
+{
+  "@@locale": "zh_Hant_TW",
+  "helloWorld": "台灣繁體你好世界"
 }
 ''';
 }
