@@ -1,0 +1,82 @@
+# Copyright (c) 2013 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Defines the configuration of emscripten for building WASM targets.
+
+declare_args() {
+  # The location of an activated embedded emsdk.
+  emsdk_dir = rebase_path("//third_party/emsdk")
+}
+
+wasm_toolchain = "//build/toolchain/wasm"
+is_wasm = target_cpu == "wasm"
+
+em_config_path = "$emsdk_dir/.emscripten"
+
+# Defines a WASM library target.
+# Args:
+#  export_name: The public name of the module to expose (EXPORT_NAME for
+#               emscripten).  Defaults to target_name.
+template("wasm_lib") {
+  export_name = target_name
+  if (defined(invoker.export_name)) {
+    export_name = invoker.export_name
+  }
+
+  _target_ldflags = [
+    # This is to prevent that two different wasm modules end up generating
+    # JS that overrides the same global variable (var Module = ...)
+    "-s",
+    "EXPORT_NAME=${export_name}",
+  ]
+
+  if (defined(invoker.ldflags)) {
+    _target_ldflags += invoker.ldflags
+  }
+
+  _target_cflags = [
+    "-s",
+    "WARN_UNALIGNED=1",
+    "-s",
+    "MAIN_MODULE=1",
+  ]
+
+  if (defined(invoker.cflags)) {
+    _target_cflags += invoker.cflags
+  }
+
+  _vars_to_forward = [
+    "defines",
+    "deps",
+    "includes",
+    "sources",
+    "include_dirs",
+    "public_configs",
+    "testonly",
+    "visibility",
+  ]
+
+  _lib_name = target_name
+
+  executable("${_lib_name}.js") {
+    forward_variables_from(invoker, _vars_to_forward)
+    cflags = _target_cflags
+    ldflags = _target_ldflags
+    output_extension = ""
+  }
+
+  executable("${_lib_name}.wasm") {
+    forward_variables_from(invoker, _vars_to_forward)
+    cflags = _target_cflags
+    ldflags = _target_ldflags
+    output_extension = ""
+  }
+
+  group("$_lib_name") {
+    deps = [
+      ":${_lib_name}.js($wasm_toolchain)",
+      ":${_lib_name}.wasm($wasm_toolchain)",
+    ]
+  }
+}

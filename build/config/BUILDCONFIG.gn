@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# define is_wasm
+import("//build/toolchain/wasm.gni")
+
 # =============================================================================
 # PLATFORM SELECTION
 # =============================================================================
@@ -48,6 +51,19 @@ if (target_cpu == "") {
   } else {
     target_cpu = host_cpu
   }
+}
+
+if (is_wasm) {
+  target_os = "wasm"
+  is_android = false
+  is_chromeos = false
+  is_fuchsia = false
+  is_fuchsia_host = false
+  is_ios = false
+  is_linux = false
+  is_mac = false
+  is_posix = false
+  is_win = false
 }
 
 if (current_cpu == "") {
@@ -534,6 +550,9 @@ if (custom_toolchain != "") {
     host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
   }
   set_default_toolchain("//build/toolchain/fuchsia")
+} else if (is_wasm) {
+  host_toolchain = "//build/toolchain/wasm"
+  set_default_toolchain("//build/toolchain/wasm")
 } else {
   assert(false, "Toolchain not set because of unknown platform.")
 }

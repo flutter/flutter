@@ -20,6 +20,7 @@ import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
+import("//build/toolchain/wasm.gni")
 
 declare_args() {
   # Normally, Android builds are lightly optimized, even for debug builds, to
@@ -306,6 +307,26 @@ config("compiler") {
     cflags += [
       "-faligned-allocation",
       "-fnew-alignment=$operator_new_alignment",
+    ]
+  }
+
+  if (is_wasm) {
+    ldflags += [
+      "-s",
+      "WASM=1",
+      "-s",
+      "FORCE_FILESYSTEM=0",
+      "-s",
+      "FILESYSTEM=0",
+      "-s",
+      "NO_EXIT_RUNTIME=1",
+      "-s",
+      "STRICT=1",
+      "-s",
+      "WARN_UNALIGNED=1",
+      # Reduces global namespace pollution.
+      "-s",
+      "MODULARIZE=1",
     ]
   }
 
@@ -633,6 +654,16 @@ if (is_win) {
     "-Wno-unused-parameter",  # Unused function parameters.
   ]
 
+  if (is_wasm) {
+    default_warning_flags += [
+      # zlib needs this
+      "-Wno-shift-negative-value",
+      # freetype2 needs these two
+      "-Wno-unused-function",
+      "-Wno-unused-variable",
+    ]
+  }
+
   if (!use_xcode) {
     default_warning_flags += [
       "-Wno-implicit-int-float-conversion",
@@ -856,6 +887,11 @@ config("optimize") {
     if (enable_lto) {
       lto_flags += [ "-flto" ]
     }
+  } else if (is_wasm) {
+    cflags = [ "-Oz" ]
+    if (enable_lto) {
+      lto_flags += [ "-flto" ]
+    }
   } else {
     cflags = [ "-O2" ] + common_optimize_on_cflags
   }
@@ -883,7 +919,9 @@ config("no_optimize") {
       cflags += [ "-fomit-frame-pointer" ]
     }
     ldflags = common_optimize_on_ldflags
-  } else {
+  } else if (is_wasm) {
+    cflags = [ "-O0", "-g4" ]
+  } else  {
     cflags = [ "-O0" ]
   }
 }
