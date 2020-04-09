@@ -8,14 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 final List<Widget> children = <Widget>[
-  Container(width: 200.0, height: 150.0),
-  Container(width: 200.0, height: 150.0),
-  Container(width: 200.0, height: 150.0),
-  Container(width: 200.0, height: 150.0),
+  const SizedBox(width: 200.0, height: 150.0),
+  const SizedBox(width: 200.0, height: 150.0),
+  const SizedBox(width: 200.0, height: 150.0),
+  const SizedBox(width: 200.0, height: 150.0),
 ];
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
-  final Finder finder = find.byType(Container);
+  final Finder finder = find.byType(SizedBox);
   finder.precache();
   final List<Rect> actual = <Rect>[];
   for (int i = 0; i < expected.length; ++i) {
