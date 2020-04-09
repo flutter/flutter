@@ -186,7 +186,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
-  }, skip: isBrowser);
+  });
 
   testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
