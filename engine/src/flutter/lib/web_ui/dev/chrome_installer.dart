@@ -13,6 +13,7 @@ import 'package:yaml/yaml.dart';
 
 import 'common.dart';
 import 'environment.dart';
+import 'exceptions.dart';
 
 class ChromeArgParser extends BrowserArgParser {
   static final ChromeArgParser _singletonInstance = ChromeArgParser._();
