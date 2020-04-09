@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_COMMON_SHELL_TEST_PLATFORM_VIEW_H_
 
 #include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
 
 namespace flutter {
@@ -25,9 +24,7 @@ class ShellTestPlatformView : public PlatformView {
       TaskRunners task_runners,
       std::shared_ptr<ShellTestVsyncClock> vsync_clock,
       CreateVsyncWaiter create_vsync_waiter,
-      BackendType backend,
-      std::shared_ptr<ShellTestExternalViewEmbedder>
-          shell_test_external_view_embedder);
+      BackendType backend);
 
   virtual void SimulateVSync() = 0;
 
