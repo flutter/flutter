@@ -12,9 +12,9 @@ void main() {
   //
   // If this symbol changes, then update [allowHttp] function as well.
   test('Zone variable can override HTTP behavior', () async {
-    final httpClient = new HttpClient();
+    final HttpClient httpClient = HttpClient();
     expect(() => runZoned(
         () async => await httpClient.getUrl(Uri.parse('http://${Platform.localHostname}')),
-        zoneValues: {#dart.library.io.allow_http: false}), throwsA(isA<StateError>()));
+        zoneValues: <Symbol, bool>{#dart.library.io.allow_http: false}), throwsA(isA<StateError>()));
   });
 }

@@ -23,5 +23,5 @@ import 'dart:async';
 /// - Do not wrap your entire app with [allowHttp]. Wrap *exactly* what you need and nothing more.
 /// - Avoid libraries that require accessing HTTP URLs.
 T allowHttp<T>(T action()) {
-  return runZoned<T>(action, zoneValues: {#dart.library.io.allow_http: true});
+  return runZoned<T>(action, zoneValues: <Symbol, bool>{#dart.library.io.allow_http: true});
 }
