@@ -81,6 +81,24 @@ void main(List<String> arguments) {
       'Alternatively, see the `header` option to pass in a string '
       'for a simpler header.'
   );
+  parser.addFlag(
+    'use-deferred-loading',
+    defaultsTo: false,
+    help: 'Whether to generate the Dart localization file with locales imported'
+      ' as deferred, allowing for lazy loading of each locale in Flutter web.\n'
+      '\n'
+      'This can reduce a web app’s initial startup time by decreasing the '
+      'size of the JavaScript bundle. When this flag is set to true, the '
+      'messages for a particular locale are only downloaded and loaded by the '
+      'Flutter app as they are needed. For projects with a lot of different '
+      'locales and many localization strings, it can be an performance '
+      'improvement to have deferred loading. For projects with a small number '
+      'of locales, the difference is negligible, and might slow down the start '
+      'up compared to bundling the localizations with the rest of the '
+      'application.\n\n'
+      'Note that this flag does not affect other platforms such as mobile or '
+      'desktop.',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -98,6 +116,7 @@ void main(List<String> arguments) {
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
   final String headerString = results['header'] as String;
   final String headerFile = results['header-file'] as String;
+  final bool useDeferredLoading = results['use-deferred-loading'] as bool;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -112,6 +131,7 @@ void main(List<String> arguments) {
         preferredSupportedLocaleString: preferredSupportedLocaleString,
         headerString: headerString,
         headerFile: headerFile,
+        useDeferredLoading: useDeferredLoading,
       )
       ..loadResources()
       ..writeOutputFile()
