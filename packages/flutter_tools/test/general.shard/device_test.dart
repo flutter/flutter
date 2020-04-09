@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_devices.dart';
 import '../src/mocks.dart';
 
 void main() {
@@ -24,9 +25,9 @@ void main() {
     });
 
     testUsingContext('getDeviceById', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
-      final _MockDevice device3 = _MockDevice('iPod touch', '82564b38861a9a5');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
@@ -42,42 +43,42 @@ void main() {
     });
 
     testUsingContext('getAllConnectedDevices caches', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
 
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
     });
 
     testUsingContext('refreshAllConnectedDevices does not cache', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
       final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device1]);
 
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
       deviceManager.resetDevices(<Device>[device2]);
       expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
     });
   });
 
   group('Filter devices', () {
-    _MockDevice ephemeral;
-    _MockDevice nonEphemeralOne;
-    _MockDevice nonEphemeralTwo;
-    _MockDevice unsupported;
-    _MockDevice webDevice;
-    _MockDevice fuchsiaDevice;
+    FakeDevice ephemeral;
+    FakeDevice nonEphemeralOne;
+    FakeDevice nonEphemeralTwo;
+    FakeDevice unsupported;
+    FakeDevice webDevice;
+    FakeDevice fuchsiaDevice;
 
     setUp(() {
-      ephemeral = _MockDevice('ephemeral', 'ephemeral', true);
-      nonEphemeralOne = _MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonEphemeralTwo = _MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-      unsupported = _MockDevice('unsupported', 'unsupported', true, false);
-      webDevice = _MockDevice('webby', 'webby')
+      ephemeral = FakeDevice('ephemeral', 'ephemeral', true);
+      nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+      webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-      fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
+      fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
@@ -182,6 +183,17 @@ void main() {
       });
     });
   });
+
+  group('JSON encode devices', () {
+    testUsingContext('Consistency of JSON representation', () async {
+      expect(
+        // This tests that fakeDevices is a list of tuples where "second" is the
+        // correct JSON representation of the "first". Actual values are irrelevant
+        await Future.wait(fakeDevices.map((FakeDeviceJsonData d) => d.dev.toJson())),
+        fakeDevices.map((FakeDeviceJsonData d) => d.json)
+      );
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
@@ -206,29 +218,6 @@ class TestDeviceManager extends DeviceManager {
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
-}
-
-class _MockDevice extends Device {
-  _MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
-      id,
-      platformType: PlatformType.web,
-      category: Category.mobile,
-      ephemeral: ephemeral,
-  );
-
-  final bool _isSupported;
-
-  @override
-  final String name;
-
-  @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
-
-  @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 }
 
 class MockProcess extends Mock implements Process {}
