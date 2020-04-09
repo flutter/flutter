@@ -56,9 +56,8 @@ abstract class UnpackMacOS extends Target {
     final Directory targetDirectory = environment
       .outputDir
       .childDirectory('FlutterMacOS.framework');
-    // This is necessary because multiple different build configurations will
-    // output different files here. Build cleaning only works when the files
-    // change within a build configuration.
+    // Deleting this directory is required or else the FlutterMacOS module
+    // cannot be found.
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
     }
@@ -291,12 +290,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final Directory assetDirectory = outputDirectory
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
-    // This is necessary because multiple different build configurations will
-    // output different files here. Build cleaning only works when the files
-    // change within a build configuration.
-    if (assetDirectory.existsSync()) {
-      assetDirectory.deleteSync(recursive: true);
-    }
     assetDirectory.createSync(recursive: true);
     final Depfile depfile = await copyAssets(environment, assetDirectory);
     final DepfileService depfileService = DepfileService(

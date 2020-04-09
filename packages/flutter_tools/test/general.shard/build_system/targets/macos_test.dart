@@ -101,10 +101,6 @@ void main() {
       final Directory source = globals.fs.directory(sourcePath);
       final Directory target = globals.fs.directory(targetPath);
 
-      // verify directory was deleted by command.
-      expect(target.existsSync(), false);
-      target.createSync(recursive: true);
-
       for (final FileSystemEntity entity in source.listSync(recursive: true)) {
         if (entity is File) {
           final String relative = globals.fs.path.relative(entity.path, from: source.path);
@@ -172,54 +168,6 @@ void main() {
     final String precompiledIsolate = globals.fs.path.join('App.framework', 'Resources',
         'flutter_assets', 'isolate_snapshot_data');
     await const ProfileMacOSBundleFlutterAssets().build(environment..defines[kBuildMode] = 'profile');
-
-    expect(globals.fs.file(outputKernel), isNot(exists));
-    expect(globals.fs.file(precompiledVm), isNot(exists));
-    expect(globals.fs.file(precompiledIsolate), isNot(exists));
-  }));
-
-  test('release/profile macOS application has no blob or precompiled runtime when '
-    'run ontop of different configuration', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'vm_isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'App.framework', 'App'))
-        .createSync(recursive: true);
-
-    final String inputKernel = globals.fs.path.join(environment.buildDir.path, 'app.dill');
-    final String outputKernel = globals.fs.path.join('App.framework', 'Versions', 'A', 'Resources',
-        'flutter_assets', 'kernel_blob.bin');
-    globals.fs.file(inputKernel)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('testing');
-
-    await const DebugMacOSBundleFlutterAssets().build(environment);
-
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'vm_isolate_snapshot.bin')).createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join('bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
-        'isolate_snapshot.bin')).createSync(recursive: true);
-
-    final Environment testEnvironment = Environment.test(
-      globals.fs.currentDirectory,
-      defines: <String, String>{
-        kBuildMode: 'profile',
-        kTargetPlatform: 'darwin-x64',
-      },
-      artifacts: MockArtifacts(),
-      processManager: FakeProcessManager.any(),
-      logger: globals.logger,
-      fileSystem: globals.fs,
-    );
-    testEnvironment.buildDir.createSync(recursive: true);
-    globals.fs.file(globals.fs.path.join(testEnvironment.buildDir.path, 'App.framework', 'App'))
-        .createSync(recursive: true);
-    final String precompiledVm = globals.fs.path.join('App.framework', 'Resources',
-        'flutter_assets', 'vm_snapshot_data');
-    final String precompiledIsolate = globals.fs.path.join('App.framework', 'Resources',
-        'flutter_assets', 'isolate_snapshot_data');
-    await const ProfileMacOSBundleFlutterAssets().build(testEnvironment);
 
     expect(globals.fs.file(outputKernel), isNot(exists));
     expect(globals.fs.file(precompiledVm), isNot(exists));
