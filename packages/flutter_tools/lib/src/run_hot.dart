@@ -572,7 +572,7 @@ class HotRunner extends ResidentRunner {
         for (final FlutterView view in device.views) {
           isolateNotifications.add(
             view.owner.vm.vmService.onIsolateEvent.firstWhere((vm_service.Event event) {
-              return event.kind == vm_service.EventKind.kServiceExtensionAdded;
+              return event.kind == vm_service.EventKind.kIsolateRunnable;
             }),
           );
         }
