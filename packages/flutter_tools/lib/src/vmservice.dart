@@ -17,6 +17,10 @@ import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
 
+const String kGetSkSLsMethod = '_flutter.getSkSLs';
+const String kSetAssetBundlePathmMethod = '_flutter.setAssetBundlePath';
+const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
@@ -1552,13 +1556,14 @@ class FlutterView extends ServiceObject {
 
 /// Flutter specific VM Service functionality.
 extension FlutterVmService on vm_service.VmService {
+  /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
     @required Uri assetsDirectory,
     @required String viewId,
     @required String uiIsolateId,
   }) async {
     assert(assetsDirectory != null);
-    await callMethod('_flutter.setAssetBundlePath',
+    await callMethod(kSetAssetBundlePathmMethod,
       isolateId: uiIsolateId,
       args: <String, dynamic>{
         'viewId': viewId,
@@ -1566,11 +1571,15 @@ extension FlutterVmService on vm_service.VmService {
       });
   }
 
+  /// Retreive the cached SkSL shaders from an attached Flutter view.
+  ///
+  /// This method will only return data if `--cache-sksl` was provided as a
+  /// flutter run agument, and only then on physical devices.
   Future<Map<String, Object>> getSkSLs({
     @required String viewId,
   }) async {
     final vm_service.Response response = await callMethod(
-      '_flutter.getSkSLs',
+      kGetSkSLsMethod,
       args: <String, String>{
         'viewId': viewId,
       },
@@ -1578,14 +1587,17 @@ extension FlutterVmService on vm_service.VmService {
     return response.json['SkSLs'] as Map<String, Object>;
   }
 
-   Future<void> flushUIThreadTasks({
-     @required String uiIsolateId,
-   }) async {
-      await callMethod(
-        '_flutter.flushUIThreadTasks',
-        args: <String, String>{
-          'isolateId': uiIsolateId,
-        },
-      );
-   }
+  /// Flush all tasks on the UI thead for an attached Flutter view.
+  ///
+  /// This method is currently used only for benchmarking.
+  Future<void> flushUIThreadTasks({
+    @required String uiIsolateId,
+  }) async {
+    await callMethod(
+      kFlushUIThreadTasksMethod,
+      args: <String, String>{
+        'isolateId': uiIsolateId,
+      },
+    );
+  }
 }

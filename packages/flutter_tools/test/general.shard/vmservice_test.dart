@@ -230,7 +230,7 @@ void main() {
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
     expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', '_flutter.setAssetBundlePath'),
+      containsPair('method', kSetAssetBundlePathmMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
         containsPair('assetDirectory', '/abc'),
@@ -253,7 +253,7 @@ void main() {
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
     expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', '_flutter.getSkSLs'),
+      containsPair('method', kGetSkSLsMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('viewId', 'abc'),
       ]))
@@ -274,7 +274,7 @@ void main() {
     final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
 
     expect(rawRequest, allOf(<Matcher>[
-      containsPair('method', '_flutter.flushUIThreadTasks'),
+      containsPair('method', kFlushUIThreadTasksMethod),
       containsPair('params', allOf(<Matcher>[
         containsPair('isolateId', 'def'),
       ]))
