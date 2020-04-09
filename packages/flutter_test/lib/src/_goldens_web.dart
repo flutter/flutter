@@ -28,7 +28,7 @@ class LocalFileComparator extends GoldenFileComparator {
 ///
 /// This method is not supported on the web and throws an [UnsupportedError]
 /// when called.
-ComparisonResult compareLists(List<int> test, List<int> master) {
+Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
   throw UnsupportedError('Golden testing is not supported on the web.');
 }
 
