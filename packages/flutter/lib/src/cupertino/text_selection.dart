@@ -478,17 +478,13 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   void _handleNextPage() {
     _controller.reverse();
     _controller.addStatusListener(_statusListener);
-    setState(() {
-      _nextPage = _page + 1;
-    });
+    _nextPage = _page + 1;
   }
 
   void _handlePreviousPage() {
     _controller.reverse();
     _controller.addStatusListener(_statusListener);
-    setState(() {
-      _nextPage = _page - 1;
-    });
+    _nextPage = _page - 1;
   }
 
   void _statusListener(AnimationStatus status) {
@@ -509,6 +505,8 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     // If the children are changing, the current page should be reset.
     if (widget.children != oldWidget.children) {
       _page = 0;
+      _controller.forward();
+      _controller.removeStatusListener(_statusListener);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -521,13 +519,13 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   @override
   void initState() {
+    super.initState();
     _controller = AnimationController(
       value: 1.0,
       vsync: this,
       // This was eyeballed on a physical iOS device running iOS 13.
       duration: const Duration(milliseconds: 150),
     );
-    super.initState();
   }
 
   @override
