@@ -439,7 +439,6 @@ Exited (sigterm)''',
     });
 
     testWithoutContext('removes xattr', () async {
-      bool processRun = false;
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: <String>[
           'xattr',
@@ -447,13 +446,11 @@ Exited (sigterm)''',
           '-d',
           'com.apple.FinderInfo',
           iosProjectDirectory.path,
-        ], onRun: () {
-          processRun = true;
-        })
+        ])
       ]);
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
-      expect(processRun, isTrue);
+      expect(processManager.hasRemainingExpectations, false);
     });
 
     testWithoutContext('ignores errors', () async {
@@ -470,6 +467,7 @@ Exited (sigterm)''',
 
       await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
       expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      expect(processManager.hasRemainingExpectations, false);
     });
   });
 }
