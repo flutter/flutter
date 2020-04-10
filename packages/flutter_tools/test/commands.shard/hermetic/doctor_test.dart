@@ -372,6 +372,7 @@ void main() {
     setUp(() {
       memoryFileSystem = MemoryFileSystem.test();
       mockArtifacts = MockArtifacts();
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
     });
 
     testUsingContext('validate non-verbose output format for run without issues', () async {
@@ -517,7 +518,6 @@ void main() {
 
     testUsingContext('gen_snapshot does not work', () async {
       memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
       when(mockProcessManager.runSync(
         <String>[genSnapshotPath],
         workingDirectory: anyNamed('workingDirectory'),
@@ -543,18 +543,18 @@ void main() {
     });
 
     testUsingContext('gen_snapshot binary not available', () async {
-        expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
-        // gen_snapshot is downloaded on demand, and the doctor should not
-        // fail if the gen_snapshot binary is not present.
-        expect(testLogger.statusText, contains('No issues found!'));
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+      // gen_snapshot is downloaded on demand, and the doctor should not
+      // fail if the gen_snapshot binary is not present.
+      expect(testLogger.statusText, contains('No issues found!'));
     }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('version checking does not work', () async {
-      //memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
-      //when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
+      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
       final VersionCheckError versionCheckError = VersionCheckError('version error');
 
       when(mockFlutterVersion.channel).thenReturn('unknown');
@@ -562,7 +562,7 @@ void main() {
       when(mockFlutterVersion.frameworkDate).thenThrow(versionCheckError);
 
       when(mockProcessManager.runSync(
-        <String>[globals.artifacts.getArtifactPath(Artifact.genSnapshot)],
+        <String>[genSnapshotPath],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 255, '', ''));
@@ -576,7 +576,8 @@ void main() {
           '! Doctor found issues in 1 category.\n'
       ));
     }, overrides: <Type, Generator>{
-      //Artifacts: () => mockArtifacts,
+      Artifacts: () => mockArtifacts,
+      FileSystem: () => memoryFileSystem,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
       Platform: _kNoColorOutputPlatform,
@@ -752,6 +753,7 @@ void main() {
       contains(isA<WebWorkflow>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => MockProcessManager(),
   });
 
