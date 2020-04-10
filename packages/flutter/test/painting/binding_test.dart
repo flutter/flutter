@@ -86,12 +86,6 @@ class TestBindingBase implements BindingBase {
 
   @override
   ui.Window get window => throw UnimplementedError();
-
-  @override
-  ui.AppLifecycleState get lifecycleState => null;
-
-  @override
-  void handleAppLifecycleStateChanged(ui.AppLifecycleState state) { }
 }
 
 class TestPaintingBinding extends TestBindingBase with SchedulerBinding, ServicesBinding, PaintingBinding {

@@ -19,7 +19,7 @@ import 'system_channels.dart';
 /// the licenses found in the `LICENSE` file stored at the root of the asset
 /// bundle, and implements the `ext.flutter.evict` service extension (see
 /// [evict]).
-mixin ServicesBinding on BindingBase {
+mixin ServicesBinding on BindingBase, SchedulerBinding {
   @override
   void initInstances() {
     super.initInstances();
