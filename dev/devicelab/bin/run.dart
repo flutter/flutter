@@ -29,7 +29,7 @@ String localEngine;
 /// The path to the engine "src/" directory.
 String localEngineSrcPath;
 
-/// Whether to exist on first test failure.
+/// Whether to exit on first test failure.
 bool exitOnFirstTestFailure;
 
 /// Runs tasks.
@@ -123,7 +123,7 @@ Future<void> _runABTest() async {
 
   final String taskName = _taskNames.single;
 
-  print('$taskName A/B test. Will run $runsPerTest times .');
+  print('$taskName A/B test. Will run $runsPerTest times.');
 
   final ABTest abTest = ABTest();
   for (int i = 1; i <= runsPerTest; i++) {
@@ -228,7 +228,7 @@ final ArgParser _argParser = ArgParser()
           'between the two engines. --local-engine is required when running\n'
           'an A/B test.',
     callback: (String value) {
-      if (int.tryParse(value) == null) {
+      if (value != null && int.tryParse(value) == null) {
         throw ArgParserException('Option --ab must be a number, but was "$value".');
       }
     },

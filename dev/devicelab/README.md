@@ -197,7 +197,7 @@ draw_rect.canvaskit.drawFrameDuration.average	5335.20 (17.59%)	6437.60 (0.59%)	0
 draw_rect.canvaskit.totalUiFrame.average	6832.00 (13.16%)	7932.00 (0.34%)	0.86x
 ```
 
-The outpout contains averages and noises for each score. More importantly, it
+The output contains averages and noises for each score. More importantly, it
 contains the speed-up value, i.e. how much _faster_ is the local engine than
 the default engine. Values less than 1.0 indicate a slow-down. For example,
 0.5x means the local engine is twice as slow as the default engine, and 2.0x
