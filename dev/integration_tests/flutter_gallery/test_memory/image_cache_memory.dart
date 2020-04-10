@@ -22,7 +22,7 @@ Future<void> main() async {
       key: const Key('ImageList'),
       itemCount: numItems,
       itemBuilder: (BuildContext context, int position) {
-        return Container(
+        return SizedBox(
           width: 200,
           height: 200,
           child: Center(

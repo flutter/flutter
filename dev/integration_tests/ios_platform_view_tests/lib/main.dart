@@ -77,8 +77,8 @@ class PlatformViewPage extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            child: const UiKitView(viewType: 'platform_view'),
+          const SizedBox(
+            child: UiKitView(viewType: 'platform_view'),
             width: 300,
             height: 300,
           ),

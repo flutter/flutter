@@ -330,7 +330,7 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     return Semantics(
       button: true,
       value: 'Shopping cart, $totalCartQuantity items',
-      child: Container(
+      child: SizedBox(
         width: _widthAnimation.value,
         height: _heightAnimation.value,
         child: Material(

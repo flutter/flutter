@@ -12,9 +12,9 @@ class AsymmetricView extends StatelessWidget {
 
   final List<Product> products;
 
-  List<Container> _buildColumns(BuildContext context) {
+  List<Widget> _buildColumns(BuildContext context) {
     if (products == null || products.isEmpty) {
-      return const <Container>[];
+      return const <Widget>[];
     }
 
     // This will return a list of columns. It will oscillate between the two
@@ -25,7 +25,7 @@ class AsymmetricView extends StatelessWidget {
     // some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
     // helpers for creating the index of the product list that will correspond
     // to the index of the list of columns.
-    return List<Container>.generate(_listItemCount(products.length), (int index) {
+    return List<Widget>.generate(_listItemCount(products.length), (int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
       if (index % 2 == 0) {
@@ -44,7 +44,7 @@ class AsymmetricView extends StatelessWidget {
           product: products[_oddCasesIndex(index)],
         );
       }
-      return Container(
+      return SizedBox(
         width: width,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
