@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -13,12 +14,14 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../codegen.dart';
 import '../compile.dart';
+import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
 /// A request to the [TestCompiler] for recompilation.
 class _CompilationRequest {
   _CompilationRequest(this.mainUri, this.result);
+
   Uri mainUri;
   Completer<String> result;
 }
@@ -100,6 +103,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
+      packagesPath: PackageMap.globalPackagesPath,
     );
     if (flutterProject.hasBuilders) {
       return CodeGeneratingResidentCompiler.create(
@@ -109,6 +113,8 @@ class TestCompiler {
     }
     return residentCompiler;
   }
+
+  PackageConfig _packageConfig;
 
   // Handle a compilation request.
   Future<void> _onCompilationRequest(_CompilationRequest request) async {
@@ -120,6 +126,16 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
+    _packageConfig ??= await loadPackageConfigUri(
+      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+      loader: (Uri uri) async {
+        final File file = globals.fs.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
       globals.printTrace('Compiling ${request.mainUri}');
@@ -134,7 +150,7 @@ class TestCompiler {
         request.mainUri,
         <Uri>[request.mainUri],
         outputPath: outputDill.path,
-        packageConfig: null,
+        packageConfig: _packageConfig,
       );
       final String outputPath = compilerOutput?.outputFilename;
 
