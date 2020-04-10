@@ -61,7 +61,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -118,7 +118,7 @@ void main() {
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -172,7 +172,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -228,7 +228,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -295,7 +295,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -350,7 +350,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -407,7 +407,7 @@ void main() {
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: Container(
+                        child: const SizedBox(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -458,7 +458,7 @@ void main() {
                   message: tooltipText,
                   padding: const EdgeInsets.all(0.0),
                   margin: const EdgeInsets.all(_customMarginValue),
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -654,7 +654,7 @@ void main() {
                 return Tooltip(
                   key: key,
                   message: tooltipText,
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -696,7 +696,7 @@ void main() {
                   key: key,
                   decoration: customDecoration,
                   message: tooltipText,
-                  child: Container(
+                  child: const SizedBox(
                     width: 0.0,
                     height: 0.0,
                   ),
@@ -780,12 +780,12 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Center(
           child: Tooltip(
             message: tooltipText,
             waitDuration: waitDuration,
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -838,7 +838,7 @@ void main() {
                       child: Tooltip(
                         key: key,
                         message: tooltipText,
-                        child: Container(width: 10.0, height: 10.0),
+                        child: const SizedBox(width: 10.0, height: 10.0),
                       ),
                     ),
                   ],
