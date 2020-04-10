@@ -83,7 +83,6 @@ StandardCodecSerializer::~StandardCodecSerializer() = default;
 EncodableValue StandardCodecSerializer::ReadValue(
     ByteBufferStreamReader* stream) const {
   EncodedType type = static_cast<EncodedType>(stream->ReadByte());
-  ;
   switch (type) {
     case EncodedType::kNull:
       return EncodableValue();
