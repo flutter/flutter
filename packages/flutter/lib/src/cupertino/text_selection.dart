@@ -471,6 +471,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
 }
 
 class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> with TickerProviderStateMixin {
+  // Controls the fading of the buttons within the menu during page transitions.
   AnimationController _controller;
   int _page = 0;
   int _nextPage;
@@ -562,8 +563,8 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           nextButtonDisabled: CupertinoButton(
             borderRadius: null,
             color: _kToolbarBackgroundColor,
+            disabledColor: _kToolbarBackgroundColor,
             minSize: _kToolbarHeight,
-            onPressed: () {},
             padding: arrowPadding,
             pressedOpacity: 1.0,
             child: const Text('▶', style: _kToolbarButtonDisabledFontStyle),
