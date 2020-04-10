@@ -39,7 +39,7 @@ import 'scrollable.dart';
 ///  * [ListWheelChildBuilderDelegate], a delegate that supplies children using
 ///    a builder callback.
 abstract class ListWheelChildDelegate {
-  /// Const constructor so that if anyone inherits from it, they can make their 
+  /// Const constructor so that if anyone inherits from it, they can make their
   /// constructor const also.
   const ListWheelChildDelegate();
   /// Return the child at the given index. If the child at the given

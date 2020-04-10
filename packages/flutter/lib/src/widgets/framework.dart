@@ -332,7 +332,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   ///
   /// The label does not affect the key's identity.
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  const LabeledGlobalKey(this._debugLabel) : super.constructor();
+  LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   final String _debugLabel;
 
@@ -2045,7 +2045,7 @@ typedef ElementVisitor = void Function(Element element);
 /// [BuildContext] objects are actually [Element] objects. The [BuildContext]
 /// interface is used to discourage direct manipulation of [Element] objects.
 abstract class BuildContext {
-  /// Constant constructor so that if anyone subclasses it, they can be made 
+  /// Constant constructor so that if anyone subclasses it, they can be made
   /// const as well.
   const BuildContext();
   /// The current configuration of the [Element] that is this [BuildContext].
