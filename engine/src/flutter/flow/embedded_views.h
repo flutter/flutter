@@ -253,6 +253,18 @@ class ExternalViewEmbedder {
   // This is called after submitting the embedder frame and the surface frame.
   virtual void FinishFrame();
 
+  // This should only be called after |SubmitFrame|.
+  // This method provides the embedder a way to do additional tasks after
+  // |SubmitFrame|. After invoking this method, the current task on the
+  // TaskRunner should end immediately.
+  //
+  // For example on the iOS embedder, threads are merged in this call.
+  // A new frame on the platform thread starts immediately. If the GPU thread
+  // still has some task running, there could be two frames being rendered
+  // concurrently, which causes undefined behaviors.
+  virtual void EndFrame(
+      fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {}
+
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 
 };  // ExternalViewEmbedder

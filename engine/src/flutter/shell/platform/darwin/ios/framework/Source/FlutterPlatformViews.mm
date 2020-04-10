@@ -248,10 +248,13 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
 }
 
 void FlutterPlatformViewsController::CancelFrame() {
-  composition_order_.clear();
+  composition_order_ = active_composition_order_;
 }
 
 bool FlutterPlatformViewsController::HasPendingViewOperations() {
+  if (!views_to_dispose_.empty()) {
+    return true;
+  }
   if (!views_to_recomposite_.empty()) {
     return true;
   }
@@ -267,8 +270,9 @@ PostPrerollResult FlutterPlatformViewsController::PostPrerollAction(
     if (raster_thread_merger->IsMerged()) {
       raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
     } else {
+      // Wait until |EndFrame| to merge the threads.
+      merge_threads_ = true;
       CancelFrame();
-      raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
       return PostPrerollResult::kResubmitFrame;
     }
   }
@@ -468,6 +472,21 @@ SkRect FlutterPlatformViewsController::GetPlatformViewRect(int view_id) {
 bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
                                                  std::shared_ptr<IOSContext> ios_context,
                                                  SkCanvas* background_canvas) {
+  if (merge_threads_) {
+    // Threads are about to be merged, we drop everything from this frame
+    // and possibly resubmit the same layer tree in the next frame.
+    // Before merging thread, we know the code is not running on the main thread. Assert that
+    FML_DCHECK(![[NSThread currentThread] isMainThread]);
+    picture_recorders_.clear();
+    composition_order_.clear();
+    return true;
+  }
+
+  // Any UIKit related code has to run on main thread.
+  // When on a non-main thread, we only allow the rest of the method to run if there is no
+  // Pending UIView operations.
+  FML_DCHECK([[NSThread currentThread] isMainThread] || !HasPendingViewOperations());
+
   DisposeViews();
 
   // Resolve all pending GPU operations before allocating a new surface.
@@ -578,6 +597,14 @@ void FlutterPlatformViewsController::BringLayersIntoView(LayersMap layer_map) {
   }
 }
 
+void FlutterPlatformViewsController::EndFrame(
+    fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+  if (merge_threads_) {
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+    merge_threads_ = false;
+  }
+}
+
 std::shared_ptr<FlutterPlatformViewLayer> FlutterPlatformViewsController::GetLayer(
     GrContext* gr_context,
     std::shared_ptr<IOSContext> ios_context,
@@ -641,6 +668,8 @@ void FlutterPlatformViewsController::DisposeViews() {
   if (views_to_dispose_.empty()) {
     return;
   }
+
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
 
   for (int64_t viewId : views_to_dispose_) {
     UIView* root_view = root_views_[viewId].get();

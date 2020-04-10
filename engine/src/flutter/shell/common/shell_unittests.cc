@@ -23,6 +23,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
+#include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/shell_test_platform_view.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
@@ -139,7 +140,7 @@ TEST_F(ShellTest,
               return static_cast<std::unique_ptr<VsyncWaiter>>(
                   std::make_unique<VsyncWaiterFallback>(task_runners));
             },
-            ShellTestPlatformView::BackendType::kDefaultBackend);
+            ShellTestPlatformView::BackendType::kDefaultBackend, nullptr);
       },
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
@@ -463,6 +464,51 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   int64_t build_start =
       timing.Get(FrameTiming::kBuildStart).ToEpochDelta().ToMicroseconds();
   ASSERT_GT(frame_target_time, build_start);
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest,
+       ExternalEmbedderEndFrameIsCalledWhenPostPrerollResultIsResubmit) {
+  auto settings = CreateSettingsForFixture();
+  fml::AutoResetWaitableEvent endFrameLatch;
+  bool end_frame_called = false;
+  auto end_frame_callback = [&] {
+    end_frame_called = true;
+    endFrameLatch.Signal();
+  };
+  auto external_view_embedder = std::make_shared<ShellTestExternalViewEmbedder>(
+      end_frame_callback, PostPrerollResult::kResubmitFrame);
+  auto shell = CreateShell(std::move(settings), GetTaskRunnersForFixture(),
+                           false, external_view_embedder);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  LayerTreeBuilder builder = [&](std::shared_ptr<ContainerLayer> root) {
+    SkPictureRecorder recorder;
+    SkCanvas* recording_canvas =
+        recorder.beginRecording(SkRect::MakeXYWH(0, 0, 80, 80));
+    recording_canvas->drawRect(SkRect::MakeXYWH(0, 0, 80, 80),
+                               SkPaint(SkColor4f::FromColor(SK_ColorRED)));
+    auto sk_picture = recorder.finishRecordingAsPicture();
+    fml::RefPtr<SkiaUnrefQueue> queue = fml::MakeRefCounted<SkiaUnrefQueue>(
+        this->GetCurrentTaskRunner(), fml::TimeDelta::FromSeconds(0));
+    auto picture_layer = std::make_shared<PictureLayer>(
+        SkPoint::Make(10, 10),
+        flutter::SkiaGPUObject<SkPicture>({sk_picture, queue}), false, false);
+    root->Add(picture_layer);
+  };
+
+  PumpOneFrame(shell.get(), 100, 100, builder);
+  endFrameLatch.Wait();
+
+  ASSERT_TRUE(end_frame_called);
+
   DestroyShell(std::move(shell));
 }
 

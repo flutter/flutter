@@ -16,6 +16,7 @@
 #include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/shell_test_external_view_embedder.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiters_test.h"
 #include "flutter/testing/elf_loader.h"
@@ -32,9 +33,12 @@ class ShellTest : public ThreadTest {
   Settings CreateSettingsForFixture();
   std::unique_ptr<Shell> CreateShell(Settings settings,
                                      bool simulate_vsync = false);
-  std::unique_ptr<Shell> CreateShell(Settings settings,
-                                     TaskRunners task_runners,
-                                     bool simulate_vsync = false);
+  std::unique_ptr<Shell> CreateShell(
+      Settings settings,
+      TaskRunners task_runners,
+      bool simulate_vsync = false,
+      std::shared_ptr<ShellTestExternalViewEmbedder>
+          shell_test_external_view_embedder = nullptr);
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell, TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();

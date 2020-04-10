@@ -90,7 +90,12 @@ void IOSSurface::CancelFrame() {
   platform_views_controller_->CancelFrame();
   // Committing the current transaction as |BeginFrame| will create a nested
   // CATransaction otherwise.
-  [CATransaction commit];
+  if ([[NSThread currentThread] isMainThread]) {
+    // The only time we need to commit the `CATranscation` is when
+    // there are platform views in the scene, which has to be run on the
+    // main thread.
+    [CATransaction commit];
+  }
 }
 
 // |ExternalViewEmbedder|
@@ -98,7 +103,12 @@ void IOSSurface::BeginFrame(SkISize frame_size, GrContext* context, double devic
   TRACE_EVENT0("flutter", "IOSSurface::BeginFrame");
   FML_CHECK(platform_views_controller_ != nullptr);
   platform_views_controller_->SetFrameSize(frame_size);
-  [CATransaction begin];
+  if ([[NSThread currentThread] isMainThread]) {
+    // The only time we need to commit the `CATranscation` is when
+    // there are platform views in the scene, which has to be run on the
+    // main thread.
+    [CATransaction begin];
+  }
 }
 
 // |ExternalViewEmbedder|
@@ -141,9 +151,21 @@ bool IOSSurface::SubmitFrame(GrContext* context, SkCanvas* background_canvas) {
 }
 
 // |ExternalViewEmbedder|
-void IOSSurface::FinishFrame() {
-  TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
-  [CATransaction commit];
+void IOSSurface::EndFrame(fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
+  TRACE_EVENT0("flutter", "IOSSurface::EndFrame");
+  FML_CHECK(platform_views_controller_ != nullptr);
+  return platform_views_controller_->EndFrame(raster_thread_merger);
 }
 
+// |ExternalViewEmbedder|
+void IOSSurface::FinishFrame() {
+  TRACE_EVENT0("flutter", "IOSSurface::DidSubmitFrame");
+  if (![[NSThread currentThread] isMainThread]) {
+    return;
+  }
+  // The only time we need to commit the `CATranscation` is when
+  // there are platform views in the scene, which has to be run on the
+  // main thread.
+  [CATransaction commit];
+}
 }  // namespace flutter
