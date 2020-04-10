@@ -193,54 +193,6 @@ class StdoutHandler {
   }
 }
 
-/// Converts filesystem paths to package URIs.
-// class PackageUriMapper {
-//   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-//     final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath), fileSystem: globals.fs).map;
-//     final bool isWindowsPath = globals.platform.isWindows && !scriptPath.startsWith('org-dartlang-app');
-//     final String scriptUri = Uri.file(scriptPath, windows: isWindowsPath).toString();
-//     for (final String packageName in packageMap.keys) {
-//       final String prefix = packageMap[packageName].toString();
-//       // Only perform a multi-root mapping if there are multiple roots.
-//       if (fileSystemScheme != null
-//         && fileSystemRoots != null
-//         && fileSystemRoots.length > 1
-//         && prefix.contains(fileSystemScheme)) {
-//         _packageName = packageName;
-//         _uriPrefixes = fileSystemRoots
-//           .map((String name) => Uri.file(name, windows:globals.platform.isWindows).toString())
-//           .toList();
-//         return;
-//       }
-//       if (scriptUri.startsWith(prefix)) {
-//         _packageName = packageName;
-//         _uriPrefixes = <String>[prefix];
-//         return;
-//       }
-//     }
-//   }
-
-//   String _packageName;
-//   List<String> _uriPrefixes;
-
-//   Uri map(String scriptPath) {
-//     if (_packageName == null) {
-//       return null;
-//     }
-//     final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
-//     for (final String uriPrefix in _uriPrefixes) {
-//       if (scriptUri.startsWith(uriPrefix)) {
-//         return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
-//       }
-//     }
-//     return null;
-//   }
-
-//   static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-//     return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
-//   }
-// }
-
 /// List the preconfigured build options for a given build mode.
 List<String> buildModeOptions(BuildMode mode) {
   switch (mode) {
@@ -640,19 +592,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
-
-    // First time recompile is called we actually have to compile the app from
-    // scratch ignoring list of invalidated files.
-    // PackageUriMapper packageUriMapper;
-    // if (request.packagesFilePath != null || packagesPath != null) {
-      // packageUriMapper = PackageUriMapper(
-      //   request.mainPath,
-      //   request.packagesFilePath ?? packagesPath,
-      //   fileSystemScheme,
-      //   fileSystemRoots,
-      // );
-    // }
-
     _compileRequestNeedsConfirmation = true;
 
     if (_server == null) {

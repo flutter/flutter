@@ -68,14 +68,12 @@ class WebEntrypointTarget extends Target {
       }
     );
 
-    // Use the package uri mapper to find the correct package-scheme import path
+    // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
     // and relative imports for a library, then importing the entrypoint as a
     // file-scheme will cause said library to be recognized as two distinct
     // libraries. This can cause surprising behavior as types from that library
     // will be considered distinct from each other.
-
-
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
