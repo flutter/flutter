@@ -80,9 +80,10 @@ echo "$(date) START:runtime_tests -----------------------------------"
     -t runtime_tests
 
 # TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
-# OnServiceProtocolGetSkSLsWorks once it passes on Fuchsia.
+# OnServiceProtocolGetSkSLsWorks and CanLoadSkSLsFromAsset once they pass on
+# Fuchsia.
 echo "$(date) START:shell_tests -------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f shell_tests-0.far  \
     -t shell_tests \
-    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks"
+    -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset"
