@@ -252,7 +252,10 @@ class _OptionsState extends State<Options> {
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
-                            widget.model.density = widget.model.density.copyWith(horizontal: value, vertical: widget.model.density.vertical);
+                            widget.model.density = widget.model.density.copyWith(
+                              horizontal: value,
+                              vertical: widget.model.density.vertical,
+                            );
                           },
                           value: widget.model.density.horizontal,
                         ),
@@ -278,7 +281,10 @@ class _OptionsState extends State<Options> {
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
                           onChanged: (double value) {
-                            widget.model.density = widget.model.density.copyWith(horizontal: widget.model.density.horizontal, vertical: value);
+                            widget.model.density = widget.model.density.copyWith(
+                              horizontal: widget.model.density.horizontal,
+                              vertical: value,
+                            );
                           },
                           value: widget.model.density.vertical,
                         ),
@@ -376,7 +382,13 @@ class _ControlTile extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            Align(alignment: AlignmentDirectional.topStart, child: Text(label, textAlign: TextAlign.start)),
+            Align(
+              alignment: AlignmentDirectional.topStart,
+              child: Text(
+                label,
+                textAlign: TextAlign.start,
+              ),
+            ),
             child,
           ],
         ),
@@ -419,9 +431,59 @@ class _MyHomePageState extends State<MyHomePage> {
       primarySwatch: m2Swatch,
     );
     final Widget label = Text(_model.rtl ? 'اضغط علي' : 'Press Me');
-    textController.text = _model.rtl ? 'يعتمد القرار الجيد على المعرفة وليس على الأرقام.' : 'A good decision is based on knowledge and not on numbers.';
+    textController.text = _model.rtl
+        ? 'يعتمد القرار الجيد على المعرفة وليس على الأرقام.'
+        : 'A good decision is based on knowledge and not on numbers.';
 
     final List<Widget> tiles = <Widget>[
+      _ControlTile(
+        label: _model.rtl ? 'حقل النص' : 'List Tile',
+        child: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ListTile(
+                title: Text(_model.rtl ? 'هذا عنوان طويل نسبيا' : 'This is a relatively long title'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
+                subtitle:
+                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                trailing: Icon(Icons.check_box),
+                onTap: () {},
+              ),
+              ListTile(
+                title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
+                subtitle:
+                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                leading: Icon(Icons.check_box),
+                dense: true,
+                onTap: () {},
+              ),
+              ListTile(
+                title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
+                subtitle:
+                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                dense: true,
+                leading: Icon(Icons.add_box),
+                trailing: Icon(Icons.check_box),
+                onTap: () {},
+              ),
+              ListTile(
+                title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
+                subtitle:
+                    Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
+                isThreeLine: true,
+                leading: Icon(Icons.add_box),
+                trailing: Icon(Icons.check_box),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
       _ControlTile(
         label: _model.rtl ? 'حقل النص' : 'Text Field',
         child: SizedBox(
