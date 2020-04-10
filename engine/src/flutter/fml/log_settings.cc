@@ -34,4 +34,13 @@ int GetMinLogLevel() {
   return std::min(state::g_log_settings.min_log_level, LOG_FATAL);
 }
 
+ScopedSetLogSettings::ScopedSetLogSettings(const LogSettings& settings) {
+  old_settings_ = GetLogSettings();
+  SetLogSettings(settings);
+}
+
+ScopedSetLogSettings::~ScopedSetLogSettings() {
+  SetLogSettings(old_settings_);
+}
+
 }  // namespace fml

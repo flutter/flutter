@@ -1154,7 +1154,9 @@ TEST_F(ShellTest, OnServiceProtocolGetSkSLsWorks) {
   std::unique_ptr<Shell> shell = CreateShell(settings);
   ServiceProtocol::Handler::ServiceProtocolMap empty_params;
   rapidjson::Document document;
-  OnServiceProtocolGetSkSLs(shell.get(), empty_params, document);
+  OnServiceProtocol(shell.get(), ServiceProtocolEnum::kGetSkSLs,
+                    shell->GetTaskRunners().GetIOTaskRunner(), empty_params,
+                    document);
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   document.Accept(writer);
