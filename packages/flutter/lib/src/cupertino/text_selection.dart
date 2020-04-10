@@ -459,6 +459,7 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
     @required this.children,
     @required this.isArrowPointingDown,
   }) : assert(children != null),
+       // This ignore is used because .isNotEmpty isn't compatible with const.
        assert(children.length > 0), // ignore: prefer_is_empty
        super(key: key);
 
@@ -476,7 +477,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   void _handleNextPage() {
     _controller.reverse();
-    _controller.addListener(_listener);
+    _controller.addStatusListener(_statusListener);
     setState(() {
       _nextPage = _page + 1;
     });
@@ -484,14 +485,14 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 
   void _handlePreviousPage() {
     _controller.reverse();
-    _controller.addListener(_listener);
+    _controller.addStatusListener(_statusListener);
     setState(() {
       _nextPage = _page - 1;
     });
   }
 
-  void _listener() {
-    if (_controller.value != 0.0) {
+  void _statusListener(AnimationStatus status) {
+    if (status != AnimationStatus.dismissed) {
       return;
     }
 
@@ -500,7 +501,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       _nextPage = null;
     });
     _controller.forward();
-    _controller.removeListener(_listener);
+    _controller.removeStatusListener(_statusListener);
   }
 
   @override
@@ -969,7 +970,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
       parentWidth -= dividerWidth;
     }
 
-    size = Size(parentWidth, _kToolbarHeight);
+    size = constraints.constrain(Size(parentWidth, _kToolbarHeight));
   }
 
   @override
