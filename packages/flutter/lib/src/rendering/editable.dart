@@ -1554,6 +1554,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (event is PointerDownEvent) {
       // Checks if there is any gesture recognizer in the text span.
       final Offset offset = entry.localPosition;
+      _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
       final TextPosition position = _textPainter.getPositionForOffset(offset);
       final InlineSpan span = _textPainter.text.getSpanForPosition(position);
       if (span != null && span is TextSpan) {
