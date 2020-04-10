@@ -215,6 +215,16 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
   BenchBuildColorsGrid.canvasKit()
       : mode = _TestMode.useCanvasKit, super(name: canvasKitBenchmarkName);
 
+  /// Disables tracing for this benchmark.
+  ///
+  /// When tracing is enabled, DOM layout takes longer to complete. This has a
+  /// significant effect on the benchmark since we do a lot of text layout
+  /// operations that trigger synchronous DOM layout.
+  ///
+  /// Tracing has a negative effect only in [_TestMode.useDomTextLayout] mode.
+  @override
+  bool get isTracingEnabled => false;
+
   static const String domBenchmarkName = 'text_dom_color_grid';
   static const String canvasBenchmarkName = 'text_canvas_color_grid';
   static const String canvasKitBenchmarkName = 'text_canvas_kit_color_grid';
