@@ -86,8 +86,10 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":$name"
-    project(":$name").projectDir = pluginDirectory
+    if (pluginDirectory.exists()) {
+        include ":$name"
+        project(":$name").projectDir = pluginDirectory
+    }
 }
 ''';
       settingsGradle.writeAsStringSync(deprecatedFileContentV2, flush: true);
@@ -130,8 +132,10 @@ if (pluginsFile.exists()) {
 
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
+    if (pluginDirectory.exists()) {
+        include ":$name"
+        project(":$name").projectDir = pluginDirectory
+    }
 }
 // some custom logic
 ''';
