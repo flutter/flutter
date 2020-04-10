@@ -331,4 +331,26 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(tapCount, 3);
   });
+
+  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: 'initialValue',
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('initialValue'), findsOneWidget);
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.didChange('changedValue');
+
+    expect(find.text('initialValue'), findsNothing);
+    expect(find.text('changedValue'), findsOneWidget);
+  });
 }
