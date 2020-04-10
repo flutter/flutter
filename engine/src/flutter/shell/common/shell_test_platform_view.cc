@@ -19,7 +19,9 @@ std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::Create(
     TaskRunners task_runners,
     std::shared_ptr<ShellTestVsyncClock> vsync_clock,
     CreateVsyncWaiter create_vsync_waiter,
-    BackendType backend) {
+    BackendType backend,
+    std::shared_ptr<ShellTestExternalViewEmbedder>
+        shell_test_external_view_embedder) {
   // TODO(gw280): https://github.com/flutter/flutter/issues/50298
   // Make this fully runtime configurable
   switch (backend) {
@@ -27,12 +29,14 @@ std::unique_ptr<ShellTestPlatformView> ShellTestPlatformView::Create(
 #ifdef SHELL_ENABLE_GL
     case BackendType::kGLBackend:
       return std::make_unique<ShellTestPlatformViewGL>(
-          delegate, task_runners, vsync_clock, create_vsync_waiter);
+          delegate, task_runners, vsync_clock, create_vsync_waiter,
+          shell_test_external_view_embedder);
 #endif  // SHELL_ENABLE_GL
 #ifdef SHELL_ENABLE_VULKAN
     case BackendType::kVulkanBackend:
       return std::make_unique<ShellTestPlatformViewVulkan>(
-          delegate, task_runners, vsync_clock, create_vsync_waiter);
+          delegate, task_runners, vsync_clock, create_vsync_waiter,
+          shell_test_external_view_embedder);
 #endif  // SHELL_ENABLE_VULKAN
     default:
       FML_LOG(FATAL) << "No backends supported for ShellTestPlatformView";
