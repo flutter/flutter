@@ -20,8 +20,8 @@ Widget _buildScroller({ List<String> log }) {
       }
       return false;
     },
-    child: SingleChildScrollView(
-      child: Container(width: 1000.0, height: 1000.0),
+    child: const SingleChildScrollView(
+      child: SizedBox(width: 1000.0, height: 1000.0),
     ),
   );
 }

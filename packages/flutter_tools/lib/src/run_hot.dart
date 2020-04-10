@@ -299,6 +299,9 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       globals.printStatus('Benchmarking hot restart');
       await restart(fullRestart: true, benchmarkMode: true);
+      // Wait for notifications to finish. attempt to work around
+      // timing issue caused by sentinel.
+      await Future<void>.delayed(const Duration(seconds: 1));
       globals.printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -483,7 +486,8 @@ class HotRunner extends ResidentRunner {
       futures.clear();
       for (final FlutterDevice device in flutterDevices) {
         for (final FlutterView view in device.views) {
-          futures.add(view.flushUIThreadTasks());
+          futures.add(device.vmService
+            .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
         }
       }
       await Future.wait(futures);
