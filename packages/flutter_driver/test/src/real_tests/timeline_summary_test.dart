@@ -104,6 +104,31 @@ void main() {
           2.0,
         );
       });
+
+      // see https://github.com/flutter/flutter/issues/54095.
+      test('ignore multiple "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(2000), frameEnd(4000),
+            frameEnd(4300), // rogue frame end.
+            frameBegin(5000), frameEnd(6000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          1.5,
+        );
+      });
+
+      test('pick latest when there are multiple "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(1000), // rogue frame begin.
+            frameBegin(2000), frameEnd(4000),
+            frameEnd(4300), // rogue frame end.
+            frameBegin(4400), // rogue frame begin.
+            frameBegin(5000), frameEnd(6000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          1.5,
+        );
+      });
     });
 
     group('worst_frame_build_time_millis', () {
