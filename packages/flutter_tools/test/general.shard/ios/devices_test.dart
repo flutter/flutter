@@ -28,12 +28,9 @@ import '../../src/context.dart';
 import '../../src/mocks.dart';
 
 void main() {
-  final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-  macPlatform.operatingSystem = 'macos';
-  final FakePlatform linuxPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-  linuxPlatform.operatingSystem = 'linux';
-  final FakePlatform windowsPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-  windowsPlatform.operatingSystem = 'windows';
+  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
+  final FakePlatform linuxPlatform = FakePlatform(operatingSystem: 'linux');
+  final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];

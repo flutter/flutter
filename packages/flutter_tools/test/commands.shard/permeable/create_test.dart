@@ -31,6 +31,7 @@ import '../../src/testbed.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
+// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,

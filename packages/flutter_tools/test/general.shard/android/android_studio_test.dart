@@ -32,15 +32,17 @@ const Map<String, dynamic> macStudioInfoPlist = <String, dynamic>{
 class MockPlistUtils extends Mock implements PlistParser {}
 
 Platform linuxPlatform() {
-  return FakePlatform.fromPlatform(const LocalPlatform())
-    ..operatingSystem = 'linux'
-    ..environment = <String, String>{'HOME': homeLinux};
+  return FakePlatform(
+    operatingSystem: 'linux',
+    environment: <String, String>{'HOME': homeLinux},
+  );
 }
 
 Platform macPlatform() {
-  return FakePlatform.fromPlatform(const LocalPlatform())
-    ..operatingSystem = 'macos'
-    ..environment = <String, String>{'HOME': homeMac};
+  return FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{'HOME': homeMac},
+  );
 }
 
 void main() {

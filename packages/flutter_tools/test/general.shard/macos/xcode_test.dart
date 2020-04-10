@@ -253,8 +253,7 @@ void main() {
     });
 
     group('available devices', () {
-      final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-      macPlatform.operatingSystem = 'macos';
+      final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
       testWithoutContext('Xcode not installed', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
@@ -447,8 +446,7 @@ void main() {
     });
 
     group('diagnostics', () {
-      final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
-      macPlatform.operatingSystem = 'macos';
+      final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
       testWithoutContext('Xcode not installed', () async {
         when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);

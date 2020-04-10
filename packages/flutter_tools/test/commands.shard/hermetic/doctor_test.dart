@@ -33,9 +33,10 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())
-  ..localeName = 'en_US.UTF-8'
-  ..stdoutSupportsAnsi = false;
+final Generator _kNoColorOutputPlatform = () => FakePlatform(
+  localeName: 'en_US.UTF-8',
+  stdoutSupportsAnsi: false,
+);
 
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
