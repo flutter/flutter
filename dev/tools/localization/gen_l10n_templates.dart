@@ -10,12 +10,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
 @(messageClassImports)
-
-// ignore_for_file: unnecessary_brace_in_string_interps
 
 /// Callers can lookup localized strings with an instance of @(class) returned
 /// by `@(class).of(context)`.
@@ -44,8 +41,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: 0.16.0
-///   intl_translation: 0.17.7
+///   intl: 0.16.1
 ///
 ///   # rest of dependencies
 /// ```
