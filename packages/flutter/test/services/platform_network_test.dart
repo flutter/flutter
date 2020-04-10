@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final Symbol _symbol = #dart.library.io.allow_http;
+  const Symbol _symbol = #dart.library.io.allow_http;
 
   test('AllowHTTP sets the correct zone variable', () async {
     expect(Zone.current[_symbol], isNull);
