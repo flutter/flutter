@@ -23,7 +23,7 @@ assert object.plugins.android instanceof List
 object.plugins.android.each { androidPlugin ->
   assert androidPlugin.name instanceof String
   assert androidPlugin.path instanceof String
-  def pluginDirectory = flutterProjectRoot.toPath().resolve(androidPlugin.path).resolve('android').toFile()
+  def pluginDirectory = new File(androidPlugin.path, 'android')
   assert pluginDirectory.exists()
   include ":${androidPlugin.name}"
   project(":${androidPlugin.name}").projectDir = pluginDirectory
