@@ -332,6 +332,28 @@ void main() {
     expect(tapCount, 3);
   });
 
+  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(
+                initialValue: 'initialValue',
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text('initialValue'), findsOneWidget);
+  });
+
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
