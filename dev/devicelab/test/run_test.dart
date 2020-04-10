@@ -24,43 +24,43 @@ void main() {
       return scriptProcess;
     }
 
-    Future<void> expectScriptResult(List<String> testNames, int expectedExitCode) async {
+    Future<void> expectScriptResult(List<String> testNames, { bool expectSuccess }) async {
       final ProcessResult result = await runScript(testNames);
-      expect(result.exitCode, expectedExitCode,
+      expect(result.exitCode, expectSuccess ? 0 : isNot(equals(0)),
           reason: '[ stderr from test process ]\n\n${result.stderr}\n\n[ end of stderr ]'
           '\n\n[ stdout from test process ]\n\n${result.stdout}\n\n[ end of stdout ]');
     }
 
     test('exits with code 0 when succeeds', () async {
-      await expectScriptResult(<String>['smoke_test_success'], 0);
+      await expectScriptResult(<String>['smoke_test_success'], expectSuccess: true);
     });
 
     test('accepts file paths', () async {
-      await expectScriptResult(<String>['bin/tasks/smoke_test_success.dart'], 0);
+      await expectScriptResult(<String>['bin/tasks/smoke_test_success.dart'], expectSuccess: true);
     });
 
     test('rejects invalid file paths', () async {
-      await expectScriptResult(<String>['lib/framework/adb.dart'], 1);
+      await expectScriptResult(<String>['lib/framework/adb.dart'], expectSuccess: false);
     });
 
     test('exits with code 1 when task throws', () async {
-      await expectScriptResult(<String>['smoke_test_throws'], 1);
+      await expectScriptResult(<String>['smoke_test_throws'], expectSuccess: false);
     });
 
     test('exits with code 1 when fails', () async {
-      await expectScriptResult(<String>['smoke_test_failure'], 1);
+      await expectScriptResult(<String>['smoke_test_failure'], expectSuccess: false);
     });
 
     test('exits with code 1 when fails to connect', () async {
-      await expectScriptResult(<String>['smoke_test_setup_failure'], 1);
-    }, skip: true); // https://github.com/flutter/flutter/issues/53707
+      await expectScriptResult(<String>['smoke_test_setup_failure'], expectSuccess: false);
+    });
 
     test('exits with code 1 when results are mixed', () async {
       await expectScriptResult(<String>[
           'smoke_test_failure',
           'smoke_test_success',
         ],
-        1,
+        expectSuccess: false,
       );
     });
   });
