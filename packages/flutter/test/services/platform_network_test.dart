@@ -10,10 +10,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final Symbol _symbol = #dart.library.io.allow_http;
 
   test('AllowHTTP sets the correct zone variable', () async {
+    expect(Zone.current[_symbol], isNull);
     allowHttp(() {
-      expect(Zone.current[#dart.library.io.allow_http], isTrue);
+      expect(Zone.current[_symbol], isTrue);
     });
   });
 
@@ -24,8 +26,9 @@ void main() {
     final HttpClient httpClient = HttpClient();
     try {
       await runZoned(
-          () async => await httpClient.getUrl(Uri.parse('http://${Platform.localHostname}')),
-          zoneValues: <Symbol, bool>{#dart.library.io.allow_http: false});
+        () async => await httpClient.getUrl(Uri.parse('http://${Platform.localHostname}')),
+        zoneValues: <Symbol, bool>{_symbol: false},
+      );
       fail('This should have thrown a StateError. '
            'Check if the symbol for setting allow_http behavior has changed');
     } on StateError catch(e) {
