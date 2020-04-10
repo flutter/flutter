@@ -50,7 +50,7 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 }
 
 void main() {
-  test('Loads licenses from rootBundle', () async {
+  test('Adds rootBundle LICENSES to LicenseRegistry', () async {
     TestBinding(); // The test binding registers a mock handler that returns licenses for the LICENSE key
 
     final List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();
