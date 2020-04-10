@@ -4,7 +4,7 @@
 
 def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
-def localPropertiesFile = new File(flutterProjectRoot, ".android/localx.properties")
+def localPropertiesFile = new File(flutterProjectRoot, ".android/local.properties")
 
 def properties = new Properties()
 
