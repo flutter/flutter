@@ -934,7 +934,9 @@ class SurfacePath implements ui.Path {
             EngineWindow.browserDevicePixelRatio) {
       _rawRecorder = null;
     }
-    _rawRecorder ??= ui.RawRecordingCanvas(size);
+    final double dpr = window.devicePixelRatio;
+    _rawRecorder ??= ui.RawRecordingCanvas(ui.Size(size.width / dpr,
+      size.height / dpr));
     // Account for the shift due to padding.
     _rawRecorder.translate(-BitmapCanvas.kPaddingPixels.toDouble(),
         -BitmapCanvas.kPaddingPixels.toDouble());
