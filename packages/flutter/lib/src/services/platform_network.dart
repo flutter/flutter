@@ -7,7 +7,7 @@ import 'dart:async';
 /// Allows an operation executed via [action] to access insecure HTTP URLs.
 ///
 /// On some platforms (notably iOS and Android), HTTP is disallowed by default.
-/// You should strive to access secure URLs from your app but we recognize that
+/// You should strive to access secure URLs from your app, but we recognize that
 /// sometimes that is not possible. In such cases, use the function below to
 /// allow access to HTTP URLs.
 ///
