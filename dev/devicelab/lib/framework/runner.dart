@@ -40,11 +40,19 @@ Future<Map<String, dynamic>> runTask(
 
   bool runnerFinished = false;
 
+  final Completer<Uri> uri = Completer<Uri>();
+
   runner.exitCode.whenComplete(() {
+    if (!uri.isCompleted) {
+      // The runner process exited prematurely.
+      uri.completeError(Exception(
+        'The task runner process exited before opening a VM service connection. '
+        'A common cause for this is when a task script does not actually create '
+        'a task.',
+      ));
+    }
     runnerFinished = true;
   });
-
-  final Completer<Uri> uri = Completer<Uri>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
@@ -68,7 +76,7 @@ Future<Map<String, dynamic>> runTask(
   });
 
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future, () => !runnerFinished);
     final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
     await runner.exitCode;
     return taskResult;
@@ -81,7 +89,7 @@ Future<Map<String, dynamic>> runTask(
   }
 }
 
-Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
+Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri, bool Function() keepTrying) async {
   final List<String> pathSegments = <String>[
     // Add authentication code.
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
@@ -91,7 +99,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       pathSegments).toString();
   final Stopwatch stopwatch = Stopwatch()..start();
 
-  while (true) {
+  while (keepTrying()) {
     try {
       // Make sure VM server is up by successfully opening and closing a socket.
       await (await WebSocket.connect(url)).close();
@@ -110,6 +118,8 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }
+
+  throw Exception('Failed to connect to Dart VM service.');
 }
 
 Future<void> cleanupSystem() async {
