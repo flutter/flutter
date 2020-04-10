@@ -4,8 +4,11 @@
 
 def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
-def localPropertiesFile = new File(flutterProjectRoot, ".android/local.properties")
 
+gradle.include ":flutter"
+gradle.project(":flutter").projectDir = new File(flutterProjectRoot, ".android/Flutter")
+
+def localPropertiesFile = new File(flutterProjectRoot, ".android/local.properties")
 def properties = new Properties()
 
 assert localPropertiesFile.exists(), "❗️The Flutter module doesn't have a `$localPropertiesFile` file." +
