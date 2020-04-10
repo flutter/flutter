@@ -3744,7 +3744,7 @@ void main() {
     },
   );
 
-  testWidgets('text span with tap gesture recognizer work in selectable rich text', (WidgetTester tester) async {
+  testWidgets('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
     int spyTaps = 0;
     final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
       ..onTap = () {
@@ -3794,7 +3794,7 @@ void main() {
     expect(spyTaps, 1);
   });
 
-  testWidgets('text span with long press gesture recognizer work in selectable rich text', (WidgetTester tester) async {
+  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
     int spyLongPress = 0;
     final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
       ..onLongPress = () {
