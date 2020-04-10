@@ -39,15 +39,17 @@ class AnimationSheetRecorder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _CellGrid(
-      cellSize: cellSize,
-      children: List<Widget>.generate(frameIndex + 1, (int index) {
-        final int i = frameIndex - index;
-        return Container(
-          key: ValueKey<int>(i),
-          child: target,
-        );
-      }),
+    return RepaintBoundary(
+      child: _CellGrid(
+        cellSize: cellSize,
+        children: List<Widget>.generate(frameIndex + 1, (int index) {
+          final int i = frameIndex - index;
+          return Container(
+            key: ValueKey<int>(i),
+            child: target,
+          );
+        }),
+      )
     );
   }
 }
