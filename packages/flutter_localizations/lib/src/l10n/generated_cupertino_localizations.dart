@@ -8398,7 +8398,7 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
 }
 
 /// The translations for Norwegian Bokmål (`nb`).
-class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
+class CupertinoLocalizationNb extends CupertinoLocalizationNo {
   /// Create an instance of the translation bundle for Norwegian Bokmål.
   ///
   /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
@@ -8423,126 +8423,6 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
-
-  @override
-  String get alertDialogLabel => 'Varsel';
-
-  @override
-  String get anteMeridiemAbbreviation => 'AM';
-
-  @override
-  String get copyButtonLabel => 'Kopiér';
-
-  @override
-  String get cutButtonLabel => 'Klipp ut';
-
-  @override
-  String get datePickerDateOrderString => 'dmy';
-
-  @override
-  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
-
-  @override
-  String get datePickerHourSemanticsLabelFew => null;
-
-  @override
-  String get datePickerHourSemanticsLabelMany => null;
-
-  @override
-  String get datePickerHourSemanticsLabelOne => '\$hour null-null';
-
-  @override
-  String get datePickerHourSemanticsLabelOther => '\$hour null-null';
-
-  @override
-  String get datePickerHourSemanticsLabelTwo => null;
-
-  @override
-  String get datePickerHourSemanticsLabelZero => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelFew => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelMany => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelOne => '1 minutt';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => '\$minute minutter';
-
-  @override
-  String get datePickerMinuteSemanticsLabelTwo => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelZero => null;
-
-  @override
-  String get pasteButtonLabel => 'Lim inn';
-
-  @override
-  String get postMeridiemAbbreviation => 'PM';
-
-  @override
-  String get selectAllButtonLabel => 'Velg alle';
-
-  @override
-  String get timerPickerHourLabelFew => null;
-
-  @override
-  String get timerPickerHourLabelMany => null;
-
-  @override
-  String get timerPickerHourLabelOne => 'time';
-
-  @override
-  String get timerPickerHourLabelOther => 'timer';
-
-  @override
-  String get timerPickerHourLabelTwo => null;
-
-  @override
-  String get timerPickerHourLabelZero => null;
-
-  @override
-  String get timerPickerMinuteLabelFew => null;
-
-  @override
-  String get timerPickerMinuteLabelMany => null;
-
-  @override
-  String get timerPickerMinuteLabelOne => 'min.';
-
-  @override
-  String get timerPickerMinuteLabelOther => 'min.';
-
-  @override
-  String get timerPickerMinuteLabelTwo => null;
-
-  @override
-  String get timerPickerMinuteLabelZero => null;
-
-  @override
-  String get timerPickerSecondLabelFew => null;
-
-  @override
-  String get timerPickerSecondLabelMany => null;
-
-  @override
-  String get timerPickerSecondLabelOne => 'sek.';
-
-  @override
-  String get timerPickerSecondLabelOther => 'sek.';
-
-  @override
-  String get timerPickerSecondLabelTwo => null;
-
-  @override
-  String get timerPickerSecondLabelZero => null;
-
-  @override
-  String get todayLabel => 'I dag';
 }
 
 /// The translations for Nepali (`ne`).
@@ -8839,6 +8719,154 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get todayLabel => 'Vandaag';
+}
+
+/// The translations for Norwegian (`no`).
+class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Norwegian.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationNo({
+    String localeName = 'no',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => 'Varsel';
+
+  @override
+  String get anteMeridiemAbbreviation => 'AM';
+
+  @override
+  String get copyButtonLabel => 'Kopiér';
+
+  @override
+  String get cutButtonLabel => 'Klipp ut';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String get datePickerHourSemanticsLabelOne => '\$hour null-null';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => '\$hour null-null';
+
+  @override
+  String get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => '1 minutt';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => '\$minute minutter';
+
+  @override
+  String get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get pasteButtonLabel => 'Lim inn';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get selectAllButtonLabel => 'Velg alle';
+
+  @override
+  String get timerPickerHourLabelFew => null;
+
+  @override
+  String get timerPickerHourLabelMany => null;
+
+  @override
+  String get timerPickerHourLabelOne => 'time';
+
+  @override
+  String get timerPickerHourLabelOther => 'timer';
+
+  @override
+  String get timerPickerHourLabelTwo => null;
+
+  @override
+  String get timerPickerHourLabelZero => null;
+
+  @override
+  String get timerPickerMinuteLabelFew => null;
+
+  @override
+  String get timerPickerMinuteLabelMany => null;
+
+  @override
+  String get timerPickerMinuteLabelOne => 'min.';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'min.';
+
+  @override
+  String get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String get timerPickerMinuteLabelZero => null;
+
+  @override
+  String get timerPickerSecondLabelFew => null;
+
+  @override
+  String get timerPickerSecondLabelMany => null;
+
+  @override
+  String get timerPickerSecondLabelOne => 'sek.';
+
+  @override
+  String get timerPickerSecondLabelOther => 'sek.';
+
+  @override
+  String get timerPickerSecondLabelTwo => null;
+
+  @override
+  String get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'I dag';
 }
 
 /// The translations for Oriya (`or`).
@@ -12794,6 +12822,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'nb', // Norwegian Bokmål
   'ne', // Nepali
   'nl', // Dutch Flemish
+  'no', // Norwegian
   'or', // Oriya
   'pa', // Panjabi Punjabi
   'pl', // Polish
@@ -12879,9 +12908,10 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `mr` - Marathi
 ///  * `ms` - Malay
 ///  * `my` - Burmese
-///  * `nb` - Norwegian Bokmål
+///  * `nb` - Norwegian Bokmål, which, in this library, is a synonym of `no`
 ///  * `ne` - Nepali
 ///  * `nl` - Dutch Flemish
+///  * `no` - Norwegian
 ///  * `or` - Oriya
 ///  * `pa` - Panjabi Punjabi
 ///  * `pl` - Polish
@@ -13087,12 +13117,12 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
       return CupertinoLocalizationMs(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'my':
       return CupertinoLocalizationMy(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'nb':
-      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ne':
       return CupertinoLocalizationNe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'nl':
       return CupertinoLocalizationNl(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'no':
+      return CupertinoLocalizationNo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'or':
       return CupertinoLocalizationOr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pa':
@@ -13176,6 +13206,8 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
     }
     case 'zu':
       return CupertinoLocalizationZu(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'nb':
+      return CupertinoLocalizationNb(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
   assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;

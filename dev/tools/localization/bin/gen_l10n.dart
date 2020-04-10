@@ -41,6 +41,15 @@ void main(List<String> arguments) {
       'delegate classes.',
   );
   parser.addOption(
+    'untranslated-messages-file',
+    help: 'The location of a file that describes the localization\n'
+      'messages have not been translated yet. Using this option will create\n'
+      'a JSON file at the target location, in the following format:\n\n'
+      '"locale": ["message_1", "message_2" ... "message_n"]\n\n'
+      'If this option is not specified, a summary of the messages that\n'
+      'have not been translated will be printed on the command line.'
+  );
+  parser.addOption(
     'output-class',
     defaultsTo: 'AppLocalizations',
     help: 'The Dart class name to use for the output localization and '
@@ -72,6 +81,24 @@ void main(List<String> arguments) {
       'Alternatively, see the `header` option to pass in a string '
       'for a simpler header.'
   );
+  parser.addFlag(
+    'use-deferred-loading',
+    defaultsTo: false,
+    help: 'Whether to generate the Dart localization file with locales imported'
+      ' as deferred, allowing for lazy loading of each locale in Flutter web.\n'
+      '\n'
+      'This can reduce a web app’s initial startup time by decreasing the '
+      'size of the JavaScript bundle. When this flag is set to true, the '
+      'messages for a particular locale are only downloaded and loaded by the '
+      'Flutter app as they are needed. For projects with a lot of different '
+      'locales and many localization strings, it can be an performance '
+      'improvement to have deferred loading. For projects with a small number '
+      'of locales, the difference is negligible, and might slow down the start '
+      'up compared to bundling the localizations with the rest of the '
+      'application.\n\n'
+      'Note that this flag does not affect other platforms such as mobile or '
+      'desktop.',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -84,10 +111,12 @@ void main(List<String> arguments) {
   final String arbPathString = results['arb-dir'] as String;
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
+  final String untranslatedMessagesFile = results['untranslated-messages-file'] as String;
   final String classNameString = results['output-class'] as String;
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
   final String headerString = results['header'] as String;
   final String headerFile = results['header-file'] as String;
+  final bool useDeferredLoading = results['use-deferred-loading'] as bool;
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
@@ -102,9 +131,11 @@ void main(List<String> arguments) {
         preferredSupportedLocaleString: preferredSupportedLocaleString,
         headerString: headerString,
         headerFile: headerFile,
+        useDeferredLoading: useDeferredLoading,
       )
       ..loadResources()
-      ..writeOutputFile();
+      ..writeOutputFile()
+      ..outputUnimplementedMessages(untranslatedMessagesFile);
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {

@@ -923,6 +923,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('gradle_r8_test', environment: gradleEnvironment),
 
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('module_custom_host_app_name_test', environment: gradleEnvironment),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
@@ -1120,7 +1121,8 @@ String get gitHash {
 /// Returns null if the contents are good. Returns a string if they are bad.
 /// The string is an error message.
 Future<String> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
+  final RegExp pattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
   final String version = await file.readAsString();
   if (!file.existsSync())
     return 'The version logic failed to create the Flutter version file.';

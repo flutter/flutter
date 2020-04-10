@@ -16,9 +16,9 @@ import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
-  with ServicesBinding,
+  with SchedulerBinding,
+       ServicesBinding,
        GestureBinding,
-       SchedulerBinding,
        PaintingBinding,
        SemanticsBinding,
        RendererBinding,
@@ -716,12 +716,13 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  }, skip: isBrowser);
+  }, skip: isBrowser); // Compilation trace is Dart VM specific and not
+  // supported in browsers.
 
   test('Service extensions - fastReassemble', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
 
     expect(result, containsPair('Success', 'true'));
-  }, skip: isBrowser);
+  });
 }

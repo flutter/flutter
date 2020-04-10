@@ -364,6 +364,13 @@ void main() {
       verifyNever(mockResidentRunner.debugDumpSemanticsTreeInInverseHitTestOrder());
     });
 
+    testUsingContext('v - launchDevTools', () async {
+      when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
+      await terminalHandler.processTerminalInput('v');
+
+      verify(mockResidentRunner.launchDevTools()).called(1);
+    });
+
     testUsingContext('w,W - debugDumpApp with service protocol', () async {
       await terminalHandler.processTerminalInput('w');
       await terminalHandler.processTerminalInput('W');

@@ -24,7 +24,7 @@ void main() {
     Cache: () => FakeCache(),
   });
 
-  testbed.test('Can run a build', () async {
+  testbed.test('flutter assemble can run a build', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
@@ -35,7 +35,7 @@ void main() {
     expect(testLogger.traceText, contains('build succeeded.'));
   });
 
-  testbed.test('Can parse defines whose values contain =', () async {
+  testbed.test('flutter assemble can parse defines whose values contain =', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         expect((invocation.positionalArguments[1] as Environment).defines, containsPair('FooBar', 'fizz=2'));
@@ -47,7 +47,19 @@ void main() {
     expect(testLogger.traceText, contains('build succeeded.'));
   });
 
-  testbed.test('Throws ToolExit if not provided with output', () async {
+  testbed.test('flutter assemble can parse inputs', () async {
+    when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        expect((invocation.positionalArguments[1] as Environment).inputs, containsPair('Foo', 'Bar.txt'));
+        return BuildResult(success: true);
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', '-o Output', '-iFoo=Bar.txt', 'debug_macos_bundle_flutter_assets']);
+
+    expect(testLogger.traceText, contains('build succeeded.'));
+  });
+
+  testbed.test('flutter assemble throws ToolExit if not provided with output', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
@@ -58,7 +70,7 @@ void main() {
       throwsToolExit());
   });
 
-  testbed.test('Throws ToolExit if called with non-existent rule', () async {
+  testbed.test('flutter assemble throws ToolExit if called with non-existent rule', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(success: true);
@@ -69,7 +81,7 @@ void main() {
       throwsToolExit());
   });
 
-  testbed.test('Does not log stack traces during build failure', () async {
+  testbed.test('flutter assemble does not log stack traces during build failure', () async {
     final StackTrace testStackTrace = StackTrace.current;
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
@@ -85,7 +97,7 @@ void main() {
     expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
 
-  testbed.test('Does not inject engine revision with local-engine', () async {
+  testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
     Environment environment;
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
@@ -100,7 +112,7 @@ void main() {
     Artifacts: () => MockLocalEngineArtifacts()
   });
 
-  testbed.test('Only writes input and output files when the values change', () async {
+  testbed.test('flutter assemble only writes input and output files when the values change', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         return BuildResult(

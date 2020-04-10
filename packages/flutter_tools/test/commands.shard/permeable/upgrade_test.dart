@@ -29,7 +29,14 @@ void main() {
     MockProcessManager processManager;
     FakePlatform fakePlatform;
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
-    const GitTagVersion gitTagVersion = GitTagVersion(1, 2, 3, 4, 5, 'asd');
+    const GitTagVersion gitTagVersion = GitTagVersion(
+      x: 1,
+      y: 2,
+      z: 3,
+      hotfix: 4,
+      commits: 5,
+      hash: 'asd',
+    );
     when(flutterVersion.channel).thenReturn('dev');
 
     setUp(() {
@@ -231,7 +238,7 @@ void main() {
         fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <String>[
-              'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
+              'git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags',
             ],
             stdout: 'v1.12.16-19-gb45b676af',
           ),
@@ -335,9 +342,6 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<bool> hasUncomittedChanges() async => willHaveUncomittedChanges;
-
-  @override
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {}
 
   @override
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}

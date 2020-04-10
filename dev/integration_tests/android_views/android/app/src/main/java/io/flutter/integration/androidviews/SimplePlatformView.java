@@ -4,35 +4,37 @@
 
 package io.flutter.integration.platformviews;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 
 public class SimplePlatformView implements PlatformView, MethodChannel.MethodCallHandler {
-    private final View mView;
-    private final MethodChannel mMethodChannel;
-    private final TouchPipe mTouchPipe;
+    private final View view;
+    private final MethodChannel methodChannel;
+    private final io.flutter.integration.platformviews.TouchPipe touchPipe;
 
     SimplePlatformView(Context context, MethodChannel methodChannel) {
-        mMethodChannel = methodChannel;
-        mView = new View(context) {
+        this.methodChannel = methodChannel;
+        view = new View(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
                 return super.onTouchEvent(event);
             }
         };
-        mView.setBackgroundColor(0xff0000ff);
-        mMethodChannel.setMethodCallHandler(this);
-        mTouchPipe = new TouchPipe(mMethodChannel, mView);
+        view.setBackgroundColor(0xff0000ff);
+        this.methodChannel.setMethodCallHandler(this);
+        touchPipe = new io.flutter.integration.platformviews.TouchPipe(this.methodChannel, view);
     }
 
     @Override
     public View getView() {
-        return mView;
+        return view;
     }
 
     @Override
@@ -43,14 +45,28 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         switch(methodCall.method) {
             case "pipeTouchEvents":
-                mTouchPipe.enable();
+                touchPipe.enable();
                 result.success(null);
                 return;
             case "stopTouchEvents":
-                mTouchPipe.disable();
+                touchPipe.disable();
                 result.success(null);
+                return;
+            case "showAlertDialog":
+                showAlertDialog(result);
                 return;
         }
         result.notImplemented();
     }
+
+    private void showAlertDialog(MethodChannel.Result result) {
+        Context context = view.getContext();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        TextView textView = new TextView(context);
+        textView.setText("Alert!");
+        builder.setView(textView);
+        final AlertDialog alertDialog = builder.show();
+        result.success(null);
+    }
+
 }

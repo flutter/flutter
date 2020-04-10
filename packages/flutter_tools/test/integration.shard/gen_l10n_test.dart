@@ -48,7 +48,7 @@ void main() {
     }
   }
 
-  test('generated l10n classes produce expected localized strings', () async {
+  void setUpAndRunGenL10n({List<String> args}) {
     // Get the intl packages before running gen_l10n.
     final String flutterBin = globals.platform.isWindows ? 'flutter.bat' : 'flutter';
     final String flutterPath = globals.fs.path.join(getFlutterRoot(), 'bin', flutterBin);
@@ -58,8 +58,10 @@ void main() {
     final String genL10nPath = globals.fs.path.join(getFlutterRoot(), 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart');
     final String dartBin = globals.platform.isWindows ? 'dart.exe' : 'dart';
     final String dartPath = globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk', 'bin', dartBin);
-    runCommand(<String>[dartPath, genL10nPath]);
+    runCommand(<String>[dartPath, genL10nPath, args?.join(' ')]);
+  }
 
+  Future<StringBuffer> runApp() async {
     // Run the app defined in GenL10nProject.main and wait for it to
     // send '#l10n END' to its stdout.
     final Completer<void> l10nEnd = Completer<void>();
@@ -75,43 +77,79 @@ void main() {
     await _flutter.run();
     await l10nEnd.future;
     await subscription.cancel();
+    return stdout;
+  }
+
+  void expectOutput(StringBuffer stdout) {
     expect(stdout.toString(),
       '#l10n 0 (--- supportedLocales tests ---)\n'
       '#l10n 1 (supportedLocales[0]: languageCode: en, countryCode: null, scriptCode: null)\n'
       '#l10n 2 (supportedLocales[1]: languageCode: en, countryCode: CA, scriptCode: null)\n'
       '#l10n 3 (supportedLocales[2]: languageCode: en, countryCode: GB, scriptCode: null)\n'
-      '#l10n 4 (--- countryCode (en_CA) tests ---)\n'
-      '#l10n 5 (CA Hello World)\n'
-      '#l10n 6 (Hello CA fallback World)\n'
-      '#l10n 7 (--- countryCode (en_GB) tests ---)\n'
-      '#l10n 8 (GB Hello World)\n'
-      '#l10n 9 (Hello GB fallback World)\n'
-      '#l10n 10 (--- General formatting tests ---)\n'
-      '#l10n 11 (Hello World)\n'
-      '#l10n 12 (Hello _NEWLINE_ World)\n'
-      '#l10n 13 (Hello World)\n'
-      '#l10n 14 (Hello World)\n'
-      '#l10n 15 (Hello World on Friday, January 1, 1960)\n'
-      '#l10n 16 (Hello world argument on 1/1/1960 at 00:00)\n'
-      '#l10n 17 (Hello World from 1960 to 2020)\n'
-      '#l10n 18 (Hello for 123)\n'
-      '#l10n 19 (Hello for price USD123.00)\n'
-      '#l10n 20 (Hello)\n'
-      '#l10n 21 (Hello World)\n'
-      '#l10n 22 (Hello two worlds)\n'
-      '#l10n 23 (Hello)\n'
-      '#l10n 24 (Hello new World)\n'
-      '#l10n 25 (Hello two new worlds)\n'
-      '#l10n 26 (Hello on Friday, January 1, 1960)\n'
-      '#l10n 27 (Hello World, on Friday, January 1, 1960)\n'
-      '#l10n 28 (Hello two worlds, on Friday, January 1, 1960)\n'
-      '#l10n 29 (Hello other 0 worlds, with a total of 100 citizens)\n'
-      '#l10n 30 (Hello World of 101 citizens)\n'
-      '#l10n 31 (Hello two worlds with 102 total citizens)\n'
-      '#l10n 32 ([Hello] -World- #123#)\n'
-      '#l10n 33 (Flutter\'s amazing!)\n'
-      '#l10n 34 (Flutter is "amazing"!)\n'
+      '#l10n 4 (supportedLocales[3]: languageCode: zh, countryCode: null, scriptCode: null)\n'
+      '#l10n 5 (supportedLocales[4]: languageCode: zh, countryCode: null, scriptCode: Hans)\n'
+      '#l10n 6 (supportedLocales[5]: languageCode: zh, countryCode: null, scriptCode: Hant)\n'
+      '#l10n 7 (supportedLocales[6]: languageCode: zh, countryCode: TW, scriptCode: Hant)\n'
+      '#l10n 8 (--- countryCode (en_CA) tests ---)\n'
+      '#l10n 9 (CA Hello World)\n'
+      '#l10n 10 (Hello CA fallback World)\n'
+      '#l10n 11 (--- countryCode (en_GB) tests ---)\n'
+      '#l10n 12 (GB Hello World)\n'
+      '#l10n 13 (Hello GB fallback World)\n'
+      '#l10n 14 (--- zh ---)\n'
+      '#l10n 15 (你好世界)\n'
+      '#l10n 16 (你好)\n'
+      '#l10n 17 (你好世界)\n'
+      '#l10n 18 (你好2个其他世界)\n'
+      '#l10n 19 (Hello 世界)\n'
+      '#l10n 20 (--- scriptCode: zh_Hans ---)\n'
+      '#l10n 21 (简体你好世界)\n'
+      '#l10n 22 (--- scriptCode - zh_Hant ---)\n'
+      '#l10n 23 (繁體你好世界)\n'
+      '#l10n 24 (--- scriptCode - zh_Hant_TW ---)\n'
+      '#l10n 25 (台灣繁體你好世界)\n'
+      '#l10n 26 (--- General formatting tests ---)\n'
+      '#l10n 27 (Hello World)\n'
+      '#l10n 28 (Hello _NEWLINE_ World)\n'
+      '#l10n 29 (Hello World)\n'
+      '#l10n 30 (Hello World)\n'
+      '#l10n 31 (Hello World on Friday, January 1, 1960)\n'
+      '#l10n 32 (Hello world argument on 1/1/1960 at 00:00)\n'
+      '#l10n 33 (Hello World from 1960 to 2020)\n'
+      '#l10n 34 (Hello for 123)\n'
+      '#l10n 35 (Hello for price USD123.00)\n'
+      '#l10n 36 (Hello)\n'
+      '#l10n 37 (Hello World)\n'
+      '#l10n 38 (Hello two worlds)\n'
+      '#l10n 39 (Hello)\n'
+      '#l10n 40 (Hello new World)\n'
+      '#l10n 41 (Hello two new worlds)\n'
+      '#l10n 42 (Hello on Friday, January 1, 1960)\n'
+      '#l10n 43 (Hello World, on Friday, January 1, 1960)\n'
+      '#l10n 44 (Hello two worlds, on Friday, January 1, 1960)\n'
+      '#l10n 45 (Hello other 0 worlds, with a total of 100 citizens)\n'
+      '#l10n 46 (Hello World of 101 citizens)\n'
+      '#l10n 47 (Hello two worlds with 102 total citizens)\n'
+      '#l10n 48 ([Hello] -World- #123#)\n'
+      '#l10n 49 (\$!)\n'
+      '#l10n 50 (One \$)\n'
+      '#l10n 51 (Flutter\'s amazing!)\n'
+      '#l10n 52 (Flutter\'s amazing, times 2!)\n'
+      '#l10n 53 (Flutter is "amazing"!)\n'
+      '#l10n 54 (Flutter is "amazing", times 2!)\n'
       '#l10n END\n'
     );
+  }
+
+  test('generated l10n classes produce expected localized strings', () async {
+    setUpAndRunGenL10n();
+    final StringBuffer stdout = await runApp();
+    expectOutput(stdout);
+  });
+
+  test('generated l10n classes produce expected localized strings with deferred loading', () async {
+    setUpAndRunGenL10n(args: <String>['--use-deferred-loading']);
+    final StringBuffer stdout = await runApp();
+    expectOutput(stdout);
   });
 }
