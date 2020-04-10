@@ -7,11 +7,11 @@ import 'package:flutter/src/painting/basic_types.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-final List<Widget> children = <Widget>[
-  const SizedBox(width: 200.0, height: 150.0),
-  const SizedBox(width: 200.0, height: 150.0),
-  const SizedBox(width: 200.0, height: 150.0),
-  const SizedBox(width: 200.0, height: 150.0),
+const List<Widget> children = <Widget>[
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
 ];
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
