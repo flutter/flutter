@@ -732,19 +732,17 @@ void main() {
     await binding.setSurfaceSize(const Size(800, 800));
 
     Widget buildTable(bool checkbox) => MaterialApp(
-          home: PaginatedDataTable(
-            header: const Text('Test table'),
-            source: TestDataSource(
-              onSelectChanged: (bool value) {},
-            ),
-            showCheckboxColumn: checkbox,
-            columns: const <DataColumn>[
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Calories'), numeric: true),
-              DataColumn(label: Text('Generation')),
-            ],
-          ),
-        );
+      home: PaginatedDataTable(
+        header: const Text('Test table'),
+        source: TestDataSource(onSelectChanged: (bool value) {}),
+        showCheckboxColumn: checkbox,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    );
 
     await tester.pumpWidget(buildTable(true));
     expect(find.byType(Checkbox), findsNWidgets(11));
