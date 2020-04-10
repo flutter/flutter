@@ -5,16 +5,31 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
+  test('AllowHTTP sets the correct zone variable', () async {
+    allowHttp(() {
+      expect(Zone.current[#dart.library.io.allow_http], isTrue);
+    });
+  });
+
   // This test ensures the zone variable used in Dart SDK does not change.
   //
   // If this symbol changes, then update [allowHttp] function as well.
   test('Zone variable can override HTTP behavior', () async {
     final HttpClient httpClient = HttpClient();
-    expect(() => runZoned(
-        () async => await httpClient.getUrl(Uri.parse('http://${Platform.localHostname}')),
-        zoneValues: <Symbol, bool>{#dart.library.io.allow_http: false}), throwsA(isA<StateError>()));
+    try {
+      await runZoned(
+          () async => await httpClient.getUrl(Uri.parse('http://${Platform.localHostname}')),
+          zoneValues: <Symbol, bool>{#dart.library.io.allow_http: false});
+      fail('This should have thrown a StateError. '
+           'Check if the symbol for setting allow_http behavior has changed');
+    } on StateError catch(e) {
+      expect(e.message, contains('Insecure HTTP is not allowed by the current platform'));
+    }
   });
 }
