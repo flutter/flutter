@@ -365,6 +365,15 @@ void main() {
   });
 
   group('doctor with fake validators', () {
+    MockArtifacts mockArtifacts;
+    const String genSnapshotPath = '/path/to/gen_snapshot';
+    FileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem.test();
+      mockArtifacts = MockArtifacts();
+    });
+
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -507,8 +516,10 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('gen_snapshot does not work', () async {
+      memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
       when(mockProcessManager.runSync(
-        <String>[globals.artifacts.getArtifactPath(Artifact.genSnapshot)],
+        <String>[genSnapshotPath],
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 1, '', ''));
@@ -524,6 +535,8 @@ void main() {
         }
       }
     }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      FileSystem: () => memoryFileSystem,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
       Platform: _kNoColorOutputPlatform,
@@ -540,6 +553,8 @@ void main() {
     });
 
     testUsingContext('version checking does not work', () async {
+      //memoryFileSystem.file(genSnapshotPath).createSync(recursive: true);
+      //when(mockArtifacts.getArtifactPath(Artifact.genSnapshot)).thenReturn(genSnapshotPath);
       final VersionCheckError versionCheckError = VersionCheckError('version error');
 
       when(mockFlutterVersion.channel).thenReturn('unknown');
@@ -561,6 +576,7 @@ void main() {
           '! Doctor found issues in 1 category.\n'
       ));
     }, overrides: <Type, Generator>{
+      //Artifacts: () => mockArtifacts,
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
       Platform: _kNoColorOutputPlatform,
@@ -1122,3 +1138,4 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockArtifacts extends Mock implements Artifacts {}
