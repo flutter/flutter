@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
@@ -130,26 +131,84 @@ Future<void> main() async {
             'Failed to build flutter iOS app with WatchOS companion in debug mode for simulated device.');
       }
 
+      section('Run app on simulator device');
+
+      // Boot simulator devices.
+      await eval(
+        'xcrun',
+        <String>['simctl', 'bootstatus', phoneDeviceID, '-b'],
+        canFail: false,
+        workingDirectory: flutterDirectory.path,
+      );
+      await eval(
+        'xcrun',
+        <String>['simctl', 'bootstatus', watchDeviceID, '-b'],
+        canFail: false,
+        workingDirectory: flutterDirectory.path,
+      );
+
+      // Start app on simulated device.
+      final Process process = await startProcess(
+          path.join(flutterDirectory.path, 'bin', 'flutter'),
+          <String>['run', '-d', phoneDeviceID],
+          workingDirectory: projectDir.path);
+
+      process.stdout
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        print('stdout: $line');
+        // Wait for app startup to complete and quit immediately afterwards.
+        if (line.startsWith('An Observatory debugger')) {
+          process.stdin.write('q');
+        }
+      });
+      process.stderr
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        print('stderr: $line');
+      });
+
+      final int exitCode = await process.exitCode;
+
+      if (exitCode != 0)
+        return TaskResult.failure(
+            'Failed to start flutter iOS app with WatchOS companion on simulated device.');
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
       // Delete simulator devices
-      if (watchDeviceID != '')
+      if (watchDeviceID != '') {
         await eval(
           'xcrun',
-          <String>['simctl', 'delete', phoneDeviceID],
+          <String>['simctl', 'shutdown', watchDeviceID],
           canFail: true,
           workingDirectory: flutterDirectory.path,
         );
-      if (phoneDeviceID != '')
         await eval(
           'xcrun',
           <String>['simctl', 'delete', watchDeviceID],
           canFail: true,
           workingDirectory: flutterDirectory.path,
         );
+      }
+      if (phoneDeviceID != '')
+        await eval(
+          'xcrun',
+          <String>['simctl', 'shutdown', phoneDeviceID],
+          canFail: true,
+          workingDirectory: flutterDirectory.path,
+        );
+      await eval(
+        'xcrun',
+        <String>['simctl', 'delete', phoneDeviceID],
+        canFail: true,
+        workingDirectory: flutterDirectory.path,
+      );
     }
   });
 }
