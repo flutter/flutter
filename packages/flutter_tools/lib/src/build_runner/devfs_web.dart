@@ -613,6 +613,9 @@ class WebDevFS implements DevFS {
   @override
   DateTime lastCompiled;
 
+  @override
+  PackageConfig lastPackageConfig;
+
   // We do not evict assets on the web.
   @override
   Set<String> get assetPathsToEvict => const <String>{};
@@ -657,7 +660,7 @@ class WebDevFS implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    String mainPath,
+    Uri mainUri,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -670,16 +673,18 @@ class WebDevFS implements DevFS {
     String pathToReload,
     List<Uri> invalidatedFiles,
     bool skipAssets = false,
+    @required PackageConfig packageConfig,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
-    final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
+    lastPackageConfig = packageConfig;
+    final String outputDirectoryPath = globals.fs.file(mainUri).parent.path;
 
     if (bundleFirstUpload) {
       webAssetServer.entrypointCacheDirectory = globals.fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
-      final String entrypoint = globals.fs.path.basename(mainPath);
-      webAssetServer.writeFile(entrypoint, globals.fs.file(mainPath).readAsStringSync());
+      final String entrypoint = globals.fs.path.basename(mainUri.toFilePath());
+      webAssetServer.writeFile(entrypoint, globals.fs.file(mainUri).readAsStringSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
       webAssetServer.writeFile('require.js', requireJS.readAsStringSync());
@@ -716,11 +721,11 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // specicial hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
-     'org-dartlang-app:///' + globals.fs.path.basename(mainPath),
+     Uri.parse('org-dartlang-app:///' + globals.fs.path.basename(mainUri.toFilePath())),
       invalidatedFiles,
       outputPath: dillOutputPath ??
         getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath: packagesFilePath,
+      packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);

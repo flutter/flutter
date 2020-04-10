@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
@@ -160,11 +161,12 @@ void main() {
 
         final MockResidentCompiler residentCompiler = MockResidentCompiler();
         final UpdateFSReport report = await devFS.update(
-          mainPath: 'lib/foo.txt',
+          mainUri: Uri.parse('lib/foo.txt'),
           generator: residentCompiler,
           pathToReload: 'lib/foo.txt.dill',
           trackWidgetCreation: false,
           invalidatedFiles: <Uri>[],
+          packageConfig: PackageConfig.empty,
         );
 
         expect(report.syncedBytes, 22);
@@ -221,11 +223,12 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
 
       final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/foo.txt',
+        mainUri: Uri.parse('lib/foo.txt'),
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
         invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
       );
       vmService.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',
@@ -284,17 +287,18 @@ void main() {
         any,
         any,
         outputPath: anyNamed('outputPath'),
-        packagesFilePath: anyNamed('packagesFilePath'),
+        packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) {
         return Future<CompilerOutput>.value(const CompilerOutput('example', 2, <Uri>[]));
       });
 
       final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/foo.txt',
+        mainUri: Uri.parse('lib/foo.txt'),
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
         invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
       );
 
       expect(report.success, false);
@@ -316,18 +320,19 @@ void main() {
         any,
         any,
         outputPath: anyNamed('outputPath'),
-        packagesFilePath: anyNamed('packagesFilePath'),
+        packageConfig: anyNamed('packageConfig'),
       )).thenAnswer((Invocation invocation) {
         fs.file('example').createSync();
         return Future<CompilerOutput>.value(CompilerOutput('example', 0, <Uri>[sourceFile.uri]));
       });
 
       final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/main.dart',
+        mainUri: Uri.parse('lib/main.dart'),
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
         invalidatedFiles: <Uri>[],
+        packageConfig: PackageConfig.empty,
       );
 
       expect(report.success, true);

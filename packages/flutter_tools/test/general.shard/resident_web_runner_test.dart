@@ -94,7 +94,7 @@ void main() {
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -106,6 +106,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       trackWidgetCreation: true,
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: true,  syncedBytes: 0)..invalidatedModules = <String>[];
     });
@@ -313,7 +314,7 @@ void main() {
     _setupMocks();
     launchChromeInstance(mockChrome);
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -325,9 +326,10 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       // Generated entrypoint file in temp dir.
-      expect(invocation.namedArguments[#mainPath], contains('entrypoint.dart'));
+      expect(invocation.namedArguments[#mainUri].toString(), contains('entrypoint.dart'));
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -362,9 +364,9 @@ void main() {
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     launchChromeInstance(mockChrome);
-    String entrypointFileName;
+    Uri entrypointFileUri;
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -376,8 +378,9 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
-      entrypointFileName = invocation.namedArguments[#mainPath] as String;
+      entrypointFileUri = invocation.namedArguments[#mainUri] as Uri;
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
     });
@@ -389,8 +392,8 @@ void main() {
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     // Ensure that generated entrypoint is generated correctly.
-    expect(entrypointFileName, isNotNull);
-    expect(globals.fs.file(entrypointFileName).readAsStringSync(), contains(
+    expect(entrypointFileUri, isNotNull);
+    expect(globals.fs.file(entrypointFileUri).readAsStringSync(), contains(
       'await ui.webOnlyInitializePlatform();'
     ));
 
@@ -416,7 +419,7 @@ void main() {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(mockWebServerDevice);
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -428,6 +431,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return UpdateFSReport(success: true)
         ..invalidatedModules = <String>['example'];
@@ -468,7 +472,7 @@ void main() {
   test('Exits when initial compile fails', () => testbed.run(() async {
     _setupMocks();
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -479,6 +483,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
       trackWidgetCreation: true,
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];
@@ -526,7 +531,7 @@ void main() {
     ));
     await connectionInfoCompleter.future;
     when(mockWebDevFS.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -537,6 +542,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
       trackWidgetCreation: true,
     )).thenAnswer((Invocation _) async {
       return UpdateFSReport(success: false,  syncedBytes: 0)..invalidatedModules = <String>[];

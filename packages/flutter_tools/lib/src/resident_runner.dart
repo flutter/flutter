@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -56,6 +57,7 @@ class FlutterDevice {
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
          dartDefines: buildInfo.dartDefines,
+         packagesPath: PackageMap.globalPackagesPath,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -99,7 +101,8 @@ class FlutterDevice {
           .absolute.uri.toString(),
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
-          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString()
+          .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
+        packagesPath: PackageMap.globalPackagesPath,
       );
     } else {
       generator = ResidentCompiler(
@@ -116,6 +119,7 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
         initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
+        packagesPath: PackageMap.globalPackagesPath,
       );
     }
 
@@ -280,7 +284,6 @@ class FlutterDevice {
       vmService,
       fsName,
       rootDirectory,
-      packagesFilePath: packagesFilePath,
       osUtils: globals.os,
     );
     return devFS.create();
@@ -537,7 +540,7 @@ class FlutterDevice {
   }
 
   Future<UpdateFSReport> updateDevFS({
-    String mainPath,
+    Uri mainUri,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -548,6 +551,7 @@ class FlutterDevice {
     String pathToReload,
     @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -556,7 +560,7 @@ class FlutterDevice {
     UpdateFSReport report;
     try {
       report = await devFS.update(
-        mainPath: mainPath,
+        mainUri: mainUri,
         target: target,
         bundle: bundle,
         firstBuildTime: firstBuildTime,
@@ -568,6 +572,7 @@ class FlutterDevice {
         projectRootPath: projectRootPath,
         pathToReload: pathToReload,
         invalidatedFiles: invalidatedFiles,
+        packageConfig: packageConfig,
       );
     } on DevFSException {
       devFSStatus.cancel();
