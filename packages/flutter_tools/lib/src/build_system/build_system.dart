@@ -350,7 +350,7 @@ class Environment {
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
     Map<String, String> inputs = const <String, String>{},
-    String engineVersion = 'abcdefghijklmnop',
+    String engineVersion,
     @required FileSystem fileSystem,
     @required Logger logger,
     @required Artifacts artifacts,
