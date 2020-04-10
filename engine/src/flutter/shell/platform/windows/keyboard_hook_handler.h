@@ -21,7 +21,7 @@ class KeyboardHookHandler {
                             int key,
                             int scancode,
                             int action,
-                            int mods) = 0;
+                            char32_t character) = 0;
 
   // A function for hooking into unicode code point input.
   virtual void CharHook(Win32FlutterWindow* window, char32_t code_point) = 0;

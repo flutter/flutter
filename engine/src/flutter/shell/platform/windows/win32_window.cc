@@ -110,6 +110,7 @@ Win32Window::MessageHandler(HWND hwnd,
   auto window =
       reinterpret_cast<Win32Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
   UINT button_pressed = 0;
+
   if (window != nullptr) {
     switch (message) {
       case kWmDpiChangedBeforeParent:
@@ -190,35 +191,71 @@ Win32Window::MessageHandler(HWND hwnd,
         // DefWindowProc will send WM_CHAR for this WM_UNICHAR.
         break;
       }
+      case WM_DEADCHAR:
+      case WM_SYSDEADCHAR:
       case WM_CHAR:
       case WM_SYSCHAR: {
-        if (wparam == VK_BACK)
-          break;
         char32_t code_point = static_cast<char32_t>(wparam);
         static char32_t lead_surrogate = 0;
-        // If code_point is LeadSurrogate, save and return.
+        // If code_point is LeadSurrogate, save to combine to potentially form
+        // a complex Unicode character.
         if ((code_point & 0xFFFFFC00) == 0xD800) {
           lead_surrogate = code_point;
-          return TRUE;
-        }
-        // Merge TrailSurrogate and LeadSurrogate.
-        if (lead_surrogate != 0 && (code_point & 0xFFFFFC00) == 0xDC00) {
+        } else if (lead_surrogate != 0 && (code_point & 0xFFFFFC00) == 0xDC00) {
+          // Merge TrailSurrogate and LeadSurrogate.
           code_point = 0x10000 + ((lead_surrogate & 0x000003FF) << 10) +
                        (code_point & 0x3FF);
+          lead_surrogate = 0;
         }
-        lead_surrogate = 0;
-        window->OnChar(code_point);
+
+        // In an ENG-INTL keyboard, pressing "'" + "e" produces é. In this case,
+        // the "'" key is a dead char, and shouldn't be sent to window->OnChar
+        // for text input. However, the key event should still be sent to
+        // Flutter. The result would be:
+        // * Key event - key code: 222 (quote) - key label: '
+        // * Key event - key code: 69 (e) - key label: é
+        //
+        // As for text input, only the second key press will display a
+        // character.
+        if (wparam != VK_BACK && message != WM_DEADCHAR &&
+            message != WM_SYSDEADCHAR) {
+          window->OnChar(code_point);
+        }
+
+        // All key presses that generate a character should be sent from
+        // WM_CHAR. In order to send the full key press information, the keycode
+        // is persisted in keycode_for_char_message_ obtained from WM_KEYDOWN.
+        if (keycode_for_char_message_ != 0) {
+          const unsigned int scancode = (lparam >> 16) & 0xff;
+          window->OnKey(keycode_for_char_message_, scancode, WM_KEYDOWN,
+                        code_point);
+          keycode_for_char_message_ = 0;
+        }
         break;
       }
       case WM_KEYDOWN:
       case WM_SYSKEYDOWN:
       case WM_KEYUP:
       case WM_SYSKEYUP:
-        unsigned char scancode = ((unsigned char*)&lparam)[2];
-        unsigned int virtualKey = MapVirtualKey(scancode, MAPVK_VSC_TO_VK);
-        const int key = virtualKey;
-        const int action = message == WM_KEYDOWN ? WM_KEYDOWN : WM_KEYUP;
-        window->OnKey(key, scancode, action, 0);
+        const bool is_keydown_message =
+            (message == WM_KEYDOWN || message == WM_SYSKEYDOWN);
+        // Check if this key produces a character. If so, the key press should
+        // be sent with the character produced at WM_CHAR. Store the produced
+        // keycode (it's not accessible from WM_CHAR) to be used in WM_CHAR.
+        const unsigned int character = MapVirtualKey(wparam, MAPVK_VK_TO_CHAR);
+        if (character > 0 && is_keydown_message) {
+          keycode_for_char_message_ = wparam;
+          break;
+        }
+        unsigned int keyCode(wparam);
+        const unsigned int scancode = (lparam >> 16) & 0xff;
+        // If the key is a modifier, get its side.
+        if (keyCode == VK_SHIFT || keyCode == VK_MENU ||
+            keyCode == VK_CONTROL) {
+          keyCode = MapVirtualKey(scancode, MAPVK_VSC_TO_VK_EX);
+        }
+        const int action = is_keydown_message ? WM_KEYDOWN : WM_KEYUP;
+        window->OnKey(keyCode, scancode, action, 0);
         break;
     }
     return DefWindowProc(hwnd, message, wparam, lparam);

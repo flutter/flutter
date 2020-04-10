@@ -106,7 +106,7 @@ class Win32Window {
   virtual void OnChar(char32_t code_point) = 0;
 
   // Called when raw keyboard input occurs.
-  virtual void OnKey(int key, int scancode, int action, int mods) = 0;
+  virtual void OnKey(int key, int scancode, int action, char32_t character) = 0;
 
   // Called when mouse scrollwheel input occurs.
   virtual void OnScroll(double delta_x, double delta_y) = 0;
@@ -172,6 +172,10 @@ class Win32Window {
 
   // Keeps track of mouse state in relation to the window.
   MouseState mouse_state_;
+
+  // Keeps track of the last key code produced by a WM_KEYDOWN or WM_SYSKEYDOWN
+  // message.
+  int keycode_for_char_message_ = 0;
 };
 
 }  // namespace flutter

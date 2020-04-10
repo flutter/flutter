@@ -60,7 +60,7 @@ class Win32FlutterWindow : public Win32Window {
   void OnChar(char32_t code_point) override;
 
   // |Win32Window|
-  void OnKey(int key, int scancode, int action, int mods) override;
+  void OnKey(int key, int scancode, int action, char32_t character) override;
 
   // |Win32Window|
   void OnScroll(double delta_x, double delta_y) override;
@@ -116,7 +116,7 @@ class Win32FlutterWindow : public Win32Window {
   void SendChar(char32_t code_point);
 
   // Reports a raw keyboard message to Flutter engine.
-  void SendKey(int key, int scancode, int action, int mods);
+  void SendKey(int key, int scancode, int action, char32_t character);
 
   // Reports scroll wheel events to Flutter engine.
   void SendScroll(double delta_x, double delta_y);
