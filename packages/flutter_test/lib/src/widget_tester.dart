@@ -225,6 +225,22 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// the [TargetPlatform] enum.
   TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
 
+  /// Creates a [TargetPlatformVariant] that includes platforms that are
+  /// considered desktop platforms.
+  TargetPlatformVariant.desktop() : values = <TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+  };
+
+  /// Creates a [TargetPlatformVariant] that includes platforms that are
+  /// considered mobile platforms.
+  TargetPlatformVariant.mobile() : values = <TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+    TargetPlatform.fuchsia,
+  };
+
   /// Creates a [TargetPlatformVariant] that tests only the given value of
   /// [TargetPlatform].
   TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
