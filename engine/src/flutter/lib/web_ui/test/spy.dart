@@ -23,7 +23,7 @@ class PlatformMessage {
   String get methodName => methodCall.method;
 
   /// Shorthand for getting the arguments of the method call.
-  String get methodArguments => methodCall.arguments;
+  dynamic get methodArguments => methodCall.arguments;
 }
 
 /// Intercepts platform messages sent from the engine to the framework.
