@@ -31,7 +31,6 @@ static void RegisterProfilerSymbols(const char* symbols_path,
 #endif  // !defined(DART_PRODUCT)
 
 int main(int argc, const char** argv) {
-  fx_log_init();
   async::Loop loop(&kAsyncLoopConfigAttachToCurrentThread);
 
   std::unique_ptr<trace::TraceProviderWithFdio> provider;
