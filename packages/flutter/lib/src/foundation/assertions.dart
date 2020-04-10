@@ -715,7 +715,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   /// Called whenever the Flutter framework catches an error.
   ///
-  /// The default behavior is to call [dumpErrorToConsole].
+  /// The default behavior is to call [presentError].
   ///
   /// You can set this to your own function to override this default behavior.
   /// For example, you could report all errors to your server.
@@ -725,7 +725,17 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// Set this to null to silently catch and ignore errors. This is not
   /// recommended.
-  static FlutterExceptionHandler onError = dumpErrorToConsole;
+  static FlutterExceptionHandler onError = presentError;
+
+  /// Called whenever the Flutter framework wants to present error to the users.
+  ///
+  /// The default behavior is to call [dumpErrorToConsole].
+  ///
+  /// Plugins can override how an error to be presented to the users. For
+  /// example, the structured errors service extension sets its own method when
+  /// the extension is enabled. If ypu want change how flutter responds to an
+  /// error , use [onError] instead.
+  static FlutterExceptionHandler presentError = dumpErrorToConsole;
 
   static int _errorCount = 0;
 
