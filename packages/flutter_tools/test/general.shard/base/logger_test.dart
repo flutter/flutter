@@ -15,7 +15,7 @@ import 'package:quiver/testing/async.dart';
 import '../../src/common.dart';
 import '../../src/mocks.dart' as mocks;
 
-final Platform _kNoAnsiPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 final String red = RegExp.escape(AnsiTerminal.red);
 final String bold = RegExp.escape(AnsiTerminal.bold);
 final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
@@ -54,7 +54,7 @@ void main() {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio:  mocks.MockStdio(),
-          platform: FakePlatform()..stdoutSupportsAnsi = true,
+          platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
       );
@@ -250,8 +250,8 @@ void main() {
         AnsiStatus ansiStatus;
 
         setUp(() {
-          platform = FakePlatform.fromPlatform(testPlatform)..stdoutSupportsAnsi = false;
-          ansiPlatform = FakePlatform.fromPlatform(testPlatform)..stdoutSupportsAnsi = true;
+          platform = FakePlatform(stdoutSupportsAnsi: false);
+          ansiPlatform = FakePlatform(stdoutSupportsAnsi: true);
 
           terminal = AnsiTerminal(
             stdio: mockStdio,
@@ -749,7 +749,7 @@ void main() {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
           stdio: mockStdio,
-          platform: FakePlatform()..stdoutSupportsAnsi = true,
+          platform: FakePlatform(stdoutSupportsAnsi: true),
         ),
         stdio: mockStdio,
         outputPreferences: OutputPreferences.test(showColor: true),

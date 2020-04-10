@@ -23,9 +23,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/mocks.dart' as mocks;
 
-final Platform _kNoAnsiPlatform =
-    FakePlatform.fromPlatform(const LocalPlatform())
-      ..stdoutSupportsAnsi = false;
+final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 
 void main() {
   BufferLogger logger;

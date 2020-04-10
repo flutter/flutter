@@ -20,7 +20,8 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Platform _kNoColorTerminalPlatform = FakePlatform(
+  stdoutSupportsAnsi: false);
 
 void main() {
   String analyzerSeparator;
