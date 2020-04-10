@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -61,13 +62,14 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   const _ManifestAssetBundleFactory();
 
   @override
-  AssetBundle createBundle() => _ManifestAssetBundle();
+  AssetBundle createBundle() => ManifestAssetBundle();
 }
 
-class _ManifestAssetBundle implements AssetBundle {
-  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
+/// An asset bundle based on a pubspec.yaml
+class ManifestAssetBundle implements AssetBundle {
+  /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  _ManifestAssetBundle();
+  ManifestAssetBundle();
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -79,6 +81,9 @@ class _ManifestAssetBundle implements AssetBundle {
   final LicenseCollector licenseCollector = LicenseCollector(fileSystem: globals.fs);
 
   DateTime _lastBuildTimestamp;
+
+  /// An optional bundle of precompiled SkSL shaders.
+  Map<String, String> skSLBundle;
 
   static const String _assetManifestJson = 'AssetManifest.json';
   static const String _fontSetMaterial = 'material';
@@ -255,6 +260,14 @@ class _ManifestAssetBundle implements AssetBundle {
     // Update wildcard directories we we can detect changes in them.
     for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= globals.fs.directory(uri);
+    }
+
+    // Unpack the SkSL bundle files into the `sksl` directory.
+    if (skSLBundle != null) {
+      for (final String fileName in skSLBundle.keys) {
+        final Uint8List bytes = base64.decode(skSLBundle[fileName]);
+        entries[Uri(pathSegments: <String>['sksl', fileName]).path] = DevFSByteContent(bytes);
+      }
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
@@ -491,7 +504,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   return <Map<String, dynamic>>[
     if (manifest.usesMaterialDesign && includeDefaultFonts)
-      ..._getMaterialFonts(_ManifestAssetBundle._fontSetMaterial),
+      ..._getMaterialFonts(ManifestAssetBundle._fontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
     else

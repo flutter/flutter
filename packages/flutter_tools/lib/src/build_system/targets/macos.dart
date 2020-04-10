@@ -291,14 +291,29 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('Resources')
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
-    final Depfile depfile = await copyAssets(environment, assetDirectory);
+
+    final String skSLBundlePath = environment.inputs[kBundleSkSLPath];
+    final Map<String, String> skSLBundle = processSkSLBundle(
+      skSLBundlePath,
+      engineRevision: globals.flutterVersion.engineRevision,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      targetPlatform: TargetPlatform.ios,
+    );
+    final Depfile assetDepfile = await copyAssets(
+      environment, assetDirectory, skSLBundle: skSLBundle);
+    if (skSLBundlePath != null) {
+      final File skSLBundleFile = environment.fileSystem
+        .file(skSLBundlePath).absolute;
+      assetDepfile.inputs.add(skSLBundleFile);
+    }
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
       platform: globals.platform,
     );
     depfileService.writeToFile(
-      depfile,
+      assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
 
