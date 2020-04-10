@@ -142,7 +142,7 @@ Map<String, String> processSkSLBundle(String bundlePath, {
   }
 
   final TargetPlatform bundleTargetPlatform = getTargetPlatformForName(
-    bundle['targetPlatform'] as String);
+    bundle['platform'] as String);
   if (bundleTargetPlatform != targetPlatform) {
     logger.printError(
       'The SkSL bundle was created for $bundleTargetPlatform, but the curent '

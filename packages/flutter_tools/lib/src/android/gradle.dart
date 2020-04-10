@@ -353,7 +353,7 @@ Future<void> buildGradleApp({
     command.add('-Pdart-obfuscation=true');
   }
   if (androidBuildInfo.buildInfo.bundleSkSLPath != null) {
-    command.add('-Pbundle-sksl-path=$androidBuildInfo.buildInfo.bundleSkSLPath{}');
+    command.add('-Pbundle-sksl-path=${androidBuildInfo.buildInfo.bundleSkSLPath}');
   }
   command.add(assembleTask);
 

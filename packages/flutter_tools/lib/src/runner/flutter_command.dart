@@ -564,7 +564,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final String bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
-      ? stringArg(FlutterOptions.kSplitDebugInfoOption)
+      ? stringArg(FlutterOptions.kBundleSkSLPathOption)
       : null;
 
     return BuildInfo(getBuildMode(),

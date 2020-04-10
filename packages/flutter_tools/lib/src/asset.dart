@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -264,10 +263,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     // Unpack the SkSL bundle files into the `sksl` directory.
     if (skSLBundle != null) {
-      for (final String fileName in skSLBundle.keys) {
-        final Uint8List bytes = base64.decode(skSLBundle[fileName]);
-        entries[Uri(pathSegments: <String>['sksl', fileName]).path] = DevFSByteContent(bytes);
-      }
+      entries['sksl'] = DevFSStringContent(json.encode(skSLBundle));
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
