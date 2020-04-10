@@ -1823,7 +1823,7 @@ void main() {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1836,7 +1836,7 @@ void main() {
                           style: const TextStyle(),
                         ),
                       ),
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1852,7 +1852,7 @@ void main() {
                   ),
                   Row(
                     children: <Widget>[
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(
@@ -1864,7 +1864,7 @@ void main() {
                           style: const TextStyle(),
                         ),
                       ),
-                      Container(
+                      SizedBox(
                         width: 100,
                         height: 100,
                         child: EditableText(

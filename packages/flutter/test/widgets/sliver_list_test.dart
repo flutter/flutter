@@ -282,7 +282,7 @@ Widget _buildSliverListRenderWidgetChild(List<String> items) {
     home: Directionality(
       textDirection: TextDirection.ltr,
       child: Material(
-        child: Container(
+        child: SizedBox(
           height: 500,
           child: CustomScrollView(
             controller: ScrollController(),
@@ -314,7 +314,7 @@ Widget _buildSliverList({
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
-      child: Container(
+      child: SizedBox(
         height: viewportHeight,
         child: CustomScrollView(
           controller: controller,

@@ -15,10 +15,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 200.0, // less than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),
@@ -43,10 +43,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           key: blockKey,
-          children: <Widget>[
-            Container(
+          children: const <Widget>[
+            SizedBox(
               height: 2000.0, // more than 600, the height of the test area
-              child: const Text('Hello'),
+              child: Text('Hello'),
             ),
           ],
         ),

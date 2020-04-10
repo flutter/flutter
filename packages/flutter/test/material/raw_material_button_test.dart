@@ -241,7 +241,7 @@ void main() {
             RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
             onPressed: () { },
-            child: Container(
+            child: SizedBox(
               width: 400.0,
               height: 400.0,
               child: Column(

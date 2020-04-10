@@ -440,18 +440,18 @@ void main() {
         Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: Container(
+              child: SizedBox(
                   height: 200.0,
                   child: ListView(
                     cacheExtent: 500.0,
                     controller: ScrollController(initialScrollOffset: 300.0),
-                    children: <Widget>[
-                      Container(height: 140.0, child: text),
-                      Container(height: 160.0, child: text),
-                      Container(height: 90.0, child: text),
-                      Container(height: 110.0, child: text),
-                      Container(height: 80.0, child: text),
-                      Container(height: 70.0, child: text),
+                    children: const <Widget>[
+                      SizedBox(height: 140.0, child: text),
+                      SizedBox(height: 160.0, child: text),
+                      SizedBox(height: 90.0, child: text),
+                      SizedBox(height: 110.0, child: text),
+                      SizedBox(height: 80.0, child: text),
+                      SizedBox(height: 70.0, child: text),
                     ],
                   ),
               ),
@@ -467,7 +467,7 @@ void main() {
     await tester.pumpWidget(
         MaterialApp(
             home: Scaffold(
-                body: Container(
+                body: SizedBox(
                     height: 500.0,
                     child: CustomScrollView(
                       controller: ScrollController(initialScrollOffset: 120.0),
@@ -479,9 +479,9 @@ void main() {
                             delegate: ListView.builder(
                                 itemExtent: 100.0,
                                 itemCount: 100,
-                                itemBuilder: (_, __) => Container(
+                                itemBuilder: (_, __) => const SizedBox(
                                   height: 40.0,
-                                  child: const Text('hey'),
+                                  child: Text('hey'),
                                 )).childrenDelegate),
                       ],
                     ),
@@ -498,7 +498,7 @@ void main() {
     await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(

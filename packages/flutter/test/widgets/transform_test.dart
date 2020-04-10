@@ -29,7 +29,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -77,7 +77,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -126,7 +126,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(
@@ -196,7 +196,7 @@ void main() {
             Positioned(
               top: 100.0,
               left: 100.0,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: Transform(

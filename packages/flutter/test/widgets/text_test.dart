@@ -814,7 +814,7 @@ Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow ov
     Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 50.0,
           height: 50.0,
           child: Text(

@@ -145,7 +145,7 @@ void main() {
                   color: const Color(0xFF00FF00),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 100.0,
                 height: 100.0,
                 child: GestureDetector(

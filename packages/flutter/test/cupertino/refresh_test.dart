@@ -62,7 +62,7 @@ void main() {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
-          return Container(
+          return SizedBox(
             height: 200.0,
             child: Center(child: Text(index.toString())),
           );
@@ -91,7 +91,7 @@ void main() {
       verifyNoMoreInteractions(mockHelper);
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 0.0),
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -127,7 +127,7 @@ void main() {
       verifyNoMoreInteractions(mockHelper);
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 50.0),
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -156,7 +156,7 @@ void main() {
         verifyNoMoreInteractions(mockHelper);
 
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
           const Offset(0.0, 0.0),
         );
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
@@ -210,7 +210,7 @@ void main() {
       verifyNoMoreInteractions(mockHelper);
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
         const Offset(0.0, 0.0),
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -333,7 +333,7 @@ void main() {
         await tester.pump(const Duration(seconds: 1000));
         verifyNoMoreInteractions(mockHelper);
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')),
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
           const Offset(0.0, 60.0),
         );
 
@@ -412,7 +412,7 @@ void main() {
             await tester.pump(const Duration(seconds: 1000));
             verifyNoMoreInteractions(mockHelper);
             expect(
-              tester.getTopLeft(find.widgetWithText(Container, '0')),
+              tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
               const Offset(0.0, 60.0),
             );
 
@@ -910,9 +910,9 @@ void main() {
           ),
         );
 
-        await tester.fling(find.byType(Container).first, const Offset(0.0, 200.0), 2000.0);
+        await tester.fling(find.byType(SizedBox).first, const Offset(0.0, 200.0), 2000.0);
 
-        await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
+        await tester.fling(find.byType(SizedBox).first, const Offset(0.0, -200.0), 3000.0);
 
         verifyNoMoreInteractions(mockHelper);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -1104,7 +1104,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -80.0)); // Overscrolling, need to move more than -40.
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(49.775111111111116), // Below 50 now.
         );
         expect(
@@ -1146,7 +1146,7 @@ void main() {
           RefreshIndicatorMode.refresh,
         );
         expect(
-          tester.getRect(find.widgetWithText(Container, '0')),
+          tester.getRect(find.widgetWithText(SizedBox, '0')),
           const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
         );
 
@@ -1197,7 +1197,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -200.0));
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(27.944444444444457),
         );
         // Need to bring it to 100 * 0.1 to reset to inactive.
@@ -1209,7 +1209,7 @@ void main() {
         await gesture.moveBy(const Offset(0.0, -35.0));
         await tester.pump();
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(9.313890708161875),
         );
         expect(
@@ -1249,7 +1249,7 @@ void main() {
         await tester.pump();
         // The refresh indicator is offscreen now.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
         expect(
@@ -1266,13 +1266,13 @@ void main() {
         );
         // Nothing moved.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
         await tester.pump(const Duration(seconds: 2));
         // Everything stayed as is.
         expect(
-          tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+          tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
           moreOrLessEquals(-145.0332383665717),
         );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));

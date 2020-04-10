@@ -89,7 +89,7 @@ Widget _buildTestWidget({ bool extraPadding, String text, ScrollController contr
           Expanded(
             child: Container(),
           ),
-          Container(
+          SizedBox(
             height: 500.0,
             child: ListView(
               controller: controller,

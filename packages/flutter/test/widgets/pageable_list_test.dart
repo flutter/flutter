@@ -38,7 +38,7 @@ Widget buildFrame({
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: Container(
+      child: SizedBox(
         width: pageSize.width, height: pageSize.height, child: child,
       ),
     ),

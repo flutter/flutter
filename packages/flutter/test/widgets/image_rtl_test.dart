@@ -308,7 +308,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -323,7 +323,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
@@ -345,7 +345,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -360,7 +360,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
@@ -371,7 +371,7 @@ void main() {
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 0.0, 100.0, 9.0))
       ..restore(),
     );
-    expect(find.byType(Container), isNot(paints..scale()));
+    expect(find.byType(SizedBox), isNot(paints..scale()));
   });
 
   testWidgets('Image RTL with alignment topEnd', (WidgetTester tester) async {
@@ -379,7 +379,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -393,7 +393,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(16.0, 0.0, 32.0, 9.0))
@@ -412,7 +412,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -426,7 +426,7 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 100.0, 50.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(-12.0, 0.0, 4.0, 9.0))
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(4.0, 0.0, 20.0, 9.0))
@@ -445,7 +445,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -459,15 +459,15 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..translate(x: 50.0, y: 0.0)
       ..scale(x: -1.0, y: 1.0)
       ..translate(x: -50.0, y: 0.0)
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(0.0, 20.5, 16.0, 29.5))
       ..restore(),
     );
-    expect(find.byType(Container), isNot(paints..scale()..scale()));
-    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..scale()..scale()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
   testWidgets('Image RTL with alignment center-right and no match', (WidgetTester tester) async {
@@ -475,7 +475,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -488,11 +488,11 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
-    expect(find.byType(Container), isNot(paints..scale()));
-    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..scale()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
   testWidgets('Image LTR with alignment center-right and match', (WidgetTester tester) async {
@@ -500,7 +500,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -514,11 +514,11 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
-    expect(find.byType(Container), isNot(paints..scale()));
-    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..scale()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
   testWidgets('Image LTR with alignment center-right and no match', (WidgetTester tester) async {
@@ -526,7 +526,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100.0,
             height: 50.0,
             child: Image(
@@ -540,11 +540,11 @@ void main() {
       Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
-    expect(find.byType(Container), paints
+    expect(find.byType(SizedBox), paints
       ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 16.0, 9.0), destination: const Rect.fromLTRB(84.0, 20.5, 100.0, 29.5)),
     );
-    expect(find.byType(Container), isNot(paints..scale()));
-    expect(find.byType(Container), isNot(paints..drawImageRect()..drawImageRect()));
+    expect(find.byType(SizedBox), isNot(paints..scale()));
+    expect(find.byType(SizedBox), isNot(paints..drawImageRect()..drawImageRect()));
   });
 
   testWidgets('Image - Switch needing direction', (WidgetTester tester) async {

@@ -1299,7 +1299,7 @@ void main() {
       itemHeight: null,
       selectedItemBuilder: (BuildContext context) {
         return items.map<Widget>((String item) {
-          return Container(
+          return SizedBox(
             height: double.parse(item),
             width: double.parse(item),
             child: Center(child: Text(item)),
@@ -1327,16 +1327,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1369,16 +1369,16 @@ void main() {
         // to the largest item regardless of which one is selected.
         value: selectedItem,
         // [hint] widget is larger than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1407,16 +1407,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1445,16 +1445,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is larger than largest selected item widget
-        hint: Container(
+        hint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1483,16 +1483,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is smaller than largest selected item widget
-        disabledHint: Container(
+        disabledHint: const SizedBox(
           height: 50,
           width: 50,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),
@@ -1521,16 +1521,16 @@ void main() {
       await tester.pumpWidget(buildFrame(
         value: null,
         // [hint] widget is larger than largest selected item widget
-        disabledHint: Container(
+        disabledHint: const SizedBox(
           height: 125,
           width: 125,
-          child: const Text('hint')
+          child: Text('hint')
         ),
         items: items,
         itemHeight: null,
         selectedItemBuilder: (BuildContext context) {
           return items.map<Widget>((String item) {
-            return Container(
+            return SizedBox(
               height: double.parse(item),
               width: double.parse(item),
               child: Center(child: Text(item)),

@@ -190,7 +190,7 @@ void main() {
                   Container(height: 200.0),
                   Container(height: 200.0),
                   Container(height: 200.0),
-                  Container(
+                  SizedBox(
                     height: 200.0,
                     child: Center(
                       child: Transform(
@@ -446,7 +446,7 @@ void main() {
                 Container(height: 200.0),
                 Container(height: 200.0),
                 Container(height: 200.0),
-                Container(
+                SizedBox(
                   height: 200.0,
                   child: Center(
                     child: Transform(

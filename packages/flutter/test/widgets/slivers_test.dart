@@ -164,7 +164,7 @@ void main() {
                 SliverList(
                   delegate: SliverChildListDelegate(
                     <Widget>[
-                      Container(height: 22.2, child: const Text('TOP')),
+                      const SizedBox(height: 22.2, child: Text('TOP')),
                       Container(height: 22.2),
                       Container(height: 22.2),
                     ],
@@ -197,7 +197,7 @@ void main() {
                     <Widget>[
                       Container(height: 22.2),
                       Container(height: 22.2),
-                      Container(height: 22.2, child: const Text('BOTTOM')),
+                      const SizedBox(height: 22.2, child: Text('BOTTOM')),
                     ],
                   ),
                 ),

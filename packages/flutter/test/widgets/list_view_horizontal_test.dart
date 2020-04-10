@@ -12,7 +12,7 @@ Widget buildFrame({ bool reverse = false, @required TextDirection textDirection 
   return Directionality(
     textDirection: textDirection,
     child: Center(
-      child: Container(
+      child: SizedBox(
         height: 50.0,
         child: ListView(
           itemExtent: 290.0,

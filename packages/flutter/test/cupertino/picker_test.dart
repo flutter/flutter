@@ -23,7 +23,7 @@ void main() {
               itemExtent: 50.0,
               onSelectedItemChanged: (_) { },
               children: List<Widget>.generate(3, (int index) {
-                return Container(
+                return SizedBox(
                   height: 50.0,
                   width: 300.0,
                   child: Text(index.toString()),
@@ -66,7 +66,7 @@ void main() {
                 itemExtent: 50.0,
                 onSelectedItemChanged: (_) { },
                 children: List<Widget>.generate(3, (int index) {
-                  return Container(
+                  return SizedBox(
                     height: 50.0,
                     width: 300.0,
                     child: Text(index.toString()),
@@ -79,7 +79,7 @@ void main() {
       );
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
         const Offset(0.0, 125.0),
       );
 
@@ -87,11 +87,11 @@ void main() {
       await tester.pump();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '1')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
         const Offset(0.0, 175.0),
       );
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0').first),
         const Offset(0.0, 125.0),
       );
     });
@@ -168,7 +168,7 @@ void main() {
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
               children: List<Widget>.generate(100, (int index) {
                 return Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 400.0,
                     height: 100.0,
                     child: Text(index.toString()),
@@ -219,7 +219,7 @@ void main() {
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
               children: List<Widget>.generate(100, (int index) {
                 return Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 400.0,
                     height: 100.0,
                     child: Text(index.toString()),
@@ -249,7 +249,7 @@ void main() {
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
             children: List<Widget>.generate(100, (int index) {
               return Center(
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -265,14 +265,14 @@ void main() {
 
       // The item that was in the center now moved a bit.
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
         const Offset(200.0, 280.0),
       );
 
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         moreOrLessEquals(250.0, epsilon: 0.5),
       );
       expect(selectedItems.isEmpty, true);
@@ -283,7 +283,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '10')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         // It's down by 100.0 now.
         moreOrLessEquals(350.0, epsilon: 0.5),
       );
@@ -304,7 +304,7 @@ void main() {
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
             children: List<Widget>.generate(100, (int index) {
               return Center(
-                child: Container(
+                child: SizedBox(
                   width: 400.0,
                   height: 100.0,
                   child: Text(index.toString()),
@@ -324,7 +324,7 @@ void main() {
 
       // Should have been flung far enough that even the first item goes off
       // screen and gets removed.
-      expect(find.widgetWithText(Container, '0').evaluate().isEmpty, true);
+      expect(find.widgetWithText(SizedBox, '0').evaluate().isEmpty, true);
 
       expect(
         selectedItems,
@@ -337,7 +337,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester.getTopLeft(find.widgetWithText(Container, '0')).dy,
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')).dy,
         // Should have sprung back to the middle now.
         moreOrLessEquals(250.0),
       );

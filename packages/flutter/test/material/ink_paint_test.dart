@@ -46,7 +46,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 200.0,
               height: 60.0,
               child: InkWell(
@@ -95,7 +95,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -268,7 +268,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Material(
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: 100.0,
                   height: 100.0,
                   child: InkWell(
@@ -359,7 +359,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(
@@ -395,7 +395,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: InkWell(

@@ -77,7 +77,7 @@ void main() {
     // both of these cases have failed in the past due to floating point issues
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           height: 400.0,
           child: Column(
             children: <Widget>[
@@ -94,7 +94,7 @@ void main() {
     );
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           height: 199.0,
           child: Column(
             children: <Widget>[

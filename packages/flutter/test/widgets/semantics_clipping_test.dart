@@ -16,22 +16,22 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: Flex(
             direction: Axis.horizontal,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 75.0,
-                child: const Text('1'),
+                child: Text('1'),
               ),
-              Container(
+              SizedBox(
                 width: 75.0,
-                child: const Text('2'),
+                child: Text('2'),
               ),
-              Container(
+              SizedBox(
                 width: 75.0,
-                child: const Text('3'),
+                child: Text('3'),
               ),
             ],
           ),
@@ -71,26 +71,26 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: 100.0,
           child: Flex(
             direction: Axis.horizontal,
             children: <Widget>[
-              Container(
+              const SizedBox(
                 width: 75.0,
-                child: const Text('1'),
+                child: Text('1'),
               ),
               MergeSemantics(
                 child: Flex(
                   direction: Axis.horizontal,
-                  children: <Widget>[
-                    Container(
+                  children: const <Widget>[
+                    SizedBox(
                       width: 75.0,
-                      child: const Text('2'),
+                      child: Text('2'),
                     ),
-                    Container(
+                    SizedBox(
                       width: 75.0,
-                      child: const Text('3'),
+                      child: Text('3'),
                     ),
                   ],
                 ),

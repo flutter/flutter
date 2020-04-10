@@ -404,13 +404,13 @@ void main() {
 
   testWidgets('selectable text selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
           body: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
-              child: const Opacity(
+              child: Opacity(
                 opacity: 0.5,
                 child: SelectableText('selectable text'),
               ),
@@ -1163,7 +1163,7 @@ void main() {
     try {
       await tester.pumpWidget(
         overlay(
-          child: Container(
+          child: SizedBox(
             width: 300.0,
             child: SelectableText(
               'abcd',
@@ -1197,9 +1197,9 @@ void main() {
   testWidgets('Can align to center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const SelectableText(
+          child: SelectableText(
             'abcd',
             textAlign: TextAlign.center,
           ),
@@ -1219,9 +1219,9 @@ void main() {
   testWidgets('Can align to center within center', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const Center(
+          child: Center(
             child: SelectableText(
               'abcd',
               textAlign: TextAlign.center,
@@ -3476,9 +3476,9 @@ void main() {
   testWidgets('Caret center position', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const SelectableText(
+          child: SelectableText(
             'abcd',
             textAlign: TextAlign.center,
           ),
@@ -3512,9 +3512,9 @@ void main() {
   testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
-        child: Container(
+        child: const SizedBox(
           width: 300.0,
-          child: const SelectableText(
+          child: SelectableText(
             'abcd    ',
             textAlign: TextAlign.center,
           ),

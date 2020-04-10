@@ -106,7 +106,7 @@ Future<void> _testConstrainedLabel(
   await tester.pumpWidget(
     _wrapForChip(
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: chipParentWidth,
           height: chipParentHeight,
           child: Chip(
@@ -320,7 +320,7 @@ void main() {
       await tester.pumpWidget(
         _wrapForChip(
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 500.0,
               height: 500.0,
               child: Column(
@@ -395,7 +395,7 @@ void main() {
       Widget chipBuilder (String text, {Widget avatar, VoidCallback onDeleted}) {
         return MaterialApp(
           home: Scaffold(
-            body: Container(
+            body: SizedBox(
               width: 150,
               child: Column(
                 children: <Widget>[

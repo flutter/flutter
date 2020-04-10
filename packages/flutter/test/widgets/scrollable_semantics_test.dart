@@ -51,7 +51,7 @@ void main() {
     const double kItemHeight = 40.0;
 
     final List<Widget> containers = List<Widget>.generate(80, (int i) => MergeSemantics(
-      child: Container(
+      child: SizedBox(
         height: kItemHeight,
         child: Text('container $i', textDirection: TextDirection.ltr),
       ),
@@ -90,7 +90,7 @@ void main() {
     const double kExpandedAppBarHeight = 56.0;
 
     final List<Widget> containers = List<Widget>.generate(80, (int i) => MergeSemantics(
-      child: Container(
+      child: SizedBox(
         height: kItemHeight,
         child: Text('container $i'),
       ),
@@ -154,7 +154,7 @@ void main() {
     final List<Widget> children = <Widget>[];
     final List<Widget> slivers = List<Widget>.generate(30, (int i) {
       final Widget child = MergeSemantics(
-        child: Container(
+        child: SizedBox(
           child: Text('Item $i'),
           height: 72.0,
         ),
@@ -308,7 +308,7 @@ void main() {
   testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
-    final List<Widget> children = List<Widget>.generate(80, (int i) => Container(
+    final List<Widget> children = List<Widget>.generate(80, (int i) => SizedBox(
       child: Text('Item $i'),
       height: 40.0,
     ));
@@ -336,7 +336,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           children: List<Widget>.generate(40, (int i) {
-            return Container(
+            return SizedBox(
               child: Text('item $i'),
               height: 400.0,
             );
@@ -410,7 +410,7 @@ void main() {
     setUp(() {
       children = List<Widget>.generate(10, (int i) {
         return MergeSemantics(
-          child: Container(
+          child: SizedBox(
             height: kItemHeight,
             child: Text('container $i'),
           ),
@@ -424,7 +424,7 @@ void main() {
       widgetUnderTest = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 2 * kItemHeight,
             child: ListView(
               controller: scrollController,
@@ -500,7 +500,7 @@ void main() {
           key: i == 5 ? center : null,
           child: MergeSemantics(
             key: ValueKey<int>(i),
-            child: Container(
+            child: SizedBox(
               height: kItemHeight,
               child: Text('container $i'),
             ),
@@ -522,7 +522,7 @@ void main() {
       widgetUnderTest = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 2 * kItemHeight,
             child: Scrollable(
               controller: scrollController,

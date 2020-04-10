@@ -361,7 +361,7 @@ class _DatePickerModeToggleButtonState extends State<_DatePickerModeToggleButton
               label: 'Select year',
               excludeSemantics: true,
               button: true,
-              child: Container(
+              child: SizedBox(
                 height: _subHeaderHeight,
                 child: InkWell(
                   onTap: widget.onTitlePressed,

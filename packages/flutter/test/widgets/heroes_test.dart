@@ -401,10 +401,10 @@ Future<void> main() async {
             onTap: () {
               log.add('foo');
             },
-            child: Container(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0,
-              child: const Text('foo'),
+              child: Text('foo'),
             ),
           ),
         ),
@@ -419,10 +419,10 @@ Future<void> main() async {
                 onTap: () {
                   log.add('bar');
                 },
-                child: Container(
+                child: const SizedBox(
                   width: 100.0,
                   height: 150.0,
-                  child: const Text('bar'),
+                  child: Text('bar'),
                 ),
               ),
             ),
@@ -1023,11 +1023,11 @@ Future<void> main() async {
                 onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
-                child: Hero(
+                child: const Hero(
                   tag: 'BC',
-                  child: Container(
+                  child: SizedBox(
                     height: 150.0,
-                    child: const Text('Hero'),
+                    child: Text('Hero'),
                   ),
                 ),
               ),
@@ -1049,12 +1049,12 @@ Future<void> main() async {
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   Container(
-                    child: Hero(
+                    child: const Hero(
                       tag: 'AB',
-                      child: Container(
+                      child: SizedBox(
                         height: 100.0,
                         width: 100.0,
-                        child: const Text('Hero'),
+                        child: Text('Hero'),
                       ),
                     ),
                   ),
@@ -2222,7 +2222,7 @@ Future<void> main() async {
               Hero(
                 tag: 'hero',
                 transitionOnUserGestures: true,
-                child: Container(
+                child: SizedBox(
                   width: 100,
                   child: Image(
                     image: imageProvider,

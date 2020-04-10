@@ -16,7 +16,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
@@ -60,7 +60,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 50.0,
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,

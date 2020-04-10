@@ -1010,7 +1010,7 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 48.0,
       height: 48.0,
       child: Material(

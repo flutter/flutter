@@ -400,7 +400,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
@@ -429,7 +429,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               cacheExtent: 500.0,
@@ -454,7 +454,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
@@ -484,7 +484,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               itemExtent: 100.0,
@@ -509,7 +509,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             height: 200.0,
             child: ListView(
               scrollDirection: Axis.horizontal,

@@ -1044,7 +1044,7 @@ void main() {
               height: 100,
               width: 10,
               alignment: moved ? Alignment.topLeft : Alignment.bottomLeft,
-              child: Container(
+              child: SizedBox(
                 height: 10,
                 width: 10,
                 child: HoverClient(
@@ -1318,7 +1318,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1339,7 +1339,7 @@ void main() {
     logs.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1360,7 +1360,7 @@ void main() {
 
     // Compare: It repaints if the MouseRegion is unactivated.
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1385,7 +1385,7 @@ void main() {
     final VoidCallback onPaintChild = () { logs.add('paint'); };
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(
@@ -1405,7 +1405,7 @@ void main() {
     logs.clear();
 
     await tester.pumpWidget(_Scaffold(
-      topLeft: Container(
+      topLeft: SizedBox(
         height: 10,
         width: 10,
         child: MouseRegion(

@@ -3866,7 +3866,7 @@ void main() {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller1,
@@ -3877,21 +3877,21 @@ void main() {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller2,
                       focusNode: focusNode2,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller3,
                       focusNode: focusNode3,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100.0,
                     child: CupertinoTextField(
                       controller: controller4,
@@ -3900,7 +3900,7 @@ void main() {
                   ),
                 ],
               ),
-              Container(
+              SizedBox(
                 width: 100.0,
                 child: CupertinoTextField(
                   controller: controller5,

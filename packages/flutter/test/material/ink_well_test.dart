@@ -95,7 +95,7 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
@@ -114,7 +114,7 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
-    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
@@ -128,7 +128,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -164,7 +164,7 @@ void main() {
         child: Center(
           child: Focus(
             focusNode: focusNode,
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: InkWell(
@@ -266,7 +266,7 @@ void main() {
                 addAutomaticKeepAlives: keepAlive,
                 dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
-                  Container(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
+                  SizedBox(height: 500.0, child: InkWell(onTap: () {}, child: const Placeholder())),
                   Container(height: 500.0),
                   Container(height: 500.0),
                 ],
@@ -367,7 +367,7 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(
@@ -395,7 +395,7 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Container(
+          child: SizedBox(
             width: 100,
             height: 100,
             child: InkWell(

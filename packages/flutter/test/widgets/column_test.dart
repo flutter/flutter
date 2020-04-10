@@ -368,7 +368,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Column(
@@ -760,7 +760,7 @@ void main() {
     const Key childKey = Key('childKey');
 
     await tester.pumpWidget(Center(
-      child: Container(
+      child: SizedBox(
         width: 0.0,
         height: 0.0,
         child: Column(

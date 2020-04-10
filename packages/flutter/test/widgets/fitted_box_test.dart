@@ -13,7 +13,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           child: FittedBox(
             key: outside,
@@ -48,7 +48,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
           child: FittedBox(
@@ -83,7 +83,7 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-        child: Container(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
           child: FittedBox(
@@ -139,7 +139,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.rtl,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
@@ -180,7 +180,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
@@ -221,7 +221,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
@@ -262,7 +262,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(
@@ -303,7 +303,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: Container(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
               child: FittedBox(

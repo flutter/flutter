@@ -20,7 +20,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             controller: scrollController,
@@ -59,7 +59,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             controller: scrollController,
@@ -105,7 +105,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             controller: scrollController,
@@ -154,7 +154,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             physics: const NoImplicitScrollPhysics(),
@@ -252,7 +252,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             controller: scrollController,
@@ -304,7 +304,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.bottomCenter,
-        child: Container(
+        child: SizedBox(
           height: 300.0,
           child: ListView(
             controller: scrollController,

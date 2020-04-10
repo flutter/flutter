@@ -242,7 +242,7 @@ void main() {
                 return Container(
                   alignment: Alignment.center,
                   child: DropdownButtonHideUnderline(
-                    child: Container(
+                    child: SizedBox(
                       width: 200.0,
                       child: DropdownButton<String>(
                         key: dropdownKey,
