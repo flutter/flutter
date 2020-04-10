@@ -119,7 +119,7 @@ void main() {
     PointerExitEvent exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -149,7 +149,7 @@ void main() {
     PointerExitEvent exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -179,7 +179,7 @@ void main() {
     PointerExitEvent exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -214,8 +214,8 @@ void main() {
     PointerEnterEvent enter;
     PointerHoverEvent move;
     PointerExitEvent exit;
-    await tester.pumpWidget(Center(
-      child: Container(
+    await tester.pumpWidget(const Center(
+      child: SizedBox(
         width: 100.0,
         height: 100.0,
       ),
@@ -230,7 +230,7 @@ void main() {
     expect(exit, isNull);
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -252,7 +252,7 @@ void main() {
     PointerExitEvent exit;
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -269,8 +269,8 @@ void main() {
     move = null;
     enter = null;
     exit = null;
-    await tester.pumpWidget(Center(
-      child: Container(
+    await tester.pumpWidget(const Center(
+      child: SizedBox(
         width: 100.0,
         height: 100.0,
       ),
@@ -287,7 +287,7 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.center,
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -306,7 +306,7 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.topLeft,
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -329,7 +329,7 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.center,
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -348,7 +348,7 @@ void main() {
     await tester.pumpWidget(Container(
       alignment: Alignment.topLeft,
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),
@@ -471,7 +471,7 @@ void main() {
         children: <Widget>[
           MouseRegion(
             key: key1,
-            child: Container(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -481,7 +481,7 @@ void main() {
           ),
           MouseRegion(
             key: key2,
-            child: Container(
+            child: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -842,7 +842,7 @@ void main() {
           onEnter: (PointerEnterEvent e) => enter.add(e),
           onHover: (PointerHoverEvent e) => hover.add(e),
           onExit: (PointerExitEvent e) => exit.add(e),
-          child: Container(
+          child: const SizedBox(
             height: 100.0,
             width: 100.0,
           ),
@@ -855,7 +855,7 @@ void main() {
     await gesture.addPointer(location: Offset.zero);
     addTearDown(() => gesture?.removePointer());
     await tester.pumpAndSettle();
-    await gesture.moveTo(tester.getCenter(find.byType(Container)));
+    await gesture.moveTo(tester.getCenter(find.byType(SizedBox)));
 
     expect(enter.length, 1);
     expect(enter.single.position, const Offset(400.0, 300.0));
@@ -1286,7 +1286,7 @@ void main() {
                 onEnter: (_) { bottomRegionIsHovered = true; },
                 onHover: (_) { bottomRegionIsHovered = true; },
                 onExit: (_) { bottomRegionIsHovered = true; },
-                child: Container(
+                child: const SizedBox(
                   width: 10,
                   height: 10,
                 ),
@@ -1456,7 +1456,7 @@ void main() {
   testWidgets('No new frames are scheduled when mouse moves without triggering callbacks', (WidgetTester tester) async {
     await tester.pumpWidget(Center(
       child: MouseRegion(
-        child: Container(
+        child: const SizedBox(
           width: 100.0,
           height: 100.0,
         ),

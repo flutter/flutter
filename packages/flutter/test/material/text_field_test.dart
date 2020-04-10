@@ -1084,8 +1084,8 @@ void main() {
     await tester.pumpAndSettle();
     final RenderBox container = tester.renderObject(find.descendant(
       of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ));
+      matching: find.byType(SizedBox),
+    ).first);
     expect(container.size, Size.zero);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
@@ -2252,7 +2252,7 @@ void main() {
     await tester.pumpWidget(containedTextFieldBuilder(
       counter: Container(height: counterHeight),
       labelText: 'I am labelText',
-      prefix: Container(
+      prefix: const SizedBox(
         width: 10,
         height: 60,
       ),

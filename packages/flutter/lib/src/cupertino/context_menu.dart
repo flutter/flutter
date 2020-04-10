@@ -1036,7 +1036,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       ),
     );
-    final Container spacer = Container(
+    const SizedBox spacer = SizedBox(
       width: _kPadding,
       height: _kPadding,
     );

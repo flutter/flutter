@@ -3623,7 +3623,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3676,7 +3676,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3730,7 +3730,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3784,7 +3784,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
