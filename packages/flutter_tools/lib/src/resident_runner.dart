@@ -234,7 +234,7 @@ class FlutterDevice {
         : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() => vmService.getVM();
+  Future<void> getVMs() => vmService.getVMOld();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -281,6 +281,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
+      osUtils: globals.os,
     );
     return devFS.create();
   }
@@ -304,7 +305,11 @@ class FlutterDevice {
         globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
     await Future.wait<void>(views.map<Future<void>>(
-      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+      (FlutterView view) => vmService.setAssetDirectory(
+        assetsDirectory: deviceAssetsDirectoryUri,
+        uiIsolateId: view.uiIsolate.id,
+        viewId: view.id,
+      )
     ));
   }
 
@@ -747,7 +752,9 @@ abstract class ResidentRunner {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final Map<String, Object> data = await flutterDevices.first.views.first.getSkSLs();
+    final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
+      viewId: flutterDevices.first.views.first.id,
+    );
     if (data.isEmpty) {
       globals.logger.printStatus(
         'No data was receieved. To ensure SkSL data can be generated use a '
@@ -821,6 +828,13 @@ abstract class ResidentRunner {
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[
       for (final FlutterDevice device in flutterDevices) device.refreshViews(),
+    ];
+    await Future.wait(futures);
+  }
+
+  Future<void> refreshVM() async {
+    final List<Future<void>> futures = <Future<void>>[
+      for (final FlutterDevice device in flutterDevices) device.getVMs(),
     ];
     await Future.wait(futures);
   }

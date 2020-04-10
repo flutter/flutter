@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -278,7 +279,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
-    final String enginePath = _findEnginePath(topLevelResults);
+    final String enginePath = await _findEnginePath(topLevelResults);
     if (enginePath != null) {
       contextOverrides.addAll(<Type, dynamic>{
         Artifacts: Artifacts.getLocalEngine(_findEngineBuildPath(topLevelResults, enginePath)),
@@ -348,13 +349,27 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return null;
   }
 
-  String _findEnginePath(ArgResults globalResults) {
+  Future<String> _findEnginePath(ArgResults globalResults) async {
     String engineSourcePath = globalResults['local-engine-src-path'] as String
       ?? globals.platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).map[kFlutterEnginePackageName];
+        final PackageConfig packageConfig = await loadPackageConfigUri(
+          globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+          onError: (dynamic error) {
+            // Errors indicate the automatic detection will fail, but are not
+            // fatal.
+          },
+          loader: (Uri uri) {
+            final File file = globals.fs.file(uri);
+            if (!file.existsSync()) {
+              return null;
+            }
+            return file.readAsBytes();
+          },
+        );
+        Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
         // Skip if sky_engine is the self-contained one.
         if (engineUri != null && globals.fs.identicalSync(globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'pkg', kFlutterEnginePackageName, 'lib'), engineUri.path)) {
           engineUri = null;

@@ -581,8 +581,9 @@ void main() {
                   children: List<Widget>.generate(10, (int y) {
                     return Row(
                       children: children[y] = List<Widget>.generate(10, (int x) {
-                        return Container(
-                          height: 100.0,
+                        // nonconst is used below to avoid const constructor and to force a new instance
+                        return SizedBox(
+                          height: nonconst(100.0),
                           width: 100.0,
                         );
                       }),

@@ -20,7 +20,7 @@ void main() {
               top: 456.0,
               child: CompositedTransformTarget(
                 link: link,
-                child: Container(height: 10.0, width: 10.0),
+                child: const SizedBox(height: 10.0, width: 10.0),
               ),
             ),
             Positioned(

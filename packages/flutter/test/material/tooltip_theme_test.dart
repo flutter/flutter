@@ -119,7 +119,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -177,7 +177,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -237,7 +237,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -306,7 +306,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -377,7 +377,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -434,7 +434,7 @@ void main() {
                         child: Tooltip(
                           key: key,
                           message: tooltipText,
-                          child: Container(
+                          child: const SizedBox(
                             width: 0.0,
                             height: 0.0,
                           ),
@@ -486,7 +486,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: Container(
+                    child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
                     ),
@@ -542,7 +542,7 @@ void main() {
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: Container(
+                    child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
                     ),
@@ -662,7 +662,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: Container(
+                    child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
                     ),
@@ -704,7 +704,7 @@ void main() {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
-                    child: Container(
+                    child: const SizedBox(
                       width: 0.0,
                       height: 0.0,
                     ),
@@ -837,10 +837,10 @@ void main() {
               waitDuration: customWaitDuration,
             ),
           ),
-          child: Center(
+          child: const Center(
             child: Tooltip(
               message: tooltipText,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -878,13 +878,13 @@ void main() {
     await gesture.moveTo(Offset.zero);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: TooltipTheme(
-          data: const TooltipThemeData(waitDuration: customWaitDuration),
+          data: TooltipThemeData(waitDuration: customWaitDuration),
           child: Center(
             child: Tooltip(
               message: tooltipText,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -922,10 +922,10 @@ void main() {
               showDuration: customShowDuration,
             ),
           ),
-          child: Center(
+          child: const Center(
             child: Tooltip(
               message: tooltipText,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
@@ -952,13 +952,13 @@ void main() {
   testWidgets('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
     const Duration customShowDuration = Duration(milliseconds: 3000);
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: TooltipTheme(
-          data: const TooltipThemeData(showDuration: customShowDuration),
+          data: TooltipThemeData(showDuration: customShowDuration),
           child: Center(
             child: Tooltip(
               message: tooltipText,
-              child: Container(
+              child: SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),

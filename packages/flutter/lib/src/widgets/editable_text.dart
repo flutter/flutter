@@ -1679,13 +1679,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
 
     // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
+    // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeatText = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    final bool isRepeatSelection = value?.selection == _lastFormattedUnmodifiedTextEditingValue?.selection;
-    final bool isRepeatComposing = value?.composing == _lastFormattedUnmodifiedTextEditingValue?.composing;
-    // Only format when the text has changed and there are available formatters.
-    if (!isRepeatText && textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      // Only format when the text has changed and there are available formatters.
+      // Pass through the formatter regardless of repeat status if the input value is
+      // different than the stored value.
       for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
       }
@@ -1695,9 +1696,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _lastFormattedValue = value;
     }
 
+    // Setting _value here ensures the selection and composing region info is passed.
     _value = value;
     // Use the last formatted value when an identical repeat pass is detected.
-    if (isRepeatText && isRepeatSelection && isRepeatComposing && textChanged && _lastFormattedValue != null) {
+    if (isRepeat && textChanged && _lastFormattedValue != null) {
       _value = _lastFormattedValue;
     }
 

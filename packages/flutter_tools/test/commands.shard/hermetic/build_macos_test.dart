@@ -69,7 +69,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler(String configuration) {
+  FakeCommand setUpMockXcodeBuildHandler(String configuration, { bool verbose = false }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -83,6 +83,8 @@ void main() {
         '-derivedDataPath', flutterBuildDir.absolute.path,
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+        if (verbose)
+          'VERBOSE_SCRIPT_LOGGING=YES',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
       stdout: 'STDOUT STUFF',
@@ -158,6 +160,23 @@ void main() {
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
+
+  testUsingContext('macOS build invokes xcode build (debug) with verbosity', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--debug', '-v']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Debug', verbose: true)
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
 
   testUsingContext('macOS build invokes xcode build (profile)', () async {
     final BuildCommand command = BuildCommand();

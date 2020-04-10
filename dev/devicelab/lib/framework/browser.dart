@@ -282,6 +282,14 @@ class BlinkTraceSummary {
         .toList()
         ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts - b.ts);
 
+      Exception noMeasuredFramesFound() => Exception(
+        'No measured frames found in benchmark tracing data. This likely '
+        'indicates a bug in the benchmark. For example, the benchmark failed '
+        'to pump enough frames. It may also indicate a change in Chrome\'s '
+        'tracing data format. Check if Chrome version changed recently and '
+        'adjust the parsing code accordingly.',
+      );
+
       // Use the pid from the first "measured_frame" event since the event is
       // emitted by the script running on the process we're interested in.
       //
@@ -290,7 +298,7 @@ class BlinkTraceSummary {
       // sometimes, causing to flakes.
       final BlinkTraceEvent firstMeasuredFrameEvent = events.firstWhere(
         (BlinkTraceEvent event) => event.isBeginMeasuredFrame,
-        orElse: () => null,
+        orElse: () => throw noMeasuredFramesFound(),
       );
 
       if (firstMeasuredFrameEvent == null) {
@@ -330,8 +338,7 @@ class BlinkTraceSummary {
       print('Skipped $skipCount non-measured frames.');
 
       if (frames.isEmpty) {
-        // The benchmark is not measuring frames.
-        return null;
+        throw noMeasuredFramesFound();
       }
 
       // Compute averages and summarize.

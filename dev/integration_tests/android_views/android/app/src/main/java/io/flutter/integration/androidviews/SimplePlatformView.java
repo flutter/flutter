@@ -52,21 +52,27 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
                 touchPipe.disable();
                 result.success(null);
                 return;
-            case "showAlertDialog":
-                showAlertDialog(result);
+            case "showAndHideAlertDialog":
+                showAndHideAlertDialog(result);
                 return;
         }
         result.notImplemented();
     }
 
-    private void showAlertDialog(MethodChannel.Result result) {
+    private void showAndHideAlertDialog(MethodChannel.Result result) {
         Context context = view.getContext();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         TextView textView = new TextView(context);
-        textView.setText("Alert!");
+        textView.setText("This alert dialog will close in 1 second");
         builder.setView(textView);
         final AlertDialog alertDialog = builder.show();
         result.success(null);
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.hide();
+            }
+        }, 1000);
     }
 
 }
