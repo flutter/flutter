@@ -418,7 +418,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio can be hovered and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Radio can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int groupValue = 0;
     const Key radioKey = Key('radio');
@@ -479,7 +479,7 @@ void main() {
               color: const Color(0xffffffff),
               rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0))
           ..circle(color: Colors.orange[500])
-          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0)
+          ..circle(color: const Color(0x8a000000), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
 
     // Check when the radio is selected, but disabled.
