@@ -303,38 +303,24 @@ void main() {
 
   testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     const int width = 16;
-    const int height = 11;
+    const int height = 12;
     
-    for (int frameCount = 0; frameCount < width * height; frameCount++) {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: _GridGoldenTester(
-              width: width,
-              height: height,
-              frameCount: frameCount,
-              target: const Padding(
-                padding: EdgeInsets.all(4.0),
-                child: SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            ),
-          ),
+    await tester.pumpAnimation(
+      (int frameIndex) => AnimationSheetRecorder(
+        const Padding(
+          padding: EdgeInsets.all(4.0),
+          child: CircularProgressIndicator(),
         ),
-        const Duration(milliseconds: 16, microseconds: 667),
-      );
-    }
-
-    expect(
-      find.byType(_GridGoldenTester),
-      matchesGoldenFile('circular_progress_indicator.grid.png'),
+        cellSize: const Size(48, 48),
+        frameIndex: frameIndex,
+      ),
+      width * height,
     );
 
-    await tester.pump(const Duration(milliseconds: 1));
+    expect(
+      find.byType(AnimationSheetRecorder),
+      matchesGoldenFile('circular_progress_indicator.grid.png'),
+    );
   });
 
   testWidgets('LinearProgressIndicator with height 12.0', (WidgetTester tester) async {
@@ -545,38 +531,4 @@ void main() {
 
     handle.dispose();
   });
-}
-
-class _GridGoldenTester extends StatelessWidget {
-  const _GridGoldenTester({
-    @required this.target,
-    @required this.width,
-    @required this.height,
-    @required this.frameCount,
-  });
-
-  final Widget target;
-  final int width;
-  final int height;
-  final int frameCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: List<Widget>.generate(height, _generateRow),
-    );
-  }
-
-  Widget _generateRow(int y) {
-    final int largestFrame = width * (height - y) - 1;
-    return Row(
-      key: ValueKey<int>(y),
-      children: List<Widget>.generate(width, (int x) {
-        return Container(
-          key: ValueKey<int>(x),
-          child: frameCount >= largestFrame - x ? target : null,
-        );
-      }),
-    );
-  }
 }
