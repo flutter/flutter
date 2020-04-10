@@ -10,6 +10,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/common/persistent_cache.h"
 
 namespace flutter {
 
@@ -26,6 +27,7 @@ RunConfiguration RunConfiguration::InferFromSettings(
   asset_manager->PushBack(
       std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
+  PersistentCache::UpdateAssetPath(settings.assets_path);
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
                                                   io_worker),

@@ -35,6 +35,15 @@ LogSettings GetLogSettings();
 // higher than LOG_FATAL.
 int GetMinLogLevel();
 
+class ScopedSetLogSettings {
+ public:
+  ScopedSetLogSettings(const LogSettings& settings);
+  ~ScopedSetLogSettings();
+
+ private:
+  LogSettings old_settings_;
+};
+
 }  // namespace fml
 
 #endif  // FLUTTER_FML_LOG_SETTINGS_H_
