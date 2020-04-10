@@ -299,7 +299,6 @@ mixin SchedulerBinding on BindingBase {
   ///
   /// The preferred way to watch for changes to this value is using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @override
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
 
@@ -309,9 +308,9 @@ mixin SchedulerBinding on BindingBase {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
-  @override
+  @protected
+  @mustCallSuper
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    super.handleAppLifecycleStateChanged(state);
     assert(state != null);
     _lifecycleState = state;
     switch (state) {
