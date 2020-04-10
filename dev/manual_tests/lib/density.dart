@@ -451,14 +451,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
                 subtitle:
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
-                trailing: Icon(Icons.check_box),
+                trailing: const Icon(Icons.check_box),
                 onTap: () {},
               ),
               ListTile(
                 title: Text(_model.rtl ? 'هذا عنوان قصير' : 'This is a short title'),
                 subtitle:
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
-                leading: Icon(Icons.check_box),
+                leading: const Icon(Icons.check_box),
                 dense: true,
                 onTap: () {},
               ),
@@ -467,8 +467,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 subtitle:
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 dense: true,
-                leading: Icon(Icons.add_box),
-                trailing: Icon(Icons.check_box),
+                leading: const Icon(Icons.add_box),
+                trailing: const Icon(Icons.check_box),
                 onTap: () {},
               ),
               ListTile(
@@ -476,8 +476,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 subtitle:
                     Text(_model.rtl ? 'هذا عنوان فرعي مناسب.' : 'This is an appropriate subtitle.'),
                 isThreeLine: true,
-                leading: Icon(Icons.add_box),
-                trailing: Icon(Icons.check_box),
+                leading: const Icon(Icons.add_box),
+                trailing: const Icon(Icons.check_box),
                 onTap: () {},
               ),
             ],
