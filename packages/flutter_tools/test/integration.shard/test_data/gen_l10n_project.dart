@@ -18,6 +18,8 @@ class GenL10nProject extends Project {
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
     writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
@@ -193,6 +195,58 @@ class Home extends StatelessWidget {
               '${localizations.singleQuotePlural(2)}',
               '${localizations.doubleQuote}',
               '${localizations.doubleQuotePlural(2)}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale('es'),
+          test: '--- es ---',
+          callback: (BuildContext context) {
+            results.add('--- es ---');
+            final AppLocalizations localizations = AppLocalizations.of(context);
+            results.addAll(<String>[
+              '${localizations.helloWorld}',
+              '${localizations.helloNewlineWorld}',
+              '${localizations.hello("Mundo")}',
+              '${localizations.greeting("Hola", "Mundo")}',
+              '${localizations.helloWorldOn(DateTime(1960))}',
+              '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
+              '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
+              '${localizations.helloFor(123)}',
+              '${localizations.helloCost("el precio", 123)}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
+              '${localizations.helloAdjectiveWorlds(0, "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(1, "nuevo")}',
+              '${localizations.helloAdjectiveWorlds(2, "nuevo")}',
+              '${localizations.helloWorldsOn(0, DateTime(1960))}',
+              '${localizations.helloWorldsOn(1, DateTime(1960))}',
+              '${localizations.helloWorldsOn(2, DateTime(1960))}',
+              '${localizations.helloWorldPopulation(0, 100)}',
+              '${localizations.helloWorldPopulation(1, 101)}',
+              '${localizations.helloWorldPopulation(2, 102)}',
+              '${localizations.helloWorldsInterpolation(123, "Hola", "Mundo")}',
+              '${localizations.dollarSign}',
+              '${localizations.dollarSignPlural(1)}',
+              '${localizations.singleQuote}',
+              '${localizations.singleQuotePlural(2)}',
+              '${localizations.doubleQuote}',
+              '${localizations.doubleQuotePlural(2)}',
+            ]);
+          },
+        ),
+        LocaleBuilder(
+          locale: Locale.fromSubtags(languageCode: 'es', countryCode: '419'),
+          test: 'countryCode - es_419',
+          callback: (BuildContext context) {
+            results.add('--- es_419 ---');
+            final AppLocalizations localizations = AppLocalizations.of(context);
+            results.addAll([
+              '${localizations.helloWorld}',
+              '${localizations.helloWorlds(0)}',
+              '${localizations.helloWorlds(1)}',
+              '${localizations.helloWorlds(2)}',
             ]);
           },
         ),
@@ -438,6 +492,44 @@ void main() {
 {
   "@@locale": "en_GB",
   "helloWorld": "GB Hello World"
+}
+''';
+
+  /// All messages are simply the template language's message with 'ES - '
+  /// appended. This makes validating test behavior easier. The interpolated
+  /// messages are different where applicable.
+  final String appEs = r'''
+{
+  "@@locale": "es",
+  "helloWorld": "ES - Hello world",
+  "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}",
+  "helloNewlineWorld": "ES - Hello \n World",
+  "hello": "ES - Hello {world}",
+  "greeting": "ES - {hello} {world}",
+  "helloWorldOn": "ES - Hello World on {date}",
+  "helloWorldDuring": "ES - Hello World from {startDate} to {endDate}",
+  "helloOn": "ES - Hello {world} on {date} at {time}",
+  "helloFor": "ES - Hello for {value}",
+  "helloCost": "ES - Hello for {price} {value}",
+  "helloAdjectiveWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello {adjective} World} =2{ES - Hello two {adjective} worlds} other{ES - Hello other {count} {adjective} worlds}}",
+  "helloWorldsOn": "{count,plural, =0{ES - Hello on {date}} =1{ES - Hello World, on {date}} =2{ES - Hello two worlds, on {date}} other{ES - Hello other {count} worlds, on {date}}}",
+  "helloWorldPopulation": "{ES - count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
+  "helloWorldInterpolation": "ES - [{hello}] #{world}#",
+  "helloWorldsInterpolation": "ES - {count,plural, other {ES - [{hello}] -{world}- #{count}#}}",
+  "dollarSign": "ES - $!",
+  "dollarSignPlural": "{count,plural, =1{ES - One $} other{ES - Many $}}",
+  "singleQuote": "ES - Flutter's amazing!",
+  "singleQuotePlural": "{count,plural, =1{ES - Flutter's amazing, times 1!} other{ES - Flutter's amazing, times {count}!}}",
+  "doubleQuote": "ES - Flutter is \"amazing\"!",
+  "doubleQuotePlural": "{count,plural, =1{ES - Flutter is \"amazing\", times 1!} other{ES - Flutter is \"amazing\", times {count}!}}"
+}
+''';
+
+  final String appEs419 = r'''
+{
+  "@@locale": "es_419",
+  "helloWorld": "ES 419 - Hello World",
+  "helloWorlds": "{count,plural, =0{ES 419 - Hello} =1{ES 419 - Hello World} =2{ES 419 - Hello two worlds} few{ES 419 - Hello {count} worlds} many{ES 419 - Hello all {count} worlds} other{ES - Hello other {count} worlds}}"
 }
 ''';
 
