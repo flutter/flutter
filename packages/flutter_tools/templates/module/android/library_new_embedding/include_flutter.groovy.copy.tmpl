@@ -15,8 +15,8 @@ if (pluginsFile.exists()) {
 plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.toPath().resolve(path).resolve('android').toFile()
     if (pluginDirectory.exists()) {
-        include ":$name"
-        project(":$name").projectDir = pluginDirectory
+        gradle.include ":$name"
+        gradle.project(":$name").projectDir = pluginDirectory
     }
 }
 
