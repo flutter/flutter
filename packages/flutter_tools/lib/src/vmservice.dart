@@ -17,6 +17,10 @@ import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
 
+const String kGetSkSLsMethod = '_flutter.getSkSLs';
+const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
+const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
@@ -441,6 +445,14 @@ class VMService implements vm_service.VmService {
   @override
   Stream<vm_service.Event> onEvent(String streamId) {
     return _delegateService.onEvent(streamId);
+  }
+
+  @override
+  Future<vm_service.Response> callMethod(String method, {
+    String isolateId,
+    Map<dynamic, dynamic> args,
+  }) {
+    return _delegateService.callMethod(method, isolateId: isolateId, args: args);
   }
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
@@ -1536,43 +1548,56 @@ class FlutterView extends ServiceObject {
     await subscription.cancel();
   }
 
-  Future<void> setAssetDirectory(Uri assetsDirectory) async {
-    assert(assetsDirectory != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setAssetBundlePath',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false),
-        });
-  }
-
-  Future<void> setSemanticsEnabled(bool enabled) async {
-    assert(enabled != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'enabled': enabled,
-        });
-  }
-
-  Future<Map<String, Object>> getSkSLs() async {
-    final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
-      '_flutter.getSkSLs',
-      params: <String, dynamic>{
-        'viewId': id,
-      },
-    );
-    return response['SkSLs'] as Map<String, Object>;
-  }
-
   bool get hasIsolate => _uiIsolate != null;
-
-  Future<void> flushUIThreadTasks() async {
-    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks',
-      params: <String, dynamic>{'isolateId': _uiIsolate.id});
-  }
 
   @override
   String toString() => id;
+}
+
+/// Flutter specific VM Service functionality.
+extension FlutterVmService on vm_service.VmService {
+  /// Set the asset directory for the an attached Flutter view.
+  Future<void> setAssetDirectory({
+    @required Uri assetsDirectory,
+    @required String viewId,
+    @required String uiIsolateId,
+  }) async {
+    assert(assetsDirectory != null);
+    await callMethod(kSetAssetBundlePathMethod,
+      isolateId: uiIsolateId,
+      args: <String, dynamic>{
+        'viewId': viewId,
+        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+      });
+  }
+
+  /// Retreive the cached SkSL shaders from an attached Flutter view.
+  ///
+  /// This method will only return data if `--cache-sksl` was provided as a
+  /// flutter run agument, and only then on physical devices.
+  Future<Map<String, Object>> getSkSLs({
+    @required String viewId,
+  }) async {
+    final vm_service.Response response = await callMethod(
+      kGetSkSLsMethod,
+      args: <String, String>{
+        'viewId': viewId,
+      },
+    );
+    return response.json['SkSLs'] as Map<String, Object>;
+  }
+
+  /// Flush all tasks on the UI thead for an attached Flutter view.
+  ///
+  /// This method is currently used only for benchmarking.
+  Future<void> flushUIThreadTasks({
+    @required String uiIsolateId,
+  }) async {
+    await callMethod(
+      kFlushUIThreadTasksMethod,
+      args: <String, String>{
+        'isolateId': uiIsolateId,
+      },
+    );
+  }
 }
