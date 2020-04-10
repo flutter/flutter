@@ -426,8 +426,13 @@ void main() {
   }));
 
   test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
-    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
-      return <String, Object>{};
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{}
+      });
     });
     await residentRunner.writeSkSL();
 
@@ -439,10 +444,15 @@ void main() {
       return TargetPlatform.android_arm;
     });
     when(mockDevice.name).thenReturn('test device');
-    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
-      return <String, Object>{
-        'A': 'B',
-      };
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{
+          'A': 'B',
+        }
+      });
     });
     await residentRunner.writeSkSL();
 

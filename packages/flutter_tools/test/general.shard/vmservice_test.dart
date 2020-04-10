@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -210,6 +212,73 @@ void main() {
     verify(mockVMService.registerService('flutterVersion', 'Flutter Tools')).called(1);
   }, overrides: <Type, Generator>{
     FlutterVersion: () => MockFlutterVersion(),
+  });
+
+  testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
+    final Completer<String> completer = Completer<String>();
+    final vm_service.VmService  vmService = vm_service.VmService(
+      const Stream<String>.empty(),
+      completer.complete,
+    );
+
+    unawaited(vmService.setAssetDirectory(
+      assetsDirectory: Uri(path: 'abc', scheme: 'file'),
+      viewId: 'abc',
+      uiIsolateId: 'def',
+    ));
+
+    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+
+    expect(rawRequest, allOf(<Matcher>[
+      containsPair('method', kSetAssetBundlePathMethod),
+      containsPair('params', allOf(<Matcher>[
+        containsPair('viewId', 'abc'),
+        containsPair('assetDirectory', '/abc'),
+        containsPair('isolateId', 'def'),
+      ]))
+    ]));
+  });
+
+  testWithoutContext('getSkSLs forwards arguments correctly', () async {
+    final Completer<String> completer = Completer<String>();
+    final vm_service.VmService  vmService = vm_service.VmService(
+      const Stream<String>.empty(),
+      completer.complete,
+    );
+
+    unawaited(vmService.getSkSLs(
+      viewId: 'abc',
+    ));
+
+    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+
+    expect(rawRequest, allOf(<Matcher>[
+      containsPair('method', kGetSkSLsMethod),
+      containsPair('params', allOf(<Matcher>[
+        containsPair('viewId', 'abc'),
+      ]))
+    ]));
+  });
+
+  testWithoutContext('flushUIThreadTasks forwards arguments correctly', () async {
+    final Completer<String> completer = Completer<String>();
+    final vm_service.VmService  vmService = vm_service.VmService(
+      const Stream<String>.empty(),
+      completer.complete,
+    );
+
+    unawaited(vmService.flushUIThreadTasks(
+      uiIsolateId: 'def',
+    ));
+
+    final Map<String, Object> rawRequest = json.decode(await completer.future) as Map<String, Object>;
+
+    expect(rawRequest, allOf(<Matcher>[
+      containsPair('method', kFlushUIThreadTasksMethod),
+      containsPair('params', allOf(<Matcher>[
+        containsPair('isolateId', 'def'),
+      ]))
+    ]));
   });
 }
 
