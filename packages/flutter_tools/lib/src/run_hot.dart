@@ -486,7 +486,8 @@ class HotRunner extends ResidentRunner {
       futures.clear();
       for (final FlutterDevice device in flutterDevices) {
         for (final FlutterView view in device.views) {
-          futures.add(view.flushUIThreadTasks());
+          futures.add(device.vmService
+            .flushUIThreadTasks(uiIsolateId: view.uiIsolate.id));
         }
       }
       await Future.wait(futures);
