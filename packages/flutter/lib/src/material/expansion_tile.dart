@@ -43,6 +43,7 @@ class ExpansionTile extends StatefulWidget {
     this.initiallyExpanded = false,
     this.maintainState = false,
   }) : assert(initiallyExpanded != null),
+       assert(maintainState != null),
        super(key: key);
 
   /// A widget to display before the title.
