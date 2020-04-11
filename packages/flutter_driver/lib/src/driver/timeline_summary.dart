@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'scene_display_lag_summarizer.dart';
 import 'timeline.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
@@ -85,6 +86,8 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
+    final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
+
     return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
@@ -105,7 +108,10 @@ class TimelineSummary {
         .toList(),
       'frame_begin_times': _extractBeginTimestamps('Frame')
         .map<int>((Duration duration) => duration.inMicroseconds)
-        .toList()
+        .toList(),
+      'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
+      '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
+      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0)
     };
   }
 
@@ -208,9 +214,7 @@ class TimelineSummary {
       throw ArgumentError('durations is empty!');
     assert(percentile >= 0.0 && percentile <= 100.0);
     final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
-    doubles.sort();
-    return doubles[((doubles.length - 1) * (percentile / 100)).round()];
-
+    return findPercentile(doubles, percentile);
   }
 
   double _maxInMillis(Iterable<Duration> durations) {
@@ -220,6 +224,8 @@ class TimelineSummary {
         .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
   }
+
+  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
 
