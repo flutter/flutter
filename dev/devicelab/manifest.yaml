@@ -760,14 +760,12 @@ tasks:
       Runs Web benchmarks on Chrome on a Linux machine using the HTML rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-    flaky: true
 
   web_benchmarks_canvaskit:
     description: >
       Runs Web benchmarks on Chrome on a Linux machine using the CanvasKit rendering backend.
     stage: devicelab
     required_agent_capabilities: ["linux-vm"]
-    flaky: true
 
   # run_without_leak_linux:
   #   description: >
