@@ -61,6 +61,8 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/examples/sector_layout_test.dart',
   // This test relies on widget tracking capability in the VM.
   'test/widgets/widget_inspector_test.dart',
+  // This test requires HttpClient and tests functionality that does not apply to Web.
+  'test/services/platform_network_test.dart',
 
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
