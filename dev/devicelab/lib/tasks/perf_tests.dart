@@ -189,7 +189,6 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
@@ -281,6 +280,9 @@ class PerfTest {
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        'average_vsync_transitions_missed',
+        '90th_percentile_vsync_transitions_missed',
+        '99th_percentile_vsync_transitions_missed',
         if (needsMeasureCpuGPu) 'cpu_percentage',
         if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
