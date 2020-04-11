@@ -5,21 +5,17 @@
 assert(is_linux)
 
 import("//flutter/shell/platform/glfw/config.gni")
-import("//flutter/shell/platform/linux/config.gni")
 
 group("linux") {
-  deps = []
+  deps = [
+    ":flutter_linux_gtk",
+    ":publish_headers_linux",
+  ]
   if (build_glfw_shell) {
     deps += [
       ":flutter_linux_glfw",
       "//flutter/shell/platform/glfw:publish_headers_glfw",
       "//flutter/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
-    ]
-  }
-  if (build_linux_shell) {
-    deps += [
-      ":flutter_linux_gtk",
-      ":publish_headers_linux",
     ]
   }
 }
@@ -46,50 +42,49 @@ if (build_glfw_shell) {
   }
 }
 
-if (build_linux_shell) {
-  _public_headers = [
-    "public/flutter_linux/fl_dart_project.h",
-    "public/flutter_linux/fl_view.h",
-    "public/flutter_linux/flutter_linux.h",
+_public_headers = [
+  "public/flutter_linux/fl_dart_project.h",
+  "public/flutter_linux/fl_view.h",
+  "public/flutter_linux/flutter_linux.h",
+]
+
+config("relative_flutter_linux_headers") {
+  include_dirs = [ "public" ]
+}
+
+source_set("flutter_linux") {
+  public = _public_headers
+
+  sources = [
+    "fl_dart_project.cc",
+    "fl_view.cc",
   ]
 
-  config("relative_flutter_linux_headers") {
-    include_dirs = [ "public" ]
-  }
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:egl",
+    "//third_party/khronos:khronos_headers",
+  ]
 
-  source_set("flutter_linux") {
-    public = _public_headers
+  # Set flag to stop headers being directly included (library users should not do this)
+  defines = [ "FLUTTER_LINUX_COMPILATION" ]
 
-    sources = [
-      "fl_dart_project.cc",
-      "fl_view.cc",
-    ]
+  deps = [
+    "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
+  ]
+}
 
-    configs += [
-      "//flutter/shell/platform/linux/config:gtk",
-      "//flutter/shell/platform/linux/config:egl",
-    ]
+shared_library("flutter_linux_gtk") {
+  deps = [
+    ":flutter_linux",
+  ]
 
-    # Set flag to stop headers being directly included (library users should not do this)
-    defines = [ "FLUTTER_LINUX_COMPILATION" ]
+  public_configs = [ "//flutter:config" ]
+}
 
-    deps = [
-      "//flutter/shell/platform/embedder:embedder_with_symbol_prefix",
-    ]
-  }
-
-  shared_library("flutter_linux_gtk") {
-    deps = [
-      ":flutter_linux",
-    ]
-
-    public_configs = [ "//flutter:config" ]
-  }
-
-  copy("publish_headers_linux") {
-    sources = _public_headers
-    outputs = [
-      "$root_out_dir/flutter_linux/{{source_file_part}}",
-    ]
-  }
+copy("publish_headers_linux") {
+  sources = _public_headers
+  outputs = [
+    "$root_out_dir/flutter_linux/{{source_file_part}}",
+  ]
 }

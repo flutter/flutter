@@ -139,7 +139,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '0c64fd23eeedbad60c2bfa294710cd587ccb7c27',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '036715c76da60220b39312ea066cd65d32c2157d',
 
    # Fuchsia compatibility
    #
@@ -178,6 +178,9 @@ deps = {
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '5005010d694e16571b8dfbf07d70817841f80a69',
+
+  'src/third_party/khronos':
+   Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
 
   'src/third_party/boringssl':
    Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
