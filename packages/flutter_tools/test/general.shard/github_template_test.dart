@@ -160,7 +160,10 @@ void main() {
           fileSystem: fs,
           logger: logger,
           client: SuccessShortenURLFakeHttpClient(),
-          flutterProjectFactory: FlutterProjectFactory(),
+          flutterProjectFactory: FlutterProjectFactory(
+            fileSystem: fs,
+            logger: logger,
+          ),
         );
         expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
@@ -176,7 +179,10 @@ void main() {
           fileSystem: fs,
           logger: logger,
           client: FakeHttpClient(),
-          flutterProjectFactory: FlutterProjectFactory(),
+          flutterProjectFactory: FlutterProjectFactory(
+            fileSystem: fs,
+            logger: logger,
+          ),
         );
         expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
@@ -199,7 +205,10 @@ void main() {
           fileSystem: fs,
           logger: logger,
           client: FakeHttpClient(),
-          flutterProjectFactory: FlutterProjectFactory(),
+          flutterProjectFactory: FlutterProjectFactory(
+            fileSystem: fs,
+            logger: logger,
+          ),
         );
         final Directory projectDirectory = fs.currentDirectory;
 
