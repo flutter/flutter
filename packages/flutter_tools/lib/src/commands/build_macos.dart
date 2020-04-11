@@ -26,6 +26,7 @@ class BuildMacosCommand extends BuildSubCommand {
     usesBuildNumberOption();
     usesBuildNameOption();
   }
+
   @override
   final String name = 'macos';
 

@@ -191,7 +191,8 @@ void main() {
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
-  testUsingContext('macOS build supports build name and number', () async {
+
+  testUsingContext('macOS build supports build-name and build-number', () async {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
 
@@ -204,9 +205,9 @@ void main() {
         '--build-number=42',
       ],
     );
-    final String contents = fileSystem.file(
-        './macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
-        .readAsStringSync();
+    final String contents = fileSystem
+      .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+      .readAsStringSync();
 
     expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
     expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
