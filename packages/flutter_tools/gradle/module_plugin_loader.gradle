@@ -11,22 +11,20 @@ def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
 // Note: if this logic is changed, also change the logic in app_plugin_loader.gradle.
 def pluginsFile = new File(moduleProjectRoot, '.flutter-plugins-dependencies')
-if (!pluginsFile.exists()) {
-  return
-}
-
-def object = new JsonSlurper().parseText(pluginsFile.text)
-assert object instanceof Map
-assert object.plugins instanceof Map
-assert object.plugins.android instanceof List
-// Includes the Flutter plugins that support the Android platform.
-object.plugins.android.each { androidPlugin ->
-  assert androidPlugin.name instanceof String
-  assert androidPlugin.path instanceof String
-  def pluginDirectory = new File(androidPlugin.path, 'android')
-  assert pluginDirectory.exists()
-  include ":${androidPlugin.name}"
-  project(":${androidPlugin.name}").projectDir = pluginDirectory
+if (pluginsFile.exists()) {
+    def object = new JsonSlurper().parseText(pluginsFile.text)
+    assert object instanceof Map
+    assert object.plugins instanceof Map
+    assert object.plugins.android instanceof List
+    // Includes the Flutter plugins that support the Android platform.
+    object.plugins.android.each { androidPlugin ->
+        assert androidPlugin.name instanceof String
+        assert androidPlugin.path instanceof String
+        def pluginDirectory = new File(androidPlugin.path, 'android')
+        assert pluginDirectory.exists()
+        include ":${androidPlugin.name}"
+        project(":${androidPlugin.name}").projectDir = pluginDirectory
+    }
 }
 
 gradle.getGradle().projectsLoaded { g ->
