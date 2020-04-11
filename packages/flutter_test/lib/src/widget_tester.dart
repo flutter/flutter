@@ -48,7 +48,7 @@ export 'package:test_api/test_api.dart' hide
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
-/// Signature for callback to [WidgetTester.pumpAnimation].
+/// Signature for callback to [WidgetTester.pumpFrames].
 typedef FrameGetter = Widget Function(int frameIndex);
 
 /// Runs the [callback] inside the Flutter test environment.
@@ -548,8 +548,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
-  /// Repeatedly triggers frames with `duration` amount of time in between.
-  Future<void> pumpAnimation(
+  /// Repeatedly triggers frames with `frameDuration` amount of time in between.
+  Future<void> pumpFrames(
     FrameGetter getFrame,
     int frameCount, {
     Duration frameDuration = const Duration(milliseconds: 16, microseconds: 667),

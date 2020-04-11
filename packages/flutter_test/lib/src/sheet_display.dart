@@ -5,23 +5,26 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-
-/// Present frame-by-frame clones of the target widget in a grid.
-///
-/// This grid displays the frame-by-frame state of the `target` widget,
-/// and composes them into a grid.
-///
-/// To use this, pump this widget with an increased `currentFrame` and a duration
-/// of a frame.
-class AnimationSheetRecorder extends StatelessWidget {
-  /// Create an [AnimationSheetRecorder]. The `cellSize` and `frameIndex` are required.
-  const AnimationSheetRecorder(
-    this.target, {
+/// Place `cellNum` number of the target widget in a grid sheet.
+/// 
+/// Each target widget is placed in a cell of size `cellSize`. Cells are placed
+/// from top left to bottom right, horizontal first.
+/// 
+/// Cells are keyed from the tail to the front, meaning new clones are added to
+/// the front of the list.
+/// 
+/// This class is useful to display the frame-by-frame animation of a widget.
+class SheetDisplay extends StatelessWidget {
+  /// Create an [SheetDisplay] using a fixed `target` widget.
+  /// 
+  /// The `cellSize` and `frameIndex` are required.
+  const SheetDisplay({
     Key key,
+    this.target, 
     @required this.cellSize,
-    @required this.frameIndex,
+    @required this.cellNum,
   }) : assert(cellSize != null),
-       assert(frameIndex != null),
+       assert(cellNum != null),
        super(key: key);
 
   /// The widget to show animation of.
@@ -34,16 +37,16 @@ class AnimationSheetRecorder extends StatelessWidget {
 
   /// An increasing integer that starts from 0.
   /// 
-  /// At the [frameIndex]'th frame, [frameIndex] clones will be displayed.
-  final int frameIndex;
+  /// At the [cellNum]'th frame, [cellNum] clones will be displayed.
+  final int cellNum;
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: _CellGrid(
         cellSize: cellSize,
-        children: List<Widget>.generate(frameIndex + 1, (int index) {
-          final int i = frameIndex - index;
+        children: List<Widget>.generate(cellNum + 1, (int index) {
+          final int i = cellNum - index;
           return Container(
             key: ValueKey<int>(i),
             child: target,
@@ -55,7 +58,7 @@ class AnimationSheetRecorder extends StatelessWidget {
 }
 
 // A grid of fixed-sized cells that are positioned from top left, horizontal-first,
-// until the the entire grid is filled. 
+// until the the entire grid is filled, discarding the remaining children.
 class _CellGrid extends MultiChildRenderObjectWidget {
   _CellGrid({
     Key key,

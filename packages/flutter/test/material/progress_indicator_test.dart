@@ -304,21 +304,21 @@ void main() {
   testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
     const int width = 16;
     const int height = 12;
-    
-    await tester.pumpAnimation(
-      (int frameIndex) => AnimationSheetRecorder(
-        const Padding(
+
+    await tester.pumpFrames(
+      (int frameIndex) => SheetDisplay(
+        cellNum: frameIndex,
+        cellSize: const Size(48, 48),
+        target: const Padding(
           padding: EdgeInsets.all(4.0),
           child: CircularProgressIndicator(),
         ),
-        cellSize: const Size(48, 48),
-        frameIndex: frameIndex,
       ),
       width * height,
     );
 
     expect(
-      find.byType(AnimationSheetRecorder),
+      find.byType(SheetDisplay),
       matchesGoldenFile('circular_progress_indicator.grid.png'),
     );
   });
