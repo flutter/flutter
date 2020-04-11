@@ -402,6 +402,7 @@ class DartIsolate : public UIDartState {
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
   const bool is_root_isolate_;
+  const bool disable_http_;
 
   DartIsolate(const Settings& settings,
               TaskRunners task_runners,
