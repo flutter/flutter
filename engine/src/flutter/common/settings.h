@@ -99,6 +99,10 @@ struct Settings {
   bool endless_trace_buffer = false;
   bool enable_dart_profiling = false;
   bool disable_dart_asserts = false;
+
+  // Used to signal the embedder whether HTTP connections are disabled.
+  bool disable_http = false;
+
   // Used as the script URI in debug messages. Does not affect how the Dart code
   // is executed.
   std::string advisory_script_uri = "main.dart";

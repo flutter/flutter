@@ -13,7 +13,7 @@ namespace flutter {
 
 class DartIO {
  public:
-  static void InitForIsolate();
+  static void InitForIsolate(bool disable_http);
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);

@@ -174,6 +174,12 @@ DEF_SWITCH(DisableDartAsserts,
            "disabled. This flag may be specified if the user wishes to run "
            "with assertions disabled in the debug product mode (i.e. with JIT "
            "or DBC).")
+DEF_SWITCH(DisableHttp,
+           "disable-http",
+           "Dart VM has a master switch that can be set to disable insecure "
+           "HTTP and WebSocket protocols. Localhost or loopback addresses are "
+           "exempted. This flag can be specified if the embedder wants this "
+           "for a particular platform.")
 DEF_SWITCH(
     ForceMultithreading,
     "force-multithreading",
