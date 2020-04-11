@@ -271,6 +271,53 @@ flutter:
     ]));
   });
 
+  testWithoutContext('FlutterManifest.fontsDescriptor combines descriptors from '
+    'individual fonts', () {
+    const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: foo
+      fonts:
+        - asset: a/bar
+        - asset: a/bar
+          weight: 400
+          style: italic
+    - family: bar
+      fonts:
+        - asset: a/baz
+        - weight: 400
+          asset: a/baz
+          style: italic
+''';
+    final BufferLogger logger = BufferLogger.test();
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest.fontsDescriptor, <Object>[
+      <String, Object>{
+        'family': 'foo',
+        'fonts': <Object>[
+          <String, Object>{'asset': 'a/bar'},
+          <String, Object>{'weight': 400, 'style': 'italic', 'asset': 'a/bar'},
+        ],
+      },
+      <String, Object>{
+        'family': 'bar',
+        'fonts': <Object>[
+          <String, Object>{'asset': 'a/baz'},
+          <String, Object>{'weight': 400, 'style': 'italic', 'asset': 'a/baz'},
+        ],
+      },
+    ]);
+  });
+
   testWithoutContext('FlutterManifest has only one of two font families when '
     'one declaration is missing the "family" option', () async {
     const String manifest = '''
