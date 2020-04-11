@@ -23,6 +23,8 @@ class BuildMacosCommand extends BuildSubCommand {
     addBuildModeFlags();
     addDartObfuscationOption();
     usesExtraFrontendOptions();
+    usesBuildNumberOption();
+    usesBuildNameOption();
   }
 
   @override
