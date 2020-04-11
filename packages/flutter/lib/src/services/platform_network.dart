@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 
 /// Allows an operation executed via [action] to access insecure HTTP URLs.
 ///
@@ -24,7 +25,7 @@ import 'dart:io';
 /// - Do not wrap your entire app with [allowHttp]. Wrap *exactly* what you need and nothing more.
 /// - Avoid libraries that require accessing HTTP URLs.
 T allowHttp<T>(T action()) {
-  if (Platform.kIsWeb) {
+  if (kIsWeb) {
     // [allowHttp] is noop on Web platform.
     return action();
   }
