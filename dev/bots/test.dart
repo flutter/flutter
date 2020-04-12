@@ -917,6 +917,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_deprecated_settings_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
