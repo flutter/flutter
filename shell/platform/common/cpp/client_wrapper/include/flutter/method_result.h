@@ -9,8 +9,8 @@
 
 namespace flutter {
 
-// Encapsulates a result sent back to the Flutter engine in response to a
-// MethodCall. Only one method should be called on any given instance.
+// Encapsulates a result returned from a MethodCall. Only one method should be
+// called on any given instance.
 template <typename T>
 class MethodResult {
  public:

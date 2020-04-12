@@ -116,6 +116,7 @@ executable("common_cpp_unittests") {
   deps = [
     ":common_cpp",
     ":common_cpp_fixtures",
+    "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper",
     "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
     "//flutter/testing",
   ]

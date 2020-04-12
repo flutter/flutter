@@ -9,9 +9,27 @@
 namespace flutter {
 
 namespace {
+
 // Keys used in MethodCall encoding.
 constexpr char kMessageMethodKey[] = "method";
 constexpr char kMessageArgumentsKey[] = "args";
+
+// Returns a new document containing only |element|, which must be an element
+// in |document|. This is a move rather than a copy, so it is efficient but
+// destructive to the data in |document|.
+std::unique_ptr<rapidjson::Document> ExtractElement(
+    rapidjson::Document* document,
+    rapidjson::Value* subtree) {
+  auto extracted = std::make_unique<rapidjson::Document>();
+  // Pull the subtree up to the root of the document.
+  document->Swap(*subtree);
+  // Swap the entire document into |extracted|. Unlike the swap above this moves
+  // the allocator ownership, so the data won't be deleted when |document| is
+  // destroyed.
+  extracted->Swap(*document);
+  return extracted;
+}
+
 }  // namespace
 
 // static
@@ -22,7 +40,7 @@ const JsonMethodCodec& JsonMethodCodec::GetInstance() {
 
 std::unique_ptr<MethodCall<rapidjson::Document>>
 JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
-                                          const size_t message_size) const {
+                                          size_t message_size) const {
   std::unique_ptr<rapidjson::Document> json_message =
       JsonMessageCodec::GetInstance().DecodeMessage(message, message_size);
   if (!json_message) {
@@ -40,19 +58,7 @@ JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
   auto arguments_iter = json_message->FindMember(kMessageArgumentsKey);
   std::unique_ptr<rapidjson::Document> arguments;
   if (arguments_iter != json_message->MemberEnd()) {
-    // Pull the arguments subtree up to the root of json_message. This is
-    // destructive to json_message, but the full value is no longer needed, and
-    // this avoids a subtree copy.
-    // Note: The static_cast is for compatibility with RapidJSON 1.1; master
-    // already allows swapping a Document with a Value directly. Once there is
-    // a new RapidJSON release (at which point clients can be expected to have
-    // that change in the version they depend on) remove the cast.
-    static_cast<rapidjson::Value*>(json_message.get())
-        ->Swap(arguments_iter->value);
-    // Swap it into |arguments|. This moves the allocator ownership, so that
-    // the data won't be deleted when json_message goes out of scope.
-    arguments = std::make_unique<rapidjson::Document>();
-    arguments->Swap(*json_message);
+    arguments = ExtractElement(json_message.get(), &(arguments_iter->value));
   }
   return std::make_unique<MethodCall<rapidjson::Document>>(
       method_name, std::move(arguments));
@@ -106,6 +112,38 @@ JsonMethodCodec::EncodeErrorEnvelopeInternal(
   envelope.PushBack(details_value, allocator);
 
   return JsonMessageCodec::GetInstance().EncodeMessage(envelope);
+}
+
+bool JsonMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
+    const uint8_t* response,
+    size_t response_size,
+    MethodResult<rapidjson::Document>* result) const {
+  std::unique_ptr<rapidjson::Document> json_response =
+      JsonMessageCodec::GetInstance().DecodeMessage(response, response_size);
+  if (!json_response) {
+    return false;
+  }
+  if (!json_response->IsArray()) {
+    return false;
+  }
+  switch (json_response->Size()) {
+    case 1: {
+      std::unique_ptr<rapidjson::Document> value =
+          ExtractElement(json_response.get(), &((*json_response)[0]));
+      result->Success(value->IsNull() ? nullptr : value.get());
+      return true;
+    }
+    case 3: {
+      std::string code = (*json_response)[0].GetString();
+      std::string message = (*json_response)[1].GetString();
+      std::unique_ptr<rapidjson::Document> details =
+          ExtractElement(json_response.get(), &((*json_response)[2]));
+      result->Error(code, message, details->IsNull() ? nullptr : details.get());
+      return true;
+    }
+    default:
+      return false;
+  }
 }
 
 }  // namespace flutter
