@@ -287,6 +287,7 @@ class InputConnectionAdaptor extends BaseInputConnection {
   public boolean setSelection(int start, int end) {
     boolean result = super.setSelection(start, end);
     markDirty();
+    updateEditingState();
     return result;
   }
 
