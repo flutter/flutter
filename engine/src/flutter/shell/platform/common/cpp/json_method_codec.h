@@ -46,6 +46,12 @@ class JsonMethodCodec : public MethodCodec<rapidjson::Document> {
       const std::string& error_code,
       const std::string& error_message,
       const rapidjson::Document* error_details) const override;
+
+  // |flutter::MethodCodec|
+  bool DecodeAndProcessResponseEnvelopeInternal(
+      const uint8_t* response,
+      const size_t response_size,
+      MethodResult<rapidjson::Document>* result) const override;
 };
 
 }  // namespace flutter

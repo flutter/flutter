@@ -285,7 +285,7 @@ StandardMessageCodec::~StandardMessageCodec() = default;
 
 std::unique_ptr<EncodableValue> StandardMessageCodec::DecodeMessageInternal(
     const uint8_t* binary_message,
-    const size_t message_size) const {
+    size_t message_size) const {
   StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(binary_message, message_size);
   return std::make_unique<EncodableValue>(serializer.ReadValue(&stream));
@@ -311,7 +311,7 @@ const StandardMethodCodec& StandardMethodCodec::GetInstance() {
 
 std::unique_ptr<MethodCall<EncodableValue>>
 StandardMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
-                                              const size_t message_size) const {
+                                              size_t message_size) const {
   StandardCodecSerializer serializer;
   ByteBufferStreamReader stream(message, message_size);
   EncodableValue method_name = serializer.ReadValue(&stream);
@@ -377,6 +377,33 @@ StandardMethodCodec::EncodeErrorEnvelopeInternal(
     serializer.WriteValue(EncodableValue(), &stream);
   }
   return encoded;
+}
+
+bool StandardMethodCodec::DecodeAndProcessResponseEnvelopeInternal(
+    const uint8_t* response,
+    size_t response_size,
+    MethodResult<EncodableValue>* result) const {
+  StandardCodecSerializer serializer;
+  ByteBufferStreamReader stream(response, response_size);
+  uint8_t flag = stream.ReadByte();
+  switch (flag) {
+    case 0: {
+      EncodableValue value = serializer.ReadValue(&stream);
+      result->Success(value.IsNull() ? nullptr : &value);
+      return true;
+    }
+    case 1: {
+      EncodableValue code = serializer.ReadValue(&stream);
+      EncodableValue message = serializer.ReadValue(&stream);
+      EncodableValue details = serializer.ReadValue(&stream);
+      result->Error(code.StringValue(),
+                    message.IsNull() ? "" : message.StringValue(),
+                    details.IsNull() ? nullptr : &details);
+      return true;
+    }
+    default:
+      return false;
+  }
 }
 
 }  // namespace flutter
