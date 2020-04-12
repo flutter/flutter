@@ -57,7 +57,7 @@ void main() {
 
       expect(
         getApkDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'host', 'outputs', 'flutter-apk')),
+        equals(globals.fs.path.join('foo', 'host', 'outputs', 'apk')),
       );
     });
 
