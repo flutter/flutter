@@ -462,6 +462,17 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableExperimentation({ bool verbose }) {
+    argParser.addMultiOption(
+      FlutterOptions.kEnableExperiment,
+      help:
+        'The name of an experimental Dart feature to enable. For more info '
+        'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
+        'experimental-flags.md',
+      hide: !verbose,
+    );
+  }
+
   set defaultBuildMode(BuildMode value) {
     _defaultBuildMode = value;
   }
