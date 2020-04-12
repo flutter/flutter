@@ -10,8 +10,8 @@ Future<void> main() async {
   await task(() async {
     section('Copy test Flutter App with WatchOS Companion');
 
-    String watchDeviceID = '';
-    String phoneDeviceID = '';
+    String watchDeviceID;
+    String phoneDeviceID;
     final Directory tempDir = Directory.systemTemp
         .createTempSync('ios_app_with_watch_companion_test');
     final Directory projectDir =
@@ -182,7 +182,7 @@ Future<void> main() async {
     } finally {
       rmTree(tempDir);
       // Delete simulator devices
-      if (watchDeviceID != '') {
+      if (watchDeviceID != null && watchDeviceID != '') {
         await eval(
           'xcrun',
           <String>['simctl', 'shutdown', watchDeviceID],
@@ -196,19 +196,20 @@ Future<void> main() async {
           workingDirectory: flutterDirectory.path,
         );
       }
-      if (phoneDeviceID != '')
+      if (phoneDeviceID != null && phoneDeviceID != '') {
         await eval(
           'xcrun',
           <String>['simctl', 'shutdown', phoneDeviceID],
           canFail: true,
           workingDirectory: flutterDirectory.path,
         );
-      await eval(
-        'xcrun',
-        <String>['simctl', 'delete', phoneDeviceID],
-        canFail: true,
-        workingDirectory: flutterDirectory.path,
-      );
+        await eval(
+          'xcrun',
+          <String>['simctl', 'delete', phoneDeviceID],
+          canFail: true,
+          workingDirectory: flutterDirectory.path,
+        );
+      }
     }
   });
 }
