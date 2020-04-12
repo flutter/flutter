@@ -26,7 +26,7 @@ void ForwardToHandler(FlutterDesktopMessengerRef messenger,
   auto* response_handle = message->response_handle;
   BinaryReply reply_handler = [messenger, response_handle](
                                   const uint8_t* reply,
-                                  const size_t reply_size) mutable {
+                                  size_t reply_size) mutable {
     if (!response_handle) {
       std::cerr << "Error: Response can be set only once. Ignoring "
                    "duplicate response."
@@ -65,12 +65,7 @@ class BinaryMessengerImpl : public BinaryMessenger {
   // |flutter::BinaryMessenger|
   void Send(const std::string& channel,
             const uint8_t* message,
-            const size_t message_size) const override;
-
-  // |flutter::BinaryMessenger|
-  void Send(const std::string& channel,
-            const uint8_t* message,
-            const size_t message_size,
+            size_t message_size,
             BinaryReply reply) const override;
 
   // |flutter::BinaryMessenger|
@@ -88,14 +83,7 @@ class BinaryMessengerImpl : public BinaryMessenger {
 
 void BinaryMessengerImpl::Send(const std::string& channel,
                                const uint8_t* message,
-                               const size_t message_size) const {
-  FlutterDesktopMessengerSend(messenger_, channel.c_str(), message,
-                              message_size);
-}
-
-void BinaryMessengerImpl::Send(const std::string& channel,
-                               const uint8_t* message,
-                               const size_t message_size,
+                               size_t message_size,
                                BinaryReply reply) const {
   if (reply == nullptr) {
     FlutterDesktopMessengerSend(messenger_, channel.c_str(), message,

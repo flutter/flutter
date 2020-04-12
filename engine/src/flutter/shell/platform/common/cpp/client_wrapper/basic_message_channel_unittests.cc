@@ -19,10 +19,6 @@ class TestBinaryMessenger : public BinaryMessenger {
  public:
   void Send(const std::string& channel,
             const uint8_t* message,
-            const size_t message_size) const override {}
-
-  void Send(const std::string& channel,
-            const uint8_t* message,
             const size_t message_size,
             BinaryReply reply) const override {}
 

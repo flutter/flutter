@@ -8,21 +8,19 @@
 #include <functional>
 #include <string>
 
-// TODO: Consider adding absl as a dependency and using absl::Span for all of
-// the message/message_size pairs.
 namespace flutter {
 
 // A binary message reply callback.
 //
 // Used for submitting a binary reply back to a Flutter message sender.
-typedef std::function<void(const uint8_t* reply, const size_t reply_size)>
+typedef std::function<void(const uint8_t* reply, size_t reply_size)>
     BinaryReply;
 
 // A message handler callback.
 //
 // Used for receiving messages from Flutter and providing an asynchronous reply.
 typedef std::function<
-    void(const uint8_t* message, const size_t message_size, BinaryReply reply)>
+    void(const uint8_t* message, size_t message_size, BinaryReply reply)>
     BinaryMessageHandler;
 
 // A protocol for a class that handles communication of binary data on named
@@ -31,18 +29,14 @@ class BinaryMessenger {
  public:
   virtual ~BinaryMessenger() = default;
 
-  // Sends a binary message to the Flutter side on the specified channel,
-  // expecting no reply.
+  // Sends a binary message to the Flutter engine on the specified channel.
+  //
+  // If |reply| is provided, it will be called back with the response from the
+  // engine.
   virtual void Send(const std::string& channel,
                     const uint8_t* message,
-                    const size_t message_size) const = 0;
-
-  // Sends a binary message to the Flutter side on the specified channel,
-  // expecting a reply.
-  virtual void Send(const std::string& channel,
-                    const uint8_t* message,
-                    const size_t message_size,
-                    BinaryReply reply) const = 0;
+                    size_t message_size,
+                    BinaryReply reply = nullptr) const = 0;
 
   // Registers a message handler for incoming binary messages from the Flutter
   // side on the specified channel.

@@ -41,12 +41,12 @@ test_fixtures("client_wrapper_fixtures") {
 executable("client_wrapper_unittests") {
   testonly = true
 
-  # TODO: Add more unit tests.
   sources = [
     "basic_message_channel_unittests.cc",
     "encodable_value_unittests.cc",
     "method_call_unittests.cc",
     "method_channel_unittests.cc",
+    "method_result_functions_unittests.cc",
     "plugin_registrar_unittests.cc",
     "standard_message_codec_unittests.cc",
     "standard_method_codec_unittests.cc",

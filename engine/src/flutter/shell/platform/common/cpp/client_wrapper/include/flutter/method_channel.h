@@ -44,21 +44,46 @@ class MethodChannel {
   MethodChannel& operator=(MethodChannel const&) = delete;
 
   // Sends a message to the Flutter engine on this channel.
-  void InvokeMethod(const std::string& method, std::unique_ptr<T> arguments) {
-    MethodCall<T> method_call(method, std::move(arguments));
-    std::unique_ptr<std::vector<uint8_t>> message =
-        codec_->EncodeMethodCall(method_call);
-    messenger_->Send(name_, message->data(), message->size(), nullptr);
-  }
-
-  // Sends a message to the Flutter engine on this channel expecting a reply.
+  //
+  // If |result| is provided, one of its methods will be invoked with the
+  // response from the engine.
   void InvokeMethod(const std::string& method,
                     std::unique_ptr<T> arguments,
-                    flutter::BinaryReply reply) {
+                    std::unique_ptr<MethodResult<T>> result = nullptr) {
     MethodCall<T> method_call(method, std::move(arguments));
     std::unique_ptr<std::vector<uint8_t>> message =
         codec_->EncodeMethodCall(method_call);
-    messenger_->Send(name_, message->data(), message->size(), reply);
+    if (!result) {
+      messenger_->Send(name_, message->data(), message->size(), nullptr);
+      return;
+    }
+
+    // std::function requires a copyable lambda, so convert to a shared pointer.
+    // This is safe since only one copy of the shared_pointer will ever be
+    // accessed.
+    std::shared_ptr<MethodResult<T>> shared_result(result.release());
+    const auto* codec = codec_;
+    std::string channel_name = name_;
+    BinaryReply reply_handler = [shared_result, codec, channel_name](
+                                    const uint8_t* reply, size_t reply_size) {
+      if (reply_size == 0) {
+        shared_result->NotImplemented();
+        return;
+      }
+      // Use this channel's codec to decode and handle the
+      // reply.
+      bool decoded = codec->DecodeAndProcessResponseEnvelope(
+          reply, reply_size, shared_result.get());
+      if (!decoded) {
+        std::cerr << "Unable to decode reply to method "
+                     "invocation on channel "
+                  << channel_name << std::endl;
+        shared_result->NotImplemented();
+      }
+    };
+
+    messenger_->Send(name_, message->data(), message->size(),
+                     std::move(reply_handler));
   }
 
   // Registers a handler that should be called any time a method call is
@@ -76,7 +101,7 @@ class MethodChannel {
     std::string channel_name = name_;
     BinaryMessageHandler binary_handler = [handler, codec, channel_name](
                                               const uint8_t* message,
-                                              const size_t message_size,
+                                              size_t message_size,
                                               BinaryReply reply) {
       // Use this channel's codec to decode the call and build a result handler.
       auto result =

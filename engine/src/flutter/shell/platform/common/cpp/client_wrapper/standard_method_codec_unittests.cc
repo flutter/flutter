@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/standard_method_codec.h"
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/method_result_functions.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/testing/encodable_value_utils.h"
 #include "gtest/gtest.h"
 
@@ -60,7 +61,17 @@ TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithNullResult) {
   ASSERT_NE(encoded.get(), nullptr);
   std::vector<uint8_t> bytes = {0x00, 0x00};
   EXPECT_EQ(*encoded, bytes);
-  // TODO: Add round-trip check once decoding replies is implemented.
+
+  bool decoded_successfully = false;
+  MethodResultFunctions<EncodableValue> result_handler(
+      [&decoded_successfully](const EncodableValue* result) {
+        decoded_successfully = true;
+        EXPECT_EQ(result, nullptr);
+      },
+      nullptr, nullptr);
+  codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),
+                                         &result_handler);
+  EXPECT_TRUE(decoded_successfully);
 }
 
 TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithResult) {
@@ -70,7 +81,17 @@ TEST(StandardMethodCodec, HandlesSuccessEnvelopesWithResult) {
   ASSERT_NE(encoded.get(), nullptr);
   std::vector<uint8_t> bytes = {0x00, 0x03, 0x2a, 0x00, 0x00, 0x00};
   EXPECT_EQ(*encoded, bytes);
-  // TODO: Add round-trip check once decoding replies is implemented.
+
+  bool decoded_successfully = false;
+  MethodResultFunctions<EncodableValue> result_handler(
+      [&decoded_successfully](const EncodableValue* result) {
+        decoded_successfully = true;
+        EXPECT_EQ(result->IntValue(), 42);
+      },
+      nullptr, nullptr);
+  codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),
+                                         &result_handler);
+  EXPECT_TRUE(decoded_successfully);
 }
 
 TEST(StandardMethodCodec, HandlesErrorEnvelopesWithNulls) {
@@ -80,7 +101,22 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithNulls) {
   std::vector<uint8_t> bytes = {0x01, 0x07, 0x09, 0x65, 0x72, 0x72, 0x6f,
                                 0x72, 0x43, 0x6f, 0x64, 0x65, 0x00, 0x00};
   EXPECT_EQ(*encoded, bytes);
-  // TODO: Add round-trip check once decoding replies is implemented.
+
+  bool decoded_successfully = false;
+  MethodResultFunctions<EncodableValue> result_handler(
+      nullptr,
+      [&decoded_successfully](const std::string& code,
+                              const std::string& message,
+                              const EncodableValue* details) {
+        decoded_successfully = true;
+        EXPECT_EQ(code, "errorCode");
+        EXPECT_EQ(message, "");
+        EXPECT_EQ(details, nullptr);
+      },
+      nullptr);
+  codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),
+                                         &result_handler);
+  EXPECT_TRUE(decoded_successfully);
 }
 
 TEST(StandardMethodCodec, HandlesErrorEnvelopesWithDetails) {
@@ -99,7 +135,24 @@ TEST(StandardMethodCodec, HandlesErrorEnvelopesWithDetails) {
       0x0c, 0x02, 0x07, 0x01, 0x61, 0x03, 0x2a, 0x00, 0x00, 0x00,
   };
   EXPECT_EQ(*encoded, bytes);
-  // TODO: Add round-trip check once decoding replies is implemented.
+
+  bool decoded_successfully = false;
+  MethodResultFunctions<EncodableValue> result_handler(
+      nullptr,
+      [&decoded_successfully](const std::string& code,
+                              const std::string& message,
+                              const EncodableValue* details) {
+        decoded_successfully = true;
+        EXPECT_EQ(code, "errorCode");
+        EXPECT_EQ(message, "something failed");
+        EXPECT_TRUE(details->IsList());
+        EXPECT_EQ(details->ListValue()[0].StringValue(), "a");
+        EXPECT_EQ(details->ListValue()[1].IntValue(), 42);
+      },
+      nullptr);
+  codec.DecodeAndProcessResponseEnvelope(encoded->data(), encoded->size(),
+                                         &result_handler);
+  EXPECT_TRUE(decoded_successfully);
 }
 
 }  // namespace flutter
