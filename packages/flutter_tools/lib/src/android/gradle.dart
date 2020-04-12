@@ -35,7 +35,7 @@ Directory getApkDirectory(FlutterProject project) {
     ? project.android.buildDirectory
         .childDirectory('host')
         .childDirectory('outputs')
-        .childDirectory('flutter-apk')
+        .childDirectory('apk')
     : project.android.buildDirectory
         .childDirectory('app')
         .childDirectory('outputs')
@@ -87,6 +87,22 @@ String getBundleTaskFor(BuildInfo buildInfo) {
 @visibleForTesting
 String getAarTaskFor(BuildInfo buildInfo) {
   return _taskFor('assembleAar', buildInfo);
+}
+
+/// Returns the output APK file names for a given [AndroidBuildInfo].
+///
+/// For example, when [splitPerAbi] is true, multiple APKs are created.
+Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
+  final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
+  final String productFlavor = androidBuildInfo.buildInfo.flavor ?? '';
+  final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
+  if (androidBuildInfo.splitPerAbi) {
+    return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
+      final String abi = getNameForAndroidArch(arch);
+      return 'app$flavorString-$abi-$buildType.apk';
+    });
+  }
+  return <String>['app$flavorString-$buildType.apk'];
 }
 
 /// Returns true if the current version of the Gradle plugin is supported.
@@ -453,7 +469,9 @@ Future<void> buildGradleApp({
     return;
   }
   // Gradle produced an APK.
-  final Iterable<String> apkFilesPaths = listApkPaths(androidBuildInfo);
+  final Iterable<String> apkFilesPaths = project.isModule
+    ? findApkFilesModule(project, androidBuildInfo)
+    : listApkPaths(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
   final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
   if (!apkFile.existsSync()) {
@@ -766,6 +784,47 @@ Future<void> buildPluginsAsAar(
   }
 }
 
+/// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
+@visibleForTesting
+Iterable<String> findApkFilesModule(
+  FlutterProject project,
+  AndroidBuildInfo androidBuildInfo,
+) {
+  final Iterable<String> apkFileNames = _apkFilesFor(androidBuildInfo);
+  final Directory apkDirectory = getApkDirectory(project);
+  final Iterable<File> apks = apkFileNames.expand<File>((String apkFileName) {
+    File apkFile = apkDirectory.childFile(apkFileName);
+    if (apkFile.existsSync()) {
+      return <File>[apkFile];
+    }
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+    final String modeName = camelCase(buildInfo.modeName);
+    apkFile = apkDirectory
+      .childDirectory(modeName)
+      .childFile(apkFileName);
+    if (apkFile.existsSync()) {
+      return <File>[apkFile];
+    }
+    if (buildInfo.flavor != null) {
+      // Android Studio Gradle plugin v3 adds flavor to path.
+      apkFile = apkDirectory
+        .childDirectory(buildInfo.flavor)
+        .childDirectory(modeName)
+        .childFile(apkFileName);
+      if (apkFile.existsSync()) {
+        return <File>[apkFile];
+      }
+    }
+    return const <File>[];
+  });
+  if (apks.isEmpty) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.apk',
+    );
+  }
+  return apks.map((File file) => file.path);
+}
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 ///
