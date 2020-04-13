@@ -119,6 +119,7 @@ abstract class SearchDelegate<T> {
   /// {@end-tool}
   SearchDelegate({
     this.searchFieldLabel,
+    this.cursorColor,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
   });
@@ -263,6 +264,9 @@ abstract class SearchDelegate<T> {
   ///
   /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
   final String searchFieldLabel;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
 
   /// The type of action button to use for the keyboard.
   ///
@@ -513,6 +517,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
             style: theme.textTheme.headline6,
+            cursorColor: widget.delegate.cursorColor,
             textInputAction: widget.delegate.textInputAction,
             keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
