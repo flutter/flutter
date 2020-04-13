@@ -162,7 +162,13 @@ Future<void> _runABTest() async {
     }
 
     abTest.addBResult(localEngineResult);
+
+    if (!silent && i < runsPerTest) {
+      section('A/B results so far');
+      print(abTest.printSummary());
+    }
   }
+  section('Final A/B results');
   print(abTest.printSummary());
 }
 
