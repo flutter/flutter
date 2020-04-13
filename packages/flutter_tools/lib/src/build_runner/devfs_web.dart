@@ -726,7 +726,10 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // specicial hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
-     Uri.parse('org-dartlang-app:///' + globals.fs.path.basename(mainUri.toFilePath())),
+      Uri(
+        scheme: 'org-dartlang-app',
+        path: '/' + mainUri.pathSegments.last,
+      ),
       invalidatedFiles,
       outputPath: dillOutputPath ??
         getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
