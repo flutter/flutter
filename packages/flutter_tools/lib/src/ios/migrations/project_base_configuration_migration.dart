@@ -36,7 +36,7 @@ class ProjectBaseConfigurationMigration extends IOSMigrator {
     //			);
     final RegExp projectBuildConfigurationList = RegExp(
       r'\/\* Build configuration list for PBXProject "Runner" \*\/ = {\s*isa = XCConfigurationList;\s*buildConfigurations = \(\s*(.*) \/\* Debug \*\/,\s*(.*) \/\* Release \*\/,\s*(.*) \/\* Profile \*\/,',
-      multiLine: true
+      multiLine: true,
     );
 
     final RegExpMatch match = projectBuildConfigurationList.firstMatch(originalProjectContents);
