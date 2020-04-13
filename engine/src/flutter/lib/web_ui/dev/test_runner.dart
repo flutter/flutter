@@ -15,11 +15,11 @@ import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_im
 import 'package:test_core/src/executable.dart'
     as test; // ignore: implementation_imports
 
+import 'environment.dart';
 import 'exceptions.dart';
 import 'integration_tests_manager.dart';
 import 'supported_browsers.dart';
 import 'test_platform.dart';
-import 'environment.dart';
 import 'utils.dart';
 
 /// The type of tests requested by the tool user.
@@ -55,6 +55,18 @@ class TestCommand extends Command<bool> with ArgUtils {
         help: 'felt test command runs the unit tests and the integration tests '
             'at the same time. If this flag is set, only run the integration '
             'tests.',
+      )
+      ..addFlag('use-system-flutter',
+        defaultsTo: false,
+        help: 'integration tests are using flutter repository for various tasks'
+        ', such as flutter drive, flutter pub get. If this flag is set, felt '
+        'will use flutter command without cloning the repository. This flag '
+        'can save internet bandwidth. However use with caution. Note that '
+        'since flutter repo is always synced to youngest commit older than '
+        'the engine commit for the tests running in CI, the tests results '
+        'won\'t be consistent with CIs when this flag is set. flutter '
+        'command should be set in the PATH for this flag to be useful.'
+        'This flag can also be used to test local Flutter changes.'
       )
       ..addFlag(
         'update-screenshot-goldens',
@@ -117,7 +129,8 @@ class TestCommand extends Command<bool> with ArgUtils {
         return runIntegrationTests();
       case TestTypesRequested.all:
         // TODO(nurhan): https://github.com/flutter/flutter/issues/53322
-        if (runAllTests) {
+        // TODO(nurhan): Expand browser matrix for felt integration tests.
+        if (runAllTests && isChrome) {
           bool integrationTestResult = await runIntegrationTests();
           bool unitTestResult = await runUnitTests();
           if (integrationTestResult != unitTestResult) {
@@ -134,11 +147,11 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   Future<bool> runIntegrationTests() async {
     // TODO(nurhan): https://github.com/flutter/flutter/issues/52983
-    if (io.Platform.environment['LUCI_CONTEXT'] != null || isCirrus) {
+    if (io.Platform.environment['LUCI_CONTEXT'] != null) {
       return true;
     }
 
-    return IntegrationTestsManager(browser).runTests();
+    return IntegrationTestsManager(browser, useSystemFlutter).runTests();
   }
 
   Future<bool> runUnitTests() async {
@@ -204,6 +217,11 @@ class TestCommand extends Command<bool> with ArgUtils {
 
   /// Whether [browser] is set to "chrome".
   bool get isChrome => browser == 'chrome';
+
+  /// Use system flutter instead of cloning the repository.
+  ///
+  /// Read the flag help for more details. Uses PATH to locate flutter.
+  bool get useSystemFlutter => boolArg('use-system-flutter');
 
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
