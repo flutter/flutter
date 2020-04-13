@@ -123,6 +123,10 @@ class ImageCache {
   int get currentSize => _cache.length;
 
   /// Maximum size of entries to store in the cache in bytes.
+  /// This cache stores uncompressed images, so the size of each entry
+  /// in bytes is equal to the number of pixels in the image, which is often
+  /// much higher than its size before decoded by the codec. This value should
+  /// therefore be selected with this in mind.
   ///
   /// Once more than this amount of bytes have been cached, the
   /// least-recently-used entry is evicted until there are fewer than the
