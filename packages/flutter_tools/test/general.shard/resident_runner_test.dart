@@ -97,7 +97,11 @@ void main() {
     final MockVM mockVM = MockVM();
     when(mockVMService.vm).thenReturn(mockVM);
     when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
-    when(mockFlutterView.runFromSource(any, any)).thenAnswer((Invocation invocation) async {});
+    when(mockVMService.runInView(
+      viewId: anyNamed('viewId'),
+      main: anyNamed('main'),
+      assetsDirectory: anyNamed('assetsDirectory'),
+    )).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(

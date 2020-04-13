@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -280,6 +281,104 @@ void main() {
       ]))
     ]));
   });
+
+  testWithoutContext('runInView forwards arguments correctly', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <FakeRequest>[
+        const FakeRequest(method: 'streamListen', id: '1', params: <String, Object>{
+          'streamId': 'Isolate'
+        }),
+        const FakeRequest(method: kRunInViewMethod, id: '2', params: <String, Object>{
+          'viewId': '1234',
+          'mainScript': 'main.dart',
+          'assetDirectory': 'flutter_assets/',
+        }),
+      ]
+    );
+
+    final Future<void> didRunInView = fakeVmServiceHost.vmService.runInView(
+      viewId: '1234',
+      main: Uri.file('main.dart'),
+      assetsDirectory: Uri.file('flutter_assets/'),
+    );
+    await fakeVmServiceHost.expectedRequestsComplete;
+
+    // Send notification that isolate is runnable.
+    fakeVmServiceHost.streamNotify('Isolate', vm_service.Event(
+      kind: vm_service.EventKind.kIsolateRunnable,
+      timestamp: 1,
+    ));
+    await didRunInView;
+  });
+}
+
+class FakeVmServiceHost {
+  FakeVmServiceHost({
+    @required List<FakeRequest> requests,
+  }) : _requests = requests {
+    if (_requests.isEmpty) {
+      _expectedRequests.complete();
+    }
+    _vmService = vm_service.VmService(
+      _input.stream,
+      _output.add,
+    );
+    _output.stream.listen((String data) {
+      final Map<String, Object> request = json.decode(data) as Map<String, Object>;
+      if (_requests.isEmpty) {
+        throw Exception('Unexpected request: $request');
+      }
+      final FakeRequest fakeRequest = _requests.removeAt(0);
+      expect(fakeRequest, isA<FakeRequest>()
+        .having((FakeRequest request) => request.method, 'method', request['method'])
+        .having((FakeRequest request) => request.id, 'id', request['id'])
+        .having((FakeRequest request) => request.params, 'params', request['params'])
+      );
+      _input.add(json.encode(<String, Object>{
+        'jsonrpc': '2.0',
+        'id': fakeRequest.id,
+        'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
+      }));
+      if (_requests.isEmpty) {
+        _expectedRequests.complete();
+      }
+    });
+  }
+
+  final List<FakeRequest> _requests;
+  final StreamController<String> _input = StreamController<String>();
+  final StreamController<String> _output = StreamController<String>();
+
+  vm_service.VmService get vmService => _vmService;
+  vm_service.VmService _vmService;
+
+  final Completer<void> _expectedRequests = Completer<void>();
+  Future<void> get expectedRequestsComplete => _expectedRequests.future;
+
+  void streamNotify(String streamId, vm_service.Event event) {
+    _input.add(json.encode(<String, Object>{
+      'jsonrpc': '2.0',
+      'method': 'streamNotify',
+      'params': <String, Object>{
+        'streamId': streamId,
+        'event': event.toJson(),
+      },
+    }));
+  }
+}
+
+class FakeRequest {
+  const FakeRequest({
+    @required this.method,
+    @required this.id,
+    @required this.params,
+    this.jsonResponse,
+  });
+
+  final String method;
+  final String id;
+  final Map<String, Object> params;
+  final Map<String, Object> jsonResponse;
 }
 
 class MockDevice extends Mock implements Device {}
