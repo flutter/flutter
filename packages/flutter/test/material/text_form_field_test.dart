@@ -332,6 +332,7 @@ void main() {
     expect(tapCount, 3);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
@@ -354,6 +355,7 @@ void main() {
     expect(find.text('initialValue'), findsOneWidget);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/54472.
   testWidgets('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
