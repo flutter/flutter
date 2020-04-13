@@ -143,7 +143,7 @@ class AutofillGroup extends StatefulWidget {
 ///
 /// {@template flutter.widgets.autofill.AutofillGroupState}
 /// An [AutofillGroupState] can be used to register an [AutofillClient] when it
-/// enteres this [AutofillGroup] (for example, when an [EditableText] is mounted or
+/// enters this [AutofillGroup] (for example, when an [EditableText] is mounted or
 /// reparented onto the [AutofillGroup]'s subtree), and unregister an
 /// [AutofillClient] when it exits (for example, when an [EditableText] gets
 /// unmounted or reparented out of the [AutofillGroup]'s subtree).
@@ -169,7 +169,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
   ///
-  /// Typically, this is be called by [AutofillTrigger]s (for example,
+  /// Typically, this is called by [AutofillTrigger]s (for example,
   /// [EditableTextState]) in [State.didChangeDependencies], when the input
   /// field should be registered to a new [AutofillGroup].
   ///
