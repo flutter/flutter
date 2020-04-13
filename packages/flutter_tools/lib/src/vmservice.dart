@@ -492,6 +492,11 @@ class VMService implements vm_service.VmService {
     _getEventController(streamId).add(event);
   }
 
+  @override
+  Future<vm_service.ScriptList> getScripts(String isolateId) {
+    return _delegateService.getScripts(isolateId);
+  }
+
   /// Reloads the VM.
   Future<void> getVMOld() async => await vm.reload();
 
