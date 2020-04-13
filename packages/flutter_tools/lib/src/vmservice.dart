@@ -149,9 +149,6 @@ class VMService implements vm_service.VmService {
     // TODO(jonahwilliams): this is temporary to support the current vm_service
     // semantics of update-in-place.
     secondary.listen((dynamic rawData) {
-      print('!!!');
-      print(rawData);
-      print('!!!');
       final String message = rawData as String;
       final dynamic map = json.decode(message);
       if (map != null && map['method'] == 'streamNotify') {
