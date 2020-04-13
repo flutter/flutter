@@ -55,7 +55,7 @@ void RunDartCodeInIsolate(DartVMRef& vm_ref,
                           const std::vector<std::string>& args,
                           const std::string& fixtures_path,
                           fml::WeakPtr<IOManager> io_manager) {
-  FML_CHECK(task_runners.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+  FML_CHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (!vm_ref) {
     return;
@@ -163,7 +163,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
   std::unique_ptr<AutoIsolateShutdown> result;
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetPlatformTaskRunner(), fml::MakeCopyable([&]() mutable {
+      task_runners.GetUITaskRunner(), fml::MakeCopyable([&]() mutable {
         RunDartCodeInIsolate(vm_ref, result, settings, task_runners, entrypoint,
                              args, fixtures_path, io_manager);
         latch.Signal();
