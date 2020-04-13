@@ -7,7 +7,7 @@ import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:js_util' as js_util;
 
-import 'package:ui/ui.dart' hide TextStyle;
+import 'package:ui/ui.dart';
 import 'package:ui/src/engine.dart';
 import 'package:test/test.dart';
 
@@ -22,7 +22,8 @@ void main() async {
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
+      {Rect region = const Rect.fromLTWH(0, 0, 500, 500),
+        double maxDiffRatePercent = 0.0}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
     rc.apply(engineCanvas);
@@ -32,7 +33,8 @@ void main() async {
     try {
       sceneElement.append(engineCanvas.rootElement);
       html.document.body.append(sceneElement);
-      await matchGoldenFile('$fileName.png', region: region, maxDiffRatePercent: 0.0);
+      await matchGoldenFile('$fileName.png',
+          region: region, maxDiffRatePercent: maxDiffRatePercent);
     } finally {
       // The page is reused across tests, so remove the element after taking the
       // Scuba screenshot.
@@ -310,6 +312,39 @@ void main() async {
     rc.restore();
     await _checkScreenshot(rc, 'draw_circle_on_image_clip_path');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/53078
+  // Verified that Text+Image+Text+Rect+Text composites correctly.
+  // Yellow text should be behind image and rectangle.
+  // Cyan text should be above everything.
+  test('Paints text above and below image', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    final Paragraph paragraph1 = createTestParagraph(
+        'should be below...............',
+        color: Color(0xFFFFFF40));
+    paragraph1.layout(const ParagraphConstraints(width: 400.0));
+    rc.drawParagraph(paragraph1, const Offset(20, 100));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 100, 200, 200), Paint());
+    rc.drawRect(
+        Rect.fromLTWH(50, 50, 100, 200),
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color(0xA0000000));
+    final Paragraph paragraph2 = createTestParagraph(
+        'Should be above...............',
+        color: Color(0xFF00FFFF));
+    paragraph2.layout(const ParagraphConstraints(width: 400.0));
+    rc.drawParagraph(paragraph2, const Offset(20, 150));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_text_composite_order_below',
+        maxDiffRatePercent: 1.0);
+  });
 }
 
 HtmlImage createTestImage({int width = 100, int height = 50}) {
@@ -328,4 +363,17 @@ HtmlImage createTestImage({int width = 100, int height = 50}) {
   html.ImageElement imageElement = html.ImageElement();
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', <dynamic>[]);
   return HtmlImage(imageElement, width, height);
+}
+
+Paragraph createTestParagraph(String text,
+    {Color color = const Color(0xFF000000)}) {
+  final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+    fontFamily: 'Ahem',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.normal,
+    fontSize: 14.0,
+  ));
+  builder.pushStyle(TextStyle(color: color));
+  builder.addText(text);
+  return builder.build();
 }

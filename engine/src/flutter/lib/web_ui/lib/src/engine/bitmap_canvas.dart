@@ -355,19 +355,18 @@ class BitmapCanvas extends EngineCanvas {
   void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
     _drawImage(image, p, paint);
     _childOverdraw = true;
-    _canvasPool.allocateExtraCanvas();
+    _canvasPool.closeCurrentCanvas();
   }
 
-  html.ImageElement _drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
+  html.ImageElement _drawImage(
+      ui.Image image, ui.Offset p, SurfacePaintData paint) {
     final HtmlImage htmlImage = image;
     final html.Element imgElement = htmlImage.cloneImageElement();
     final ui.BlendMode blendMode = paint.blendMode;
     imgElement.style.mixBlendMode = _stringForBlendMode(blendMode);
     if (_canvasPool.isClipped) {
       // Reset width/height since they may have been previously set.
-      imgElement.style
-        ..removeProperty('width')
-        ..removeProperty('height');
+      imgElement.style..removeProperty('width')..removeProperty('height');
       final List<html.Element> clipElements = _clipContent(
           _canvasPool._clipStack, imgElement, p, _canvasPool.currentTransform);
       for (html.Element clipElement in clipElements) {
@@ -418,7 +417,8 @@ class BitmapCanvas extends EngineCanvas {
         }
       }
 
-      final html.ImageElement imgElement = _drawImage(image, ui.Offset(targetLeft, targetTop), paint);
+      final html.ImageElement imgElement =
+          _drawImage(image, ui.Offset(targetLeft, targetTop), paint);
       // To scale set width / height on destination image.
       // For clipping we need to scale according to
       // clipped-width/full image width and shift it according to left/top of
@@ -436,8 +436,22 @@ class BitmapCanvas extends EngineCanvas {
       if (requiresClipping) {
         restore();
       }
-      _canvasPool.allocateExtraCanvas();
     }
+    _closeCurrentCanvas();
+  }
+
+  // Should be called when we add new html elements into rootElement so that
+  // paint order is preserved.
+  //
+  // For example if we draw a path and then a paragraph and image:
+  //   - rootElement
+  //   |--- <canvas>
+  //   |--- <p>
+  //   |--- <img>
+  // Any drawing operations after these tags should allocate a new canvas,
+  // instead of drawing into earlier canvas.
+  void _closeCurrentCanvas() {
+    _canvasPool.closeCurrentCanvas();
     _childOverdraw = true;
   }
 
@@ -505,7 +519,6 @@ class BitmapCanvas extends EngineCanvas {
 
     final html.Element paragraphElement =
         _drawParagraphElement(paragraph, offset);
-
     if (_canvasPool.isClipped) {
       final List<html.Element> clipElements = _clipContent(
           _canvasPool._clipStack,
@@ -524,6 +537,7 @@ class BitmapCanvas extends EngineCanvas {
       rootElement.append(paragraphElement);
     }
     _children.add(paragraphElement);
+    _closeCurrentCanvas();
   }
 
   /// Paints the [picture] into this canvas.

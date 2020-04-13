@@ -9,7 +9,7 @@ part of engine;
 ///
 /// [BitmapCanvas] signals allocation of first canvas using allocateCanvas.
 /// When a painting command such as drawImage or drawParagraph requires
-/// multiple canvases for correct compositing, it calls [allocateExtraCanvas]
+/// multiple canvases for correct compositing, it calls [closeCurrentCanvas]
 /// and adds the canvas(s) to a [_pool] of active canvas(s).
 ///
 /// To make sure transformations and clips are preserved correctly when a new
@@ -54,9 +54,12 @@ class _CanvasPool extends _SaveStackTracking {
     return _contextHandle;
   }
 
-  // Allocating extra canvas items. Save current canvas so we can dispose
+  // Prevents active canvas to be used for rendering and prepares a new
+  // canvas allocation on next drawing request that will require one.
+  //
+  // Saves current canvas so we can dispose
   // and replay the clip/transform stack on top of new canvas.
-  void allocateExtraCanvas() {
+  void closeCurrentCanvas() {
     assert(_rootElement != null);
     // Place clean copy of current canvas with context stack restored and paint
     // reset into pool.
