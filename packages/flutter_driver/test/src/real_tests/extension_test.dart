@@ -769,7 +769,7 @@ void main() {
       Future<Offset> getAncestorTopLeft() async {
         final Map<String, String> arguments = GetOffset(Ancestor(
           of: ByValueKey('leaf'),
-          matching: const ByType('Container'),
+          matching: const ByType('SizedBox'),
           firstMatchOnly: true,
         ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await extension.call(arguments);
