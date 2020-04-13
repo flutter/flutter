@@ -28,6 +28,7 @@ class FakeCommand {
     this.stdout = '',
     this.stderr = '',
     this.completer,
+    this.stdin,
   }) : assert(command != null),
        assert(duration != null),
        assert(exitCode != null);
@@ -81,6 +82,10 @@ class FakeCommand {
   /// If provided, allows the command completion to be blocked until the future
   /// resolves.
   final Completer<void> completer;
+
+  /// An optional stdin sink that will be exposed through the resulting
+  /// [FakeProcess].
+  final IOSink stdin;
 
   void _matches(List<String> command, String workingDirectory, Map<String, String> environment) {
     expect(command, equals(this.command));
@@ -198,7 +203,7 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.onRun,
       _pid,
       fakeCommand.stderr,
-      null, // stdin
+      fakeCommand.stdin,
       fakeCommand.stdout,
       fakeCommand.completer,
     );

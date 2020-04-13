@@ -304,6 +304,32 @@ StringBuffer bar = StringBuffer('baz');
     }
   });
 
+  testUsingContext('analyze once supports analyzing null-safe code', () async {
+    const String contents = '''
+int? bar;
+''';
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_null_safety.');
+    _createDotPackages(tempDir.path);
+
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          terminal: terminal,
+        ),
+        arguments: <String>['analyze', '--no-pub', '--enable-experiment=non-nullable'],
+        statusTextContains: <String>['No issues found!'],
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
+
   testUsingContext('analyze once returns no issues for todo comments', () async {
     const String contents = '''
 // TODO(foobar):
