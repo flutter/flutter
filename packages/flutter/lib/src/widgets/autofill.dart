@@ -124,7 +124,7 @@ class AutofillGroup extends StatefulWidget {
   /// In order to interact with the platform's autofill mechanism,
   /// [AutofillTrigger]s need to call [AutofillScope.attach] on their closest
   /// [AutofillScope], instead of calling [TextInputClient.attach].
-  static AutofillScope of(BuildContext context) {
+  static AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
@@ -133,35 +133,41 @@ class AutofillGroup extends StatefulWidget {
   final Widget child;
 
   @override
-  _AutofillGroupState createState() => _AutofillGroupState();
+  AutofillGroupState createState() => AutofillGroupState();
 }
 
-class _AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
+/// State associated with an [AutofillGroup] widget.
+///
+/// An [AutofillGroupState] object can be used to register an [AutofillClient]
+/// when it enteres this [AutofillGroup] (for example, when a [TextField] is
+/// mounted or reparented onto the [AutofillGroup]'s subtree), and unregister
+/// an [AutofillClient] when it exits (for example, when a [TextField] gets
+/// unmounted or reparented out of the [AutofillGroup]'s subtree).
+///
+/// Typically obtained using [AutofillGroup.of].
+class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
+  final Map<String, AutofillClient> _clients = <String, AutofillClient>{};
+
+  @override
+  AutofillClient getAutofillClient(String tag) => _clients[tag];
+
   @override
   Iterable<AutofillClient> get autofillClients {
-    final List<AutofillClient> clients = <AutofillClient>[];
-    void visit(Element element) {
-      if (element is AutofillScope)
-        return;
+    return _clients.values
+      .where((AutofillClient client) => client?.textInputConfiguration?.autofillConfiguration != null);
+  }
 
-      if (element is AutofillClient) {
-        clients.add(element as AutofillClient);
-        return;
-      }
+  /// Adds the [AutofillClient] to this [AutofillGroup].
+  void register(AutofillClient client) {
+    assert(client != null);
+    _clients.putIfAbsent(client.autofillId, () => client);
+  }
 
-      if (element is StatefulElement) {
-        if (element.state is AutofillScope)
-          return;
-        if (element.state is AutofillClient)
-          clients.add(element.state as AutofillClient);
-          return;
-      }
-
-      element.visitChildElements(visit);
-    }
-
-    context.visitChildElements(visit);
-    return clients;
+  /// Removes an [AutofillClient] with the given [autofillId] from this
+  /// [AutofillGroup].
+  void unregister(String autofillId) {
+    assert(autofillId != null && _clients.containsKey(autofillId));
+    _clients.remove(autofillId);
   }
 
   @override
@@ -177,11 +183,11 @@ class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
     Key key,
     Widget child,
-    _AutofillGroupState autofillScopeState,
+    AutofillGroupState autofillScopeState,
   }) : _scope = autofillScopeState,
        super(key: key, child: child);
 
-  final _AutofillGroupState _scope;
+  final AutofillGroupState _scope;
 
   AutofillGroup get client => _scope.widget;
 

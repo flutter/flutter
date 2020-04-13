@@ -469,7 +469,9 @@ class TextInputConfiguration {
   /// The configuration to use for autofill.
   ///
   /// Defaults to null, in which case no autofill information will be provided
-  /// to the platform.
+  /// to the platform. This will prevent the corresponding input field from
+  /// participating in autofills triggered by other fields. Additionally, on
+  /// Android and web, setting [autofillConfiguration] to null disables autofill.
   final AutofillConfiguration autofillConfiguration;
 
   /// {@template flutter.services.textInput.smartDashesType}
@@ -1096,7 +1098,7 @@ class TextInput {
           final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
             editingValue[tag] as Map<String, dynamic>,
           );
-          scope.getAutofillClient(tag).updateEditingValue(textEditingValue);
+          scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
         }
       }
 

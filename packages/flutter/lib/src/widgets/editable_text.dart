@@ -1085,8 +1085,14 @@ class EditableText extends StatefulWidget {
   /// A list of strings that helps the autofill service identify the type of this
   /// text input.
   ///
-  /// When set to null, the text input will not participate in autofill triggered
-  /// by a different [AutofillClient], even if they're in the same [AutofillScope].
+  /// When set to null or empty, the text input will not send any autofill related
+  /// information to the platform. As a result, it will not participate in
+  /// autofills triggered by a different [AutofillClient], even if they're in the
+  /// same [AutofillScope]. Additionally, on Android and web, setting this to null
+  /// or empty will disable autofill for this text field.
+  ///
+  /// The minimum platform SDK version that supports Autofill is API level 26
+  /// for Android, and iOS 10.0 for iOS.
   ///
   /// {@macro flutter.services.autofill.autofillHints}
   /// {@endtemplate}
@@ -1122,7 +1128,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText>, AutofillClientMixin implements TextSelectionDelegate, AutofillTrigger {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin<EditableText>, WidgetsBindingObserver, TickerProviderStateMixin<EditableText> implements TextSelectionDelegate, AutofillTrigger, AutofillClient {
   Timer _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
@@ -1141,6 +1147,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _didAutoFocus = false;
   FocusAttachment _focusAttachment;
+
+  AutofillGroupState _currentAutofillScope;
+  @override
+  AutofillScope get currentAutofillScope => _currentAutofillScope;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -1189,6 +1199,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final AutofillGroupState newAutofillGroup = AutofillGroup.of(context);
+    if (currentAutofillScope != newAutofillGroup) {
+      _currentAutofillScope?.unregister(autofillId);
+      _currentAutofillScope = newAutofillGroup;
+      newAutofillGroup?.register(this);
+    }
+
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -1243,6 +1261,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
+    _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
     _cursorBlinkOpacityController.removeListener(_onCursorColorTick);
     _floatingCursorResetController.removeListener(_onFloatingCursorResetTick);
@@ -1483,7 +1502,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastFormattedUnmodifiedTextEditingValue = localValue;
 
-      _textInputConnection = widget.autofillHints != null && currentAutofillScope != null
+      _textInputConnection = (widget.autofillHints?.isNotEmpty ?? false) && currentAutofillScope != null
         ? currentAutofillScope.attach(this, textInputConfiguration)
         : TextInput.attach(this, textInputConfiguration);
       _textInputConnection.show();
@@ -1910,7 +1929,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
+  String get autofillId => 'EditableText-$hashCode';
+
+  @override
   TextInputConfiguration get textInputConfiguration {
+    final bool isAutofillEnabled = widget.autofillHints?.isNotEmpty ?? false;
     return TextInputConfiguration(
       inputType: widget.keyboardType,
       obscureText: widget.obscureText,
@@ -1924,17 +1947,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ),
       textCapitalization: widget.textCapitalization,
       keyboardAppearance: widget.keyboardAppearance,
-      autofillConfiguration: (widget.autofillHints?.isEmpty ?? true) ? null : AutofillConfiguration(
-        uniqueIdentifier: 'EditableText-$hashCode',
+      autofillConfiguration: !isAutofillEnabled ? null : AutofillConfiguration(
+        uniqueIdentifier: autofillId,
         autofillHints: widget.autofillHints.toList(growable: false),
-        currentEditingValue: currentTextEditingValue
+        currentEditingValue: currentTextEditingValue,
       ),
     );
-  }
-
-  @override
-  AutofillScope get currentAutofillScope {
-    return widget.autofillHints == null ? null : AutofillGroup.of(context);
   }
 
   // null if no promptRect should be shown.
