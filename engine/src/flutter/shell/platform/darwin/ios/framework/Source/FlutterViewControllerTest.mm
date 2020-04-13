@@ -122,7 +122,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testItReportsDarkPlatformBrightnessWhenTraitCollectionRequestsIt {
-  if (!@available(iOS 13, *)) {
+  if (@available(iOS 13, *)) {
+    // noop
+  } else {
     return;
   }
 
@@ -171,7 +173,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 #pragma mark - Platform Contrast
 
 - (void)testItReportsNormalPlatformContrastByDefault {
-  if (!@available(iOS 13, *)) {
+  if (@available(iOS 13, *)) {
+    // noop
+  } else {
     return;
   }
 
@@ -199,7 +203,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testItReportsPlatformContrastWhenViewWillAppear {
-  if (!@available(iOS 13, *)) {
+  if (@available(iOS 13, *)) {
+    // noop
+  } else {
     return;
   }
 
@@ -227,7 +233,9 @@ typedef enum UIAccessibilityContrast : NSInteger {
 }
 
 - (void)testItReportsHighContrastWhenTraitCollectionRequestsIt {
-  if (!@available(iOS 13, *)) {
+  if (@available(iOS 13, *)) {
+    // noop
+  } else {
     return;
   }
 
@@ -453,13 +461,12 @@ typedef enum UIAccessibilityContrast : NSInteger {
     FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                           nibName:nil
                                                                            bundle:nil];
-    id observer =
-        [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
-                                                          object:nil
-                                                           queue:[NSOperationQueue mainQueue]
-                                                      usingBlock:^(NSNotification* _Nonnull note) {
-                                                        [expectation fulfill];
-                                                      }];
+    [[NSNotificationCenter defaultCenter] addObserverForName:FlutterViewControllerWillDealloc
+                                                      object:nil
+                                                       queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification* _Nonnull note) {
+                                                    [expectation fulfill];
+                                                  }];
     realVC = nil;
   }
   [self waitForExpectations:@[ expectation ] timeout:1.0];
