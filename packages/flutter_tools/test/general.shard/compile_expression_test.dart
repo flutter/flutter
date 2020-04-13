@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
@@ -75,7 +76,7 @@ void main() {
     )));
 
     await generator.recompile(
-      Uri.parse('/path/to/main.dart'),
+      globals.fs.file('/path/to/main.dart').uri,
       null, /* invalidatedFiles */
       outputPath: '/build/',
       packageConfig: PackageConfig.empty,

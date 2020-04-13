@@ -79,5 +79,47 @@ void main() {
         isEmpty,
       );
     });
+
+    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
+      ', asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final PackageConfig packageConfig = PackageConfig.empty;
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages')
+        .writeAsStringSync('\n');
+
+      final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '.packages',
+        asyncScanning: asyncScanning,
+        packageConfig: packageConfig,
+      );
+
+      expect(invalidationResult.packageConfig, isNot(packageConfig));
+
+      fileSystem.file('.packages')
+        .writeAsStringSync('foo:lib/\n');
+      final DateTime packagesUpdated = fileSystem.statSync('.packages')
+        .modified;
+
+      final InvalidationResult nextInvalidationResult = await projectFileInvalidator
+        .findInvalidated(
+          lastCompiled: packagesUpdated.subtract(const Duration(seconds: 1)),
+          urisToMonitor: <Uri>[],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        );
+
+      expect(nextInvalidationResult.uris, contains(Uri.parse('.packages')));
+      // The PackagConfig should have been recreated too
+      expect(nextInvalidationResult.packageConfig,
+        isNot(invalidationResult.packageConfig));
+    });
   }
 }

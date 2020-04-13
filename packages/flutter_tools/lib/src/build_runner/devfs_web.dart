@@ -366,7 +366,11 @@ class WebAssetServer implements AssetReader {
 
   /// Write a single file into the in-memory cache.
   void writeFile(String filePath, String contents) {
-    _files[filePath] = Uint8List.fromList(utf8.encode(contents));
+    writeBytes(filePath, utf8.encode(contents) as Uint8List);
+  }
+
+  void writeBytes(String filePath, Uint8List contents) {
+    _files[filePath] = contents;
   }
 
   /// Update the in-memory asset server with the provided source and manifest files.
@@ -678,17 +682,18 @@ class WebDevFS implements DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     lastPackageConfig = packageConfig;
-    final String outputDirectoryPath = globals.fs.file(mainUri).parent.path;
+    final File mainFile = globals.fs.file(mainUri);
+    final String outputDirectoryPath = mainFile.parent.path;
 
     if (bundleFirstUpload) {
       webAssetServer.entrypointCacheDirectory = globals.fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
-      final String entrypoint = globals.fs.path.basename(mainUri.toFilePath());
-      webAssetServer.writeFile(entrypoint, globals.fs.file(mainUri).readAsStringSync());
+      final String entrypoint = globals.fs.path.basename(mainFile.path);
+      webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
+      webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
-      webAssetServer.writeFile('require.js', requireJS.readAsStringSync());
-      webAssetServer.writeFile('stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile(
         'main.dart.js',
         generateBootstrapScript(
