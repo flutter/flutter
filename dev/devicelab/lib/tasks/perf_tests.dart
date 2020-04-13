@@ -416,13 +416,8 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
-        File apk = file(apkPath);
-        if (!apk.existsSync()) {
-          // Pre Android SDK 26 path
-          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
-          apk = file(apkPath);
-        }
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
