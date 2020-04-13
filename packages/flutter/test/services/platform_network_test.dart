@@ -13,22 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const Symbol _symbol = #dart.library.io.allow_http;
 
-  if (kIsWeb) {
-    // Web tests
-    test('AllowHTTP does not set zone variable', () async {
-      expect(Zone.current[_symbol], isNull);
-      allowHttp(() {
-        expect(Zone.current[_symbol], isNull);
-      });
+  test('AllowHTTP sets the correct zone variable', () async {
+    expect(Zone.current[_symbol], isNull);
+    allowHttp(() {
+      expect(Zone.current[_symbol], isTrue);
     });
-  } else {
-    test('AllowHTTP sets the correct zone variable', () async {
-      expect(Zone.current[_symbol], isNull);
-      allowHttp(() {
-        expect(Zone.current[_symbol], isTrue);
-      });
-    });
+  });
 
+  if (!kIsWeb) {
     // This test ensures the zone variable used in Dart SDK does not change.
     //
     // If this symbol changes, then update [allowHttp] function as well.
