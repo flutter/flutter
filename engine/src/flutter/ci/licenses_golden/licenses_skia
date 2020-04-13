@@ -1,4 +1,4 @@
-Signature: d5e054dd8461b290526b5ec7d32fe7e7
+Signature: c84bffa2069989f133dc96953d12ba27
 
 UNUSED LICENSES:
 
@@ -3902,6 +3902,8 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceState.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTextureRenderTarget.cpp
