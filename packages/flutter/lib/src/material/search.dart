@@ -266,7 +266,7 @@ abstract class SearchDelegate<T> {
   final String searchFieldLabel;
 
   /// The style of the [searchFieldLabel].
-  /// 
+  ///
   /// If this value is set to null, the value of theme.inputDecorationTheme.hintStyle will be used instead.
   final TextStyle searchFieldStyle;
 
