@@ -43,10 +43,16 @@ To run unit tests only:
 felt test --unit-tests-only
 ```
 
-To run integration tests only. For now these tests are only available on Chrome Desktop browsers.
+To run integration tests only. For now these tests are only available on Chrome Desktop browsers. These tests will fetch the flutter repository for using `flutter drive` and `flutter pub get` commands. The repository will be synced to the youngest commit older than the engine commit.
 
 ```
 felt test --integration-tests-only
+```
+
+To skip cloning the flutter repository use the following flag. This flag can save internet bandwidth. However use with caution. Note the tests results will not be consistent with CIs when this flag is set. flutter command should be set in the PATH for this flag to be useful. This flag can also be used to test local Flutter changes.
+
+```
+felt test --integration-tests-only --use-system-flutter
 ```
 
 To run tests on Firefox (this will work only on a Linux device):

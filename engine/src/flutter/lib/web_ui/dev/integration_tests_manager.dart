@@ -7,8 +7,8 @@ import 'package:path/path.dart' as pathlib;
 import 'package:web_driver_installer/chrome_driver_installer.dart';
 
 import 'chrome_installer.dart';
-import 'common.dart';
 import 'environment.dart';
+import 'exceptions.dart';
 import 'utils.dart';
 
 class IntegrationTestsManager {
@@ -29,7 +29,9 @@ class IntegrationTestsManager {
   /// tests shutdown.
   final io.Directory _drivers;
 
-  IntegrationTestsManager(this._browser)
+  final bool _useSystemFlutter;
+
+  IntegrationTestsManager(this._browser, this._useSystemFlutter)
       : this._browserDriverDir = io.Directory(pathlib.join(
             environment.webUiDartToolDir.path, 'drivers', _browser)),
         this._drivers = io.Directory(
@@ -46,37 +48,49 @@ class IntegrationTestsManager {
     }
   }
 
-  Future<bool> _runPubGet(String workingDirectory) async {
-    final String executable = isCirrus ? environment.pubExecutable : 'flutter';
-    final List<String> arguments = isCirrus
-        ? <String>[
-            'get',
-          ]
-        : <String>[
-            'pub',
-            'get',
-          ];
+  Future<void> _runPubGet(String workingDirectory) async {
+    if (!_useSystemFlutter) {
+      await _cloneFlutterRepo();
+      await _enableWeb(workingDirectory);
+    }
+    await runFlutter(workingDirectory, <String>['pub', 'get'],
+        useSystemFlutter: _useSystemFlutter);
+  }
+
+  /// Clone flutter repository, use the youngest commit older than the engine
+  /// commit.
+  ///
+  /// Use engine/src/flutter/.dart_tools to clone the Flutter repo.
+  /// TODO(nurhan): Use git pull instead if repo exists.
+  Future<void> _cloneFlutterRepo() async {
+    // Delete directory if exists.
+    if (environment.engineDartToolDir.existsSync()) {
+      environment.engineDartToolDir.deleteSync();
+    }
+    environment.engineDartToolDir.createSync();
+
     final int exitCode = await runProcess(
-      executable,
-      arguments,
-      workingDirectory: workingDirectory,
+      environment.cloneFlutterScript.path,
+      <String>[
+        environment.engineDartToolDir.path,
+      ],
+      workingDirectory: environment.webUiRootDir.path,
     );
 
     if (exitCode != 0) {
-      io.stderr.writeln(
-          'ERROR: Failed to run pub get. Exited with exit code $exitCode');
-      return false;
-    } else {
-      return true;
+      throw ToolException('ERROR: Failed to clone flutter repo. Exited with '
+          'exit code $exitCode');
     }
   }
 
+  Future<void> _enableWeb(String workingDirectory) async {
+    await runFlutter(workingDirectory, <String>['config', '--enable-web'],
+        useSystemFlutter: _useSystemFlutter);
+  }
+
   void _runDriver() async {
-    startProcess(
-      './chromedriver/chromedriver',
-      ['--port=4444'],
-      workingDirectory: io.Directory.current.path
-    );
+    startProcess('./chromedriver/chromedriver', ['--port=4444'],
+        workingDirectory: io.Directory.current.path);
     print('INFO: Driver started');
   }
 
@@ -175,8 +189,10 @@ class IntegrationTestsManager {
 
   Future<bool> _runTestsInProfileMode(
       io.Directory directory, String testName) async {
+    final String executable =
+        _useSystemFlutter ? 'flutter' : environment.flutterCommand.path;
     final int exitCode = await runProcess(
-      'flutter',
+      executable,
       <String>[
         'drive',
         '--target=test_driver/${testName}',

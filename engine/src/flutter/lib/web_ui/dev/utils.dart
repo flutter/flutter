@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'environment.dart';
+import 'exceptions.dart';
 
 class FilePath {
   FilePath.fromCwd(String relativePath)
@@ -105,6 +106,26 @@ Future<String> evalProcess(
     );
   }
   return result.stdout as String;
+}
+
+Future<void> runFlutter(
+  String workingDirectory,
+  List<String> arguments, {
+  bool useSystemFlutter = false,
+}) async {
+  final String executable =
+      useSystemFlutter ? 'flutter' : environment.flutterCommand.path;
+  arguments.add('--local-engine=host_debug_unopt');
+  final int exitCode = await runProcess(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory,
+  );
+
+  if (exitCode != 0) {
+    throw ToolException('ERROR: Failed to run $executable with '
+        'arguments ${arguments.toString()}. Exited with exit code $exitCode');
+  }
 }
 
 @immutable
