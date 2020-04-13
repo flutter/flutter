@@ -8,18 +8,18 @@ import 'framework.dart';
 export 'package:flutter/services.dart' show AutofillHints;
 
 /// An [AutofillScope] widget that groups [AutofillClient]s together.
-/// [AutofillClient]s within the same [AutofillScope] will be autofilled together.
+///
+/// [AutofillClient]s within the same [AutofillScope] must be built together, and
+/// they be will be autofilled together.
 ///
 /// {@macro flutter.services.autofill.AutofillScope}
 ///
-/// The [AutofillGroup] widget finds its [AutofillClient]s by traversing its
-/// subtree using [Element.visitChildElements], looking for [Element]s or [State]s
-/// that are [AutofillClient]s. Other [AutofillGroup] nodes and their subtrees
-/// will be ignored in this process. As a result, [AutofillGroup] will not pick
-/// up [AutofillClient]s that are not mounted, for example, an [AutofillClient]
-/// within a [Scrollable] that has never been scrolled into the viewport. To
-/// workaround this problem, ensure clients in the same [AutofillGroup] are built
-/// together:
+/// The [AutofillGroup] widget only knows about [AutofillClient]s registered to
+/// it using the [AutofillGroupState.register] API. Typically, [AutofillGroup]
+/// will not pick up [AutofillClient]s that are not mounted, for example, an
+/// [AutofillClient] within a [Scrollable] that has never been scrolled into the
+/// viewport. To workaround this problem, ensure clients in the same [AutofillGroup]
+/// are built together:
 ///
 /// {@tool dartpad --template=stateful_widget_material}
 ///
@@ -119,11 +119,14 @@ class AutofillGroup extends StatefulWidget {
   }) : assert(child != null),
        super(key: key);
 
-  /// Returns the closest [AutofillScope] which encloses the given context.
+  /// Returns the closest [AutofillGroupState] which encloses the given context.
   ///
-  /// In order to interact with the platform's autofill mechanism,
-  /// [AutofillTrigger]s need to call [AutofillScope.attach] on their closest
-  /// [AutofillScope], instead of calling [TextInputClient.attach].
+  /// {@macro flutter.widgets.autofill.AutofillGroupState}
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState], where this method is used to retrive the closest
+  ///   [AutofillGroupState].
   static AutofillGroupState of(BuildContext context) {
     final _AutofillScope scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
@@ -138,11 +141,18 @@ class AutofillGroup extends StatefulWidget {
 
 /// State associated with an [AutofillGroup] widget.
 ///
-/// An [AutofillGroupState] object can be used to register an [AutofillClient]
-/// when it enteres this [AutofillGroup] (for example, when a [TextField] is
-/// mounted or reparented onto the [AutofillGroup]'s subtree), and unregister
-/// an [AutofillClient] when it exits (for example, when a [TextField] gets
+/// {@template flutter.widgets.autofill.AutofillGroupState}
+/// An [AutofillGroupState] can be used to register an [AutofillClient] when it
+/// enteres this [AutofillGroup] (for example, when an [EditableText] is mounted or
+/// reparented onto the [AutofillGroup]'s subtree), and unregister an
+/// [AutofillClient] when it exits (for example, when an [EditableText] gets
 /// unmounted or reparented out of the [AutofillGroup]'s subtree).
+///
+/// This [AutofillGroupState] class also provides an [attach] method that can be
+/// called by [AutofillTrigger]s to create a [TextInputConnection], in order to
+/// interact with the platform's text input system, instead of calling
+/// [TextInputClient.attach].
+/// {@endtemplate}
 ///
 /// Typically obtained using [AutofillGroup.of].
 class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
@@ -158,6 +168,15 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
+  ///
+  /// Typically, this is be called by [AutofillTrigger]s (for example,
+  /// [EditableTextState]) in [State.didChangeDependencies], when the input
+  /// field should be registered to a new [AutofillGroup].
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.didChangeDependencies], where this method is called
+  ///   to update the current [AutofillScope] when needed.
   void register(AutofillClient client) {
     assert(client != null);
     _clients.putIfAbsent(client.autofillId, () => client);
@@ -165,6 +184,18 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   /// Removes an [AutofillClient] with the given [autofillId] from this
   /// [AutofillGroup].
+  ///
+  /// Typically, this should be called by [AutofillTrigger]s in [State.dispose]
+  /// and [State.didChangeDependencies], when the input field needs to be removed
+  /// from the [AutofillGroup] it is currently registered to.
+  ///
+  /// See also:
+  ///
+  /// * [EditableTextState.didChangeDependencies], where this method is called
+  ///   to unregister from the previous [AutofillScope].
+  /// * [EditableTextState.dispose], where this method is called to unregister
+  ///   from the current [AutofillScope] when the widget is about to be removed
+  ///   from the tree.
   void unregister(String autofillId) {
     assert(autofillId != null && _clients.containsKey(autofillId));
     _clients.remove(autofillId);
