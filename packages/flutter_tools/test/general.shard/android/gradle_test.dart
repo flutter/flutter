@@ -44,7 +44,7 @@ void main() {
 
       expect(
         getApkDirectory(project).path,
-        equals(globals.fs.path.join('foo', 'app', 'outputs', 'apk')),
+        equals(globals.fs.path.join('foo', 'app', 'outputs', 'flutter-apk')),
       );
     });
 
@@ -312,107 +312,41 @@ void main() {
     });
   });
 
-  group('findApkFiles', () {
-    final Usage mockUsage = MockUsage();
-
-    testUsingContext('Finds APK without flavor in release', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
-
-      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
-      apkDirectory.createSync(recursive: true);
-      apkDirectory.childFile('app-release.apk').createSync();
-
-      final Iterable<File> apks = findApkFiles(
-        project,
+  group('listApkPaths', () {
+    testWithoutContext('Finds APK without flavor in release', () {
+      final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, '', treeShakeIcons: false)),
       );
-      expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-release.apk')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+
+      expect(apks, <String>['app-release.apk']);
     });
 
-    testUsingContext('Finds APK with flavor in release mode', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
-
-      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
-      apkDirectory.createSync(recursive: true);
-      apkDirectory.childFile('app-flavor1-release.apk').createSync();
-
-      final Iterable<File> apks = findApkFiles(
-        project,
+    testWithoutContext('Finds APK with flavor in release mode', () {
+      final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
-      expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-flavor1-release.apk')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+
+      expect(apks, <String>['app-flavor1-release.apk']);
     });
 
-    testUsingContext('Finds APK with flavor in release mode - AGP v3', () {
-      final FlutterProject project = MockFlutterProject();
-      final AndroidProject androidProject = MockAndroidProject();
-
-      when(project.android).thenReturn(androidProject);
-      when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
-
-      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release'));
-      apkDirectory.createSync(recursive: true);
-      apkDirectory.childFile('app-flavor1-release.apk').createSync();
-
-      final Iterable<File> apks = findApkFiles(
-        project,
+    testWithoutContext('Finds APK with flavor in release mode - AGP v3', () {
+      final Iterable<String> apks = listApkPaths(
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false)),
       );
-      expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release', 'app-flavor1-release.apk')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
+
+      expect(apks, <String>['app-flavor1-release.apk']);
     });
 
-    testUsingContext('apk not found', () {
-      final FlutterProject project = FlutterProject.current();
-      expect(
-        () {
-          findApkFiles(
-            project,
-            const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'foo_bar', treeShakeIcons: false)),
-          );
-        },
-        throwsToolExit(
-          message:
-            "Gradle build failed to produce an .apk file. It's likely that this file "
-            "was generated under ${project.android.buildDirectory.path}, but the tool couldn't find it."
-        )
+    testWithoutContext('Finds APK with split-per-abi', () {
+      final Iterable<String> apks = listApkPaths(
+        const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1', treeShakeIcons: false), splitPerAbi: true),
       );
-      verify(
-        mockUsage.sendEvent(
-          any,
-          any,
-          label: 'gradle-expected-file-not-found',
-          parameters: const <String, String> {
-            'cd37': 'androidGradlePluginVersion: 5.6.2, fileExtension: .apk',
-          },
-        ),
-      ).called(1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-      Usage: () => mockUsage,
+
+      expect(apks, unorderedEquals(<String>[
+        'app-armeabi-v7a-flavor1-release.apk',
+        'app-arm64-v8a-flavor1-release.apk',
+        'app-x86_64-flavor1-release.apk',
+      ]));
     });
   });
 
@@ -1415,8 +1349,7 @@ plugin1=${plugin1.path}
       fileSystem.directory('build')
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('apk')
-        .childDirectory('release')
+        .childDirectory('flutter-apk')
         .childFile('app-release.apk')
         .createSync(recursive: true);
 
@@ -1455,7 +1388,6 @@ plugin1=${plugin1.path}
         label: 'gradle-random-event-label-success',
         parameters: anyNamed('parameters'),
       )).called(1);
-
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       Cache: () => cache,
@@ -1553,17 +1485,6 @@ plugin1=${plugin1.path}
     });
 
     testUsingContext('indicates that an APK has been built successfully', () async {
-      when(mockProcessManager.start(any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment')))
-      .thenAnswer((_) {
-        return Future<Process>.value(
-          createMockProcess(
-            exitCode: 0,
-            stdout: '',
-          ));
-      });
-
       fileSystem.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
@@ -1581,8 +1502,7 @@ plugin1=${plugin1.path}
       fileSystem.directory('build')
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('apk')
-        .childDirectory('release')
+        .childDirectory('flutter-apk')
         .childFile('app-release.apk')
         .createSync(recursive: true);
 
@@ -1602,7 +1522,7 @@ plugin1=${plugin1.path}
 
       expect(
         testLogger.statusText,
-        contains('Built build/app/outputs/apk/release/app-release.apk (0.0MB)'),
+        contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
 
     }, overrides: <Type, Generator>{
@@ -1610,7 +1530,7 @@ plugin1=${plugin1.path}
       Cache: () => cache,
       FileSystem: () => fileSystem,
       Platform: () => android,
-      ProcessManager: () => mockProcessManager,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAaar is false", () async {

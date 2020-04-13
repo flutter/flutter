@@ -39,7 +39,7 @@ Directory getApkDirectory(FlutterProject project) {
     : project.android.buildDirectory
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('apk');
+        .childDirectory('flutter-apk');
 }
 
 /// The directory where the app bundle artifact is generated.
@@ -469,25 +469,33 @@ Future<void> buildGradleApp({
     return;
   }
   // Gradle produced an APK.
-  final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
+  final Iterable<String> apkFilesPaths = project.isModule
+    ? findApkFilesModule(project, androidBuildInfo)
+    : listApkPaths(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
+  final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
+  if (!apkFile.existsSync()) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.apk',
+    );
+  }
+
   // Copy the first APK to app.apk, so `flutter run` can find it.
   // TODO(egarciad): Handle multiple APKs.
-  apkFiles.first.copySync(apkDirectory.childFile('app.apk').path);
+  apkFile.copySync(apkDirectory.childFile('app.apk').path);
   globals.printTrace('calculateSha: $apkDirectory/app.apk');
 
   final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
-  apkShaFile.writeAsStringSync(_calculateSha(apkFiles.first));
+  apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-  for (final File apkFile in apkFiles) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-      ? '' // Don't display the size when building a debug variant.
-      : ' (${getSizeAsMB(apkFile.lengthSync())})';
-    globals.printStatus(
-      '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-  }
+  final String appSize = (buildInfo.mode == BuildMode.debug)
+    ? '' // Don't display the size when building a debug variant.
+    : ' (${getSizeAsMB(apkFile.lengthSync())})';
+  globals.printStatus(
+    '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
+    color: TerminalColor.green,
+  );
 }
 
 /// Builds AAR and POM files.
@@ -778,7 +786,7 @@ Future<void> buildPluginsAsAar(
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 @visibleForTesting
-Iterable<File> findApkFiles(
+Iterable<String> findApkFilesModule(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
 ) {
@@ -815,7 +823,39 @@ Iterable<File> findApkFiles(
       fileExtension: '.apk',
     );
   }
-  return apks;
+  return apks.map((File file) => file.path);
+}
+
+/// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
+///
+/// The flutter.gradle plugin will copy APK outputs into:
+/// $buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk
+@visibleForTesting
+Iterable<String> listApkPaths(
+  AndroidBuildInfo androidBuildInfo,
+) {
+  final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
+  final List<String> apkPartialName = <String>[
+    if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
+      androidBuildInfo.buildInfo.flavor,
+    '$buildType.apk',
+  ];
+  if (androidBuildInfo.splitPerAbi) {
+    return <String>[
+      for (AndroidArch androidArch in androidBuildInfo.targetArchs)
+        <String>[
+          'app',
+          getNameForAndroidArch(androidArch),
+          ...apkPartialName
+        ].join('-')
+    ];
+  }
+  return <String>[
+    <String>[
+      'app',
+      ...apkPartialName,
+    ].join('-')
+  ];
 }
 
 @visibleForTesting
