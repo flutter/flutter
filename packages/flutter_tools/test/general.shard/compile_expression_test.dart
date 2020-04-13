@@ -82,7 +82,7 @@ void main() {
       packageConfig: PackageConfig.empty,
     ).then((CompilerOutput output) {
       expect(mockFrontendServerStdIn.getAndClear(),
-          'compile /path/to/main.dart\n');
+          'compile file:///path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
           equals('\nCompiler message:\nline1\nline2\n'));
