@@ -289,7 +289,7 @@ class BorderRadius extends BorderRadiusGeometry {
   );
 
   /// Creates a border radius where all radii are [Radius.circular(radius)].
-  BorderRadius.circular(double radius) : this.all(
+  const BorderRadius.circular(double radius) : this.all(
     Radius.circular(radius),
   );
 
