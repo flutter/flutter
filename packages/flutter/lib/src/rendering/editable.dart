@@ -300,12 +300,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Whether the [handleEvent] will propagate pointer events to selection
   /// handlers.
   ///
-  /// If this property is true, the [handleEvent] assumed that this renderer
+  /// If this property is true, the [handleEvent] assumes that this renderer
   /// will be notified of input gestures via [handleTapDown], [handleTap],
   /// [handleDoubleTap], and [handleLongPress].
   ///
-  /// If there is any gesture recognizers in the text span, the [handleEvent] will
-  /// still propagate pointer events to those recognizers
+  /// If there are any gesture recognizers in the text span, the [handleEvent]
+  /// will still propagate pointer events to those recognizers
   ///
   /// The default value of this property is false.
   bool ignorePointer;
