@@ -255,7 +255,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
-    DialogTheme dialogTheme,
+    DialogThemeData dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
@@ -364,7 +364,7 @@ class ThemeData with Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.bodyText1,
     );
-    dialogTheme ??= const DialogTheme();
+    dialogTheme ??= const DialogThemeData();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     navigationRailTheme ??= const NavigationRailThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -981,8 +981,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
   final SnackBarThemeData snackBarTheme;
 
-  /// A theme for customizing the shape of a dialog.
-  final DialogTheme dialogTheme;
+  /// A theme for customizing the visual properties of [Dialog]s.
+  ///
+  /// This is the value returned from [DialogTheme.of].
+  final DialogThemeData dialogTheme;
 
   /// A theme for customizing the shape, elevation, and color of a
   /// [FloatingActionButton].
@@ -1080,7 +1082,7 @@ class ThemeData with Diagnosticable {
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
-    DialogTheme dialogTheme,
+    DialogThemeData dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
     NavigationRailThemeData navigationRailTheme,
     Typography typography,
@@ -1292,7 +1294,7 @@ class ThemeData with Diagnosticable {
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
-      dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      dialogTheme: DialogThemeData.lerp(a.dialogTheme, b.dialogTheme, t),
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
@@ -1505,7 +1507,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
-    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<DialogThemeData>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));

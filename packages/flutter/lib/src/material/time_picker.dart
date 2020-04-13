@@ -13,6 +13,7 @@ import 'button_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
+import 'dialog_theme.dart';
 import 'feedback.dart';
 import 'flat_button.dart';
 import 'ink_well.dart';
@@ -1662,7 +1663,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           );
 
           final Widget pickerAndActions = Container(
-            color: theme.dialogBackgroundColor,
+            color: DialogTheme.of(context).backgroundColor,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[

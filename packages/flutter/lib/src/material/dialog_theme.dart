@@ -9,28 +9,27 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines a theme for [Dialog] widgets.
+/// Defines the visual properties of [Dialog] widgets.
 ///
-/// Descendant widgets obtain the current [DialogTheme] object using
-/// `DialogTheme.of(context)`. Instances of [DialogTheme] can be customized with
-/// [DialogTheme.copyWith].
+/// Used by [DialogTheme] to control the visual properties of Dialogs in a
+/// widget subtree.
 ///
-/// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
-/// a border radius of 2.0 on all corners.
+/// To obtain this configuration, use [DialogTheme.of] to access the closest
+/// ancestor [DialogTheme] of the current [BuildContext].
 ///
-/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s.
-/// If null, they default to [TextTheme.headline6] and [TextTheme.subtitle1],
-/// respectively.
+/// All [DialogThemeData] properties are `null` by default. When null, the
+/// [Dialog] will provide its own defaults.
 ///
 /// See also:
 ///
-///  * [Dialog], a material dialog that can be customized using this [DialogTheme].
-///  * [ThemeData], which describes the overall theme information for the
-///    application.
+///  * [DialogTheme], an [InheritedWidget] that propagates the theme down its
+///    subtree.
+///  * [ThemeData.dialogTheme], which is where default properties can be set for
+///    the entire app.
 @immutable
-class DialogTheme with Diagnosticable {
-  /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
-  const DialogTheme({
+class DialogThemeData with Diagnosticable {
+  /// Creates the set of properties used to configure [Dialog]s.
+  const DialogThemeData({
     this.backgroundColor,
     this.elevation,
     this.shape,
@@ -41,7 +40,7 @@ class DialogTheme with Diagnosticable {
   /// Default value for [Dialog.backgroundColor].
   ///
   /// If null, [ThemeData.dialogBackgroundColor] is used, if that's null,
-  /// defaults to [Colors.white].
+  /// defaults to [ThemeData.colorScheme.surface].
   final Color backgroundColor;
 
   /// Default value for [Dialog.elevation].
@@ -50,6 +49,9 @@ class DialogTheme with Diagnosticable {
   final double elevation;
 
   /// Default value for [Dialog.shape].
+  ///
+  /// If null, the [Dialog] shape defaults to a [RoundedRectangleBorder] with a
+  /// radius of `4.0`.
   final ShapeBorder shape;
 
   /// Used to configure the [DefaultTextStyle] for the [AlertDialog.title] widget.
@@ -64,14 +66,14 @@ class DialogTheme with Diagnosticable {
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
-  DialogTheme copyWith({
+  DialogThemeData copyWith({
     Color backgroundColor,
     double elevation,
     ShapeBorder shape,
     TextStyle titleTextStyle,
     TextStyle contentTextStyle,
   }) {
-    return DialogTheme(
+    return DialogThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
@@ -80,19 +82,16 @@ class DialogTheme with Diagnosticable {
     );
   }
 
-  /// The data from the closest [DialogTheme] instance given the build context.
-  static DialogTheme of(BuildContext context) {
-    return Theme.of(context).dialogTheme;
-  }
-
   /// Linearly interpolate between two dialog themes.
   ///
-  /// The arguments must not be null.
+  /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DialogTheme lerp(DialogTheme a, DialogTheme b, double t) {
+  static DialogThemeData lerp(DialogThemeData a, DialogThemeData b, double t) {
+    if (a == null && b == null)
+      return null;
     assert(t != null);
-    return DialogTheme(
+    return DialogThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -102,20 +101,28 @@ class DialogTheme with Diagnosticable {
   }
 
   @override
-  int get hashCode => shape.hashCode;
+  int get hashCode {
+    return hashValues(
+      backgroundColor,
+      elevation,
+      shape,
+      titleTextStyle,
+      contentTextStyle,
+    );
+  }
 
   @override
-  bool operator ==(Object other) {
+  bool operator==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is DialogTheme
-        && other.backgroundColor == backgroundColor
-        && other.elevation == elevation
-        && other.shape == shape
-        && other.titleTextStyle == titleTextStyle
-        && other.contentTextStyle == contentTextStyle;
+    return other is DialogThemeData
+      && other.backgroundColor == backgroundColor
+      && other.elevation == elevation
+      && other.shape == shape
+      && other.titleTextStyle == titleTextStyle
+      && other.contentTextStyle == contentTextStyle;
   }
 
   @override
@@ -127,4 +134,46 @@ class DialogTheme with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }
+}
+
+/// An inherited widget that defines the configuration for
+/// [Dialog]s in this widget's subtree.
+///
+/// Values specified here are used for [Dialog] properties that are not
+/// given an explicit non-null value.
+class DialogTheme extends InheritedTheme {
+  /// Creates a dialog theme that controls the configurations for [Dialog].
+  ///
+  /// The data argument must not be null.
+  const DialogTheme({
+    Key key,
+    @required this.data,
+    Widget child,
+  }) : assert(data != null), super(key: key, child: child);
+
+  /// The properties for descendant [Dialog] widgets.
+  final DialogThemeData data;
+
+  /// Returns the [data] from the closest [DialogTheme] ancestor. If there is
+  /// no ancestor, it returns [ThemeData.DialogTheme]. Applications can assume
+  /// that the returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DialogThemeData theme = DialogTheme.of(context);
+  /// ```
+  static DialogThemeData of(BuildContext context) {
+    final DialogTheme dialogTheme = context.dependOnInheritedWidgetOfExactType<DialogTheme>();
+    return dialogTheme?.data ?? Theme.of(context).dialogTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DialogTheme ancestorTheme = context.findAncestorWidgetOfExactType<DialogTheme>();
+    return identical(this, ancestorTheme) ? child : DialogTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(DialogTheme oldWidget) => data != oldWidget.data;
 }

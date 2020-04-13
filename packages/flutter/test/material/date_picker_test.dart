@@ -249,7 +249,7 @@ void main() {
 
     testWidgets('honors DialogTheme for shape and elevation', (WidgetTester tester) async {
       // Test that the defaults work
-      const DialogTheme datePickerDefaultDialogTheme = DialogTheme(
+      const DialogThemeData datePickerDefaultDialogTheme = DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0))
         ),
@@ -283,7 +283,7 @@ void main() {
       expect(defaultDialogMaterial.elevation, datePickerDefaultDialogTheme.elevation);
 
       // Test that it honors ThemeData.dialogTheme settings
-      const DialogTheme customDialogTheme = DialogTheme(
+      const DialogThemeData customDialogTheme = DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(40.0))
         ),

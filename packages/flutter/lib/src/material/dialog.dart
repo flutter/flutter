@@ -63,7 +63,8 @@ class Dialog extends StatelessWidget {
   ///
   /// This sets the [Material.color] on this [Dialog]'s [Material].
   ///
-  /// If `null`, [ThemeData.cardColor] is used.
+  /// If `null`, [ThemeData.dialogBackgroundColor] is used. If that is
+  /// `null` then [ThemeData.colorScheme.surface] is used.
   /// {@endtemplate}
   final Color backgroundColor;
 
@@ -126,14 +127,14 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  // TODO(johnsonmh): Update default dialog border radius to 4.0 to match material spec.
   static const RoundedRectangleBorder _defaultDialogShape =
-    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+    RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
   static const double _defaultElevation = 24.0;
 
   @override
   Widget build(BuildContext context) {
-    final DialogTheme dialogTheme = DialogTheme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.of(context).viewInsets + (insetPadding ?? const EdgeInsets.all(0.0));
     return AnimatedPadding(
       padding: effectivePadding,
@@ -149,7 +150,7 @@ class Dialog extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
             child: Material(
-              color: backgroundColor ?? dialogTheme.backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+              color: backgroundColor ?? dialogTheme.backgroundColor ?? theme.dialogBackgroundColor ?? theme.colorScheme.surface,
               elevation: elevation ?? dialogTheme.elevation ?? _defaultElevation,
               shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
               type: MaterialType.card,
@@ -453,7 +454,7 @@ class AlertDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
-    final DialogTheme dialogTheme = DialogTheme.of(context);
+    final DialogThemeData dialogTheme = DialogTheme.of(context);
 
     String label = semanticLabel;
     if (title == null) {

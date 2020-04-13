@@ -44,7 +44,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 void main() {
   testWidgets('Dialog Theme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const DialogTheme(
+    const DialogThemeData(
       backgroundColor: Color(0xff123456),
       elevation: 8.0,
       shape: null,
@@ -68,7 +68,7 @@ void main() {
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(backgroundColor: customColor));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(backgroundColor: customColor));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -84,7 +84,7 @@ void main() {
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(elevation: customElevation));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(elevation: customElevation));
 
     await tester.pumpWidget(
         _appWithAlertDialog(tester, dialog, theme: theme)
@@ -103,7 +103,7 @@ void main() {
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(shape: customBorder));
 
     await tester.pumpWidget(
       _appWithAlertDialog(tester, dialog, theme: theme)
@@ -122,7 +122,7 @@ void main() {
       title: Text('Title'),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(shape: customBorder));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(shape: customBorder));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -158,7 +158,7 @@ void main() {
       title: Text(titleText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(titleTextStyle: titleTextStyle));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(titleTextStyle: titleTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));
@@ -209,7 +209,7 @@ void main() {
       content: Text(contentText),
       actions: <Widget>[ ],
     );
-    final ThemeData theme = ThemeData(dialogTheme: const DialogTheme(contentTextStyle: contentTextStyle));
+    final ThemeData theme = ThemeData(dialogTheme: const DialogThemeData(contentTextStyle: contentTextStyle));
 
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog, theme: theme));
     await tester.tap(find.text('X'));

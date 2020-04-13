@@ -44,7 +44,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
   return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
 }
 
-const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 
 void main() {
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
