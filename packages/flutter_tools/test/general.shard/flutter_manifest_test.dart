@@ -850,7 +850,7 @@ flutter:
     );
   });
 
-  testWithoutContext('FlutterManifest with MemoryFileSystem', () {
+  testWithoutContext('FlutterManifest can parse manifest on posix filesystem', () {
     const String manifest = '''
 name: test
 dependencies:
@@ -870,7 +870,7 @@ flutter:
     expect(flutterManifest.isEmpty, false);
   });
 
-  testWithoutContext('FlutterManifest can parse manifest on posix filesystem', () {
+  testWithoutContext('FlutterManifest can parse manifest on windows filesystem', () {
     const String manifest = '''
 name: test
 dependencies:
