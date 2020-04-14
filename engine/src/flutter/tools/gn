@@ -250,9 +250,8 @@ def to_gn_args(args):
       gn_args['dart_platform_sdk'] = not args.full_dart_sdk
     gn_args['full_dart_sdk'] = args.full_dart_sdk
 
-    if sys.platform == 'darwin':
-      if args.build_glfw_shell:
-        gn_args['build_glfw_shell'] = True
+    if args.build_glfw_shell is not None:
+      gn_args['build_glfw_shell'] = args.build_glfw_shell
 
     gn_args['stripped_symbols'] = args.stripped
 
@@ -340,8 +339,10 @@ def parse_args(args):
                       help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
                       ' see supported IDEs. If this flag is not specified, a platform specific default is selected.')
 
-  parser.add_argument('--build-glfw-shell', dest='build_glfw_shell', default=False, action='store_true',
-                      help='Force building the GLFW shell on desktop platforms where it is not built by default.')
+  parser.add_argument('--build-glfw-shell', action='store_const', const=True,
+                      help='Build the GLFW shell on supported platforms where it is not built by default.')
+  parser.add_argument('--no-build-glfw-shell', dest='build_glfw_shell', action='store_const', const=False,
+                      help='Do not build the GLFW shell on platforms where it is built by default.')
 
   parser.add_argument('--bitcode', default=False, action='store_true',
                       help='Enable bitcode for iOS targets. On debug runtime modes, this will be a marker only.')
