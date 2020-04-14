@@ -53,8 +53,7 @@ void main() {
     });
 
     setUp((){
-      mockStdio = MockStdio();
-      mockStdio.stdout.terminalColumns = 80;
+      mockStdio = MockStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('fails when target not found', () async {
