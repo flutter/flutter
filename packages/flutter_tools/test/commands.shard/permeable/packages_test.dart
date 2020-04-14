@@ -338,6 +338,7 @@ void main() {
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockStdio = MockStdio();
+      mockStdio.stdout.terminalColumns = 80;
     });
 
     testUsingContext('test without bot', () async {
