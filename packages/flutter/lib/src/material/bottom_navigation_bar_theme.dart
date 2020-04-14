@@ -15,7 +15,7 @@ import 'theme.dart';
 ///
 /// Descendant widgets obtain the current [BottomNavigationBarThemeData] object
 /// using `BottomNavigationBarTheme.of(context)`. Instances of
-/// [BottomNavigationBar] can be customized with
+/// [BottomNavigationBarThemeData] can be customized with
 /// [BottomNavigationBarThemeData.copyWith].
 ///
 /// Typically a [BottomNavigationBarThemeData] is specified as part of the
@@ -45,20 +45,11 @@ class BottomNavigationBarThemeData with Diagnosticable {
     this.type,
   });
 
-  /// Default value for [BottomNavigationBar.elevation].
-  final double elevation;
-
-  /// Default value for [BottomNavigationBar.type].
-  final BottomNavigationBarType type;
-
   /// Default value for [BottomNavigationBar.backgroundColor].
   final Color backgroundColor;
 
-  /// Default value for [BottomNavigationBar.selectedItemColor].
-  final Color selectedItemColor;
-
-  /// Default value for [BottomNavigationBar.unselectedItemColor].
-  final Color unselectedItemColor;
+  /// Default value for [BottomNavigationBar.elevation].
+  final double elevation;
 
   /// Default value for [BottomNavigationBar.selectedIconTheme].
   final IconThemeData selectedIconTheme;
@@ -66,45 +57,54 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// Default value for [BottomNavigationBar.unselectedIconTheme].
   final IconThemeData unselectedIconTheme;
 
+  /// Default value for [BottomNavigationBar.selectedItemColor].
+  final Color selectedItemColor;
+
+  /// Default value for [BottomNavigationBar.unselectedItemColor].
+  final Color unselectedItemColor;
+
   /// Default value for [BottomNavigationBar.selectedLabelStyle].
   final TextStyle selectedLabelStyle;
 
   /// Default value for [BottomNavigationBar.unselectedLabelStyle].
   final TextStyle unselectedLabelStyle;
 
+  /// Default value for [BottomNavigationBar.showSelectedLabels].
+  final bool showSelectedLabels;
+
   /// Default value for [BottomNavigationBar.showUnselectedLabels].
   final bool showUnselectedLabels;
 
-  /// Default value for [BottomNavigationBar.showSelectedLabels].
-  final bool showSelectedLabels;
+  /// Default value for [BottomNavigationBar.type].
+  final BottomNavigationBarType type;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
-    double elevation,
-    BottomNavigationBarType type,
     Color backgroundColor,
-    Color selectedItemColor,
-    Color unselectedItemColor,
+    double elevation,
     IconThemeData selectedIconTheme,
     IconThemeData unselectedIconTheme,
+    Color selectedItemColor,
+    Color unselectedItemColor,
     TextStyle selectedLabelStyle,
     TextStyle unselectedLabelStyle,
-    bool showUnselectedLabels,
     bool showSelectedLabels,
+    bool showUnselectedLabels,
+    BottomNavigationBarType type,
   }) {
     return BottomNavigationBarThemeData(
-      elevation: elevation ?? this.elevation,
-      type: type ?? this.type,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      selectedItemColor: selectedItemColor ?? this.selectedItemColor,
-      unselectedItemColor: unselectedItemColor ?? this.unselectedItemColor,
+      elevation: elevation ?? this.elevation,
       selectedIconTheme: selectedIconTheme ?? this.selectedIconTheme,
       unselectedIconTheme: unselectedIconTheme ?? this.unselectedIconTheme,
+      selectedItemColor: selectedItemColor ?? this.selectedItemColor,
+      unselectedItemColor: unselectedItemColor ?? this.unselectedItemColor,
       selectedLabelStyle: selectedLabelStyle ?? this.selectedLabelStyle,
       unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
-      showUnselectedLabels: showUnselectedLabels ?? this.showUnselectedLabels,
       showSelectedLabels: showSelectedLabels ?? this.showSelectedLabels,
+      showUnselectedLabels: showUnselectedLabels ?? this.showUnselectedLabels,
+      type: type ?? this.type,
     );
   }
 
@@ -116,34 +116,34 @@ class BottomNavigationBarThemeData with Diagnosticable {
   static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData a, BottomNavigationBarThemeData b, double t) {
     assert(t != null);
     return BottomNavigationBarThemeData(
-      elevation: lerpDouble(a?.elevation, b?.elevation, t),
-      type: t < 0.5 ? a?.type : b?.type,
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
-      selectedItemColor: Color.lerp(a?.selectedItemColor, b?.selectedItemColor, t),
-      unselectedItemColor: Color.lerp(a?.unselectedItemColor, b?.unselectedItemColor, t),
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       selectedIconTheme: IconThemeData.lerp(a?.selectedIconTheme, b?.selectedIconTheme, t),
       unselectedIconTheme: IconThemeData.lerp(a?.unselectedIconTheme, b?.unselectedIconTheme, t),
+      selectedItemColor: Color.lerp(a?.selectedItemColor, b?.selectedItemColor, t),
+      unselectedItemColor: Color.lerp(a?.unselectedItemColor, b?.unselectedItemColor, t),
       selectedLabelStyle: TextStyle.lerp(a?.selectedLabelStyle, b?.selectedLabelStyle, t),
       unselectedLabelStyle: TextStyle.lerp(a?.unselectedLabelStyle, b?.unselectedLabelStyle, t),
-      showUnselectedLabels: t < 0.5 ? a?.showUnselectedLabels : b?.showUnselectedLabels,
       showSelectedLabels: t < 0.5 ? a?.showSelectedLabels : b?.showSelectedLabels,
+      showUnselectedLabels: t < 0.5 ? a?.showUnselectedLabels : b?.showUnselectedLabels,
+      type: t < 0.5 ? a?.type : b?.type,
     );
   }
 
   @override
   int get hashCode {
     return hashValues(
-      elevation,
-      type,
       backgroundColor,
-      selectedItemColor,
-      unselectedItemColor,
+      elevation,
       selectedIconTheme,
       unselectedIconTheme,
+      selectedItemColor,
+      unselectedItemColor,
       selectedLabelStyle,
       unselectedLabelStyle,
-      showUnselectedLabels,
       showSelectedLabels,
+      showUnselectedLabels,
+      type,
     );
   }
 
@@ -154,32 +154,80 @@ class BottomNavigationBarThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     return other is BottomNavigationBarThemeData
-        && other.elevation == elevation
-        && other.type == type
         && other.backgroundColor == backgroundColor
-        && other.selectedItemColor == selectedItemColor
-        && other.unselectedItemColor == unselectedItemColor
+        && other.elevation == elevation
         && other.selectedIconTheme == selectedIconTheme
         && other.unselectedIconTheme == unselectedIconTheme
+        && other.selectedItemColor == selectedItemColor
+        && other.unselectedItemColor == unselectedItemColor
         && other.selectedLabelStyle == selectedLabelStyle
         && other.unselectedLabelStyle == unselectedLabelStyle
+        && other.showSelectedLabels == showSelectedLabels
         && other.showUnselectedLabels == showUnselectedLabels
-        && other.showSelectedLabels == showSelectedLabels;
+        && other.type == type;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('selectedItemColor', selectedItemColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('unselectedItemColor', unselectedItemColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('selectedItemColor', selectedItemColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('unselectedItemColor', unselectedItemColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('selectedLabelStyle', selectedLabelStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('unselectedLabelStyle', unselectedLabelStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('showUnselectedLabels', showUnselectedLabels, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showSelectedLabels', showSelectedLabels, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showUnselectedLabels', showUnselectedLabels, defaultValue: null));
+    properties.add(DiagnosticsProperty<BottomNavigationBarType>('type', type, defaultValue: null));
   }
+}
+
+/// Applies a bottom navigation bar theme to descendant [BottomNavigationBar]
+/// widgets.
+///
+/// Descendant widgets obtain the current theme's [BottomNavigationBarTheme]
+/// object using [BottomNavigationBarTheme.of]. When a widget uses
+/// [BottomNavigationBarTheme.of], it is automatically rebuilt if the theme
+/// later changes.
+///
+/// A bottom navigation theme can be specified as part of the overall Material
+/// theme using [ThemeData.bottomNavigationBarTheme].
+///
+/// See also:
+///
+///  * [BottomNavigationBarThemeData], which describes the actual configuration
+///    of a bottom navigation bar theme.
+class BottomNavigationBarTheme extends InheritedWidget {
+  /// Constructs a bottom navigation bar theme that configures all descendant
+  /// [BottomNavigationBar] widgets.
+  ///
+  /// The [data] must not be null.
+  const BottomNavigationBarTheme({
+    Key key,
+    @required this.data,
+    Widget child,
+  }) : assert(data != null), super(key: key, child: child);
+
+  /// The properties used for all descendant [BottomNavigationBar] widgets.
+  final BottomNavigationBarThemeData data;
+
+  /// Returns the configuration [data] from the closest
+  /// [BottomNavigationBarTheme] ancestor. If there is no ancestor, it returns
+  /// [ThemeData.bottomNavigationBarTheme]. Applications can assume that the
+  /// returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// BottomNavigationBarThemeData theme = BottomNavigationBarTheme.of(context);
+  /// ```
+  static BottomNavigationBarThemeData of(BuildContext context) {
+    final BottomNavigationBarTheme bottomNavTheme = context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
+    return bottomNavTheme?.data ?? Theme.of(context).bottomNavigationBarTheme;
+  }
+
+  @override
+  bool updateShouldNotify(BottomNavigationBarTheme oldWidget) => data != oldWidget.data;
 }

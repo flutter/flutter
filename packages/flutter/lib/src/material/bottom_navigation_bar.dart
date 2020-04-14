@@ -369,7 +369,7 @@ class _BottomNavigationTile extends StatelessWidget {
     // (which is an integer) by a large number.
     int size;
 
-    final BottomNavigationBarThemeData bottomNavTheme = Theme.of(context).bottomNavigationBarTheme;
+    final BottomNavigationBarThemeData bottomNavTheme = BottomNavigationBarTheme.of(context);
 
     final double selectedFontSize = selectedLabelStyle.fontSize;
 
@@ -675,15 +675,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // [BottomNavigationBarType.fixed] for 3 or fewer items, and
   // [BottomNavigationBarType.shifting] is used for 4+ items.
   BottomNavigationBarType get _effectiveType {
-
-    if (widget.type != null) {
-      return widget.type;
-    }
-    final BottomNavigationBarType themeType = Theme.of(context).bottomNavigationBarTheme.type;
-    if (themeType != null) {
-      return themeType;
-    }
-    return widget.items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting;
+    return widget.type
+      ?? BottomNavigationBarTheme.of(context).type
+      ?? (widget.items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting);
   }
 
   // Computes the default value for the [showUnselected] parameter.
@@ -793,7 +787,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context);
-    final BottomNavigationBarThemeData bottomNavTheme = themeData.bottomNavigationBarTheme;
+    final BottomNavigationBarThemeData bottomNavTheme = BottomNavigationBarTheme.of(context);
 
     final TextStyle effectiveSelectedLabelStyle =
       _effectiveTextStyle(
@@ -879,7 +873,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
 
-    final BottomNavigationBarThemeData bottomNavTheme = Theme.of(context).bottomNavigationBarTheme;
+    final BottomNavigationBarThemeData bottomNavTheme = BottomNavigationBarTheme.of(context);
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
     final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - widget.selectedFontSize / 2.0, 0.0);
