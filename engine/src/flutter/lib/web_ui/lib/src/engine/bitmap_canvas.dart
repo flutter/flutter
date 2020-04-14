@@ -489,10 +489,11 @@ class BitmapCanvas extends EngineCanvas {
   @override
   void drawParagraph(EngineParagraph paragraph, ui.Offset offset) {
     assert(paragraph._isLaidOut);
-    html.CanvasRenderingContext2D ctx = _canvasPool.context;
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
 
     if (paragraph._drawOnCanvas && _childOverdraw == false) {
+      // !Do not move this assignment above this if clause since, accessing
+      // context will generate extra <canvas> tags.
       final List<EngineLineMetrics> lines = paragraph._measurementResult.lines;
 
       final SurfacePaintData backgroundPaint = paragraph._background?.paintData;
@@ -503,6 +504,7 @@ class BitmapCanvas extends EngineCanvas {
       }
 
       if (style != _cachedLastStyle) {
+        html.CanvasRenderingContext2D ctx = _canvasPool.context;
         ctx.font = style.cssFontString;
         _cachedLastStyle = style;
       }
