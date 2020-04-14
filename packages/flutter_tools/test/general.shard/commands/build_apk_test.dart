@@ -523,6 +523,10 @@ Future<BuildApkCommand> runBuildApkCommand(
   return command;
 }
 
+String removeTextFormatting(String source){
+  return source.replaceAll('\n', '').replaceAll('    ', ' ');
+}
+
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}

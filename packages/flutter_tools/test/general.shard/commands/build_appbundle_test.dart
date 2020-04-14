@@ -361,8 +361,9 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, containsIgnoringWhitespace(
+      final String statusTextWithoutFormatting = removeTextFormatting(testLogger.statusText);
+      expect(statusTextWithoutFormatting, contains("Your app isn't using AndroidX"));
+      expect(statusTextWithoutFormatting, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
