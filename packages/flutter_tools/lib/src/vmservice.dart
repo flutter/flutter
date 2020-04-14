@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart' show required;
@@ -392,9 +391,7 @@ class VMService implements vm_service.VmService {
     });
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
-      (String data) {
-        channel.add(data);
-      },
+      channel.add,
       log: null,
       disposeHandler: () async {
         if (!streamClosedCompleter.isCompleted) {
