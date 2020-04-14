@@ -284,7 +284,7 @@ void main() {
 
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-      requests: <FakeRequest>[
+      requests: <VmServiceExpectation>[
         const FakeRequest(method: 'streamListen', id: '1', params: <String, Object>{
           'streamId': 'Isolate'
         }),
@@ -293,42 +293,40 @@ void main() {
           'mainScript': 'main.dart',
           'assetDirectory': 'flutter_assets/',
         }),
+        FakeStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kIsolateRunnable,
+            timestamp: 1,
+          )
+        ),
       ]
     );
 
-    final Future<void> didRunInView = fakeVmServiceHost.vmService.runInView(
+    await fakeVmServiceHost.vmService.runInView(
       viewId: '1234',
       main: Uri.file('main.dart'),
       assetsDirectory: Uri.file('flutter_assets/'),
     );
-    await fakeVmServiceHost.expectedRequestsComplete;
-
-    // Send notification that isolate is runnable.
-    fakeVmServiceHost.streamNotify('Isolate', vm_service.Event(
-      kind: vm_service.EventKind.kIsolateRunnable,
-      timestamp: 1,
-    ));
-    await didRunInView;
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 }
 
 class FakeVmServiceHost {
   FakeVmServiceHost({
-    @required List<FakeRequest> requests,
+    @required List<VmServiceExpectation> requests,
   }) : _requests = requests {
-    if (_requests.isEmpty) {
-      _expectedRequests.complete();
-    }
     _vmService = vm_service.VmService(
       _input.stream,
       _output.add,
     );
+    _applyStreamListen();
     _output.stream.listen((String data) {
       final Map<String, Object> request = json.decode(data) as Map<String, Object>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
-      final FakeRequest fakeRequest = _requests.removeAt(0);
+      final FakeRequest fakeRequest = _requests.removeAt(0) as FakeRequest;
       expect(fakeRequest, isA<FakeRequest>()
         .having((FakeRequest request) => request.method, 'method', request['method'])
         .having((FakeRequest request) => request.id, 'id', request['id'])
@@ -339,35 +337,41 @@ class FakeVmServiceHost {
         'id': fakeRequest.id,
         'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
       }));
-      if (_requests.isEmpty) {
-        _expectedRequests.complete();
-      }
+      _applyStreamListen();
     });
   }
 
-  final List<FakeRequest> _requests;
+  final List<VmServiceExpectation> _requests;
   final StreamController<String> _input = StreamController<String>();
   final StreamController<String> _output = StreamController<String>();
 
   vm_service.VmService get vmService => _vmService;
   vm_service.VmService _vmService;
 
-  final Completer<void> _expectedRequests = Completer<void>();
-  Future<void> get expectedRequestsComplete => _expectedRequests.future;
+  bool get hasRemainingExpectations => _requests.isNotEmpty;
 
-  void streamNotify(String streamId, vm_service.Event event) {
-    _input.add(json.encode(<String, Object>{
-      'jsonrpc': '2.0',
-      'method': 'streamNotify',
-      'params': <String, Object>{
-        'streamId': streamId,
-        'event': event.toJson(),
-      },
-    }));
+  // remove FakeStreamResponse objects from _requests until it is empty
+  // or until we hit a FakeRequest
+  void _applyStreamListen() {
+    while (_requests.isNotEmpty && !_requests.first.isRequest) {
+      final FakeStreamResponse response = _requests.removeAt(0) as FakeStreamResponse;
+      _input.add(json.encode(<String, Object>{
+        'jsonrpc': '2.0',
+        'method': 'streamNotify',
+        'params': <String, Object>{
+          'streamId': response.streamId,
+          'event': response.event.toJson(),
+        },
+      }));
+    }
   }
 }
 
-class FakeRequest {
+abstract class VmServiceExpectation {
+  bool get isRequest;
+}
+
+class FakeRequest implements VmServiceExpectation {
   const FakeRequest({
     @required this.method,
     @required this.id,
@@ -379,7 +383,24 @@ class FakeRequest {
   final String id;
   final Map<String, Object> params;
   final Map<String, Object> jsonResponse;
+
+  @override
+  bool get isRequest => true;
 }
+
+class FakeStreamResponse implements VmServiceExpectation {
+  const FakeStreamResponse({
+    @required this.event,
+    @required this.streamId,
+  });
+
+  final vm_service.Event event;
+  final String streamId;
+
+  @override
+  bool get isRequest => false;
+}
+
 
 class MockDevice extends Mock implements Device {}
 class MockVMService extends Mock implements vm_service.VmService {}
