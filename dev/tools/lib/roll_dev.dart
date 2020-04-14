@@ -77,6 +77,10 @@ void main(List<String> args) {
   final String commit = argResults[kCommit] as String;
   final String origin = argResults[kOrigin] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
+  if (!justPrint) { //TODO
+    print('Chris, use --just-print while testing this!');
+    exit(1);
+  }
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
@@ -99,7 +103,9 @@ void main(List<String> args) {
   }
 
   runGit('fetch $origin', 'fetch $origin');
-  //runGit('reset $commit --hard', 'reset to the release commit'); TODO
+  if (!justPrint) {
+    runGit('reset $commit --hard', 'reset to the release commit');
+  }
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
