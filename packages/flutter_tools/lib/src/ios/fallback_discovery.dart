@@ -13,6 +13,16 @@ import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 
+typedef Delay = Future<void> Function(Duration);
+
+typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
+
+// constructors cannot be torn off, otherwise it would be better to use
+// Future.delayed directly.
+Future<void> _defaultDelay(Duration duration) {
+  return Future<void>.delayed(duration);
+}
+
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
 ///
@@ -42,14 +52,16 @@ class FallbackDiscovery {
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
     @required Usage flutterUsage,
-    Future<VmService> Function(String wsUri, {Log log}) vmServiceConnectUri =
+    VmServiceConnector vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
+    Delay delay = _defaultDelay,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
        _flutterUsage = flutterUsage,
-       _vmServiceConnectUri = vmServiceConnectUri;
+       _vmServiceConnectUri = vmServiceConnectUri,
+       _delay = delay;
 
   static const String _kEventName = 'ios-handshake';
 
@@ -58,7 +70,8 @@ class FallbackDiscovery {
   final Logger _logger;
   final ProtocolDiscovery _protocolDiscovery;
   final Usage _flutterUsage;
-  final Future<VmService> Function(String wsUri, {Log log}) _vmServiceConnectUri;
+  final VmServiceConnector  _vmServiceConnectUri;
+  final Delay _delay;
 
   /// Attempt to discover the observatory port.
   Future<Uri> discover({
@@ -184,7 +197,7 @@ class FallbackDiscovery {
       // tool waits for a connection to be reasonable. If the vmservice cannot
       // be connected to in this way, the mDNS discovery must be reached
       // sooner rather than later.
-      await Future<void>.delayed(const Duration(seconds: kDelaySeconds));
+      await _delay(const Duration(seconds: kDelaySeconds));
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
