@@ -172,7 +172,10 @@ String getFullTag() {
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = RegExp(r'^([0-9]+)\.([0-9]+)\.([0-9]+)-dev\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)$');
+  final RegExp versionPattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)-dev\.(\d+)\.(\d+)-(\d+)-g([a-f0-9]+)$');
+  //final RegExp versionPattern = RegExp(
+  //  r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 
@@ -180,8 +183,10 @@ String getVersionFromParts(List<int> parts) {
   assert(parts.length == 5);
   final StringBuffer buf = StringBuffer()
     ..write(parts.take(3).join('.'))
-    ..write('-dev.')
-    ..write(parts.skip(3).join('.'));
+    ..write('-')
+    ..write(parts.skip(3).take(2).join('.'))
+    ..write('.pre');
+    //..write(parts.skip(3).join('.'));
   return buf.toString();
 }
 
