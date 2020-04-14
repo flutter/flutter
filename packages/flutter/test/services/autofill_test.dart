@@ -118,7 +118,7 @@ void main() {
   });
 }
 
-class FakeAutofillClient with AutofillClient implements AutofillTrigger {
+class FakeAutofillClient implements TextInputClient, AutofillClient {
   FakeAutofillClient(this.currentTextEditingValue);
 
   @override

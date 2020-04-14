@@ -759,6 +759,18 @@ abstract class TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue get currentTextEditingValue;
 
+  /// The [AutofillScope] this [TextInputClient] belongs to, if any.
+  ///
+  /// It should return null if this [TextInputClient] does not need autofill
+  /// support. For a [TextInputClient] that supports autofill, returning null
+  /// causes it to participate in autofill alone.
+  ///
+  /// See also:
+  ///
+  /// * [AutofillGroup], a widget that creates an [AutofillScope] for its
+  ///   descendent autofillable [TextInputClient]s.
+  AutofillScope get currentAutofillScope;
+
   /// Requests that this client update its editing state to the given value.
   void updateEditingValue(TextEditingValue value);
 
@@ -1091,15 +1103,13 @@ class TextInput {
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final TextInputClient client = _currentConnection._client;
       assert(client != null);
-      if (client is AutofillTrigger) {
-        final AutofillScope scope = client.currentAutofillScope;
-        final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
-        for (final String tag in editingValue.keys) {
-          final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
-            editingValue[tag] as Map<String, dynamic>,
-          );
-          scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
-        }
+      final AutofillScope scope = client.currentAutofillScope;
+      final Map<String, dynamic> editingValue = args[1] as Map<String, dynamic>;
+      for (final String tag in editingValue.keys) {
+        final TextEditingValue textEditingValue = TextEditingValue.fromJSON(
+          editingValue[tag] as Map<String, dynamic>,
+        );
+        scope?.getAutofillClient(tag)?.updateEditingValue(textEditingValue);
       }
 
       return;

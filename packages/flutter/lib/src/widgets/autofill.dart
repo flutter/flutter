@@ -148,10 +148,10 @@ class AutofillGroup extends StatefulWidget {
 /// [AutofillClient] when it exits (for example, when an [EditableText] gets
 /// unmounted or reparented out of the [AutofillGroup]'s subtree).
 ///
-/// This [AutofillGroupState] class also provides an [attach] method that can be
-/// called by [AutofillTrigger]s to create a [TextInputConnection], in order to
-/// interact with the platform's text input system, instead of calling
-/// [TextInputClient.attach].
+/// The [AutofillGroupState] class also provides an [attach] method that can be
+/// called by [TextInputClient]s that support autofill, instead of
+/// [TextInputClient.attach], to create a [TextInputConnection] to interact with
+/// the platform's text input system.
 /// {@endtemplate}
 ///
 /// Typically obtained using [AutofillGroup.of].
@@ -169,9 +169,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
   ///
-  /// Typically, this is called by [AutofillTrigger]s (for example,
-  /// [EditableTextState]) in [State.didChangeDependencies], when the input
-  /// field should be registered to a new [AutofillGroup].
+  /// Typically, this is called by [TextInputClient]s that support autofill (for
+  /// example, [EditableTextState]) in [State.didChangeDependencies], when the
+  /// input field should be registered to a new [AutofillGroup].
   ///
   /// See also:
   ///
@@ -185,9 +185,9 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// Removes an [AutofillClient] with the given [autofillId] from this
   /// [AutofillGroup].
   ///
-  /// Typically, this should be called by [AutofillTrigger]s in [State.dispose]
-  /// and [State.didChangeDependencies], when the input field needs to be removed
-  /// from the [AutofillGroup] it is currently registered to.
+  /// Typically, this should be called by autofillable [TextInputClient]s in
+  /// [State.dispose] and [State.didChangeDependencies], when the input field
+  /// needs to be removed from the [AutofillGroup] it is currently registered to.
   ///
   /// See also:
   ///

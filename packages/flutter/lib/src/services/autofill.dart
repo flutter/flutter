@@ -719,24 +719,14 @@ abstract class AutofillClient {
   void updateEditingValue(TextEditingValue newEditingValue);
 }
 
-/// A [TextInputClient] that triggers autofill when focused.
-///
-/// This is typically a [State] or [Element], and should be able to gain focus in
-/// order to trigger autofill.
-abstract class AutofillTrigger extends TextInputClient {
-  /// The [AutofillScope] that this [AutofillTrigger] belongs to.
-  ///
-  /// This [AutofillTrigger] will participate in autofill alone if null.
-  AutofillScope get currentAutofillScope;
-}
-
 /// An ordered group within which [AutofillClient]s are logically connected.
 ///
 /// {@template flutter.services.autofill.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
-/// input fields during autofill. That is, when an [AutofillTrigger] gains focus,
-/// only the [AutofillClient]s within the same [AutofillScope] will be visible to
-/// the autofill service, in the same order as they appear in [autofillClients].
+/// input fields during autofill. That is, when an autofillable [TextInputClient]
+/// gains focus, only the [AutofillClient]s within the same [AutofillScope] will
+/// be visible to the autofill service, in the same order as they appear in
+/// [autofillClients].
 ///
 /// [AutofillScope] also allows [TextInput] to redirect autofill values from the
 /// platform to the [AutofillClient] with the given identifier, by calling
@@ -744,7 +734,7 @@ abstract class AutofillTrigger extends TextInputClient {
 ///
 /// An [AutofillClient] that's not tied to any [AutofillScope] will only
 /// participate in autofill if the autofill is directly triggered by its own
-/// [AutofillTrigger].
+/// [TextInputClient].
 /// {@endtemplate}
 abstract class AutofillScope {
   /// Gets the [AutofillScope] associated with the given [autofillId], in
@@ -760,10 +750,10 @@ abstract class AutofillScope {
   /// [AutofillConfiguration].)
   Iterable<AutofillClient> get autofillClients;
 
-  /// Allows an [AutofillTrigger] to attach to this scope. This method should be
-  /// called in lieu of [TextInput.attach], when the [AutofillTrigger] wishes to
+  /// Allows a [TextInputClient] to attach to this scope. This method should be
+  /// called in lieu of [TextInput.attach], when the [TextInputClient] wishes to
   /// participate in autofill.
-  TextInputConnection attach(AutofillTrigger trigger, TextInputConfiguration configuration);
+  TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration);
 }
 
 @immutable
@@ -803,7 +793,7 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 /// The mixin provides a default implementation for [AutofillScope.attach].
 mixin AutofillScopeMixin implements AutofillScope {
   @override
-  TextInputConnection attach(AutofillTrigger trigger, TextInputConfiguration configuration) {
+  TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
     assert(trigger != null);
     assert(
       !autofillClients.any((AutofillClient client) => client.textInputConfiguration.autofillConfiguration == null),
