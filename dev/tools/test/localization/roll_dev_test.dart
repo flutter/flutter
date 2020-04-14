@@ -3,3 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:dev_tools/roll_dev.dart';
+
+test('Hello', () {
+  expect(1, 1);
+});
