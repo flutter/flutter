@@ -121,6 +121,7 @@ void main() {
         platform: FakePlatform(operatingSystem: 'windows'),
         processManager: mockProcessManager,
       );
+
       expect(osUtils.verifyGzip(mockFile), isFalse);
     });
 
