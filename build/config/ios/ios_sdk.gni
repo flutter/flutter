@@ -21,6 +21,9 @@ declare_args() {
 
   # The path to the iOS simulator SDK.
   ios_simulator_sdk_path = ""
+
+  # Version of iOS that we're targeting for tests.
+  ios_testing_deployment_target = "13.0"
 }
 
 if (ios_sdk_path == "") {
