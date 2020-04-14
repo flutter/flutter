@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:dev_tools/roll_dev.dart';
-import 'package:test_api/test_api.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('parseFullTag', () {
@@ -14,20 +14,20 @@ void main() {
       ];
       for (final String validTag in validTags) {
         final Match match = parseFullTag(validTag);
-        expect(match, isNotNull);
+        expect(match, isNotNull, reason: 'Expected $validTag to be parsed');
       }
     });
 
     test('returns null on invalid version input', () {
-      final List<String> validTags = <String>[
+      final List<String> invalidTags = <String>[
         '1.2.3-dev.1.2-3-gabc123',
         '1.2.3-1.2-3-gabc123',
         'v1.2.3',
         '1.2.3',
       ];
-      for (final String validTag in validTags) {
-        final Match match = parseFullTag(validTag);
-        expect(match, null);
+      for (final String invalidTag in invalidTags) {
+        final Match match = parseFullTag(invalidTag);
+        expect(match, null, reason: 'Expected $invalidTag to not be parsed');
       }
     });
   });

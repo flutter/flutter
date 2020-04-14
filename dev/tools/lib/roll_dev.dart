@@ -187,9 +187,7 @@ String getFullTag() {
 
 Match parseFullTag(String version) {
   final RegExp versionPattern = RegExp(
-    r'^(\d+)\.(\d+)\.(\d+)-dev\.(\d+)\.(\d+)-(\d+)-g([a-f0-9]+)$');
-  //final RegExp versionPattern = RegExp(
-  //  r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
+    r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 
