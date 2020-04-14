@@ -3669,7 +3669,7 @@ void main() {
       )
       ..restore(),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
