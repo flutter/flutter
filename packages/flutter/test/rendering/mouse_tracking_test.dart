@@ -121,6 +121,15 @@ void main() {
       annotation2.toString(),
       equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
     );
+
+    final MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(
+      onEnter: (_) {},
+      cursor: SystemMouseCursors.grab,
+    );
+    expect(
+      annotation3.toString(),
+      equals('MouseTrackerAnnotation#${shortHash(annotation3)}(callbacks: [enter], cursor: SystemMouseCursor(grab))'),
+    );
   });
 
   test('should detect enter, hover, and exit from Added, Hover, and Removed events', () {
