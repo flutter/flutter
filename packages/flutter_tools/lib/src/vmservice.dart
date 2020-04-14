@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart' show required;
@@ -144,6 +145,10 @@ class VMService implements vm_service.VmService {
     Stream<dynamic> secondary,
   ) {
     _vm = VM._empty(this);
+    _delegateService.streamListen('Service');
+    _delegateService.onServiceEvent.listen((event) {
+      print(event.toJson());
+    });
 
     // TODO(jonahwilliams): this is temporary to support the current vm_service
     // semantics of update-in-place.
@@ -371,10 +376,11 @@ class VMService implements vm_service.VmService {
       primary.addError(error, stackTrace);
       secondary.addError(error, stackTrace);
     });
-
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
-      channel.add,
+      (String data) {
+        channel.add(data);
+      },
       log: null,
       disposeHandler: () async {
         if (!streamClosedCompleter.isCompleted) {
@@ -383,6 +389,7 @@ class VMService implements vm_service.VmService {
         await channel.close();
       },
     );
+    await delegateService.setClientName('Flutter Tools');
 
     final VMService service = VMService(
       httpUri,
