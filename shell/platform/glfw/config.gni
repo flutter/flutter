@@ -9,5 +9,5 @@ declare_args() {
   # but it can be enabled for supported platforms (Windows, macOS, and Linux)
   # as an extra build artifact with this flag. The native toolkit shell will
   # still be built as well.
-  build_glfw_shell = (is_linux || is_win) && current_toolchain == host_toolchain
+  build_glfw_shell = is_linux && current_toolchain == host_toolchain
 }
