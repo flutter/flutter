@@ -132,7 +132,7 @@ class RangeSlider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
-    this.useV2Slider = false,
+    this.useV2Slider = true,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
