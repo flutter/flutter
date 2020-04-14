@@ -37,10 +37,6 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
-# TODO(54502): move this variable into //build/config/ios/ios_sdk.gni
-# Version of iOS that we're targeting for tests.
-ios_testing_deployment_target = "13.0"
-
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
@@ -150,89 +146,6 @@ source_set("flutter_framework_source") {
   ]
 }
 
-ocmock_path = "../../../../../third_party/ocmock/Source"
-
-# TODO(54503): Clone the OCMock repository so we can add a BUILD.gn to it.
-static_library("ocmock") {
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  cflags = [
-    "-fvisibility=default",
-    "-mios-simulator-version-min=$ios_testing_deployment_target",
-    "-Wno-misleading-indentation",
-  ]
-  sources = [
-    "$ocmock_path/OCMock/NSInvocation+OCMAdditions.h",
-    "$ocmock_path/OCMock/NSInvocation+OCMAdditions.m",
-    "$ocmock_path/OCMock/NSMethodSignature+OCMAdditions.h",
-    "$ocmock_path/OCMock/NSMethodSignature+OCMAdditions.m",
-    "$ocmock_path/OCMock/NSNotificationCenter+OCMAdditions.h",
-    "$ocmock_path/OCMock/NSNotificationCenter+OCMAdditions.m",
-    "$ocmock_path/OCMock/NSObject+OCMAdditions.h",
-    "$ocmock_path/OCMock/NSObject+OCMAdditions.m",
-    "$ocmock_path/OCMock/NSValue+OCMAdditions.h",
-    "$ocmock_path/OCMock/NSValue+OCMAdditions.m",
-    "$ocmock_path/OCMock/OCClassMockObject.h",
-    "$ocmock_path/OCMock/OCClassMockObject.m",
-    "$ocmock_path/OCMock/OCMArg.h",
-    "$ocmock_path/OCMock/OCMArg.m",
-    "$ocmock_path/OCMock/OCMArgAction.h",
-    "$ocmock_path/OCMock/OCMArgAction.m",
-    "$ocmock_path/OCMock/OCMBlockArgCaller.h",
-    "$ocmock_path/OCMock/OCMBlockArgCaller.m",
-    "$ocmock_path/OCMock/OCMBlockCaller.h",
-    "$ocmock_path/OCMock/OCMBlockCaller.m",
-    "$ocmock_path/OCMock/OCMBoxedReturnValueProvider.h",
-    "$ocmock_path/OCMock/OCMBoxedReturnValueProvider.m",
-    "$ocmock_path/OCMock/OCMConstraint.h",
-    "$ocmock_path/OCMock/OCMConstraint.m",
-    "$ocmock_path/OCMock/OCMExceptionReturnValueProvider.h",
-    "$ocmock_path/OCMock/OCMExceptionReturnValueProvider.m",
-    "$ocmock_path/OCMock/OCMExpectationRecorder.h",
-    "$ocmock_path/OCMock/OCMExpectationRecorder.m",
-    "$ocmock_path/OCMock/OCMFunctions.h",
-    "$ocmock_path/OCMock/OCMFunctions.m",
-    "$ocmock_path/OCMock/OCMFunctionsPrivate.h",
-    "$ocmock_path/OCMock/OCMIndirectReturnValueProvider.h",
-    "$ocmock_path/OCMock/OCMIndirectReturnValueProvider.m",
-    "$ocmock_path/OCMock/OCMInvocationExpectation.h",
-    "$ocmock_path/OCMock/OCMInvocationExpectation.m",
-    "$ocmock_path/OCMock/OCMInvocationMatcher.h",
-    "$ocmock_path/OCMock/OCMInvocationMatcher.m",
-    "$ocmock_path/OCMock/OCMInvocationStub.h",
-    "$ocmock_path/OCMock/OCMInvocationStub.m",
-    "$ocmock_path/OCMock/OCMLocation.h",
-    "$ocmock_path/OCMock/OCMLocation.m",
-    "$ocmock_path/OCMock/OCMMacroState.h",
-    "$ocmock_path/OCMock/OCMMacroState.m",
-    "$ocmock_path/OCMock/OCMNotificationPoster.h",
-    "$ocmock_path/OCMock/OCMNotificationPoster.m",
-    "$ocmock_path/OCMock/OCMObserverRecorder.h",
-    "$ocmock_path/OCMock/OCMObserverRecorder.m",
-    "$ocmock_path/OCMock/OCMPassByRefSetter.h",
-    "$ocmock_path/OCMock/OCMPassByRefSetter.m",
-    "$ocmock_path/OCMock/OCMRealObjectForwarder.h",
-    "$ocmock_path/OCMock/OCMRealObjectForwarder.m",
-    "$ocmock_path/OCMock/OCMRecorder.h",
-    "$ocmock_path/OCMock/OCMRecorder.m",
-    "$ocmock_path/OCMock/OCMReturnValueProvider.h",
-    "$ocmock_path/OCMock/OCMReturnValueProvider.m",
-    "$ocmock_path/OCMock/OCMStubRecorder.h",
-    "$ocmock_path/OCMock/OCMStubRecorder.m",
-    "$ocmock_path/OCMock/OCMVerifier.h",
-    "$ocmock_path/OCMock/OCMVerifier.m",
-    "$ocmock_path/OCMock/OCMock.h",
-    "$ocmock_path/OCMock/OCMockObject.h",
-    "$ocmock_path/OCMock/OCMockObject.m",
-    "$ocmock_path/OCMock/OCObserverMockObject.h",
-    "$ocmock_path/OCMock/OCObserverMockObject.m",
-    "$ocmock_path/OCMock/OCPartialMockObject.h",
-    "$ocmock_path/OCMock/OCPartialMockObject.m",
-    "$ocmock_path/OCMock/OCProtocolMockObject.h",
-    "$ocmock_path/OCMock/OCProtocolMockObject.m",
-  ]
-  include_dirs = [ "$ocmock_path" ]
-}
-
 ios_test_flutter_path = rebase_path("$root_out_dir/libios_test_flutter.dylib")
 platform_frameworks_path = "$ios_sdk_path/../../Library/Frameworks/"
 
@@ -266,11 +179,10 @@ shared_library("ios_test_flutter") {
   ]
   deps = [
     ":flutter_framework_source",
-    ":ocmock",
     "//flutter/shell/platform/darwin/common:framework_shared",
+    "//third_party/ocmock:ocmock",
     "//third_party/skia",
   ]
-  include_dirs = [ "$ocmock_path" ]
   public_configs = [ "//flutter:config" ]
 }
 
