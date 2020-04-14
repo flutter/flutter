@@ -45,37 +45,65 @@ class BottomNavigationBarThemeData with Diagnosticable {
     this.type,
   });
 
-  /// Default value for [BottomNavigationBar.backgroundColor].
+  /// The color of the [BottomNavigationBar] itself.
+  ///
+  /// See [BottomNavigationBar.backgroundColor].
   final Color backgroundColor;
 
-  /// Default value for [BottomNavigationBar.elevation].
+  /// The z-coordinate of the [BottomNavigationBar].
+  ///
+  /// See [BottomNavigationBar.elevation].
   final double elevation;
 
-  /// Default value for [BottomNavigationBar.selectedIconTheme].
+  /// The size, opacity, and color of the icon in the currently selected
+  /// [BottomNavigationBarItem.icon].
+  ///
+  /// See [BottomNavigationBar.selectedIconTheme].
   final IconThemeData selectedIconTheme;
 
-  /// Default value for [BottomNavigationBar.unselectedIconTheme].
+  /// The size, opacity, and color of the icon in the currently unselected
+  /// [BottomNavigationBarItem.icon]s.
+  ///
+  /// See [BottomNavigationBar.unselectedIconTheme].
   final IconThemeData unselectedIconTheme;
 
-  /// Default value for [BottomNavigationBar.selectedItemColor].
+  /// The color of the selected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label].
+  ///
+  /// See [BottomNavigationBar.selectedItemColor].
   final Color selectedItemColor;
 
-  /// Default value for [BottomNavigationBar.unselectedItemColor].
+  /// The color of the unselected [BottomNavigationBarItem.icon] and
+  /// [BottomNavigationBarItem.label]s.
+  ///
+  /// See [BottomNavigationBar.unselectedItemColor].
   final Color unselectedItemColor;
 
-  /// Default value for [BottomNavigationBar.selectedLabelStyle].
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
+  /// selected.
+  ///
+  /// See [BottomNavigationBar.selectedLabelStyle].
   final TextStyle selectedLabelStyle;
 
-  /// Default value for [BottomNavigationBar.unselectedLabelStyle].
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
+  ///
+  /// See [BottomNavigationBar.unselectedLabelStyle].
   final TextStyle unselectedLabelStyle;
 
-  /// Default value for [BottomNavigationBar.showSelectedLabels].
+  /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
+  ///
+  /// See [BottomNavigationBar.showSelectedLabels].
   final bool showSelectedLabels;
 
-  /// Default value for [BottomNavigationBar.showUnselectedLabels].
+  /// Whether the labels are shown for the selected [BottomNavigationBarItem].
+  ///
+  /// See [BottomNavigationBar.showUnselectedLabels].
   final bool showUnselectedLabels;
 
-  /// Default value for [BottomNavigationBar.type].
+  /// Defines the layout and behavior of a [BottomNavigationBar].
+  ///
+  /// See [BottomNavigationBar.type].
   final BottomNavigationBarType type;
 
   /// Creates a copy of this object but with the given fields replaced with the
