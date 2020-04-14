@@ -278,6 +278,40 @@ void main() {
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
     });
+
+    testWidgets('pumpFrames', (WidgetTester tester) async {
+      final List<int> logBuilds = <int>[];
+      final List<int> logLayouts = <int>[];
+      final List<int> logPaints = <int>[];
+
+      final FrameBuilder frameBuilder = (int frame) => _PhaseRecorder(
+        onBuild: () {
+          logBuilds.add(SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds);
+        },
+        onLayout: () {
+          logLayouts.add(SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds);
+        },
+        onPaint: () {
+          logPaints.add(SchedulerBinding.instance.currentFrameTimeStamp.inMicroseconds);
+        },
+        child: Container(key: ValueKey<int>(frame)),
+      );
+
+      await tester.pumpFrames(frameBuilder, 4);
+
+      expect(logBuilds, <int>[0, 17000, 34000, 50000]);
+      expect(logLayouts, <int>[50000]);
+      expect(logPaints, <int>[50000]);
+      logBuilds.clear();
+      logLayouts.clear();
+      logPaints.clear();
+
+      await tester.pumpFrames(frameBuilder, 3, frameDuration: const Duration(milliseconds: 10));
+
+      expect(logBuilds, <int>[60000, 70000, 80000]);
+      expect(logLayouts, <int>[80000]);
+      expect(logPaints, <int>[80000]);
+    });
   });
 
   group('find.byElementPredicate', () {
@@ -784,5 +818,77 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   @override
   Widget build(BuildContext context) {
     return Container();
+  }
+}
+
+// Invokes callbacks at different phases.
+class _PhaseRecorder extends StatelessWidget {
+  const _PhaseRecorder({
+    this.onBuild,
+    this.onLayout,
+    this.onPaint,
+    this.child,
+  });
+
+  final VoidCallback onBuild;
+  final VoidCallback onLayout;
+  final VoidCallback onPaint;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onBuild != null)
+      onBuild();
+    return _InnerPhaseRecorder(
+      onLayout: onLayout,
+      onPaint: onPaint,
+      child: child,
+    );
+  }
+}
+
+class _InnerPhaseRecorder extends SingleChildRenderObjectWidget {
+  const _InnerPhaseRecorder({
+    this.onLayout,
+    this.onPaint,
+    Widget child,
+  }) : super(child: child);
+
+  final VoidCallback onLayout;
+  final VoidCallback onPaint;
+
+  @override
+  _RenderInnerPhaseRecorder createRenderObject(BuildContext context) {
+    return _RenderInnerPhaseRecorder(onLayout: onLayout, onPaint: onPaint);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderInnerPhaseRecorder renderObject) {
+    renderObject
+      ..onLayout = onLayout
+      ..onPaint = onPaint;
+  }
+}
+
+class _RenderInnerPhaseRecorder extends RenderConstrainedBox {
+  _RenderInnerPhaseRecorder({
+    this.onLayout,
+    this.onPaint,
+  }) : super(additionalConstraints: const BoxConstraints.tightFor(width: 1, height: 1));
+
+  VoidCallback onLayout;
+  VoidCallback onPaint;
+
+  @override
+  void performLayout() {
+    if (onLayout != null)
+      onLayout();
+    super.performLayout();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (onPaint != null)
+      onPaint();
   }
 }

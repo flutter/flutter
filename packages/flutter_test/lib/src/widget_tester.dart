@@ -49,7 +49,7 @@ export 'package:test_api/test_api.dart' hide
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
 /// Signature for callback to [WidgetTester.pumpFrames].
-typedef FrameGetter = Widget Function(int frameIndex);
+typedef FrameBuilder = Widget Function(int frameIndex);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -548,19 +548,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
-  /// Repeatedly triggers frames with `frameDuration` amount of time in between.
+  /// Repeatedly triggers `frameCount` frames with a fixed `frameDuration`.
+  /// 
+  /// The `frameDuration` defaults to 16.683 milliseconds (59.94 FPS).
+  /// All frames stop executing after finishing [EnginePhase.build], except for
+  /// the last frame, which executes the full pass.
   Future<void> pumpFrames(
-    FrameGetter getFrame,
-    int frameCount, {
-    Duration frameDuration = const Duration(milliseconds: 16, microseconds: 667),
+    FrameBuilder buildFrame,
+    int frameNum, {
+    Duration frameDuration = const Duration(milliseconds: 16, microseconds: 683),
   }) {
     return TestAsyncUtils.guard<void>(() async {
-      for (int currentFrame = 0; currentFrame < frameCount; currentFrame++) {
-        binding.attachRootWidget(getFrame(currentFrame));
+      for (int currentFrame = 0; currentFrame < frameNum; currentFrame++) {
+        binding.attachRootWidget(buildFrame(currentFrame));
         binding.scheduleFrame();
         await binding.pump(
           frameDuration,
-          currentFrame == frameCount - 1 ? EnginePhase.sendSemanticsUpdate : EnginePhase.build,
+          currentFrame == frameNum - 1 ? EnginePhase.sendSemanticsUpdate : EnginePhase.build,
         );
       }
     });

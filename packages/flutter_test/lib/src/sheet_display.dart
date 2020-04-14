@@ -7,13 +7,15 @@ import 'package:flutter/widgets.dart';
 
 /// Place `cellNum` number of the target widget in a grid sheet.
 /// 
-/// Each target widget is placed in a cell of size `cellSize`. Cells are placed
-/// from top left to bottom right, horizontal first.
+/// The [SheetDisplay] tries to fill as much space as the parent allows, then
+/// display clones of the target widget in cells of size `cellSize`, placing
+/// cells from top left to bottom right, horizontal first. Cells are keyed from
+/// the tail to the front, meaning new clones are added to the front of the list.
 /// 
-/// Cells are keyed from the tail to the front, meaning new clones are added to
-/// the front of the list.
+/// See also:
 /// 
-/// This class is useful to display the frame-by-frame animation of a widget.
+///  * [WidgetTester.pumpFrames], which is often used together to display the
+///    frame-by-frame animation of a widget in a test.
 class SheetDisplay extends StatelessWidget {
   /// Create an [SheetDisplay] using a fixed `target` widget.
   /// 
@@ -35,9 +37,7 @@ class SheetDisplay extends StatelessWidget {
   /// Should not change throughout the test.
   final Size cellSize;
 
-  /// An increasing integer that starts from 0.
-  /// 
-  /// At the [cellNum]'th frame, [cellNum] clones will be displayed.
+  /// The number of clones to be displayed.
   final int cellNum;
 
   @override
