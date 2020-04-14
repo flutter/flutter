@@ -361,8 +361,9 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, contains(
+      final String statusTextWithoutFormatting = removeTextFormatting(testLogger.statusText);
+      expect(statusTextWithoutFormatting, contains("Your app isn't using AndroidX"));
+      expect(statusTextWithoutFormatting, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -412,9 +413,10 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains("Your app isn't using AndroidX"), isFalse);
+      final String statusTextWithoutFormatting = removeTextFormatting(testLogger.statusText);
+      expect(statusTextWithoutFormatting.contains("Your app isn't using AndroidX"), isFalse);
       expect(
-        testLogger.statusText.contains(
+        statusTextWithoutFormatting.contains(
           'To avoid potential build failures, you can quickly migrate your app by '
           'following the steps on https://goo.gl/CP92wY'
         ),
@@ -449,6 +451,10 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
     globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
+}
+
+String removeTextFormatting(String source){
+  return source.replaceAll('\n', '').replaceAll('    ', ' ');
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}
