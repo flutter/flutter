@@ -11,12 +11,6 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
-/**
- * FlView:
- *
- * #FlView is a GTK widget that is capable of displaying a Flutter application.
- */
-
 struct _FlView {
   GtkWidget parent_instance;
 
@@ -278,14 +272,6 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 static void fl_view_init(FlView* self) {}
 
-/**
- * fl_view_new:
- * @project: The project to show.
- *
- * Create a widget to show Flutter application.
- *
- * Returns: a new #FlView
- */
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   return static_cast<FlView*>(
       g_object_new(fl_view_get_type(), "flutter-project", project, nullptr));
