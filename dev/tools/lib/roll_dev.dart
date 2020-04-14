@@ -23,8 +23,7 @@ const String kHelp = 'help';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
-void main(List<String> args) {
-  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
+ArgResults parseArguments(List<String> args, ArgParser argParser) {
   argParser.addOption(
     kIncrement,
     help: 'Specifies which part of the x.y.z version number to increment. Required.',
@@ -57,6 +56,7 @@ void main(List<String> args) {
   );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
+
   ArgResults argResults;
   try {
     argResults = argParser.parse(args);
@@ -65,6 +65,13 @@ void main(List<String> args) {
     print(argParser.usage);
     exit(1);
   }
+
+  return argResults;
+}
+
+void main(List<String> args) {
+  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
+  final ArgResults argResults = parseArguments(args, argParser);
 
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
@@ -165,8 +172,9 @@ void main(List<String> args) {
 }
 
 String getFullTag() {
+  const String glob = '*.*.*-dev.*.*';
   return getGitOutput(
-    'describe --match *.*.*-dev.*.* --first-parent --long --tags',
+    'describe --match $glob --first-parent --long --tags',
     'obtain last released version number',
   );
 }
@@ -186,7 +194,6 @@ String getVersionFromParts(List<int> parts) {
     ..write('-')
     ..write(parts.skip(3).take(2).join('.'))
     ..write('.pre');
-    //..write(parts.skip(3).join('.'));
   return buf.toString();
 }
 
