@@ -1101,7 +1101,7 @@ class ThemeData with Diagnosticable {
     MaterialBannerThemeData bannerTheme,
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
-    BottomNavigationBarThemeData bottomNavigationBarThemeData,
+    BottomNavigationBarThemeData bottomNavigationBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
