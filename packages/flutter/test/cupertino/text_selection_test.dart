@@ -53,7 +53,6 @@ void main() {
   // Returns true iff the button is visually enabled.
   bool appearsEnabled(WidgetTester tester, String text) {
     final CupertinoButton button = tester.widget<CupertinoButton>(
-
       find.ancestor(
         of: find.text(text),
         matching: find.byType(CupertinoButton),

@@ -502,10 +502,22 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      value: 1.0,
+      vsync: this,
+      // This was eyeballed on a physical iOS device running iOS 13.
+      duration: const Duration(milliseconds: 150),
+    );
+  }
+
+  @override
   void didUpdateWidget(_CupertinoTextSelectionToolbarContent oldWidget) {
     // If the children are changing, the current page should be reset.
     if (widget.children != oldWidget.children) {
       _page = 0;
+      _nextPage = null;
       _controller.forward();
       _controller.removeStatusListener(_statusListener);
     }
@@ -516,17 +528,6 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      value: 1.0,
-      vsync: this,
-      // This was eyeballed on a physical iOS device running iOS 13.
-      duration: const Duration(milliseconds: 150),
-    );
   }
 
   @override
@@ -870,7 +871,7 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     _nextButtonDisabled.layout(constraints.loosen(), parentUsesSize: true);
 
     final double subsequentPageButtonsWidth =
-      _backButton.size.width + _nextButton.size.width;
+        _backButton.size.width + _nextButton.size.width;
     double currentButtonPosition = 0.0;
     double toolbarWidth; // The width of the whole widget.
     double firstPageWidth;
@@ -938,13 +939,13 @@ class _CupertinoTextSelectionToolbarItemsRenderBox extends RenderBox with Contai
     assert(page <= currentPage);
 
     // Position page nav buttons.
-    final ToolbarItemsParentData nextButtonParentData =
-        _nextButton.parentData as ToolbarItemsParentData;
-    final ToolbarItemsParentData nextButtonDisabledParentData =
-        _nextButtonDisabled.parentData as ToolbarItemsParentData;
-    final ToolbarItemsParentData backButtonParentData =
-        _backButton.parentData as ToolbarItemsParentData;
     if (currentPage > 0) {
+      final ToolbarItemsParentData nextButtonParentData =
+          _nextButton.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData nextButtonDisabledParentData =
+          _nextButtonDisabled.parentData as ToolbarItemsParentData;
+      final ToolbarItemsParentData backButtonParentData =
+          _backButton.parentData as ToolbarItemsParentData;
       // The forward button always shows if there is more than one page, even on
       // the last page (it's just disabled).
       if (page == currentPage) {
