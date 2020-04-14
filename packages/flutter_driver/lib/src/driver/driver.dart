@@ -128,7 +128,7 @@ abstract class FlutterDriver {
   /// to an isolate.
   ///
   /// `headers` optionally specifies HTTP headers to be included in the
-  /// WebSocket connection. This is only used for VMServiceFlutterDriver
+  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
   /// connections.
   ///
   /// `browser` specifies which FlutterDriver implementation to use. If not
