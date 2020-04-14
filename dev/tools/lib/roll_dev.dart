@@ -92,7 +92,7 @@ void main(List<String> args) {
   }
 
   runGit('fetch $origin', 'fetch $origin');
-  runGit('reset $commit --hard', 'reset to the release commit');
+  //runGit('reset $commit --hard', 'reset to the release commit'); TODO
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
