@@ -145,10 +145,6 @@ class VMService implements vm_service.VmService {
     Stream<dynamic> secondary,
   ) {
     _vm = VM._empty(this);
-    _delegateService.streamListen('Service');
-    _delegateService.onServiceEvent.listen((event) {
-      print(event.toJson());
-    });
 
     // TODO(jonahwilliams): this is temporary to support the current vm_service
     // semantics of update-in-place.
@@ -379,6 +375,7 @@ class VMService implements vm_service.VmService {
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
       (String data) {
+        print('SENDING: $data');
         channel.add(data);
       },
       log: null,
@@ -390,6 +387,11 @@ class VMService implements vm_service.VmService {
       },
     );
     await delegateService.setClientName('Flutter Tools');
+    await delegateService.streamListen('Service');
+    delegateService.onServiceEvent.listen((event) {
+      print('SERVICE EVENT');
+      print(event.toJson());
+    });
 
     final VMService service = VMService(
       httpUri,
