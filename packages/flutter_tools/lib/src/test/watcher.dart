@@ -17,14 +17,14 @@ abstract class TestWatcher {
   ///
   /// The child process won't exit until this method completes.
   /// Not called if the process died.
-  Future<void> handleFinishedTest(ProcessEvent event) async { }
+  Future<void> handleFinishedTest(ProcessEvent event);
 
   /// Called when the test process crashed before connecting to test harness.
-  Future<void> handleTestCrashed(ProcessEvent event) async { }
+  Future<void> handleTestCrashed(ProcessEvent event);
 
   /// Called if we timed out waiting for the test process to connect to test
   /// harness.
-  Future<void> handleTestTimedOut(ProcessEvent event) async { }
+  Future<void> handleTestTimedOut(ProcessEvent event);
 }
 
 /// Describes a child process started during testing.
