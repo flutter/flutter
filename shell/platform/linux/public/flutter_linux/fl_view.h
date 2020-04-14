@@ -17,6 +17,20 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlView, fl_view, FL, VIEW, GtkWidget)
 
+/**
+ * FlView:
+ *
+ * #FlView is a GTK widget that is capable of displaying a Flutter application.
+ */
+
+/**
+ * fl_view_new:
+ * @project: The project to show.
+ *
+ * Creates a widget to show Flutter application.
+ *
+ * Returns: a new #FlView
+ */
 FlView* fl_view_new(FlDartProject* project);
 
 G_END_DECLS
