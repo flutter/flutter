@@ -372,6 +372,7 @@ class VMService implements vm_service.VmService {
     final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
     final StreamController<dynamic> primary = StreamController<dynamic>();
     final StreamController<dynamic> secondary = StreamController<dynamic>();
+
     // Create an instance of the package:vm_service API in addition to the flutter
     // tool's to allow gradual migration.
     final Completer<void> streamClosedCompleter = Completer<void>();
