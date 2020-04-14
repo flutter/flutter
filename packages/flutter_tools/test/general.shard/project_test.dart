@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -23,6 +24,10 @@ import '../src/context.dart';
 import '../src/testbed.dart';
 
 void main() {
+  // TODO(jonahwilliams): remove once FlutterProject is fully refactored.
+  // this is safe since no tests have expectations on the test logger.
+  final BufferLogger logger = BufferLogger.test();
+
   group('Project', () {
     group('construction', () {
       testInMemory('fails on null directory', () async {
@@ -154,8 +159,8 @@ void main() {
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = FlutterProject(
           globals.fs.directory('not_created'),
-          FlutterManifest.empty(),
-          FlutterManifest.empty(),
+          FlutterManifest.empty(logger: logger),
+          FlutterManifest.empty(logger: logger),
         );
         await project.ensureReadyForPlatformSpecificTooling();
         expectNotExists(project.directory);
@@ -197,7 +202,10 @@ void main() {
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          logger: logger,
+          fileSystem: globals.fs,
+        ),
       });
       testUsingContext('generates Xcode configuration for macOS', () async {
         final FlutterProject project = await someProject();
@@ -208,7 +216,10 @@ void main() {
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          logger: logger,
+          fileSystem: globals.fs,
+        ),
       });
       testUsingContext('injects plugins for Linux', () async {
         final FlutterProject project = await someProject();
@@ -220,7 +231,10 @@ void main() {
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          logger: logger,
+          fileSystem: globals.fs,
+        ),
       });
       testUsingContext('injects plugins for Windows', () async {
         final FlutterProject project = await someProject();
@@ -246,7 +260,10 @@ EndGlobal''');
         FileSystem: () => MemoryFileSystem(),
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-        FlutterProjectFactory: () => FlutterProjectFactory(),
+        FlutterProjectFactory: () => FlutterProjectFactory(
+          logger: logger,
+          fileSystem: globals.fs,
+        ),
       });
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
@@ -312,7 +329,10 @@ EndGlobal''');
       setUp(() {
         fs = MemoryFileSystem();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory();
+        flutterProjectFactory = FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+        );
       });
 
       testInMemory('default host app language', () async {
@@ -348,7 +368,10 @@ apply plugin: 'kotlin-android'
         fs = MemoryFileSystem();
         mockPlistUtils = MockPlistUtils();
         mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory();
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+        );
       });
 
       void testWithMocks(String description, Future<void> testMethod()) {
@@ -521,8 +544,12 @@ apply plugin: 'kotlin-android'
     FlutterProjectFactory flutterProjectFactory;
 
     setUp(() {
-      testbed = Testbed();
-      flutterProjectFactory = FlutterProjectFactory();
+      testbed = Testbed(setup: () {
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+        );
+      });
     });
 
     test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
@@ -646,7 +673,10 @@ void testInMemory(String description, Future<void> testMethod()) {
   packagesFile.createSync(recursive: true);
   packagesFile.writeAsStringSync('flutter_template_images:${dummyTemplateImagesDirectory.uri}');
 
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory();
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: testFileSystem,
+    logger: globals.logger ?? BufferLogger.test(),
+  );
 
   testUsingContext(
     description,

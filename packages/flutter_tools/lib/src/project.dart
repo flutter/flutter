@@ -12,6 +12,7 @@ import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'features.dart';
@@ -24,7 +25,14 @@ import 'plugins.dart';
 import 'template.dart';
 
 class FlutterProjectFactory {
-  FlutterProjectFactory();
+  FlutterProjectFactory({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) : _logger = logger,
+       _fileSystem = fileSystem;
+
+  final Logger _logger;
+  final FileSystem _fileSystem;
 
   @visibleForTesting
   final Map<String, FlutterProject> projects =
@@ -34,14 +42,18 @@ class FlutterProjectFactory {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    return projects.putIfAbsent(directory.path, /* ifAbsent */ () {
+    return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
+        logger: _logger,
+        fileSystem: _fileSystem,
       );
       final FlutterManifest exampleManifest = FlutterProject._readManifest(
         FlutterProject._exampleDirectory(directory)
             .childFile(bundle.defaultManifestPath)
             .path,
+        logger: _logger,
+        fileSystem: _fileSystem,
       );
       return FlutterProject(directory, manifest, exampleManifest);
     });
@@ -167,7 +179,7 @@ class FlutterProject {
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
-    FlutterManifest.empty(),
+    FlutterManifest.empty(logger: globals.logger),
   );
 
   /// True if this project is a Flutter module project.
@@ -187,13 +199,20 @@ class FlutterProject {
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static FlutterManifest _readManifest(String path) {
+  static FlutterManifest _readManifest(String path, {
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) {
     FlutterManifest manifest;
     try {
-      manifest = FlutterManifest.createFromPath(path);
+      manifest = FlutterManifest.createFromPath(
+        path,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
     } on YamlException catch (e) {
-      globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      globals.printError('$e');
+      logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');

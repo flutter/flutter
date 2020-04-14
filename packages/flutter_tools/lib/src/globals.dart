@@ -43,7 +43,10 @@ Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 Usage get flutterUsage => context.get<Usage>();
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory(
+  logger: logger,
+  fileSystem: fs,
+);
 
 const FileSystem _kLocalFs = LocalFileSystem();
 
