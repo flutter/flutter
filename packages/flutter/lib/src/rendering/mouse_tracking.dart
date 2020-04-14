@@ -7,9 +7,11 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+
+import 'mouse_cursor.dart';
+import 'object.dart';
 
 /// Signature for listening to [PointerEnterEvent] events.
 ///
