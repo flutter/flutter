@@ -706,6 +706,18 @@ class MouseTracker extends ChangeNotifier {
 
   /// MOUSE CURSOR
 
+  /// Returns the current mouse cursor of a device.
+  /// 
+  /// Only valid when asserts are enabled. In release builds, always returns
+  /// null.
+  PreparedMouseCursor debugDeviceCursor(int device) {
+    PreparedMouseCursor result;
+    assert(() {
+      result = _mouseCursorStates[device]?.currentAnnotation?.cursor;
+      return true;
+    }());
+    return result;
+  }
   final Map<int, _MouseCursorState> _mouseCursorStates = <int, _MouseCursorState>{};
 
   // Find the mouse cursor, which fallbacks to _fallbackAnnotation.

@@ -539,10 +539,6 @@ void main() {
   });
 
   testWidgets('applies mouse cursor', (WidgetTester tester) async {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _setMockCursorHandlers(logCursors: logCursors);
-    addTearDown(_clearMockCursorHandlers);
-
     await tester.pumpWidget(_Scaffold(
       topLeft: MouseRegion(
         cursor: SystemMouseCursors.text,
@@ -555,22 +551,13 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await tester.pump();
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
-    ]);
-    logCursors.clear();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.basic);
 
     await gesture.moveTo(const Offset(5, 5));
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
-    ]);
-    logCursors.clear();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.text);
 
     await gesture.moveTo(const Offset(100, 100));
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
-    ]);
-    logCursors.clear();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.basic);
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -1458,17 +1445,12 @@ void main() {
   });
 
   testWidgets("Changing MouseRegion.cursor is effective and doesn't repaint", (WidgetTester tester) async {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _setMockCursorHandlers(logCursors: logCursors);
-    addTearDown(_clearMockCursorHandlers);
-
     final List<String> logPaints = <String>[];
     final List<String> logEnters = <String>[];
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
-    logCursors.clear();
 
     final VoidCallback onPaintChild = () { logPaints.add('paint'); };
 
@@ -1487,12 +1469,9 @@ void main() {
     await gesture.moveTo(const Offset(5, 5));
 
     expect(logPaints, <String>['paint']);
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.forbidden.shapeCode),
-    ]);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.forbidden);
     expect(logEnters, <String>['enter']);
     logPaints.clear();
-    logCursors.clear();
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
@@ -1509,27 +1488,19 @@ void main() {
     ));
 
     expect(logPaints, isEmpty);
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
-    ]);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.text);
     expect(logEnters, isEmpty);
     logPaints.clear();
-    logCursors.clear();
     logEnters.clear();
   });
 
   testWidgets('Changing whether MouseRegion.cursor is null is effective and repaints', (WidgetTester tester) async {
-    final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
-    _setMockCursorHandlers(logCursors: logCursors);
-    addTearDown(_clearMockCursorHandlers);
-
     final List<String> logEnters = <String>[];
     final List<String> logPaints = <String>[];
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(100, 100));
     addTearDown(gesture.removePointer);
-    logCursors.clear();
 
     final VoidCallback onPaintChild = () { logPaints.add('paint'); };
 
@@ -1548,11 +1519,8 @@ void main() {
 
     expect(logPaints, <String>['paint']);
     expect(logEnters, <String>['enter']);
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
-    ]);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.text);
     logPaints.clear();
-    logCursors.clear();
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
@@ -1569,11 +1537,8 @@ void main() {
 
     expect(logPaints, <String>['paint']);
     expect(logEnters, isEmpty);
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.basic.shapeCode),
-    ]);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.basic);
     logPaints.clear();
-    logCursors.clear();
     logEnters.clear();
 
     await tester.pumpWidget(_Scaffold(
@@ -1589,12 +1554,9 @@ void main() {
     ));
 
     expect(logPaints, <String>['paint']);
-    expect(logCursors, <_CursorUpdateDetails>[
-      _CursorUpdateDetails.activateSystemCursor(device: 1, shapeCode: SystemMouseCursors.text.shapeCode),
-    ]);
+    expect(RendererBinding.instance.mouseTracker.debugDeviceCursor(1), SystemMouseCursors.text);
     expect(logEnters, isEmpty);
     logPaints.clear();
-    logCursors.clear();
     logEnters.clear();
   });
 
@@ -1741,55 +1703,4 @@ class _ColumnContainer extends StatelessWidget {
       ),
     );
   }
-}
-
-
-class _CursorUpdateDetails extends MethodCall {
-  const _CursorUpdateDetails(String method, Map<String, dynamic> arguments)
-    : assert(arguments != null),
-      super(method, arguments);
-
-  _CursorUpdateDetails.wrap(MethodCall call)
-    : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
-
-  _CursorUpdateDetails.activateSystemCursor({int device, int shapeCode})
-    : this('activateSystemCursor', <String, dynamic>{'device': device, 'shapeCode': shapeCode});
-
-  @override
-  Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(other, this))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is _CursorUpdateDetails
-        && other.method == method
-        && other.arguments.length == arguments.length
-        && other.arguments.entries.every(
-          (MapEntry<String, dynamic> entry) =>
-            arguments.containsKey(entry.key) && arguments[entry.key] == entry.value,
-        );
-  }
-
-  @override
-  int get hashCode => hashValues(method, arguments);
-
-  @override
-  String toString() {
-    return '_CursorUpdateDetails(method: $method, arguments: $arguments)';
-  }
-}
-
-void _setMockCursorHandlers({
-  List<_CursorUpdateDetails> logCursors,
-}) {
-  SystemChannels.mouseCursor.setMockMethodCallHandler((MethodCall call) async {
-    logCursors.add(_CursorUpdateDetails.wrap(call));
-    return;
-  });
-}
-void _clearMockCursorHandlers() {
-  SystemChannels.mouseCursor.setMockMethodCallHandler(null);
 }

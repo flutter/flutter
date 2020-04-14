@@ -400,7 +400,7 @@ class _CursorUpdateDetails extends MethodCall {
 }
 
 class _TestGestureFlutterBinding extends BindingBase
-    with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {
+    with SchedulerBinding, ServicesBinding, GestureBinding, SemanticsBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
