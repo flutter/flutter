@@ -481,7 +481,7 @@ void main() {
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
-      'localhost',
+      'any',
       8123,
       (String url) => null,
       true,
@@ -509,6 +509,7 @@ void main() {
         expect(enableDebugging, true);
         expect(enableDebugExtension, true);
         expect(useSseForDebugProxy, true);
+        expect(hostname, 'any');
 
         return MockDwds();
       });

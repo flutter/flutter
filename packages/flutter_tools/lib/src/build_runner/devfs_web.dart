@@ -216,6 +216,7 @@ class WebAssetServer implements AssetReader {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
           return chrome.chromeConnection;
         },
+        hostname: hostname,
         urlEncoder: urlTunneller,
         enableDebugging: true,
         useSseForDebugProxy: useSseForDebugProxy,
