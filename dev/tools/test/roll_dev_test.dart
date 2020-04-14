@@ -10,6 +10,7 @@ void main() {
     test('returns match on valid version input', () {
       final List<String> validTags = <String>[
         '1.2.3-dev.1.2-3-gabc123',
+        'v1.2.3',
       ];
       for (final String validTag in validTags) {
         final Match match = parseFullTag(validTag);
