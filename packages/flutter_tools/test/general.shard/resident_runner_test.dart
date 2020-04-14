@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -23,8 +24,8 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -110,6 +111,7 @@ void main() {
       });
     when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
+    when(mockFlutterDevice.getVMs()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
         'type': 'ReloadReport',
@@ -222,7 +224,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
     expect(result.fatal, true);
@@ -327,7 +329,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
-    )).thenThrow(RpcException(666, 'something bad happened'));
+    )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
     expect(result.fatal, true);
@@ -387,6 +389,8 @@ void main() {
     expect(residentRunner.isRunningDebug, true);
     // does not support CanvasKit
     expect(residentRunner.supportsCanvasKit, false);
+    // does support SkSL
+    expect(residentRunner.supportsWriteSkSL, true);
     // commands
     expect(testLogger.statusText, equals(
         <dynamic>[
@@ -406,6 +410,7 @@ void main() {
           commandHelp.p,
           commandHelp.o,
           commandHelp.z,
+          commandHelp.M,
           commandHelp.v,
           commandHelp.P,
           commandHelp.a,
@@ -415,9 +420,50 @@ void main() {
     ));
   }));
 
-  test('ResidentRunner does not support CanvasKit', () => testbed.run(() async {
+  test('ResidentRunner does support CanvasKit', () => testbed.run(() async {
     expect(() => residentRunner.toggleCanvaskit(),
       throwsA(isA<Exception>()));
+  }));
+
+  test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{}
+      });
+    });
+    await residentRunner.writeSkSL();
+
+    expect(testLogger.statusText, contains('No data was receieved'));
+  }));
+
+  test('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.name).thenReturn('test device');
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{
+          'A': 'B',
+        }
+      });
+    });
+    await residentRunner.writeSkSL();
+
+    expect(testLogger.statusText, contains('flutter_01.sksl'));
+    expect(globals.fs.file('flutter_01.sksl'), exists);
+    expect(json.decode(globals.fs.file('flutter_01.sksl').readAsStringSync()), <String, Object>{
+      'platform': 'android-arm',
+      'name': 'test device',
+      'engineRevision': '42.2', // From FakeFlutterVersion
+      'data': <String, Object>{'A': 'B'}
+    });
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {

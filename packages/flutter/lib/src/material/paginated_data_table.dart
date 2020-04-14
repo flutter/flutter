@@ -474,6 +474,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
                     columnSpacing: widget.columnSpacing,
+                    showCheckboxColumn: widget.showCheckboxColumn,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
                   ),
                 ),

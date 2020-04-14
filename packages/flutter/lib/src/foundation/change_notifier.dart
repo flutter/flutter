@@ -183,9 +183,9 @@ class ChangeNotifier implements Listenable {
   /// Call all the registered listeners.
   ///
   /// Call this method whenever the object changes, to notify any clients the
-  /// object may have. Listeners that are added during this iteration will not
-  /// be visited. Listeners that are removed during this iteration will not be
-  /// visited after they are removed.
+  /// object may have changed. Listeners that are added during this iteration
+  /// will not be visited. Listeners that are removed during this iteration will
+  /// not be visited after they are removed.
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].

@@ -386,12 +386,14 @@ void paintImage({
   bool flipHorizontally = false,
   bool invertColors = false,
   FilterQuality filterQuality = FilterQuality.low,
+  bool isAntiAlias = false,
 }) {
   assert(canvas != null);
   assert(image != null);
   assert(alignment != null);
   assert(repeat != null);
   assert(flipHorizontally != null);
+  assert(isAntiAlias != null);
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;
@@ -422,7 +424,7 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  final Paint paint = Paint()..isAntiAlias = false;
+  final Paint paint = Paint()..isAntiAlias = isAntiAlias;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {

@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
@@ -1421,6 +1422,86 @@ void main() {
     // These callbacks shouldn't have been triggered.
     assert(!onSubmittedCalled);
     assert(!onEditingCompleteCalled);
+  });
+
+  testWidgets(
+    'iOS autocorrection rectangle should appear on demand'
+    'and dismiss when the text changes or when focus is lost',
+    (WidgetTester tester) async {
+      const Color rectColor = Color(0xFFFF0000);
+
+      void verifyAutocorrectionRectVisibility({ bool expectVisible }) {
+        PaintPattern evaluate() {
+          if (expectVisible) {
+            return paints..something(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return false;
+              final Paint paint = arguments[1] as Paint;
+              return paint.color == rectColor;
+            }));
+          } else {
+            return paints..everything(((Symbol method, List<dynamic> arguments) {
+              if (method != #drawRect)
+                return true;
+              final Paint paint = arguments[1] as Paint;
+              if (paint.color != rectColor)
+                return true;
+              throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
+            }));
+          }
+        }
+
+        expect(findRenderEditable(tester), evaluate());
+      }
+
+      final FocusNode focusNode = FocusNode();
+      final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
+
+      final Widget widget = MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: Typography.material2018(platform: TargetPlatform.android).black.subtitle1,
+          cursorColor: Colors.blue,
+          autocorrect: true,
+          autocorrectionTextRectColor: rectColor,
+          showCursor: false,
+          onEditingComplete: () { },
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+      assert(focusNode.hasFocus);
+
+      // The prompt rect should be invisible initially.
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      // Show prompt rect when told to.
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Text changed, prompt rect goes away.
+      controller.text = '12345';
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
+
+      state.showAutocorrectionPromptRect(0, 1);
+      await tester.pump();
+
+      verifyAutocorrectionRectVisibility(expectVisible: true);
+
+      // Unfocus, prompt rect should go away.
+      focusNode.unfocus();
+      await tester.pump();
+      verifyAutocorrectionRectVisibility(expectVisible: false);
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
@@ -4218,22 +4299,24 @@ void main() {
     const List<String> referenceLog = <String>[
       '[1]: , a',
       '[1]: normal aa',
-      '[2]: aa, aaa',
+      '[2]: a, aa',
       '[2]: normal aaaa',
-      '[3]: aaaa, aa',
-      '[3]: deleting a',
-      '[4]: a, aaa',
-      '[4]: normal aaaaaaaa',
-      '[5]: aaaaaaaa, aaaa',
-      '[5]: deleting aaa',
-      '[6]: aaa, aa',
-      '[6]: deleting aaaa',
-      '[7]: aaaa, aaaaaaa',
-      '[7]: normal aaaaaaaaaaaaaa',
-      '[8]: aaaaaaaaaaaaaa, aa',
-      '[8]: deleting aaaaaa',
-      '[9]: aaaaaa, aaaaaaaaa',
-      '[9]: normal aaaaaaaaaaaaaaaaaa',
+      '[3]: aa, aaa',
+      '[3]: normal aaaaaa',
+      '[4]: aaa, aa',
+      '[4]: deleting aa',
+      '[5]: aa, aaa',
+      '[5]: normal aaaaaaaaaa',
+      '[6]: aaa, aaaa',
+      '[6]: normal aaaaaaaaaaaa',
+      '[7]: aaaa, aa',
+      '[7]: deleting aaaaa',
+      '[8]: aa, aaaaaaa',
+      '[8]: normal aaaaaaaaaaaaaaaa',
+      '[9]: aaaaaaa, aa',
+      '[9]: deleting aaaaaaa',
+      '[10]: aa, aaaaaaaaa',
+      '[10]: normal aaaaaaaaaaaaaaaaaaaa'
     ];
 
     expect(formatter.log, referenceLog);
@@ -4273,6 +4356,10 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals(''));
     expect(state.wantKeepAlive, true);
 
+    // We no longer perform full repeat filtering in framework, it is now left
+    // to the engine to prevent repeat calls from being sent in the first place.
+    // Engine preventing repeats is far more reliable and avoids many of the ambiguous
+    // filtering we performed before.
     expect(formatter.formatCallCount, 0);
     state.updateEditingValue(const TextEditingValue(text: '01'));
     expect(formatter.formatCallCount, 1);
@@ -4280,20 +4367,20 @@ void main() {
     expect(formatter.formatCallCount, 2);
     state.updateEditingValue(const TextEditingValue(text: '0123')); // Text change causes reformat
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // No text change, does not format
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123')); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123')); // No text change, does not format
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Selection change does not reformat
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // No text change, does not format
     expect(formatter.formatCallCount, 3);
-    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // Repeat, does not format
+    state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2))); // No text change, does not format
     expect(formatter.formatCallCount, 3);
     state.updateEditingValue(const TextEditingValue(text: '0123', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 1, end: 2))); // Composing change does not reformat
     expect(formatter.formatCallCount, 3);
     expect(formatter.lastOldValue.composing, const TextRange(start: -1, end: -1));
-    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1));
+    expect(formatter.lastNewValue.composing, const TextRange(start: -1, end: -1)); // Since did not format, the new composing was not registered in formatter.
     state.updateEditingValue(const TextEditingValue(text: '01234', selection: TextSelection.collapsed(offset: 2))); // Formats, with oldValue containing composing region.
     expect(formatter.formatCallCount, 4);
     expect(formatter.lastOldValue.composing, const TextRange(start: 1, end: 2));
@@ -4302,9 +4389,9 @@ void main() {
     const List<String> referenceLog = <String>[
       '[1]: , 01',
       '[1]: normal aa',
-      '[2]: aa, 012',
+      '[2]: 01, 012',
       '[2]: normal aaaa',
-      '[3]: aaaa, 0123',
+      '[3]: 012, 0123',
       '[3]: normal aaaaaa',
       '[4]: 0123, 01234',
       '[4]: normal aaaaaaaa'
@@ -4613,13 +4700,13 @@ class MockTextFormatter extends TextInputFormatter {
       TextEditingValue oldValue, TextEditingValue newValue) {
     final String result = 'a' * (formatCallCount - 2);
     log.add('[$formatCallCount]: deleting $result');
-    return TextEditingValue(text: result);
+    return TextEditingValue(text: newValue.text, selection: newValue.selection, composing: newValue.composing);
   }
 
   TextEditingValue _formatText(TextEditingValue value) {
     final String result = 'a' * formatCallCount * 2;
     log.add('[$formatCallCount]: normal $result');
-    return TextEditingValue(text: result);
+    return TextEditingValue(text: value.text, selection: value.selection, composing: value.composing);
   }
 }
 

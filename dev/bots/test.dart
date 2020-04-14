@@ -47,11 +47,16 @@ const int kDeviceLabShardCount = 4;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
+/// The default is 8 shards. Typically .cirrus.yml would define the
+/// WEB_SHARD_COUNT environment variable rather than relying on the default.
+///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-const int kWebShardCount = 8;
+int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
+  ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
+  : 8;
 
 /// Tests that we don't run on Web for various reasons.
 //
@@ -539,12 +544,12 @@ Future<void> _runWebUnitTests() async {
     // We use a constant seed for repeatability.
     ..shuffle(math.Random(0));
 
-  assert(kWebShardCount >= 1);
-  final int testsPerShard = (allTests.length / kWebShardCount).ceil();
-  assert(testsPerShard * kWebShardCount >= allTests.length);
+  assert(webShardCount >= 1);
+  final int testsPerShard = (allTests.length / webShardCount).ceil();
+  assert(testsPerShard * webShardCount >= allTests.length);
 
   // This for loop computes all but the last shard.
-  for (int index = 0; index < kWebShardCount - 1; index += 1) {
+  for (int index = 0; index < webShardCount - 1; index += 1) {
     subshards['$index'] = () => _runFlutterWebTest(
       flutterPackageDirectory.path,
       allTests.sublist(
@@ -558,11 +563,11 @@ Future<void> _runWebUnitTests() async {
   //
   // We make sure the last shard ends in _last so it's easier to catch mismatches
   // between `.cirrus.yml` and `test.dart`.
-  subshards['${kWebShardCount - 1}_last'] = () async {
+  subshards['${webShardCount - 1}_last'] = () async {
     await _runFlutterWebTest(
       flutterPackageDirectory.path,
       allTests.sublist(
-        (kWebShardCount - 1) * testsPerShard,
+        (webShardCount - 1) * testsPerShard,
         allTests.length,
       ),
     );
@@ -917,6 +922,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_deprecated_settings_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
@@ -1121,7 +1127,8 @@ String get gitHash {
 /// Returns null if the contents are good. Returns a string if they are bad.
 /// The string is an error message.
 Future<String> verifyVersion(File file) async {
-  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(\+hotfix\.\d+)?(-pre\.\d+)?$');
+  final RegExp pattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
   final String version = await file.readAsString();
   if (!file.existsSync())
     return 'The version logic failed to create the Flutter version file.';

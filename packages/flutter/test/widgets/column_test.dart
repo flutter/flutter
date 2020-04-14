@@ -338,9 +338,9 @@ void main() {
     await tester.pumpWidget(Center(
       child: Column(
         key: flexKey,
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+          SizedBox(width: 100.0, height: 150.0),
         ],
       ),
     ));
@@ -353,9 +353,9 @@ void main() {
       child: Column(
         key: flexKey,
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+          SizedBox(width: 100.0, height: 150.0),
         ],
       ),
     ));
@@ -729,9 +729,9 @@ void main() {
       child: Column(
         key: flexKey,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+          SizedBox(width: 100.0, height: 150.0),
         ],
       ),
     ));
@@ -745,9 +745,9 @@ void main() {
         key: flexKey,
         mainAxisSize: MainAxisSize.min,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+          SizedBox(width: 100.0, height: 150.0),
         ],
       ),
     ));

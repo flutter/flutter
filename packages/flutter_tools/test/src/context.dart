@@ -322,6 +322,9 @@ class FakeOperatingSystemUtils implements OperatingSystemUtils {
   bool verifyGzip(File gzippedFile) => true;
 
   @override
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
+
+  @override
   String get name => 'fake OS name and version';
 
   @override

@@ -168,6 +168,15 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
+    argParser.addOption('web-server-debug-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
+      'when using the Web Server device and Dart Debugger extension. '
+      'This is useful for editors/debug adapters that do not support debugging '
+      'over SSE (the default protocol for Web Server/Dart Debugger extension).',
+      hide: hide,
+    );
     argParser.addFlag('web-allow-expose-url',
       defaultsTo: false,
       help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
@@ -450,6 +459,17 @@ abstract class FlutterCommand extends Command<void> {
       hide: hide,
       help: 'The name of the module (required if attaching to a fuchsia device)',
       valueHelp: 'module-name',
+    );
+  }
+
+  void addEnableExperimentation({ bool verbose }) {
+    argParser.addMultiOption(
+      FlutterOptions.kEnableExperiment,
+      help:
+        'The name of an experimental Dart feature to enable. For more info '
+        'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
+        'experimental-flags.md',
+      hide: !verbose,
     );
   }
 

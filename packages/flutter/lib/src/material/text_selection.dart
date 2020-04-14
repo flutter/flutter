@@ -100,7 +100,7 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
 
     // If there is no option available, build an empty widget.
     if (items.isEmpty) {
-      return Container(width: 0.0, height: 0.0);
+      return const SizedBox(width: 0.0, height: 0.0);
     }
 
 
