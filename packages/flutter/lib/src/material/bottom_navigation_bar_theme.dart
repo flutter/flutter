@@ -116,7 +116,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData a, BottomNavigationBarThemeData b, double t) {
     assert(t != null);
     return BottomNavigationBarThemeData(
-      elevation: t < 0.5 ? a?.elevation : b?.elevation,
+      elevation: lerpDouble(a?.elevation, b?.elevation, t),
       type: t < 0.5 ? a?.type : b?.type,
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       selectedItemColor: Color.lerp(a?.selectedItemColor, b?.selectedItemColor, t),

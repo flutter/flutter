@@ -7,12 +7,12 @@ import 'dart:ui' show Color, hashList, lerpDouble;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/bottom_navigation_bar_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
+import 'bottom_navigation_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
