@@ -18,7 +18,7 @@ void main() {
     await tester.pump();
 
     // Verify it correctly exposes its semantics.
-    // TODO(goderbauer): Use `SemanticsTester` after https://github.com/flutter/flutter/issues/12286.
+    // Change what?
     final SemanticsNode semantics = tester
         .renderObject(find.byType(AdjustableDropdownListTile))
         .debugSemantics;

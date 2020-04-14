@@ -99,7 +99,7 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
   return true;
 }
 
-// TODO(dnfield): we can drop this in favor of vm_service when https://github.com/dart-lang/webdev/issues/899 is resolved.
+// Change what now?
 class TimelineObtainer {
   WebSocket _observatorySocket;
   int _lastCallId = 0;
