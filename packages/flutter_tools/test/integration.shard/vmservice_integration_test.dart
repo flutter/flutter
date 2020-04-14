@@ -14,28 +14,30 @@ import 'test_utils.dart';
 
 void main() {
   Directory tempDir;
+  FlutterRunTestDriver flutter;
 
-  tearDown(() {
-    tryToDelete(tempDir);
-  });
-
-  test('Flutter Tool VMService methods', () async {
+  test('Flutter Tool VMService methods can be called', () async {
     tempDir = createResolvedTempDirectorySync('vmservice_integration_test.');
 
     final BasicProject _project = BasicProject();
     await _project.setUpIn(tempDir);
 
-    final FlutterRunTestDriver flutter = FlutterRunTestDriver(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
     await flutter.run(withDebugger: true);
     final int port = flutter.vmServicePort;
     final VmService vmService = await vmServiceConnectUri('ws://localhost:$port/ws');
-    await Future<void>.delayed(const Duration(seconds: 5));
 
-    await vmService.callServiceExtension('flutterVersion');
-    await vmService.callMethod('compileExpression');
-    await vmService.callMethod('flutterMemoryInfo');
-    await vmService.callMethod('reloadSources');
-    await vmService.callMethod('hotRestart');
+    final Response versionResponse = await vmService.callMethod('s0.flutterVersion');
+    expect(versionResponse.type, 'Success');
+    expect(versionResponse.json, containsPair('frameworkRevisionShort', isNotNull));
+    expect(versionResponse.json, containsPair('engineRevisionShort', isNotNull));
+
+    final Response memoryInfoResponse = await vmService.callMethod('s0.flutterMemoryInfo');
+    expect(memoryInfoResponse.type, 'Success');
+  });
+
+  tearDown(() {
+    tryToDelete(tempDir);
+    flutter?.stop();
   });
 }
-

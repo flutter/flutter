@@ -256,7 +256,12 @@ class VMService implements vm_service.VmService {
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;
-      return versionJson;
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+          ...versionJson,
+        }
+      };
     });
     _delegateService.registerService('flutterVersion', 'Flutter Tools');
 
@@ -307,8 +312,21 @@ class VMService implements vm_service.VmService {
     }
     if (device != null) {
       _delegateService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
-        final MemoryInfo result = await device.queryMemoryInfo();
-        return result.toJson();
+        try {
+          final MemoryInfo result = await device.queryMemoryInfo();
+          return <String, dynamic>{
+            'result': <String, Object>{
+              'type': 'Success',
+              ...result.toJson(),
+            }
+          };
+        } on Exception catch (e, st) {
+          throw vm_service.RPCError(
+            'Error during memory info query $e\n$st',
+            RPCErrorCodes.kServerError,
+            '',
+          );
+        }
       });
       _delegateService.registerService('flutterMemoryInfo', 'Flutter Tools');
     }
@@ -375,7 +393,6 @@ class VMService implements vm_service.VmService {
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
       (String data) {
-        print('SENDING: $data');
         channel.add(data);
       },
       log: null,
@@ -386,12 +403,6 @@ class VMService implements vm_service.VmService {
         await channel.close();
       },
     );
-    await delegateService.setClientName('Flutter Tools');
-    await delegateService.streamListen('Service');
-    delegateService.onServiceEvent.listen((event) {
-      print('SERVICE EVENT');
-      print(event.toJson());
-    });
 
     final VMService service = VMService(
       httpUri,
