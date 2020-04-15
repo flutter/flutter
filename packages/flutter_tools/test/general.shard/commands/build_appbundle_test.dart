@@ -361,11 +361,16 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, containsIgnoringWhitespace(
-        'To avoid potential build failures, you can quickly migrate your app by '
-        'following the steps on https://goo.gl/CP92wY'
-        )
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Your app isn't using AndroidX"),
+      );
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace(
+          'To avoid potential build failures, you can quickly migrate your app by '
+          'following the steps on https://goo.gl/CP92wY'
+        ),
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -413,12 +418,17 @@ void main() {
       }, throwsToolExit());
       
 
-      expect(testLogger.statusText,
-        not(containsIgnoringWhitespace("Your app isn't using AndroidX")));
       expect(
-        testLogger.statusText, not(containsIgnoringWhitespace(
-          'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'))
+        testLogger.statusText,
+        not(containsIgnoringWhitespace("Your app isn't using AndroidX")),
+      );
+      expect(
+        testLogger.statusText,
+        not(
+          containsIgnoringWhitespace(
+            'To avoid potential build failures, you can quickly migrate your app by '
+            'following the steps on https://goo.gl/CP92wY'),
+        )
       );
       verify(mockUsage.sendEvent(
         'build',
