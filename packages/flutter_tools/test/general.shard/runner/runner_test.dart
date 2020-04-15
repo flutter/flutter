@@ -25,7 +25,7 @@ void main() {
     MockGitHubTemplateCreator mockGitHubTemplateCreator;
     setUp(() {
       mockGitHubTemplateCreator = MockGitHubTemplateCreator();
-      runner.crashFileSystem = MemoryFileSystem();
+      CrashReportSender.crashFileSystem = MemoryFileSystem();
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
       io.setExitFunctionForTests((int _) { throw 'test exit';});
@@ -33,7 +33,7 @@ void main() {
     });
 
     tearDown(() {
-      runner.crashFileSystem = const LocalFileSystem();
+      CrashReportSender.crashFileSystem = const LocalFileSystem();
       io.restoreExitFunction();
       Cache.enableLocking();
     });

@@ -10,14 +10,19 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/time.dart';
 import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
+
+import 'github_template.dart';
 
 part 'crash_reporting.dart';
 part 'disabled_usage.dart';

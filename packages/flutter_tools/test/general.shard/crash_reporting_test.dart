@@ -32,13 +32,13 @@ void main() {
     });
 
     setUp(() async {
-      tools.crashFileSystem = MemoryFileSystem();
+      CrashReportSender.crashFileSystem = MemoryFileSystem();
       setExitFunctionForTests((_) { });
       MockCrashReportSender.sendCalls = 0;
     });
 
     tearDown(() {
-      tools.crashFileSystem = const LocalFileSystem();
+      CrashReportSender.crashFileSystem = const LocalFileSystem();
       restoreExitFunction();
     });
 
@@ -264,7 +264,7 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
 
   // Verify that we've written the crash report to disk.
   final List<String> writtenFiles =
-  (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
+    CrashReportSender.crashFileSystem.directory('/').listSync(recursive: true)
       .map((FileSystemEntity e) => e.path).toList();
   expect(writtenFiles, hasLength(crashes));
   expect(writtenFiles, contains('flutter_01.log'));

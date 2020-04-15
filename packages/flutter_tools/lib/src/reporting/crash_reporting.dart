@@ -137,4 +137,108 @@ class CrashReportSender {
       }
     }
   }
+
+  Future<void> informUserOfCrash(List<String> args, dynamic error, StackTrace stackTrace, String errorString) async {
+    final String doctorText = await _doctorText();
+    final File file = await _createLocalCrashReport(args, error, stackTrace, doctorText);
+
+    globals.printError('A crash report has been written to ${file.path}.');
+    globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+
+    final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
+    final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      flutterProjectFactory: globals.projectFactory,
+      client: clientFactory != null ? clientFactory() : HttpClient(),
+    );
+    final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(errorString);
+    globals.printStatus('$similarIssuesURL\n', wrap: false);
+    globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+    globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+    globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+
+    final String command = _crashCommand(args);
+    final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+      command,
+      error,
+      stackTrace,
+      doctorText
+    );
+    globals.printStatus('$gitHubTemplateURL\n', wrap: false);
+  }
+
+  String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
+
+  String _crashException(dynamic error) => '${error.runtimeType}: $error';
+
+  /// File system used by the crash reporting logic.
+  ///
+  /// We do not want to use the file system stored in the context because it may
+  /// be recording. Additionally, in the case of a crash we do not trust the
+  /// integrity of the [AppContext].
+  @visibleForTesting
+  static FileSystem crashFileSystem = const LocalFileSystem();
+
+  /// Saves the crash report to a local file.
+  Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
+    File crashFile = globals.fsUtils.getUniqueFile(
+      crashFileSystem.currentDirectory,
+      'flutter',
+      'log',
+    );
+
+    final StringBuffer buffer = StringBuffer();
+
+    buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+
+    buffer.writeln('## command\n');
+    buffer.writeln('${_crashCommand(args)}\n');
+
+    buffer.writeln('## exception\n');
+    buffer.writeln('${_crashException(error)}\n');
+    buffer.writeln('```\n$stackTrace```\n');
+
+    buffer.writeln('## flutter doctor\n');
+    buffer.writeln('```\n$doctorText```');
+
+    try {
+      crashFile.writeAsStringSync(buffer.toString());
+    } on FileSystemException catch (_) {
+      // Fallback to the system temporary directory.
+      crashFile = globals.fsUtils.getUniqueFile(
+        crashFileSystem.systemTempDirectory,
+        'flutter',
+        'log',
+      );
+      try {
+        crashFile.writeAsStringSync(buffer.toString());
+      } on FileSystemException catch (e) {
+        globals.printError('Could not write crash report to disk: $e');
+        globals.printError(buffer.toString());
+      }
+    }
+
+    return crashFile;
+  }
+
+  Future<String> _doctorText() async {
+    try {
+      final BufferLogger logger = BufferLogger(
+        terminal: globals.terminal,
+        outputPreferences: globals.outputPreferences,
+      );
+
+      await context.run<bool>(
+        body: () => doctor.diagnose(verbose: true, showColor: false),
+        overrides: <Type, Generator>{
+          Logger: () => logger,
+        },
+      );
+
+      return logger.statusText;
+    } on Exception catch (error, trace) {
+      return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
+    }
+  }
 }
