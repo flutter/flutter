@@ -32,13 +32,10 @@ class ABTest {
     _addResult(result, _bResults);
   }
 
-  static void accumulateLengths(List<int> lengths, List<String> results) {
-    for (int i = 0; i < lengths.length; i++) {
-      if (results[i] != null) {
-        final int len = results[i].length;
-        if (lengths[i] < len) {
-          lengths[i] = len;
-        }
+  static void updateColumnLengths(List<int> lengths, List<String> results) {
+    for (int column = 0; column < lengths.length; column++) {
+      if (results[column] != null) {
+        lengths[column] = math.max(lengths[column], results[column].length);
       }
     }
   }
@@ -47,13 +44,13 @@ class ABTest {
                            List<int> lengths,
                            List<FieldJustification> aligns,
                            List<String> values) {
-    for (int i = 0; i < lengths.length; i++) {
-      final int len = lengths[i];
-      String value = values[i];
+    for (int column = 0; column < lengths.length; column++) {
+      final int len = lengths[column];
+      String value = values[column];
       if (value == null) {
         value = ''.padRight(len);
       } else {
-        switch (aligns[i]) {
+        switch (aligns[column]) {
           case FieldJustification.LEFT:
             value = value.padRight(len);
             break;
@@ -66,7 +63,7 @@ class ABTest {
             break;
         }
       }
-      if (i > 0) {
+      if (column > 0) {
         value = value.padLeft(len+1);
       }
       buffer.write(value);
@@ -80,10 +77,16 @@ class ABTest {
   String printSummary() {
     final Map<String, _ScoreSummary> summariesA = _summarize(_aResults);
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
-    final Set<String> scoreKeyUnion = <String>{
-      ...summariesA.keys,
-      ...summariesB.keys,
-    };
+
+    final List<List<String>> tableRows = <List<String>>[
+      for (final String scoreKey in <String>{...summariesA.keys, ...summariesB.keys})
+        <String>[
+          scoreKey,
+          summariesA[scoreKey]?.averageString, summariesA[scoreKey]?.noiseString,
+          summariesB[scoreKey]?.averageString, summariesB[scoreKey]?.noiseString,
+          summariesA[scoreKey]?.improvementOver(summariesB[scoreKey]),
+        ],
+    ];
 
     final List<String> titles = <String>[
       'Score',
@@ -99,31 +102,15 @@ class ABTest {
     ];
 
     final List<int> lengths = List<int>.filled(6, 0);
-    accumulateLengths(lengths, titles);
-    for (final String scoreKey in scoreKeyUnion) {
-      final _ScoreSummary summaryA = summariesA[scoreKey];
-      final _ScoreSummary summaryB = summariesB[scoreKey];
-      accumulateLengths(lengths, <String>[
-        scoreKey,
-        summaryA?.averageString, summaryA?.noiseString,
-        summaryB?.averageString, summaryB?.noiseString,
-        summaryA?.improvementOver(summaryB),
-      ]);
+    updateColumnLengths(lengths, titles);
+    for (final List<String> row in tableRows) {
+      updateColumnLengths(lengths, row);
     }
 
     final StringBuffer buffer = StringBuffer();
-    alignments[0] = FieldJustification.CENTER;
-    formatResult(buffer, lengths, alignments, titles);
-    alignments[0] = FieldJustification.LEFT;
-    for (final String scoreKey in scoreKeyUnion) {
-      final _ScoreSummary summaryA = summariesA[scoreKey];
-      final _ScoreSummary summaryB = summariesB[scoreKey];
-      formatResult(buffer, lengths, alignments, <String>[
-        scoreKey,
-        summaryA?.averageString, summaryA?.noiseString,
-        summaryB?.averageString, summaryB?.noiseString,
-        summaryA?.improvementOver(summaryB),
-      ]);
+    formatResult(buffer, lengths, <FieldJustification>[FieldJustification.CENTER, ...alignments.skip(1)], titles);
+    for (final List<String> row in tableRows) {
+      formatResult(buffer, lengths, alignments, row);
     }
 
     return buffer.toString();
