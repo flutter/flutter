@@ -23,7 +23,9 @@ const String kHelp = 'help';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
-ArgResults parseArguments(List<String> args, ArgParser argParser) {
+void main(List<String> args) {
+  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
+
   argParser.addOption(
     kIncrement,
     help: 'Specifies which part of the x.y.z version number to increment. Required.',
@@ -65,13 +67,6 @@ ArgResults parseArguments(List<String> args, ArgParser argParser) {
     print(argParser.usage);
     exit(1);
   }
-
-  return argResults;
-}
-
-void main(List<String> args) {
-  final ArgParser argParser = ArgParser(allowTrailingOptions: false);
-  final ArgResults argResults = parseArguments(args, argParser);
 
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
