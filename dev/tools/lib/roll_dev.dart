@@ -21,7 +21,7 @@ const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
 
-const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
+const String kUpstreamRemote = 'git@github.com:christopherfujino/flutter.git'; //TODO
 
 ArgResults parseArguments(List<String> args, ArgParser argParser) {
   argParser.addOption(
@@ -75,12 +75,11 @@ void main(List<String> args) {
 
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
+  if (commit == 'upstream/master') { // TODO
+    throw Exception('Chris! Set --commit');
+  }
   final String origin = argResults[kOrigin] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
-  if (!justPrint) { //TODO
-    print('Chris, use --just-print while testing this!');
-    exit(1);
-  }
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
