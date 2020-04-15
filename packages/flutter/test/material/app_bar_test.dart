@@ -1046,8 +1046,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, customToolbarHeight));
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), customToolbarHeight);
   });
 
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
