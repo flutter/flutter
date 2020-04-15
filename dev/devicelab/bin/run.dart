@@ -168,6 +168,12 @@ Future<void> _runABTest() async {
       print(abTest.printSummary());
     }
   }
+
+  if (!silent) {
+    section('Raw results');
+    print(abTest.rawResults());
+  }
+
   section('Final A/B results');
   print(abTest.printSummary());
 }
