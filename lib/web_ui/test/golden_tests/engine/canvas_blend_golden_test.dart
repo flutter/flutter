@@ -23,7 +23,8 @@ void main() async {
        double maxDiffRatePercent = 0.0}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
-    rc.apply(engineCanvas);
+    rc.endRecording();
+    rc.apply(engineCanvas, screenRect);
 
     // Wrap in <flt-scene> so that our CSS selectors kick in.
     final html.Element sceneElement = html.Element.tag('flt-scene');

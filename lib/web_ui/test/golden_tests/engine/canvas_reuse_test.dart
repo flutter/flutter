@@ -39,7 +39,8 @@ void main() async {
       ..moveTo(3, 0)
       ..lineTo(100, 97);
     rc.drawPath(path, testPaint);
-    rc.apply(engineCanvas);
+    rc.endRecording();
+    rc.apply(engineCanvas, screenRect);
     engineCanvas.endOfPaint();
 
     html.Element sceneElement = html.Element.tag('flt-scene');
@@ -69,7 +70,8 @@ void main() async {
       ..quadraticBezierTo(100, 0, 100, 100);
     rc2.drawImage(_createRealTestImage(), Offset(0, 0), Paint());
     rc2.drawPath(path2, testPaint);
-    rc2.apply(engineCanvas);
+    rc2.endRecording();
+    rc2.apply(engineCanvas, screenRect);
 
     sceneElement = html.Element.tag('flt-scene');
     sceneElement.append(engineCanvas.rootElement);
