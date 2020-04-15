@@ -380,7 +380,7 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    await webDevFS.create();
+    final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     globals.fs.currentDirectory
       .childDirectory('lib')
@@ -432,13 +432,56 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
 
+    // served on localhost
+    expect(uri, Uri.http('localhost:0', ''));
+
+    await webDevFS.destroy();
+  }));
+
+  test('Can start web server with hostname any', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      ..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
+
+    final ResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packagesFilePath: anyNamed('packagesFilePath'),
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('a', 0, <Uri>[]);
+    });
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'any',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      buildMode: BuildMode.debug,
+      enableDwds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    expect(uri, Uri.http('localhost:0', ''));
     await webDevFS.destroy();
   }));
 
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
-      'localhost',
+      'any',
       8123,
       (String url) => null,
       true,
@@ -466,6 +509,7 @@ void main() {
         expect(enableDebugging, true);
         expect(enableDebugExtension, true);
         expect(useSseForDebugProxy, true);
+        expect(hostname, 'any');
 
         return MockDwds();
       });
