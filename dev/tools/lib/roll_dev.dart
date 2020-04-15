@@ -21,7 +21,7 @@ const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
 
-const String kUpstreamRemote = 'git@github.com:christopherfujino/flutter.git'; //TODO
+const String kUpstreamRemote = 'git@github.com:christopherfujino/flutter.git'; // TODO
 
 ArgResults parseArguments(List<String> args, ArgParser argParser) {
   argParser.addOption(
@@ -39,7 +39,7 @@ ArgResults parseArguments(List<String> args, ArgParser argParser) {
     kCommit,
     help: 'Specifies which git commit to roll to the dev branch.',
     valueHelp: 'hash',
-    defaultsTo: 'upstream/master',
+    defaultsTo: null, // This option is required
   );
   argParser.addOption(
     kOrigin,
@@ -75,15 +75,12 @@ void main(List<String> args) {
 
   final String level = argResults[kIncrement] as String;
   final String commit = argResults[kCommit] as String;
-  if (commit == 'upstream/master') { // TODO
-    throw Exception('Chris! Set --commit');
-  }
   final String origin = argResults[kOrigin] as String;
   final bool justPrint = argResults[kJustPrint] as bool;
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
-  if (help || level == null) {
+  if (help || level == null || commit == null) {
     print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
     print(argParser.usage);
     exit(0);
@@ -102,9 +99,7 @@ void main(List<String> args) {
   }
 
   runGit('fetch $origin', 'fetch $origin');
-  if (!justPrint) {
-    runGit('reset $commit --hard', 'reset to the release commit');
-  }
+  runGit('reset $commit --hard', 'reset to the release commit');
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
