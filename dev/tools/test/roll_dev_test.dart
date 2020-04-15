@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:dev_tools/roll_dev.dart';
-import 'package:test/test.dart';
+import './common.dart';
 
 void main() {
   group('parseFullTag', () {
