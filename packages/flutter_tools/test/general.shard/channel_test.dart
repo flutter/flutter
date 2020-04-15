@@ -290,12 +290,15 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, containsIgnoringWhitespace(
-        "Successfully switched to flutter channel 'beta'."));
+      expect(
+        testLogger.statusText,
+        containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
+      );
       expect(testLogger.statusText,
         containsIgnoringWhitespace(
           "To ensure that you're on the latest build "
-          "from this channel, run 'flutter upgrade'"));
+          "from this channel, run 'flutter upgrade'"),
+      );
       expect(testLogger.errorText, hasLength(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
