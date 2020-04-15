@@ -693,7 +693,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportsTimelineAction = true;
+      when(mockConnection.supportsTimelineAction).thenReturn(true);
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
@@ -1033,19 +1033,19 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      mockConnection.supportsTimelineAction = false;
+      when(mockConnection.supportsTimelineAction).thenReturn(false);
       driver = WebFlutterDriver.connectedTo(mockConnection);
     });
 
     test('tracing', () async {
       expect(driver.traceAction(() async { return Future<dynamic>.value(); }),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.startTracing(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.stopTracingAndDownloadTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
       expect(driver.clearTimeline(),
-          throwsA(isA<UnimplementedError>()));
+          throwsA(isA<UnsupportedError>()));
     });
   });
 }

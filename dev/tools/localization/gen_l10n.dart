@@ -875,7 +875,7 @@ class LocalizationsGenerator {
         stdout.writeln('"$locale": ${messages.length} untranslated message(s).');
       });
       stdout.writeln(
-        'To see a detailed report, use the --unimplemented-messages-file \n'
+        'To see a detailed report, use the --untranslated-messages-file \n'
         'option in the tool to generate a JSON format file containing \n'
         'all messages that need to be translated.'
       );

@@ -85,7 +85,7 @@ void main() {
       mockLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: MockStdio(),
-          platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+          platform: FakePlatform(stdoutSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );
@@ -248,7 +248,7 @@ void main() {
       testLogger = BufferLogger(
         terminal: AnsiTerminal(
           stdio: MockStdio(),
-          platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+          platform: FakePlatform(stdinSupportsAnsi: false),
         ),
         outputPreferences: OutputPreferences(wrapText: true, wrapColumn: 40),
       );

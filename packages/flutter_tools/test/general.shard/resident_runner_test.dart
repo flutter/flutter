@@ -89,6 +89,8 @@ void main() {
         invalidatedSourcesCount: 0,
       );
     });
+    // TODO(jonahwilliams): replace mock with FakeVmServiceHost once all methods
+    // are moved to real vm service.
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
       mockFlutterView,
@@ -98,7 +100,20 @@ void main() {
     final MockVM mockVM = MockVM();
     when(mockVMService.vm).thenReturn(mockVM);
     when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
-    when(mockFlutterView.runFromSource(any, any)).thenAnswer((Invocation invocation) async {});
+    when(mockVMService.streamListen('Isolate')).thenAnswer((Invocation invocation) async {
+      return vm_service.Success();
+    });
+    when(mockVMService.onIsolateEvent).thenAnswer((Invocation invocation) {
+      return Stream<vm_service.Event>.fromIterable(<vm_service.Event>[
+        vm_service.Event(kind: vm_service.EventKind.kIsolateRunnable, timestamp: 0),
+      ]);
+    });
+    when(mockVMService.callMethod(
+      kRunInViewMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Success();
+    });
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(
@@ -429,8 +444,13 @@ void main() {
   }));
 
   test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
-    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
-      return <String, Object>{};
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{}
+      });
     });
     await residentRunner.writeSkSL();
 
@@ -442,10 +462,15 @@ void main() {
       return TargetPlatform.android_arm;
     });
     when(mockDevice.name).thenReturn('test device');
-    when(mockFlutterView.getSkSLs()).thenAnswer((Invocation invocation) async {
-      return <String, Object>{
-        'A': 'B',
-      };
+    when(mockVMService.callMethod(
+      kGetSkSLsMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(<String, Object>{
+        'SkSLs': <String, Object>{
+          'A': 'B',
+        }
+      });
     });
     await residentRunner.writeSkSL();
 

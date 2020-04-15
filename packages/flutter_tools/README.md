@@ -76,14 +76,6 @@ To run the tests in a specific file, run:
 $ ../../bin/cache/dart-sdk/bin/pub run test test/general.shard/utils_test.dart
 ```
 
-When running all of the tests, it is a bit faster to use `build_runner`. First,
-set `FLUTTER_ROOT` to the root of your Flutter checkout. Then, in this directory
-run:
-```shell
-$ ../../bin/cache/dart-sdk/bin/pub run build_runner test
-```
-This is what we do in the continuous integration bots.
-
 ### Forcing snapshot regeneration
 
 To force the Flutter Tools snapshot to be regenerated, delete the following

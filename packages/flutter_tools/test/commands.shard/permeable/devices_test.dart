@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
@@ -30,6 +31,7 @@ void main() {
     });
 
     setUpAll(() {
+      Cache.disableLocking();
       configDir ??= globals.fs.systemTempDirectory.createTempSync(
         'flutter_config_dir_test.',
       );
