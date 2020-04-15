@@ -405,7 +405,7 @@ static void CommonInit(FlutterViewController* controller) {
   FlutterPointerEvent flutterEvent = {
       .struct_size = sizeof(flutterEvent),
       .phase = phase,
-      .timestamp = static_cast<size_t>(event.timestamp * NSEC_PER_MSEC),
+      .timestamp = static_cast<size_t>(event.timestamp * USEC_PER_SEC),
       .x = locationInBackingCoordinates.x,
       .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
       .device_kind = kFlutterPointerDeviceKindMouse,
