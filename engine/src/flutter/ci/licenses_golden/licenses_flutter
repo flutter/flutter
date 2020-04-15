@@ -1182,6 +1182,9 @@ FILE: ../../../flutter/shell/platform/windows/keyboard_hook_handler.h
 FILE: ../../../flutter/shell/platform/windows/platform_handler.cc
 FILE: ../../../flutter/shell/platform/windows/platform_handler.h
 FILE: ../../../flutter/shell/platform/windows/public/flutter_windows.h
+FILE: ../../../flutter/shell/platform/windows/string_conversion.cc
+FILE: ../../../flutter/shell/platform/windows/string_conversion.h
+FILE: ../../../flutter/shell/platform/windows/string_conversion_unittests.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/win32_flutter_window.cc

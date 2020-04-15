@@ -29,9 +29,6 @@ class PlatformHandler {
   // The MethodChannel used for communication with the Flutter engine.
   std::unique_ptr<flutter::MethodChannel<rapidjson::Document>> channel_;
 
-  static std::string GetClipboardString();
-  static void SetClipboardString(std::string data);
-
   // A reference to the win32 window.
   Win32FlutterWindow* window_;
 };
