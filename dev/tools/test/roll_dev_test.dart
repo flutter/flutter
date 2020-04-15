@@ -13,6 +13,7 @@ void main() {
         '10.2.30-12.22.pre-45-gabc123',
         '1.18.0-0.0.pre-0-gf0adb240a',
         '2.0.0-1.99.pre-45-gf0adb240a',
+        '12.34.56-78.90.pre-12-g9db2003a2',
       ];
       for (final String validTag in validTags) {
         final Match match = parseFullTag(validTag);
@@ -28,6 +29,7 @@ void main() {
         '2.0.0',
         'v1.2.3-1.2.pre-3-gabc123',
         '10.0.1-0.0.pre-gf0adb240a',
+        '10.0.1-0.0.pre-3-gggggggggg',
         '1.2.3-1.2.pre-3-abc123',
       ];
       for (final String invalidTag in invalidTags) {
