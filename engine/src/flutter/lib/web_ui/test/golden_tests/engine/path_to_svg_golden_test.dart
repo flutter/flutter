@@ -37,7 +37,8 @@ void main() async {
     html.document.body.append(bitmapCanvas.rootElement);
     html.document.body.append(svgElement);
 
-    canvas.apply(bitmapCanvas);
+    canvas.endRecording();
+    canvas.apply(bitmapCanvas, canvasBounds);
 
     await matchGoldenFile('$scubaFileName.png', region: region);
 

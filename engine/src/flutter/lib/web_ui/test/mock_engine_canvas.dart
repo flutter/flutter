@@ -137,7 +137,10 @@ class MockEngineCanvas implements EngineCanvas {
 
   @override
   void drawRect(Rect rect, SurfacePaintData paint) {
-    _called('drawRect', arguments: paint);
+    _called('drawRect', arguments: <String, dynamic>{
+      'rect': rect,
+      'paint': paint,
+    });
   }
 
   @override

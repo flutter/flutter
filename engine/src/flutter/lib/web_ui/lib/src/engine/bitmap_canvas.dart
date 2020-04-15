@@ -545,7 +545,7 @@ class BitmapCanvas extends EngineCanvas {
   /// Paints the [picture] into this canvas.
   void drawPicture(ui.Picture picture) {
     final EnginePicture enginePicture = picture;
-    enginePicture.recordingCanvas.apply(this);
+    enginePicture.recordingCanvas.apply(this, bounds);
   }
 
   /// Draws vertices on a gl context.
