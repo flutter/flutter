@@ -31,9 +31,10 @@ void main() async {
       ..style = PaintingStyle.stroke;
 
     canvas.drawPath(path, paint);
+    canvas.endRecording();
 
     html.document.body.append(bitmapCanvas.rootElement);
-    canvas.apply(bitmapCanvas);
+    canvas.apply(bitmapCanvas, canvasBounds);
     await matchGoldenFile('$scubaFileName.png', region: region);
     bitmapCanvas.rootElement.remove();
   }
