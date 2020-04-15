@@ -175,18 +175,23 @@ String getFullTag() {
 }
 
 Match parseFullTag(String version) {
+  // of the form: x.y.z-m.n.pre-c-g<revision>
   final RegExp versionPattern = RegExp(
     r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 
 String getVersionFromParts(List<int> parts) {
+  // where parts correspond to [x, y, z, m, n] from tag
   assert(parts.length == 5);
   final StringBuffer buf = StringBuffer()
+    // take x, y, and z
     ..write(parts.take(3).join('.'))
     ..write('-')
+    // skip x, y, and z, take m and n
     ..write(parts.skip(3).take(2).join('.'))
     ..write('.pre');
+  // return a string that looks like: '1.2.3-4.5.pre'
   return buf.toString();
 }
 
