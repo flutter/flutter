@@ -412,15 +412,15 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Stack(
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
               Positioned(
                 top: 0.0,
                 left: 0.0,
-                child: Container(
+                child: SizedBox(
                   width: 200.0,
                   height: 200.0,
                 ),
@@ -442,15 +442,15 @@ void main() {
         child: Center(
           child: Stack(
             overflow: Overflow.visible,
-            children: <Widget>[
-              Container(
+            children: const <Widget>[
+              SizedBox(
                 width: 100.0,
                 height: 100.0,
               ),
               Positioned(
                 top: 0.0,
                 left: 0.0,
-                child: Container(
+                child: SizedBox(
                   width: 200.0,
                   height: 200.0,
                 ),

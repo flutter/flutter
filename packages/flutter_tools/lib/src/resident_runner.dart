@@ -20,6 +20,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -233,7 +234,7 @@ class FlutterDevice {
         : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() => vmService.getVM();
+  Future<void> getVMs() => vmService.getVMOld();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -280,6 +281,7 @@ class FlutterDevice {
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
+      osUtils: globals.os,
     );
     return devFS.create();
   }
@@ -303,7 +305,11 @@ class FlutterDevice {
         globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
     await Future.wait<void>(views.map<Future<void>>(
-      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+      (FlutterView view) => vmService.setAssetDirectory(
+        assetsDirectory: deviceAssetsDirectoryUri,
+        uiIsolateId: view.uiIsolate.id,
+        viewId: view.id,
+      )
     ));
   }
 
@@ -673,6 +679,7 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
   bool get supportsCanvasKit => false;
+  bool get supportsWriteSkSL => supportsServiceProtocol;
 
   // Returns the Uri of the first connected device for mobile,
   // and only connected device for web.
@@ -740,6 +747,39 @@ abstract class ResidentRunner {
     throw Exception('Canvaskit not supported by this runner.');
   }
 
+  /// Write the SkSL shaders to a zip file in build directory.
+  Future<void> writeSkSL() async {
+    if (!supportsWriteSkSL) {
+      throw Exception('writeSkSL is not supported by this runner.');
+    }
+    final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
+      viewId: flutterDevices.first.views.first.id,
+    );
+    if (data.isEmpty) {
+      globals.logger.printStatus(
+        'No data was receieved. To ensure SkSL data can be generated use a '
+        'physical device then:\n'
+        '  1. Pass "--cache-sksl" as an argument to flutter run.\n'
+        '  2. Interact with the application to force shaders to be compiled.\n'
+      );
+      return;
+    }
+    final File outputFile = globals.fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'sksl',
+    );
+    final Device device = flutterDevices.first.device;
+    final Map<String, Object> manifest = <String, Object>{
+      'platform': getNameForTargetPlatform(await flutterDevices.first.device.targetPlatform),
+      'name': device.name,
+      'engineRevision': globals.flutterVersion.engineRevision,
+      'data': data,
+    };
+    outputFile.writeAsStringSync(json.encode(manifest));
+    globals.logger.printStatus('Wrote SkSL data to ${outputFile.path}.');
+  }
+
   /// The resident runner API for interaction with the reloadMethod vmservice
   /// request.
   ///
@@ -788,6 +828,13 @@ abstract class ResidentRunner {
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[
       for (final FlutterDevice device in flutterDevices) device.refreshViews(),
+    ];
+    await Future.wait(futures);
+  }
+
+  Future<void> refreshVM() async {
+    final List<Future<void>> futures = <Future<void>>[
+      for (final FlutterDevice device in flutterDevices) device.getVMs(),
     ];
     await Future.wait(futures);
   }
@@ -1094,6 +1141,9 @@ abstract class ResidentRunner {
       if (supportsCanvasKit){
         commandHelp.k.print();
       }
+      if (supportsWriteSkSL) {
+        commandHelp.M.print();
+      }
       commandHelp.v.print();
       // `P` should precede `a`
       commandHelp.P.print();
@@ -1259,6 +1309,12 @@ class TerminalHandler {
       case 'O':
         if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
           await residentRunner.debugTogglePlatform();
+          return true;
+        }
+        return false;
+      case 'M':
+        if (residentRunner.supportsWriteSkSL) {
+          await residentRunner.writeSkSL();
           return true;
         }
         return false;

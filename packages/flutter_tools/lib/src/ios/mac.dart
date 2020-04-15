@@ -25,6 +25,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'code_signing.dart';
 import 'migrations/ios_migrator.dart';
+import 'migrations/project_base_configuration_migration.dart';
 import 'migrations/remove_framework_link_and_embedding_migration.dart';
 import 'migrations/xcode_build_system_migration.dart';
 import 'xcodeproj.dart';
@@ -94,6 +95,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final List<IOSMigrator> migrators = <IOSMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.xcode, globals.flutterUsage),
     XcodeBuildSystemMigration(app.project, globals.logger),
+    ProjectBaseConfigurationMigration(app.project, globals.logger),
   ];
 
   final IOSMigration migration = IOSMigration(migrators);
@@ -104,6 +106,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
   }
+
+  await removeFinderExtendedAttributes(app.project.hostAppRoot, processUtils, globals.logger);
 
   final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
@@ -402,6 +406,25 @@ Future<XcodeBuildResult> buildXcodeProject({
           buildSettings: buildSettings,
       ),
     );
+  }
+}
+
+/// Extended attributes applied by Finder can cause code signing errors. Remove them.
+/// https://developer.apple.com/library/archive/qa/qa1940/_index.html
+@visibleForTesting
+Future<void> removeFinderExtendedAttributes(Directory iosProjectDirectory, ProcessUtils processUtils, Logger logger) async {
+  final bool success = await processUtils.exitsHappy(
+    <String>[
+      'xattr',
+      '-r',
+      '-d',
+      'com.apple.FinderInfo',
+      iosProjectDirectory.path,
+    ]
+  );
+  // Ignore all errors, for example if directory is missing.
+  if (!success) {
+    logger.printTrace('Failed to remove xattr com.apple.FinderInfo from ${iosProjectDirectory.path}');
   }
 }
 

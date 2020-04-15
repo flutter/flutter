@@ -25,7 +25,7 @@ void main() {
     testLogger = BufferLogger(
       terminal: AnsiTerminal(
         stdio: MockStdio(),
-        platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+        platform: FakePlatform(stdoutSupportsAnsi: false),
       ),
       outputPreferences: OutputPreferences.test(),
     );
@@ -35,7 +35,7 @@ void main() {
     return Net(
       httpClientFactory: () => client,
       logger: testLogger,
-      platform: FakePlatform.fromPlatform(const LocalPlatform()),
+      platform: FakePlatform(),
     );
   }
 
@@ -160,10 +160,11 @@ void main() {
         ArgumentError('test exception handling'),
       ),
       logger: testLogger,
-      platform: FakePlatform.fromPlatform(const LocalPlatform())
-        ..environment = <String, String>{
+      platform: FakePlatform(
+        environment: <String, String>{
           'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
         },
+      ),
     );
     String error;
     FakeAsync().run((FakeAsync time) {

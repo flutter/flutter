@@ -10,12 +10,7 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/discovery.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages.dart';
+import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
@@ -102,19 +97,35 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-  // ignore: deprecated_member_use
-  final Future<Packages> _packagesFuture = loadPackagesFile(Uri.base.resolve('.packages'));
+  final Future<PackageConfig> _packagesFuture = loadPackageConfigUri(
+    Uri.base.resolve('.packages'),
+    loader: (Uri uri) {
+      final File file = globals.fs.file(uri);
+      if (!file.existsSync()) {
+        return null;
+      }
+      return file.readAsBytes();
+    }
+  );
 
-  final PackageMap _flutterToolsPackageMap = PackageMap(p.join(
-    Cache.flutterRoot,
-    'packages',
-    'flutter_tools',
-    '.packages',
-  ), fileSystem: globals.fs);
+  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigUri(
+    globals.fs.file(globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.packages',
+    )).absolute.uri,
+      loader: (Uri uri) {
+        final File file = globals.fs.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
 
   /// Uri of the test package.
-  Uri get testUri => _flutterToolsPackageMap.map['test'];
+  Future<Uri> get testUri async => (await _flutterToolsPackageMap)['test']?.packageUriRoot;
 
   /// The test runner configuration.
   final Configuration _config;
@@ -168,19 +179,19 @@ class FlutterWebPlatform extends PlatformPlugin {
       ));
 
   /// The precompiled test javascript.
-  File get testDartJs => globals.fs.file(globals.fs.path.join(
-        testUri.toFilePath(),
-        'dart.js',
-      ));
+  Future<File> get testDartJs async => globals.fs.file(globals.fs.path.join(
+    (await testUri).toFilePath(),
+    'dart.js',
+  ));
 
-  File get testHostDartJs => globals.fs.file(globals.fs.path.join(
-        testUri.toFilePath(),
-        'src',
-        'runner',
-        'browser',
-        'static',
-        'host.dart.js',
-      ));
+  Future<File> get testHostDartJs async => globals.fs.file(globals.fs.path.join(
+    (await testUri).toFilePath(),
+    'src',
+    'runner',
+    'browser',
+    'static',
+    'host.dart.js',
+  ));
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
     if (request.requestedUri.path.contains('require.js')) {
@@ -203,12 +214,12 @@ class FlutterWebPlatform extends PlatformPlugin {
       );
     } else if (request.requestedUri.path.contains('static/dart.js')) {
       return shelf.Response.ok(
-        testDartJs.openRead(),
+        (await testDartJs).openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else if (request.requestedUri.path.contains('host.dart.js')) {
       return shelf.Response.ok(
-        testHostDartJs.openRead(),
+        (await testHostDartJs).openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else {
@@ -218,10 +229,8 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   FutureOr<shelf.Response> _packageFilesHandler(shelf.Request request) async {
     if (request.requestedUri.pathSegments.first == 'packages') {
-      // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-      // ignore: deprecated_member_use
-      final Packages packages = await _packagesFuture;
-      final Uri fileUri = packages.resolve(Uri(
+      final PackageConfig packageConfig = await _packagesFuture;
+      final Uri fileUri = packageConfig.resolve(Uri(
         scheme: 'package',
         pathSegments: request.requestedUri.pathSegments.skip(1),
       ));

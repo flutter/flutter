@@ -757,6 +757,12 @@ abstract class TextInputClient {
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue get currentTextEditingValue;
 
+  /// Requests that this client display a prompt rectangle for the given text range,
+  /// to indicate the range of text that will be changed by a pending autocorrection.
+  ///
+  /// This method will only be called on iOS.
+  void showAutocorrectionPromptRect(int start, int end);
+
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -1078,6 +1084,9 @@ class TextInput {
         break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection._client.connectionClosed();
+        break;
+      case 'TextInputClient.showAutocorrectionPromptRect':
+        _currentConnection._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
         break;
       default:
         throw MissingPluginException();

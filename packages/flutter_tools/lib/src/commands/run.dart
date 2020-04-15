@@ -100,7 +100,8 @@ class RunCommand extends RunCommandBase {
       ..addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging '
-              'the GPU thread. By default, Flutter will not log skia code.',
+              'the raster thread (formerly known as the GPU thread). '
+              'By default, Flutter will not log skia code.',
       )
       ..addOption('trace-whitelist',
         help: 'Filters out all trace events except those that are specified in '
@@ -351,6 +352,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -376,6 +378,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,

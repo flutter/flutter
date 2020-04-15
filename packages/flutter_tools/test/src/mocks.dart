@@ -29,6 +29,7 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 
+// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator kNoColorTerminalPlatform = () {
   return FakePlatform.fromPlatform(
     const LocalPlatform()
