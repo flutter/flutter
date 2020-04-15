@@ -644,6 +644,7 @@ tasks:
       Checks that an iOS app with a watchOS companion can be build for physical and simulated devices.
     stage: devicelab
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   # Tests running on Windows host
 
