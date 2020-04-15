@@ -892,14 +892,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _effectiveFocusNode.canRequestFocus = _isEnabled || NavigationModality.isDirectional(context);
+  }
+
+  @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
       _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
-    _effectiveFocusNode.canRequestFocus = _isEnabled;
-    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
+    _effectiveFocusNode.canRequestFocus = _isEnabled || NavigationModality.isDirectional(context);
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly && _isEnabled) {
       if(_effectiveController.selection.isCollapsed) {
         _showSelectionHandles = !widget.readOnly;
       }
@@ -928,6 +934,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
       return false;
 
     if (widget.readOnly && _effectiveController.selection.isCollapsed)
+      return false;
+
+    if (!_isEnabled)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
@@ -995,8 +1004,9 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null && widget.maxLengthEnforced)
+    if (widget.maxLength != null && widget.maxLengthEnforced) {
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
+    }
 
     TextSelectionControls textSelectionControls;
     bool paintCursorAboveText;
@@ -1034,7 +1044,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
-        readOnly: widget.readOnly,
+        readOnly: widget.readOnly || !_isEnabled,
         toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,

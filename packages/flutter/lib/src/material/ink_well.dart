@@ -878,7 +878,7 @@ class _InkResponseState extends State<_InnerInkResponse>
         showFocus = false;
         break;
       case FocusHighlightMode.traditional:
-        showFocus = enabled && _hasFocus;
+        showFocus = (enabled || NavigationModality.isDirectional(context)) && _hasFocus;
         break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
@@ -999,7 +999,7 @@ class _InkResponseState extends State<_InnerInkResponse>
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    final bool canRequestFocus = enabled && widget.canRequestFocus;
+    final bool canRequestFocus = (enabled && widget.canRequestFocus) || NavigationModality.isDirectional(context);
     return _ParentInkResponseProvider(
       state: this,
       child: Actions(

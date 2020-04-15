@@ -1013,7 +1013,9 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
 
     bool shouldShowFocusHighlight(FocusableActionDetector target) {
-      return _focused && target.enabled && _canShowHighlight;
+      return _focused
+          && (target.enabled || NavigationModality.isDirectional(context))
+          && _canShowHighlight;
     }
 
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
@@ -1051,7 +1053,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
-        canRequestFocus: widget.enabled,
+        canRequestFocus: widget.enabled || NavigationModality.isDirectional(context),
         onFocusChange: _handleFocusChange,
         child: widget.child,
       ),
