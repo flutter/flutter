@@ -1,4 +1,4 @@
-Signature: 8b13b3b022828174f91e229cf515afa5
+Signature: 2da6a5acd07c2b9887c4985c26a2708d
 
 UNUSED LICENSES:
 
@@ -2674,7 +2674,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_processor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/stream_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/timeline_function.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/codec_factory.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/intent/intent_handler.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/module/module_manifest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/puppet_master.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_command.fidl
