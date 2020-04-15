@@ -647,7 +647,7 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
 /// Run a web integration test in release mode.
 Future<void> _runWebReleaseTest(String target, {
   List<String> additionalArguments = const<String>[],
-) async {
+}) async {
   // Build the app.
   await runCommand(
     flutter,
