@@ -411,9 +411,8 @@ void main() {
           projectPath,
         );
       }, throwsToolExit());
-      
 
-      expect(testLogger.statusText, 
+      expect(testLogger.statusText,
         not(containsIgnoreWhitespace("Your app isn't using AndroidX")));
       expect(
         testLogger.statusText, not(containsIgnoreWhitespace(

@@ -292,7 +292,7 @@ void main() {
 
       expect(testLogger.statusText, containsIgnoreWhitespace(
         "Successfully switched to flutter channel 'beta'."));
-      expect(testLogger.statusText, 
+      expect(testLogger.statusText,
         containsIgnoreWhitespace(
           "To ensure that you're on the latest build "
           "from this channel, run 'flutter upgrade'"));
