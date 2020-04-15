@@ -163,6 +163,13 @@ Future<void> _runABTest() async {
 
     abTest.addBResult(localEngineResult);
   }
+
+  if (!silent) {
+    section('Raw results');
+    print(abTest.rawResults());
+  }
+
+  section('Final A/B results');
   print(abTest.printSummary());
 }
 
