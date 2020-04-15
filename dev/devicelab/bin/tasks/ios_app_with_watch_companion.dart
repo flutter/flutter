@@ -74,7 +74,52 @@ Future<void> main() async {
 
       section('Create build for a simulator device');
 
-      // Create iOS simulator devices.
+      // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
+      // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
+      final String availableRuntimes = await eval(
+        'xcrun',
+        <String>[
+          'simctl',
+          'list',
+          'runtimes',
+        ],
+        canFail: false,
+        workingDirectory: flutterDirectory.path,
+      );
+
+      // Example simctl list:
+      //    == Runtimes ==
+      //    iOS 10.3 (10.3.1 - 14E8301) - com.apple.CoreSimulator.SimRuntime.iOS-10-3
+      //    iOS 13.4 (13.4 - 17E255) - com.apple.CoreSimulator.SimRuntime.iOS-13-4
+      //    tvOS 13.4 (13.4 - 17L255) - com.apple.CoreSimulator.SimRuntime.tvOS-13-4
+      //    watchOS 6.2 (6.2 - 17T256) - com.apple.CoreSimulator.SimRuntime.watchOS-6-2
+      String iOSSimRuntime;
+      String watchSimRuntime;
+
+      final RegExp iOSRuntimePattern = RegExp(r'iOS .*\) - (.*)');
+      final RegExp watchOSRuntimePattern = RegExp(r'watchOS .*\) - (.*)');
+
+      for (final String runtime in LineSplitter.split(availableRuntimes)) {
+        // These seem to be in order, so allow matching multiple lines so it grabs
+        // the last (hopefully latest) one.
+        final RegExpMatch iOSRuntimeMatch = iOSRuntimePattern.firstMatch(runtime);
+        if (iOSRuntimeMatch != null) {
+          iOSSimRuntime = iOSRuntimeMatch.group(1).trim();
+          continue;
+        }
+        final RegExpMatch watchOSRuntimeMatch = watchOSRuntimePattern.firstMatch(runtime);
+        if (watchOSRuntimeMatch != null) {
+          watchSimRuntime = watchOSRuntimeMatch.group(1).trim();
+        }
+      }
+      if (iOSSimRuntime == null) {
+        return TaskResult.failure('No iOS Simulator runtime found, available runtimes:\n$availableRuntimes');
+      }
+      if (watchSimRuntime == null) {
+        return TaskResult.failure('No watchOS Simulator runtime found, available runtimes:\n$availableRuntimes');
+      }
+
+      // Create iOS simulator.
       phoneDeviceID = await eval(
         'xcrun',
         <String>[
@@ -82,12 +127,13 @@ Future<void> main() async {
           'create',
           'TestFlutteriPhoneWithWatch',
           'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
-          'com.apple.CoreSimulator.SimRuntime.iOS-13-2',
+          iOSSimRuntime,
         ],
         canFail: false,
         workingDirectory: flutterDirectory.path,
       );
 
+      // Create watchOS simulator.
       watchDeviceID = await eval(
         'xcrun',
         <String>[
@@ -95,7 +141,7 @@ Future<void> main() async {
           'create',
           'TestFlutterWatch',
           'com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-5-44mm',
-          'com.apple.CoreSimulator.SimRuntime.watchOS-6-1'
+          watchSimRuntime,
         ],
         canFail: false,
         workingDirectory: flutterDirectory.path,
