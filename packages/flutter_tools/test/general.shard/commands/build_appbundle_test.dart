@@ -361,9 +361,8 @@ void main() {
         );
       }, throwsToolExit());
 
-      final String statusTextWithoutFormatting = removeTextFormatting(testLogger.statusText);
-      expect(statusTextWithoutFormatting, contains("Your app isn't using AndroidX"));
-      expect(statusTextWithoutFormatting, contains(
+      expect(testLogger.statusText, containsIgnoreWhitespacesAndLineBreaks("Your app isn't using AndroidX"));
+      expect(testLogger.statusText, containsIgnoreWhitespacesAndLineBreaks(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -412,15 +411,14 @@ void main() {
           projectPath,
         );
       }, throwsToolExit());
+      
 
-      final String statusTextWithoutFormatting = removeTextFormatting(testLogger.statusText);
-      expect(statusTextWithoutFormatting.contains("Your app isn't using AndroidX"), isFalse);
+      expect(testLogger.statusText, 
+        not(containsIgnoreWhitespacesAndLineBreaks("Your app isn't using AndroidX")));
       expect(
-        statusTextWithoutFormatting.contains(
+        testLogger.statusText, not(containsIgnoreWhitespacesAndLineBreaks(
           'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'
-        ),
-        isFalse,
+          'following the steps on https://goo.gl/CP92wY'))
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -453,8 +451,8 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   return command;
 }
 
-String removeTextFormatting(String source){
-  return source.replaceAll('\n', '').replaceAll('    ', ' ');
+Matcher not(Matcher target){
+  return isNot(target);
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}

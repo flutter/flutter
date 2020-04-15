@@ -145,6 +145,19 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
+Matcher containsIgnoreWhitespacesAndLineBreaks(String toContain){
+return  predicate((String value) => _ignoreWhitespace(_ignoreLinebreak(value))
+    .contains(_ignoreWhitespace(_ignoreLinebreak(toContain))),
+    'contains "$toContain" ignoring whitespaces and linebreaks.');
+}
+
+String _ignoreLinebreak(String source){
+  return source.replaceAll('\n', '');
+}
+String _ignoreWhitespace(String source){
+  return source.replaceAll(' ', '');
+}
+
 /// Executes a test body in zone that does not allow context-based injection.
 ///
 /// For classes which have been refactored to excluded context-based injection
