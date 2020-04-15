@@ -7,6 +7,7 @@ import 'dart:convert' show json;
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/driver/common.dart';
+import 'package:flutter_driver/src/driver/scene_display_lag_summarizer.dart';
 import 'package:path/path.dart' as path;
 
 import '../../common.dart';
@@ -42,6 +43,24 @@ void main() {
       'name': 'GPURasterizer::Draw',
       'ph': 'E',
       'ts': timeStamp,
+    };
+
+    Map<String, dynamic> lagBegin(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+      'name': 'SceneDisplayLag',
+      'ph': 'b',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'vsync_transitions_missed': vsyncsMissed.toString()
+      }
+    };
+
+    Map<String, dynamic> lagEnd(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+      'name': 'SceneDisplayLag',
+      'ph': 'e',
+      'ts': timeStamp,
+      'args': <String, String>{
+        'vsync_transitions_missed': vsyncsMissed.toString()
+      }
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
@@ -356,6 +375,9 @@ void main() {
             'frame_build_times': <int>[17000, 9000, 19000],
             'frame_rasterizer_times': <int>[18000, 10000, 20000],
             'frame_begin_times': <int>[0, 18000, 28000],
+            'average_vsync_transitions_missed': 0.0,
+            '90th_percentile_vsync_transitions_missed': 0.0,
+            '99th_percentile_vsync_transitions_missed': 0.0
           },
         );
       });
@@ -391,6 +413,9 @@ void main() {
           frameBegin(1000), frameEnd(18000),
           frameBegin(19000), frameEnd(28000),
           frameBegin(29000), frameEnd(48000),
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
@@ -409,7 +434,61 @@ void main() {
           'frame_build_times': <int>[17000, 9000, 19000],
           'frame_rasterizer_times': <int>[18000, 10000, 20000],
           'frame_begin_times': <int>[0, 18000, 28000],
+          'average_vsync_transitions_missed': 8.0,
+          '90th_percentile_vsync_transitions_missed': 12.0,
+          '99th_percentile_vsync_transitions_missed': 12.0
         });
+      });
+    });
+
+    group('SceneDisplayLagSummarizer tests', () {
+      SceneDisplayLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+          final Timeline timeline = Timeline.fromJson(<String, dynamic>{
+          'traceEvents': traceEvents,
+          });
+          return SceneDisplayLagSummarizer(timeline.events);
+      }
+
+      test('average_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+        ]);
+        expect(summarizer.computeAverageVsyncTransitionsMissed(), 8.0);
+      });
+
+      test('all stats are 0 for 0 missed transitions', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[]);
+        expect(summarizer.computeAverageVsyncTransitionsMissed(), 0.0);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(90.0), 0.0);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(99.0), 0.0);
+      });
+
+      test('90th_percentile_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+          lagBegin(6100, 14), lagEnd(11000, 14),
+          lagBegin(7100, 16), lagEnd(11500, 16),
+          lagBegin(7400, 11), lagEnd(13000, 11),
+          lagBegin(8200, 27), lagEnd(14100, 27),
+          lagBegin(8700, 7), lagEnd(14300, 7),
+          lagBegin(24200, 4187), lagEnd(39400, 4187),
+        ]);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(90), 27.0);
+      });
+
+      test('99th_percentile_vsyncs_missed', () async {
+        final SceneDisplayLagSummarizer summarizer = summarize(<Map<String, dynamic>>[
+          lagBegin(1000, 4), lagEnd(2000, 4),
+          lagBegin(1200, 12), lagEnd(2400, 12),
+          lagBegin(4200, 8), lagEnd(9400, 8),
+          lagBegin(6100, 14), lagEnd(11000, 14),
+          lagBegin(24200, 4187), lagEnd(39400, 4187),
+        ]);
+        expect(summarizer.computePercentileVsyncTransitionsMissed(99), 4187.0);
       });
     });
   });

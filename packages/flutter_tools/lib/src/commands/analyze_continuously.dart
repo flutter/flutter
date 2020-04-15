@@ -27,6 +27,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     @required AnsiTerminal terminal,
     @required Platform platform,
     @required ProcessManager processManager,
+    @required List<String> experiments,
   }) : super(
         argResults,
         repoPackages: repoPackages,
@@ -36,6 +37,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         platform: platform,
         terminal: terminal,
         processManager: processManager,
+        experiments: experiments,
       );
 
   String analysisTarget;
@@ -74,6 +76,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      experiments: experiments,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);

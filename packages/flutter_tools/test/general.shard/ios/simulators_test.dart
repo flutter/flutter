@@ -44,8 +44,10 @@ void main() {
   MemoryFileSystem fileSystem;
 
   setUp(() {
-    osx = FakePlatform.fromPlatform(const LocalPlatform());
-    osx.operatingSystem = 'macos';
+    osx = FakePlatform(
+      environment: <String, String>{},
+      operatingSystem: 'macos',
+    );
     fileSystem = MemoryFileSystem();
     fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: osx);
   });
