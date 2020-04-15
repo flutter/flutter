@@ -196,8 +196,3 @@ task:
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
-    - name: build_fuchsia_artifacts
-      compile_fuchsia_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/fuchsia/build_fuchsia_artifacts.py --engine-version HEAD --runtime-mode debug --no-lto --archs x64
-        cd $ENGINE_PATH/src/flutter
