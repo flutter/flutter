@@ -590,6 +590,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -635,7 +636,9 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
-Future<void> _runWebDebugTest(String target) async {
+Future<void> _runWebDebugTest(String target, {
+  bool enableNullSafety = false,
+}) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final CapturedOutput output = CapturedOutput();
   bool success = false;
@@ -644,6 +647,11 @@ Future<void> _runWebDebugTest(String target) async {
     <String>[
       'run',
       '--debug',
+      if (enableNullSafety)
+        ...<String>[
+          '--enable-experiment',
+          'non-nullable',
+        ],
       '-d',
       'chrome',
       '--web-run-headless',

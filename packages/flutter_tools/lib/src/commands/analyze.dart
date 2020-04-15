@@ -30,7 +30,7 @@ class AnalyzeCommand extends FlutterCommand {
        _logger = logger,
        _terminal = terminal,
        _platform = platform {
-    addEnableExperimentation(verbose: verboseHelp);
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',

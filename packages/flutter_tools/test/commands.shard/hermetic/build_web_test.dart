@@ -59,6 +59,7 @@ void main() {
       BuildInfo.debug,
       false,
       false,
+      <String>[],
     ), throwsToolExit());
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
@@ -186,7 +187,7 @@ class UrlLauncherPlugin {}
   });
 
   testUsingContext('hidden if feature flag is not enabled', () async {
-    expect(BuildWebCommand().hidden, true);
+    expect(BuildWebCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -196,7 +197,7 @@ class UrlLauncherPlugin {}
   });
 
   testUsingContext('not hidden if feature flag is enabled', () async {
-    expect(BuildWebCommand().hidden, false);
+    expect(BuildWebCommand(verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

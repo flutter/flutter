@@ -24,6 +24,7 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     this.dartDefines = const <String>[],
+    this.experiments = const <String>[],
     @required this.treeShakeIcons,
   });
 
@@ -78,6 +79,9 @@ class BuildInfo {
   /// These values can be used with the const `fromEnvironment` constructors of
   /// [bool], [String], [int], and [double].
   final List<String> dartDefines;
+
+  /// A list of dart experiments.
+  final List<String> experiments;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
