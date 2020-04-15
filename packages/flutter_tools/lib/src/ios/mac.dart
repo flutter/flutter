@@ -399,6 +399,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
     String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
     if (hasWatchCompanion && !buildForDevice) {
+      globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
       targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
     }
     final String expectedOutputDirectory = globals.fs.path.join(
