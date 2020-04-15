@@ -20,6 +20,7 @@ import 'version.dart';
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
 const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
+const String kRunInViewMethod = '_flutter.runInView';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
@@ -1091,19 +1092,6 @@ class VM extends ServiceObjectOwner {
     return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
-  Future<ServiceMap> runInView(
-    String viewId,
-    Uri main,
-    Uri assetsDirectory,
-  ) {
-    return invokeRpc<ServiceMap>('_flutter.runInView',
-      params: <String, dynamic>{
-        'viewId': viewId,
-        'mainScript': main.toString(),
-        'assetDirectory': assetsDirectory.toString(),
-    });
-  }
-
   Future<Map<String, dynamic>> clearVMTimeline() {
     return invokeRpcRaw('clearVMTimeline');
   }
@@ -1541,36 +1529,6 @@ class FlutterView extends ServiceObject {
     _uiIsolate = map['isolate'] as Isolate;
   }
 
-  // TODO(johnmccutchan): Report errors when running failed.
-  Future<void> runFromSource(
-    Uri entryUri,
-    Uri assetsDirectoryUri,
-  ) async {
-    final String viewId = id;
-    // When this completer completes the isolate is running.
-    final Completer<void> completer = Completer<void>();
-    try {
-      await owner.vm.vmService.streamListen('Isolate');
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
-    }
-    final StreamSubscription<vm_service.Event> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
-        if (event.kind == ServiceEvent.kIsolateRunnable) {
-          globals.printTrace('Isolate is runnable.');
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        }
-      });
-    await owner.vm.runInView(viewId,
-                             entryUri,
-                             assetsDirectoryUri);
-    await completer.future;
-    await owner.vm.refreshViews(waitForViews: true);
-    await subscription.cancel();
-  }
-
   bool get hasIsolate => _uiIsolate != null;
 
   @override
@@ -1579,6 +1537,7 @@ class FlutterView extends ServiceObject {
 
 /// Flutter specific VM Service functionality.
 extension FlutterVmService on vm_service.VmService {
+
   /// Set the asset directory for the an attached Flutter view.
   Future<void> setAssetDirectory({
     @required Uri assetsDirectory,
@@ -1622,5 +1581,34 @@ extension FlutterVmService on vm_service.VmService {
         'isolateId': uiIsolateId,
       },
     );
+  }
+
+  /// Launch the Dart isolate with entrypoint [main] in the Flutter engine [viewId]
+  /// with [assetsDirectory] as the devFS.
+  ///
+  /// This method is used by the tool to hot restart an already running Flutter
+  /// engine.
+  Future<void> runInView({
+    @required String viewId,
+    @required Uri main,
+    @required Uri assetsDirectory,
+  }) async {
+    try {
+      await streamListen('Isolate');
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+    final Future<void> onRunnable = onIsolateEvent.firstWhere((vm_service.Event event) {
+      return event.kind == vm_service.EventKind.kIsolateRunnable;
+    });
+    await callMethod(
+      kRunInViewMethod,
+      args: <String, Object>{
+        'viewId': viewId,
+        'mainScript': main.toString(),
+        'assetDirectory': assetsDirectory.toString(),
+      },
+    );
+    await onRunnable;
   }
 }
