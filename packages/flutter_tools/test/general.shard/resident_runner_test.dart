@@ -88,6 +88,8 @@ void main() {
         invalidatedSourcesCount: 0,
       );
     });
+    // TODO(jonahwilliams): replace mock with FakeVmServiceHost once all methods
+    // are moved to real vm service.
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
       mockFlutterView,
@@ -97,7 +99,20 @@ void main() {
     final MockVM mockVM = MockVM();
     when(mockVMService.vm).thenReturn(mockVM);
     when(mockVM.isolates).thenReturn(<Isolate>[mockIsolate]);
-    when(mockFlutterView.runFromSource(any, any)).thenAnswer((Invocation invocation) async {});
+    when(mockVMService.streamListen('Isolate')).thenAnswer((Invocation invocation) async {
+      return vm_service.Success();
+    });
+    when(mockVMService.onIsolateEvent).thenAnswer((Invocation invocation) {
+      return Stream<vm_service.Event>.fromIterable(<vm_service.Event>[
+        vm_service.Event(kind: vm_service.EventKind.kIsolateRunnable, timestamp: 0),
+      ]);
+    });
+    when(mockVMService.callMethod(
+      kRunInViewMethod,
+      args: anyNamed('args'),
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Success();
+    });
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(
