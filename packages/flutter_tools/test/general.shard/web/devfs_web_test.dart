@@ -453,7 +453,7 @@ void main() {
       any,
       any,
       outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
