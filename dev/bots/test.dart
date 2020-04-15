@@ -648,6 +648,9 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
 Future<void> _runWebReleaseTest(String target, {
   List<String> additionalArguments = const<String>[],
 }) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
+
   // Build the app.
   await runCommand(
     flutter,
