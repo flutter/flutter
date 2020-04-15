@@ -293,7 +293,7 @@ class _DevFSHttpWriter {
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = Completer<void>();
-    _outstanding = Map<Uri, DevFSContent>.from(entries);
+    _outstanding = Map<Uri, DevFSContent>.of(entries);
     _scheduleWrites();
     await _completer.future;
   }
