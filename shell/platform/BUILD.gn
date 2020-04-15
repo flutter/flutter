@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("//flutter/shell/platform/config.gni")
 
 group("platform") {
   if (is_mac || is_ios) {
@@ -14,18 +15,15 @@ group("platform") {
       "android",
     ]
   } else if (is_linux) {
-    if (is_fuchsia_host) {
-      # The linux build is not supported as part of the Fuchsia host build.
-      deps = []
-    } else {
-      deps = [
-        "linux",
-      ]
+    deps = []
+    if (enable_desktop_embeddings) {
+      deps += [ "linux" ]
     }
   } else if (is_win) {
-    deps = [
-      "windows",
-    ]
+    deps = []
+    if (enable_desktop_embeddings) {
+      deps += [ "windows" ]
+    }
   } else if (is_fuchsia) {
     deps = [
       "fuchsia",

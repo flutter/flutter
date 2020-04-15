@@ -4,6 +4,7 @@
 
 assert(is_mac || is_ios)
 
+import("//flutter/shell/platform/config.gni")
 import("//flutter/testing/testing.gni")
 
 group("darwin") {
@@ -13,9 +14,10 @@ group("darwin") {
     ]
   }
   if (is_mac) {
-    deps = [
-      "macos",
-    ]
+    deps = []
+    if (enable_desktop_embeddings) {
+      deps += [ "macos" ]
+    }
   }
 }
 
