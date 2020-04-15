@@ -416,7 +416,6 @@ void main() {
           projectPath,
         );
       }, throwsToolExit());
-      
 
       expect(
         testLogger.statusText,
