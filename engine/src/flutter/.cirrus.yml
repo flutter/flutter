@@ -3,9 +3,10 @@ gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def
 web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'DEPS', 'lib/web_ui/**', 'web_sdk/**') || $CIRRUS_PR == ''"
   environment:
-        # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
+    # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
     CPU: 4
     MEMORY: 16G
+    WEB_SHARD_COUNT: 4
   compile_host_script: |
     cd $ENGINE_PATH/src
     ./flutter/tools/gn --unoptimized --full-dart-sdk
@@ -124,19 +125,7 @@ task:
     - name: web_tests-2-linux
       << : *WEB_SHARD_TEMPLATE
 
-    - name: web_tests-3-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-4-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-5-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-6-linux
-      << : *WEB_SHARD_TEMPLATE
-
-    - name: web_tests-7_last-linux # last Web shard must end with _last
+    - name: web_tests-3_last-linux # last Web shard must end with _last
       << : *WEB_SHARD_TEMPLATE
 
     - name: web_engine_analysis
