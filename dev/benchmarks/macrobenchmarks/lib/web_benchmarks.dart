@@ -123,6 +123,7 @@ void _fallbackToManual(String error) {
   }
 }
 
+/// Visualizes results on the Web page for manual inspection.
 void _printResultsToScreen(Profile profile) {
   html.document.body.remove();
   html.document.body = html.BodyElement();
@@ -135,6 +136,7 @@ void _printResultsToScreen(Profile profile) {
   });
 }
 
+/// Draws timeseries data and statistics on a canvas.
 class TimeseriesVisualization {
   TimeseriesVisualization(this._timeseries) {
     _stats = _timeseries.computeStats();
@@ -150,8 +152,8 @@ class TimeseriesVisualization {
 
     // The amount of vertical space available on the chart. Because some
     // outliers can be huge they can dwarf all the useful values. So we
-    // limit it to 2 x the maximum non-outlier.
-    _maxValueChartRange = 2.0 * _stats.samples
+    // limit it to 1.5 x the biggest non-outlier.
+    _maxValueChartRange = 1.5 * _stats.samples
       .where((AnnotatedSample sample) => !sample.isOutlier)
       .map<double>((AnnotatedSample sample) => sample.magnitude)
       .fold<double>(0, math.max);
@@ -163,8 +165,10 @@ class TimeseriesVisualization {
   TimeseriesStats _stats;
   html.CanvasElement _canvas;
   html.CanvasRenderingContext2D _ctx;
-  double _maxValueChartRange;
   int _screenWidth;
+
+  // Used to normalize benchmark values to chart height.
+  double _maxValueChartRange;
 
   /// Converts a sample value to vertical canvas coordinates.
   ///
@@ -173,6 +177,7 @@ class TimeseriesVisualization {
     return _kCanvasHeight * value / _maxValueChartRange;
   }
 
+  /// A utility for drawing lines.
   void drawLine(num x1, num y1, num x2, num y2) {
     _ctx.beginPath();
     _ctx.moveTo(x1, y1);
@@ -180,6 +185,7 @@ class TimeseriesVisualization {
     _ctx.stroke();
   }
 
+  /// Renders the timeseries into a `<canvas>` and returns the canvas element.
   html.CanvasElement render() {
     _ctx.translate(0, _kCanvasHeight * html.window.devicePixelRatio);
     _ctx.scale(1, -html.window.devicePixelRatio);

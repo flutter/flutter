@@ -309,8 +309,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   ///
   /// The widget must create its own animation to drive the benchmark. The
   /// animation should continue indefinitely. The benchmark harness will stop
-  /// pumping frames automatically as soon as the noise levels are sufficiently
-  /// low.
+  /// pumping frames automatically.
   Widget createWidget();
 
   @override
@@ -504,6 +503,8 @@ class Timeseries {
   int get count => _allValues.length;
 
   /// Extracts useful statistics out of this timeseries.
+  ///
+  /// See [TimeseriesStats] for more details.
   TimeseriesStats computeStats() {
     // The first few values we simply discard and never look at. There's from warm-up phase.
     final List<double> warmUpValues = _allValues.sublist(0, _allValues.length - _kMeasuredSampleCount);
@@ -571,6 +572,9 @@ class Timeseries {
   }
 }
 
+/// Various statistics about a [Timeseries].
+///
+/// See the docs on the individual fields for more details.
 @sealed
 class TimeseriesStats {
   const TimeseriesStats({
@@ -585,19 +589,16 @@ class TimeseriesStats {
     @required this.samples,
   });
 
+  /// The label used to refer to the corresponding timeseries.
   final String name;
 
-  /// The average value of the measured samples.
+  /// The average value of the measured samples without outliers.
   final double average;
 
-  final double outlierCutOff;
-
-  final double outlierAverage;
-
-  /// The standard deviation in the measured samples.
+  /// The standard deviation in the measured samples without outliers.
   final double standardDeviation;
 
-  /// The noise as a multiple of the [average] value.
+  /// The noise as a multiple of the [average] value takes from clean samples.
   ///
   /// This value can be multiplied by 100.0 to get noise as a percentage of
   /// the average.
@@ -605,9 +606,29 @@ class TimeseriesStats {
   /// If [average] is zero, treats the result as perfect score, returns zero.
   final double noise;
 
+  /// The maximum value a sample can have without being considered an outlier.
+  ///
+  /// See [Timeseries.computeStats] for details on how this value is computed.
+  final double outlierCutOff;
+
+  /// The average of outlier samples.
+  ///
+  /// This value can be used to judge how badly we jank, when we jank.
+  ///
+  /// Another useful metrics is the difference between [outlierAverage] and
+  /// [average]. The smaller the value the more predictable is the performance
+  /// of the corresponding benchmark.
+  final double outlierAverage;
+
+  /// The number of measured samples after outlier are removed.
   final int cleanSampleCount;
+
+  /// The number of outliers.
   final int outlierSampleCount;
 
+  /// All collected samples, annotated with statistical information.
+  ///
+  /// See [AnnotatedSample] for more details.
   final List<AnnotatedSample> samples;
 
   @override
@@ -624,6 +645,7 @@ class TimeseriesStats {
   }
 }
 
+/// Annotates a single measurement with statistical information.
 @sealed
 class AnnotatedSample {
   const AnnotatedSample({
@@ -632,8 +654,19 @@ class AnnotatedSample {
     @required this.isWarmUpValue,
   });
 
+  /// The non-negative raw result of the measurement.
   final double magnitude;
+
+  /// Whether this sample was considered an outlier.
   final bool isOutlier;
+
+  /// Whether this sample was taken during the warm-up phase.
+  ///
+  /// If this value is `true`, this sample does not participate in
+  /// statistical computations. However, the sample would still be
+  /// shown in the visualization of results so that the benchmark
+  /// can be inspected manually to make sure there's a predictable
+  /// warm-up regression slope.
   final bool isWarmUpValue;
 }
 
