@@ -162,7 +162,7 @@ abstract class FlutterCommand extends Command<void> {
       help:
         'The hostname that the web sever will use to resolve an IP to serve '
         'from. The unresolved hostname is used to launch Chrome when using '
-        'the chrome Device. The name "any" may also be used to server on any '
+        'the chrome Device. The name "any" may also be used to serve on any '
         'IPV4 for either the Chrome or web-server device.',
       hide: hide,
     );
