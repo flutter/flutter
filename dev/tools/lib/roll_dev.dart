@@ -39,7 +39,7 @@ void main(List<String> args) {
   );
   argParser.addOption(
     kCommit,
-    help: 'Specifies which git commit to roll to the dev branch.',
+    help: 'Specifies which git commit to roll to the dev branch. Required.',
     valueHelp: 'hash',
     defaultsTo: null, // This option is required
   );
