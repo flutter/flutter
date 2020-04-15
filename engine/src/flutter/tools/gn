@@ -250,6 +250,12 @@ def to_gn_args(args):
       gn_args['dart_platform_sdk'] = not args.full_dart_sdk
     gn_args['full_dart_sdk'] = args.full_dart_sdk
 
+    # Desktop embeddings can have more dependencies than the engine library,
+    # which can be problematic in some build environments (e.g., building on
+    # Linux will bring in pkg-config dependencies at generation time). These
+    # flags allow preventing those those targets from being part of the build
+    # tree.
+    gn_args['enable_desktop_embeddings'] = not args.disable_desktop_embeddings
     if args.build_glfw_shell is not None:
       gn_args['build_glfw_shell'] = args.build_glfw_shell
 
@@ -339,6 +345,8 @@ def parse_args(args):
                       help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
                       ' see supported IDEs. If this flag is not specified, a platform specific default is selected.')
 
+  parser.add_argument('--disable-desktop-embeddings', default=False, action='store_true',
+                      help='Do not include desktop embeddings in the build.')
   parser.add_argument('--build-glfw-shell', action='store_const', const=True,
                       help='Build the GLFW shell on supported platforms where it is not built by default.')
   parser.add_argument('--no-build-glfw-shell', dest='build_glfw_shell', action='store_const', const=False,

@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//flutter/common/config.gni")
+import("//flutter/shell/platform/config.gni")
 
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
@@ -63,10 +64,8 @@ group("flutter") {
   # If on the host, compile all unittests targets.
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
-      public_deps += [
-        "//flutter/shell/platform/darwin:flutter_channels_unittests",
-        "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests",
-      ]
+      public_deps +=
+          [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
     }
 
     public_deps += [
@@ -75,21 +74,10 @@ group("flutter") {
       "//flutter/lib/ui:ui_unittests",
       "//flutter/runtime:runtime_unittests",
       "//flutter/shell/common:shell_unittests",
-      "//flutter/shell/platform/common/cpp:common_cpp_core_unittests",
-      "//flutter/shell/platform/common/cpp:common_cpp_unittests",
-      "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
-      "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
       "//flutter/testing:testing_unittests",
       "//flutter/third_party/txt:txt_unittests",
     ]
-
-    if (is_win) {
-      public_deps += [
-        "//flutter/shell/platform/windows:flutter_windows_unittests",
-        "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
-      ]
-    }
 
     if (!is_win) {
       public_deps += [
@@ -97,6 +85,26 @@ group("flutter") {
         "//flutter/shell/common:shell_benchmarks",
         "//flutter/third_party/txt:txt_benchmarks",
       ]
+    }
+
+    # Unit tests for desktop embeddings should only be built if the desktop
+    # embeddings are being built.
+    if (enable_desktop_embeddings) {
+      public_deps += [
+        "//flutter/shell/platform/common/cpp:common_cpp_core_unittests",
+        "//flutter/shell/platform/common/cpp:common_cpp_unittests",
+        "//flutter/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",
+        "//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests",
+      ]
+      if (is_mac) {
+        public_deps += [ "//flutter/shell/platform/darwin/macos:flutter_desktop_darwin_unittests" ]
+      }
+      if (is_win) {
+        public_deps += [
+          "//flutter/shell/platform/windows:flutter_windows_unittests",
+          "//flutter/shell/platform/windows/client_wrapper:client_wrapper_windows_unittests",
+        ]
+      }
     }
   }
 }
