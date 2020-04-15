@@ -579,6 +579,97 @@ name: foo_bar
       FlutterProjectFactory: () => flutterProjectFactory,
     }));
   });
+
+  group('watch companion', () {
+    MemoryFileSystem fs;
+    MockPlistUtils mockPlistUtils;
+    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+    FlutterProjectFactory flutterProjectFactory;
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      mockPlistUtils = MockPlistUtils();
+      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+      );
+    });
+
+    testUsingContext('cannot find bundle identifier', () async {
+      final FlutterProject project = await someProject();
+      expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      PlistParser: () => mockPlistUtils,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+      FlutterProjectFactory: () => flutterProjectFactory,
+    });
+
+    group('with bundle identifier', () {
+      setUp(() {
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+            (_) {
+            return Future<Map<String,String>>.value(<String, String>{
+              'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+            });
+          }
+        );
+      });
+
+      testUsingContext('no Info.plist in target', () async {
+        final FlutterProject project = await someProject();
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => mockPlistUtils,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+      testUsingContext('Info.plist in target does not contain WKCompanionAppBundleIdentifier', () async {
+        final FlutterProject project = await someProject();
+        project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
+
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => mockPlistUtils,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+      testUsingContext('target WKCompanionAppBundleIdentifier is not project bundle identifier', () async {
+        final FlutterProject project = await someProject();
+        project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
+
+        when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someOTHERproject');
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => mockPlistUtils,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+      testUsingContext('has watch companion', () async {
+        final FlutterProject project = await someProject();
+        project.ios.hostAppRoot.childDirectory('WatchTarget').childFile('Info.plist').createSync(recursive: true);
+        when(mockPlistUtils.getValueFromFile(any, 'WKCompanionAppBundleIdentifier')).thenReturn('io.flutter.someProject');
+
+        expect(await project.ios.containsWatchCompanion(<String>['WatchTarget']), isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        PlistParser: () => mockPlistUtils,
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+    });
+  });
 }
 
 Future<FlutterProject> someProject() async {
