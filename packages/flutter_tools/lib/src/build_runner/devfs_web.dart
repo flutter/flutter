@@ -78,7 +78,7 @@ class WebExpressionCompiler implements ExpressionCompiler {
     }
 
     return ExpressionCompilationResult(
-      'InternalError: frontend server failed to compile $expression', true);
+      'InternalError: frontend server failed to compile \'$expression\'', true);
   }
 }
 
