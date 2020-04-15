@@ -21,7 +21,7 @@ const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
 
-const String kUpstreamRemote = 'git@github.com:christopherfujino/flutter.git'; // TODO
+const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 ArgResults parseArguments(List<String> args, ArgParser argParser) {
   argParser.addOption(
