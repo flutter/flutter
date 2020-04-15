@@ -38,4 +38,30 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   XCTAssertNotNil(object);
 }
 
+- (void)testSetChildren {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child ];
+  XCTAssertEqual(parent, child.parent);
+  parent.children = @[];
+  XCTAssertNil(child.parent);
+}
+
+- (void)testReplaceChildAtIndex {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child1 = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child2 = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  parent.children = @[ child1 ];
+  [parent replaceChildAtIndex:0 withChild:child2];
+  XCTAssertNil(child1.parent);
+  XCTAssertEqual(parent, child2.parent);
+  XCTAssertEqualObjects(parent.children, @[ child2 ]);
+}
+
 @end
