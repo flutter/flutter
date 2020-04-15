@@ -178,7 +178,7 @@ void main(List<String> args) {
 }
 
 String getFullTag() {
-  const String glob = '*.*.*-dev.*.*';
+  const String glob = '*.*.*-*.*.pre';
   return getGitOutput(
     'describe --match $glob --first-parent --long --tags',
     'obtain last released version number',
