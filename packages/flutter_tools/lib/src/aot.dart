@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/logger.dart';
 import 'build_info.dart';
@@ -83,7 +82,7 @@ class AotBuilder {
       buildDir: FlutterProject.current().dartTool.childDirectory('flutter_build'),
       cacheDir: null,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-      engineVersion: globals.artifacts is LocalEngineArtifacts
+      engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision,
       defines: <String, String>{

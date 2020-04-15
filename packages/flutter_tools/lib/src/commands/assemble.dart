@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
@@ -164,7 +163,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
-      engineVersion: globals.artifacts is LocalEngineArtifacts
+      engineVersion: globals.artifacts.isLocalEngine
         ? null
         : globals.flutterVersion.engineRevision
     );

@@ -99,6 +99,7 @@ void main() {
 
   testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
     Environment environment;
+    when(globals.artifacts.isLocalEngine).thenReturn(true);
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
         environment = invocation.positionalArguments[1] as Environment;
