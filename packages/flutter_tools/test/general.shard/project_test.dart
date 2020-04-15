@@ -589,7 +589,10 @@ name: foo_bar
       fs = MemoryFileSystem.test();
       mockPlistUtils = MockPlistUtils();
       mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-      flutterProjectFactory = FlutterProjectFactory();
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+      );
     });
 
     testUsingContext('cannot find bundle identifier', () async {
