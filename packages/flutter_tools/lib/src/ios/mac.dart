@@ -87,6 +87,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   DarwinArch activeArch,
   bool codesign = true,
+  String deviceID,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -227,10 +228,28 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
-  if (buildForDevice) {
-    buildCommands.addAll(<String>['-sdk', 'iphoneos']);
+  // Check if the project contains a watchOS companion app.
+  final bool hasWatchCompanion = await app.project.containsWatchCompanion(projectInfo.targets);
+  if (hasWatchCompanion) {
+    // The -sdk argument has to be omitted if a watchOS companion app exists.
+    // Otherwise the build will fail as WatchKit dependencies cannot be build using the iOS SDK.
+    globals.printStatus('Watch companion app found. Adjusting build settings.');
+    if (!buildForDevice && (deviceID == null || deviceID == '')) {
+      globals.printError('No simulator device ID has been set.');
+      globals.printError('A device ID is required to build an app with a watchOS companion app.');
+      globals.printError('Please run "flutter devices" to get a list of available device IDs');
+      globals.printError('and specify one using the -d, --device-id flag.');
+      return XcodeBuildResult(success: false);
+    }
+    if (!buildForDevice) {
+      buildCommands.addAll(<String>['-destination', 'id=$deviceID']);
+    }
   } else {
-    buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    if (buildForDevice) {
+      buildCommands.addAll(<String>['-sdk', 'iphoneos']);
+    } else {
+      buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    }
   }
 
   if (activeArch != null) {
@@ -374,8 +393,17 @@ Future<XcodeBuildResult> buildXcodeProject({
       ),
     );
   } else {
+    // If the app contains a watch companion target, the sdk argument of xcodebuild has to be omitted.
+    // For some reason this leads to TARGET_BUILD_DIR always ending in 'iphoneos' even though the
+    // actual directory will end with 'iphonesimulator' for simulator builds.
+    // The value of TARGET_BUILD_DIR is adjusted to accommodate for this effect.
+    String targetBuildDir = buildSettings['TARGET_BUILD_DIR'];
+    if (hasWatchCompanion && !buildForDevice) {
+      globals.printTrace('Replacing iphoneos with iphonesimulator in TARGET_BUILD_DIR.');
+      targetBuildDir = targetBuildDir.replaceFirst('iphoneos', 'iphonesimulator');
+    }
     final String expectedOutputDirectory = globals.fs.path.join(
-      buildSettings['TARGET_BUILD_DIR'],
+      targetBuildDir,
       buildSettings['WRAPPER_NAME'],
     );
 

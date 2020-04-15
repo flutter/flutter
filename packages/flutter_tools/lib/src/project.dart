@@ -486,6 +486,25 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
     await _updateGeneratedXcodeConfigIfNeeded();
   }
 
+  /// Check if one the [targets] of the project is a watchOS companion app target.
+  Future<bool> containsWatchCompanion(List<String> targets) async {
+    final String bundleIdentifier = await productBundleIdentifier;
+    // A bundle identifier is required for a companion app.
+    if (bundleIdentifier == null) {
+      return false;
+    }
+    for (final String target in targets) {
+      // Create Info.plist file of the target.
+      final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
+      // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
+      // if it is a watchOS companion app.
+      if (infoFile.existsSync() && globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier') == bundleIdentifier) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
     if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
