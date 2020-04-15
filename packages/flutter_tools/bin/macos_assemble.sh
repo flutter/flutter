@@ -72,7 +72,7 @@ if [[ -n "$DART_OBFUSCATION" ]]; then
   dart_obfuscation_flag="true"
 fi
 
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
