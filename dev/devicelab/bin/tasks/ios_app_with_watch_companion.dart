@@ -82,6 +82,7 @@ Future<void> main() async {
           'create',
           'TestFlutteriPhoneWithWatch',
           'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+          'com.apple.CoreSimulator.SimRuntime.iOS-13-2',
         ],
         canFail: false,
         workingDirectory: flutterDirectory.path,
@@ -94,6 +95,7 @@ Future<void> main() async {
           'create',
           'TestFlutterWatch',
           'com.apple.CoreSimulator.SimDeviceType.Apple-Watch-Series-5-44mm',
+          'com.apple.CoreSimulator.SimRuntime.watchOS-6-1'
         ],
         canFail: false,
         workingDirectory: flutterDirectory.path,
