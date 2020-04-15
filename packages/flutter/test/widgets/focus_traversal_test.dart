@@ -29,11 +29,11 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(key: key3, width: 100, height: 100),
+                child: SizedBox(key: key3, width: 100, height: 100),
               ),
               Focus(
                 key: key4,
-                child: Container(key: key5, width: 100, height: 100),
+                child: SizedBox(key: key5, width: 100, height: 100),
               ),
             ],
           ),
@@ -327,11 +327,11 @@ void main() {
             children: <Widget>[
               Focus(
                 key: key2,
-                child: Container(key: key3, width: 100, height: 100),
+                child: SizedBox(key: key3, width: 100, height: 100),
               ),
               Focus(
                 key: key4,
-                child: Container(key: key5, width: 100, height: 100),
+                child: SizedBox(key: key5, width: 100, height: 100),
               ),
             ],
           ),
@@ -763,13 +763,13 @@ void main() {
               FocusTraversalOrder(
                 order: const NumericFocusOrder(2),
                 child: Focus(
-                  child: Container(key: key1, width: 100, height: 100),
+                  child: SizedBox(key: key1, width: 100, height: 100),
                 ),
               ),
               FocusTraversalOrder(
                 order: const NumericFocusOrder(1),
                 child: Focus(
-                  child: Container(key: key2, width: 100, height: 100),
+                  child: SizedBox(key: key2, width: 100, height: 100),
                 ),
               ),
             ],
@@ -1139,12 +1139,12 @@ void main() {
                       Focus(
                         debugLabel: 'upperLeft',
                         onFocusChange: (bool focus) => focusUpperLeft = focus,
-                        child: Container(width: 100, height: 100, key: upperLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                       ),
                       Focus(
                         debugLabel: 'upperRight',
                         onFocusChange: (bool focus) => focusUpperRight = focus,
-                        child: Container(width: 100, height: 100, key: upperRightKey),
+                        child: SizedBox(width: 100, height: 100, key: upperRightKey),
                       ),
                     ],
                   ),
@@ -1153,12 +1153,12 @@ void main() {
                       Focus(
                         debugLabel: 'lowerLeft',
                         onFocusChange: (bool focus) => focusLowerLeft = focus,
-                        child: Container(width: 100, height: 100, key: lowerLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                       ),
                       Focus(
                         debugLabel: 'lowerRight',
                         onFocusChange: (bool focus) => focusLowerRight = focus,
-                        child: Container(width: 100, height: 100, key: lowerRightKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerRightKey),
                       ),
                     ],
                   ),
@@ -1270,7 +1270,7 @@ void main() {
         return Focus(
           debugLabel: keys[index].toString(),
           onFocusChange: (bool isFocused) => focus[index] = isFocused,
-          child: Container(width: 100, height: 100, key: keys[index]),
+          child: SizedBox(width: 100, height: 100, key: keys[index]),
         );
       }
 
@@ -1412,11 +1412,11 @@ void main() {
                     children: <Widget>[
                       Focus(
                         debugLabel: 'upperLeft',
-                        child: Container(width: 100, height: 100, key: upperLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                       ),
                       Focus(
                         debugLabel: 'upperRight',
-                        child: Container(width: 100, height: 100, key: upperRightKey),
+                        child: SizedBox(width: 100, height: 100, key: upperRightKey),
                       ),
                     ],
                   ),
@@ -1424,7 +1424,7 @@ void main() {
                     children: <Widget>[
                       Focus(
                         debugLabel: 'lowerLeft',
-                        child: Container(width: 100, height: 100, key: lowerLeftKey),
+                        child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                       ),
                       const Focus(
                         debugLabel: 'lowerRight',
@@ -1527,11 +1527,11 @@ void main() {
                           Focus(
                             autofocus: true,
                             debugLabel: 'upperLeft',
-                            child: Container(width: 100, height: 100, key: upperLeftKey),
+                            child: SizedBox(width: 100, height: 100, key: upperLeftKey),
                           ),
                           Focus(
                             debugLabel: 'upperRight',
-                            child: Container(width: 100, height: 100, key: upperRightKey),
+                            child: SizedBox(width: 100, height: 100, key: upperRightKey),
                           ),
                         ],
                       ),
@@ -1539,11 +1539,11 @@ void main() {
                         children: <Widget>[
                           Focus(
                             debugLabel: 'lowerLeft',
-                            child: Container(width: 100, height: 100, key: lowerLeftKey),
+                            child: SizedBox(width: 100, height: 100, key: lowerLeftKey),
                           ),
                           Focus(
                             debugLabel: 'lowerRight',
-                            child: Container(width: 100, height: 100, key: lowerRightKey),
+                            child: SizedBox(width: 100, height: 100, key: lowerRightKey),
                           ),
                         ],
                       ),

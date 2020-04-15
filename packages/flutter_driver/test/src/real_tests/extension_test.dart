@@ -527,8 +527,8 @@ void main() {
         alignment: Alignment.topLeft,
         child: Transform.translate(
           offset: const Offset(40, 30),
-          child: Container(
-            key: const ValueKey<int>(1),
+          child: const SizedBox(
+            key: ValueKey<int>(1),
             width: 100,
             height: 120,
           ),
@@ -713,20 +713,20 @@ void main() {
       await tester.pumpWidget(
           MaterialApp(
             home: Center(
-                child: Container(
+                child: SizedBox(
                   key: const ValueKey<String>('parent'),
                   height: 100,
                   width: 100,
                   child: Center(
                     child: Row(
-                      children: <Widget>[
-                        Container(
-                          key: const ValueKey<String>('leftchild'),
+                      children: const <Widget>[
+                        SizedBox(
+                          key: ValueKey<String>('leftchild'),
                           width: 25,
                           height: 25,
                         ),
-                        Container(
-                          key: const ValueKey<String>('righttchild'),
+                        SizedBox(
+                          key: ValueKey<String>('righttchild'),
                           width: 25,
                           height: 25,
                         ),
@@ -781,7 +781,7 @@ void main() {
       }
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
             child: SizedBox(
               height: 200,
@@ -791,8 +791,8 @@ void main() {
                   height: 100,
                   width: 100,
                   child: Center(
-                    child: Container(
-                      key: const ValueKey<String>('leaf'),
+                    child: SizedBox(
+                      key: ValueKey<String>('leaf'),
                       height: 50,
                       width: 50,
                     ),

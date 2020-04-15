@@ -13,7 +13,7 @@ final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey(
 int currentPage;
 
 Widget buildPage(int page) {
-  return Container(
+  return SizedBox(
     key: globalKeys[page],
     width: pageSize.width,
     height: pageSize.height,

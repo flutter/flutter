@@ -347,7 +347,7 @@ void main() {
                 },
                 onShowHoverHighlight: (bool value) => hovering = value,
                 onShowFocusHighlight: (bool value) => focusing = value,
-                child: Container(width: 100, height: 100, key: containerKey),
+                child: SizedBox(width: 100, height: 100, key: containerKey),
               ),
             ),
           ),

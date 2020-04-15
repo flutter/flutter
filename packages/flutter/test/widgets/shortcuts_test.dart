@@ -225,7 +225,7 @@ void main() {
             },
             child: Focus(
               autofocus: true,
-              child: Container(key: containerKey, width: 100, height: 100),
+              child: SizedBox(key: containerKey, width: 100, height: 100),
             ),
           ),
         ),
@@ -262,7 +262,7 @@ void main() {
               },
               child: Focus(
                 autofocus: true,
-                child: Container(key: containerKey, width: 100, height: 100),
+                child: SizedBox(key: containerKey, width: 100, height: 100),
               ),
             ),
           ),
@@ -301,7 +301,7 @@ void main() {
                 },
                 child: Focus(
                   autofocus: true,
-                  child: Container(key: containerKey, width: 100, height: 100),
+                  child: SizedBox(key: containerKey, width: 100, height: 100),
                 ),
               ),
             ),

@@ -924,7 +924,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(
@@ -1026,7 +1026,7 @@ void main() {
                   ),
                 ),
               ],
-              drawer: Container(
+              drawer: SizedBox(
                 key: drawer,
                 width: 204.0,
                 child: SafeArea(

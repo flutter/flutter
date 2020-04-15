@@ -72,10 +72,10 @@ void main() {
           child: Material(
             child: Center(
               child: ListTile(
-                leading: Container(key: leadingKey, width: 24.0, height: 24.0),
+                leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
                 subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
-                trailing: Container(key: trailingKey, width: 24.0, height: 24.0),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
               ),

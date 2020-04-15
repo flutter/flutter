@@ -24,7 +24,7 @@ void main() {
           left: ListView.builder(
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return Container(
+              return SizedBox(
                 key: ValueKey<int>(index),
                 height: 100.0,
                 child: Text('$index'),
@@ -70,7 +70,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 200.0,
@@ -133,7 +133,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         height: 500.0, // this should be ignored
         width: 200.0,
@@ -184,7 +184,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return Container(
+      return SizedBox(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,

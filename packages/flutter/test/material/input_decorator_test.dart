@@ -1311,8 +1311,8 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
-          prefix: Container(
+        decoration: const InputDecoration(
+          prefix: SizedBox(
             key: pKey,
             height: 100,
             width: 10,
@@ -1355,9 +1355,9 @@ void main() {
       buildInputDecorator(
         // isEmpty: false (default)
         // isFocused: false (default)
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          prefix: Container(
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          prefix: SizedBox(
             key: pKey,
             height: 100,
             width: 10,
@@ -1886,8 +1886,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1915,8 +1915,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1944,8 +1944,8 @@ void main() {
           buildInputDecorator(
             // isEmpty: false (default)
             // isFocused: false (default)
-            decoration: InputDecoration(
-              prefix: Container(
+            decoration: const InputDecoration(
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -1976,9 +1976,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2007,9 +2007,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2040,9 +2040,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,
@@ -2071,9 +2071,9 @@ void main() {
             // isEmpty: false (default)
             // isFocused: false (default)
             expands: true,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              prefix: Container(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              prefix: SizedBox(
                 key: pKey,
                 height: 100,
                 width: 10,

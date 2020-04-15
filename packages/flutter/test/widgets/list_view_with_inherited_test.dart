@@ -10,7 +10,7 @@ List<int> items = <int>[0, 1, 2, 3, 4, 5];
 Widget buildCard(BuildContext context, int index) {
   if (index >= items.length)
     return null;
-  return Container(
+  return SizedBox(
     key: ValueKey<int>(items[index]),
     height: 100.0,
     child: DefaultTextStyle(

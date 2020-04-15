@@ -28,7 +28,7 @@ void main() {
               top: 343.0,
               child: CompositedTransformFollower(
                 link: link,
-                child: Container(key: key, height: 10.0, width: 10.0),
+                child: SizedBox(key: key, height: 10.0, width: 10.0),
               ),
             ),
           ],
@@ -55,7 +55,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, height: 10.0, width: 10.0),
+                  child: SizedBox(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -66,7 +66,7 @@ void main() {
                 angle: -0.3, // radians
                 child: CompositedTransformFollower(
                   link: link,
-                  child: Container(key: key2, height: 10.0, width: 10.0),
+                  child: SizedBox(key: key2, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -98,7 +98,7 @@ void main() {
                 angle: 1.0, // radians
                 child: CompositedTransformTarget(
                   link: link,
-                  child: Container(key: key1, height: 10.0, width: 10.0),
+                  child: SizedBox(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -117,7 +117,7 @@ void main() {
                         padding: const EdgeInsets.all(20.0),
                         child: CompositedTransformFollower(
                           link: link,
-                          child: Container(key: key2, height: 10.0, width: 10.0),
+                          child: SizedBox(key: key2, height: 10.0, width: 10.0),
                         ),
                       ),
                     ),
@@ -153,7 +153,7 @@ void main() {
               top: 456.0,
               child: CompositedTransformTarget(
                 link: link,
-                child: Container(key: key1, height: 10.0, width: 10.0),
+                child: SizedBox(key: key1, height: 10.0, width: 10.0),
               ),
             ),
             CompositedTransformFollower(
@@ -162,7 +162,7 @@ void main() {
                 key: key2,
                 behavior: HitTestBehavior.opaque,
                 onTap: () { _tapped = true; },
-                child: Container(key: key3, height: 10.0, width: 10.0),
+                child: SizedBox(key: key3, height: 10.0, width: 10.0),
               ),
             ),
           ],

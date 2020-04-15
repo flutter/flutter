@@ -17,7 +17,7 @@ void main() {
           width: 200.0,
           child: FittedBox(
             key: outside,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -53,7 +53,7 @@ void main() {
           height: 200.0,
           child: FittedBox(
             key: outside,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -89,7 +89,7 @@ void main() {
           child: FittedBox(
             key: outside,
             fit: BoxFit.cover,
-            child: Container(
+            child: SizedBox(
               key: inside,
               width: 100.0,
               height: 50.0,
@@ -146,7 +146,7 @@ void main() {
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -187,7 +187,7 @@ void main() {
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -228,7 +228,7 @@ void main() {
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -269,7 +269,7 @@ void main() {
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 30.0,
                   height: 10.0,
@@ -310,7 +310,7 @@ void main() {
                 key: outside,
                 fit: BoxFit.fill,
                 alignment: AlignmentDirectional.center,
-                child: Container(
+                child: SizedBox(
                   key: inside,
                   width: 30.0,
                   height: 10.0,

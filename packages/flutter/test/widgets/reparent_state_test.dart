@@ -205,7 +205,7 @@ void main() {
         child: ListView(
           itemExtent: 100.0,
           children: <Widget>[
-            Container(
+            SizedBox(
               key: const Key('container'),
               height: 100.0,
               child: StateMarker(key: key),

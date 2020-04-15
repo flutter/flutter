@@ -322,7 +322,7 @@ Widget _buildSliverList({
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int i) {
-                  return Container(
+                  return SizedBox(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,
                     child: Text('Tile ${items[i]}'),
