@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
+enum FieldJustification { LEFT, RIGHT, CENTER }
+
 /// Collects data from an A/B test and produces a summary for human evaluation.
 ///
 /// See [printSummary] for more.
@@ -30,6 +32,48 @@ class ABTest {
     _addResult(result, _bResults);
   }
 
+  static void accumulateLengths(List<int> lengths, List<String> results) {
+    for (int i = 0; i < lengths.length; i++) {
+      if (results[i] != null) {
+        final int len = results[i].length;
+        if (lengths[i] < len) {
+          lengths[i] = len;
+        }
+      }
+    }
+  }
+
+  static void formatResult(StringBuffer buffer,
+                           List<int> lengths,
+                           List<FieldJustification> aligns,
+                           List<String> values) {
+    for (int i = 0; i < lengths.length; i++) {
+      final int len = lengths[i];
+      String value = values[i];
+      if (value == null) {
+        value = ''.padRight(len);
+      } else {
+        switch (aligns[i]) {
+          case FieldJustification.LEFT:
+            value = value.padRight(len);
+            break;
+          case FieldJustification.RIGHT:
+            value = value.padLeft(len);
+            break;
+          case FieldJustification.CENTER:
+            value = value.padLeft((len + value.length) ~/2);
+            value = value.padRight(len);
+            break;
+        }
+      }
+      if (i > 0) {
+        value = value.padLeft(len+1);
+      }
+      buffer.write(value);
+    }
+    buffer.writeln();
+  }
+
   /// Returns the summary as a tab-separated spreadsheet.
   ///
   /// This value can be copied straight to a Google Spreadsheet for further analysis.
@@ -41,32 +85,45 @@ class ABTest {
       ...summariesB.keys,
     };
 
-    final StringBuffer buffer = StringBuffer(
-      'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n',
-    );
+    final List<String> titles = <String>[
+      'Score',
+      'Average A', '(noise)',
+      'Average B', '(noise)',
+      'Speed-up'
+    ];
+    final List<FieldJustification> alignments = <FieldJustification>[
+      FieldJustification.LEFT,
+      FieldJustification.RIGHT, FieldJustification.LEFT,
+      FieldJustification.RIGHT, FieldJustification.LEFT,
+      FieldJustification.CENTER
+    ];
 
+    final List<int> lengths = List<int>.filled(6, 0);
+    accumulateLengths(lengths, titles);
     for (final String scoreKey in scoreKeyUnion) {
       final _ScoreSummary summaryA = summariesA[scoreKey];
       final _ScoreSummary summaryB = summariesB[scoreKey];
-      buffer.write('$scoreKey\t');
+      accumulateLengths(lengths, <String>[
+        scoreKey,
+        summaryA?.averageString, summaryA?.noiseString,
+        summaryB?.averageString, summaryB?.noiseString,
+        summaryA?.improvementOver(summaryB),
+      ]);
+    }
 
-      if (summaryA != null) {
-        buffer.write('${summaryA.average.toStringAsFixed(2)} (${_ratioToPercent(summaryA.noise)})\t');
-      } else {
-        buffer.write('\t');
-      }
-
-      if (summaryB != null) {
-        buffer.write('${summaryB.average.toStringAsFixed(2)} (${_ratioToPercent(summaryB.noise)})\t');
-      } else {
-        buffer.write('\t');
-      }
-
-      if (summaryA != null && summaryB != null) {
-        buffer.write('${(summaryA.average / summaryB.average).toStringAsFixed(2)}x\t');
-      }
-
-      buffer.writeln();
+    final StringBuffer buffer = StringBuffer();
+    alignments[0] = FieldJustification.CENTER;
+    formatResult(buffer, lengths, alignments, titles);
+    alignments[0] = FieldJustification.LEFT;
+    for (final String scoreKey in scoreKeyUnion) {
+      final _ScoreSummary summaryA = summariesA[scoreKey];
+      final _ScoreSummary summaryB = summariesB[scoreKey];
+      formatResult(buffer, lengths, alignments, <String>[
+        scoreKey,
+        summaryA?.averageString, summaryA?.noiseString,
+        summaryB?.averageString, summaryB?.noiseString,
+        summaryA?.improvementOver(summaryB),
+      ]);
     }
 
     return buffer.toString();
@@ -85,6 +142,13 @@ class _ScoreSummary {
   /// The noise (standard deviation divided by [average]) in the collected
   /// values.
   final double noise;
+
+  String get averageString => average.toStringAsFixed(2);
+  String get noiseString => '(${_ratioToPercent(noise)})';
+
+  String improvementOver(_ScoreSummary other) {
+    return other == null ? '' : '${(average / other.average).toStringAsFixed(2)}x';
+  }
 }
 
 void _addResult(Map<String, dynamic> result, Map<String, List<double>> results) {
