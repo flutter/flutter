@@ -361,8 +361,8 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, containsIgnoreWhitespacesAndLineBreaks("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, containsIgnoreWhitespacesAndLineBreaks(
+      expect(testLogger.statusText, containsIgnoreWhitespace("Your app isn't using AndroidX"));
+      expect(testLogger.statusText, containsIgnoreWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -414,9 +414,9 @@ void main() {
       
 
       expect(testLogger.statusText, 
-        not(containsIgnoreWhitespacesAndLineBreaks("Your app isn't using AndroidX")));
+        not(containsIgnoreWhitespace("Your app isn't using AndroidX")));
       expect(
-        testLogger.statusText, not(containsIgnoreWhitespacesAndLineBreaks(
+        testLogger.statusText, not(containsIgnoreWhitespace(
           'To avoid potential build failures, you can quickly migrate your app by '
           'following the steps on https://goo.gl/CP92wY'))
       );

@@ -145,7 +145,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
-Matcher containsIgnoreWhitespacesAndLineBreaks(String toContain){
+Matcher containsIgnoreWhitespace(String toContain){
 return  predicate((String value) => _removeWhitespaces(_removeLinebreaks(value))
     .contains(_removeWhitespaces(_removeLinebreaks(toContain))),
     'contains "$toContain" ignoring whitespaces and linebreaks.');
