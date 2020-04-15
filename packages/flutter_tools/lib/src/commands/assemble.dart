@@ -87,6 +87,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -182,12 +183,17 @@ class AssembleCommand extends FlutterCommand {
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
+    // Workaround for dart-define formatting
+    if (argResults.wasParsed(kDartDefines)) {
+      results[kDartDefines] = argResults[kDartDefines] as String;
+    }
     return results;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
+    print(createEnvironment().defines);
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await globals.buildSystem.build(
       target,
