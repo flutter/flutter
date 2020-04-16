@@ -247,6 +247,14 @@ void PlatformViewAndroid::UpdateSemantics(
           value.second.customAccessibilityActions.size() * kBytesPerChild;
     }
 
+    // The encoding defined here is used in:
+    //
+    //  * AccessibilityBridge.java
+    //  * AccessibilityBridgeTest.java
+    //  * accessibility_bridge.mm
+    //
+    // If any of the encoding structure or length is changed, those locations
+    // must be updated (at a minimum).
     std::vector<uint8_t> buffer(num_bytes);
     int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
     float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
