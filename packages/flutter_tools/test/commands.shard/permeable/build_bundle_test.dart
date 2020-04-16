@@ -219,7 +219,7 @@ void main() {
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
         kTrackWidgetCreation: 'true',
-        kIconTreeShakerFlag: null,
+        kIconTreeShakerFlag: 'true',
       });
 
       return BuildResult(success: true);
