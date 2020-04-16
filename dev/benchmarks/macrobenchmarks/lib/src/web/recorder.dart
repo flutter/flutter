@@ -16,28 +16,16 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Minimum number of samples collected by a benchmark irrespective of noise
-/// levels.
-const int kMinSampleCount = 50;
-
-/// Maximum number of samples collected by a benchmark irrespective of noise
-/// levels.
+/// The number of samples from warm-up iterations.
 ///
-/// If the noise doesn't settle down before we reach the max we'll report noisy
-/// results assuming the benchmarks is simply always noisy.
-const int kMaxSampleCount = 10 * kMinSampleCount;
+/// We warm-up the benchmark prior to measuring to allow JIT and caches to settle.
+const int _kWarmUpSampleCount = 200;
 
-/// The number of samples used to extract metrics, such as noise, means,
-/// max/min values.
-///
-/// Keep this constant in sync with the same constant defined in `dev/devicelab/lib/framework/browser.dart`.
-const int _kMeasuredSampleCount = 10;
+/// The number of samples we use to collect statistics from.
+const int _kMeasuredSampleCount = 100;
 
-/// Maximum tolerated noise level.
-///
-/// A benchmark continues running until a noise level below this threshold is
-/// reached.
-const double _kNoiseThreshold = 0.05; // 5%
+/// The total number of samples collected by a benchmark.
+const int kTotalSampleCount = _kWarmUpSampleCount + _kMeasuredSampleCount;
 
 /// Measures the amount of time [action] takes.
 Duration timeAction(VoidCallback action) {
@@ -321,8 +309,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
   ///
   /// The widget must create its own animation to drive the benchmark. The
   /// animation should continue indefinitely. The benchmark harness will stop
-  /// pumping frames automatically as soon as the noise levels are sufficiently
-  /// low.
+  /// pumping frames automatically.
   Widget createWidget();
 
   @override
@@ -503,52 +490,184 @@ class _WidgetBuildRecorderHostState extends State<_WidgetBuildRecorderHost> {
 class Timeseries {
   Timeseries(this.name);
 
+  /// The label of this timeseries used for debugging and result inspection.
   final String name;
 
   /// List of all the values that have been recorded.
   ///
   /// This list has no limit.
-  final List<num> _allValues = <num>[];
-
-  /// List of values that are being used for measurement purposes.
-  ///
-  /// [average], [standardDeviation] and [noise] are all based on this list, not
-  /// the [_allValues] list.
-  final List<num> _measuredValues = <num>[];
+  final List<double> _allValues = <double>[];
 
   /// The total amount of data collected, including ones that were dropped
   /// because of the sample size limit.
   int get count => _allValues.length;
 
-  /// Computes the average value of the measured values.
-  double get average => _computeAverage(name, _measuredValues);
-
-  /// Computes the standard deviation of the measured values.
-  double get standardDeviation =>
-      _computeStandardDeviationForPopulation(name, _measuredValues);
-
-  /// Computes noise as a multiple of the [average] value.
+  /// Extracts useful statistics out of this timeseries.
   ///
-  /// This value can be multiplied by 100.0 to get noise as a percentage of
-  /// the average.
-  ///
-  /// If [average] is zero, treats the result as perfect score, returns zero.
-  double get noise => average > 0.0 ? standardDeviation / average : 0.0;
+  /// See [TimeseriesStats] for more details.
+  TimeseriesStats computeStats() {
+    // The first few values we simply discard and never look at. They're from the warm-up phase.
+    final List<double> warmUpValues = _allValues.sublist(0, _allValues.length - _kMeasuredSampleCount);
+
+    // Values we analyze.
+    final List<double> candidateValues = _allValues.sublist(_allValues.length - _kMeasuredSampleCount);
+
+    // The average that includes outliers.
+    final double dirtyAverage = _computeAverage(name, candidateValues);
+
+    // The standard deviation that includes outliers.
+    final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
+
+    // Any value that's higher than this is considered an outlier.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+
+    // Candidates with outliers removed.
+    final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);
+
+    // Outlier candidates.
+    final Iterable<double> outliers = candidateValues.where((double value) => value > outlierCutOff);
+
+    // Final statistics.
+    final double cleanAverage = _computeAverage(name, cleanValues);
+    final double outlierAverage = _computeAverage(name, outliers);
+    final double standardDeviation = _computeStandardDeviationForPopulation(name, cleanValues);
+    final double noise = cleanAverage > 0.0 ? standardDeviation / cleanAverage : 0.0;
+
+    final List<AnnotatedSample> annotatedValues = <AnnotatedSample>[
+      for (final double warmUpValue in warmUpValues)
+        AnnotatedSample(
+          magnitude: warmUpValue,
+          isOutlier: warmUpValue > outlierCutOff,
+          isWarmUpValue: true,
+        ),
+      for (final double candidate in candidateValues)
+        AnnotatedSample(
+          magnitude: candidate,
+          isOutlier: candidate > outlierCutOff,
+          isWarmUpValue: false,
+        ),
+    ];
+
+    return TimeseriesStats(
+      name: name,
+      average: cleanAverage,
+      outlierCutOff: outlierCutOff,
+      outlierAverage: outlierAverage,
+      standardDeviation: standardDeviation,
+      noise: noise,
+      cleanSampleCount: cleanValues.length,
+      outlierSampleCount: outliers.length,
+      samples: annotatedValues,
+    );
+  }
 
   /// Adds a value to this timeseries.
-  void add(num value) {
+  void add(double value) {
     if (value < 0.0) {
       throw StateError(
         'Timeseries $name: negative metric values are not supported. Got: $value',
       );
     }
-    _measuredValues.add(value);
     _allValues.add(value);
-    // Don't let the [_measuredValues] list grow beyond [_kMeasuredSampleCount].
-    if (_measuredValues.length > _kMeasuredSampleCount) {
-      _measuredValues.removeAt(0);
-    }
   }
+}
+
+/// Various statistics about a [Timeseries].
+///
+/// See the docs on the individual fields for more details.
+@sealed
+class TimeseriesStats {
+  const TimeseriesStats({
+    @required this.name,
+    @required this.average,
+    @required this.outlierCutOff,
+    @required this.outlierAverage,
+    @required this.standardDeviation,
+    @required this.noise,
+    @required this.cleanSampleCount,
+    @required this.outlierSampleCount,
+    @required this.samples,
+  });
+
+  /// The label used to refer to the corresponding timeseries.
+  final String name;
+
+  /// The average value of the measured samples without outliers.
+  final double average;
+
+  /// The standard deviation in the measured samples without outliers.
+  final double standardDeviation;
+
+  /// The noise as a multiple of the [average] value takes from clean samples.
+  ///
+  /// This value can be multiplied by 100.0 to get noise as a percentage of
+  /// the average.
+  ///
+  /// If [average] is zero, treats the result as perfect score, returns zero.
+  final double noise;
+
+  /// The maximum value a sample can have without being considered an outlier.
+  ///
+  /// See [Timeseries.computeStats] for details on how this value is computed.
+  final double outlierCutOff;
+
+  /// The average of outlier samples.
+  ///
+  /// This value can be used to judge how badly we jank, when we jank.
+  ///
+  /// Another useful metrics is the difference between [outlierAverage] and
+  /// [average]. The smaller the value the more predictable is the performance
+  /// of the corresponding benchmark.
+  final double outlierAverage;
+
+  /// The number of measured samples after outlier are removed.
+  final int cleanSampleCount;
+
+  /// The number of outliers.
+  final int outlierSampleCount;
+
+  /// All collected samples, annotated with statistical information.
+  ///
+  /// See [AnnotatedSample] for more details.
+  final List<AnnotatedSample> samples;
+
+  @override
+  String toString() {
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln(
+      '$name: (samples: $cleanSampleCount clean/$outlierSampleCount outliers/'
+      '${cleanSampleCount + outlierSampleCount} measured/'
+      '${samples.length} total)');
+    buffer.writeln(' | average: $average μs');
+    buffer.writeln(' | outlier average: $outlierAverage μs');
+    buffer.writeln(' | noise: ${_ratioToPercent(noise)}');
+    return buffer.toString();
+  }
+}
+
+/// Annotates a single measurement with statistical information.
+@sealed
+class AnnotatedSample {
+  const AnnotatedSample({
+    @required this.magnitude,
+    @required this.isOutlier,
+    @required this.isWarmUpValue,
+  });
+
+  /// The non-negative raw result of the measurement.
+  final double magnitude;
+
+  /// Whether this sample was considered an outlier.
+  final bool isOutlier;
+
+  /// Whether this sample was taken during the warm-up phase.
+  ///
+  /// If this value is `true`, this sample does not participate in
+  /// statistical computations. However, the sample would still be
+  /// shown in the visualization of results so that the benchmark
+  /// can be inspected manually to make sure there's a predictable
+  /// warm-up regression slope.
+  final bool isWarmUpValue;
 }
 
 /// Base class for a profile collected from running a benchmark.
@@ -572,7 +691,7 @@ class Profile {
   }
 
   void addDataPoint(String key, Duration duration) {
-    scoreData.putIfAbsent(key, () => Timeseries(key)).add(duration.inMicroseconds);
+    scoreData.putIfAbsent(key, () => Timeseries(key)).add(duration.inMicroseconds.toDouble());
   }
 
   /// Decides whether the data collected so far is sufficient to stop, or
@@ -584,56 +703,15 @@ class Profile {
   /// method will return true (asking the benchmark to continue collecting
   /// data).
   bool shouldContinue() {
-    // If we haven't recorded anything yet, we don't wanna stop now.
+    // If there are no `Timeseries` in the `scoreData`, then we haven't
+    // recorded anything yet. Don't stop.
     if (scoreData.isEmpty) {
       return true;
     }
 
-    // Accumulates all the messages to be printed when the final decision is to
-    // stop collecting data.
-    final StringBuffer buffer = StringBuffer();
-
-    final Iterable<bool> shouldContinueList = scoreData.keys.map((String key) {
-      final Timeseries timeseries = scoreData[key];
-
-      // Collect enough data points before considering to stop.
-      if (timeseries.count < kMinSampleCount) {
-        return true;
-      }
-
-      // Is it still too noisy?
-      if (timeseries.noise > _kNoiseThreshold) {
-        // If the timeseries has enough data, stop it, even if it's noisy under
-        // the assumption that this benchmark is always noisy and there's nothing
-        // we can do about it.
-        if (timeseries.count > kMaxSampleCount) {
-          buffer.writeln(
-            'WARNING: Noise of benchmark "$name.$key" did not converge below '
-            '${_ratioToPercent(_kNoiseThreshold)}. Stopping because it reached the '
-            'maximum number of samples $kMaxSampleCount. Noise level is '
-            '${_ratioToPercent(timeseries.noise)}.',
-          );
-          return false;
-        } else {
-          return true;
-        }
-      }
-
-      buffer.writeln(
-        'SUCCESS: Benchmark "$name.$key" converged below ${_ratioToPercent(_kNoiseThreshold)}. '
-        'Noise level is ${_ratioToPercent(timeseries.noise)}.',
-      );
-      return false;
-    });
-
-    // If any of the score data needs to continue to be collected, we should
-    // return true.
-    final bool finalDecision =
-        shouldContinueList.any((bool element) => element);
-    if (!finalDecision) {
-      print(buffer.toString());
-    }
-    return finalDecision;
+    // We have recorded something, but do we have enough samples? If every
+    // timeseries has collected enough samples, stop the benchmark.
+    return !scoreData.keys.every((String key) => scoreData[key].count >= kTotalSampleCount);
   }
 
   /// Returns a JSON representation of the profile that will be sent to the
@@ -647,9 +725,12 @@ class Profile {
 
     for (final String key in scoreData.keys) {
       scoreKeys.add('$key.average');
+      scoreKeys.add('$key.outlierAverage');
       final Timeseries timeseries = scoreData[key];
-      json['$key.average'] = timeseries.average;
-      json['$key.noise'] = timeseries.noise;
+      final TimeseriesStats stats = timeseries.computeStats();
+      json['$key.average'] = stats.average;
+      json['$key.outlierAverage'] = stats.outlierAverage;
+      json['$key.noise'] = stats.noise;
     }
 
     json.addAll(extraData);
@@ -663,9 +744,8 @@ class Profile {
     buffer.writeln('name: $name');
     for (final String key in scoreData.keys) {
       final Timeseries timeseries = scoreData[key];
-      buffer.writeln('$key: (samples=${timeseries.count})');
-      buffer.writeln(' | average: ${timeseries.average} μs');
-      buffer.writeln(' | noise: ${_ratioToPercent(timeseries.noise)}');
+      final TimeseriesStats stats = timeseries.computeStats();
+      buffer.writeln(stats.toString());
     }
     for (final String key in extraData.keys) {
       final dynamic value = extraData[key];
@@ -683,12 +763,12 @@ class Profile {
 }
 
 /// Computes the arithmetic mean (or average) of given [values].
-double _computeAverage(String label, Iterable<num> values) {
+double _computeAverage(String label, Iterable<double> values) {
   if (values.isEmpty) {
     throw StateError('$label: attempted to compute an average of an empty value list.');
   }
 
-  final num sum = values.reduce((num a, num b) => a + b);
+  final double sum = values.reduce((double a, double b) => a + b);
   return sum / values.length;
 }
 
@@ -699,14 +779,14 @@ double _computeAverage(String label, Iterable<num> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double _computeStandardDeviationForPopulation(String label, Iterable<num> population) {
+double _computeStandardDeviationForPopulation(String label, Iterable<double> population) {
   if (population.isEmpty) {
     throw StateError('$label: attempted to compute the standard deviation of empty population.');
   }
   final double mean = _computeAverage(label, population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
-    (double previous, num value) => previous += math.pow(value - mean, 2),
+    (double previous, double value) => previous += math.pow(value - mean, 2),
   );
   return math.sqrt(sumOfSquaredDeltas / population.length);
 }
