@@ -188,7 +188,7 @@ class FallbackDiscovery {
       // tool waits for a connection to be reasonable. If the vmservice cannot
       // be connected to in this way, the mDNS discovery must be reached
       // sooner rather than later.
-      await Future.delayed(_pollingDelay);
+      await Future<void>.delayed(_pollingDelay);
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
