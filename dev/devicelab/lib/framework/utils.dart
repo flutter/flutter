@@ -189,11 +189,18 @@ void mkdirs(Directory directory) {
 bool exists(FileSystemEntity entity) => entity.existsSync();
 
 void section(String title) {
-  title = '╡ ••• $title ••• ╞';
-  final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
-  String output = '$line$title$line';
-  if (output.length == 79)
-    output += '═';
+  String output;
+  if (Platform.isWindows) {
+    // Windows doesn't cope well with characters produced for *nix systems, so
+    // just output the title with no decoration.
+    output = title;
+  } else {
+    title = '╡ ••• $title ••• ╞';
+    final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
+    output = '$line$title$line';
+    if (output.length == 79)
+      output += '═';
+  }
   print('\n\n$output\n');
 }
 
