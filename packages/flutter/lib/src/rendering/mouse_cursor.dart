@@ -128,11 +128,15 @@ abstract class PreparedMouseCursor extends MouseCursor {
   const PreparedMouseCursor();
 }
 
-/// A mouse cursor that does nothing when activated.
-///
-/// The singleton instance of this class is available at
-/// [SystemMouseCursors.uncontrolled], which also introduces its usage.
-/// Directly instantiating this class is not allowed.
+/// A mouse cursor that doesn't change the cursor when activated.
+/// 
+/// Although setting a region's cursor to [NoopMouseCursor] doesn't change the 
+/// cursor, it blocks regions behind it from changing the cursor, in contrast to
+/// setting the cursor to null. More information about the usage of this class
+/// can be found at [SystemMouseCursors.uncontrolled].
+/// 
+/// To use this class, use [SystemMouseCursors.uncontrolled]. Directly
+/// instantiating this class is not allowed.
 class NoopMouseCursor extends PreparedMouseCursor {
   // Application code shouldn't directly instantiate this class, since its only
   // instance is accessible at [SystemMouseCursors.releaseControl].
@@ -214,14 +218,20 @@ class SystemMouseCursors {
   // extended.
   factory SystemMouseCursors._() => null;
 
-  /// A special value that tells Flutter to release the control of cursors.
-  ///
-  /// A region with this value will absorb the mouse cursor hit test without
-  /// changing the pointer's cursor when it enters or is hovering over this
-  /// region.
-  ///
-  /// This value is typically used on a platform view, which detects pointer
-  /// movement and changes cursors in a non-Flutter way.
+  /// A special value that doesn't change cursor by itself, but make a region
+  /// blocks other regions behind it from changing the cursor.
+  /// 
+  /// When a pointer enters a region with a cursor of [uncontrolled], the pointer
+  /// retains its previous cursor and keeps so until it moves out of the region.
+  /// Technically, this region absorb the mouse cursor hit test without changing
+  /// the pointer's cursor.
+  /// 
+  /// This is useful in a region that displays a platform view, which let the
+  /// operating system handle pointer events and change cursors accordingly. This
+  /// requires that the region's cursor must not be any Flutter cursor, since
+  /// that might overwrite the system request upon pointer entering; the cursor
+  /// must not be null either, since that allows the widgets behind the region to
+  /// change cursors.
   static const NoopMouseCursor uncontrolled = NoopMouseCursor._();
 
   // The `shapeCode` values are chosen as the first 6 bytes of the MD5 hash of the
@@ -231,6 +241,8 @@ class SystemMouseCursors {
   // The `shapeCode` values must be kept in sync with the engine implementations.
 
   /// Hide the cursor.
+  /// 
+  /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
   static const SystemMouseCursor none = SystemMouseCursor._(shapeCode: 0x334c4a, debugDescription: 'none');
 
   /// The platform-dependent basic cursor.
