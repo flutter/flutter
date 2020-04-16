@@ -16,6 +16,7 @@ import android.text.InputType;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.TextPaint;
+import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
@@ -321,35 +322,11 @@ class InputConnectionAdaptor extends BaseInputConnection {
           updateEditingState();
           return true;
         } else if (selStart > 0) {
-          // Delete to the left/right of the cursor depending on direction of text.
-          // TODO(garyq): Explore how to obtain per-character direction. The
-          // isRTLCharAt() call below is returning blanket direction assumption
-          // based on the first character in the line.
-          boolean isRtl = mLayout.isRtlCharAt(mLayout.getLineForOffset(selStart));
-          try {
-            if (isRtl) {
-              Selection.extendRight(mEditable, mLayout);
-            } else {
-              Selection.extendLeft(mEditable, mLayout);
-            }
-          } catch (IndexOutOfBoundsException e) {
-            // On some Chinese devices (primarily Huawei, some Xiaomi),
-            // on initial app startup before focus is lost, the
-            // Selection.extendLeft and extendRight calls always extend
-            // from the index of the initial contents of mEditable. This
-            // try-catch will prevent crashing on Huawei devices by falling
-            // back to a simple way of deletion, although this a hack and
-            // will not handle emojis.
-            Selection.setSelection(mEditable, selStart, selStart - 1);
+          if (TextKeyListener.getInstance().onKeyDown(null, mEditable, event.getKeyCode(), event)) {
+            updateEditingState();
+            return true;
           }
-          int newStart = clampIndexToEditable(Selection.getSelectionStart(mEditable), mEditable);
-          int newEnd = clampIndexToEditable(Selection.getSelectionEnd(mEditable), mEditable);
-          Selection.setSelection(mEditable, Math.min(newStart, newEnd));
-          // Min/Max the values since RTL selections will start at a higher
-          // index than they end at.
-          mEditable.delete(Math.min(newStart, newEnd), Math.max(newStart, newEnd));
-          updateEditingState();
-          return true;
+          return false;
         }
       } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
         int selStart = Selection.getSelectionStart(mEditable);
