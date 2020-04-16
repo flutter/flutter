@@ -505,7 +505,8 @@ class SliderThemeData with Diagnosticable {
   /// [Slider] is disabled.
   final Color disabledThumbColor;
 
-  /// The color of the overlay drawn around the slider thumb when it is pressed.
+  /// The color of the overlay drawn around the slider thumb when it is
+  /// pressed, focused, or hovered.
   ///
   /// This is typically a semi-transparent color.
   final Color overlayColor;
