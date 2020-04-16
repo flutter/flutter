@@ -420,10 +420,13 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addTreeShakeIconsFlag() {
+  void addTreeShakeIconsFlag({
+    bool defaultFlagValue,
+  }) {
     argParser.addFlag('tree-shake-icons',
       negatable: true,
-      defaultsTo: kIconTreeShakerEnabledDefault,
+      defaultsTo: defaultFlagValue
+        ?? kIconTreeShakerEnabledDefault,
       help: 'Tree shake icon fonts so that only glyphs used by the application remain.',
     );
   }
