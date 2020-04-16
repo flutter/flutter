@@ -313,11 +313,40 @@ public class InputConnectionAdaptorTest {
     assertEquals(textInputChannel.selectionEnd, 4);
   }
 
+  @Test
+  public void testSendKeyEvent_delKeyDeletesBackward() {
+    int selStart = 29;
+    Editable editable = sampleRtlEditable(selStart, selStart);
+    InputConnectionAdaptor adaptor = sampleInputConnectionAdaptor(editable);
+
+    KeyEvent downKeyDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+
+    for (int i = 0; i < 9; i++) {
+      boolean didConsume = adaptor.sendKeyEvent(downKeyDown);
+      assertTrue(didConsume);
+    }
+    assertEquals(Selection.getSelectionStart(editable), 19);
+
+    for (int i = 0; i < 9; i++) {
+      boolean didConsume = adaptor.sendKeyEvent(downKeyDown);
+      assertTrue(didConsume);
+    }
+    assertEquals(Selection.getSelectionStart(editable), 10);
+  }
+
   private static final String SAMPLE_TEXT =
       "Lorem ipsum dolor sit amet," + "\nconsectetur adipiscing elit.";
 
+  private static final String SAMPLE_RTL_TEXT = "متن ساختگی" + "\nبرای تستfor test😊";
+
   private static Editable sampleEditable(int selStart, int selEnd) {
     SpannableStringBuilder sample = new SpannableStringBuilder(SAMPLE_TEXT);
+    Selection.setSelection(sample, selStart, selEnd);
+    return sample;
+  }
+
+  private static Editable sampleRtlEditable(int selStart, int selEnd) {
+    SpannableStringBuilder sample = new SpannableStringBuilder(SAMPLE_RTL_TEXT);
     Selection.setSelection(sample, selStart, selEnd);
     return sample;
   }
