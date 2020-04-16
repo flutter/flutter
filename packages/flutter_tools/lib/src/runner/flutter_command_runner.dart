@@ -301,7 +301,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
           globals.flutterUsage.suppressAnalytics = true;
         }
 
-        _checkFlutterCopy();
         try {
           await globals.flutterVersion.ensureVersionFile();
         } on FileSystemException catch (e) {
@@ -481,68 +480,4 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     return projectPaths;
   }
-
-  void _checkFlutterCopy() {
-    // If the current directory is contained by a flutter repo, check that it's
-    // the same flutter that is currently running.
-    String directory = globals.fs.path.normalize(globals.fs.path.absolute(globals.fs.currentDirectory.path));
-
-    // Check if the cwd is a flutter dir.
-    while (directory.isNotEmpty) {
-      if (_isDirectoryFlutterRepo(directory)) {
-        if (!_compareResolvedPaths(directory, Cache.flutterRoot)) {
-          globals.printError(userMessages.runnerWrongFlutterInstance(Cache.flutterRoot, directory));
-        }
-
-        break;
-      }
-
-      final String parent = globals.fs.path.dirname(directory);
-      if (parent == directory) {
-        break;
-      }
-      directory = parent;
-    }
-
-    // Check that the flutter running is that same as the one referenced in the pubspec.
-    if (globals.fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = PackageMap(kPackagesFileName, fileSystem: globals.fs);
-      Uri flutterUri;
-      try {
-        flutterUri = packageMap.map['flutter'];
-      } on FormatException {
-        // We're not quite sure why this can happen, perhaps the user
-        // accidentally edited the .packages file. Re-running pub should
-        // fix the issue, and we definitely shouldn't crash here.
-        globals.printTrace('Failed to parse .packages file to check flutter dependency.');
-        return;
-      }
-
-      if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
-        // .../flutter/packages/flutter/lib
-        final Uri rootUri = flutterUri.resolve('../../..');
-        final String flutterPath = globals.fs.path.normalize(globals.fs.file(rootUri).absolute.path);
-
-        if (!globals.fs.isDirectorySync(flutterPath)) {
-          globals.printError(userMessages.runnerRemovedFlutterRepo(Cache.flutterRoot, flutterPath));
-        } else if (!_compareResolvedPaths(flutterPath, Cache.flutterRoot)) {
-          globals.printError(userMessages.runnerChangedFlutterRepo(Cache.flutterRoot, flutterPath));
-        }
-      }
-    }
-  }
-
-  // Check if `bin/flutter` and `bin/cache/engine.stamp` exist.
-  bool _isDirectoryFlutterRepo(String directory) {
-    return
-      globals.fs.isFileSync(globals.fs.path.join(directory, 'bin/flutter')) &&
-      globals.fs.isFileSync(globals.fs.path.join(directory, 'bin/cache/engine.stamp'));
-  }
-}
-
-bool _compareResolvedPaths(String path1, String path2) {
-  path1 = globals.fs.directory(globals.fs.path.absolute(path1)).resolveSymbolicLinksSync();
-  path2 = globals.fs.directory(globals.fs.path.absolute(path2)).resolveSymbolicLinksSync();
-
-  return path1 == path2;
 }
