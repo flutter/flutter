@@ -9,7 +9,7 @@ import 'mouse_tracking.dart';
 /// An interface for mouse cursor definitions.
 ///
 /// A mouse cursor is a graphical image on the screen that echoes the movement
-/// of a pointer device, such as a mouse or a stylus. A [MouseCursor] object
+/// of a pointing device, such as a mouse or a stylus. A [MouseCursor] object
 /// defines a kind of mouse cursor, such as an arrow, a pointing hand, or an
 /// I-beam.
 ///

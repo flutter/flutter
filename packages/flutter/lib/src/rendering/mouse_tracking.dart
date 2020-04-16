@@ -372,7 +372,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   /// It is non-null if and only if the update is triggered by a pointer event.
   final PointerEvent triggeringEvent;
 
-  /// The pointer device of this update.
+  /// The pointing device of this update.
   int get device {
     final int result = (previousEvent ?? triggeringEvent).device;
     assert(result != null);
