@@ -527,6 +527,23 @@ class VMService implements vm_service.VmService {
     _delegateService?.dispose();
   }
 
+  @override
+  Future<vm_service.ReloadReport> reloadSources(
+    String isolateId, {
+    bool force,
+    bool pause,
+    String rootLibUri,
+    String packagesUri,
+  }) {
+    return _delegateService.reloadSources(
+      isolateId,
+      force: force,
+      pause: pause,
+      rootLibUri: rootLibUri,
+      packagesUri: packagesUri,
+    );
+  }
+
   // To enable a gradual migration to package:vm_service
   @override
   dynamic noSuchMethod(Invocation invocation) {
