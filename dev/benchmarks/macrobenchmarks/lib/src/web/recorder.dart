@@ -506,7 +506,7 @@ class Timeseries {
   ///
   /// See [TimeseriesStats] for more details.
   TimeseriesStats computeStats() {
-    // The first few values we simply discard and never look at. There's from warm-up phase.
+    // The first few values we simply discard and never look at. They're from the warm-up phase.
     final List<double> warmUpValues = _allValues.sublist(0, _allValues.length - _kMeasuredSampleCount);
 
     // Values we analyze.
@@ -728,6 +728,7 @@ class Profile {
       final Timeseries timeseries = scoreData[key];
       final TimeseriesStats stats = timeseries.computeStats();
       json['$key.average'] = stats.average;
+      json['$key.outlierAverage'] = stats.outlierAverage;
       json['$key.noise'] = stats.noise;
     }
 
