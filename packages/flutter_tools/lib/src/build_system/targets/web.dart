@@ -168,8 +168,6 @@ class Dart2JSTarget extends Target {
       '--libraries-spec=$specPath',
       '-o',
       outputKernel.path,
-      for (final String dartDefine in dartDefines)
-        '-D$dartDefine',
       '--packages=$packageFile',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path,
