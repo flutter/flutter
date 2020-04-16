@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -762,7 +761,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
-    if (!doctor.canLaunchAnything) {
+    if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
