@@ -13,15 +13,7 @@ import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 
-typedef PollingDelay = Future<void> Function(Duration);
-
 typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
-
-// constructors cannot be torn off, otherwise it would be better to use
-// Future.delayed directly.
-Future<void> _defaultDelay(Duration duration) {
-  return Future<void>.delayed(duration);
-}
 
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
@@ -54,7 +46,7 @@ class FallbackDiscovery {
     @required Usage flutterUsage,
     VmServiceConnector vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
-    PollingDelay pollingDelay = _defaultDelay,
+    Duration pollingDelay = const Duration(seconds: 2),
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
@@ -71,7 +63,7 @@ class FallbackDiscovery {
   final ProtocolDiscovery _protocolDiscovery;
   final Usage _flutterUsage;
   final VmServiceConnector  _vmServiceConnectUri;
-  final PollingDelay _pollingDelay;
+  final Duration _pollingDelay;
 
   /// Attempt to discover the observatory port.
   Future<Uri> discover({
@@ -165,7 +157,6 @@ class FallbackDiscovery {
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
-    const int kDelaySeconds = 2;
     Exception firstException;
     while (attempts < 5) {
       try {
@@ -197,7 +188,7 @@ class FallbackDiscovery {
       // tool waits for a connection to be reasonable. If the vmservice cannot
       // be connected to in this way, the mDNS discovery must be reached
       // sooner rather than later.
-      await _pollingDelay(const Duration(seconds: kDelaySeconds));
+      await Future.delayed(_pollingDelay);
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
