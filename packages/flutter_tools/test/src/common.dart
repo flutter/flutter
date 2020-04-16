@@ -154,7 +154,7 @@ return  predicate((String source)  {
   }
   return sourceWithoutWhitespaces.contains(toSearchWithoutWhitespaces);
 },
-    'contains "$toSearch" ignoring whitespaces and linebreaks.');
+    'contains "$toSearch" ignoring whitespaces.');
 }
 
 String _removeWhitespaces(String source){
