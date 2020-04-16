@@ -28,6 +28,8 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
+typedef PreparedMouseCursorListener = void Function(PreparedMouseCursor status);
+
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
 /// 
@@ -110,20 +112,11 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
   /// others can be found.
   /// 
-  /// The immutable [MouseTrackerAnnotation] does not support varying [cursor].
-  ///
-  /// ### Varying cursor
+  /// The [MouseTrackerAnnotation] is immutable and does not support varying
+  /// [cursor].
   /// 
-  /// For a subclass that allows varying [cursor], it must provide a non-null
-  /// [cursorNotifier] and behave as follows when [cursor] changes in
-  /// order to keep hovering mouse pointers updated:
-  /// 
-  ///  * If the change is from null to non-null or vice versa, trigger a device
-  ///    update (e.g. [RenderObject.markNeedsPaint]).
-  ///  * Other wise, call [ChangeNotifier.notifyListeners] on [cursorNotifier].
-  /// 
-  /// A convenient way in this case is to make a [RenderObject] mixin
-  /// [MouseTrackedRenderObjectMixin] and push itself as the annotation.
+  /// For a subclass that wishes to support varying [cursor], it must implement
+  /// [addStatusListener] and [removeStatusListener].
   ///
   /// See also:
   ///
@@ -132,35 +125,37 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///    platforms.
   ///  * [RenderMouseRegion.cursor] and [MouseRegion.cursor], which provide
   ///    values to this field. 
+  ///  * [MouseTrackedRenderObjectMixin], which is a utility class that simplifies
+  ///    defining annotations that support varying [cursor].
   final PreparedMouseCursor cursor;
 
-  /// A [ChangeNotifier] that should notify listeners when [cursor] is
-  /// changed from a non-null value to another non-null value.
+  /// Calls listener every time the cursor changes.
   /// 
-  /// The [cursorNotifier] is listened to by [MouseTracker] to keep hovering
-  /// mouse pointer updated. This is needed if the change to [cursor] is not
-  /// triggered by a pointer event or a new frame, but by a cursor finishing its
-  /// asynchronous loading. 
+  /// This is listened to by [MouseTracker], so that when [cursor] changes 
+  /// mouse pointers that are hovering over this region are properly updated.
   /// 
-  /// If the value is null, [MouseTracker] will take [cursor] as immutable, and
-  /// if the cursor actually changes in the aforementioned way, the effect won't
-  /// be updated until the next time the mouse moves.
+  /// The [MouseTrackerAnnotation] is immutable and does not support varying
+  /// [cursor], therefore this method has no effect. For a subclass that allows
+  /// varying [cursor], this method should forward this call to a
+  /// [ChangeNotifier] and behave as follows:
   /// 
-  /// The immutable [MouseTrackerAnnotation] does not support varying [cursor],
-  /// therefore the [cursorNotifier] is always null.
+  ///  * If the change of [cursor] is from null to non-null or vice versa, trigger
+  ///    a device update (e.g. [RenderObject.markNeedsPaint]).
+  ///  * Otherwise, fire all listeners.
+  ///
+  /// Listeners can be removed with [removeStatusListener].
+  void addCursorListener(PreparedMouseCursorListener listener) { }
+
+  /// Stops calling the listener every time the cursor changes.
   /// 
-  /// For a subclass that allows changing [cursor], such as
-  /// [MouseTrackedRenderObjectMixin], it must also implement [cursorNotifier]
-  /// and behave as follows:
-  /// 
-  ///   * When the annotation is available for searching, the [cursorNotifier] is 
-  ///     a [ChangeNotifier].
-  ///   * Call [ChangeNotifier.notifyListeners] right after [cursor] is changed,
-  ///     if and only if both the old value and new value are non-null.
-  ///   * When the annotation becomes unavailable for searching (e.g. the owner
-  ///     render object is detached), dispose the [cursorNotifier], then set
-  ///     [cursorNotifier] to null.
-  ChangeNotifier get cursorNotifier => null;
+  /// This is listened to by [MouseTracker]. The [MouseTrackerAnnotation] is
+  /// immutable and does not support varying [cursor], therefore this method has
+  /// no effect. For a subclass that allows varying [cursor], this method should
+  /// foward this call to a [ChangeNotifier] that removes the listener added via
+  /// [addCursorListener].
+  ///
+  /// Listeners can be added with [addCursorListener].
+  void removeCursorListener(PreparedMouseCursorListener listener) { }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -175,12 +170,6 @@ class MouseTrackerAnnotation with Diagnosticable {
       ifEmpty: '<none>',
     ));
     properties.add(DiagnosticsProperty<PreparedMouseCursor>('cursor', cursor, defaultValue: null));
-  }
-}
-
-class _PlainChangeNotifier extends ChangeNotifier {
-  void notify() {
-    notifyListeners();
   }
 }
 
@@ -215,8 +204,7 @@ mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnot
     _cursor = value;
     if (attached && oldCursor != value) {
       if ((oldCursor != null) == (value != null)) {
-        final _PlainChangeNotifier notifier = _cursorNotifier as _PlainChangeNotifier;
-        notifier.notify();
+        _notifyCursorListeners();
       } else {
         markNeedsPaint();
       }
@@ -224,25 +212,44 @@ mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnot
   }
 
   @override
-  ChangeNotifier get cursorNotifier {
-    assert(attached == (_cursorNotifier != null),
-      '$this is ${attached ? '' : 'not '}attached, '
-      'while its cursorNotifier is ${_cursorNotifier == null ? '' : 'not '}null');
-    return _cursorNotifier;
-  }
-  ChangeNotifier _cursorNotifier;
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _cursorNotifier = _PlainChangeNotifier();
+  void addCursorListener(PreparedMouseCursorListener listener) {
+    _cursorListeners.add(listener);
   }
 
   @override
-  void detach() {
-    _cursorNotifier.dispose();
-    _cursorNotifier = null;
-    super.detach();
+  void removeCursorListener(PreparedMouseCursorListener listener) {
+    _cursorListeners.remove(listener);
+  }
+
+  final ObserverList<PreparedMouseCursorListener> _cursorListeners = ObserverList<PreparedMouseCursorListener>();
+
+  void _notifyCursorListeners() {
+    final List<PreparedMouseCursorListener> localListeners = List<PreparedMouseCursorListener>.from(_cursorListeners);
+    for (final PreparedMouseCursorListener listener in localListeners) {
+      try {
+        if (_cursorListeners.contains(listener))
+          listener(_cursor);
+      } catch (exception, stack) {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
+            yield DiagnosticsProperty<MouseTrackedRenderObjectMixin>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'animation library',
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: collector
+        ));
+      }
+    }
   }
 }
 
@@ -299,7 +306,7 @@ class _MouseState {
 
 class _MouseCursorState {
   MouseTrackerAnnotation currentAnnotation;
-  VoidCallback onCursorChange;
+  PreparedMouseCursorListener onCursorChange;
 }
 
 class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation {
@@ -314,7 +321,9 @@ class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation 
   @override
   PreparedMouseCursor get cursor => SystemMouseCursors.basic;
   @override
-  ChangeNotifier get cursorNotifier => null;
+  void addCursorListener(PreparedMouseCursorListener listener) { }
+  @override
+  void removeCursorListener(PreparedMouseCursorListener listener) { }
 }
 
 /// Used by [MouseTracker] to provide the details of an update of a mouse
@@ -768,9 +777,9 @@ class MouseTracker extends ChangeNotifier {
     final bool hadState = _mouseCursorStates.containsKey(device);
     _mouseCursorStates.putIfAbsent(device, () {
       final _MouseCursorState state = _MouseCursorState();
-      state.onCursorChange = () {
-        assert(state.currentAnnotation?.cursor != null);
-        _handleActivateCursor(device, state.currentAnnotation.cursor);
+      state.onCursorChange = (PreparedMouseCursor cursor) {
+        assert(cursor != null);
+        _handleActivateCursor(device, cursor);
       };
       return state;
     });
@@ -782,14 +791,14 @@ class MouseTracker extends ChangeNotifier {
     if (lastAnnotation == nextAnnotation)
       return;
 
-    lastAnnotation?.cursorNotifier?.removeListener(state.onCursorChange);
+    lastAnnotation?.removeCursorListener(state.onCursorChange);
     state.currentAnnotation = nextAnnotation;
-    nextAnnotation.cursorNotifier?.addListener(state.onCursorChange);
+    nextAnnotation.addCursorListener(state.onCursorChange);
 
     final PreparedMouseCursor lastCursor = lastAnnotation?.cursor;
     final PreparedMouseCursor nextCursor = nextAnnotation.cursor;
     if (nextCursor != lastCursor) {
-      state.onCursorChange();
+      state.onCursorChange(nextCursor);
     }
   }
 

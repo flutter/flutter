@@ -481,9 +481,24 @@ class _MutableMouseTrackerAnnotation with Diagnosticable, ChangeNotifier impleme
   PreparedMouseCursor cursor;
 
   @override
-  ChangeNotifier get cursorNotifier => this;
+  void addCursorListener(PreparedMouseCursorListener listener) {
+    _cursorListeners.add(listener);
+  }
 
-  void testNotify() => notifyListeners();
+  @override
+  void removeCursorListener(PreparedMouseCursorListener listener) {
+    _cursorListeners.remove(listener);
+  }
+
+  final ObserverList<PreparedMouseCursorListener> _cursorListeners = ObserverList<PreparedMouseCursorListener>();
+
+  void testNotify() {
+    final List<PreparedMouseCursorListener> localListeners = List<PreparedMouseCursorListener>.from(_cursorListeners);
+    for (final PreparedMouseCursorListener listener in localListeners) {
+      if (_cursorListeners.contains(listener))
+        listener(cursor);
+    }
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
