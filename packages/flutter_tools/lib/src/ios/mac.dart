@@ -256,7 +256,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     final String activeArchName = getNameForDarwinArch(activeArch);
     if (activeArchName != null) {
       buildCommands.add('ONLY_ACTIVE_ARCH=YES');
-      buildCommands.add('ARCHS=$activeArchName');
+      // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
+      // as it cannot be build for the architecture of the flutter app.
+      if (!hasWatchCompanion) {
+        buildCommands.add('ARCHS=$activeArchName');
+      }
     }
   }
 
