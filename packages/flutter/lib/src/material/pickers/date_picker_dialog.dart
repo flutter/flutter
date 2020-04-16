@@ -93,6 +93,7 @@ Future<DateTime> showDatePicker({
   @required DateTime initialDate,
   @required DateTime firstDate,
   @required DateTime lastDate,
+  DateTime currentDate,
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   SelectableDayPredicate selectableDayPredicate,
   String helpText,
@@ -141,6 +142,7 @@ Future<DateTime> showDatePicker({
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
+    currentDate: currentDate,
     initialEntryMode: initialEntryMode,
     selectableDayPredicate: selectableDayPredicate,
     helpText: helpText,
@@ -184,6 +186,7 @@ class _DatePickerDialog extends StatefulWidget {
     @required DateTime initialDate,
     @required DateTime firstDate,
     @required DateTime lastDate,
+    DateTime currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.selectableDayPredicate,
     this.cancelText,
@@ -200,6 +203,7 @@ class _DatePickerDialog extends StatefulWidget {
        initialDate = utils.dateOnly(initialDate),
        firstDate = utils.dateOnly(firstDate),
        lastDate = utils.dateOnly(lastDate),
+       currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
        assert(initialEntryMode != null),
        assert(initialCalendarMode != null),
        super(key: key) {
@@ -229,6 +233,9 @@ class _DatePickerDialog extends StatefulWidget {
 
   /// The latest allowable [DateTime] that the user can select.
   final DateTime lastDate;
+
+  /// The [DateTime] representing today. It will be highlighted in the day grid.
+  final DateTime currentDate;
 
   final DatePickerEntryMode initialEntryMode;
 
@@ -382,6 +389,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialDate: _selectedDate,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
+          currentDate: widget.currentDate,
           onDateChanged: _handleDateChanged,
           selectableDayPredicate: widget.selectableDayPredicate,
           initialCalendarMode: widget.initialCalendarMode,
