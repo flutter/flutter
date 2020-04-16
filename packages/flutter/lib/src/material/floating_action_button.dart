@@ -379,7 +379,7 @@ class FloatingActionButton extends StatelessWidget {
   final ShapeBorder shape;
 
   /// {@macro flutter.material.inkwell.mousecursor}
-  /// 
+  ///
   /// Defaults to null.
   final MouseCursor mouseCursor;
 

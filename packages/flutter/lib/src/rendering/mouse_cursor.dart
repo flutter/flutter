@@ -129,12 +129,12 @@ abstract class PreparedMouseCursor extends MouseCursor {
 }
 
 /// A mouse cursor that doesn't change the cursor when activated.
-/// 
-/// Although setting a region's cursor to [NoopMouseCursor] doesn't change the 
+///
+/// Although setting a region's cursor to [NoopMouseCursor] doesn't change the
 /// cursor, it blocks regions behind it from changing the cursor, in contrast to
 /// setting the cursor to null. More information about the usage of this class
 /// can be found at [SystemMouseCursors.uncontrolled].
-/// 
+///
 /// To use this class, use [SystemMouseCursors.uncontrolled]. Directly
 /// instantiating this class is not allowed.
 class NoopMouseCursor extends PreparedMouseCursor {
@@ -153,7 +153,7 @@ class NoopMouseCursor extends PreparedMouseCursor {
 /// without external resources and match the experience of native apps. Examples
 /// of system cursors are a pointing arrow, a pointing hand, a double arrow for
 /// resizing, or a text I-beam, etc.
-/// 
+///
 /// An instance of [SystemMouseCursor] refers to one cursor from each platform
 /// that represents the same concept, such as being text text, being clickable,
 /// or being a forbidden operation. Since the set of system cursors supported by
@@ -209,7 +209,7 @@ class SystemMouseCursor extends PreparedMouseCursor {
 /// that Flutter supports, therefore some of these objects might map to the same
 /// result, or fallback to the basic arrow. This mapping is defined by the
 /// Flutter engine.
-/// 
+///
 /// The cursor names are chosen to reflect the cursors' use cases instead of
 /// their shapes, because different platforms might (although not commonly) use
 /// different shapes for the same use case.
@@ -220,12 +220,12 @@ class SystemMouseCursors {
 
   /// A special value that doesn't change cursor by itself, but make a region
   /// blocks other regions behind it from changing the cursor.
-  /// 
+  ///
   /// When a pointer enters a region with a cursor of [uncontrolled], the pointer
   /// retains its previous cursor and keeps so until it moves out of the region.
   /// Technically, this region absorb the mouse cursor hit test without changing
   /// the pointer's cursor.
-  /// 
+  ///
   /// This is useful in a region that displays a platform view, which let the
   /// operating system handle pointer events and change cursors accordingly. This
   /// requires that the region's cursor must not be any Flutter cursor, since
@@ -241,7 +241,7 @@ class SystemMouseCursors {
   // The `shapeCode` values must be kept in sync with the engine implementations.
 
   /// Hide the cursor.
-  /// 
+  ///
   /// Any cursor other than [none] or [uncontrolled] unhides the cursor.
   static const SystemMouseCursor none = SystemMouseCursor._(shapeCode: 0x334c4a, debugDescription: 'none');
 

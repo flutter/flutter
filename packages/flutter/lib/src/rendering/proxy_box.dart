@@ -2751,15 +2751,15 @@ class RenderMouseRegion extends RenderProxyBox with MouseTrackedRenderObjectMixi
   /// control cursors, but defers the choice to the next region behind this
   /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
   /// others can be found.
-  /// 
-  /// The [cursor] must be a prepared cursor, i.e. one that contains all 
+  ///
+  /// The [cursor] must be a prepared cursor, i.e. one that contains all
   /// resources and immediately usable by the engine. To use a general
   /// [MouseCursor], see [MouseRegion.cursor].
   ///
   /// See also:
   ///
   ///  * [MouseCursors] for a general introduction to the mouse cursor system.
-  ///  * [MouseRegion.cursor], which is the widget-layer counterpart, and 
+  ///  * [MouseRegion.cursor], which is the widget-layer counterpart, and
   ///    allows general (unprepared) mouse cursors.
   @override
   set cursor(PreparedMouseCursor value) {

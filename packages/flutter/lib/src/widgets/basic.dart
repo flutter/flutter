@@ -6107,7 +6107,7 @@ class MouseRegion extends StatefulWidget {
   /// control cursors, but defers the choice to the next region behind this
   /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
   /// others can be found.
-  /// 
+  ///
   /// The [cursor] can be a prepared or unprepared cursor. If the cursor is
   /// unprepared, [MouseRegion] will handle the preparation when a mouse pointer
   /// enters the region for the first time. It will use

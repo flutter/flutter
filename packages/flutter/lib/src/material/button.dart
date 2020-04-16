@@ -104,7 +104,7 @@ class RawMaterialButton extends StatefulWidget {
   final ValueChanged<bool> onHighlightChanged;
 
   /// {@macro flutter.material.inkwell.mousecursor}
-  /// 
+  ///
   /// Defaults to null.
   final MouseCursor mouseCursor;
 
