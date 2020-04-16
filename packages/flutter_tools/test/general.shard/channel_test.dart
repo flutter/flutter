@@ -35,7 +35,7 @@ void main() {
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
-      expect(testLogger.statusText, contains('Flutter channels:'));
+      expect(testLogger.statusText, containsIgnoreWhitespace('Flutter channels:'));
     }
 
     testUsingContext('list', () async {
@@ -212,7 +212,7 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, contains("Switching to flutter channel 'beta'..."));
+      expect(testLogger.statusText, containsIgnoreWhitespace("Switching to flutter channel 'beta'..."));
       expect(testLogger.errorText, hasLength(0));
 
       when(mockProcessManager.start(

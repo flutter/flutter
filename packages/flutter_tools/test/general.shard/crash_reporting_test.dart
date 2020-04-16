@@ -75,7 +75,8 @@ void main() {
         flutterVersion: 'test-version',
       ));
       expect(await exitCodeCompleter.future, 1);
-      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+      expect(testLogger.errorText,
+        containsIgnoreWhitespace('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
       Stdio: () => _NoStderr(),
     });
@@ -96,7 +97,8 @@ void main() {
         flutterVersion: 'test-version',
       ));
       expect(await exitCodeCompleter.future, 1);
-      expect(testLogger.errorText, contains('Failed to send crash report due to a network error'));
+      expect(testLogger.errorText,
+        containsIgnoreWhitespace('Failed to send crash report due to a network error'));
     }, overrides: <Type, Generator>{
       Stdio: () => _NoStderr(),
     });

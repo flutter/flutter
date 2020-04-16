@@ -108,8 +108,8 @@ void main() {
       await completer.future;
 
       final String errorText = testLogger.errorText;
-      expect(errorText, contains('A crash report has been written to /flutter_01.log.'));
-      expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
+      expect(errorText, containsIgnoreWhitespace('A crash report has been written to /flutter_01.log.'));
+      expect(errorText, containsIgnoreWhitespace('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
 
       final String statusText = testLogger.statusText;
       expect(statusText, contains('https://github.com/flutter/flutter/issues?q=is%3Aissue+an+exception+%25+--'));

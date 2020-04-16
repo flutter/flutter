@@ -161,7 +161,8 @@ void main() {
         '--enable-web'
       ]);
 
-      expect(testLogger.statusText, contains('You may need to restart any open editors'));
+      expect(testLogger.statusText,
+        containsIgnoreWhitespace('You may need to restart any open editors'));
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
@@ -183,10 +184,10 @@ void main() {
         'config',
       ]);
 
-      expect(testLogger.statusText, contains('enable-web: true (Unavailable)'));
-      expect(testLogger.statusText, contains('enable-linux-desktop: true (Unavailable)'));
-      expect(testLogger.statusText, contains('enable-windows-desktop: true (Unavailable)'));
-      expect(testLogger.statusText, contains('enable-macos-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, containsIgnoreWhitespace('enable-web: true (Unavailable)'));
+      expect(testLogger.statusText, containsIgnoreWhitespace('enable-linux-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, containsIgnoreWhitespace('enable-windows-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, containsIgnoreWhitespace('enable-macos-desktop: true (Unavailable)'));
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,

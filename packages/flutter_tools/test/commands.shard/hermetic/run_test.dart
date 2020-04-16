@@ -113,7 +113,7 @@ void main() {
         expect(e, isA<ToolExit>());
       }
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
-      expect(bufferLogger.statusText, contains(
+      expect(bufferLogger.statusText, containsIgnoreWhitespace(
         'Changing current working directory to:'
       ));
     }, overrides: <Type, Generator>{
@@ -230,7 +230,7 @@ void main() {
           expect(e.message, null);
         }
 
-        expect(testLogger.statusText, contains(userMessages.flutterNoSupportedDevices));
+        expect(testLogger.statusText, containsIgnoreWhitespace(userMessages.flutterNoSupportedDevices));
       }, overrides: <Type, Generator>{
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
