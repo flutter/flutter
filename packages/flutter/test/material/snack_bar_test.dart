@@ -1075,10 +1075,6 @@ void main() {
         '$behavior should align SnackBar with the bottom of Scaffold '
         'when Scaffold has no other elements',
         (WidgetTester tester) async {
-          // TODO(shihaohong): Remove this flag once the migration to fix
-          // SnackBarBehavior.floating is complete.
-          Scaffold.shouldSnackBarIgnoreFABRect = true;
-
           await tester.pumpWidget(
             MaterialApp(
               home: Scaffold(
@@ -1101,9 +1097,6 @@ void main() {
           final Offset scaffoldBottomLeft = tester.getBottomLeft(find.byType(Scaffold));
 
           expect(snackBarBottomLeft, equals(scaffoldBottomLeft));
-          // TODO(shihaohong): Remove this flag once the migration to fix
-          // SnackBarBehavior.floating is complete.
-          Scaffold.shouldSnackBarIgnoreFABRect = false;
         },
       );
 
@@ -1111,9 +1104,6 @@ void main() {
         '$behavior should align SnackBar with the top of BottomNavigationBar '
         'when Scaffold has no FloatingActionButton',
         (WidgetTester tester) async {
-          // TODO(shihaohong): Remove this flag once the migration to fix
-          // SnackBarBehavior.floating is complete.
-          Scaffold.shouldSnackBarIgnoreFABRect = true;
           final UniqueKey boxKey = UniqueKey();
           await tester.pumpWidget(
             MaterialApp(
@@ -1138,9 +1128,6 @@ void main() {
           final Offset bottomNavigationBarTopLeft = tester.getTopLeft(find.byKey(boxKey));
 
           expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
-          // TODO(shihaohong): Remove this flag once the migration to fix
-          // SnackBarBehavior.floating is complete.
-          Scaffold.shouldSnackBarIgnoreFABRect = false;
         },
       );
 
