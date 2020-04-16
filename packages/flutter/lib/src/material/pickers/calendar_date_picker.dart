@@ -77,7 +77,7 @@ class CalendarDatePicker extends StatefulWidget {
   /// [initialDate] must be between [firstDate] and [lastDate] or equal to
   /// one of them.
   ///
-  /// [currentDate] if not null represents the current day (i.e. today). This
+  /// [currentDate] represents the current day (i.e. today). This
   /// date will be highlighted in the day grid. If null, the date of
   /// `DateTime.now()` will be used.
   ///

@@ -45,6 +45,10 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// their dates are considered. Their time fields are ignored. They must all
 /// be non-null.
 ///
+/// The [currentDate] represents the current day (i.e. today). This
+/// date will be highlighted in the day grid. If null, the date of
+/// `DateTime.now()` will be used.
+///
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
