@@ -193,7 +193,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<Target> targets = createTargets();
-    print(createEnvironment().defines);
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await globals.buildSystem.build(
       target,
