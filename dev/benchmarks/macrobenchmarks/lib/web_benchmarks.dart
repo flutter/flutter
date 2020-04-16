@@ -196,15 +196,19 @@ class TimeseriesVisualization {
       final AnnotatedSample sample = _stats.samples[i];
 
       if (sample.isWarmUpValue) {
+        // Put gray background behing warm-up samples.
         _ctx.fillStyle = 'rgba(200,200,200,1)';
         _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
       }
 
       if (sample.magnitude > _maxValueChartRange) {
+        // The sample value is so big it doesn't fit on the chart. Paint it purple.
         _ctx.fillStyle = 'rgba(100,50,100,0.8)';
       } else if (sample.isOutlier) {
+        // The sample is an outlier, color it light red.
         _ctx.fillStyle = 'rgba(255,50,50,0.6)';
       } else {
+        // A non-outlier sample, color it light blue.
         _ctx.fillStyle = 'rgba(50,50,255,0.6)';
       }
 
@@ -212,12 +216,15 @@ class TimeseriesVisualization {
       xOffset += barWidth;
     }
 
+    // Draw a horizontal solid line corresponding to the average.
     _ctx.lineWidth = 1;
     drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
 
+    // Draw a horizontal dashed line corresponding to the outlier cut off.
     _ctx.setLineDash(<num>[5, 5]);
     drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth, _normalized(_stats.outlierCutOff));
 
+    // Draw a light red band that shows the noise (1 stddev in each direction).
     _ctx.fillStyle = 'rgba(255,50,50,0.3)';
     _ctx.fillRect(
       0,
