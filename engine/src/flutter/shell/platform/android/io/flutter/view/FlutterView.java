@@ -21,15 +21,18 @@ import android.os.LocaleList;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -443,6 +446,17 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         .getPluginRegistry()
         .getPlatformViewsController()
         .checkInputConnectionProxy(view);
+  }
+
+  @Override
+  public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
+    super.onProvideAutofillVirtualStructure(structure, flags);
+    mTextInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+  }
+
+  @Override
+  public void autofill(SparseArray<AutofillValue> values) {
+    mTextInputPlugin.autofill(values);
   }
 
   @Override

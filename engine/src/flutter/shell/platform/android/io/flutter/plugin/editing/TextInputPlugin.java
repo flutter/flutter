@@ -6,12 +6,18 @@ package io.flutter.plugin.editing;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
+import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewStructure;
+import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -23,18 +29,22 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.util.HashMap;
 
 /** Android implementation of the text input plugin. */
 public class TextInputPlugin {
   @NonNull private final View mView;
   @NonNull private final InputMethodManager mImm;
+  @NonNull private final AutofillManager afm;
   @NonNull private final TextInputChannel textInputChannel;
   @NonNull private InputTarget inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
   @Nullable private TextInputChannel.Configuration configuration;
+  @Nullable private SparseArray<TextInputChannel.Configuration> mAutofillConfigurations;
   @Nullable private Editable mEditable;
   private boolean mRestartInputPending;
   @Nullable private InputConnection lastInputConnection;
   @NonNull private PlatformViewsController platformViewsController;
+  @Nullable private Rect lastClientRect;
   private final boolean restartAlwaysRequired;
 
   // When true following calls to createInputConnection will return the cached lastInputConnection
@@ -49,6 +59,11 @@ public class TextInputPlugin {
       @NonNull PlatformViewsController platformViewsController) {
     mView = view;
     mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      afm = view.getContext().getSystemService(AutofillManager.class);
+    } else {
+      afm = null;
+    }
 
     textInputChannel = new TextInputChannel(dartExecutor);
     textInputChannel.setTextInputMethodHandler(
@@ -61,6 +76,11 @@ public class TextInputPlugin {
           @Override
           public void hide() {
             hideTextInput(mView);
+          }
+
+          @Override
+          public void requestAutofill() {
+            notifyViewEntered();
           }
 
           @Override
@@ -77,6 +97,11 @@ public class TextInputPlugin {
           @Override
           public void setEditingState(TextInputChannel.TextEditState editingState) {
             setTextInputEditingState(mView, editingState);
+          }
+
+          @Override
+          public void setEditableSizeAndTransform(double width, double height, double[] transform) {
+            saveEditableSizeAndTransform(width, height, transform);
           }
 
           @Override
@@ -268,6 +293,7 @@ public class TextInputPlugin {
   }
 
   private void hideTextInput(View view) {
+    notifyViewExited();
     // Note: a race condition may lead to us hiding the keyboard here just after a platform view has
     // shown it.
     // This can only potentially happen when switching focus from a Flutter text field to a platform
@@ -277,16 +303,51 @@ public class TextInputPlugin {
     mImm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
   }
 
+  private void notifyViewEntered() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || afm == null || !needsAutofill()) {
+      return;
+    }
+
+    final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
+    final int[] offset = new int[2];
+    mView.getLocationOnScreen(offset);
+    Rect rect = new Rect(lastClientRect);
+    rect.offset(offset[0], offset[1]);
+    afm.notifyViewEntered(mView, triggerIdentifier.hashCode(), rect);
+  }
+
+  private void notifyViewExited() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+        || afm == null
+        || configuration == null
+        || configuration.autofill == null) {
+      return;
+    }
+
+    final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
+    afm.notifyViewExited(mView, triggerIdentifier.hashCode());
+  }
+
+  private void notifyValueChanged(String newValue) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || afm == null || !needsAutofill()) {
+      return;
+    }
+
+    final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
+    afm.notifyValueChanged(mView, triggerIdentifier.hashCode(), AutofillValue.forText(newValue));
+  }
+
   @VisibleForTesting
   void setTextInputClient(int client, TextInputChannel.Configuration configuration) {
     inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
-    this.configuration = configuration;
+    updateAutofillConfigurationIfNeeded(configuration);
     mEditable = Editable.Factory.getInstance().newEditable("");
 
     // setTextInputClient will be followed by a call to setTextInputEditingState.
     // Do a restartInput at that time.
     mRestartInputPending = true;
     unlockPlatformViewInputConnection();
+    lastClientRect = null;
   }
 
   private void setPlatformViewTextInputClient(int platformViewId) {
@@ -320,6 +381,7 @@ public class TextInputPlugin {
     if (!state.text.equals(mEditable.toString())) {
       mEditable.replace(0, mEditable.length(), state.text);
     }
+    notifyValueChanged(mEditable.toString());
     // Always apply state to selection which handles updating the selection if needed.
     applyStateToSelection(state);
     InputConnection connection = getLastInputConnection();
@@ -340,6 +402,141 @@ public class TextInputPlugin {
       mImm.restartInput(view);
       mRestartInputPending = false;
     }
+  }
+
+  private interface MinMax {
+    void inspect(double x, double y);
+  }
+
+  private void saveEditableSizeAndTransform(double width, double height, double[] matrix) {
+    final double[] minMax = new double[4]; // minX, maxX, minY, maxY.
+    final boolean isAffine = matrix[3] == 0 && matrix[7] == 0 && matrix[15] == 1;
+    minMax[0] = minMax[1] = matrix[12] / matrix[15]; // minX and maxX.
+    minMax[2] = minMax[3] = matrix[13] / matrix[15]; // minY and maxY.
+
+    final MinMax finder =
+        new MinMax() {
+          @Override
+          public void inspect(double x, double y) {
+            final double w = isAffine ? 1 : 1 / (matrix[3] * x + matrix[7] * y + matrix[15]);
+            final double tx = (matrix[0] * x + matrix[4] * y + matrix[12]) * w;
+            final double ty = (matrix[1] * x + matrix[5] * y + matrix[13]) * w;
+
+            if (tx < minMax[0]) {
+              minMax[0] = tx;
+            } else if (tx > minMax[1]) {
+              minMax[1] = tx;
+            }
+
+            if (ty < minMax[2]) {
+              minMax[2] = ty;
+            } else if (ty > minMax[3]) {
+              minMax[3] = ty;
+            }
+          }
+        };
+
+    finder.inspect(width, 0);
+    finder.inspect(width, height);
+    finder.inspect(0, height);
+    final Float density = mView.getContext().getResources().getDisplayMetrics().density;
+    lastClientRect =
+        new Rect(
+            (int) (minMax[0] * density),
+            (int) (minMax[2] * density),
+            (int) Math.ceil(minMax[1] * density),
+            (int) Math.ceil(minMax[3] * density));
+  }
+
+  private void updateAutofillConfigurationIfNeeded(TextInputChannel.Configuration configuration) {
+    notifyViewExited();
+    this.configuration = configuration;
+    final TextInputChannel.Configuration[] configurations = configuration.fields;
+
+    if (configuration.autofill == null) {
+      // Disables autofill if the configuration doesn't have an autofill field.
+      mAutofillConfigurations = null;
+      return;
+    }
+
+    mAutofillConfigurations = new SparseArray<>();
+
+    if (configurations == null) {
+      mAutofillConfigurations.put(
+          configuration.autofill.uniqueIdentifier.hashCode(), configuration);
+    } else {
+      for (TextInputChannel.Configuration config : configurations) {
+        TextInputChannel.Configuration.Autofill autofill = config.autofill;
+        if (autofill == null) {
+          continue;
+        }
+
+        mAutofillConfigurations.put(autofill.uniqueIdentifier.hashCode(), config);
+      }
+    }
+  }
+
+  private boolean needsAutofill() {
+    return mAutofillConfigurations != null;
+  }
+
+  public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !needsAutofill()) {
+      return;
+    }
+
+    final String triggerIdentifier = configuration.autofill.uniqueIdentifier;
+    final AutofillId parentId = structure.getAutofillId();
+    for (int i = 0; i < mAutofillConfigurations.size(); i++) {
+      final int autofillId = mAutofillConfigurations.keyAt(i);
+      final TextInputChannel.Configuration config = mAutofillConfigurations.valueAt(i);
+      final TextInputChannel.Configuration.Autofill autofill = config.autofill;
+      if (autofill == null) {
+        continue;
+      }
+
+      structure.addChildCount(1);
+      final ViewStructure child = structure.newChild(i);
+      child.setAutofillId(parentId, autofillId);
+      child.setAutofillValue(AutofillValue.forText(autofill.editState.text));
+      child.setAutofillHints(autofill.hints);
+      child.setAutofillType(View.AUTOFILL_TYPE_TEXT);
+      child.setVisibility(View.VISIBLE);
+    }
+  }
+
+  public void autofill(SparseArray<AutofillValue> values) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return;
+    }
+
+    final TextInputChannel.Configuration.Autofill currentAutofill = configuration.autofill;
+    if (currentAutofill == null) {
+      return;
+    }
+
+    final HashMap<String, TextInputChannel.TextEditState> editingValues = new HashMap<>();
+    for (int i = 0; i < values.size(); i++) {
+      int virtualId = values.keyAt(i);
+
+      final TextInputChannel.Configuration config = mAutofillConfigurations.get(virtualId);
+      if (config == null || config.autofill == null) {
+        continue;
+      }
+
+      final TextInputChannel.Configuration.Autofill autofill = config.autofill;
+      final String value = values.valueAt(i).getTextValue().toString();
+      final TextInputChannel.TextEditState newState =
+          new TextInputChannel.TextEditState(value, value.length(), value.length());
+
+      // The value of the currently focused text field needs to be updated.
+      if (autofill.uniqueIdentifier.equals(currentAutofill.uniqueIdentifier)) {
+        setTextInputEditingState(mView, newState);
+      }
+      editingValues.put(autofill.uniqueIdentifier, newState);
+    }
+
+    textInputChannel.updateEditingStateWithTag(inputTarget.id, editingValues);
   }
 
   // Samsung's Korean keyboard has a bug where it always attempts to combine characters based on
@@ -394,6 +591,8 @@ public class TextInputPlugin {
     }
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
+    notifyViewExited();
+    lastClientRect = null;
   }
 
   private static class InputTarget {

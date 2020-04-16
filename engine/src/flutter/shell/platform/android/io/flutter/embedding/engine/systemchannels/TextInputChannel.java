@@ -1,5 +1,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
+import android.os.Build;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +12,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +88,22 @@ public class TextInputChannel {
                 result.error("error", exception.getMessage(), null);
               }
               break;
+            case "TextInput.setEditableSizeAndTransform":
+              try {
+                final JSONObject arguments = (JSONObject) args;
+                final double width = arguments.getDouble("width");
+                final double height = arguments.getDouble("height");
+                final JSONArray jsonMatrix = arguments.getJSONArray("transform");
+                final double[] matrix = new double[16];
+                for (int i = 0; i < 16; i++) {
+                  matrix[i] = jsonMatrix.getDouble(i);
+                }
+
+                textInputMethodHandler.setEditableSizeAndTransform(width, height, matrix);
+              } catch (JSONException exception) {
+                result.error("error", exception.getMessage(), null);
+              }
+              break;
             case "TextInput.clearClient":
               textInputMethodHandler.clearClient();
               result.success(null);
@@ -119,6 +138,16 @@ public class TextInputChannel {
     channel.invokeMethod("TextInputClient.requestExistingInputState", null);
   }
 
+  private static HashMap<Object, Object> createEditingStateJSON(
+      String text, int selectionStart, int selectionEnd, int composingStart, int composingEnd) {
+    HashMap<Object, Object> state = new HashMap<>();
+    state.put("text", text);
+    state.put("selectionBase", selectionStart);
+    state.put("selectionExtent", selectionEnd);
+    state.put("composingBase", composingStart);
+    state.put("composingExtent", composingEnd);
+    return state;
+  }
   /**
    * Instructs Flutter to update its text input editing state to reflect the given configuration.
    */
@@ -147,14 +176,29 @@ public class TextInputChannel {
             + "Composing end: "
             + composingEnd);
 
-    HashMap<Object, Object> state = new HashMap<>();
-    state.put("text", text);
-    state.put("selectionBase", selectionStart);
-    state.put("selectionExtent", selectionEnd);
-    state.put("composingBase", composingStart);
-    state.put("composingExtent", composingEnd);
+    final HashMap<Object, Object> state =
+        createEditingStateJSON(text, selectionStart, selectionEnd, composingStart, composingEnd);
 
     channel.invokeMethod("TextInputClient.updateEditingState", Arrays.asList(inputClientId, state));
+  }
+
+  public void updateEditingStateWithTag(
+      int inputClientId, HashMap<String, TextEditState> editStates) {
+    Log.v(
+        TAG,
+        "Sending message to update editing state for "
+            + String.valueOf(editStates.size())
+            + " field(s).");
+
+    final HashMap<String, HashMap<Object, Object>> json = new HashMap<>();
+    for (Map.Entry<String, TextEditState> element : editStates.entrySet()) {
+      final TextEditState state = element.getValue();
+      json.put(
+          element.getKey(),
+          createEditingStateJSON(state.text, state.selectionStart, state.selectionEnd, -1, -1));
+    }
+    channel.invokeMethod(
+        "TextInputClient.updateEditingStateWithTag", Arrays.asList(inputClientId, json));
   }
 
   /** Instructs Flutter to execute a "newline" action. */
@@ -229,6 +273,13 @@ public class TextInputChannel {
     // TODO(mattcarroll): javadoc
     void hide();
 
+    /**
+     * Requests that the autofill dropdown menu appear for the current client.
+     *
+     * <p>Has no effect if the current client does not support autofill.
+     */
+    void requestAutofill();
+
     // TODO(mattcarroll): javadoc
     void setClient(int textInputClientId, @NonNull Configuration configuration);
 
@@ -241,6 +292,16 @@ public class TextInputChannel {
      * @param id the ID of the platform view to be set as a text input client.
      */
     void setPlatformViewClient(int id);
+
+    /**
+     * Sets the size and the transform matrix of the current text input client.
+     *
+     * @param width the width of text input client. Must be finite.
+     * @param height the height of text input client. Must be finite.
+     * @param transform a 4x4 matrix that maps the local paint coordinate system to coordinate
+     *     system of the FlutterView that owns the current client.
+     */
+    void setEditableSizeAndTransform(double width, double height, double[] transform);
 
     // TODO(mattcarroll): javadoc
     void setEditingState(@NonNull TextEditState editingState);
@@ -257,7 +318,14 @@ public class TextInputChannel {
       if (inputActionName == null) {
         throw new JSONException("Configuration JSON missing 'inputAction' property.");
       }
-
+      Configuration[] fields = null;
+      if (!json.isNull("fields")) {
+        final JSONArray jsonFields = json.getJSONArray("fields");
+        fields = new Configuration[jsonFields.length()];
+        for (int i = 0; i < fields.length; i++) {
+          fields[i] = Configuration.fromJson(jsonFields.getJSONObject(i));
+        }
+      }
       final Integer inputAction = inputActionFromTextInputAction(inputActionName);
       return new Configuration(
           json.optBoolean("obscureText"),
@@ -266,7 +334,9 @@ public class TextInputChannel {
           TextCapitalization.fromValue(json.getString("textCapitalization")),
           InputType.fromJson(json.getJSONObject("inputType")),
           inputAction,
-          json.isNull("actionLabel") ? null : json.getString("actionLabel"));
+          json.isNull("actionLabel") ? null : json.getString("actionLabel"),
+          json.isNull("autofill") ? null : Autofill.fromJson(json.getJSONObject("autofill")),
+          fields);
     }
 
     @NonNull
@@ -296,6 +366,117 @@ public class TextInputChannel {
       }
     }
 
+    public static class Autofill {
+      public static Autofill fromJson(@NonNull JSONObject json)
+          throws JSONException, NoSuchFieldException {
+        final String uniqueIdentifier = json.getString("uniqueIdentifier");
+        final JSONArray hints = json.getJSONArray("hints");
+        final JSONObject editingState = json.getJSONObject("editingValue");
+        final String[] hintList = new String[hints.length()];
+
+        for (int i = 0; i < hintList.length; i++) {
+          hintList[i] = translateAutofillHint(hints.getString(i));
+        }
+        return new Autofill(uniqueIdentifier, hintList, TextEditState.fromJson(editingState));
+      }
+
+      public final String uniqueIdentifier;
+      public final String[] hints;
+      public final TextEditState editState;
+
+      @NonNull
+      private static String translateAutofillHint(@NonNull String hint) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+          return hint;
+        }
+        switch (hint) {
+          case "addressCity":
+            return "addressLocality";
+          case "addressState":
+            return "addressRegion";
+          case "birthday":
+            return "birthDateFull";
+          case "birthdayDay":
+            return "birthDateDay";
+          case "birthdayMonth":
+            return "birthDateMonth";
+          case "birthdayYear":
+            return "birthDateYear";
+          case "countryName":
+            return "addressCountry";
+          case "creditCardExpirationDate":
+            return View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE;
+          case "creditCardExpirationDay":
+            return View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY;
+          case "creditCardExpirationMonth":
+            return View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH;
+          case "creditCardExpirationYear":
+            return View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR;
+          case "creditCardNumber":
+            return View.AUTOFILL_HINT_CREDIT_CARD_NUMBER;
+          case "creditCardSecurityCode":
+            return View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE;
+          case "email":
+            return View.AUTOFILL_HINT_EMAIL_ADDRESS;
+          case "familyName":
+            return "personFamilyName";
+          case "fullStreetAddress":
+            return "streetAddress";
+          case "gender":
+            return "gender";
+          case "givenName":
+            return "personGivenName";
+          case "middleInitial":
+            return "personMiddleInitial";
+          case "middleName":
+            return "personMiddleName";
+          case "name":
+            return "personName";
+          case "namePrefix":
+            return "personNamePrefix";
+          case "nameSuffix":
+            return "personNameSuffix";
+          case "newPassword":
+            return "newPassword";
+          case "newUsername":
+            return "newUsername";
+          case "oneTimeCode":
+            return "smsOTPCode";
+          case "password":
+            return View.AUTOFILL_HINT_PASSWORD;
+          case "postalAddress":
+            return View.AUTOFILL_HINT_POSTAL_ADDRESS;
+          case "postalAddressExtended":
+            return "extendedAddress";
+          case "postalAddressExtendedPostalCode":
+            return "extendedPostalCode";
+          case "postalCode":
+            return View.AUTOFILL_HINT_POSTAL_CODE;
+          case "telephoneNumber":
+            return "phoneNumber";
+          case "telephoneNumberCountryCode":
+            return "phoneCountryCode";
+          case "telephoneNumberDevice":
+            return "phoneNumberDevice";
+          case "telephoneNumberNational":
+            return "phoneNational";
+          case "username":
+            return View.AUTOFILL_HINT_USERNAME;
+          default:
+            return hint;
+        }
+      }
+
+      public Autofill(
+          @NonNull String uniqueIdentifier,
+          @NonNull String[] hints,
+          @NonNull TextEditState editingState) {
+        this.uniqueIdentifier = uniqueIdentifier;
+        this.hints = hints;
+        this.editState = editingState;
+      }
+    }
+
     public final boolean obscureText;
     public final boolean autocorrect;
     public final boolean enableSuggestions;
@@ -303,6 +484,8 @@ public class TextInputChannel {
     @NonNull public final InputType inputType;
     @Nullable public final Integer inputAction;
     @Nullable public final String actionLabel;
+    @Nullable public final Autofill autofill;
+    @Nullable public final Configuration[] fields;
 
     public Configuration(
         boolean obscureText,
@@ -311,7 +494,9 @@ public class TextInputChannel {
         @NonNull TextCapitalization textCapitalization,
         @NonNull InputType inputType,
         @Nullable Integer inputAction,
-        @Nullable String actionLabel) {
+        @Nullable String actionLabel,
+        @Nullable Autofill autofill,
+        @Nullable Configuration[] fields) {
       this.obscureText = obscureText;
       this.autocorrect = autocorrect;
       this.enableSuggestions = enableSuggestions;
@@ -319,6 +504,8 @@ public class TextInputChannel {
       this.inputType = inputType;
       this.inputAction = inputAction;
       this.actionLabel = actionLabel;
+      this.autofill = autofill;
+      this.fields = fields;
     }
   }
 
