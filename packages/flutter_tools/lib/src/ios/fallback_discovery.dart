@@ -13,7 +13,7 @@ import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 
-typedef Delay = Future<void> Function(Duration);
+typedef PollingDelay = Future<void> Function(Duration);
 
 typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
 
@@ -54,14 +54,14 @@ class FallbackDiscovery {
     @required Usage flutterUsage,
     VmServiceConnector vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
-    Delay delay = _defaultDelay,
+    PollingDelay pollingDelay = _defaultDelay,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
        _flutterUsage = flutterUsage,
        _vmServiceConnectUri = vmServiceConnectUri,
-       _delay = delay;
+       _pollingDelay = pollingDelay;
 
   static const String _kEventName = 'ios-handshake';
 
@@ -71,7 +71,7 @@ class FallbackDiscovery {
   final ProtocolDiscovery _protocolDiscovery;
   final Usage _flutterUsage;
   final VmServiceConnector  _vmServiceConnectUri;
-  final Delay _delay;
+  final PollingDelay _pollingDelay;
 
   /// Attempt to discover the observatory port.
   Future<Uri> discover({
@@ -197,7 +197,7 @@ class FallbackDiscovery {
       // tool waits for a connection to be reasonable. If the vmservice cannot
       // be connected to in this way, the mDNS discovery must be reached
       // sooner rather than later.
-      await _delay(const Duration(seconds: kDelaySeconds));
+      await _pollingDelay(const Duration(seconds: kDelaySeconds));
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
