@@ -457,14 +457,18 @@ class HotRunner extends ResidentRunner {
 
   Future<void> _launchInView(
     FlutterDevice device,
-    Uri entryUri,
-    Uri packagesUri,
-    Uri assetsDirectoryUri,
-  ) {
-    return Future.wait(<Future<void>>[
+    Uri main,
+    Uri assetsDirectory,
+  ) async {
+    await Future.wait(<Future<void>>[
       for (final FlutterView view in device.views)
-        view.runFromSource(entryUri, assetsDirectoryUri),
+        device.vmService.runInView(
+          viewId: view.id,
+          main: main,
+          assetsDirectory: assetsDirectory,
+        ),
     ]);
+    await device.refreshViews();
   }
 
   Future<void> _launchFromDevFS(String mainScript) async {
@@ -473,12 +477,10 @@ class HotRunner extends ResidentRunner {
     for (final FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
         globals.fs.path.toUri(entryUri));
-      final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
       final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
         globals.fs.path.toUri(getAssetBuildDirectory()));
       futures.add(_launchInView(device,
                           deviceEntryUri,
-                          devicePackagesUri,
                           deviceAssetsDirectoryUri));
     }
     await Future.wait(futures);
