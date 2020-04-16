@@ -145,11 +145,18 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
-Matcher containsIgnoreWhitespace(String toContain){
-return  predicate((String value) => _removeWhitespaces(value)
-    .contains(_removeWhitespaces(toContain)),
-    'contains "$toContain" ignoring whitespaces and linebreaks.');
+Matcher containsIgnoreWhitespace(String toSearch){
+return  predicate((String source)  {
+  final String sourceWithoutWhitespaces = _removeWhitespaces(source);
+  final String toSearchWithoutWhitespaces = _removeWhitespaces(toSearch);
+  if(source.contains(toSearchWithoutWhitespaces)){
+    return false;
+  }
+  return sourceWithoutWhitespaces.contains(toSearchWithoutWhitespaces);
+},
+    'contains "$toSearch" ignoring whitespaces and linebreaks.');
 }
+
 String _removeWhitespaces(String source){
   return source.replaceAll(RegExp(r'\s'), '');
 }
