@@ -474,7 +474,7 @@ void main() {
     "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
     "architecture" : "BOGUS",
     "modelName" : "Future iPad",
-    "name" : "iPad" 
+    "name" : "iPad"
   }
 ]
 ''';
