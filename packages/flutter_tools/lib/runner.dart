@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
 
 import 'src/base/common.dart';
 import 'src/base/context.dart';
@@ -27,13 +28,13 @@ import 'src/runner/flutter_command_runner.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
-  bool muteCommandLogging = false,
-  bool verbose = false,
-  bool verboseHelp = false,
-  bool reportCrashes,
-  String flutterVersion,
-  Map<Type, Generator> overrides,
-}) async {
+    bool muteCommandLogging = false,
+    bool verbose = false,
+    bool verboseHelp = false,
+    bool reportCrashes,
+    String flutterVersion,
+    Map<Type, Generator> overrides,
+  }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
@@ -121,7 +122,14 @@ Future<int> _handleToolError(
 
     // Report to both [Usage] and [CrashReportSender].
     globals.flutterUsage.sendException(error);
-    await CrashReportSender.instance.sendReport(
+    final CrashReportSender crashReportSender = CrashReportSender(
+      client: http.Client(),
+      usage: globals.flutterUsage,
+      platform: globals.platform,
+      logger: globals.logger,
+      operatingSystemUtils: globals.os,
+    );
+    await crashReportSender.sendReport(
       error: error,
       stackTrace: stackTrace,
       getFlutterVersion: getFlutterVersion,
