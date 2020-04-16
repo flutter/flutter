@@ -446,6 +446,7 @@ action("robolectric_tests") {
     "test/io/flutter/plugins/GeneratedPluginRegistrant.java",
     "test/io/flutter/util/FakeKeyEvent.java",
     "test/io/flutter/util/PreconditionsTest.java",
+    "test/io/flutter/view/AccessibilityBridgeTest.java",
   ]
 
   outputs = [

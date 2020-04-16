@@ -22,6 +22,7 @@ import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.PlatformPluginTest;
 import io.flutter.plugin.platform.SingleViewPresentationTest;
 import io.flutter.util.PreconditionsTest;
+import io.flutter.view.AccessibilityBridgeTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -55,6 +56,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
   SingleViewPresentationTest.class,
   SmokeTest.class,
   TextInputPluginTest.class,
+  AccessibilityBridgeTest.class,
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */
 public class FlutterTestSuite {}

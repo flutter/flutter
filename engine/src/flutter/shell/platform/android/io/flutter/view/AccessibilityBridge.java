@@ -739,6 +739,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
+    if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
+      result.setText(semanticsNode.getValueLabelHint());
+    } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
+      result.setContentDescription(semanticsNode.getValueLabelHint());
+    }
+
     boolean hasCheckedState = semanticsNode.hasFlag(Flag.HAS_CHECKED_STATE);
     boolean hasToggledState = semanticsNode.hasFlag(Flag.HAS_TOGGLED_STATE);
     if (BuildConfig.DEBUG && (hasCheckedState && hasToggledState)) {
@@ -747,7 +753,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setCheckable(hasCheckedState || hasToggledState);
     if (hasCheckedState) {
       result.setChecked(semanticsNode.hasFlag(Flag.IS_CHECKED));
-      result.setContentDescription(semanticsNode.getValueLabelHint());
       if (semanticsNode.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
         result.setClassName("android.widget.RadioButton");
       } else {
@@ -756,13 +761,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     } else if (hasToggledState) {
       result.setChecked(semanticsNode.hasFlag(Flag.IS_TOGGLED));
       result.setClassName("android.widget.Switch");
-      result.setContentDescription(semanticsNode.getValueLabelHint());
-    } else if (!semanticsNode.hasFlag(Flag.SCOPES_ROUTE)) {
-      // Setting the text directly instead of the content description
-      // will replace the "checked" or "not-checked" label.
-      result.setText(semanticsNode.getValueLabelHint());
     }
-
     result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
 
     // Heading support
@@ -1660,7 +1659,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsFlag in semantics.dart
   // https://github.com/flutter/engine/blob/master/lib/ui/semantics.dart
-  private enum Flag {
+  /* Package */ enum Flag {
     HAS_CHECKED_STATE(1 << 0),
     IS_CHECKED(1 << 1),
     IS_SELECTED(1 << 2),
