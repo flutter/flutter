@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:dwds/dwds.dart';
-import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:matcher/matcher.dart';
