@@ -5,7 +5,6 @@
 import '../src/common.dart';
 
 void main() {
-        
   final Map<dynamic, dynamic> stubMatchState = <dynamic, dynamic>{};
   group('containsIgnoreWhitespace Matcher', () {
     group('on item to be contained', () {
