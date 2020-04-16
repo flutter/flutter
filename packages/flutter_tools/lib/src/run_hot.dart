@@ -58,7 +58,7 @@ class DeviceReloadReport {
   DeviceReloadReport(this.device, this.reports);
 
   FlutterDevice device;
-  List<Map<String, dynamic>> reports; // List has one report per Flutter view.
+  List<vm_service.ReloadReport> reports; // List has one report per Flutter view.
 }
 
 // TODO(mklim): Test this, flutter/flutter#23031.
@@ -179,12 +179,12 @@ class HotRunner extends ResidentRunner {
         from: projectRootPath,
       );
       for (final FlutterDevice device in flutterDevices) {
-        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
+        final List<Future<vm_service.ReloadReport>> reportFutures = device.reloadSources(
           entryPath, pause: false,
         );
-        final List<Map<String, dynamic>> reports = await Future.wait(reportFutures);
-        final Map<String, dynamic> firstReport = reports.first;
-        await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
+        final List<vm_service.ReloadReport> reports = await Future.wait(reportFutures);
+        final vm_service.ReloadReport firstReport = reports.first;
+        await device.updateReloadStatus(validateReloadReport(firstReport.json, printErrors: false));
       }
     } on Exception catch (error) {
       return OperationResult(1, error.toString());
@@ -539,7 +539,7 @@ class HotRunner extends ResidentRunner {
           final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
           if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
             // Resume the isolate so that it can be killed by the embedder.
-            return view.uiIsolate.resume();
+            return device.vmService.resume(view.uiIsolate.id);
           }
           return null;
         }));
@@ -834,18 +834,18 @@ class HotRunner extends ResidentRunner {
           await device.resetAssetDirectory();
           _shouldResetAssetDirectory = false;
         }
-        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
+        final List<Future<vm_service.ReloadReport>> reportFutures = device.reloadSources(
           entryPath, pause: pause,
         );
         allReportsFutures.add(Future.wait(reportFutures).then(
-          (List<Map<String, dynamic>> reports) async {
+          (List<vm_service.ReloadReport> reports) async {
             // TODO(aam): Investigate why we are validating only first reload report,
             // which seems to be current behavior
-            final Map<String, dynamic> firstReport = reports.first;
+            final vm_service.ReloadReport firstReport = reports.first;
             // Don't print errors because they will be printed further down when
             // `validateReloadReport` is called again.
             await device.updateReloadStatus(
-              validateReloadReport(firstReport, printErrors: false),
+              validateReloadReport(firstReport.json, printErrors: false),
             );
             return DeviceReloadReport(device, reports);
           },
@@ -853,8 +853,8 @@ class HotRunner extends ResidentRunner {
       }
       final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
       for (final DeviceReloadReport report in reports) {
-        final Map<String, dynamic> reloadReport = report.reports[0];
-        if (!validateReloadReport(reloadReport)) {
+        final vm_service.ReloadReport reloadReport = report.reports[0];
+        if (!validateReloadReport(reloadReport.json)) {
           // Reload failed.
           HotEvent('reload-reject',
             targetPlatform: targetPlatform,
@@ -868,9 +868,9 @@ class HotRunner extends ResidentRunner {
         // Collect stats only from the first device. If/when run -d all is
         // refactored, we'll probably need to send one hot reload/restart event
         // per device to analytics.
-        firstReloadDetails ??= castStringKeyedMap(reloadReport['details']);
-        final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'] as int;
-        final int finalLibraryCount = reloadReport['details']['finalLibraryCount'] as int;
+        firstReloadDetails ??= castStringKeyedMap(reloadReport.json['details']);
+        final int loadedLibraryCount = reloadReport.json['details']['loadedLibraryCount'] as int;
+        final int finalLibraryCount = reloadReport.json['details']['finalLibraryCount'] as int;
         globals.printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
         reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
@@ -878,7 +878,7 @@ class HotRunner extends ResidentRunner {
       globals.printTrace('Hot reload failed: $error\n$stackTrace');
       final int errorCode = error['code'] as int;
       String errorMessage = error['message'] as String;
-      if (errorCode == Isolate.kIsolateReloadBarred) {
+      if (errorCode == kIsolateReloadBarred) {
         errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
                        'the source code. Please address the error and then use "R" to '
                        'restart the app.\n'

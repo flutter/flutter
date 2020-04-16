@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -25,7 +26,6 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -127,8 +127,8 @@ void main() {
     when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.getVMs()).thenAnswer((Invocation invocation) async { });
-    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
-      Future<Map<String, dynamic>>.value(<String, dynamic>{
+    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<vm_service.ReloadReport>>[
+      Future<vm_service.ReloadReport>.value(vm_service.ReloadReport.parse(<String, dynamic>{
         'type': 'ReloadReport',
         'success': true,
         'details': <String, dynamic>{
@@ -138,16 +138,13 @@ void main() {
           'receivedClassesCount': 1,
           'receivedProceduresCount': 1,
         },
-      }),
+      })),
     ]);
     // VMService mocks.
     when(mockVMService.wsAddress).thenReturn(testUri);
     when(mockVMService.done).thenAnswer((Invocation invocation) {
       final Completer<void> result = Completer<void>.sync();
       return result.future;
-    });
-    when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
-      return Future<Map<String, Object>>.value(null);
     });
     when(mockIsolate.flutterExit()).thenAnswer((Invocation invocation) {
       return Future<Map<String, Object>>.value(null);
