@@ -14,12 +14,15 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
@@ -283,6 +286,9 @@ public class FlutterView extends FrameLayout {
     // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
     setFocusable(true);
     setFocusableInTouchMode(true);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS);
+    }
   }
 
   /**
@@ -896,6 +902,17 @@ public class FlutterView extends FrameLayout {
 
     viewportMetrics.devicePixelRatio = getResources().getDisplayMetrics().density;
     flutterEngine.getRenderer().setViewportMetrics(viewportMetrics);
+  }
+
+  @Override
+  public void onProvideAutofillVirtualStructure(ViewStructure structure, int flags) {
+    super.onProvideAutofillVirtualStructure(structure, flags);
+    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+  }
+
+  @Override
+  public void autofill(SparseArray<AutofillValue> values) {
+    textInputPlugin.autofill(values);
   }
 
   /**
