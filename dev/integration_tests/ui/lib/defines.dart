@@ -11,7 +11,7 @@ void main() {
   runApp(
     const Center(
       child: Text(
-        String.fromEnvironment('test.valueA') + String.fromEnvironment('test.valueB'),
+        String.fromEnvironment('test.value'),
         textDirection: TextDirection.ltr,
       ),
     ),

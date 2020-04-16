@@ -360,14 +360,12 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '-DFOO=bar',
-        '-DBAZ=qux',
          '--packages=${globals.fs.path.join('foo', '.packages')}',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -393,14 +391,12 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
+    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-        '-DFOO=bar',
-        '-DBAZ=qux',
          '--packages=${globals.fs.path.join('foo', '.packages')}',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -423,6 +419,27 @@ void main() {
     await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
+  }));
+
+  test('Dart2JSTarget throws developer-friendly exception on misformatted DartDefines', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kDartDefines] = '[misformatted json';
+    try {
+      await const Dart2JSTarget().build(environment);
+      fail('Call to build() must not have succeeded.');
+    } on Exception catch(exception) {
+      expect(
+        '$exception',
+        'Exception: The value of -D$kDartDefines is not formatted correctly.\n'
+        'The value must be a JSON-encoded list of strings but was:\n'
+        '[misformatted json',
+      );
+    }
+
+    // Should not attempt to run any processes.
+    verifyNever(globals.processManager.run(any));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
   }));
 
   test('Generated service worker correctly inlines file hashes', () {

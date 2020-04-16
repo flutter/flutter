@@ -14,6 +14,7 @@ import 'build_system/targets/dart.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'build_system/targets/ios.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'globals.dart' as globals;
 import 'ios/bitcode.dart';
 import 'project.dart';
@@ -86,7 +87,7 @@ class AotBuilder {
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetPlatform: getNameForTargetPlatform(platform),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        kDartDefines: buildInfo.dartDefines.join(','),
+        kDartDefines: jsonEncode(buildInfo.dartDefines),
         kBitcodeFlag: bitcode.toString(),
         if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
           kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),

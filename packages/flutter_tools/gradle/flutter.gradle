@@ -916,7 +916,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "-dDartObfuscation=true"
             }
             if (dartDefines != null) {
-                args "--DartDefines=${dartDefines}"
+                args "-dDartDefines=${dartDefines}"
             }
             if (extraGenSnapshotOptions != null) {
                 args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
