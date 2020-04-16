@@ -250,22 +250,22 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
     if (decomposition.IsValid()) {
       // Don't allow clients to control the z dimension; we control that
       // instead to make sure layers appear in proper order.
-      entity_node().SetTranslation(decomposition.translation().x(),  //
-                                   decomposition.translation().y(),  //
-                                   0.f                               //
+      entity_node().SetTranslation(decomposition.translation().x,  //
+                                   decomposition.translation().y,  //
+                                   0.f                             //
       );
 
-      entity_node().SetScale(decomposition.scale().x(),  //
-                             decomposition.scale().y(),  //
-                             1.f                         //
+      entity_node().SetScale(decomposition.scale().x,  //
+                             decomposition.scale().y,  //
+                             1.f                       //
       );
-      context.top_scale_x_ *= decomposition.scale().x();
-      context.top_scale_y_ *= decomposition.scale().y();
+      context.top_scale_x_ *= decomposition.scale().x;
+      context.top_scale_y_ *= decomposition.scale().y;
 
-      entity_node().SetRotation(decomposition.rotation().fData[0],  //
-                                decomposition.rotation().fData[1],  //
-                                decomposition.rotation().fData[2],  //
-                                decomposition.rotation().fData[3]   //
+      entity_node().SetRotation(decomposition.rotation().x,  //
+                                decomposition.rotation().y,  //
+                                decomposition.rotation().z,  //
+                                decomposition.rotation().w   //
       );
     }
   }
