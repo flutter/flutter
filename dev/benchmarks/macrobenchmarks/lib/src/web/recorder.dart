@@ -725,6 +725,7 @@ class Profile {
 
     for (final String key in scoreData.keys) {
       scoreKeys.add('$key.average');
+      scoreKeys.add('$key.outlierAverage');
       final Timeseries timeseries = scoreData[key];
       final TimeseriesStats stats = timeseries.computeStats();
       json['$key.average'] = stats.average;
