@@ -534,6 +534,11 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
                               arguments:@[ @(client), state ]];
 }
 
+- (void)updateEditingClient:(int)client withState:(NSDictionary*)state withTag:(NSString*)tag {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingStateWithTag"
+                              arguments:@[ @(client), @{tag : state} ]];
+}
+
 - (void)updateFloatingCursor:(FlutterFloatingCursorDragState)state
                   withClient:(int)client
                 withPosition:(NSDictionary*)position {

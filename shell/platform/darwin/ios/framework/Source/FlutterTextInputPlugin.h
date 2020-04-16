@@ -36,9 +36,6 @@
 @end
 
 /** A range of text in the buffer of a Flutter text editing widget. */
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-FLUTTER_EXPORT
-#endif
 @interface FlutterTextRange : UITextRange <NSCopying>
 
 @property(nonatomic, readonly) NSRange range;
@@ -71,6 +68,7 @@ FLUTTER_EXPORT
 @property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
 @property(nonatomic) UITextSmartQuotesType smartQuotesType API_AVAILABLE(ios(11.0));
 @property(nonatomic) UITextSmartDashesType smartDashesType API_AVAILABLE(ios(11.0));
+@property(nonatomic, copy) UITextContentType textContentType API_AVAILABLE(ios(10.0));
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 
