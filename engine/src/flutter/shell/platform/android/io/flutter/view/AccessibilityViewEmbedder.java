@@ -44,7 +44,7 @@ import java.util.Map;
  * corresponding platform view and `originId`.
  */
 @Keep
-final class AccessibilityViewEmbedder {
+class AccessibilityViewEmbedder {
   private static final String TAG = "AccessibilityBridge";
 
   private final ReflectionAccessors reflectionAccessors;
@@ -385,6 +385,18 @@ final class AccessibilityViewEmbedder {
             event.getSource(),
             event.getFlags());
     return origin.view.dispatchGenericMotionEvent(translatedEvent);
+  }
+
+  /**
+   * Returns the View that contains the accessibility node identified by the provided flutterId or
+   * null if it doesn't belong to a view.
+   */
+  public View platformViewOfNode(int flutterId) {
+    ViewAndId viewAndId = flutterIdToOrigin.get(flutterId);
+    if (viewAndId == null) {
+      return null;
+    }
+    return viewAndId.view;
   }
 
   private static class ViewAndId {
