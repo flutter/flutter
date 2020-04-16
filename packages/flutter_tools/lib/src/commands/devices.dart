@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -52,7 +51,7 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (!doctor.canListAnything) {
+    if (!globals.doctor.canListAnything) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         'information about installing additional components.',

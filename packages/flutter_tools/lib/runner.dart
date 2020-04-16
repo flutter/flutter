@@ -242,12 +242,8 @@ Future<String> _doctorText() async {
       outputPreferences: globals.outputPreferences,
     );
 
-    await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true, showColor: false),
-      overrides: <Type, Generator>{
-        Logger: () => logger,
-      },
-    );
+    final Doctor doctor = Doctor(logger: logger);
+    await doctor.diagnose(verbose: true, showColor: false);
 
     return logger.statusText;
   } on Exception catch (error, trace) {

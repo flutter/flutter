@@ -220,7 +220,7 @@ void main() {
 
   group('doctor with overridden validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect(await doctor.diagnose(verbose: false), isTrue);
+      expect(await globals.doctor.diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -244,7 +244,7 @@ void main() {
     });
 
     testUsingContext('contains installed', () async {
-      await doctor.diagnose(verbose: false);
+      await globals.doctor.diagnose(verbose: false);
 
       expect(
         verify(mockUsage.sendEvent(
