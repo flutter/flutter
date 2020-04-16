@@ -378,10 +378,9 @@ class FloatingActionButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
-  /// The cursor of the mouse pointer when it is on this button.
-  ///
-  /// By default it is [SystemMouseCursors.click]. If it is null, then the
-  /// cursor is decided by the next widget behind it.
+  /// {@macro flutter.material.inkwell.mousecursor}
+  /// 
+  /// Defaults to null.
   final MouseCursor mouseCursor;
 
   /// {@macro flutter.widgets.Clip}

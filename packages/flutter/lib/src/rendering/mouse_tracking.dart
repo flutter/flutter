@@ -41,15 +41,11 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// See also:
 /// 
 ///  * [MouseTracker], which uses [MouseTrackerAnnotation].
-///  * [MouseTrackedRenderObjectMixin], which is a mutable implementation of 
-///    this class, supporting varying cursor and callbacks.
+///  * [MouseTrackedRenderObjectMixin], which is a convenient mixin for render
+///    objects that implements this class while supporting varying cursor and
+///    callbacks.
 class MouseTrackerAnnotation with Diagnosticable {
   /// Creates an immutable [MouseTrackerAnnotation].
-  /// 
-  /// See also:
-  /// 
-  ///  * [MouseTrackedRenderObjectMixin], which creates a mutable
-  ///    [MouseTrackerAnnotation].
   const MouseTrackerAnnotation({
     this.onEnter,
     this.onHover,
@@ -109,16 +105,25 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// region.
   ///
   /// When a mouse enters the annotated region, its cursor will be changed to the
-  /// [cursor]. If the [cursor] is null, then this annotated region does not
-  /// control cursors, then the choice is deferred to the next annotation behind
-  /// this one, or [MouseTrackerCursorMixin.defaultCursor] if it can't find any.
+  /// [cursor]. If the [cursor] is null, then the annotated region does not
+  /// control cursors, but defers the choice to the next annotation behind this
+  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
+  /// others can be found.
   /// 
   /// The immutable [MouseTrackerAnnotation] does not support varying [cursor].
+  ///
+  /// ### Varying cursor
   /// 
-  /// For a subclass that allows changing [cursor], such as
-  /// [MouseTrackedRenderObjectMixin], it must also implement [cursorNotifier]
-  /// and when [cursor] changes, make the notifier notify listeners in order to
-  /// keep hovering mouse pointers updated.
+  /// For a subclass that allows varying [cursor], it must provide a non-null
+  /// [cursorNotifier] and behave as follows when [cursor] changes in
+  /// order to keep hovering mouse pointers updated:
+  /// 
+  ///  * If the change is from null to non-null or vice versa, trigger a device
+  ///    update (e.g. [RenderObject.markNeedsPaint]).
+  ///  * Other wise, call [ChangeNotifier.notifyListeners] on [cursorNotifier].
+  /// 
+  /// A convenient way in this case is to make a [RenderObject] mixin
+  /// [MouseTrackedRenderObjectMixin] and push itself as the annotation.
   ///
   /// See also:
   ///
@@ -179,13 +184,13 @@ class _PlainChangeNotifier extends ChangeNotifier {
   }
 }
 
-/// A [MouseTrackerAnnotation] that allows varying callbacks and cursors. 
+/// A mixin for render objects that wants to push a [MouseTrackerAnnotation] with
+/// varying callbacks and cursors.
 /// 
-/// The [MouseTrackedRenderObjectMixin] can be used whenever a [MouseTrackerAnnotation]
-/// annotation is needed, since the fields of annotations only matter when it's
-/// searched. However, the [cursorNotifier] must be provided whenever the annotation
-/// is available for searching, and be triggered properly. For more information,
-/// see [MouseTrackerAnnotation.cursorNotifier]
+/// A [RenderObject] that has [MouseTrackedRenderObjectMixin] should push itself
+/// as and annotation, then assign the callbacks or [cursor] as desired.
+/// This mixin will monitor the value of [cursor] and properly notify 
+/// listeners or call [markNeedsPaint] when necessary.
 /// 
 /// See also:
 /// 

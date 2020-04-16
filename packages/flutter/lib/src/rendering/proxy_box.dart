@@ -2743,25 +2743,22 @@ class RenderMouseRegion extends RenderProxyBox with MouseTrackedRenderObjectMixi
     _markPropertyUpdated(mustRepaint: false);
   }
 
-  /// The mouse cursor for a pointer if it enters or is hovering over this
+  /// The mouse cursor for mouse pointers that are hovering over the annotated
   /// region.
-  /// 
-  /// This cursor will be set to a mouse pointer if this region is the
-  /// front-most region that contains the pointer.
+  ///
+  /// When a mouse enters the region, its cursor will be changed to the
+  /// [cursor]. The [cursor] defaults to null, meaning the region does not
+  /// control cursors, but defers the choice to the next region behind this
+  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
+  /// others can be found.
   /// 
   /// The [cursor] must be a prepared cursor, i.e. one that contains all 
   /// resources and immediately usable by the engine. To use a general
   /// [MouseCursor], see [MouseRegion.cursor].
-  /// 
-  /// This defaults to null, which means the choice is deferred to the next
-  /// region behind this one with a non-null [cursor], or
-  /// [MouseTrackerCursorMixin.defaultCursor] if it can't find any.
   ///
   /// See also:
   ///
   ///  * [MouseCursors] for a general introduction to the mouse cursor system.
-  ///  * [SystemMouseCursors], which is a collection of system cursors of all
-  ///    platforms.
   ///  * [MouseRegion.cursor], which is the widget-layer counterpart, and 
   ///    allows general (unprepared) mouse cursors.
   @override

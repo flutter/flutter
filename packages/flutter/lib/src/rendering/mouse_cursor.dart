@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,10 +14,9 @@ import 'mouse_tracking.dart';
 /// I-beam.
 ///
 /// Internally, when the mouse pointer moves, it finds the front-most region
-/// assigned with a mouse cursor, and, if the cursor for this pointer changes,
-/// activates the cursor based on its type. If no cursors are assigned to
-/// a position, it defaults to [MouseTrackerCursorMixin.defaultCursor], which
-/// is typically [SystemMouseCursors.basic].
+/// associated with a mouse cursor, and, if the cursor for this pointer changes,
+/// activates the cursor based on its type. If no cursors are associated with
+/// a position, it defaults to [SystemMouseCursors.basic].
 ///
 /// A [MouseCursor] object may contain the full resources that are ready to be
 /// consumed by the system (in which case it should subclass
@@ -224,7 +223,7 @@ class SystemMouseCursors {
   /// or is hovering this region. In other words, Flutter has released its
   /// control over the mouse cursor.
   ///
-  /// This value is typically used on a platform view or other layers that
+  /// This value is typically used on a platform view or another layer that
   /// manages the cursor by itself.
   static const NoopMouseCursor uncontrolled = NoopMouseCursor._();
 
@@ -234,7 +233,11 @@ class SystemMouseCursors {
   //
   // The `shapeCode` values must be kept in sync with the engine implementations.
 
-  /// Displays no cursor at the pointer.
+  /// Displays no cursor at the pointer. In other words, hide the cursor.
+  /// 
+  /// Setting cursor to [none] means Flutter is still taking the control.
+  /// If there is something else controlling the cursor and Flutter should not
+  /// overwrite, such as a platform view, use [uncontrolled],
   static const SystemMouseCursor none = SystemMouseCursor._(shapeCode: 0x334c4a, debugDescription: 'none');
 
   /// The platform-dependent basic cursor.
@@ -242,18 +245,17 @@ class SystemMouseCursors {
   /// Typically the shape of an arrow.
   static const SystemMouseCursor basic = SystemMouseCursor._(shapeCode: 0xf17aaa, debugDescription: 'basic');
 
-  /// A cursor that indicates links or something that needs to be emphasized
-  /// to be clickable.
+  /// A cursor that indicates a user interface element that is clickable, such as a hyperlink.
   ///
   /// Typically the shape of a pointing hand.
   static const SystemMouseCursor click = SystemMouseCursor._(shapeCode: 0xa8affc, debugDescription: 'click');
 
-  /// A cursor that indicates a selectable text.
+  /// A cursor that indicates selectable text.
   ///
   /// Typically the shape of a capital I.
   static const SystemMouseCursor text = SystemMouseCursor._(shapeCode: 0x1cb251, debugDescription: 'text');
 
-  /// A cursor that indicates an unpermitted action.
+  /// A cursor that indicates a forbidden action.
   ///
   /// Typically the shape of a circle with a diagnal line.
   static const SystemMouseCursor forbidden = SystemMouseCursor._(shapeCode: 0x350f9d, debugDescription: 'forbidden');

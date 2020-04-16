@@ -6099,26 +6099,20 @@ class MouseRegion extends StatefulWidget {
   ///    this callback is internally implemented, but without the restriction.
   final PointerExitEventListener onExit;
 
-  /// The mouse cursor for a pointer if it enters or is hovering over this
+  /// The mouse cursor for mouse pointers that are hovering over the annotated
   /// region.
   ///
-  /// This cursor will be set to a mouse pointer if this region is the
-  /// front-most region that contains the pointer.
+  /// When a mouse enters the region, its cursor will be changed to the
+  /// [cursor]. The [cursor] defaults to null, meaning the region does not
+  /// control cursors, but defers the choice to the next region behind this
+  /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
+  /// others can be found.
   /// 
   /// The [cursor] can be a prepared or unprepared cursor. If the cursor is
   /// unprepared, [MouseRegion] will handle the preparation when a mouse pointer
   /// enters the region for the first time. It will use
-  /// [MouseTrackerCursorMixin.defaultCursor] before completing the preparation,
-  /// then switch to the prepared value while also update the hovering pointers'
-  /// cursors.
-  ///
-  /// The [cursor] defaults to null, which means the choice is deferred to the
-  /// next region behind this one with a non-null [cursor], or
-  /// [MouseTrackerCursorMixin.defaultCursor] if it can't find any.
-  ///
-  /// See also:
-  ///
-  ///  * [MouseCursors] for a general introduction to the mouse cursor system.
+  /// [SystemMouseCursors.basic] before completing the preparation, then switch
+  /// to the prepared value while also update the hovering pointers' cursors.
   final MouseCursor cursor;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
