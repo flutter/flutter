@@ -17,6 +17,11 @@ import 'device.dart';
 import 'globals.dart' as globals;
 import 'version.dart';
 
+const String kGetSkSLsMethod = '_flutter.getSkSLs';
+const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
+const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
+const String kRunInViewMethod = '_flutter.runInView';
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
@@ -251,7 +256,12 @@ class VMService implements vm_service.VmService {
       final Map<String, Object> versionJson = version.toJson();
       versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
       versionJson['engineRevisionShort'] = version.engineRevisionShort;
-      return versionJson;
+      return <String, dynamic>{
+        'result': <String, Object>{
+          'type': 'Success',
+          ...versionJson,
+        }
+      };
     });
     _delegateService.registerService('flutterVersion', 'Flutter Tools');
 
@@ -302,8 +312,21 @@ class VMService implements vm_service.VmService {
     }
     if (device != null) {
       _delegateService.registerServiceCallback('flutterMemoryInfo', (Map<String, dynamic> params) async {
-        final MemoryInfo result = await device.queryMemoryInfo();
-        return result.toJson();
+        try {
+          final MemoryInfo result = await device.queryMemoryInfo();
+          return <String, dynamic>{
+            'result': <String, Object>{
+              'type': 'Success',
+              ...result.toJson(),
+            }
+          };
+        } on Exception catch (e, st) {
+          throw vm_service.RPCError(
+            'Error during memory info query $e\n$st',
+            RPCErrorCodes.kServerError,
+            '',
+          );
+        }
       });
       _delegateService.registerService('flutterMemoryInfo', 'Flutter Tools');
     }
@@ -350,6 +373,7 @@ class VMService implements vm_service.VmService {
     final io.WebSocket channel = await _openChannel(wsUri.toString(), compression: compression);
     final StreamController<dynamic> primary = StreamController<dynamic>();
     final StreamController<dynamic> secondary = StreamController<dynamic>();
+
     // Create an instance of the package:vm_service API in addition to the flutter
     // tool's to allow gradual migration.
     final Completer<void> streamClosedCompleter = Completer<void>();
@@ -367,7 +391,6 @@ class VMService implements vm_service.VmService {
       primary.addError(error, stackTrace);
       secondary.addError(error, stackTrace);
     });
-
     final vm_service.VmService delegateService = vm_service.VmService(
       primary.stream,
       channel.add,
@@ -443,6 +466,14 @@ class VMService implements vm_service.VmService {
     return _delegateService.onEvent(streamId);
   }
 
+  @override
+  Future<vm_service.Response> callMethod(String method, {
+    String isolateId,
+    Map<dynamic, dynamic> args,
+  }) {
+    return _delegateService.callMethod(method, isolateId: isolateId, args: args);
+  }
+
   StreamController<ServiceEvent> _getEventController(String eventName) {
     StreamController<ServiceEvent> controller = _eventControllers[eventName];
     if (controller == null) {
@@ -478,6 +509,11 @@ class VMService implements vm_service.VmService {
       event = ServiceObject._fromMap(vm, eventData) as ServiceEvent;
     }
     _getEventController(streamId).add(event);
+  }
+
+  @override
+  Future<vm_service.ScriptList> getScripts(String isolateId) {
+    return _delegateService.getScripts(isolateId);
   }
 
   /// Reloads the VM.
@@ -1056,19 +1092,6 @@ class VM extends ServiceObjectOwner {
     return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
-  Future<ServiceMap> runInView(
-    String viewId,
-    Uri main,
-    Uri assetsDirectory,
-  ) {
-    return invokeRpc<ServiceMap>('_flutter.runInView',
-      params: <String, dynamic>{
-        'viewId': viewId,
-        'mainScript': main.toString(),
-        'assetDirectory': assetsDirectory.toString(),
-    });
-  }
-
   Future<Map<String, dynamic>> clearVMTimeline() {
     return invokeRpcRaw('clearVMTimeline');
   }
@@ -1506,73 +1529,86 @@ class FlutterView extends ServiceObject {
     _uiIsolate = map['isolate'] as Isolate;
   }
 
-  // TODO(johnmccutchan): Report errors when running failed.
-  Future<void> runFromSource(
-    Uri entryUri,
-    Uri assetsDirectoryUri,
-  ) async {
-    final String viewId = id;
-    // When this completer completes the isolate is running.
-    final Completer<void> completer = Completer<void>();
-    try {
-      await owner.vm.vmService.streamListen('Isolate');
-    } on vm_service.RPCError {
-      // Do nothing, since the tool is already subscribed.
-    }
-    final StreamSubscription<vm_service.Event> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((vm_service.Event event) {
-        if (event.kind == ServiceEvent.kIsolateRunnable) {
-          globals.printTrace('Isolate is runnable.');
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        }
-      });
-    await owner.vm.runInView(viewId,
-                             entryUri,
-                             assetsDirectoryUri);
-    await completer.future;
-    await owner.vm.refreshViews(waitForViews: true);
-    await subscription.cancel();
-  }
-
-  Future<void> setAssetDirectory(Uri assetsDirectory) async {
-    assert(assetsDirectory != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setAssetBundlePath',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false),
-        });
-  }
-
-  Future<void> setSemanticsEnabled(bool enabled) async {
-    assert(enabled != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'enabled': enabled,
-        });
-  }
-
-  Future<Map<String, Object>> getSkSLs() async {
-    final Map<String, dynamic> response = await owner.vmService.vm.invokeRpcRaw(
-      '_flutter.getSkSLs',
-      params: <String, dynamic>{
-        'viewId': id,
-      },
-    );
-    return response['SkSLs'] as Map<String, Object>;
-  }
-
   bool get hasIsolate => _uiIsolate != null;
-
-  Future<void> flushUIThreadTasks() async {
-    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks',
-      params: <String, dynamic>{'isolateId': _uiIsolate.id});
-  }
 
   @override
   String toString() => id;
+}
+
+/// Flutter specific VM Service functionality.
+extension FlutterVmService on vm_service.VmService {
+
+  /// Set the asset directory for the an attached Flutter view.
+  Future<void> setAssetDirectory({
+    @required Uri assetsDirectory,
+    @required String viewId,
+    @required String uiIsolateId,
+  }) async {
+    assert(assetsDirectory != null);
+    await callMethod(kSetAssetBundlePathMethod,
+      isolateId: uiIsolateId,
+      args: <String, dynamic>{
+        'viewId': viewId,
+        'assetDirectory': assetsDirectory.toFilePath(windows: false),
+      });
+  }
+
+  /// Retreive the cached SkSL shaders from an attached Flutter view.
+  ///
+  /// This method will only return data if `--cache-sksl` was provided as a
+  /// flutter run agument, and only then on physical devices.
+  Future<Map<String, Object>> getSkSLs({
+    @required String viewId,
+  }) async {
+    final vm_service.Response response = await callMethod(
+      kGetSkSLsMethod,
+      args: <String, String>{
+        'viewId': viewId,
+      },
+    );
+    return response.json['SkSLs'] as Map<String, Object>;
+  }
+
+  /// Flush all tasks on the UI thead for an attached Flutter view.
+  ///
+  /// This method is currently used only for benchmarking.
+  Future<void> flushUIThreadTasks({
+    @required String uiIsolateId,
+  }) async {
+    await callMethod(
+      kFlushUIThreadTasksMethod,
+      args: <String, String>{
+        'isolateId': uiIsolateId,
+      },
+    );
+  }
+
+  /// Launch the Dart isolate with entrypoint [main] in the Flutter engine [viewId]
+  /// with [assetsDirectory] as the devFS.
+  ///
+  /// This method is used by the tool to hot restart an already running Flutter
+  /// engine.
+  Future<void> runInView({
+    @required String viewId,
+    @required Uri main,
+    @required Uri assetsDirectory,
+  }) async {
+    try {
+      await streamListen('Isolate');
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+    final Future<void> onRunnable = onIsolateEvent.firstWhere((vm_service.Event event) {
+      return event.kind == vm_service.EventKind.kIsolateRunnable;
+    });
+    await callMethod(
+      kRunInViewMethod,
+      args: <String, Object>{
+        'viewId': viewId,
+        'mainScript': main.toString(),
+        'assetDirectory': assetsDirectory.toString(),
+      },
+    );
+    await onRunnable;
+  }
 }

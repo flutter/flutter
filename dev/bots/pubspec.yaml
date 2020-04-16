@@ -15,7 +15,7 @@ dependencies:
   http: 0.12.0+4
   http_parser: 3.1.4
   meta: 1.1.8
-  path: 1.6.4
+  path: 1.7.0
   platform: 2.2.1
   process: 3.0.12
   test: 1.14.2
@@ -78,4 +78,4 @@ dev_dependencies:
   mockito: 4.1.1
   test_api: 0.2.15
 
-# PUBSPEC CHECKSUM: da8c
+# PUBSPEC CHECKSUM: a589

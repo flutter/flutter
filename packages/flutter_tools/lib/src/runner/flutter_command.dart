@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -159,7 +158,11 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebOptions({ bool hide = true }) {
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
-      help: 'The hostname to serve web application on.',
+      help:
+        'The hostname that the web sever will use to resolve an IP to serve '
+        'from. The unresolved hostname is used to launch Chrome when using '
+        'the chrome Device. The name "any" may also be used to serve on any '
+        'IPV4 for either the Chrome or web-server device.',
       hide: hide,
     );
     argParser.addOption('web-port',
@@ -462,6 +465,17 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addEnableExperimentation({ bool verbose }) {
+    argParser.addMultiOption(
+      FlutterOptions.kEnableExperiment,
+      help:
+        'The name of an experimental Dart feature to enable. For more info '
+        'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
+        'experimental-flags.md',
+      hide: !verbose,
+    );
+  }
+
   set defaultBuildMode(BuildMode value) {
     _defaultBuildMode = value;
   }
@@ -747,7 +761,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
-    if (!doctor.canLaunchAnything) {
+    if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }

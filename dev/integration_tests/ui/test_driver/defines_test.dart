@@ -16,7 +16,7 @@ void main() {
     await driver.close();
   });
 
-  test('Can run with --dart-deinfe', () async {
+  test('Can run with --dart-define', () async {
     await driver.waitFor(find.text('ExampleValue'));
   });
 }

@@ -22,7 +22,7 @@ class XcodeBuildSystemMigration extends IOSMigrator {
   @override
   bool migrate() {
     if (!_xcodeWorkspaceSharedSettings.existsSync()) {
-      logger.printTrace('Xcode workspace settings not found, skipping migration');
+      logger.printTrace('Xcode workspace settings not found, skipping build system migration');
       return true;
     }
 
