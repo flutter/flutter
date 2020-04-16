@@ -78,10 +78,13 @@ void main() {
       );
       expect(result.exitCode, 0);
 
+      String sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════'
+          : 'A/B results so far';
       expect(
         result.stdout,
         contains(
-          '═════════════════════════╡ ••• A/B results so far ••• ╞═════════════════════════\n'
+          '$sectionHeader\n'
           '\n'
           'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n'
           'metric1\t42.00 (0.00%)\t42.00 (0.00%)\t1.00x\t\n'
@@ -89,10 +92,13 @@ void main() {
         ),
       );
 
+      sectionHeader = !Platform.isWindows
+          ? '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════'
+          : 'Raw results';
       expect(
         result.stdout,
         contains(
-          '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════\n'
+          '$sectionHeader\n'
           '\n'
           'metric1:\n'
           '  A:\t42.00\t42.00\t\n'
@@ -103,10 +109,13 @@ void main() {
         ),
       );
 
+      sectionHeader = !Platform.isWindows
+          ? '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════'
+          : 'Final A/B results';
       expect(
         result.stdout,
         contains(
-          '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════\n'
+          '$sectionHeader\n'
           '\n'
           'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n'
           'metric1\t42.00 (0.00%)\t42.00 (0.00%)\t1.00x\t\n'
