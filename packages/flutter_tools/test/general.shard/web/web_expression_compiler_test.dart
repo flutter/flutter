@@ -21,7 +21,7 @@ void main() {
 
   test('WebExpressionCompiler handles successful expression compilation', () => testbed.run(() async {
     globals.fs.file('compilerOutput').writeAsStringSync('a');
-    
+
     final ResidentCompiler residentCompiler = MockResidentCompiler();
     when(residentCompiler.compileExpressionToJs(
       any, any, any, any, any, any, any
@@ -29,23 +29,14 @@ void main() {
       return const CompilerOutput('compilerOutput', 0, <Uri>[]);
     });
 
-    final ExpressionCompiler expressionCompiler = 
+    final ExpressionCompiler expressionCompiler =
       WebExpressionCompiler(residentCompiler);
 
-    final ExpressionCompilationResult result = 
+    final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
         null, null, 1, 1, null, null, null, null);
 
-    expect(result,
-      const TypeMatcher<ExpressionCompilationResult>()
-        .having(
-          (ExpressionCompilationResult instance) => instance.isError,
-          'isError',
-          false)
-        .having(
-          (ExpressionCompilationResult instance) => instance.result,
-          'result',
-          'a'));
+    expectResult(result, false, 'a');
   }));
 
   test('WebExpressionCompiler handles compilation error', () => testbed.run(() async {
@@ -58,23 +49,14 @@ void main() {
       return const CompilerOutput('compilerOutput', 1, <Uri>[]);
     });
 
-    final ExpressionCompiler expressionCompiler = 
+    final ExpressionCompiler expressionCompiler =
       WebExpressionCompiler(residentCompiler);
 
-    final ExpressionCompilationResult result = 
+    final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
         null, null, 1, 1, null, null, null, null);
 
-    expect(result,
-      const TypeMatcher<ExpressionCompilationResult>()
-        .having(
-          (ExpressionCompilationResult instance) => instance.isError,
-          'isError',
-          true)
-        .having(
-          (ExpressionCompilationResult instance) => instance.result,
-          'result',
-          'Error: a'));
+    expectResult(result, true, 'Error: a');
   }));
 
   test('WebExpressionCompiler handles internal error', () => testbed.run(() async {
@@ -85,24 +67,22 @@ void main() {
       return null;
     });
 
-    final ExpressionCompiler expressionCompiler = 
+    final ExpressionCompiler expressionCompiler =
       WebExpressionCompiler(residentCompiler);
 
-    final ExpressionCompilationResult result = 
+    final ExpressionCompilationResult result =
       await expressionCompiler.compileExpressionToJs(
         null, null, 1, 1, null, null, null, 'a');
 
-    expect(result,
-      const TypeMatcher<ExpressionCompilationResult>()
-        .having(
-          (ExpressionCompilationResult instance) => instance.isError,
-          'isError',
-          true)
-        .having(
-          (ExpressionCompilationResult instance) => instance.result,
-          'result',
-          'InternalError: frontend server failed to compile \'a\''));
+    expectResult(result, true, 'InternalError: frontend server failed to compile \'a\'');
   }));
+}
+
+void expectResult(ExpressionCompilationResult result, bool isError, String value) {
+  expect(result,
+    const TypeMatcher<ExpressionCompilationResult>()
+      .having((ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
+      .having((ExpressionCompilationResult instance) =>instance.result, 'result', value));
 }
 
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
