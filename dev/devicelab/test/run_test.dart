@@ -14,11 +14,12 @@ void main() {
   const ProcessManager processManager = LocalProcessManager();
 
   group('run.dart script', () {
-    Future<ProcessResult> runScript(List<String> testNames) async {
+    Future<ProcessResult> runScript(List<String> testNames, [ List<String> otherArgs = const <String>[] ]) async {
       final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
         dart,
         'bin/run.dart',
+        ...otherArgs,
         for (final String testName in testNames) ...<String>['-t', testName],
       ]);
       return scriptProcess;
@@ -62,6 +63,33 @@ void main() {
         ],
         1,
       );
+    });
+
+    test('runs A/B test', () async {
+      final ProcessResult result = await runScript(
+        <String>['smoke_test_success'],
+        <String>['--ab=2', '--local-engine=host_debug_unopt'],
+      );
+      expect(result.exitCode, 0);
+
+      expect(result.stdout, contains(
+        '════════════════════════════╡ ••• Raw results ••• ╞═════════════════════════════\n'
+        '\n'
+        'metric1:\n'
+        '  A:\t42.00\t42.00\t\n'
+        '  B:\t42.00\t42.00\t\n'
+        'metric2:\n'
+        '  A:\t123.00\t123.00\t\n'
+        '  B:\t123.00\t123.00\t\n'
+      ));
+
+      expect(result.stdout, contains(
+        '═════════════════════════╡ ••• Final A/B results ••• ╞══════════════════════════\n'
+        '\n'
+        'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n'
+        'metric1\t42.00 (0.00%)\t42.00 (0.00%)\t1.00x\t\n'
+        'metric2\t123.00 (0.00%)\t123.00 (0.00%)\t1.00x\t\n'
+      ));
     });
   });
 }
