@@ -26,6 +26,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
@@ -333,10 +334,32 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       // TODO(mattcarrol): Add the annotation once the plumbing is done.
       // https://github.com/flutter/flutter/issues/29618
       PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
+    this(
+        rootAccessibilityView,
+        accessibilityChannel,
+        accessibilityManager,
+        contentResolver,
+        new AccessibilityViewEmbedder(rootAccessibilityView, MIN_ENGINE_GENERATED_NODE_ID),
+        platformViewsAccessibilityDelegate);
+  }
+
+  @VisibleForTesting
+  public AccessibilityBridge(
+      @NonNull View rootAccessibilityView,
+      @NonNull AccessibilityChannel accessibilityChannel,
+      @NonNull AccessibilityManager accessibilityManager,
+      @NonNull ContentResolver contentResolver,
+      @NonNull AccessibilityViewEmbedder accessibilityViewEmbedder,
+      // This should be @NonNull once the plumbing for
+      // io.flutter.embedding.engine.android.FlutterView is done.
+      // TODO(mattcarrol): Add the annotation once the plumbing is done.
+      // https://github.com/flutter/flutter/issues/29618
+      PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate) {
     this.rootAccessibilityView = rootAccessibilityView;
     this.accessibilityChannel = accessibilityChannel;
     this.accessibilityManager = accessibilityManager;
     this.contentResolver = contentResolver;
+    this.accessibilityViewEmbedder = accessibilityViewEmbedder;
     this.platformViewsAccessibilityDelegate = platformViewsAccessibilityDelegate;
 
     // Tell Flutter whether accessibility is initially active or not. Then register a listener
@@ -388,8 +411,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (platformViewsAccessibilityDelegate != null) {
       platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
     }
-    accessibilityViewEmbedder =
-        new AccessibilityViewEmbedder(rootAccessibilityView, MIN_ENGINE_GENERATED_NODE_ID);
   }
 
   /**
@@ -1580,15 +1601,31 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     //                    for null'ing accessibilityFocusedSemanticsNode, inputFocusedSemanticsNode,
     //                    and hoveredObject.  Is this a hook method or a command?
     semanticsNodeToBeRemoved.parent = null;
+
+    if (semanticsNodeToBeRemoved.platformViewId != -1
+        && embeddedAccessibilityFocusedNodeId != null
+        && accessibilityViewEmbedder.platformViewOfNode(embeddedAccessibilityFocusedNodeId)
+            == platformViewsAccessibilityDelegate.getPlatformViewById(
+                semanticsNodeToBeRemoved.platformViewId)) {
+      // If the currently focused a11y node is within a platform view that is
+      // getting removed: clear it's a11y focus.
+      sendAccessibilityEvent(
+          embeddedAccessibilityFocusedNodeId,
+          AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+      embeddedAccessibilityFocusedNodeId = null;
+    }
+
     if (accessibilityFocusedSemanticsNode == semanticsNodeToBeRemoved) {
       sendAccessibilityEvent(
           accessibilityFocusedSemanticsNode.id,
           AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
       accessibilityFocusedSemanticsNode = null;
     }
+
     if (inputFocusedSemanticsNode == semanticsNodeToBeRemoved) {
       inputFocusedSemanticsNode = null;
     }
+
     if (hoveredObject == semanticsNodeToBeRemoved) {
       hoveredObject = null;
     }
