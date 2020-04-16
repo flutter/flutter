@@ -61,15 +61,15 @@ std::ostream& operator<<(std::ostream& os, const SkMatrix& m) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const SkMatrix44& m) {
-  os << m.get(0, 0) << ", " << m.get(0, 1) << ", " << m.get(0, 2) << ", "
-     << m.get(0, 3) << std::endl;
-  os << m.get(1, 0) << ", " << m.get(1, 1) << ", " << m.get(1, 2) << ", "
-     << m.get(1, 3) << std::endl;
-  os << m.get(2, 0) << ", " << m.get(2, 1) << ", " << m.get(2, 2) << ", "
-     << m.get(2, 3) << std::endl;
-  os << m.get(3, 0) << ", " << m.get(3, 1) << ", " << m.get(3, 2) << ", "
-     << m.get(3, 3);
+std::ostream& operator<<(std::ostream& os, const SkM44& m) {
+  os << m.rc(0, 0) << ", " << m.rc(0, 1) << ", " << m.rc(0, 2) << ", "
+     << m.rc(0, 3) << std::endl;
+  os << m.rc(1, 0) << ", " << m.rc(1, 1) << ", " << m.rc(1, 2) << ", "
+     << m.rc(1, 3) << std::endl;
+  os << m.rc(2, 0) << ", " << m.rc(2, 1) << ", " << m.rc(2, 2) << ", "
+     << m.rc(2, 3) << std::endl;
+  os << m.rc(3, 0) << ", " << m.rc(3, 1) << ", " << m.rc(3, 2) << ", "
+     << m.rc(3, 3);
   return os;
 }
 
