@@ -168,7 +168,7 @@ class AnsiTerminal implements Terminal {
   static String colorCode(TerminalColor color) => _colorMap[color];
 
   @override
-  bool get supportsColor => _platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => _platform?.stdoutSupportsAnsi ?? false;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,

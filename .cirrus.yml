@@ -5,6 +5,7 @@ web_shard_template: &WEB_SHARD_TEMPLATE
   only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'packages/flutter_web_plugins/**', 'bin/internal/**') || $CIRRUS_PR == ''"
   environment:
     # As of March 2020, the Web shards needed 16G of RAM and 4 CPUs to run all framework tests with goldens without flaking.
+    WEB_SHARD_COUNT: 8
     CPU: 4
     MEMORY: 16G
     CHROME_NO_SANDBOX: true
@@ -601,7 +602,6 @@ task:
       # See also: https://github.com/flutter/flutter/pull/49454
       depends_on:
         - analyze-linux
-      skip: true # https://github.com/flutter/flutter/issues/54016
       environment:
         # Apple Fastlane password.
         FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]

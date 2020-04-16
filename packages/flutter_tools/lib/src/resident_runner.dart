@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 
@@ -286,17 +287,19 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  List<Future<Map<String, dynamic>>> reloadSources(
+  List<Future<vm_service.ReloadReport>> reloadSources(
     String entryPath, {
     bool pause = false,
   }) {
-    final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
-    return <Future<Map<String, dynamic>>>[
+    final String deviceEntryUri = devFS.baseUri
+      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+    return <Future<vm_service.ReloadReport>>[
       for (final Isolate isolate in vmService.vm.isolates)
-        isolate.reloadSources(
+        vmService.reloadSources(
+          isolate.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
-        ),
+        )
     ];
   }
 
@@ -305,7 +308,11 @@ class FlutterDevice {
         globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
     await Future.wait<void>(views.map<Future<void>>(
-      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+      (FlutterView view) => vmService.setAssetDirectory(
+        assetsDirectory: deviceAssetsDirectoryUri,
+        uiIsolateId: view.uiIsolate.id,
+        viewId: view.id,
+      )
     ));
   }
 
@@ -748,7 +755,9 @@ abstract class ResidentRunner {
     if (!supportsWriteSkSL) {
       throw Exception('writeSkSL is not supported by this runner.');
     }
-    final Map<String, Object> data = await flutterDevices.first.views.first.getSkSLs();
+    final Map<String, Object> data = await flutterDevices.first.vmService.getSkSLs(
+      viewId: flutterDevices.first.views.first.id,
+    );
     if (data.isEmpty) {
       globals.logger.printStatus(
         'No data was receieved. To ensure SkSL data can be generated use a '

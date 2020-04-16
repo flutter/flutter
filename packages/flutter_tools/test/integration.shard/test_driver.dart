@@ -126,6 +126,8 @@ abstract class FlutterTestDriver {
     _stderr.stream.listen((String message) => _debugPrint(message, topic: '<=stderr='));
   }
 
+  Future<void> get done => _process.exitCode;
+
   Future<void> connectToVmService({ bool pauseOnExceptions = false }) async {
     _vmService = await vmServiceConnectUri('$_vmServiceWsUri');
     _vmService.onSend.listen((String s) => _debugPrint(s, topic: '=vm=>'));
@@ -680,6 +682,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     String testFile = 'test/test.dart',
     bool withDebugger = false,
     bool pauseOnExceptions = false,
+    bool coverage = false,
     File pidFile,
     Future<void> Function() beforeStart,
   }) async {
@@ -687,6 +690,8 @@ class FlutterTestTestDriver extends FlutterTestDriver {
       'test',
       '--disable-service-auth-codes',
       '--machine',
+      if (coverage)
+        '--coverage',
     ], script: testFile, withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions, pidFile: pidFile, beforeStart: beforeStart);
   }
 
