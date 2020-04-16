@@ -44,6 +44,7 @@ class MacOSDevice extends DesktopDevice {
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
       targetOverride: mainPath,
+      verboseLogging: globals.logger.isVerbose,
     );
   }
 
@@ -78,7 +79,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => macOSWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

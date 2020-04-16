@@ -96,6 +96,7 @@ abstract class Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    String flutterRootOverride,
   });
 
   /// Runs pub in 'batch' mode.
@@ -143,6 +144,7 @@ class _DefaultPub implements Pub {
     bool offline = false,
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
+    String flutterRootOverride,
   }) async {
     directory ??= globals.fs.currentDirectory.path;
 
@@ -178,9 +180,11 @@ class _DefaultPub implements Pub {
           filter: _filterOverrideWarnings,
           failureMessage: 'pub $command failed',
           retry: true,
+          flutterRootOverride: flutterRootOverride,
         );
         status.stop();
-      } catch (exception) {
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }
@@ -230,6 +234,7 @@ class _DefaultPub implements Pub {
     String failureMessage = 'pub failed',
     @required bool retry,
     bool showTraceForErrors,
+    String flutterRootOverride,
   }) async {
     showTraceForErrors ??= await globals.isRunningOnBot;
 
@@ -258,7 +263,7 @@ class _DefaultPub implements Pub {
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
-        environment: await _createPubEnvironment(context),
+        environment: await _createPubEnvironment(context, flutterRootOverride),
       );
       String message;
       switch (code) {
@@ -322,7 +327,7 @@ class _DefaultPub implements Pub {
         globals.stdio.addStdoutStream(process.stdout),
         globals.stdio.addStderrStream(process.stderr),
       ]);
-    } catch (err, stack) {
+    } on Exception catch (err, stack) {
       globals.printTrace('Echoing stdout or stderr from the pub subprocess failed:');
       globals.printTrace('$err\n$stack');
     }
@@ -347,9 +352,9 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Map<String, String>> _createPubEnvironment(PubContext context) async {
+Future<Map<String, String>> _createPubEnvironment(PubContext context, [ String flutterRootOverride ]) async {
   final Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_ROOT': flutterRootOverride ?? Cache.flutterRoot,
     _pubEnvironmentKey: await _getPubEnvironmentValue(context),
   };
   final String pubCache = _getRootPubCacheIfAvailable();

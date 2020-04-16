@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
@@ -18,16 +17,30 @@ Future<void> main() async {
     driver.close();
   });
 
-  group('MotionEvents tests ', () {
-    test('recomposition', () async {
-      if (Platform.isAndroid) {
-        final SerializableFinder motionEventsListTile =
-        find.byValueKey('MotionEventsListTile');
-        await driver.tap(motionEventsListTile);
-        await driver.waitFor(find.byValueKey('PlatformView'));
-        final String errorMessage = await driver.requestData('run test');
-        expect(errorMessage, '');
-      }
-    });
+  // Each test below must return back to the home page after finishing.
+
+  test('MotionEvent recomposition', () async {
+    final SerializableFinder motionEventsListTile =
+    find.byValueKey('MotionEventsListTile');
+    await driver.tap(motionEventsListTile);
+    await driver.waitFor(find.byValueKey('PlatformView'));
+    final String errorMessage = await driver.requestData('run test');
+    expect(errorMessage, '');
+    final SerializableFinder backButton = find.byValueKey('back');
+    await driver.tap(backButton);
+  });
+
+  test('AlertDialog from platform view context', () async {
+    final SerializableFinder wmListTile =
+    find.byValueKey('WmIntegrationsListTile');
+    await driver.tap(wmListTile);
+
+    final SerializableFinder showAlertDialog = find.byValueKey('ShowAlertDialog');
+    await driver.waitFor(showAlertDialog);
+    await driver.tap(showAlertDialog);
+    final String status = await driver.getText(find.byValueKey('Status'));
+    expect(status, 'Success');
+    await driver.waitFor(find.pageBack());
+    await driver.tap(find.pageBack());
   });
 }

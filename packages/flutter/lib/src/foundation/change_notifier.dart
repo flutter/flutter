@@ -38,9 +38,10 @@ import 'observer_list.dart';
 ///
 ///  * [AnimatedBuilder], a widget that uses a builder callback to rebuild
 ///    whenever a given [Listenable] triggers its notifications. This widget is
-///    commonly used with [Animation] subclasses, wherein its name. It is a
-///    subclass of [AnimatedWidget], which can be used to create widgets that
-///    are driven from a [Listenable].
+///    commonly used with [Animation] subclasses, hence its name, but is by no
+///    means limited to animations, as it can be used with any [Listenable]. It
+///    is a subclass of [AnimatedWidget], which can be used to create widgets
+///    that are driven from a [Listenable].
 ///  * [ValueListenableBuilder], a widget that uses a builder callback to
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
@@ -182,9 +183,9 @@ class ChangeNotifier implements Listenable {
   /// Call all the registered listeners.
   ///
   /// Call this method whenever the object changes, to notify any clients the
-  /// object may have. Listeners that are added during this iteration will not
-  /// be visited. Listeners that are removed during this iteration will not be
-  /// visited after they are removed.
+  /// object may have changed. Listeners that are added during this iteration
+  /// will not be visited. Listeners that are removed during this iteration will
+  /// not be visited after they are removed.
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].

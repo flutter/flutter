@@ -41,11 +41,14 @@ class FallbackDiscovery {
     @required MDnsObservatoryDiscovery mDnsObservatoryDiscovery,
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
-    Future<VmService> Function(String wsUri, {Log log}) vmServiceConnectUri = vm_service_io.vmServiceConnectUri,
+    @required Usage flutterUsage,
+    Future<VmService> Function(String wsUri, {Log log}) vmServiceConnectUri =
+      vm_service_io.vmServiceConnectUri,
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
+       _flutterUsage = flutterUsage,
        _vmServiceConnectUri = vmServiceConnectUri;
 
   static const String _kEventName = 'ios-handshake';
@@ -54,6 +57,7 @@ class FallbackDiscovery {
   final MDnsObservatoryDiscovery _mDnsObservatoryDiscovery;
   final Logger _logger;
   final ProtocolDiscovery _protocolDiscovery;
+  final Usage _flutterUsage;
   final Future<VmService> Function(String wsUri, {Log log}) _vmServiceConnectUri;
 
   /// Attempt to discover the observatory port.
@@ -82,19 +86,33 @@ class FallbackDiscovery {
         hostVmservicePort: hostVmservicePort,
       );
       if (result != null) {
-        UsageEvent(_kEventName, 'mdns-success').send();
+        UsageEvent(
+          _kEventName,
+          'mdns-success',
+          flutterUsage: _flutterUsage,
+        ).send();
         return result;
       }
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with mDNS, falling back to log scanning');
-    UsageEvent(_kEventName, 'mdns-failure').send();
+    UsageEvent(
+      _kEventName,
+      'mdns-failure',
+      flutterUsage: _flutterUsage,
+    ).send();
 
     try {
       final Uri result = await _protocolDiscovery.uri;
-      UsageEvent(_kEventName, 'fallback-success').send();
-      return result;
+      if (result != null) {
+        UsageEvent(
+          _kEventName,
+          'fallback-success',
+          flutterUsage: _flutterUsage,
+        ).send();
+        return result;
+      }
     } on ArgumentError {
     // In the event of an invalid InternetAddress, this code attempts to catch
     // an ArgumentError from protocol_discovery.dart
@@ -102,7 +120,11 @@ class FallbackDiscovery {
       _logger.printTrace(err.toString());
     }
     _logger.printTrace('Failed to connect with log scanning');
-    UsageEvent(_kEventName, 'fallback-failure').send();
+    UsageEvent(
+      _kEventName,
+      'fallback-failure',
+      flutterUsage: _flutterUsage,
+    ).send();
     return null;
   }
 
@@ -116,7 +138,10 @@ class FallbackDiscovery {
     int hostPort;
     Uri assumedWsUri;
     try {
-      hostPort = await _portForwarder.forward(assumedDevicePort, hostPort: hostVmservicePort);
+      hostPort = await _portForwarder.forward(
+        assumedDevicePort,
+        hostPort: hostVmservicePort,
+      );
       assumedWsUri = Uri.parse('ws://localhost:$hostPort/ws');
     } on Exception catch (err) {
       _logger.printTrace(err.toString());
@@ -131,17 +156,21 @@ class FallbackDiscovery {
     Exception firstException;
     while (attempts < 5) {
       try {
-        final VmService vmService = await _vmServiceConnectUri(assumedWsUri.toString());
+        final VmService vmService = await _vmServiceConnectUri(
+          assumedWsUri.toString(),
+        );
         final VM vm = await vmService.getVM();
         for (final IsolateRef isolateRefs in vm.isolates) {
-          final dynamic isolateResponse = await vmService.getIsolate(isolateRefs.id);
-          if (isolateResponse is Sentinel) {
-            // Might have been a Sentinel. Try again later.
-            throw Exception('Expected Isolate but found Sentinel: $isolateResponse');
-          }
-          final LibraryRef library = (isolateResponse as Isolate).rootLib;
-          if (library.uri.startsWith('package:$packageName')) {
-            UsageEvent(_kEventName, 'success').send();
+          final Isolate isolateResponse = await vmService.getIsolate(
+            isolateRefs.id,
+          );
+          final LibraryRef library = isolateResponse.rootLib;
+          if (library != null && library.uri.startsWith('package:$packageName')) {
+            UsageEvent(
+              _kEventName,
+              'success',
+              flutterUsage: _flutterUsage,
+            ).send();
             return Uri.parse('http://localhost:$hostPort');
           }
         }
@@ -180,6 +209,7 @@ class FallbackDiscovery {
       _kEventName,
       eventAction,
       label: eventLabel,
+      flutterUsage: _flutterUsage,
     ).send();
   }
 }

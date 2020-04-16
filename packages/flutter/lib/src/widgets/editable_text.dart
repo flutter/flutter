@@ -402,6 +402,7 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.autocorrectionTextRectColor,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
@@ -643,6 +644,18 @@ class EditableText extends StatefulWidget {
   /// Cannot be null.
   final Color cursorColor;
 
+  /// The color to use when painting the autocorrection Rect.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
+  /// on iOS.
+  ///
+  /// Currently the autocorrection Rect only appears on iOS.
+  ///
+  /// Defaults to null, which disables autocorrection Rect painting.
+  final Color autocorrectionTextRectColor;
+
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
   ///
@@ -746,6 +759,10 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
@@ -1230,6 +1247,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // _lastFormattedUnmodifiedTextEditingValue tracks the last value
   // that the formatter ran on and is used to prevent double-formatting.
   TextEditingValue _lastFormattedUnmodifiedTextEditingValue;
+  // _lastFormattedValue tracks the last post-format value, so that it can be
+  // reused without rerunning the formatter when the input value is repeated.
+  TextEditingValue _lastFormattedValue;
   // _receivedRemoteTextEditingValue is the direct value last passed in
   // updateEditingValue. This value does not get updated with the formatted
   // version.
@@ -1249,6 +1269,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
+      _currentPromptRectRange = null;
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -1652,19 +1673,40 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
   }
 
+  _WhitespaceDirectionalityFormatter _whitespaceFormatter;
+
   void _formatAndSetValue(TextEditingValue value) {
+    _whitespaceFormatter ??= _WhitespaceDirectionalityFormatter(textDirection: _textDirection);
+
     // Check if the new value is the same as the current local value, or is the same
-    // as the post-formatting value of the previous pass.
+    // as the pre-formatting value of the previous pass (repeat call).
     final bool textChanged = _value?.text != value?.text;
-    final bool isRepeat = value?.text == _lastFormattedUnmodifiedTextEditingValue?.text;
-    if (textChanged && !isRepeat && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
-      for (final TextInputFormatter formatter in widget.inputFormatters)
+    final bool isRepeat = value == _lastFormattedUnmodifiedTextEditingValue;
+
+    if (textChanged && widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      // Only format when the text has changed and there are available formatters.
+      // Pass through the formatter regardless of repeat status if the input value is
+      // different than the stored value.
+      for (final TextInputFormatter formatter in widget.inputFormatters) {
         value = formatter.formatEditUpdate(_value, value);
-      _value = value;
-      _updateRemoteEditingValueIfNeeded();
-    } else {
-      _value = value;
+      }
+      // Always pass the text through the whitespace directionality formatter to
+      // maintain expected behavior with carets on trailing whitespace.
+      value = _whitespaceFormatter.formatEditUpdate(_value, value);
+      _lastFormattedValue = value;
     }
+
+    // Setting _value here ensures the selection and composing region info is passed.
+    _value = value;
+    // Use the last formatted value when an identical repeat pass is detected.
+    if (isRepeat && textChanged && _lastFormattedValue != null) {
+      _value = _lastFormattedValue;
+    }
+
+    // Always attempt to send the value. If the value has changed, then it will send,
+    // otherwise, it will short-circuit.
+    _updateRemoteEditingValueIfNeeded();
+
     if (textChanged && widget.onChanged != null)
       widget.onChanged(value.text);
     _lastFormattedUnmodifiedTextEditingValue = _receivedRemoteTextEditingValue;
@@ -1783,6 +1825,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
+      _currentPromptRectRange = null;
     }
     updateKeepAlive();
   }
@@ -1859,6 +1902,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
+  }
+
+  // null if no promptRect should be shown.
+  TextRange _currentPromptRectRange;
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    setState(() {
+      _currentPromptRectRange = TextRange(start: start, end: end);
+    });
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
@@ -1941,6 +1994,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
+              promptRectRange: _currentPromptRectRange,
+              promptRectColor: widget.autocorrectionTextRectColor,
             ),
           ),
         );
@@ -2011,6 +2066,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
     this.devicePixelRatio,
+    this.promptRectRange,
+    this.promptRectColor,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -2053,6 +2110,8 @@ class _Editable extends LeafRenderObjectWidget {
   final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
+  final TextRange promptRectRange;
+  final Color promptRectColor;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2091,6 +2150,8 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
+      promptRectRange: promptRectRange,
+      promptRectColor: promptRectColor,
     );
   }
 
@@ -2128,6 +2189,177 @@ class _Editable extends LeafRenderObjectWidget {
       ..selectionWidthStyle = selectionWidthStyle
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText;
+      ..paintCursorAboveText = paintCursorAboveText
+      ..promptRectColor = promptRectColor
+      ..setPromptRectRange(promptRectRange);
+  }
+}
+
+// This formatter inserts [Unicode.RLM] and [Unicode.LRM] into the
+// string in order to preserve expected caret behavior when trailing
+// whitespace is inserted.
+//
+// When typing in a direction that opposes the base direction
+// of the paragraph, un-enclosed whitespace gets the directionality
+// of the paragraph. This is often at odds with what is immeditely
+// being typed causing the caret to jump to the wrong side of the text.
+// This formatter makes use of the RLM and LRM to cause the text
+// shaper to inherently treat the whitespace as being surrounded
+// by the directionality of the previous non-whitespace codepoint.
+class _WhitespaceDirectionalityFormatter extends TextInputFormatter {
+  // The [textDirection] should be the base directionality of the
+  // paragraph/editable.
+  _WhitespaceDirectionalityFormatter({TextDirection textDirection})
+    : _baseDirection = textDirection,
+      _previousNonWhitespaceDirection = textDirection;
+
+  // Using regex here instead of ICU is suboptimal, but is enough
+  // to produce the correct results for any reasonable input where this
+  // is even relevant. Using full ICU would be a much heavier change,
+  // requiring exposure of the C++ ICU API.
+  //
+  // LTR covers most scripts and symbols, including but not limited to Latin,
+  // ideographic scripts (Chinese, Japanese, etc), Cyrilic, Indic, and
+  // SE Asian scripts.
+  final RegExp _ltrRegExp = RegExp(r'[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02B8\u0300-\u0590\u0800-\u1FFF\u2C00-\uFB1C\uFDFE-\uFE6F\uFEFD-\uFFFF]');
+  // RTL covers Arabic, Hebrew, and other RTL languages such as Urdu,
+  // Aramic, Farsi, Dhivehi.
+  final RegExp _rtlRegExp = RegExp(r'[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]');
+  // Although whitespaces are not the only codepoints that have weak directionality,
+  // these are the primary cause of the caret being misplaced.
+  final RegExp _whitespaceRegExp = RegExp(r'\s');
+
+  final TextDirection _baseDirection;
+  // Tracks the directionality of the most recently encountered
+  // codepoint that was not whitespace. This becomes the direction of
+  // marker inserted to fully surround ambiguous whitespace.
+  TextDirection _previousNonWhitespaceDirection;
+
+  // Prevents the formatter from attempting more expensive formatting
+  // operations mixed directionality is found.
+  bool _hasOpposingDirection = false;
+
+  // See [Unicode.RLM] and [Unicode.LRM].
+  //
+  // We do not directly use the [Unicode] constants since they are strings.
+  static const int _rlm = 0x200F;
+  static const int _lrm = 0x200E;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Skip formatting (which can be more expensive) if there are no cases of
+    // mixing directionality. Once a case of mixed directionality is found,
+    // always perform the formatting.
+    if (!_hasOpposingDirection) {
+      _hasOpposingDirection = _baseDirection == TextDirection.ltr ?
+        _rtlRegExp.hasMatch(newValue.text) : _ltrRegExp.hasMatch(newValue.text);
+    }
+
+    if (_hasOpposingDirection) {
+      _previousNonWhitespaceDirection = _baseDirection;
+
+      final List<int> outputCodepoints = <int>[];
+
+      // We add/subtract from these as we insert/remove markers.
+      int selectionBase = newValue.selection.baseOffset;
+      int selectionExtent = newValue.selection.extentOffset;
+      int composingStart = newValue.composing.start;
+      int composingEnd = newValue.composing.end;
+
+      void addToLength() {
+        selectionBase += outputCodepoints.length <= selectionBase ? 1 : 0;
+        selectionExtent += outputCodepoints.length <= selectionExtent ? 1 : 0;
+
+        composingStart += outputCodepoints.length <= composingStart ? 1 : 0;
+        composingEnd += outputCodepoints.length <= composingEnd ? 1 : 0;
+      }
+      void subtractFromLength() {
+        selectionBase -= outputCodepoints.length < selectionBase ? 1 : 0;
+        selectionExtent -= outputCodepoints.length < selectionExtent ? 1 : 0;
+
+        composingStart -= outputCodepoints.length < composingStart ? 1 : 0;
+        composingEnd -= outputCodepoints.length < composingEnd ? 1 : 0;
+      }
+
+      bool previousWasWhitespace = false;
+      bool previousWasDirectionalityMarker = false;
+      int previousNonWhitespaceCodepoint;
+      for (final int codepoint in newValue.text.runes) {
+        if (isWhitespace(codepoint)) {
+          // Only compute the directionality of the non-whitespace
+          // when the value is needed.
+          if (!previousWasWhitespace && previousNonWhitespaceCodepoint != null) {
+            _previousNonWhitespaceDirection = getDirection(previousNonWhitespaceCodepoint);
+          }
+          // If we already added directionality for this run of whitespace,
+          // "shift" the marker added to the end of the whitespace run.
+          if (previousWasWhitespace) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          outputCodepoints.add(codepoint);
+          addToLength();
+          outputCodepoints.add(_previousNonWhitespaceDirection == TextDirection.rtl ? _rlm : _lrm);
+
+          previousWasWhitespace = true;
+          previousWasDirectionalityMarker = false;
+        } else if (isDirectionalityMarker(codepoint)) {
+          // Handle pre-existing directionality markers. Use pre-existing marker
+          // instead of the one we add.
+          if (previousWasWhitespace) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          outputCodepoints.add(codepoint);
+
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = true;
+        } else {
+          // If the whitespace was already enclosed by the same directionality,
+          // we can remove the artifically added marker.
+          if (!previousWasDirectionalityMarker &&
+              previousWasWhitespace &&
+              getDirection(codepoint) == _previousNonWhitespaceDirection) {
+            subtractFromLength();
+            outputCodepoints.removeLast();
+          }
+          // Normal character, track its codepoint add it to the string.
+          previousNonWhitespaceCodepoint = codepoint;
+          outputCodepoints.add(codepoint);
+
+          previousWasWhitespace = false;
+          previousWasDirectionalityMarker = false;
+        }
+      }
+      final String formatted = String.fromCharCodes(outputCodepoints);
+      return TextEditingValue(
+        text: formatted,
+        selection: TextSelection(
+          baseOffset: selectionBase,
+          extentOffset: selectionExtent,
+          affinity: newValue.selection.affinity,
+          isDirectional: newValue.selection.isDirectional
+        ),
+        composing: TextRange(start: composingStart, end: composingEnd),
+      );
+    }
+    return newValue;
+  }
+
+  bool isWhitespace(int value) {
+    return _whitespaceRegExp.hasMatch(String.fromCharCode(value));
+  }
+
+  bool isDirectionalityMarker(int value) {
+    return value == _rlm || value == _lrm;
+  }
+
+  TextDirection getDirection(int value) {
+    // Use the LTR version as short-circuiting will be more efficient since
+    // there are more LTR codepoints.
+    return _ltrRegExp.hasMatch(String.fromCharCode(value)) ? TextDirection.ltr : TextDirection.rtl;
   }
 }

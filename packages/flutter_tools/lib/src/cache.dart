@@ -47,13 +47,13 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', feature: flutterWebFeature);
 
   /// Artifacts required for desktop macOS.
-  static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
+  static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', feature: flutterMacOSDesktopFeature);
 
   /// Artifacts required for desktop Windows.
-  static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
+  static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', feature: flutterWindowsDesktopFeature);
 
   /// Artifacts required for desktop Linux.
-  static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
+  static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', feature: flutterLinuxDesktopFeature);
 
   /// Artifacts required for Fuchsia.
   static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
@@ -155,6 +155,10 @@ class Cache {
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
   bool includeAllPlatforms = false;
+
+  // Names of artifacts which should be cached even if they would normally
+  // be filtered out for the current platform.
+  Set<String> platformOverrideArtifacts;
 
   // Whether to cache the unsigned mac binaries. Defaults to caching the signed binaries.
   bool useUnsignedMacBinaries = false;
@@ -403,7 +407,7 @@ class Cache {
     if (!cachedFile.existsSync()) {
       try {
         await downloadFile(url, cachedFile);
-      } catch (e) {
+      } on Exception catch (e) {
         throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
     }
@@ -523,6 +527,12 @@ abstract class CachedArtifact extends ArtifactSet {
   @visibleForTesting
   final List<File> downloadedFiles = <File>[];
 
+  // Whether or not to bypass normal platform filtering for this artifact.
+  bool get ignorePlatformFiltering {
+    return cache.includeAllPlatforms ||
+      (cache.platformOverrideArtifacts != null && cache.platformOverrideArtifacts.contains(developmentArtifact.name));
+  }
+
   @override
   bool isUpToDate() {
     if (!location.existsSync()) {
@@ -597,7 +607,8 @@ abstract class CachedArtifact extends ArtifactSet {
         try {
           await cache.downloadFile(url, tempFile);
           status.stop();
-        } catch (exception) {
+        // The exception is rethrown, so don't catch only Exceptions.
+        } catch (exception) { // ignore: avoid_catches_without_on_clauses
           status.cancel();
           rethrow;
         }
@@ -858,7 +869,7 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isMacOS) {
+    if (globals.platform.isMacOS || ignorePlatformFiltering) {
       return _macOSDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -880,7 +891,7 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isWindows) {
+    if (globals.platform.isWindows || ignorePlatformFiltering) {
       return _windowsDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -902,7 +913,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isLinux) {
+    if (globals.platform.isLinux || ignorePlatformFiltering) {
       return _linuxDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -1019,14 +1030,14 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
   @override
   List<List<String>> getBinaryDirs() {
     return <List<String>>[
-      if (globals.platform.isMacOS || cache.includeAllPlatforms)
+      if (globals.platform.isMacOS || ignorePlatformFiltering)
         ..._iosBinaryDirs,
     ];
   }
 
   @override
   List<String> getLicenseDirs() {
-    if (cache.includeAllPlatforms || globals.platform.isMacOS) {
+    if (globals.platform.isMacOS || ignorePlatformFiltering) {
       return const <String>['ios', 'ios-profile', 'ios-release'];
     }
     return const <String>[];
@@ -1273,6 +1284,9 @@ class IosUsbArtifacts extends CachedArtifact {
       'idevicescreenshot',
       'idevicesyslog',
     ],
+    'usbmuxd': <String>[
+      'iproxy',
+    ],
   };
 
   @override
@@ -1298,7 +1312,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    if (!globals.platform.isMacOS && !cache.includeAllPlatforms) {
+    if (!globals.platform.isMacOS && !ignorePlatformFiltering) {
       return Future<void>.value();
     }
     if (location.existsSync()) {

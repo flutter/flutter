@@ -15,8 +15,17 @@
 *.yaml   text
 
 # Make sure that these Windows files always have CRLF line endings in checkout
-*.bat    text eol=crlf
-*.ps1    text eol=crlf
+*.bat             text eol=crlf
+*.ps1             text eol=crlf
+*.rc              text eol=crlf
+*.sln             text eol=crlf
+*.props           text eol=crlf
+*.vcxproj         text eol=crlf
+*.vcxproj.filters text eol=crlf
+# Including templatized versions.
+*.sln.tmpl        text eol=crlf
+*.props.tmpl      text eol=crlf
+*.vcxproj.tmpl    text eol=crlf
 
 # Never perform LF normalization on these files
 *.ico    binary

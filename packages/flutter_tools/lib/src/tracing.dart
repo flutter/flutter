@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -45,7 +46,8 @@ class Tracing {
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
-        (await vmService.onExtensionEvent).listen((ServiceEvent event) {
+        await vmService.streamListen('Extension');
+        vmService.onExtensionEvent.listen((vm_service.Event event) {
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
           }
@@ -60,7 +62,8 @@ class Tracing {
         if (!done) {
           await whenFirstFrameRendered.future;
         }
-      } catch (exception) {
+      // The exception is rethrown, so don't catch only Exceptions.
+      } catch (exception) { // ignore: avoid_catches_without_on_clauses
         status.cancel();
         rethrow;
       }

@@ -18,24 +18,8 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess, AlwaysTrueBotDetector, AlwaysFalseBotDetector;
 import '../../src/testbed.dart';
-
-class AlwaysTrueBotDetector implements BotDetector {
-  const AlwaysTrueBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => true;
-}
-
-
-class AlwaysFalseBotDetector implements BotDetector {
-  const AlwaysFalseBotDetector();
-
-  @override
-  Future<bool> get isRunningOnBot async => false;
-}
-
 
 void main() {
   Cache.disableLocking();
@@ -530,6 +514,19 @@ void main() {
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
       expect(commands[1], 'global');
       expect(commands[2], 'list');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+      Pub: () => const Pub(),
+    });
+
+    testUsingContext('outdated', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'outdated']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'outdated');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,

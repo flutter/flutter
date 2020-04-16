@@ -191,6 +191,19 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        section('gradlew assembleDebug forwards stderr');
+        await project.introducePubspecError();
+                final ProcessResult result =
+            await project.resultOfGradleTask('assembleRelease');
+        if (result.exitCode == 0)
+          throw failure(
+              'Gradle did not exit with error as expected', result);
+        final String output = '${result.stdout}\n${result.stderr}';
+        if (!output.contains('No file or variants found for asset: lib/gallery/example_code.dart.'))
+          throw failure(output, result);
+      });
+
+      await runProjectTest((FlutterProject project) async {
         section('flutter build apk on build script with error');
         await project.introduceError();
         final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);

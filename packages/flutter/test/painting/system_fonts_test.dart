@@ -169,7 +169,10 @@ void main() {
         (ByteData data) { },
     );
     final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
-    expect(renderObject.debugNeedsLayout, isTrue);
+
+    bool sliderBoxNeedsLayout;
+    renderObject.visitChildren((RenderObject child) {sliderBoxNeedsLayout = child.debugNeedsLayout;});
+    expect(sliderBoxNeedsLayout, isTrue);
   });
 
   testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
@@ -191,7 +194,8 @@ void main() {
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData data) { },
     );
-    final RenderObject renderObject = tester.renderObject(find.byType(Slider));
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
     expect(renderObject.debugNeedsLayout, isTrue);
   });
 

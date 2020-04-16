@@ -14,8 +14,8 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/net.dart';
 import 'src/base/process.dart';
-import 'src/base/terminal.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
@@ -35,8 +35,6 @@ Future<int> run(
   String flutterVersion,
   Map<Type, Generator> overrides,
 }) async {
-  reportCrashes ??= !await globals.isRunningOnBot;
-
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
@@ -48,6 +46,8 @@ Future<int> run(
   commands.forEach(runner.addCommand);
 
   return runInContext<int>(() async {
+    reportCrashes ??= !await globals.isRunningOnBot;
+
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
@@ -62,13 +62,14 @@ Future<int> run(
       try {
         await runner.run(args);
         return await _exit(0);
-      } catch (error, stackTrace) {
+      // This catches all exceptions to send to crash logging, etc.
+      } catch (error, stackTrace) {  // ignore: avoid_catches_without_on_clauses
         firstError = error;
         firstStackTrace = stackTrace;
         return await _handleToolError(
             error, stackTrace, verbose, args, reportCrashes, getVersion);
       }
-    }, onError: (Object error, StackTrace stackTrace) async {
+    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
@@ -120,7 +121,7 @@ Future<int> _handleToolError(
     }
 
     // Report to both [Usage] and [CrashReportSender].
-    flutterUsage.sendException(error);
+    globals.flutterUsage.sendException(error);
     await CrashReportSender.instance.sendReport(
       error: error,
       stackTrace: stackTrace,
@@ -135,7 +136,8 @@ Future<int> _handleToolError(
       await _informUserOfCrash(args, error, stackTrace, errorString);
 
       return _exit(1);
-    } catch (error) {
+    // This catch catches all exceptions to ensure the message below is printed.
+    } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
         'please let us know at https://github.com/flutter/flutter/issues.\n',
@@ -156,8 +158,14 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   globals.printError('A crash report has been written to ${file.path}.');
   globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
-  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator();
-  final String similarIssuesURL = await gitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(errorString);
+  final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
+  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    flutterProjectFactory: globals.projectFactory,
+    client: clientFactory != null ? clientFactory() : HttpClient(),
+  );
+  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(errorString);
   globals.printStatus('$similarIssuesURL\n', wrap: false);
   globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
   globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
@@ -166,8 +174,7 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   final String command = _crashCommand(args);
   final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
     command,
-    errorString,
-    _crashException(error),
+    error,
     stackTrace,
     doctorText
   );
@@ -232,31 +239,27 @@ Future<String> _doctorText() async {
   try {
     final BufferLogger logger = BufferLogger(
       terminal: globals.terminal,
-      outputPreferences: outputPreferences,
+      outputPreferences: globals.outputPreferences,
     );
 
-    await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true, showColor: false),
-      overrides: <Type, Generator>{
-        Logger: () => logger,
-      },
-    );
+    final Doctor doctor = Doctor(logger: logger);
+    await doctor.diagnose(verbose: true, showColor: false);
 
     return logger.statusText;
-  } catch (error, trace) {
+  } on Exception catch (error, trace) {
     return 'encountered exception: $error\n\n${trace.toString().trim()}\n';
   }
 }
 
 Future<int> _exit(int code) async {
   // Prints the welcome message if needed.
-  flutterUsage.printWelcome();
+  globals.flutterUsage.printWelcome();
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
-  if (flutterUsage.enabled) {
+  if (globals.flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
-    await flutterUsage.ensureAnalyticsSent();
+    await globals.flutterUsage.ensureAnalyticsSent();
     globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
@@ -271,7 +274,9 @@ Future<int> _exit(int code) async {
       globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
-    } catch (error, stackTrace) {
+    // This catches all exceptions becauce the error is propagated on the
+    // completer.
+    } catch (error, stackTrace) { // ignore: avoid_catches_without_on_clauses
       completer.completeError(error, stackTrace);
     }
   });

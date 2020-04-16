@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -77,12 +78,14 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           ipv6: true,
           stayResident: true,
-          dartDefines: const <String>[],
           urlTunneller: null,
         ) as ResidentWebRunner;
         globals.fs.currentDirectory.childFile('.packages')
           .writeAsStringSync('\n');
       },
+      overrides: <Type, Generator>{
+        Pub: () => MockPub(),
+      }
     );
   });
 
@@ -113,8 +116,16 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
+    when(mockVmService.onStderrEvent).thenAnswer((Invocation _) {
+      return const Stream<Event>.empty();
+    });
     when(mockVmService.onDebugEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
+    });
+    when(mockVmService.onIsolateEvent).thenAnswer((Invocation _) {
+      return Stream<Event>.fromIterable(<Event>[
+        Event(kind: EventKind.kIsolateStart, timestamp: 1),
+      ]);
     });
     when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
     when(mockFlutterDevice.devFS).thenReturn(mockWebDevFS);
@@ -139,7 +150,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -158,7 +168,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: <String>[],
       urlTunneller: null,
     );
 
@@ -174,7 +183,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     );
 
@@ -213,6 +221,10 @@ void main() {
     verify(mockAppConnection.runMain()).called(1);
     verify(mockVmService.registerService('reloadSources', 'FlutterTools')).called(1);
     verify(status.stop()).called(1);
+    verify(pub.get(
+      context: PubContext.pubGet,
+      directory: globals.fs.path.join('packages', 'flutter_tools')
+    )).called(1);
 
     expect(bufferLogger.statusText, contains('Debug service listening on ws://127.0.0.1/abcd/'));
     expect(debugConnectionInfo.wsUri.toString(), 'ws://127.0.0.1/abcd/');
@@ -234,26 +246,35 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: false,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
   }));
 
-  test('Listens to stdout streams before running main', () => testbed.run(() async {
+  test('Listens to stdout and stderr streams before running main', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-    final StreamController<Event> controller = StreamController<Event>.broadcast();
+    final StreamController<Event> stdoutController = StreamController<Event>.broadcast();
+    final StreamController<Event> stderrController = StreamController<Event>.broadcast();
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
-      return controller.stream;
+      return stdoutController.stream;
+    });
+    when(mockVmService.onStderrEvent).thenAnswer((Invocation _) {
+      return stderrController.stream;
     });
     when(mockAppConnection.runMain()).thenAnswer((Invocation invocation) {
-      controller.add(Event.parse(<String, Object>{
+      stdoutController.add(Event.parse(<String, Object>{
         'type': 'Event',
         'kind': 'WriteEvent',
         'timestamp': 1569473488296,
         'bytes': base64.encode('THIS MESSAGE IS IMPORTANT'.codeUnits),
+      }));
+       stderrController.add(Event.parse(<String, Object>{
+        'type': 'Event',
+        'kind': 'WriteEvent',
+        'timestamp': 1569473488296,
+        'bytes': base64.encode('SO IS THIS'.codeUnits),
       }));
     });
     unawaited(residentWebRunner.run(
@@ -262,6 +283,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     expect(testLogger.statusText, contains('THIS MESSAGE IS IMPORTANT'));
+    expect(testLogger.statusText, contains('SO IS THIS'));
   }));
 
   test('Does not run main with --start-paused', () => testbed.run(() async {
@@ -271,7 +293,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
@@ -324,7 +345,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -333,7 +354,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -377,7 +398,7 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
 	  // ensure that analytics are sent.
-    final Map<String, String> config = verify(Usage.instance.sendEvent('hot', 'restart',
+    final Map<String, String> config = verify(globals.flutterUsage.sendEvent('hot', 'restart',
       parameters: captureAnyNamed('parameters'))).captured.first as Map<String, String>;
 
     expect(config, allOf(<Matcher>[
@@ -386,7 +407,7 @@ void main() {
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
-    verify(Usage.instance.sendTiming('hot', 'web-incremental-restart', any)).called(1);
+    verify(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
@@ -422,13 +443,26 @@ void main() {
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
     // ensure that analytics are sent.
-    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-incremental-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
 
   test('web resident runner is debuggable', () => testbed.run(() {
     expect(residentWebRunner.debuggingEnabled, true);
+  }));
+
+  test('web resident runner can toggle CanvasKit', () => testbed.run(() async {
+    final WebAssetServer webAssetServer = WebAssetServer(null, null, null, null, null);
+    when(mockWebDevFS.webAssetServer).thenReturn(webAssetServer);
+
+    expect(residentWebRunner.supportsCanvasKit, true);
+    expect(webAssetServer.canvasKitRendering, false);
+
+    final bool toggleResult = await residentWebRunner.toggleCanvaskit();
+
+    expect(webAssetServer.canvasKitRendering, true);
+    expect(toggleResult, true);
   }));
 
   test('Exits when initial compile fails', () => testbed.run(() async {
@@ -455,9 +489,33 @@ void main() {
     ));
 
     expect(await residentWebRunner.run(), 1);
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Faithfully displays stdout messages with leading/trailing spaces', () => testbed.run(() async {
+    _setupMocks();
+    final StreamController<Event> stdoutController = StreamController<Event>();
+    when(mockVmService.onStdoutEvent).thenAnswer((Invocation invocation) {
+      return stdoutController.stream;
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+
+    stdoutController.add(Event(
+      timestamp: 0,
+      kind: 'Stdout',
+      bytes: base64.encode(utf8.encode('    This is a message with 4 leading and trailing spaces    '))),
+    );
+    // Wait one event loop for the stream listener to fire.
+    await null;
+
+    expect(testLogger.statusText,
+      contains('    This is a message with 4 leading and trailing spaces    '));
   }));
 
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
@@ -488,59 +546,66 @@ void main() {
 
     expect(result.code, 1);
     expect(result.message, contains('Failed to recompile application.'));
-    verifyNever(Usage.instance.sendTiming('hot', 'web-restart', any));
+    verifyNever(globals.flutterUsage.sendTiming('hot', 'web-restart', any));
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
   }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice response error for hot restart', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('fullReload')).thenAnswer((Invocation _) async {
-  //     return Response.parse(<String, Object>{'type': 'Failed'});
-  //   });
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+  test('Fails non-fatally on vmservice response error for hot restart', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenAnswer((Invocation _) async {
+      return Response.parse(<String, Object>{'type': 'Failed'});
+    });
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Failed'));
-  // }));
+    expect(result.code, 0);
+  }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice response error for hot reload', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('hotRestart')).thenAnswer((Invocation _) async {
-  //     return Response.parse(<String, Object>{'type': 'Failed'});
-  //   });
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  test('Fails fatally on vmservice RpcError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(RPCError('Something went wrong', 2, '123'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Failed'));
-  // }));
+    expect(result.code, 1);
+    expect(result.message, contains('Something went wrong'));
+  }));
 
-  // TODO(jonahwilliams): re-enable tests once we switch back to DWDS for hot reload/restart.
-  // test('Fails on vmservice RpcError', () => testbed.run(() async {
-  //   _setupMocks();
-  //   final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
-  //   unawaited(residentWebRunner.run(
-  //     connectionInfoCompleter: connectionInfoCompleter,
-  //   ));
-  //   await connectionInfoCompleter.future;
-  //   when(mockVmService.callServiceExtension('hotRestart')).thenThrow(RPCError('', 2, '123'));
-  //   final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+  test('Fails fatally on vmservice WipError', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(WipError(<String, String>{}));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
-  //   expect(result.code, 1);
-  //   expect(result.message, contains('Page requires refresh'));
-  // }));
+    expect(result.code, 1);
+  }));
+
+  test('Fails fatally on vmservice Exception', () => testbed.run(() async {
+    _setupMocks();
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    when(mockVmService.callMethod('hotRestart')).thenThrow(Exception('Something went wrong'));
+    final OperationResult result = await residentWebRunner.restart(fullRestart: false);
+
+    expect(result.code, 1);
+    expect(result.message, contains('Something went wrong'));
+  }));
 
   test('printHelp without details has web warning', () => testbed.run(() async {
     residentWebRunner.printHelp(details: false);
@@ -779,7 +844,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -820,7 +884,6 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ipv6: true,
       stayResident: true,
-      dartDefines: const <String>[],
       urlTunneller: null,
     ) as ResidentWebRunner;
 
@@ -968,3 +1031,4 @@ class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockWebServerDevice extends Mock implements WebServerDevice {}
 class MockDevice extends Mock implements Device {}
+class MockPub extends Mock implements Pub {}

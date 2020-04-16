@@ -112,10 +112,12 @@ Future<T> asyncGuard<T>(
       if (!completer.isCompleted) {
         completer.complete(result);
       }
-    } catch (e, s) {
+    // This catches all exceptions so that they can be propagated to the
+    // caller-supplied error handling or the completer.
+    } catch (e, s) { // ignore: avoid_catches_without_on_clauses
       handleError(e, s);
     }
-  }, onError: (Object e, StackTrace s) {
+  }, onError: (Object e, StackTrace s) { // ignore: deprecated_member_use
     handleError(e, s);
   });
 

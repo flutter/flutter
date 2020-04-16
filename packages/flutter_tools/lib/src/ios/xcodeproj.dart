@@ -10,7 +10,6 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -209,20 +208,9 @@ List<String> _xcodeBuildSettingsLines({
 
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
-    final String engineOutPath = globals.fs.path.basename(localEngineArtifacts.engineOutPath);
-    String engineBuildMode = 'release';
-    if (engineOutPath.toLowerCase().contains('debug')) {
-      engineBuildMode = 'debug';
-    } else if (engineOutPath.toLowerCase().contains('profile')) {
-      engineBuildMode = 'profile';
-    }
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=$engineOutPath');
-    // Only write this for local engines, where it is supposed to be sticky to
-    // match the engine configuration. Avoid writing it otherwise so that it
-    // does not stick the user with the wrong build mode, particularly for
-    // existing app use cases.
-    xcodeBuildSettings.add('FLUTTER_BUILD_MODE=$engineBuildMode');
+    xcodeBuildSettings.add('LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -246,10 +234,16 @@ List<String> _xcodeBuildSettingsLines({
     xcodeBuildSettings.add('TREE_SHAKE_ICONS=true');
   }
 
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('DART_DEFINES=${buildInfo.dartDefines.join(',')}');
+  }
+
+  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add('EXTRA_FRONT_END_OPTIONS=${buildInfo.extraFrontEndOptions.join(',')}');
+  }
+
   return xcodeBuildSettings;
 }
-
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -258,18 +252,21 @@ class XcodeProjectInterpreter {
     @required ProcessManager processManager,
     @required Logger logger,
     @required FileSystem fileSystem,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
+    @required Usage usage,
   }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _terminal = terminal,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+      _fileSystem = fileSystem,
+      _terminal = terminal,
+      _logger = logger,
+      _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+      _usage = usage;
 
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final Logger _logger;
+  final Usage _usage;
 
   static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
@@ -360,10 +357,11 @@ class XcodeProjectInterpreter {
       );
       final String out = result.stdout.trim();
       return parseXcodeBuildSettings(out);
-    } catch(error) {
+    } on Exception catch (error) {
       if (error is ProcessException && error.toString().contains('timed out')) {
         BuildEvent('xcode-show-build-settings-timeout',
           command: showBuildSettingsCommand.join(' '),
+          flutterUsage: _usage,
         ).send();
       }
       _logger.printTrace('Unexpected failure to get the build settings: $error.');
@@ -373,14 +371,15 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme) async {
+  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
     await _processUtils.run(<String>[
       _executable,
       '-workspace',
       workspacePath,
       '-scheme',
       scheme,
-      '-quiet',
+      if (!verbose)
+        '-quiet',
       'clean',
       ...environmentVariablesAsXcodeBuildSettings(_platform)
     ], workingDirectory: _fileSystem.currentDirectory.path);

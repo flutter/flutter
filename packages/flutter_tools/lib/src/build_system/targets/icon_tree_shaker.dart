@@ -25,7 +25,7 @@ const bool kIconTreeShakerEnabledDefault = false;
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
     return (object as List<dynamic>).cast<Map<String, dynamic>>();
-  } on CastError catch (_) {
+  } on TypeError catch (_) {
     throw IconTreeShakerException._(errorMessage);
   }
 }
@@ -188,7 +188,7 @@ class IconTreeShaker {
       await fontSubsetProcess.stdin.close();
     } on Exception catch (_) {
       // handled by checking the exit code.
-    } on OSError catch (_) {
+    } on OSError catch (_) {  // ignore: dead_code_on_catch_subtype
       // handled by checking the exit code.
     }
 

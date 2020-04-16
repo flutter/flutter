@@ -30,7 +30,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
-    usesDartDefines();
+    usesDartDefineOption();
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -100,7 +100,13 @@ class RunCommand extends RunCommandBase {
       ..addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging '
-              'the GPU thread. By default, Flutter will not log skia code.',
+              'the raster thread (formerly known as the GPU thread). '
+              'By default, Flutter will not log skia code.',
+      )
+      ..addOption('trace-whitelist',
+        help: 'Filters out all trace events except those that are specified in '
+              'this comma separated list of whitelisted prefixes.',
+        valueHelp: 'foo,bar',
       )
       ..addFlag('endless-trace-buffer',
         negatable: false,
@@ -204,7 +210,6 @@ class RunCommand extends RunCommandBase {
               'cannot be paired with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
         splitCommas: true,
         hide: true,
@@ -347,6 +352,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -361,6 +367,7 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: boolArg('enable-software-rendering'),
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
+        traceWhitelist: stringArg('trace-whitelist'),
         traceSystrace: boolArg('trace-systrace'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
@@ -371,6 +378,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webUseSseForDebugProxy: featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
@@ -403,7 +411,6 @@ class RunCommand extends RunCommandBase {
         stdoutCommandResponse,
         notifyingLogger: NotifyingLogger(),
         logToStdout: true,
-        dartDefines: dartDefines,
       );
       AppInstance app;
       try {
@@ -420,7 +427,7 @@ class RunCommand extends RunCommandBase {
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6,
         );
-      } catch (error) {
+      } on Exception catch (error) {
         throwToolExit(error.toString());
       }
       final DateTime appStartedTime = systemClock.now();
@@ -483,14 +490,12 @@ class RunCommand extends RunCommandBase {
         await FlutterDevice.create(
           device,
           flutterProject: flutterProject,
-          trackWidgetCreation: boolArg('track-widget-creation'),
           fileSystemRoots: stringsArg('filesystem-root'),
           fileSystemScheme: stringArg('filesystem-scheme'),
           viewFilter: stringArg('isolate-filter'),
           experimentalFlags: expFlags,
           target: stringArg('target'),
-          buildMode: getBuildMode(),
-          dartDefines: dartDefines,
+          buildInfo: getBuildInfo(),
         ),
     ];
     // Only support "web mode" with a single web device due to resident runner
@@ -524,7 +529,6 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
-        dartDefines: dartDefines,
         urlTunneller: null,
       );
     } else {

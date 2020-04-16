@@ -39,10 +39,22 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      environment = Environment.test(globals.fs.currentDirectory, defines: <String, String>{
-        kTargetPlatform: 'ios',
-      });
+      environment = Environment.test(
+        globals.fs.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+        },
+        processManager: processManager,
+        artifacts: MockArtifacts(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
+      );
     });
+  });
+
+  test('iOS AOT targets has analyicsName', () {
+    expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
+    expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
 
   test('DebugUniveralFramework creates expected binary with arm64 only arch', () => testbed.run(() async {

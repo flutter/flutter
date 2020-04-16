@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -35,7 +36,7 @@ void main() {
 
   setUp(() {
     processManager = mocks.MockProcessManager();
-    platform = fakePlatform('macos');
+    platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem();
     fileSystem.file(xcodebuild).createSync(recursive: true);
     terminal = MockAnsiTerminal();
@@ -48,6 +49,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: null,
     );
   });
 
@@ -123,13 +125,14 @@ void main() {
   });
 
   testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
-    final Platform platform = fakePlatform('notMacOS');
+    final Platform platform = FakePlatform(operatingSystem: 'notMacOS');
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: Usage.test(),
     );
     fileSystem.file(xcodebuild).deleteSync();
 
@@ -172,6 +175,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{});
     when(processManager.runSync(
               argThat(contains(xcodebuild)),
               workingDirectory: anyNamed('workingDirectory'),
@@ -187,6 +191,7 @@ void main() {
       flakes: 1,
       delay: delay + const Duration(seconds: 1),
     );
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{});
 
     expect(await xcodeProjectInterpreter.getBuildSettings(
                 '', '', timeout: delay),
@@ -261,6 +266,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: Usage.test(),
     );
 
     expect(await xcodeProjectInterpreter.getInfo(workingDirectory), isNotNull);
@@ -282,6 +288,7 @@ void main() {
       platform: platform,
       processManager: processManager,
       terminal: terminal,
+      usage: Usage.test(),
     );
 
     expect(
@@ -417,7 +424,7 @@ Information about project "Runner":
     FakePlatform platform;
 
     setUp(() {
-      platform = fakePlatform('ignored');
+      platform = FakePlatform();
     });
 
     testWithoutContext('environment variables as Xcode build settings', () {
@@ -433,24 +440,22 @@ Information about project "Runner":
   });
 
   group('updateGeneratedXcodeProperties', () {
-    MockLocalEngineArtifacts mockEngineArtifacts;
-    MockArtifacts mockArtifacts;
+    MockLocalEngineArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
     FakePlatform macOS;
     FileSystem fs;
 
     setUp(() {
       fs = MemoryFileSystem();
-      mockEngineArtifacts = MockLocalEngineArtifacts();
-      mockArtifacts = MockArtifacts();
+      mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      macOS = fakePlatform('macos');
+      macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
-    void testUsingOsxContext(String description, dynamic testMethod(), {bool isLocalEngine = true}) {
+    void testUsingOsxContext(String description, dynamic testMethod()) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
-        Artifacts: () => isLocalEngine ? mockEngineArtifacts : mockArtifacts,
+        Artifacts: () => mockArtifacts,
         Platform: () => macOS,
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
@@ -458,9 +463,9 @@ Information about project "Runner":
     }
 
     testUsingOsxContext('sets OTHER_LDFLAGS for iOS', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'Flutter.framework'));
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -483,9 +488,9 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('do not set OTHER_LDFLAGS for macOS', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterMacOSFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterMacOSFramework,
           platform: TargetPlatform.darwin_x64, mode: anyNamed('mode'))).thenReturn(fs.path.join('engine', 'FlutterMacOS.framework'));
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -509,9 +514,9 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -533,59 +538,10 @@ Information about project "Runner":
       expect(buildPhaseScriptContents.contains('ARCHS=armv7'), isTrue);
     });
 
-    testUsingOsxContext('sets FLUTTER_BUILD_MODE local engine is set', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-
-      const BuildInfo buildInfo = BuildInfo(BuildMode.profile, null, treeShakeIcons: false);
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
-      await updateGeneratedXcodeProperties(
-        project: project,
-        buildInfo: buildInfo,
-      );
-
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-      expect(config.existsSync(), isTrue);
-
-      final String contents = config.readAsStringSync();
-      expect(contents, contains('FLUTTER_BUILD_MODE=profile'));
-
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
-      expect(buildPhaseScript.existsSync(), isTrue);
-
-      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
-      expect(buildPhaseScriptContents, contains('FLUTTER_BUILD_MODE=profile'));
-    });
-
-    testUsingOsxContext('does not set FLUTTER_BUILD_MODE without local engine', () async {
+    testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-
-      const BuildInfo buildInfo = BuildInfo(BuildMode.profile, null, treeShakeIcons: false);
-      final FlutterProject project = FlutterProject.fromPath('path/to/project');
-      await updateGeneratedXcodeProperties(
-        project: project,
-        buildInfo: buildInfo,
-      );
-
-      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
-      expect(config.existsSync(), isTrue);
-
-      final String contents = config.readAsStringSync();
-      expect(contents, isNot(contains('FLUTTER_BUILD_MODE=')));
-
-      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
-      expect(buildPhaseScript.existsSync(), isTrue);
-
-      final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
-      expect(buildPhaseScriptContents, isNot(contains('FLUTTER_BUILD_MODE=')));
-    }, isLocalEngine: false);
-
-    testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
@@ -607,9 +563,9 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
@@ -631,9 +587,9 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
 
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -664,9 +620,9 @@ Information about project "Runner":
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockEngineArtifacts.getArtifactPath(Artifact.flutterFramework,
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockEngineArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -849,10 +805,6 @@ flutter:
   });
 }
 
-FakePlatform fakePlatform(String name) {
-  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
-}
-
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
@@ -860,4 +812,3 @@ class MockAnsiTerminal extends Mock implements AnsiTerminal {
   @override
   bool get supportsColor => false;
 }
-class MockArtifacts extends Mock implements Artifacts {}

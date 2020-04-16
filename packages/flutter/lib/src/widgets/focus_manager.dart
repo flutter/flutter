@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -1352,7 +1351,7 @@ enum FocusHighlightStrategy {
 ///    subtrees into groups and restrict focus to them.
 ///  * The [primaryFocus] global accessor, for convenient access from anywhere
 ///    to the current focus manager state.
-class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagnosticable {
+class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
@@ -1367,8 +1366,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   /// Provides convenient access to the current [FocusManager] singleton from
   /// the [WidgetsBinding] instance.
   static FocusManager get instance => WidgetsBinding.instance.focusManager;
-
-  bool _lastInteractionWasTouch = true;
 
   /// Sets the strategy by which [highlightMode] is determined.
   ///
@@ -1401,6 +1398,30 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     _updateHighlightMode();
   }
 
+  static FocusHighlightMode get _defaultModeForPlatform {
+    // Assume that if we're on one of the mobile platforms, and there's no mouse
+    // connected, that the initial interaction will be touch-based, and that
+    // it's traditional mouse and keyboard on all other platforms.
+    //
+    // This only affects the initial value: the ongoing value is updated to a
+    // known correct value as soon as any pointer/keyboard events are received.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        if (WidgetsBinding.instance.mouseTracker.mouseIsConnected) {
+          return FocusHighlightMode.traditional;
+        }
+        return FocusHighlightMode.touch;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return FocusHighlightMode.traditional;
+    }
+    assert(false, 'Unhandled target platform $defaultTargetPlatform');
+    return null;
+  }
+
   /// Indicates the current interaction mode for focus highlights.
   ///
   /// The value returned depends upon the [highlightStrategy] used, and possibly
@@ -1412,22 +1433,28 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   ///
   /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
   /// draw their focus highlight whenever they are focused.
-  FocusHighlightMode get highlightMode => _highlightMode;
-  FocusHighlightMode _highlightMode = FocusHighlightMode.touch;
+  // Don't want to set _highlightMode here, since it's possible for the target
+  // platform to change (especially in tests).
+  FocusHighlightMode get highlightMode => _highlightMode ?? _defaultModeForPlatform;
+  FocusHighlightMode _highlightMode;
+
+  // If set, indicates if the last interaction detected was touch or not.
+  // If null, no interactions have occurred yet.
+  bool _lastInteractionWasTouch;
 
   // Update function to be called whenever the state relating to highlightMode
   // changes.
   void _updateHighlightMode() {
-    // Assume that if we're on one of these mobile platforms, or if there's no
-    // mouse connected, that the initial interaction will be touch-based, and
-    // that it's traditional mouse and keyboard on all others.
-    //
-    // This only affects the initial value: the ongoing value is updated as soon
-    // as any input events are received.
-    _lastInteractionWasTouch ??= Platform.isAndroid || Platform.isIOS || !WidgetsBinding.instance.mouseTracker.mouseIsConnected;
     FocusHighlightMode newMode;
     switch (highlightStrategy) {
       case FocusHighlightStrategy.automatic:
+        if (_lastInteractionWasTouch == null) {
+          // If we don't have any information about the last interaction yet,
+          // then just rely on the default value for the platform, which will be
+          // determined based on the target platform if _highlightMode is not
+          // set.
+          return;
+        }
         if (_lastInteractionWasTouch) {
           newMode = FocusHighlightMode.touch;
         } else {
@@ -1441,8 +1468,12 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
         newMode = FocusHighlightMode.traditional;
         break;
     }
-    if (newMode != _highlightMode) {
-      _highlightMode = newMode;
+    // We can't just compare newMode with _highlightMode here, since
+    // _highlightMode could be null, so we want to compare with the return value
+    // for the getter, since that's what clients will be looking at.
+    final FocusHighlightMode oldMode = highlightMode;
+    _highlightMode = newMode;
+    if (highlightMode != oldMode) {
       _notifyHighlightModeListeners();
     }
   }
@@ -1466,21 +1497,26 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
     for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
-          listener(_highlightMode);
+          listener(highlightMode);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets library',
-          context: ErrorDescription('while dispatching notifications for $runtimeType'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<FocusManager>(
               'The $runtimeType sending notification was',
               this,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while dispatching notifications for $runtimeType'),
+          informationCollector: collector,
         ));
       }
     }
@@ -1493,20 +1529,21 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handlePointerEvent(PointerEvent event) {
-    bool currentInteractionIsTouch;
+    FocusHighlightMode expectedMode;
     switch (event.kind) {
       case PointerDeviceKind.touch:
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
-        currentInteractionIsTouch = true;
+        _lastInteractionWasTouch = true;
+        expectedMode = FocusHighlightMode.touch;
         break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.unknown:
-        currentInteractionIsTouch = false;
+        _lastInteractionWasTouch = false;
+        expectedMode = FocusHighlightMode.traditional;
         break;
     }
-    if (_lastInteractionWasTouch != currentInteractionIsTouch) {
-      _lastInteractionWasTouch = currentInteractionIsTouch;
+    if (expectedMode != highlightMode) {
       _updateHighlightMode();
     }
   }
@@ -1514,10 +1551,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier implements Diagn
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Update highlightMode first, since things responding to the keys might
     // look at the highlight mode, and it should be accurate.
-    if (_lastInteractionWasTouch) {
-      _lastInteractionWasTouch = false;
-      _updateHighlightMode();
-    }
+    _lastInteractionWasTouch = false;
+    _updateHighlightMode();
 
     assert(_focusDebug('Received key event ${event.logicalKey}'));
     // Walk the current focus from the leaf to the root, calling each one's

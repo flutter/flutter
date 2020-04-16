@@ -38,7 +38,7 @@ Directory getApkDirectory(FlutterProject project) {
     : project.android.buildDirectory
         .childDirectory('app')
         .childDirectory('outputs')
-        .childDirectory('apk');
+        .childDirectory('flutter-apk');
 }
 
 /// The directory where the app bundle artifact is generated.
@@ -241,9 +241,9 @@ Future<void> buildGradleApp({
 
   final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
   if (usesAndroidX) {
-    BuildEvent('app-using-android-x').send();
+    BuildEvent('app-using-android-x', flutterUsage: globals.flutterUsage).send();
   } else if (!usesAndroidX) {
-    BuildEvent('app-not-using-android-x').send();
+    BuildEvent('app-not-using-android-x', flutterUsage: globals.flutterUsage).send();
     globals.printStatus("$warningMark Your app isn't using AndroidX.", emphasis: true);
     globals.printStatus(
       'To avoid potential build failures, you can quickly migrate your app '
@@ -312,7 +312,7 @@ Future<void> buildGradleApp({
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
 
   if (buildInfo.extraFrontEndOptions != null) {
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
+    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}');
   }
   if (buildInfo.extraGenSnapshotOptions != null) {
     command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
@@ -328,6 +328,9 @@ Future<void> buildGradleApp({
   }
   if (androidBuildInfo.shrink) {
     command.add('-Pshrink=true');
+  }
+  if (androidBuildInfo.buildInfo.dartDefines?.isNotEmpty ?? false) {
+    command.add('-Pdart-defines=${androidBuildInfo.buildInfo.dartDefines.join(',')}');
   }
   if (shouldBuildPluginAsAar) {
     // Pass a system flag instead of a project flag, so this flag can be
@@ -396,11 +399,11 @@ Future<void> buildGradleApp({
     status.stop();
   }
 
-  flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle', sw.elapsed);
 
   if (exitCode != 0) {
     if (detectedGradleError == null) {
-      BuildEvent('gradle-unkown-failure').send();
+      BuildEvent('gradle-unkown-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -426,7 +429,7 @@ Future<void> buildGradleApp({
               shouldBuildPluginAsAar: shouldBuildPluginAsAar,
               retries: retries - 1,
             );
-            BuildEvent(successEventLabel).send();
+            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
             return;
           case GradleBuildStatus.retryWithAarPlugins:
             await buildGradleApp(
@@ -438,13 +441,13 @@ Future<void> buildGradleApp({
               shouldBuildPluginAsAar: true,
               retries: retries - 1,
             );
-            BuildEvent(successEventLabel).send();
+            BuildEvent(successEventLabel, flutterUsage: globals.flutterUsage).send();
             return;
           case GradleBuildStatus.exit:
             // noop.
         }
       }
-      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure').send();
+      BuildEvent('gradle-${detectedGradleError.eventLabel}-failure', flutterUsage: globals.flutterUsage).send();
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -465,25 +468,33 @@ Future<void> buildGradleApp({
     return;
   }
   // Gradle produced an APK.
-  final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
+  final Iterable<String> apkFilesPaths = project.isModule
+    ? findApkFilesModule(project, androidBuildInfo)
+    : listApkPaths(androidBuildInfo);
   final Directory apkDirectory = getApkDirectory(project);
+  final File apkFile = apkDirectory.childFile(apkFilesPaths.first);
+  if (!apkFile.existsSync()) {
+    _exitWithExpectedFileNotFound(
+      project: project,
+      fileExtension: '.apk',
+    );
+  }
+
   // Copy the first APK to app.apk, so `flutter run` can find it.
   // TODO(egarciad): Handle multiple APKs.
-  apkFiles.first.copySync(apkDirectory.childFile('app.apk').path);
+  apkFile.copySync(apkDirectory.childFile('app.apk').path);
   globals.printTrace('calculateSha: $apkDirectory/app.apk');
 
   final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
-  apkShaFile.writeAsStringSync(_calculateSha(apkFiles.first));
+  apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-  for (final File apkFile in apkFiles) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-      ? '' // Don't display the size when building a debug variant.
-      : ' (${getSizeAsMB(apkFile.lengthSync())})';
-    globals.printStatus(
-      '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
-      color: TerminalColor.green,
-    );
-  }
+  final String appSize = (buildInfo.mode == BuildMode.debug)
+    ? '' // Don't display the size when building a debug variant.
+    : ' (${getSizeAsMB(apkFile.lengthSync())})';
+  globals.printStatus(
+    '$successMark Built ${globals.fs.path.relative(apkFile.path)}$appSize.',
+    color: TerminalColor.green,
+  );
 }
 
 /// Builds AAR and POM files.
@@ -589,7 +600,7 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'gradle-aar', sw.elapsed);
 
   if (result.exitCode != 0) {
     globals.printStatus(result.stdout, wrap: false);
@@ -684,16 +695,16 @@ String _calculateSha(File file) {
   final Stopwatch sw = Stopwatch()..start();
   final List<int> bytes = file.readAsBytesSync();
   globals.printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-read', sw.elapsed);
   sw.reset();
   final String sha = _hex(sha1.convert(bytes).bytes);
   globals.printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
-  flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
+  globals.flutterUsage.sendTiming('build', 'apk-sha-calc', sw.elapsed);
   return sha;
 }
 
 void _exitWithUnsupportedProjectMessage() {
-  BuildEvent('unsupported-project', eventError: 'gradle-plugin').send();
+  BuildEvent('unsupported-project', eventError: 'gradle-plugin', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark Your app is using an unsupported Gradle project. '
     'To fix this problem, create a new project by running `flutter create -t app <app-directory>` '
@@ -702,7 +713,7 @@ void _exitWithUnsupportedProjectMessage() {
 }
 
 void _exitWithProjectNotUsingGradleMessage() {
-  BuildEvent('unsupported-project', eventError: 'app-not-using-gradle').send();
+  BuildEvent('unsupported-project', eventError: 'app-not-using-gradle', flutterUsage: globals.flutterUsage).send();
   throwToolExit(
     '$warningMark The build process for Android has changed, and the '
     'current project configuration is no longer valid. Please consult\n\n'
@@ -766,7 +777,7 @@ Future<void> buildPluginsAsAar(
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
       // includes the plugin name and the version.
-      BuildEvent('gradle-plugin-aar-failure', eventError: plugin).send();
+      BuildEvent('gradle-plugin-aar-failure', eventError: plugin, flutterUsage: globals.flutterUsage).send();
       throwToolExit('The plugin $pluginName could not be built due to the issue above.');
     }
   }
@@ -774,7 +785,7 @@ Future<void> buildPluginsAsAar(
 
 /// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
 @visibleForTesting
-Iterable<File> findApkFiles(
+Iterable<String> findApkFilesModule(
   FlutterProject project,
   AndroidBuildInfo androidBuildInfo,
 ) {
@@ -811,7 +822,39 @@ Iterable<File> findApkFiles(
       fileExtension: '.apk',
     );
   }
-  return apks;
+  return apks.map((File file) => file.path);
+}
+
+/// Returns the APK files for a given [FlutterProject] and [AndroidBuildInfo].
+///
+/// The flutter.gradle plugin will copy APK outputs into:
+/// $buildDir/app/outputs/flutter-apk/app-<abi>-<flavor-flag>-<build-mode-flag>.apk
+@visibleForTesting
+Iterable<String> listApkPaths(
+  AndroidBuildInfo androidBuildInfo,
+) {
+  final String buildType = camelCase(androidBuildInfo.buildInfo.modeName);
+  final List<String> apkPartialName = <String>[
+    if (androidBuildInfo.buildInfo.flavor?.isNotEmpty ?? false)
+      androidBuildInfo.buildInfo.flavor,
+    '$buildType.apk',
+  ];
+  if (androidBuildInfo.splitPerAbi) {
+    return <String>[
+      for (AndroidArch androidArch in androidBuildInfo.targetArchs)
+        <String>[
+          'app',
+          getNameForAndroidArch(androidArch),
+          ...apkPartialName
+        ].join('-')
+    ];
+  }
+  return <String>[
+    <String>[
+      'app',
+      ...apkPartialName,
+    ].join('-')
+  ];
 }
 
 @visibleForTesting
@@ -862,12 +905,13 @@ void _exitWithExpectedFileNotFound({
   assert(fileExtension != null);
 
   final String androidGradlePluginVersion =
-      getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
+  getGradleVersionForAndroidPlugin(project.android.hostAppGradleRoot);
   BuildEvent('gradle-expected-file-not-found',
     settings:
-      'androidGradlePluginVersion: $androidGradlePluginVersion, '
-      'fileExtension: $fileExtension'
-    ).send();
+    'androidGradlePluginVersion: $androidGradlePluginVersion, '
+      'fileExtension: $fileExtension',
+    flutterUsage: globals.flutterUsage,
+  ).send();
   throwToolExit(
     'Gradle build failed to produce an $fileExtension file. '
     "It's likely that this file was generated under ${project.android.buildDirectory.path}, "

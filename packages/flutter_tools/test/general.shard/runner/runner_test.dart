@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -54,7 +55,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
@@ -67,7 +68,7 @@ void main() {
       // exception on the first attempt, the second attempt tries to report the
       // *original* crash, and not the crash from the first crash report
       // attempt.
-      final CrashingUsage crashingUsage = flutterUsage as CrashingUsage;
+      final CrashingUsage crashingUsage = globals.flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException, 'an exception % --');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
@@ -80,11 +81,8 @@ void main() {
     });
 
     testUsingContext('GitHub issue template', () async {
-      const String similarURL = 'https://example.com/1';
-      when(mockGitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(any))
-        .thenAnswer((_) async => similarURL);
       const String templateURL = 'https://example.com/2';
-      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any, any))
+      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any))
         .thenAnswer((_) async => templateURL);
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
@@ -102,7 +100,7 @@ void main() {
         ));
         return null;
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
           expect(error, 'test exit');
           completer.complete();
         },
@@ -114,7 +112,7 @@ void main() {
       expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
 
       final String statusText = testLogger.statusText;
-      expect(statusText, contains(similarURL));
+      expect(statusText, contains('https://github.com/flutter/flutter/issues?q=is%3Aissue+an+exception+%25+--'));
       expect(statusText, contains('https://flutter.dev/docs/resources/bug-reports'));
       expect(statusText, contains(templateURL));
 

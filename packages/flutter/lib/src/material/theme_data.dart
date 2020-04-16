@@ -25,6 +25,7 @@ import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'navigation_rail_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
 import 'slider_theme.dart';
@@ -163,7 +164,7 @@ enum MaterialTapTargetSize {
 /// ```
 /// {@end-tool}
 @immutable
-class ThemeData extends Diagnosticable {
+class ThemeData with Diagnosticable {
   /// Create a [ThemeData] given a set of preferred values.
   ///
   /// Default values will be derived for arguments that are omitted.
@@ -256,6 +257,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
+    NavigationRailThemeData navigationRailTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
@@ -364,6 +366,7 @@ class ThemeData extends Diagnosticable {
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    navigationRailTheme ??= const NavigationRailThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
@@ -428,6 +431,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme,
+      navigationRailTheme: navigationRailTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
@@ -505,6 +509,7 @@ class ThemeData extends Diagnosticable {
     @required this.colorScheme,
     @required this.dialogTheme,
     @required this.floatingActionButtonTheme,
+    @required this.navigationRailTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
@@ -566,6 +571,7 @@ class ThemeData extends Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
+       assert(navigationRailTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
@@ -982,6 +988,10 @@ class ThemeData extends Diagnosticable {
   /// [FloatingActionButton].
   final FloatingActionButtonThemeData floatingActionButtonTheme;
 
+  /// A theme for customizing the background color, elevation, text style, and
+  /// icon themes of a [NavigationRail].
+  final NavigationRailThemeData navigationRailTheme;
+
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
@@ -1072,6 +1082,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     FloatingActionButtonThemeData floatingActionButtonTheme,
+    NavigationRailThemeData navigationRailTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
@@ -1138,6 +1149,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
+      navigationRailTheme: navigationRailTheme ?? this.navigationRailTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
@@ -1282,6 +1294,7 @@ class ThemeData extends Diagnosticable {
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
+      navigationRailTheme: NavigationRailThemeData.lerp(a.navigationRailTheme, b.navigationRailTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
@@ -1354,6 +1367,7 @@ class ThemeData extends Diagnosticable {
         && other.colorScheme == colorScheme
         && other.dialogTheme == dialogTheme
         && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.navigationRailTheme == navigationRailTheme
         && other.typography == typography
         && other.cupertinoOverrideTheme == cupertinoOverrideTheme
         && other.snackBarTheme == snackBarTheme
@@ -1425,6 +1439,7 @@ class ThemeData extends Diagnosticable {
       colorScheme,
       dialogTheme,
       floatingActionButtonTheme,
+      navigationRailTheme,
       typography,
       cupertinoOverrideTheme,
       snackBarTheme,
@@ -1492,6 +1507,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<NavigationRailThemeData>('navigationRailThemeData', navigationRailTheme, defaultValue: defaultData.navigationRailTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
@@ -1620,8 +1636,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   }
 }
 
+@immutable
 class _IdentityThemeDataCacheKey {
-  _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
+  const _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
 
   final ThemeData baseTheme;
   final TextTheme localTextGeometry;
@@ -1697,7 +1714,8 @@ class _FifoCache<K, V> {
 ///  * [ThemeData.visualDensity], where this property is used to specify the base
 ///    horizontal density of Material components.
 ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
-class VisualDensity extends Diagnosticable {
+@immutable
+class VisualDensity with Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///
   /// All of the arguments must be non-null, and [horizontal] and [vertical]
@@ -1745,6 +1763,24 @@ class VisualDensity extends Diagnosticable {
   ///
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
+
+  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms,
+  /// it returns a default-constructed [VisualDensity].
+  static VisualDensity get adaptivePlatformDensity {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        break;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return compact;
+    }
+    return const VisualDensity();
+  }
 
   /// Copy the current [VisualDensity] with the given values replacing the
   /// current values.

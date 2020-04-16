@@ -7,7 +7,6 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../convert.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
@@ -204,9 +203,10 @@ class KernelSnapshot extends Target {
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
 
     // This configuration is all optional.
-    final List<String> extraFrontEndOptions = <String>[
-      ...?environment.defines[kExtraFrontEndOptions]?.split(',')
-    ];
+    final String rawFrontEndOption = environment.defines[kExtraFrontEndOptions];
+    final List<String> extraFrontEndOptions = (rawFrontEndOption?.isNotEmpty ?? false)
+      ? rawFrontEndOption?.split(',')
+      : null;
     final List<String> fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -260,8 +260,18 @@ abstract class AotElfBase extends Target {
   const AotElfBase();
 
   @override
+  String get analyticsName => 'android_aot';
+
+  @override
   Future<void> build(Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final AOTSnapshotter snapshotter = AOTSnapshotter(
+      reportTimings: false,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      xcode: globals.xcode,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts,
+    );
     final String outputPath = environment.buildDir.path;
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'aot_elf');
@@ -379,21 +389,10 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
-/// Dart defines are encoded inside [Environment] as a JSON array.
+/// Dart defines are encoded inside [Environment] as a comma-separated list.
 List<String> parseDartDefines(Environment environment) {
-  if (!environment.defines.containsKey(kDartDefines)) {
+  if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
     return const <String>[];
   }
-
-  final String dartDefinesJson = environment.defines[kDartDefines];
-  try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
-    return parsedDefines.cast<String>();
-  } on FormatException catch (_) {
-    throw Exception(
-      'The value of -D$kDartDefines is not formatted correctly.\n'
-      'The value must be a JSON-encoded list of strings but was:\n'
-      '$dartDefinesJson'
-    );
-  }
+  return environment.defines[kDartDefines].split(',');
 }

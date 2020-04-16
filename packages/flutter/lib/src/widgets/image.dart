@@ -221,6 +221,14 @@ typedef ImageLoadingBuilder = Widget Function(
   ImageChunkEvent loadingProgress,
 );
 
+/// Signature used by [Image.errorBuilder] to create a replacement widget to
+/// render instead of the image.
+typedef ImageErrorWidgetBuilder = Widget Function(
+  BuildContext context,
+  Object error,
+  StackTrace stackTrace,
+);
+
 /// A widget that displays an image.
 ///
 /// Several constructors are provided for the various ways that an image can be
@@ -311,6 +319,7 @@ class Image extends StatefulWidget {
     @required this.image,
     this.frameBuilder,
     this.loadingBuilder,
+    this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -323,12 +332,14 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
@@ -370,6 +381,7 @@ class Image extends StatefulWidget {
     double scale = 1.0,
     this.frameBuilder,
     this.loadingBuilder,
+    this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -383,6 +395,7 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
+    this.isAntiAlias = false,
     Map<String, String> headers,
     int cacheWidth,
     int cacheHeight,
@@ -392,6 +405,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -423,6 +437,7 @@ class Image extends StatefulWidget {
     Key key,
     double scale = 1.0,
     this.frameBuilder,
+    this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -435,6 +450,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
@@ -446,6 +462,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
 
@@ -584,6 +601,7 @@ class Image extends StatefulWidget {
     Key key,
     AssetBundle bundle,
     this.frameBuilder,
+    this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     double scale,
@@ -597,6 +615,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     String package,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
@@ -611,6 +630,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -643,6 +663,7 @@ class Image extends StatefulWidget {
     Key key,
     double scale = 1.0,
     this.frameBuilder,
+    this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -655,6 +676,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
     int cacheWidth,
     int cacheHeight,
@@ -665,6 +687,7 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0),
+       assert(isAntiAlias != null),
        super(key: key);
 
   /// The image to display.
@@ -822,6 +845,43 @@ class Image extends StatefulWidget {
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
   final ImageLoadingBuilder loadingBuilder;
 
+  /// A builder function that is called if an error occurs during image loading.
+  ///
+  /// If this builder is not provided, any exceptions will be reported to
+  /// [FlutterError.onError]. If it is provided, the caller should either handle
+  /// the exception by providing a replacement widget, or rethrow the exception.
+  ///
+  /// {@tool dartpad --template=stateless_widget_material}
+  ///
+  /// The following sample uses [errorBuilder] to show a '😢' in place of the
+  /// image that fails to load, and prints the error to the console.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.does.not.exist/image.jpg',
+  ///       errorBuilder: (BuildContext context, Object exception, StackTrace stackTrace) {
+  ///         // Appropriate logging or analytics, e.g.
+  ///         // myAnalytics.recordError(
+  ///         //   'An error occurred loading "https://example.does.not.exist/image.jpg"',
+  ///         //   exception,
+  ///         //   stackTrace,
+  ///         // );
+  ///         return Text('😢');
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ImageErrorWidgetBuilder errorBuilder;
+
   /// If non-null, require the image to have this width.
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
@@ -944,6 +1004,11 @@ class Image extends StatefulWidget {
   /// application.
   final bool excludeFromSemantics;
 
+  /// Whether to paint the image with anti-aliasing.
+  ///
+  /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
+  final bool isAntiAlias;
+
   @override
   _ImageState createState() => _ImageState();
 
@@ -977,6 +1042,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   int _frameNumber;
   bool _wasSynchronouslyLoaded;
   DisposableBuildContext<State<Image>> _scrollAwareContext;
+  Object _lastException;
+  StackTrace _lastStack;
 
   @override
   void initState() {
@@ -1054,9 +1121,19 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   ImageStreamListener _getListener([ImageLoadingBuilder loadingBuilder]) {
     loadingBuilder ??= widget.loadingBuilder;
+    _lastException = null;
+    _lastStack = null;
     return ImageStreamListener(
       _handleImageFrame,
       onChunk: loadingBuilder == null ? null : _handleImageChunk,
+      onError: widget.errorBuilder != null
+        ? (dynamic error, StackTrace stackTrace) {
+            setState(() {
+              _lastException = error;
+              _lastStack = stackTrace;
+            });
+          }
+        : null,
     );
   }
 
@@ -1116,6 +1193,11 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (_lastException  != null) {
+      assert(widget.errorBuilder != null);
+      return widget.errorBuilder(context, _lastException, _lastStack);
+    }
+
     Widget result = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
@@ -1129,6 +1211,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
       invertColors: _invertColors,
+      isAntiAlias: widget.isAntiAlias,
       filterQuality: widget.filterQuality,
     );
 

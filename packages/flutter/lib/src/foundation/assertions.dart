@@ -326,7 +326,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
-class FlutterErrorDetails extends Diagnosticable {
+class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
   ///
@@ -478,7 +478,7 @@ class FlutterErrorDetails extends Diagnosticable {
     return longMessage;
   }
 
-  DiagnosticableMixin _exceptionToDiagnosticable() {
+  Diagnosticable _exceptionToDiagnosticable() {
     if (exception is FlutterError) {
       return exception as FlutterError;
     }
@@ -501,7 +501,7 @@ class FlutterErrorDetails extends Diagnosticable {
     if (kReleaseMode) {
       return DiagnosticsNode.message(formatException());
     }
-    final DiagnosticableMixin diagnosticable = _exceptionToDiagnosticable();
+    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
     if (diagnosticable != null) {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
@@ -515,7 +515,7 @@ class FlutterErrorDetails extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
-    final DiagnosticableMixin diagnosticable = _exceptionToDiagnosticable();
+    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     if (exception is NullThrownError) {
       properties.add(ErrorDescription('The null value was $verb.'));
     } else if (exception is num) {
@@ -890,6 +890,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    if (kReleaseMode) {
+      final Iterable<_ErrorDiagnostic> errors = diagnostics.whereType<_ErrorDiagnostic>();
+      return errors.isNotEmpty ? errors.first.valueToString() : toStringShort();
+    }
     // Avoid wrapping lines.
     final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 4000000000);
     return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
@@ -926,6 +930,7 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
     // is addressed.
     lines = lines.skipWhile((String line) {
       return line.contains('StackTrace.current') ||
+             line.contains('dart-sdk/lib/_internal') ||
              line.contains('dart:sdk_internal');
     });
   }

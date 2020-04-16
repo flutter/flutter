@@ -39,6 +39,8 @@ class KeyEventSimulator {
       case 'fuchsia':
       case 'macos':
       case 'linux':
+      case 'web':
+      case 'windows':
         return true;
     }
     return false;
@@ -61,6 +63,12 @@ class KeyEventSimulator {
       case 'linux':
         map = kLinuxToPhysicalKey;
         break;
+      case 'windows':
+        map = kWindowsToPhysicalKey;
+        break;
+      case 'web':
+      // web doesn't have int type code
+        return null;
     }
     for (final int code in map.keys) {
       if (key.usbHidUsage == map[code].usbHidUsage) {
@@ -85,8 +93,14 @@ class KeyEventSimulator {
       case 'macos':
       // macOS doesn't do key codes, just scan codes.
         return null;
+      case 'web':
+      // web doesn't have int type code
+        return null;
       case 'linux':
         map = kGlfwToLogicalKey;
+        break;
+      case 'windows':
+        map = kWindowsToLogicalKey;
         break;
     }
     for (final int code in map.keys) {
@@ -97,10 +111,18 @@ class KeyEventSimulator {
     }
     return keyCode;
   }
+  static String _getWebKeyCode(LogicalKeyboardKey key) {
+    for (final String code in kWebToLogicalKey.keys) {
+      if (key.keyId == kWebToLogicalKey[code].keyId) {
+        return code;
+      }
+    }
+    return null;
+  }
 
   static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key, String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
-    Map<int, PhysicalKeyboardKey> map;
+    Map<dynamic, PhysicalKeyboardKey> map;
     switch (platform) {
       case 'android':
         map = kAndroidToPhysicalKey;
@@ -113,6 +135,12 @@ class KeyEventSimulator {
         break;
       case 'linux':
         map = kLinuxToPhysicalKey;
+        break;
+      case 'web':
+        map = kWebToPhysicalKey;
+        break;
+      case 'windows':
+        map = kWindowsToPhysicalKey;
         break;
     }
     for (final PhysicalKeyboardKey physicalKey in map.values) {
@@ -138,10 +166,10 @@ class KeyEventSimulator {
     physicalKey ??= _findPhysicalKey(key, platform);
 
     assert(key.debugName != null);
-    final int keyCode = platform == 'macos' ? -1 : _getKeyCode(key, platform);
-    assert(platform == 'macos' || keyCode != null, 'Key $key not found in $platform keyCode map');
-    final int scanCode = _getScanCode(physicalKey, platform);
-    assert(scanCode != null, 'Physical key for $key not found in $platform scanCode map');
+    final int keyCode = platform == 'macos' || platform == 'web' ? -1 : _getKeyCode(key, platform);
+    assert(platform == 'macos' || platform == 'web' || keyCode != null, 'Key $key not found in $platform keyCode map');
+    final int scanCode = platform == 'web' ? -1 : _getScanCode(physicalKey, platform);
+    assert(platform == 'web' || scanCode != null, 'Physical key for $key not found in $platform scanCode map');
 
     final Map<String, dynamic> result = <String, dynamic>{
       'type': isDown ? 'keydown' : 'keyup',
@@ -173,6 +201,16 @@ class KeyEventSimulator {
         result['charactersIgnoringModifiers'] = key.keyLabel;
         result['modifiers'] = _getMacOsModifierFlags(key, isDown);
         break;
+      case 'web':
+        result['code'] = _getWebKeyCode(key);
+        result['key'] = '';
+        result['metaState'] = _getWebModifierFlags(key, isDown);
+        break;
+      case 'windows':
+        result['keyCode'] = keyCode;
+        result['scanCode'] = scanCode;
+        result['characterCodePoint'] = key.keyLabel?.codeUnitAt(0) ?? 0;
+        result['modifiers'] = _getWindowsModifierFlags(key, isDown);
     }
     return result;
   }
@@ -250,6 +288,59 @@ class KeyEventSimulator {
     return result;
   }
 
+  static int _getWindowsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+    int result = 0;
+    final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+    if (isDown) {
+      pressed.add(newKey);
+    } else {
+      pressed.remove(newKey);
+    }
+    if (pressed.contains(LogicalKeyboardKey.shift)) {
+      result |= RawKeyEventDataWindows.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+      result |= RawKeyEventDataWindows.modifierRightShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+      result |= RawKeyEventDataWindows.modifierRightMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.control)) {
+      result |= RawKeyEventDataWindows.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+      result |= RawKeyEventDataWindows.modifierRightControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.alt)) {
+      result |= RawKeyEventDataWindows.modifierAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+      result |= RawKeyEventDataWindows.modifierLeftAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altRight)) {
+      result |= RawKeyEventDataWindows.modifierRightAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+      result |= RawKeyEventDataWindows.modifierCaps;
+    }
+    if (pressed.contains(LogicalKeyboardKey.numLock)) {
+      result |= RawKeyEventDataWindows.modifierNumLock;
+    }
+    if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
+      result |= RawKeyEventDataWindows.modifierScrollLock;
+    }
+    return result;
+  }
+
   static int _getFuchsiaModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
@@ -284,6 +375,50 @@ class KeyEventSimulator {
     }
     if (pressed.contains(LogicalKeyboardKey.capsLock)) {
       result |= RawKeyEventDataFuchsia.modifierCapsLock;
+    }
+    return result;
+  }
+
+  static int _getWebModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+    int result = 0;
+    final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
+    if (isDown) {
+      pressed.add(newKey);
+    } else {
+      pressed.remove(newKey);
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftLeft)) {
+      result |= RawKeyEventDataWeb.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.shiftRight)) {
+      result |= RawKeyEventDataWeb.modifierShift;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaLeft)) {
+      result |= RawKeyEventDataWeb.modifierMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.metaRight)) {
+      result |= RawKeyEventDataWeb.modifierMeta;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlLeft)) {
+      result |= RawKeyEventDataWeb.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.controlRight)) {
+      result |= RawKeyEventDataWeb.modifierControl;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altLeft)) {
+      result |= RawKeyEventDataWeb.modifierAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.altRight)) {
+      result |= RawKeyEventDataWeb.modifierAlt;
+    }
+    if (pressed.contains(LogicalKeyboardKey.capsLock)) {
+      result |= RawKeyEventDataWeb.modifierCapsLock;
+    }
+    if (pressed.contains(LogicalKeyboardKey.numLock)) {
+      result |= RawKeyEventDataWeb.modifierNumLock;
+    }
+    if (pressed.contains(LogicalKeyboardKey.scrollLock)) {
+      result |= RawKeyEventDataWeb.modifierScrollLock;
     }
     return result;
   }

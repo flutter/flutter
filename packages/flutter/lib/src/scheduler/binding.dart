@@ -9,7 +9,6 @@ import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallbac
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -197,13 +196,11 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-mixin SchedulerBinding on BindingBase, ServicesBinding {
+mixin SchedulerBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    readInitialLifecycleStateFromNativeWindow();
 
     if (!kReleaseMode) {
       int frameNumber = 0;
@@ -254,17 +251,22 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
           callback(timings);
         }
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          context: ErrorDescription('while executing callbacks for FrameTiming'),
-          informationCollector: () sync* {
+        InformationCollector collector;
+        assert(() {
+          collector = () sync* {
             yield DiagnosticsProperty<TimingsCallback>(
               'The TimingsCallback that gets executed was',
               callback,
               style: DiagnosticsTreeStyle.errorProperty,
             );
-          },
+          };
+          return true;
+        }());
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          context: ErrorDescription('while executing callbacks for FrameTiming'),
+          informationCollector: collector
         ));
       }
     }
@@ -300,23 +302,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
 
-  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
-  /// window.
-  ///
-  /// Once the [lifecycleState] is populated through any means (including this
-  /// method), this method will do nothing. This is because the
-  /// [initialLifecycleState] may already be stale and it no longer makes sense
-  /// to use the initial state at dart vm startup as the current state anymore.
-  ///
-  /// The latest state should be obtained by subscribing to
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  @protected
-  void readInitialLifecycleStateFromNativeWindow() {
-    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
-      _handleLifecycleMessage(window.initialLifecycleState);
-    }
-  }
-
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
@@ -338,25 +323,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         _setFramesEnabledState(false);
         break;
     }
-  }
-
-  Future<String> _handleLifecycleMessage(String message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
-    return null;
-  }
-
-  static AppLifecycleState _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
   }
 
   /// The strategy to use when deciding whether to run a task or not.
@@ -774,7 +740,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///  * [scheduleWarmUpFrame], which ignores the "Vsync" signal entirely and
   ///    triggers a frame immediately.
   void scheduleFrame() {
-    if (_hasScheduledFrame || !_framesEnabled)
+    if (_hasScheduledFrame || !framesEnabled)
       return;
     assert(() {
       if (debugPrintScheduleFrameStacks)
@@ -808,7 +774,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   void scheduleForcedFrame() {
     // TODO(chunhtai): Removes the if case once the issue is fixed
     // https://github.com/flutter/flutter/issues/45131
-    if (!_framesEnabled)
+    if (!framesEnabled)
       return;
 
     if (_hasScheduledFrame)

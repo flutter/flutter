@@ -28,23 +28,33 @@ class KeyData {
     String androidNameMap,
     String glfwKeyCodeHeader,
     String glfwNameMap,
+    String windowsKeyCodeHeader,
+    String windowsNameMap,
   )   : assert(chromiumHidCodes != null),
         assert(androidKeyboardLayout != null),
         assert(androidKeyCodeHeader != null),
         assert(androidNameMap != null),
         assert(glfwKeyCodeHeader != null),
-        assert(glfwNameMap != null) {
+        assert(glfwNameMap != null),
+        assert(windowsKeyCodeHeader != null),
+        assert(windowsNameMap != null) {
     _nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout);
     _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
     _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
+    _nameToWindowsKeyCode = _readWindowsKeyCodes(windowsKeyCodeHeader);
     // Cast Android dom map
-    final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, List<dynamic>>).cast<String, List<dynamic>>();
+    final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
     _nameToAndroidName = dynamicAndroidNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     // Cast GLFW dom map
-    final Map<String, List<dynamic>> dynamicGlfwNames = (json.decode(glfwNameMap) as Map<String, List<dynamic>>).cast<String, List<dynamic>>();
+    final Map<String, List<dynamic>> dynamicGlfwNames = (json.decode(glfwNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
     _nameToGlfwName = dynamicGlfwNames.map<String, List<String>>((String key, List<dynamic> value) {
+      return MapEntry<String, List<String>>(key, value.cast<String>());
+    });
+    // Cast Windows dom map
+    final Map<String, List<dynamic>> dynamicWindowsNames = (json.decode(windowsNameMap) as Map<String, dynamic>).cast<String, List<dynamic>>();
+    _nameToWindowsName = dynamicWindowsNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     data = _readHidEntries(chromiumHidCodes);
@@ -53,7 +63,7 @@ class KeyData {
   /// Parses the given JSON data and populates the data structure from it.
   KeyData.fromJson(Map<String, dynamic> contentMap) {
     data = <Key>[
-      for (final String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, List<dynamic>>),
+      for (final String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, dynamic>),
     ];
   }
 
@@ -83,6 +93,17 @@ class KeyData {
           if (_nameToGlfwKeyCode[glfwKeyName] != null) {
             entry.glfwKeyCodes ??= <int>[];
             entry.glfwKeyCodes.add(_nameToGlfwKeyCode[glfwKeyName]);
+          }
+        }
+      }
+
+      // Windows key names
+      entry.windowsKeyNames = _nameToWindowsName[entry.constantName]?.cast<String>();
+      if (entry.windowsKeyNames != null && entry.windowsKeyNames.isNotEmpty) {
+        for (final String windowsKeyName in entry.windowsKeyNames) {
+          if (_nameToWindowsKeyCode[windowsKeyName] != null) {
+            entry.windowsKeyCodes ??= <int>[];
+            entry.windowsKeyCodes.add(_nameToWindowsKeyCode[windowsKeyName]);
           }
         }
       }
@@ -132,6 +153,21 @@ class KeyData {
   /// Only populated if data is parsed from the source files, not if parsed from
   /// JSON.
   Map<String, int> _nameToGlfwKeyCode;
+
+  /// The mapping from Widows name (e.g. "RETURN") to the integer key code
+  /// (logical meaning) of the key.
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, int> _nameToWindowsKeyCode;
+
+  /// The mapping from the Flutter name (e.g. "enter") to the Windows name (e.g.
+  /// "RETURN").
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, List<String>> _nameToWindowsName;
+
 
   /// Parses entries from Androids Generic.kl scan code data file.
   ///
@@ -191,9 +227,9 @@ class KeyData {
   ///  #define GLFW_KEY_SPACE              32,
   Map<String, int> _readGlfwKeyCodes(String headerFile) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
-    final RegExp enumEntry = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
+    final RegExp definedCodes = RegExp(r'define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?');
     final Map<String, dynamic> replaced = <String, dynamic>{};
-    for (final Match match in enumEntry.allMatches(headerFile)) {
+    for (final Match match in definedCodes.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
     }
     final Map<String, int> result = <String, int>{};
@@ -208,15 +244,32 @@ class KeyData {
     return result;
   }
 
+  Map<String, int> _readWindowsKeyCodes(String headerFile) {
+    final RegExp definedCodes = RegExp(r'define VK_([A-Z0-9_]+)\s*([A-Z0-9_x]+),?');
+    final Map<String, int> replaced = <String, int>{};
+    for (final Match match in definedCodes.allMatches(headerFile)) {
+      replaced[match.group(1)] = int.tryParse(match.group(2));
+    }
+    // The header doesn't explicitly define the [0-9] and [A-Z], but they mention that the range
+    // is equivalent to the ASCII value.
+    for (int i = 0x30; i <= 0x39; i++) {
+      replaced[String.fromCharCode(i)] = i;
+    }
+    for (int i = 0x41; i <= 0x5A; i++) {
+      replaced[String.fromCharCode(i)] = i;
+    }
+    return replaced;
+  }
+
   /// Parses entries from Chromium's HID code mapping header file.
   ///
   /// Lines in this file look like this (without the ///):
   ///            USB       evdev   XKB     Win     Mac     Code     Enum
-  /// USB_KEYMAP(0x000010, 0x0000, 0x0000, 0x0000, 0xffff, "Hyper", HYPER),
+  /// DOM_CODE(0x000010, 0x0000, 0x0000, 0x0000, 0xffff, "Hyper", HYPER),
   List<Key> _readHidEntries(String input) {
     final List<Key> entries = <Key>[];
     final RegExp usbMapRegExp = RegExp(
-        r'USB_KEYMAP\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
+        r'DOM_CODE\s*\(\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),'
         r'\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*0x([a-fA-F0-9]+),\s*"?([^\s]+?)"?,\s*([^\s]+?)\s*\)',
         multiLine: true);
     final RegExp commentRegExp = RegExp(r'//.*$', multiLine: true);
@@ -270,6 +323,8 @@ class Key {
     this.linuxScanCode,
     this.xKbScanCode,
     this.windowsScanCode,
+    this.windowsKeyNames,
+    this.windowsKeyCodes,
     this.macOsScanCode,
     @required this.chromiumName,
     this.androidKeyNames,
@@ -294,6 +349,8 @@ class Key {
       linuxScanCode: map['scanCodes']['linux'] as int,
       xKbScanCode: map['scanCodes']['xkb'] as int,
       windowsScanCode: map['scanCodes']['windows'] as int,
+      windowsKeyCodes: (map['keyCodes']['windows'] as List<dynamic>)?.cast<int>(),
+      windowsKeyNames: (map['names']['windows'] as List<dynamic>)?.cast<String>(),
       macOsScanCode: map['scanCodes']['macos'] as int,
       glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
       glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
@@ -309,6 +366,13 @@ class Key {
   int xKbScanCode;
   /// The Windows scan code of the key from Chromium's header file.
   int windowsScanCode;
+  /// The list of Windows key codes matching this key, created by looking up the
+  /// Windows name in the Chromium data, and substituting the Windows key code
+  /// value.
+  List<int> windowsKeyCodes;
+  /// The list of names that Windows gives to this key (symbol names minus the
+  /// prefix).
+  List<String> windowsKeyNames;
   /// The macOS scan code of the key from Chromium's header file.
   int macOsScanCode;
   /// The name of the key, mostly derived from the DomKey name in Chromium,
@@ -347,6 +411,7 @@ class Key {
         'english': commentName,
         'chromium': chromiumName,
         'glfw': glfwKeyNames,
+        'windows': windowsKeyNames,
       },
       'scanCodes': <String, dynamic>{
         'android': androidScanCodes,
@@ -359,6 +424,7 @@ class Key {
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
         'glfw': glfwKeyCodes,
+        'windows': windowsKeyCodes,
       },
     };
   }
@@ -420,7 +486,7 @@ class Key {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
         'linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '
         'windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '
-        'chromiumSymbolName: $chromiumName';
+        'windowsScanCode: ${toHex(windowsScanCode)}, chromiumSymbolName: $chromiumName';
   }
 
   /// Returns the static map of printable representations.

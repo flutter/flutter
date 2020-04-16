@@ -726,4 +726,27 @@ void main() {
     // Reset the surface size.
     await binding.setSurfaceSize(originalSize);
   });
+
+  testWidgets('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
+    await binding.setSurfaceSize(const Size(800, 800));
+
+    Widget buildTable(bool checkbox) => MaterialApp(
+      home: PaginatedDataTable(
+        header: const Text('Test table'),
+        source: TestDataSource(onSelectChanged: (bool value) {}),
+        showCheckboxColumn: checkbox,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    );
+
+    await tester.pumpWidget(buildTable(true));
+    expect(find.byType(Checkbox), findsNWidgets(11));
+
+    await tester.pumpWidget(buildTable(false));
+    expect(find.byType(Checkbox), findsNothing);
+  });
 }

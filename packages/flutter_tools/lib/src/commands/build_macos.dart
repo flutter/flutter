@@ -22,6 +22,9 @@ class BuildMacosCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags();
     addDartObfuscationOption();
+    usesExtraFrontendOptions();
+    usesBuildNumberOption();
+    usesBuildNameOption();
   }
 
   @override
@@ -53,6 +56,7 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
+      verboseLogging: globals.logger.isVerbose,
     );
     return FlutterCommandResult.success();
   }

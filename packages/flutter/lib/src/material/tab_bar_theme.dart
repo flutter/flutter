@@ -23,7 +23,8 @@ import 'theme.dart';
 ///  * [TabBar], a widget that displays a horizontal row of tabs.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class TabBarTheme extends Diagnosticable {
+@immutable
+class TabBarTheme with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
     this.indicator,

@@ -8,22 +8,21 @@ import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 
-import '../base/context.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// A reasonable amount of files to open at the same time.
 ///
@@ -113,6 +112,14 @@ abstract class Target {
   /// This information is surfaced in the assemble commands and used as an
   /// argument to build a particular target.
   String get name;
+
+  /// A name that measurements can be categorized under for this [Target].
+  ///
+  /// Unlike [name], this is not expected to be unique, so multiple targets
+  /// that are conceptually the same can share an analytics name.
+  ///
+  /// If not provided, defaults to [name]
+  String get analyticsName => name;
 
   /// The dependencies of this target.
   List<Target> get dependencies;
@@ -282,8 +289,13 @@ class Environment {
     @required Directory outputDir,
     @required Directory cacheDir,
     @required Directory flutterRootDir,
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    Map<String, String> inputs = const <String, String>{},
   }) {
     // Compute a unique hash of this build's particular environment.
     // Sort the keys by key so that the result is stable. We always
@@ -310,6 +322,11 @@ class Environment {
       cacheDir: cacheDir,
       defines: defines,
       flutterRootDir: flutterRootDir,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+      inputs: inputs,
     );
   }
 
@@ -323,6 +340,11 @@ class Environment {
     Directory flutterRootDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    Map<String, String> inputs = const <String, String>{},
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Artifacts artifacts,
+    @required ProcessManager processManager,
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
@@ -331,6 +353,11 @@ class Environment {
       flutterRootDir: flutterRootDir ?? testDirectory,
       buildDir: buildDir,
       defines: defines,
+      inputs: inputs,
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
     );
   }
 
@@ -342,6 +369,11 @@ class Environment {
     @required this.cacheDir,
     @required this.defines,
     @required this.flutterRootDir,
+    @required this.processManager,
+    @required this.logger,
+    @required this.fileSystem,
+    @required this.artifacts,
+    @required this.inputs,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -367,8 +399,11 @@ class Environment {
 
   /// The `BUILD_DIR` environment variable.
   ///
-  /// Defaults to `{PROJECT_ROOT}/build`. The root of the output directory where
-  /// build step intermediates and outputs are written.
+  /// The root of the output directory where build step intermediates and
+  /// outputs are written. Current usages of assemble configure ths to be
+  /// a unique directory under `.dart_tool/flutter_build`, though it can
+  /// be placed anywhere. The uniqueness is only enforced by callers, and
+  /// is currently done by hashing the build configuration.
   final Directory buildDir;
 
   /// The `CACHE_DIR` environment variable.
@@ -393,8 +428,26 @@ class Environment {
   /// which prevents the config from leaking into different builds.
   final Map<String, String> defines;
 
+  /// Additional input files passed to the build targets.
+  ///
+  /// Unlike [defines], values set here do not force a new build configuration.
+  /// This is useful for passing file inputs that may have changing paths
+  /// without running builds from scratch.
+  ///
+  /// It is the responsibility of the [Target] to declare that an input was
+  /// used in an output depfile.
+  final Map<String, String> inputs;
+
   /// The root build directory shared by all builds.
   final Directory rootBuildDir;
+
+  final ProcessManager processManager;
+
+  final Logger logger;
+
+  final Artifacts artifacts;
+
+  final FileSystem fileSystem;
 }
 
 /// The result information from the build system.
@@ -418,7 +471,17 @@ class BuildResult {
 
 /// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
-  const BuildSystem();
+  const BuildSystem({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required Logger logger,
+  }) : _fileSystem = fileSystem,
+       _platform = platform,
+       _logger = logger;
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final Logger _logger;
 
   /// Build `target` and all of its dependencies.
   Future<BuildResult> build(
@@ -432,15 +495,22 @@ class BuildSystem {
     // Load file hash store from previous builds.
     final FileHashStore fileCache = FileHashStore(
       environment: environment,
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: _fileSystem,
+      logger: _logger,
     )..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
     final Node node = target._toNode(environment);
-    final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
+    final _BuildInstance buildInstance = _BuildInstance(
+      environment: environment,
+      fileCache: fileCache,
+      buildSystemConfig: buildSystemConfig,
+      logger: _logger,
+      fileSystem: _fileSystem,
+      platform: _platform,
+    );
     bool passed = true;
     try {
       passed = await buildInstance.invokeTarget(node);
@@ -467,6 +537,12 @@ class BuildSystem {
                      path.contains('.dart_tool');
       });
     }
+    trackSharedBuildDirectory(
+      environment, _fileSystem, buildInstance.outputFiles,
+    );
+    environment.buildDir.childFile('outputs.json')
+      .writeAsStringSync(json.encode(buildInstance.outputFiles.keys.toList()));
+
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
@@ -477,14 +553,78 @@ class BuildSystem {
           ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
+
+  /// Write the identifier of the last build into the output directory and
+  /// remove the previous build's output.
+  ///
+  /// The build identifier is the basename of the build directory where
+  /// outputs and intermediaries are written, under `.dart_tool/flutter_build`.
+  /// This is computed from a hash of the build's configuration.
+  ///
+  /// This identifier is used to perform a targeted cleanup of the last output
+  /// files, if these were not already covered by the built-in cleanup. This
+  /// cleanup is only necessary when multiple different build configurations
+  /// output to the same directory.
+  @visibleForTesting
+  static void trackSharedBuildDirectory(
+    Environment environment,
+    FileSystem fileSystem,
+    Map<String, File> currentOutputs,
+  ) {
+    final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
+    final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
+    if (!lastBuildIdFile.existsSync()) {
+      lastBuildIdFile.writeAsStringSync(currentBuildId);
+      // No config file, either output was cleaned or this is the first build.
+      return;
+    }
+    final String lastBuildId = lastBuildIdFile.readAsStringSync().trim();
+    if (lastBuildId == currentBuildId) {
+      // The last build was the same configuration as the current build
+      return;
+    }
+    // Update the output dir with the latest config.
+    lastBuildIdFile
+      ..createSync()
+      ..writeAsStringSync(currentBuildId);
+    final File outputsFile = environment.buildDir
+      .parent
+      .childDirectory(lastBuildId)
+      .childFile('outputs.json');
+
+    if (!outputsFile.existsSync()) {
+      // There is no output list. This could happen if the user manually
+      // edited .last_config or deleted .dart_tool.
+      return;
+    }
+    final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object>)
+      .cast<String>();
+    for (final String lastOutput in lastOutputs) {
+      if (!currentOutputs.containsKey(lastOutput)) {
+        final File lastOutputFile = fileSystem.file(lastOutput);
+        if (lastOutputFile.existsSync()) {
+          lastOutputFile.deleteSync();
+        }
+      }
+    }
+  }
 }
 
 
 /// An active instance of a build.
 class _BuildInstance {
-  _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? globals.platform?.numberOfProcessors ?? 1);
+  _BuildInstance({
+    this.environment,
+    this.fileCache,
+    this.buildSystemConfig,
+    this.logger,
+    this.fileSystem,
+    Platform platform,
+  })
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
+  final Logger logger;
+  final FileSystem fileSystem;
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
@@ -541,17 +681,17 @@ class _BuildInstance {
       // If we're missing a depfile, wait until after evaluating the target to
       // compute changes.
       final bool canSkip = !node.missingDepfile &&
-        await node.computeChanges(environment, fileCache);
+        await node.computeChanges(environment, fileCache, fileSystem, logger);
 
       if (canSkip) {
         skipped = true;
-        globals.printTrace('Skipping target: ${node.target.name}');
+        logger.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
         return passed;
       }
-      globals.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
-      globals.printTrace('${node.target.name}: Complete');
+      logger.printTrace('${node.target.name}: Complete');
 
       node.inputs
         ..clear()
@@ -577,12 +717,12 @@ class _BuildInstance {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
-        final File previousFile = globals.fs.file(previousOutput);
+        final File previousFile = fileSystem.file(previousOutput);
         if (previousFile.existsSync()) {
           previousFile.deleteSync();
         }
       }
-    } catch (exception, stackTrace) {
+    } on Exception catch (exception, stackTrace) {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
@@ -594,7 +734,12 @@ class _BuildInstance {
       resource.release();
       stopwatch.stop();
       stepTimings[node.target.name] = PerformanceMeasurement(
-          node.target.name, stopwatch.elapsedMilliseconds, skipped, passed);
+        target: node.target.name,
+        elapsedMilliseconds: stopwatch.elapsedMilliseconds,
+        skipped: skipped,
+        passed: passed,
+        analyicsName: node.target.analyticsName,
+      );
     }
     return passed;
   }
@@ -617,11 +762,19 @@ class ExceptionMeasurement {
 
 /// Helper class to collect measurement data.
 class PerformanceMeasurement {
-  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skipped, this.passed);
+  PerformanceMeasurement({
+    @required this.target,
+    @required this.elapsedMilliseconds,
+    @required this.skipped,
+    @required this.passed,
+    @required this.analyicsName,
+  });
+
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
   final bool passed;
+  final String analyicsName;
 }
 
 /// Check if there are any dependency cycles in the target.
@@ -754,6 +907,8 @@ class Node {
   Future<bool> computeChanges(
     Environment environment,
     FileHashStore fileHashStore,
+    FileSystem fileSystem,
+    Logger logger,
   ) async {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
@@ -791,7 +946,7 @@ class Node {
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
-      final File file = globals.fs.file(previousOutput);
+      final File file = fileSystem.file(previousOutput);
       if (!file.existsSync()) {
         invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
@@ -816,7 +971,7 @@ class Node {
     if (missingInputs.isNotEmpty) {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
-      globals.printTrace('invalidated build due to missing files: $missingMessage');
+      logger.printTrace('invalidated build due to missing files: $missingMessage');
       invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 

@@ -15,9 +15,13 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
-  CleanCommand() {
+  CleanCommand({
+    bool verbose = false,
+  }) : _verbose = verbose {
     requiresPubspecYaml();
   }
+
+  final bool _verbose;
 
   @override
   final String name = 'clean';
@@ -67,11 +71,11 @@ class CleanCommand extends FlutterCommand {
     );
     try {
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
-      final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
+      final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
       for (final String scheme in projectInfo.schemes) {
-        await xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
+        await globals.xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme, verbose: _verbose);
       }
-    } catch (error) {
+    } on Exception catch (error) {
       globals.printTrace('Could not clean Xcode workspace: $error');
     } finally {
       xcodeStatus?.stop();

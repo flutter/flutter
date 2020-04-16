@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -828,6 +829,41 @@ void main() {
       // receive it.
       expect(receivedAnEvent, isEmpty);
     });
+    testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
+      FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+          expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+          break;
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+          break;
+      }
+    }, variant: TargetPlatformVariant.all());
+    testWidgets('Mouse events change initial focus highlight mode on mobile.', (WidgetTester tester) async {
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(Offset.zero);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.mobile());
+    testWidgets('Mouse events change initial focus highlight mode on desktop.', (WidgetTester tester) async {
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 0);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(Offset.zero);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.desktop());
+    testWidgets('Keyboard events change initial focus highlight mode.', (WidgetTester tester) async {
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.all());
     testWidgets('Events change focus highlight mode.', (WidgetTester tester) async {
       await setupWidget(tester);
       int callCount = 0;

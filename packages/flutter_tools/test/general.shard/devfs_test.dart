@@ -11,11 +11,12 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -28,7 +29,7 @@ void main() {
   String basePath;
 
   setUpAll(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem.test();
     filePath = fs.path.join('lib', 'foo.txt');
   });
 
@@ -69,7 +70,7 @@ void main() {
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
 
-      final DateTime fiveSecondsAgo = DateTime.now().subtract(const Duration(seconds:5));
+      final DateTime fiveSecondsAgo = file.statSync().modified.subtract(const Duration(seconds: 5));
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
@@ -96,6 +97,7 @@ void main() {
   group('mocked http client', () {
     HttpOverrides savedHttpOverrides;
     HttpClient httpClient;
+    OperatingSystemUtils osUtils;
 
     setUpAll(() {
       tempDir = _newTempDir(fs);
@@ -103,65 +105,79 @@ void main() {
       savedHttpOverrides = HttpOverrides.current;
       httpClient = MockOddlyFailingHttpClient();
       HttpOverrides.global = MyHttpOverrides(httpClient);
+      osUtils = MockOperatingSystemUtils();
     });
 
     tearDownAll(() async {
       HttpOverrides.global = savedHttpOverrides;
     });
 
-    testUsingContext('retry uploads when failure', () async {
-      final File file = fs.file(fs.path.join(basePath, filePath));
-      await file.parent.create(recursive: true);
-      file.writeAsBytesSync(<int>[1, 2, 3]);
-      // simulate package
-      await _createPackage(fs, 'somepkg', 'somefile.txt');
+    final List<dynamic> exceptions = <dynamic>[
+      Exception('Connection resert by peer'),
+      const OSError('Connection reset by peer'),
+    ];
 
-      final RealMockVMService vmService = RealMockVMService();
-      final RealMockVM vm = RealMockVM();
-      final Map<String, dynamic> response =  <String, dynamic>{ 'uri': 'file://abc' };
-      when(vm.createDevFS(any)).thenAnswer((Invocation invocation) {
-        return Future<Map<String, dynamic>>.value(response);
+    for (final dynamic exception in exceptions) {
+      testUsingContext('retry uploads when failure: $exception', () async {
+        final File file = fs.file(fs.path.join(basePath, filePath));
+        await file.parent.create(recursive: true);
+        file.writeAsBytesSync(<int>[1, 2, 3]);
+        // simulate package
+        await _createPackage(fs, 'somepkg', 'somefile.txt');
+
+        final RealMockVMService vmService = RealMockVMService();
+        final RealMockVM vm = RealMockVM();
+        final Map<String, dynamic> response =  <String, dynamic>{ 'uri': 'file://abc' };
+        when(vm.createDevFS(any)).thenAnswer((Invocation invocation) {
+          return Future<Map<String, dynamic>>.value(response);
+        });
+        when(vmService.vm).thenReturn(vm);
+
+        reset(httpClient);
+
+        final MockHttpClientRequest httpRequest = MockHttpClientRequest();
+        when(httpRequest.headers).thenReturn(MockHttpHeaders());
+        when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
+          return Future<HttpClientRequest>.value(httpRequest);
+        });
+        final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
+        int nRequest = 0;
+        const int kFailedAttempts = 5;
+        when(httpRequest.close()).thenAnswer((Invocation invocation) {
+          if (nRequest++ < kFailedAttempts) {
+            throw exception;
+          }
+          return Future<HttpClientResponse>.value(httpClientResponse);
+        });
+
+        final DevFS devFS = DevFS(
+          vmService,
+          'test',
+          tempDir,
+          osUtils: osUtils,
+        );
+        await devFS.create();
+
+        final MockResidentCompiler residentCompiler = MockResidentCompiler();
+        final UpdateFSReport report = await devFS.update(
+          mainPath: 'lib/foo.txt',
+          generator: residentCompiler,
+          pathToReload: 'lib/foo.txt.dill',
+          trackWidgetCreation: false,
+          invalidatedFiles: <Uri>[],
+        );
+
+        expect(report.syncedBytes, 22);
+        expect(report.success, isTrue);
+        verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
+        verify(httpRequest.close()).called(kFailedAttempts + 1);
+        verify(osUtils.gzipLevel1Stream(any)).called(kFailedAttempts + 1);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        HttpClientFactory: () => () => httpClient,
+        ProcessManager: () => FakeProcessManager.any(),
       });
-      when(vmService.vm).thenReturn(vm);
-
-      reset(httpClient);
-
-      final MockHttpClientRequest httpRequest = MockHttpClientRequest();
-      when(httpRequest.headers).thenReturn(MockHttpHeaders());
-      when(httpClient.putUrl(any)).thenAnswer((Invocation invocation) {
-        return Future<HttpClientRequest>.value(httpRequest);
-      });
-      final MockHttpClientResponse httpClientResponse = MockHttpClientResponse();
-      int nRequest = 0;
-      const int kFailedAttempts = 5;
-      when(httpRequest.close()).thenAnswer((Invocation invocation) {
-        if (nRequest++ < kFailedAttempts) {
-          throw 'Connection resert by peer';
-        }
-        return Future<HttpClientResponse>.value(httpClientResponse);
-      });
-
-      final DevFS devFS = DevFS(vmService, 'test', tempDir);
-      await devFS.create();
-
-      final MockResidentCompiler residentCompiler = MockResidentCompiler();
-      final UpdateFSReport report = await devFS.update(
-        mainPath: 'lib/foo.txt',
-        generator: residentCompiler,
-        pathToReload: 'lib/foo.txt.dill',
-        trackWidgetCreation: false,
-        invalidatedFiles: <Uri>[],
-      );
-
-      expect(report.syncedBytes, 22);
-      expect(report.success, isTrue);
-      verify(httpClient.putUrl(any)).called(kFailedAttempts + 1);
-      verify(httpRequest.close()).called(kFailedAttempts + 1);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      HttpClientFactory: () => () => httpClient,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
+    }
   });
 
   group('devfs remote', () {
@@ -178,7 +194,12 @@ void main() {
 
     setUp(() {
       vmService.resetState();
-      devFS = DevFS(vmService, 'test', tempDir);
+      devFS = DevFS(
+        vmService,
+        'test',
+        tempDir,
+        osUtils: FakeOperatingSystemUtils(),
+      );
     });
 
     tearDownAll(() async {
@@ -382,7 +403,7 @@ class MockVM implements VM {
   Future<Map<String, dynamic>> createDevFS(String fsName) async {
     _service.messages.add('create $fsName');
     if (_devFSExists) {
-      throw rpc.RpcException(kFileSystemAlreadyExists, 'File system already exists');
+      throw vm_service.RPCError('File system already exists', kFileSystemAlreadyExists, '');
     }
     _devFSExists = true;
     return <String, dynamic>{'uri': '$_baseUri'};
@@ -470,3 +491,4 @@ class MockOddlyFailingHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

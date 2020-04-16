@@ -46,7 +46,8 @@ enum SnackBarBehavior {
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class SnackBarThemeData extends Diagnosticable {
+@immutable
+class SnackBarThemeData with Diagnosticable {
 
   /// Creates a theme that can be used for [ThemeData.snackBarTheme].
   ///

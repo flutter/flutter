@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -55,7 +56,11 @@ void main() {
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
-        }
+        },
+        artifacts: MockArtifacts(),
+        processManager: FakeProcessManager.any(),
+        logger: globals.logger,
+        fileSystem: globals.fs,
       );
       depfileService = DepfileService(
       fileSystem: globals.fs,
@@ -355,12 +360,14 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
+        '-DFOO=bar',
+        '-DBAZ=qux',
          '--packages=${globals.fs.path.join('foo', '.packages')}',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -386,12 +393,14 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
+        '-DFOO=bar',
+        '-DBAZ=qux',
          '--packages=${globals.fs.path.join('foo', '.packages')}',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -416,27 +425,6 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
-  test('Dart2JSTarget throws developer-friendly exception on misformatted DartDefines', () => testbed.run(() async {
-    environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = '[misformatted json';
-    try {
-      await const Dart2JSTarget().build(environment);
-      fail('Call to build() must not have succeeded.');
-    } on Exception catch(exception) {
-      expect(
-        '$exception',
-        'Exception: The value of -D$kDartDefines is not formatted correctly.\n'
-        'The value must be a JSON-encoded list of strings but was:\n'
-        '[misformatted json',
-      );
-    }
-
-    // Should not attempt to run any processes.
-    verifyNever(globals.processManager.run(any));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
-  }));
-
   test('Generated service worker correctly inlines file hashes', () {
     final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
 
@@ -452,11 +440,27 @@ void main() {
     expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash.
     expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
-      contains('"/a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
+      contains('"a/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
     // Depends on resource file.
     expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a/a.txt'));
   }));
+
+  test('WebServiceWorker contains baseUrl cache', () => testbed.run(() async {
+    environment.outputDir
+      .childFile('index.html')
+      .createSync(recursive: true);
+    await const WebServiceWorker().build(environment);
+
+    expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
+    // Contains file hash for both `/` and index.html.
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"/": "d41d8cd98f00b204e9800998ecf8427e"'));
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"index.html": "d41d8cd98f00b204e9800998ecf8427e"'));
+    expect(environment.buildDir.childFile('service_worker.d'), exists);
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockArtifacts extends Mock implements Artifacts {}

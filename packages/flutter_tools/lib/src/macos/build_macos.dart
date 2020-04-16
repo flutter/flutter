@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -10,7 +12,6 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcodebuild.
@@ -19,6 +20,7 @@ Future<void> buildMacOS({
   FlutterProject flutterProject,
   BuildInfo buildInfo,
   String targetOverride,
+  @required bool verboseLogging,
 }) async {
   if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
     throwToolExit('No macOS desktop project configured. '
@@ -53,7 +55,7 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(
+  final XcodeProjectInfo projectInfo = await globals.xcodeProjectInterpreter.getInfo(
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
@@ -84,6 +86,8 @@ Future<void> buildMacOS({
       '-derivedDataPath', flutterBuildDir.absolute.path,
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      if (verboseLogging)
+        'VERBOSE_SCRIPT_LOGGING=YES',
       'COMPILER_INDEX_STORE_ENABLE=NO',
       ...environmentVariablesAsXcodeBuildSettings(globals.platform)
     ], trace: true);
@@ -93,5 +97,5 @@ Future<void> buildMacOS({
   if (result != 0) {
     throwToolExit('Build process failed');
   }
-  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+  globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

@@ -77,7 +77,9 @@ class FadeInImage extends StatelessWidget {
   const FadeInImage({
     Key key,
     @required this.placeholder,
+    this.placeholderErrorBuilder,
     @required this.image,
+    this.imageErrorBuilder,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -132,7 +134,9 @@ class FadeInImage extends StatelessWidget {
   FadeInImage.memoryNetwork({
     Key key,
     @required Uint8List placeholder,
+    this.placeholderErrorBuilder,
     @required String image,
+    this.imageErrorBuilder,
     double placeholderScale = 1.0,
     double imageScale = 1.0,
     this.excludeFromSemantics = false,
@@ -200,7 +204,9 @@ class FadeInImage extends StatelessWidget {
   FadeInImage.assetNetwork({
     Key key,
     @required String placeholder,
+    this.placeholderErrorBuilder,
     @required String image,
+    this.imageErrorBuilder,
     AssetBundle bundle,
     double placeholderScale,
     double imageScale = 1.0,
@@ -239,8 +245,23 @@ class FadeInImage extends StatelessWidget {
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;
 
+  /// A builder function that is called if an error occurs during placeholder
+  /// image loading.
+  ///
+  /// If this builder is not provided, any exceptions will be reported to
+  /// [FlutterError.onError]. If it is provided, the caller should either handle
+  /// the exception by providing a replacement widget, or rethrow the exception.
+  final ImageErrorWidgetBuilder placeholderErrorBuilder;
+
   /// The target image that is displayed once it has loaded.
   final ImageProvider image;
+
+  /// A builder function that is called if an error occurs during image loading.
+  ///
+  /// If this builder is not provided, any exceptions will be reported to
+  /// [FlutterError.onError]. If it is provided, the caller should either handle
+  /// the exception by providing a replacement widget, or rethrow the exception.
+  final ImageErrorWidgetBuilder imageErrorBuilder;
 
   /// The duration of the fade-out animation for the [placeholder].
   final Duration fadeOutDuration;
@@ -337,11 +358,13 @@ class FadeInImage extends StatelessWidget {
 
   Image _image({
     @required ImageProvider image,
+    ImageErrorWidgetBuilder errorBuilder,
     ImageFrameBuilder frameBuilder,
   }) {
     assert(image != null);
     return Image(
       image: image,
+      errorBuilder: errorBuilder,
       frameBuilder: frameBuilder,
       width: width,
       height: height,
@@ -358,12 +381,13 @@ class FadeInImage extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget result = _image(
       image: image,
+      errorBuilder: imageErrorBuilder,
       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded)
           return child;
         return _AnimatedFadeOutFadeIn(
           target: child,
-          placeholder: _image(image: placeholder),
+          placeholder: _image(image: placeholder, errorBuilder: placeholderErrorBuilder),
           isTargetLoaded: frame != null,
           fadeInDuration: fadeInDuration,
           fadeOutDuration: fadeOutDuration,

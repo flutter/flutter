@@ -119,9 +119,9 @@ void main() {
     await tester.pumpWidget(
       Flow(
         delegate: DuplicatePainterOpacityFlowDelegate(1.0),
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
+          SizedBox(width: 100.0, height: 100.0),
         ],
       ),
     );
@@ -142,8 +142,8 @@ void main() {
     await tester.pumpWidget(
       Flow(
         delegate: OpacityFlowDelegate(opacity),
-        children: <Widget>[
-          Container(width: 100.0, height: 100.0),
+        children: const <Widget>[
+          SizedBox(width: 100.0, height: 100.0),
         ],
       ),
     );
