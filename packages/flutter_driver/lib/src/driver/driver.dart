@@ -127,6 +127,10 @@ abstract class FlutterDriver {
   /// `isolateNumber` is set, as this is already enough information to connect
   /// to an isolate.
   ///
+  /// `headers` optionally specifies HTTP headers to be included in the
+  /// [WebSocket] connection. This is only used for [VMServiceFlutterDriver]
+  /// connections.
+  ///
   /// `browser` specifies which FlutterDriver implementation to use. If not
   /// speicifed or set to false, [VMServiceFlutterDriver] implementation
   /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
@@ -141,6 +145,7 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     Duration timeout,
+    Map<String, dynamic> headers,
   }) async {
     if (Platform.environment['FLUTTER_WEB_TEST'] != null) {
       return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
@@ -151,6 +156,7 @@ abstract class FlutterDriver {
               logCommunicationToFile: logCommunicationToFile,
               isolateNumber: isolateNumber,
               fuchsiaModuleTarget: fuchsiaModuleTarget,
+              headers: headers,
     );
   }
 
