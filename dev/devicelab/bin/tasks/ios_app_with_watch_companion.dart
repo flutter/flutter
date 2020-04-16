@@ -112,11 +112,16 @@ Future<void> main() async {
           watchSimRuntime = watchOSRuntimeMatch.group(1).trim();
         }
       }
-      if (iOSSimRuntime == null) {
-        return TaskResult.failure('No iOS Simulator runtime found, available runtimes:\n$availableRuntimes');
-      }
-      if (watchSimRuntime == null) {
-        return TaskResult.failure('No watchOS Simulator runtime found, available runtimes:\n$availableRuntimes');
+      if (iOSSimRuntime == null || watchSimRuntime == null) {
+        String message;
+        if (iOSSimRuntime != null) {
+          message = 'Found "$iOSSimRuntime", but no watchOS simulator runtime found.';
+        } else if (watchSimRuntime != null) {
+          message = 'Found "$watchSimRuntime", but no iOS simulator runtime found.';
+        } else {
+          message = 'watchOS and iOS simulator runtimes not found.';
+        }
+        return TaskResult.failure('$message Available runtimes:\n$availableRuntimes');
       }
 
       // Create iOS simulator.
