@@ -51,9 +51,6 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
     if (!context->has_platform_view && context->raster_cache &&
         SkRect::Intersects(context->cull_rect, paint_bounds())) {
       SkMatrix ctm = child_matrix;
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      ctm = RasterCache::GetIntegralTransCTM(ctm);
-#endif
       context->raster_cache->Prepare(context, container, ctm);
     }
   }
@@ -69,11 +66,6 @@ void OpacityLayer::Paint(PaintContext& context) const {
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
 
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  context.internal_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
-      context.leaf_nodes_canvas->getTotalMatrix()));
-#endif
-
   if (context.raster_cache) {
     ContainerLayer* container = GetChildContainer();
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
@@ -87,8 +79,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
   // Skia may clip the content with saveLayerBounds (although it's not a
   // guaranteed clip). So we have to provide a big enough saveLayerBounds. To do
   // so, we first remove the offset from paint bounds since it's already in the
-  // matrix. Then we round out the bounds because of our
-  // RasterCache::GetIntegralTransCTM optimization.
+  // matrix. Then we round out the bounds.
   //
   // Note that the following lines are only accessible when the raster cache is
   // not available (e.g., when we're using the software backend in golden
