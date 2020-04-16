@@ -31,9 +31,6 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
   if (!context->has_platform_view && context->raster_cache &&
       SkRect::Intersects(context->cull_rect, paint_bounds())) {
     SkMatrix ctm = matrix;
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-    ctm = RasterCache::GetIntegralTransCTM(ctm);
-#endif
     context->raster_cache->Prepare(context, this, ctm);
   }
 }
@@ -41,12 +38,6 @@ void ImageFilterLayer::Preroll(PrerollContext* context,
 void ImageFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ImageFilterLayer::Paint");
   FML_DCHECK(needs_painting());
-
-#ifndef SUPPORT_FRACTIONAL_TRANSLATION
-  SkAutoCanvasRestore save(context.leaf_nodes_canvas, true);
-  context.leaf_nodes_canvas->setMatrix(RasterCache::GetIntegralTransCTM(
-      context.leaf_nodes_canvas->getTotalMatrix()));
-#endif
 
   if (context.raster_cache) {
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
