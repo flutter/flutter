@@ -135,7 +135,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   final PreparedMouseCursor cursor;
 
   /// A [ChangeNotifier] that should notify listeners when [cursor] is
-  /// changed while keeping non-null
+  /// changed from a non-null value to another non-null value.
   /// 
   /// The [cursorNotifier] is listened to by [MouseTracker] to keep hovering
   /// mouse pointer updated. This is needed if the change to [cursor] is not
@@ -442,9 +442,6 @@ class MouseTracker extends ChangeNotifier {
   /// search for [MouseTrackerAnnotation]s at a given position.
   /// Usually it is [Layer.findAllAnnotations] of the root layer.
   ///
-  /// The third parameter is a [MouseCursorManager] that handles the mouse
-  /// cursor system.
-  ///
   /// All of the parameters must be non-null.
   MouseTracker(this._router, this.annotationFinder)
       : assert(_router != null),
@@ -658,7 +655,7 @@ class MouseTracker extends ChangeNotifier {
 
   /// MOUSE EVENTS
 
-  // Handle device update and dispatch mouse event callbacks.
+  // Handles device update and dispatches mouse event callbacks.
   static void _handleDeviceUpdateMouseEvents(_MouseTrackerUpdateDetails details) {
     final PointerEvent previousEvent = details.previousEvent;
     final PointerEvent triggeringEvent = details.triggeringEvent;
@@ -734,6 +731,7 @@ class MouseTracker extends ChangeNotifier {
     for (final MouseTrackerAnnotation annotation in annotations) {
       if (annotation.cursor != null) {
         result = annotation;
+        break;
       }
     }
     return result ?? const _FallbackAnnotation();
@@ -758,10 +756,7 @@ class MouseTracker extends ChangeNotifier {
     throw UnimplementedError('Unsupported mouse cursor type: ${cursor.runtimeType}');
   }
 
-  // Called when a mouse device has a change in status that might affect
-  // its cursor.
-  //
-  // This method is called by [MouseTracker].
+  // Handles device update and changes mouse cursors.
   void _handleDeviceUpdateMouseCursor(_MouseTrackerUpdateDetails details) {
     final int device = details.device;
 

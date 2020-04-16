@@ -14,9 +14,10 @@ import 'mouse_tracking.dart';
 /// I-beam.
 ///
 /// Internally, when the mouse pointer moves, it finds the front-most region
-/// associated with a mouse cursor, and, if the cursor for this pointer changes,
-/// activates the cursor based on its type. If no cursors are associated with
-/// a position, it defaults to [SystemMouseCursors.basic].
+/// associated with a mouse cursor. The cursor of the pointer changes if the
+/// MouseRegion it is currently hovering over has a different mouse cursor
+/// specified than the one that's currently active. If no cursors are associated
+/// with a position, it defaults to [SystemMouseCursors.basic].
 ///
 /// A [MouseCursor] object may contain the full resources that are ready to be
 /// consumed by the system (in which case it should subclass
@@ -104,7 +105,7 @@ abstract class MouseCursor with Diagnosticable {
   /// a [SystemMouseCursor] class with description "drag" will be printed as
   /// "SystemMouseCursor(drag)".
   ///
-  /// The [debugDescription] should not be null, but can be an empty string,
+  /// The [debugDescription] must not be null, but can be an empty string,
   /// which means the class is not configurable.
   String get debugDescription;
 
@@ -146,7 +147,7 @@ class NoopMouseCursor extends PreparedMouseCursor {
 
 /// A mouse cursor that comes with the system that the program is running on.
 ///
-/// System cursors are the most commonly used cursors, since they are avaiable
+/// System cursors are the most commonly used cursors, since they are available
 /// without external resources, and matches the experience of native apps.
 /// Examples of system cursors are a pointing arrow, a pointing hand, a double
 /// arrow for resizing, or a text I-beam, etc.
