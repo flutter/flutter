@@ -28,8 +28,6 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-typedef PreparedMouseCursorListener = void Function(PreparedMouseCursor status);
-
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
 /// 
@@ -144,7 +142,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * Otherwise, fire all listeners.
   ///
   /// Listeners can be removed with [removeStatusListener].
-  void addCursorListener(PreparedMouseCursorListener listener) { }
+  void addCursorListener(VoidCallback listener) { }
 
   /// Stops calling the listener every time the cursor changes.
   /// 
@@ -155,7 +153,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// [addCursorListener].
   ///
   /// Listeners can be added with [addCursorListener].
-  void removeCursorListener(PreparedMouseCursorListener listener) { }
+  void removeCursorListener(VoidCallback listener) { }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -212,23 +210,23 @@ mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnot
   }
 
   @override
-  void addCursorListener(PreparedMouseCursorListener listener) {
+  void addCursorListener(VoidCallback listener) {
     _cursorListeners.add(listener);
   }
 
   @override
-  void removeCursorListener(PreparedMouseCursorListener listener) {
+  void removeCursorListener(VoidCallback listener) {
     _cursorListeners.remove(listener);
   }
 
-  final ObserverList<PreparedMouseCursorListener> _cursorListeners = ObserverList<PreparedMouseCursorListener>();
+  final ObserverList<VoidCallback> _cursorListeners = ObserverList<VoidCallback>();
 
   void _notifyCursorListeners() {
-    final List<PreparedMouseCursorListener> localListeners = List<PreparedMouseCursorListener>.from(_cursorListeners);
-    for (final PreparedMouseCursorListener listener in localListeners) {
+    final List<VoidCallback> localListeners = List<VoidCallback>.from(_cursorListeners);
+    for (final VoidCallback listener in localListeners) {
       try {
         if (_cursorListeners.contains(listener))
-          listener(_cursor);
+          listener();
       } catch (exception, stack) {
         InformationCollector collector;
         assert(() {
@@ -306,7 +304,7 @@ class _MouseState {
 
 class _MouseCursorState {
   MouseTrackerAnnotation currentAnnotation;
-  PreparedMouseCursorListener onCursorChange;
+  VoidCallback onCursorChange;
 }
 
 class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation {
@@ -321,9 +319,9 @@ class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation 
   @override
   PreparedMouseCursor get cursor => SystemMouseCursors.basic;
   @override
-  void addCursorListener(PreparedMouseCursorListener listener) { }
+  void addCursorListener(VoidCallback listener) { }
   @override
-  void removeCursorListener(PreparedMouseCursorListener listener) { }
+  void removeCursorListener(VoidCallback listener) { }
 }
 
 /// Used by [MouseTracker] to provide the details of an update of a mouse
@@ -777,9 +775,9 @@ class MouseTracker extends ChangeNotifier {
     final bool hadState = _mouseCursorStates.containsKey(device);
     _mouseCursorStates.putIfAbsent(device, () {
       final _MouseCursorState state = _MouseCursorState();
-      state.onCursorChange = (PreparedMouseCursor cursor) {
-        assert(cursor != null);
-        _handleActivateCursor(device, cursor);
+      state.onCursorChange = () {
+        assert(state.currentAnnotation?.cursor != null);
+        _handleActivateCursor(device, state.currentAnnotation.cursor);
       };
       return state;
     });
@@ -798,7 +796,7 @@ class MouseTracker extends ChangeNotifier {
     final PreparedMouseCursor lastCursor = lastAnnotation?.cursor;
     final PreparedMouseCursor nextCursor = nextAnnotation.cursor;
     if (nextCursor != lastCursor) {
-      state.onCursorChange(nextCursor);
+      state.onCursorChange();
     }
   }
 
