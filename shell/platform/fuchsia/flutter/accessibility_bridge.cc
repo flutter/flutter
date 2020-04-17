@@ -58,7 +58,7 @@ fuchsia::ui::gfx::mat4 AccessibilityBridge::GetNodeTransform(
     const flutter::SemanticsNode& node) const {
   fuchsia::ui::gfx::mat4 value;
   float* m = value.matrix.data();
-  node.transform.asColMajorf(m);
+  node.transform.getColMajor(m);
   return value;
 }
 
@@ -266,12 +266,12 @@ void AccessibilityBridge::AddSemanticsNodeUpdate(
 
 void AccessibilityBridge::UpdateScreenRects() {
   std::unordered_set<int32_t> visited_nodes;
-  UpdateScreenRects(kRootNodeId, SkMatrix44::I(), &visited_nodes);
+  UpdateScreenRects(kRootNodeId, SkM44{}, &visited_nodes);
 }
 
 void AccessibilityBridge::UpdateScreenRects(
     int32_t node_id,
-    SkMatrix44 parent_transform,
+    SkM44 parent_transform,
     std::unordered_set<int32_t>* visited_nodes) {
   auto it = nodes_.find(node_id);
   if (it == nodes_.end()) {
@@ -282,22 +282,12 @@ void AccessibilityBridge::UpdateScreenRects(
   const auto& current_transform = parent_transform * node.transform;
 
   const auto& rect = node.rect;
-  SkScalar quad[] = {
-      rect.left(),  rect.top(),     //
-      rect.right(), rect.top(),     //
-      rect.right(), rect.bottom(),  //
-      rect.left(),  rect.bottom(),  //
+  SkV4 dst[2] = {
+      current_transform.map(rect.left(), rect.top(), 0, 1),
+      current_transform.map(rect.right(), rect.bottom(), 0, 1),
   };
-  SkScalar dst[4 * 4];
-  current_transform.map2(quad, 4, dst);
-  node.screen_rect.setLTRB(dst[0], dst[1], dst[8], dst[9]);
+  node.screen_rect.setLTRB(dst[0].x, dst[0].y, dst[1].x, dst[1].y);
   node.screen_rect.sort();
-  std::vector<SkVector4> points = {
-      current_transform * SkVector4(rect.left(), rect.top(), 0, 1),
-      current_transform * SkVector4(rect.right(), rect.top(), 0, 1),
-      current_transform * SkVector4(rect.right(), rect.bottom(), 0, 1),
-      current_transform * SkVector4(rect.left(), rect.bottom(), 0, 1),
-  };
 
   visited_nodes->emplace(node_id);
 

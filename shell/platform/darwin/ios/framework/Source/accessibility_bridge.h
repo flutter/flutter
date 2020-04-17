@@ -22,7 +22,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge_ios.h"
-#include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
