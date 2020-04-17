@@ -710,7 +710,7 @@ public class FlutterView extends FrameLayout {
     textInputPlugin =
         new TextInputPlugin(
             this,
-            this.flutterEngine.getDartExecutor(),
+            this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getPlatformViewsController());
     androidKeyProcessor =
         new AndroidKeyProcessor(this.flutterEngine.getKeyEventChannel(), textInputPlugin);
