@@ -815,6 +815,11 @@ class TextEditingChannel {
         implementation.hide();
         break;
 
+      case 'TextInput.requestAutofill':
+        // No-op:  This message is sent by the framework to requests the platform autofill UI to appear.
+        // Since autofill UI is a part of the browser, web engine does not need to utilize this method.
+        break;
+
       default:
         throw StateError('Unsupported method call on the flutter/textinput channel: ${call.method}');
     }
