@@ -138,30 +138,6 @@ task:
         - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         - $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dartanalyzer --fatal-warnings --fatal-hints dev/ lib/ test/ tool/
 
-    - name: web_engine_integration_test_linux
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --unoptimized --full-dart-sdk
-        ninja -C out/host_debug_unopt
-      fetch_framework_script: |
-        cd $ENGINE_PATH/src/flutter/tools
-        ./clone_flutter.sh
-        cd $FRAMEWORK_PATH/flutter
-        bin/flutter update-packages --local-engine=host_debug_unopt
-      script:
-        - git clone https://github.com/flutter/web_installers.git
-        - cd web_installers/packages/web_drivers/
-        - $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/pub get
-        - $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/dart lib/web_driver_installer.dart chromedriver --install-only
-        - ./chromedriver/chromedriver --port=4444 &
-        - cd $ENGINE_PATH/src/flutter/e2etests/web/regular_integration_tests
-        - $FRAMEWORK_PATH/flutter/bin/flutter config --local-engine=host_debug_unopt --no-analytics --enable-web
-        - $FRAMEWORK_PATH/flutter/bin/flutter pub get --local-engine=host_debug_unopt
-        - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/text_editing_e2e.dart -d web-server --release --browser-name=chrome --local-engine=host_debug_unopt
-        - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/platform_messages_e2e.dart -d web-server --release --browser-name=chrome --local-engine=host_debug_unopt
-        - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/treeshaking_e2e.dart -d web-server --profile --browser-name=chrome --local-engine=host_debug_unopt
-        - $FRAMEWORK_PATH/flutter/bin/flutter drive -v --target=test_driver/image_loading_e2e.dart -d web-server --release --browser-name=chrome --local-engine=host_debug_unopt
-
     - name: build_and_test_web_linux_firefox
       compile_host_script: |
         cd $ENGINE_PATH/src
