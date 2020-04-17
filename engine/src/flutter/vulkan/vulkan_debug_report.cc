@@ -182,8 +182,7 @@ VulkanDebugReport::VulkanDebugReport(
     const VulkanProcTable& p_vk,
     const VulkanHandle<VkInstance>& application)
     : vk(p_vk), application_(application), valid_(false) {
-  if (!IsDebuggingEnabled() || !vk.CreateDebugReportCallbackEXT ||
-      !vk.DestroyDebugReportCallbackEXT) {
+  if (!vk.CreateDebugReportCallbackEXT || !vk.DestroyDebugReportCallbackEXT) {
     return;
   }
 

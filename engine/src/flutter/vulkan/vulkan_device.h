@@ -19,7 +19,8 @@ class VulkanSurface;
 class VulkanDevice {
  public:
   VulkanDevice(VulkanProcTable& vk,
-               VulkanHandle<VkPhysicalDevice> physical_device);
+               VulkanHandle<VkPhysicalDevice> physical_device,
+               bool enable_validation_layers);
 
   ~VulkanDevice();
 
@@ -71,6 +72,7 @@ class VulkanDevice {
   VulkanHandle<VkCommandPool> command_pool_;
   uint32_t graphics_queue_index_;
   bool valid_;
+  bool enable_validation_layers_;
 
   std::vector<VkQueueFamilyProperties> GetQueueFamilyProperties() const;
 

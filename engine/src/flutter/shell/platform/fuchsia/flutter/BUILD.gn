@@ -34,10 +34,6 @@ flutter_runner("jit") {
     extra_defines += [ "FLUTTER_PROFILE" ]
   }
 
-  if (enable_vulkan_validation_layers) {
-    extra_defines += [ "VULKAN_VALIDATION_LAYERS_ENABLED" ]
-  }
-
   extra_deps = [
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
@@ -49,10 +45,6 @@ flutter_runner("jit_product") {
   product = true
 
   extra_defines = [ "DART_PRODUCT" ]
-
-  if (enable_vulkan_validation_layers) {
-    extra_defines += [ "VULKAN_VALIDATION_LAYERS_ENABLED" ]
-  }
 
   extra_deps = [
     "//third_party/dart/runtime:libdart_jit_product",
@@ -69,10 +61,6 @@ flutter_runner("aot") {
     extra_defines += [ "FLUTTER_PROFILE" ]
   }
 
-  if (enable_vulkan_validation_layers) {
-    extra_defines += [ "VULKAN_VALIDATION_LAYERS_ENABLED" ]
-  }
-
   extra_deps = [
     "//third_party/dart/runtime:libdart_precompiled_runtime",
     "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
@@ -84,10 +72,6 @@ flutter_runner("aot_product") {
   product = true
 
   extra_defines = [ "DART_PRODUCT" ]
-
-  if (enable_vulkan_validation_layers) {
-    extra_defines += [ "VULKAN_VALIDATION_LAYERS_ENABLED" ]
-  }
 
   extra_deps = [
     "//third_party/dart/runtime:libdart_precompiled_runtime_product",

@@ -14,15 +14,16 @@
 
 namespace vulkan {
 
-bool IsDebuggingEnabled();
 bool ValidationLayerInfoMessagesEnabled();
 bool ValidationErrorsFatal();
 
-std::vector<std::string> InstanceLayersToEnable(const VulkanProcTable& vk);
+std::vector<std::string> InstanceLayersToEnable(const VulkanProcTable& vk,
+                                                bool enable_validation_layers);
 
 std::vector<std::string> DeviceLayersToEnable(
     const VulkanProcTable& vk,
-    const VulkanHandle<VkPhysicalDevice>& physical_device);
+    const VulkanHandle<VkPhysicalDevice>& physical_device,
+    bool enable_validation_layers);
 
 }  // namespace vulkan
 
