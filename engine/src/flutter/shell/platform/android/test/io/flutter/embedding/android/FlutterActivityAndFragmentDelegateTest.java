@@ -30,6 +30,7 @@ import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
+import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import org.junit.Before;
 import org.junit.Test;
@@ -613,6 +614,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getLifecycleChannel()).thenReturn(mock(LifecycleChannel.class));
     when(engine.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
     when(engine.getSystemChannel()).thenReturn(mock(SystemChannel.class));
+    when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
     when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
 
     return engine;

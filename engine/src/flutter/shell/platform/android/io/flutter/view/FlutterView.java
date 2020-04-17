@@ -52,6 +52,7 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
+import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.editing.TextInputPlugin;
@@ -216,7 +217,8 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     PlatformViewsController platformViewsController =
         mNativeView.getPluginRegistry().getPlatformViewsController();
-    mTextInputPlugin = new TextInputPlugin(this, dartExecutor, platformViewsController);
+    mTextInputPlugin =
+        new TextInputPlugin(this, new TextInputChannel(dartExecutor), platformViewsController);
     androidKeyProcessor = new AndroidKeyProcessor(keyEventChannel, mTextInputPlugin);
     androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer);
     mNativeView
