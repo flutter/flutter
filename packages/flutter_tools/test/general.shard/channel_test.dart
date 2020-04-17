@@ -290,10 +290,10 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, containsIgnoreWhitespace(
+      expect(testLogger.statusText, containsIgnoringWhitespace(
         "Successfully switched to flutter channel 'beta'."));
       expect(testLogger.statusText,
-        containsIgnoreWhitespace(
+        containsIgnoringWhitespace(
           "To ensure that you're on the latest build "
           "from this channel, run 'flutter upgrade'"));
       expect(testLogger.errorText, hasLength(0));
