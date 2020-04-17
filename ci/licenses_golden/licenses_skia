@@ -1,4 +1,4 @@
-Signature: dfa359a74e4a695858084a048ec684dc
+Signature: d7d46a44433bc790ece1f1c477946934
 
 UNUSED LICENSES:
 
@@ -5622,6 +5622,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2KeyframeAnimato
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/ShadowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Gradient.cpp
