@@ -419,7 +419,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         );
 
         final ExpressionCompiler expressionCompiler =
-        debuggingOptions.webEnableExpressionEvaluation
+          debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device.generator)
               : null;
 
