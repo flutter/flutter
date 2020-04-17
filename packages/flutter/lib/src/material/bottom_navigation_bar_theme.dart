@@ -198,12 +198,12 @@ class BottomNavigationBarThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('selectedIconTheme', selectedIconTheme, defaultValue: null));
     properties.add(DiagnosticsProperty<IconThemeData>('unselectedIconTheme', unselectedIconTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('selectedItemColor', selectedItemColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('unselectedItemColor', unselectedItemColor, defaultValue: null));
+    properties.add(ColorProperty('selectedItemColor', selectedItemColor, defaultValue: null));
+    properties.add(ColorProperty('unselectedItemColor', unselectedItemColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('selectedLabelStyle', selectedLabelStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('unselectedLabelStyle', unselectedLabelStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('showSelectedLabels', showSelectedLabels, defaultValue: null));
