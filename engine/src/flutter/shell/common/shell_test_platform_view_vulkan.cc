@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/common/shell_test_platform_view_vulkan.h"
+#include "flutter/vulkan/vulkan_utilities.h"
 
 namespace flutter {
 namespace testing {
@@ -65,7 +66,8 @@ ShellTestPlatformViewVulkan::OffScreenSurface::OffScreenSurface(
   };
 
   application_ = std::make_unique<vulkan::VulkanApplication>(
-      *vk_, "FlutterTest", std::move(extensions));
+      *vk_, "FlutterTest", std::move(extensions), VK_MAKE_VERSION(1, 0, 0),
+      VK_MAKE_VERSION(1, 1, 0), true);
 
   if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it setup the

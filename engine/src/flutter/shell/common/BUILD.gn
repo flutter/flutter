@@ -5,6 +5,7 @@
 import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/testing/testing.gni")
+import("//flutter/vulkan/config.gni")
 
 if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
@@ -267,6 +268,11 @@ if (enable_unittests) {
           dest = "assets/shelltest_screenshot.png"
         },
       ]
+
+      if (test_enable_vulkan) {
+        libraries = vulkan_validation_libs
+        resources += vulkan_icds
+      }
     }
   }
 

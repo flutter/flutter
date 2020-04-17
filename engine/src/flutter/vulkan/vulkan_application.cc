@@ -18,13 +18,17 @@ VulkanApplication::VulkanApplication(
     const std::string& application_name,
     std::vector<std::string> enabled_extensions,
     uint32_t application_version,
-    uint32_t api_version)
-    : vk(p_vk), api_version_(api_version), valid_(false) {
+    uint32_t api_version,
+    bool enable_validation_layers)
+    : vk(p_vk),
+      api_version_(api_version),
+      valid_(false),
+      enable_validation_layers_(enable_validation_layers) {
   // Check if we want to enable debugging.
   std::vector<VkExtensionProperties> supported_extensions =
       GetSupportedInstanceExtensions(vk);
   bool enable_instance_debugging =
-      IsDebuggingEnabled() &&
+      enable_validation_layers_ &&
       ExtensionSupported(supported_extensions,
                          VulkanDebugReport::DebugExtensionName());
 
@@ -54,7 +58,8 @@ VulkanApplication::VulkanApplication(
 
   // Configure layers.
 
-  const std::vector<std::string> enabled_layers = InstanceLayersToEnable(vk);
+  const std::vector<std::string> enabled_layers =
+      InstanceLayersToEnable(vk, enable_validation_layers_);
 
   const char* layers[enabled_layers.size()];
 
@@ -172,7 +177,8 @@ std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
 std::unique_ptr<VulkanDevice>
 VulkanApplication::AcquireFirstCompatibleLogicalDevice() const {
   for (auto device_handle : GetPhysicalDevices()) {
-    auto logical_device = std::make_unique<VulkanDevice>(vk, device_handle);
+    auto logical_device = std::make_unique<VulkanDevice>(
+        vk, device_handle, enable_validation_layers_);
     if (logical_device->IsValid()) {
       return logical_device;
     }

@@ -30,11 +30,13 @@ static uint32_t FindGraphicsQueueIndex(
 }
 
 VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
-                           VulkanHandle<VkPhysicalDevice> physical_device)
+                           VulkanHandle<VkPhysicalDevice> physical_device,
+                           bool enable_validation_layers)
     : vk(p_vk),
       physical_device_(std::move(physical_device)),
       graphics_queue_index_(std::numeric_limits<uint32_t>::max()),
-      valid_(false) {
+      valid_(false),
+      enable_validation_layers_(enable_validation_layers) {
   if (!physical_device_ || !vk.AreInstanceProcsSetup()) {
     return;
   }
@@ -69,7 +71,8 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 #endif
   };
 
-  auto enabled_layers = DeviceLayersToEnable(vk, physical_device_);
+  auto enabled_layers =
+      DeviceLayersToEnable(vk, physical_device_, enable_validation_layers_);
 
   const char* layers[enabled_layers.size()];
 
