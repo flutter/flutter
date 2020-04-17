@@ -84,6 +84,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     -dDartObfuscation="${dart_obfuscation_flag}"                            \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
     --DartDefines="${DART_DEFINES}"                                         \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \

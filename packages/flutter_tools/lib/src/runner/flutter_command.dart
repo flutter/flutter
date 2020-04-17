@@ -549,17 +549,20 @@ abstract class FlutterCommand extends Command<void> {
       argParser.options.containsKey(FlutterOptions.kEnableExperiment)
         ? stringsArg(FlutterOptions.kEnableExperiment)
         : <String>[];
-
+    final List<String> extraGenSnapshotOptions =
+      argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+        : <String>[];
     final List<String> extraFrontEndOptions =
       argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
           : <String>[];
-    assert(extraFrontEndOptions != null);
 
     if (experiments.isNotEmpty) {
       for (final String expFlag in experiments) {
         final String flag = '--enable-experiment=' + expFlag;
         extraFrontEndOptions.add(flag);
+        extraGenSnapshotOptions.add(flag);
       }
     }
 
@@ -585,8 +588,8 @@ abstract class FlutterCommand extends Command<void> {
       extraFrontEndOptions: extraFrontEndOptions?.isNotEmpty ?? false
         ? extraFrontEndOptions
         : null,
-      extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+      extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
+        ? extraGenSnapshotOptions
         : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)

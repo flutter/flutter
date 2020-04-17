@@ -249,14 +249,14 @@ void main() {
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand().hidden, true);
+    expect(BuildMacosCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
     Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand().hidden, false);
+    expect(BuildMacosCommand(verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,

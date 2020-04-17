@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/utils.dart';
@@ -17,7 +19,7 @@ import 'build.dart';
 /// or simulator. Can only be run on a macOS host. For producing deployment
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand() {
+  BuildIOSCommand({ @required bool verboseHelp }) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(defaultToRelease: false);
@@ -29,6 +31,7 @@ class BuildIOSCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesDartDefineOption();
     usesExtraFrontendOptions();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device.',
