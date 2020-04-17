@@ -199,6 +199,11 @@ abstract class FlutterCommand extends Command<void> {
         '(https://chromedevtools.github.io/devtools-protocol/).',
       hide: true,
     );
+    argParser.addFlag('web-enable-expression-evaluation',
+      defaultsTo: false,
+      help: 'Enables expression evaluation in the debugger.',
+      hide: hide,
+    );
   }
 
   void usesTargetOption() {

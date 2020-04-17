@@ -610,6 +610,7 @@ class DebuggingOptions {
     this.webUseSseForDebugProxy = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
+    this.webEnableExpressionEvaluation = false,
     this.vmserviceOutFile,
     this.fastStart = false,
    }) : debuggingEnabled = true;
@@ -639,7 +640,8 @@ class DebuggingOptions {
       hostVmServicePort = null,
       deviceVmServicePort = null,
       vmserviceOutFile = null,
-      fastStart = false;
+      fastStart = false,
+      webEnableExpressionEvaluation = false;
 
   final bool debuggingEnabled;
 
@@ -675,6 +677,9 @@ class DebuggingOptions {
 
   /// The port the browser should use for its debugging protocol.
   final int webBrowserDebugPort;
+
+  /// Enable expression evaluation for web target
+  final bool webEnableExpressionEvaluation;
 
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
