@@ -403,11 +403,11 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '--cfe-only',
+       '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));

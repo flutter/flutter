@@ -177,8 +177,6 @@ class Dart2JSTarget extends Target {
         '--enable-experiment=$enabledExperiments',
       '-o',
       outputKernel.path,
-      for (final String dartDefine in dartDefines)
-        '-D$dartDefine',
       '--packages=$packageFile',
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
