@@ -143,6 +143,10 @@ template("fuchsia_test_archive") {
       resources = invoker.resources
     }
 
+    if (defined(invoker.libraries)) {
+      libraries += invoker.libraries
+    }
+
     meta_dir = "//flutter/testing/fuchsia/meta"
     cmx_file = "$meta_dir/fuchsia_test.cmx"
   }

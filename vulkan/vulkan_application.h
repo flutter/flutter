@@ -28,7 +28,8 @@ class VulkanApplication {
                     const std::string& application_name,
                     std::vector<std::string> enabled_extensions,
                     uint32_t application_version = VK_MAKE_VERSION(1, 0, 0),
-                    uint32_t api_version = VK_MAKE_VERSION(1, 0, 0));
+                    uint32_t api_version = VK_MAKE_VERSION(1, 0, 0),
+                    bool enable_validation_layers = false);
 
   ~VulkanApplication();
 
@@ -48,6 +49,7 @@ class VulkanApplication {
   uint32_t api_version_;
   std::unique_ptr<VulkanDebugReport> debug_report_;
   bool valid_;
+  bool enable_validation_layers_;
 
   std::vector<VkPhysicalDevice> GetPhysicalDevices() const;
   std::vector<VkExtensionProperties> GetSupportedInstanceExtensions(
