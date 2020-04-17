@@ -856,7 +856,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   }
 
   Future<CompilerOutput> _compileExpressionToJs(_CompileExpressionToJsRequest request) async {
-    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
+    _stdoutHandler.reset(suppressCompilerMessages: false, expectSources: false);
 
     // 'compile-expression-to-js' should be invoked after compiler has been started,
     // program was compiled.

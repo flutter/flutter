@@ -109,7 +109,8 @@ void main() {
   });
 
   testUsingContext('build aot outputs timing info', () async {
-    globals.fs.file('.dart_tool/flutter_build/cce09742720db17ffec62331bd7e42d5/app.so')
+    globals.fs
+      .file('.dart_tool/flutter_build/0c21fd4ab3b8bde8b385ff01d08e0093/app.so')
       .createSync(recursive: true);
     when(globals.buildSystem.build(any, any))
       .thenAnswer((Invocation invocation) async {

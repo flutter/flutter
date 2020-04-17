@@ -13,6 +13,8 @@ import '../mdns_discovery.dart';
 import '../protocol_discovery.dart';
 import '../reporting/reporting.dart';
 
+typedef VmServiceConnector = Future<VmService> Function(String, {Log log});
+
 /// A protocol for discovery of a vmservice on an attached iOS device with
 /// multiple fallbacks.
 ///
@@ -42,14 +44,16 @@ class FallbackDiscovery {
     @required Logger logger,
     @required ProtocolDiscovery protocolDiscovery,
     @required Usage flutterUsage,
-    Future<VmService> Function(String wsUri, {Log log}) vmServiceConnectUri =
+    VmServiceConnector vmServiceConnectUri =
       vm_service_io.vmServiceConnectUri,
+    Duration pollingDelay = const Duration(seconds: 2),
   }) : _logger = logger,
        _mDnsObservatoryDiscovery = mDnsObservatoryDiscovery,
        _portForwarder = portForwarder,
        _protocolDiscovery = protocolDiscovery,
        _flutterUsage = flutterUsage,
-       _vmServiceConnectUri = vmServiceConnectUri;
+       _vmServiceConnectUri = vmServiceConnectUri,
+       _pollingDelay = pollingDelay;
 
   static const String _kEventName = 'ios-handshake';
 
@@ -58,7 +62,8 @@ class FallbackDiscovery {
   final Logger _logger;
   final ProtocolDiscovery _protocolDiscovery;
   final Usage _flutterUsage;
-  final Future<VmService> Function(String wsUri, {Log log}) _vmServiceConnectUri;
+  final VmServiceConnector  _vmServiceConnectUri;
+  final Duration _pollingDelay;
 
   /// Attempt to discover the observatory port.
   Future<Uri> discover({
@@ -152,7 +157,6 @@ class FallbackDiscovery {
 
     // Attempt to connect to the VM service 5 times.
     int attempts = 0;
-    const int kDelaySeconds = 2;
     Exception firstException;
     while (attempts < 5) {
       try {
@@ -184,7 +188,7 @@ class FallbackDiscovery {
       // tool waits for a connection to be reasonable. If the vmservice cannot
       // be connected to in this way, the mDNS discovery must be reached
       // sooner rather than later.
-      await Future<void>.delayed(const Duration(seconds: kDelaySeconds));
+      await Future<void>.delayed(_pollingDelay);
       attempts += 1;
     }
     _logger.printTrace('Failed to connect directly, falling back to mDNS');
