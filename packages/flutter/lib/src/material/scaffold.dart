@@ -1325,17 +1325,6 @@ class Scaffold extends StatefulWidget {
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
 
-  /// This flag is deprecated and fixes and issue with incorrect clipping
-  /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
-  @Deprecated(
-    'This property controls whether to clip and position the snackbar as '
-    'if there is always a floating action button, even if one is not present. '
-    'It exists to provide backwards compatibility to ease migrations, and will '
-    'eventually be removed. '
-    'This feature was deprecated after v1.15.3.'
-  )
-  static bool shouldSnackBarIgnoreFABRect = true;
-
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// {@tool dartpad --template=freeform}
