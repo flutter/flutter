@@ -146,7 +146,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
 }
 
 Matcher containsIgnoringWhitespace(String toSearch){
-return  predicate((String source)  {
+return predicate((String source)  {
   final String sourceWithoutWhitespaces = _removeWhitespaces(source);
   final String toSearchWithoutWhitespaces = _removeWhitespaces(toSearch);
   if(source.contains(toSearchWithoutWhitespaces)){
