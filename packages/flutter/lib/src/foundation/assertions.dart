@@ -330,7 +330,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// [FlutterError.reportError].
 ///
 /// ```dart
-/// _runningAsyncTasks = true;
+/// final bool _runningAsyncTasks = true;
 /// try {
 ///   return await callback();
 /// } catch (error, stack) {
