@@ -1343,7 +1343,7 @@ class Scaffold extends StatefulWidget {
     'eventually be removed. '
     'This feature was deprecated after v1.15.3.'
   )
-  static bool shouldSnackBarIgnoreFABRect = false;
+  static bool shouldSnackBarIgnoreFABRect = true;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///

@@ -644,7 +644,6 @@ tasks:
       Checks that an iOS app with a watchOS companion can be build for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   # Tests running on Windows host
 
@@ -729,12 +728,14 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__image_cache_memory:
     description: >
