@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 enum FilterType {
-  OPACITY, ROTATE_TRANSFORM, ROTATE_FILTER,
+  opacity, rotateTransform, rotateFilter,
 }
 
 class FilteredChildAnimationPage extends StatefulWidget {
@@ -55,21 +55,13 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     setState(() => _filterType = selected ? type : null);
   }
 
-  List<Widget> makeComplexChildList(int rows, int cols, double w, double h) {
-    final List<Widget> children = <Widget>[];
-    final double sx = w / cols;
-    final double sy = h / rows;
-    final double tx = - sx * cols / 2.0;
-    final double ty = - sy * rows / 2.0;
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        children.add(RepaintBoundary(child: Transform(
-          child: const Text('text'),
-          transform: Matrix4.translationValues(c * sx + tx, r * sy + ty, 0.0),
-        )));
-      }
+  String get _title {
+    switch (_filterType) {
+      case FilterType.opacity: return 'Fading Child Animation';
+      case FilterType.rotateTransform: return 'Transformed Child Animation';
+      case FilterType.rotateFilter: return 'Matrix Filtered Child Animation';
+      default: return 'Static Child';
     }
-    return children;
   }
 
   static Widget _makeChild(int rows, int cols, double fontSize, bool complex) {
@@ -114,20 +106,20 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
     _controller.repeat();
     Widget Function(BuildContext, Widget) builder;
     switch (_filterType) {
-      case FilterType.OPACITY:
+      case FilterType.opacity:
         builder = (BuildContext context, Widget child) => Opacity(
           opacity: (_controller.value * 2.0 - 1.0).abs(),
           child: child,
         );
         break;
-      case FilterType.ROTATE_TRANSFORM:
+      case FilterType.rotateTransform:
         builder = (BuildContext context, Widget child) => Transform(
           transform: Matrix4.rotationZ(_controller.value * 2.0 * pi),
           alignment: Alignment.center,
           child: child,
         );
         break;
-      case FilterType.ROTATE_FILTER:
+      case FilterType.rotateFilter:
         builder = (BuildContext context, Widget child) => ImageFiltered(
           imageFilter: ImageFilter.matrix((
               Matrix4.identity()
@@ -152,7 +144,7 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Filtered Child Animation'),
+        title: Text(_title),
       ),
       body: Center(
         child: _animate(
@@ -178,18 +170,18 @@ class _FilteredChildAnimationPageState extends State<FilteredChildAnimationPage>
               children: <Widget>[
                 const Text('Opacity:'),
                 Checkbox(
-                  value: _filterType == FilterType.OPACITY,
-                  onChanged: (bool b) => _setFilterType(FilterType.OPACITY, b),
+                  value: _filterType == FilterType.opacity,
+                  onChanged: (bool b) => _setFilterType(FilterType.opacity, b),
                 ),
                 const Text('Tx Rotate:'),
                 Checkbox(
-                  value: _filterType == FilterType.ROTATE_TRANSFORM,
-                  onChanged: (bool b) => _setFilterType(FilterType.ROTATE_TRANSFORM, b),
+                  value: _filterType == FilterType.rotateTransform,
+                  onChanged: (bool b) => _setFilterType(FilterType.rotateTransform, b),
                 ),
                 const Text('IF Rotate:'),
                 Checkbox(
-                  value: _filterType == FilterType.ROTATE_FILTER,
-                  onChanged: (bool b) => _setFilterType(FilterType.ROTATE_FILTER, b),
+                  value: _filterType == FilterType.rotateFilter,
+                  onChanged: (bool b) => _setFilterType(FilterType.rotateFilter, b),
                 ),
               ],
             ),
