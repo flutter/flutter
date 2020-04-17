@@ -26,7 +26,6 @@ import android.view.inputmethod.InputMethodSubtype;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.HashMap;
@@ -55,7 +54,7 @@ public class TextInputPlugin {
 
   public TextInputPlugin(
       View view,
-      @NonNull DartExecutor dartExecutor,
+      @NonNull TextInputChannel textInputChannel,
       @NonNull PlatformViewsController platformViewsController) {
     mView = view;
     mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -65,7 +64,7 @@ public class TextInputPlugin {
       afm = null;
     }
 
-    textInputChannel = new TextInputChannel(dartExecutor);
+    this.textInputChannel = textInputChannel;
     textInputChannel.setTextInputMethodHandler(
         new TextInputChannel.TextInputMethodHandler() {
           @Override
@@ -162,6 +161,7 @@ public class TextInputPlugin {
    */
   public void destroy() {
     platformViewsController.detachTextInputPlugin();
+    textInputChannel.setTextInputMethodHandler(null);
   }
 
   private static int inputTypeFromTextInputType(
