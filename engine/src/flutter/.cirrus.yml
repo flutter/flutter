@@ -150,21 +150,6 @@ task:
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         export FELT="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart"
         $FELT test --browser=firefox
-    - name: build_and_test_android_unopt_debug
-      env:
-        USE_ANDROID: "True"
-        ANDROID_HOME: $ENGINE_PATH/src/third_party/android_tools/sdk
-      lint_host_script: |
-        cd $ENGINE_PATH/src/flutter/tools/android_lint
-        $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/pub get
-        $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/dart bin/main.dart
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --android --unoptimized
-        ninja -C out/android_debug_unopt
-        mkdir javadoc_tmp
-        ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
-      test_android_script: cd $ENGINE_PATH/src && python ./flutter/testing/run_tests.py --type=java
     - name: format_and_dart_test
       format_script: |
         cd $ENGINE_PATH/src/flutter
