@@ -22,7 +22,7 @@ import 'theme.dart';
 /// overall [Theme] with [ThemeData.bottomNavigationBarTheme].
 ///
 /// All [BottomNavigationBarThemeData] properties are `null` by default. When
-/// null, the [BottomNavigationBar] constructor provides defaults.
+/// null, the [BottomNavigationBar]'s build method provides defaults.
 ///
 /// See also:
 ///
