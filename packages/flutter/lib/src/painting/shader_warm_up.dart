@@ -24,9 +24,9 @@ import 'package:flutter/foundation.dart';
 /// done before calling [runApp].
 ///
 /// To determine whether a draw operation is useful for warming up shaders,
-/// check whether it improves the slowest GPU frame. Also, tracing with
-/// `flutter run --profile --trace-skia` may reveal whether there is shader-
-/// compilation-related jank. If there is such jank, some long
+/// check whether it improves the slowest frame rasterization time. Also,
+/// tracing with `flutter run --profile --trace-skia` may reveal whether
+/// there is shader-compilation-related jank. If there is such jank, some long
 /// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
 /// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
 /// `CircularRRectOp`) would suggest Xyz draw operations are causing the
@@ -72,7 +72,7 @@ abstract class ShaderWarmUp {
   /// `flutter screenshot --observatory-uri=<uri> --type=skia`
   /// and analyze it with https://debugger.skia.org.
   /// Alternatively, one may run the app with `flutter run --trace-skia` and
-  /// then examine the GPU thread in the observatory timeline to see which
+  /// then examine the raster thread in the observatory timeline to see which
   /// Skia draw operations are commonly used, and which shader compilations
   /// are causing jank.
   @protected

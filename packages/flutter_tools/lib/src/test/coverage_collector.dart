@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:coverage/coverage.dart' as coverage;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -176,6 +177,12 @@ class CoverageCollector extends TestWatcher {
     }
     return true;
   }
+
+  @override
+  Future<void> handleTestCrashed(ProcessEvent event) async { }
+
+  @override
+  Future<void> handleTestTimedOut(ProcessEvent event) async { }
 }
 
 Future<VMService> _defaultConnect(Uri serviceUri) {
@@ -189,7 +196,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   Future<VMService> Function(Uri) connector = _defaultConnect,
 }) async {
   final VMService vmService = await connector(serviceUri);
-  await vmService.getVM();
+  await vmService.getVMOld();
   final Map<String, dynamic> result = await _getAllCoverage(
       vmService, libraryPredicate);
   await vmService.close();
@@ -197,11 +204,17 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 }
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
-  await service.getVM();
+  await service.getVMOld();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (final Isolate isolateRef in service.vm.isolates) {
     await isolateRef.load();
-    final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
+    Map<String, Object> scriptList;
+    try {
+      final vm_service.ScriptList actualScriptList = await service.getScripts(isolateRef.id);
+      scriptList = actualScriptList.json;
+    } on vm_service.SentinelException {
+      continue;
+    }
     final List<Future<void>> futures = <Future<void>>[];
 
     final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};
@@ -209,12 +222,6 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
 
-    // We may receive such objects as
-    // {type: Sentinel, kind: Collected, valueAsString: <collected>}
-    // that need to be skipped.
-    if (scriptList['scripts'] == null) {
-      continue;
-    }
     for (final Map<String, dynamic> script in (scriptList['scripts'] as List<dynamic>).cast<Map<String, dynamic>>()) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;

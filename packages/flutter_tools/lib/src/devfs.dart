@@ -4,14 +4,15 @@
 
 import 'dart:async';
 
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:vm_service/vm_service.dart' as vmservice;
 
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/net.dart';
+import 'base/os.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
@@ -46,8 +47,10 @@ abstract class DevFSContent {
 
   Stream<List<int>> contentsAsStream();
 
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
+  Stream<List<int>> contentsAsCompressedStream(
+    OperatingSystemUtils osUtils,
+  ) {
+    return osUtils.gzipLevel1Stream(contentsAsStream());
   }
 
   /// Return the list of files this content depends on.
@@ -265,15 +268,21 @@ class DevFSException implements Exception {
 }
 
 class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
+  _DevFSHttpWriter(
+    this.fsName,
+    VMService serviceProtocol, {
+    @required OperatingSystemUtils osUtils,
+  })
     : httpAddress = serviceProtocol.httpAddress,
       _client = (context.get<HttpClientFactory>() == null)
         ? HttpClient()
-        : context.get<HttpClientFactory>()();
+        : context.get<HttpClientFactory>()(),
+      _osUtils = osUtils;
 
   final String fsName;
   final Uri httpAddress;
   final HttpClient _client;
+  final OperatingSystemUtils _osUtils;
 
   static const int kMaxInFlight = 6;
 
@@ -312,7 +321,9 @@ class _DevFSHttpWriter {
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
         request.headers.add('dev_fs_name', fsName);
         request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
-        final Stream<List<int>> contents = content.contentsAsCompressedStream();
+        final Stream<List<int>> contents = content.contentsAsCompressedStream(
+          _osUtils,
+        );
         await request.addStream(contents);
         final HttpClientResponse response = await request.close();
         response.listen((_) => null,
@@ -385,8 +396,13 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
+    @required OperatingSystemUtils osUtils,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
+       _httpWriter = _DevFSHttpWriter(
+        fsName,
+        serviceProtocol,
+        osUtils: osUtils,
+      ),
        _packagesFilePath = packagesFilePath ?? globals.fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
@@ -423,7 +439,7 @@ class DevFS {
     globals.printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
       _baseUri = await _operations.create(fsName);
-    } on rpc.RpcException catch (rpcException) {
+    } on vmservice.RPCError catch (rpcException) {
       // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
       if (rpcException.code != 1001) {
         rethrow;

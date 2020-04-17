@@ -538,6 +538,28 @@ abstract class Device {
     await descriptions(devices).forEach(globals.printStatus);
   }
 
+  /// Convert the Device object to a JSON representation suitable for serialization.
+  Future<Map<String, Object>> toJson() async {
+    final bool isLocalEmu = await isLocalEmulator;
+    return <String, Object>{
+      'name': name,
+      'id': id,
+      'isSupported': isSupported(),
+      'targetPlatform': getNameForTargetPlatform(await targetPlatform),
+      'emulator': isLocalEmu,
+      'sdk': await sdkNameAndVersion,
+      'capabilities': <String, Object>{
+        'hotReload': supportsHotReload,
+        'hotRestart': supportsHotRestart,
+        'screenshot': supportsScreenshot,
+        'fastStart': supportsFastStart,
+        'flutterExit': supportsFlutterExit,
+        'hardwareRendering': isLocalEmu && await supportsHardwareRendering,
+        'startPaused': supportsStartPaused,
+      }
+    };
+  }
+
   /// Clean up resources allocated by device
   ///
   /// For example log readers or port forwarders.
@@ -585,6 +607,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.webEnableExposeUrl,
+    this.webUseSseForDebugProxy = true,
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.vmserviceOutFile,
@@ -596,6 +619,7 @@ class DebuggingOptions {
       this.port,
       this.hostname,
       this.webEnableExposeUrl,
+      this.webUseSseForDebugProxy = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
       this.cacheSkSL = false,
@@ -640,6 +664,7 @@ class DebuggingOptions {
   final String port;
   final String hostname;
   final bool webEnableExposeUrl;
+  final bool webUseSseForDebugProxy;
 
   /// Whether to run the browser in headless mode.
   ///

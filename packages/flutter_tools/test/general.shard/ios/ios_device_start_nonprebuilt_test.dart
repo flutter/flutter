@@ -22,6 +22,16 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
+List<String> _xattrArgs(FlutterProject flutterProject) {
+  return <String>[
+    'xattr',
+    '-r',
+    '-d',
+    'com.apple.FinderInfo',
+    flutterProject.ios.hostAppRoot.path,
+  ];
+}
+
 const List<String> kRunReleaseArgs = <String>[
   '/usr/bin/env',
   'xcrun',
@@ -74,6 +84,7 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter');
 
+    processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
     processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
     processManager.addCommand(const FakeCommand(command: <String>[...kRunReleaseArgs, '-showBuildSettings']));
     processManager.addCommand(FakeCommand(
@@ -123,6 +134,7 @@ void main() {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter');
 
+      processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
       // The first showBuildSettings call should timeout.
       processManager.addCommand(
@@ -194,6 +206,7 @@ void main() {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter');
 
+    processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
     // The first xcrun call should fail with a
     // concurrent build exception.
     processManager.addCommand(

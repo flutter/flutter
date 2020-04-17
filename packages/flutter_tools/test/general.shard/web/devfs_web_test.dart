@@ -18,12 +18,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/discovery.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages.dart';
+import 'package:package_config/package_config.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:shelf/shelf.dart';
@@ -43,14 +38,12 @@ void main() {
   Testbed testbed;
   WebAssetServer webAssetServer;
   Platform linux;
-  // TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-  // ignore: deprecated_member_use
-  Packages packages;
+  PackageConfig packages;
   Platform windows;
   MockHttpServer mockHttpServer;
 
   setUpAll(() async {
-    packages = await loadPackagesFile(Uri.base.resolve('.packages'));
+    packages = await loadPackageConfigUri(Uri.base.resolve('.packages'));
   });
 
   setUp(() {
@@ -354,6 +347,7 @@ void main() {
   }));
 
   test('Can start web server with specified assets', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -376,6 +370,7 @@ void main() {
       port: 0,
       packagesFilePath: '.packages',
       urlTunneller: null,
+      useSseForDebugProxy: true,
       buildMode: BuildMode.debug,
       enableDwds: false,
       entrypoint: Uri.base,
@@ -385,7 +380,7 @@ void main() {
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
 
-    await webDevFS.create();
+    final Uri uri = await webDevFS.create();
     webDevFS.webAssetServer.entrypointCacheDirectory = globals.fs.currentDirectory;
     globals.fs.currentDirectory
       .childDirectory('lib')
@@ -437,14 +432,59 @@ void main() {
     expect(await webDevFS.webAssetServer.dartSourceContents('web_entrypoint.dart'),
       contains('GENERATED'));
 
+    // served on localhost
+    expect(uri, Uri.http('localhost:0', ''));
+
+    await webDevFS.destroy();
+  }));
+
+  test('Can start web server with hostname any', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+      ..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+    outputFile.parent.childFile('.packages').writeAsStringSync('\n');
+
+    final ResidentCompiler residentCompiler = MockResidentCompiler();
+    when(residentCompiler.recompile(
+      any,
+      any,
+      outputPath: anyNamed('outputPath'),
+      packagesFilePath: anyNamed('packagesFilePath'),
+    )).thenAnswer((Invocation invocation) async {
+      return const CompilerOutput('a', 0, <Uri>[]);
+    });
+
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'any',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      buildMode: BuildMode.debug,
+      enableDwds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+    );
+    webDevFS.requireJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    expect(uri, Uri.http('localhost:0', ''));
     await webDevFS.destroy();
   }));
 
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
-      'localhost',
+      'any',
       8123,
       (String url) => null,
+      true,
       BuildMode.debug,
       true,
       Uri.file('test.dart'),
@@ -468,11 +508,13 @@ void main() {
         expect(verbose, null);
         expect(enableDebugging, true);
         expect(enableDebugExtension, true);
+        expect(useSseForDebugProxy, true);
+        expect(hostname, 'any');
 
         return MockDwds();
       });
 
-      await server.dispose();
+    await server.dispose();
   }));
 }
 

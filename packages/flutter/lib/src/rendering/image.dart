@@ -38,12 +38,14 @@ class RenderImage extends RenderBox {
     bool matchTextDirection = false,
     TextDirection textDirection,
     bool invertColors = false,
+    bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.low,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(isAntiAlias != null),
        _image = image,
        _width = width,
        _height = height,
@@ -57,6 +59,7 @@ class RenderImage extends RenderBox {
        _matchTextDirection = matchTextDirection,
        _invertColors = invertColors,
        _textDirection = textDirection,
+       _isAntiAlias = isAntiAlias,
        _filterQuality = filterQuality {
     _updateColorFilter();
   }
@@ -287,6 +290,20 @@ class RenderImage extends RenderBox {
     _markNeedResolution();
   }
 
+  /// Whether to paint the image with anti-aliasing.
+  ///
+  /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
+  bool get isAntiAlias => _isAntiAlias;
+  bool _isAntiAlias;
+  set isAntiAlias(bool value) {
+    if (_isAntiAlias == value) {
+      return;
+    }
+    assert(value != null);
+    _isAntiAlias = value;
+    markNeedsPaint();
+  }
+
   /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
@@ -367,6 +384,7 @@ class RenderImage extends RenderBox {
       flipHorizontally: _flipHorizontally,
       invertColors: invertColors,
       filterQuality: _filterQuality,
+      isAntiAlias: _isAntiAlias,
     );
   }
 

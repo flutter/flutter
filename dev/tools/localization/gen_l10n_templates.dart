@@ -6,15 +6,13 @@ const String fileTemplate = '''
 @(header)
 import 'dart:async';
 
+// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 
 @(messageClassImports)
-
-// ignore_for_file: unnecessary_brace_in_string_interps
 
 /// Callers can lookup localized strings with an instance of @(class) returned
 /// by `@(class).of(context)`.
@@ -43,8 +41,7 @@ import 'package:intl/intl.dart' as intl;
 ///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
-///   intl: 0.16.0
-///   intl_translation: 0.17.7
+///   intl: 0.16.1
 ///
 ///   # rest of dependencies
 /// ```
@@ -104,26 +101,7 @@ abstract class @(class) {
 
 @(methods)}
 
-class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
-  const _@(class)Delegate();
-
-  @override
-  Future<@(class)> load(Locale locale) {
-    return SynchronousFuture<@(class)>(@(lookupName)(locale));
-  }
-
-  @override
-  bool isSupported(Locale locale) => <String>[@(supportedLanguageCodes)].contains(locale.languageCode);
-
-  @override
-  bool shouldReload(_@(class)Delegate old) => false;
-}
-
-@(class) @(lookupName)(Locale locale) {
-  @(lookupBody)
-  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
-  return null;
-}
+@(delegateClass)
 ''';
 
 const String numberFormatTemplate = '''
@@ -205,14 +183,67 @@ const String baseClassMethodTemplate = '''
   String @(name)(@(parameters));
 ''';
 
+// DELEGATE CLASS TEMPLATES
+
+const String delegateClassTemplate = '''
+class _@(class)Delegate extends LocalizationsDelegate<@(class)> {
+  const _@(class)Delegate();
+
+  @override
+  Future<@(class)> load(Locale locale) {
+    @(loadBody)
+  }
+
+  @override
+  bool isSupported(Locale locale) => <String>[@(supportedLanguageCodes)].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_@(class)Delegate old) => false;
+}
+
+@(lookupFunction)''';
+
+const String loadBodyTemplate = '''return SynchronousFuture<@(class)>(@(lookupName)(locale));''';
+
+const String loadBodyDeferredLoadingTemplate = '''return @(lookupName)(locale);''';
+
 // DELEGATE LOOKUP TEMPLATES
+
+const String lookupFunctionTemplate = '''
+@(class) @(lookupName)(Locale locale) {
+  @(lookupBody)
+  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  return null;
+}''';
+
+const String lookupFunctionDeferredLoadingTemplate = '''
+/// Lazy load the library for web, on other platforms we return the
+/// localizations synchronously.
+Future<@(class)> _loadLibraryForWeb(
+  Future<dynamic> Function() loadLibrary,
+  @(class) Function() localizationClosure,
+) {
+  if (kIsWeb) {
+    return loadLibrary().then((dynamic _) => localizationClosure());
+  } else {
+    return SynchronousFuture<@(class)>(localizationClosure());
+  }
+}
+
+Future<@(class)> @(lookupName)(Locale locale) {
+  @(lookupBody)
+  assert(false, '@(class).delegate failed to load unsupported locale "\$locale"');
+  return null;
+}''';
 
 const String lookupBodyTemplate = '''@(lookupAllCodesSpecified)
   @(lookupScriptCodeSpecified)
   @(lookupCountryCodeSpecified)
   @(lookupLanguageCodeSpecified)''';
 
-const String switchClauseTemplate = '''case '@(case)': return @(class)();''';
+const String switchClauseTemplate = '''case '@(case)': return @(localeClass)();''';
+
+const String switchClauseDeferredLoadingTemplate = '''case '@(case)': return _loadLibraryForWeb(@(library).loadLibrary, () => @(library).@(localeClass)());''';
 
 const String nestedSwitchTemplate = '''case '@(languageCode)': {
       switch (locale.@(code)) {

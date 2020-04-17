@@ -48,6 +48,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     bool logCommunicationToFile = true,
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
+    Map<String, dynamic> headers,
   }) async {
     // If running on a Fuchsia device, connect to the first isolate whose name
     // matches FUCHSIA_MODULE_TARGET.
@@ -92,7 +93,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // Connect to Dart VM services
     _log('Connecting to Flutter application at $dartVmServiceUrl');
     final VMServiceClientConnection connection =
-    await vmServiceConnectFunction(dartVmServiceUrl);
+    await vmServiceConnectFunction(dartVmServiceUrl, headers: headers);
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     final VMIsolateRef isolateRef = isolateNumber ==
@@ -564,15 +565,16 @@ void _checkCloseCode(WebSocket ws) {
 
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
-Future<VMServiceClientConnection> _waitAndConnect(String url) async {
+Future<VMServiceClientConnection> _waitAndConnect(
+    String url, {Map<String, dynamic> headers}) async {
   final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(webSocketUrl);
-      ws2 = await WebSocket.connect(webSocketUrl);
+      ws1 = await WebSocket.connect(webSocketUrl, headers: headers);
+      ws2 = await WebSocket.connect(webSocketUrl, headers: headers);
 
       ws1.done.whenComplete(() => _checkCloseCode(ws1));
       ws2.done.whenComplete(() => _checkCloseCode(ws2));
@@ -650,5 +652,8 @@ class VMServiceClientConnection {
   final rpc.Peer peer;
 }
 
-/// A function that connects to a Dart VM service given the [url].
-typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(String url);
+/// A function that connects to a Dart VM service
+/// with [headers] given the [url].
+typedef VMServiceConnectFunction =
+  Future<VMServiceClientConnection> Function(
+    String url, {Map<String, dynamic> headers});

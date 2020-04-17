@@ -1239,9 +1239,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  /// Returns the value of the first callback added with
-  /// [addScopedWillPopCallback] that returns false. If they all return true,
-  /// returns the inherited method's result (see [Route.willPop]).
+  /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
+  /// [addScopedWillPopCallback] returns either false or null. If they all
+  /// return true, the base [Route.willPop]'s result will be returned. The
+  /// callbacks will be called in the order they were added, and will only be
+  /// called if all previous callbacks returned true.
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
@@ -1260,7 +1262,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
-      if (!await callback())
+      if (await callback() != true)
         return RoutePopDisposition.doNotPop;
     }
     return await super.willPop();

@@ -69,7 +69,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpMockXcodeBuildHandler(String configuration) {
+  FakeCommand setUpMockXcodeBuildHandler(String configuration, { bool verbose = false }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -83,6 +83,8 @@ void main() {
         '-derivedDataPath', flutterBuildDir.absolute.path,
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+        if (verbose)
+          'VERBOSE_SCRIPT_LOGGING=YES',
         'COMPILER_INDEX_STORE_ENABLE=NO',
       ],
       stdout: 'STDOUT STUFF',
@@ -159,6 +161,23 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('macOS build invokes xcode build (debug) with verbosity', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--debug', '-v']
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Debug', verbose: true)
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+
   testUsingContext('macOS build invokes xcode build (profile)', () async {
     final BuildCommand command = BuildCommand();
     createMinimalMockProjectFiles();
@@ -187,6 +206,34 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       setUpMockXcodeBuildHandler('Release')
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build supports build-name and build-number', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'build',
+        'macos',
+        '--debug',
+        '--build-name=1.2.3',
+        '--build-number=42',
+      ],
+    );
+    final String contents = fileSystem
+      .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+      .readAsStringSync();
+
+    expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
+    expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Debug')
     ]),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

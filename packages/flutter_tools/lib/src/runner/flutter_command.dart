@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -159,13 +158,26 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebOptions({ bool hide = true }) {
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
-      help: 'The hostname to serve web application on.',
+      help:
+        'The hostname that the web sever will use to resolve an IP to serve '
+        'from. The unresolved hostname is used to launch Chrome when using '
+        'the chrome Device. The name "any" may also be used to serve on any '
+        'IPV4 for either the Chrome or web-server device.',
       hide: hide,
     );
     argParser.addOption('web-port',
       defaultsTo: null,
       help: 'The host port to serve the web application from. If not provided, the tool '
         'will select a random open port on the host.',
+      hide: hide,
+    );
+    argParser.addOption('web-server-debug-protocol',
+      allowed: <String>['sse', 'ws'],
+      defaultsTo: 'sse',
+      help: 'The protocol (SSE or WebSockets) to use for the debug service proxy '
+      'when using the Web Server device and Dart Debugger extension. '
+      'This is useful for editors/debug adapters that do not support debugging '
+      'over SSE (the default protocol for Web Server/Dart Debugger extension).',
       hide: hide,
     );
     argParser.addFlag('web-allow-expose-url',
@@ -450,6 +462,17 @@ abstract class FlutterCommand extends Command<void> {
       hide: hide,
       help: 'The name of the module (required if attaching to a fuchsia device)',
       valueHelp: 'module-name',
+    );
+  }
+
+  void addEnableExperimentation({ bool verbose }) {
+    argParser.addMultiOption(
+      FlutterOptions.kEnableExperiment,
+      help:
+        'The name of an experimental Dart feature to enable. For more info '
+        'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
+        'experimental-flags.md',
+      hide: !verbose,
     );
   }
 
@@ -738,7 +761,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
-    if (!doctor.canLaunchAnything) {
+    if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
