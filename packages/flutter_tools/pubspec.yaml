@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
+  ffi:
   archive: 2.0.13
   args: 1.6.0
   dwds: 3.0.3
