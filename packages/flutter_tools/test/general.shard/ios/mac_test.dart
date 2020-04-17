@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -426,6 +428,46 @@ Exited (sigterm)''',
         logger.statusText,
         isEmpty,
       );
+    });
+  });
+
+  group('remove Finder extended attributes', () {
+    Directory iosProjectDirectory;
+    setUp(() {
+      final MemoryFileSystem fs = MemoryFileSystem.test();
+      iosProjectDirectory = fs.directory('ios');
+    });
+
+    testWithoutContext('removes xattr', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'xattr',
+          '-r',
+          '-d',
+          'com.apple.FinderInfo',
+          iosProjectDirectory.path,
+        ])
+      ]);
+
+      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(processManager.hasRemainingExpectations, false);
+    });
+
+    testWithoutContext('ignores errors', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(command: <String>[
+          'xattr',
+          '-r',
+          '-d',
+          'com.apple.FinderInfo',
+          iosProjectDirectory.path,
+        ], exitCode: 1,
+        )
+      ]);
+
+      await removeFinderExtendedAttributes(iosProjectDirectory, ProcessUtils(processManager: processManager, logger: logger), logger);
+      expect(logger.traceText, contains('Failed to remove xattr com.apple.FinderInfo'));
+      expect(processManager.hasRemainingExpectations, false);
     });
   });
 }

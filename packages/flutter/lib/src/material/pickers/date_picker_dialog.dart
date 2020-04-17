@@ -45,6 +45,10 @@ const Duration _dialogSizeAnimationDuration = Duration(milliseconds: 200);
 /// their dates are considered. Their time fields are ignored. They must all
 /// be non-null.
 ///
+/// The [currentDate] represents the current day (i.e. today). This
+/// date will be highlighted in the day grid. If null, the date of
+/// `DateTime.now()` will be used.
+///
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
@@ -93,6 +97,7 @@ Future<DateTime> showDatePicker({
   @required DateTime initialDate,
   @required DateTime firstDate,
   @required DateTime lastDate,
+  DateTime currentDate,
   DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
   SelectableDayPredicate selectableDayPredicate,
   String helpText,
@@ -141,6 +146,7 @@ Future<DateTime> showDatePicker({
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
+    currentDate: currentDate,
     initialEntryMode: initialEntryMode,
     selectableDayPredicate: selectableDayPredicate,
     helpText: helpText,
@@ -184,6 +190,7 @@ class _DatePickerDialog extends StatefulWidget {
     @required DateTime initialDate,
     @required DateTime firstDate,
     @required DateTime lastDate,
+    DateTime currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.selectableDayPredicate,
     this.cancelText,
@@ -200,6 +207,7 @@ class _DatePickerDialog extends StatefulWidget {
        initialDate = utils.dateOnly(initialDate),
        firstDate = utils.dateOnly(firstDate),
        lastDate = utils.dateOnly(lastDate),
+       currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
        assert(initialEntryMode != null),
        assert(initialCalendarMode != null),
        super(key: key) {
@@ -229,6 +237,9 @@ class _DatePickerDialog extends StatefulWidget {
 
   /// The latest allowable [DateTime] that the user can select.
   final DateTime lastDate;
+
+  /// The [DateTime] representing today. It will be highlighted in the day grid.
+  final DateTime currentDate;
 
   final DatePickerEntryMode initialEntryMode;
 
@@ -382,6 +393,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           initialDate: _selectedDate,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
+          currentDate: widget.currentDate,
           onDateChanged: _handleDateChanged,
           selectableDayPredicate: widget.selectableDayPredicate,
           initialCalendarMode: widget.initialCalendarMode,

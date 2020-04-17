@@ -25,6 +25,7 @@ const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
 void main(List<String> args) {
   final ArgParser argParser = ArgParser(allowTrailingOptions: false);
+
   argParser.addOption(
     kIncrement,
     help: 'Specifies which part of the x.y.z version number to increment. Required.',
@@ -38,9 +39,9 @@ void main(List<String> args) {
   );
   argParser.addOption(
     kCommit,
-    help: 'Specifies which git commit to roll to the dev branch.',
+    help: 'Specifies which git commit to roll to the dev branch. Required.',
     valueHelp: 'hash',
-    defaultsTo: 'upstream/master',
+    defaultsTo: null, // This option is required
   );
   argParser.addOption(
     kOrigin,
@@ -57,6 +58,7 @@ void main(List<String> args) {
   );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
+
   ArgResults argResults;
   try {
     argResults = argParser.parse(args);
@@ -73,7 +75,7 @@ void main(List<String> args) {
   final bool autoApprove = argResults[kYes] as bool;
   final bool help = argResults[kHelp] as bool;
 
-  if (help || level == null) {
+  if (help || level == null || commit == null) {
     print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
     print(argParser.usage);
     exit(0);
@@ -165,23 +167,31 @@ void main(List<String> args) {
 }
 
 String getFullTag() {
+  const String glob = '*.*.*-*.*.pre';
   return getGitOutput(
-    'describe --match *.*.*-dev.*.* --first-parent --long --tags',
+    'describe --match $glob --first-parent --long --tags',
     'obtain last released version number',
   );
 }
 
 Match parseFullTag(String version) {
-  final RegExp versionPattern = RegExp(r'^([0-9]+)\.([0-9]+)\.([0-9]+)-dev\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)$');
+  // of the form: x.y.z-m.n.pre-c-g<revision>
+  final RegExp versionPattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)-(\d+)\.(\d+)\.pre-(\d+)-g([a-f0-9]+)$');
   return versionPattern.matchAsPrefix(version);
 }
 
 String getVersionFromParts(List<int> parts) {
+  // where parts correspond to [x, y, z, m, n] from tag
   assert(parts.length == 5);
   final StringBuffer buf = StringBuffer()
+    // take x, y, and z
     ..write(parts.take(3).join('.'))
-    ..write('-dev.')
-    ..write(parts.skip(3).join('.'));
+    ..write('-')
+    // skip x, y, and z, take m and n
+    ..write(parts.skip(3).take(2).join('.'))
+    ..write('.pre');
+  // return a string that looks like: '1.2.3-4.5.pre'
   return buf.toString();
 }
 
