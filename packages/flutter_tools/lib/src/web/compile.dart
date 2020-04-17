@@ -13,6 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
 import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
