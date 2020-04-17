@@ -291,9 +291,9 @@ abstract class FlutterTestDriver {
     return waitForNextPause ? waitForPause() : null;
   }
 
-  Future<InstanceRef> evaluateInFrame(String expression) async {
-    return _timeoutWithMessages<InstanceRef>(
-      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression) as InstanceRef,
+  Future<ObjRef> evaluateInFrame(String expression) async {
+    return _timeoutWithMessages<ObjRef>(
+      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression) as ObjRef,
       task: 'Evaluating expression ($expression)',
     );
   }
