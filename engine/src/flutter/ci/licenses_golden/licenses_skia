@@ -1,4 +1,4 @@
-Signature: bfea63318cfc35e64a47648bbbffcd51
+Signature: dfa359a74e4a695858084a048ec684dc
 
 UNUSED LICENSES:
 
@@ -635,8 +635,8 @@ FILE: ../../../third_party/skia/src/gpu/GrWindowRectangles.h
 FILE: ../../../third_party/skia/src/gpu/GrWindowRectsState.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrShadowGeoProc.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrShadowGeoProc.h
-FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.cpp
-FILE: ../../../third_party/skia/src/gpu/geometry/GrShape.h
+FILE: ../../../third_party/skia/src/gpu/geometry/GrStyledShape.cpp
+FILE: ../../../third_party/skia/src/gpu/geometry/GrStyledShape.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLOpsRenderPass.h
@@ -1070,6 +1070,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Debug-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Release-NoGPU_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian10-GCC-x86_64-Release-Shared_Docker.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-arm-Release-Flutter_Android_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Chromebook_GLES_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Chromebook_GLES_Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Mac-Clang-arm-Debug-iOS.json
@@ -5338,6 +5339,8 @@ FILE: ../../../third_party/skia/docs/examples/unexpected_setAlphaType.cpp
 FILE: ../../../third_party/skia/docs/examples/upscale_checkerboard.cpp
 FILE: ../../../third_party/skia/docs/examples/weird_RRect_bug.cpp
 FILE: ../../../third_party/skia/docs/examples/zero_off_dashing.cpp
+FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.cpp
+FILE: ../../../third_party/skia/src/gpu/GrFinishCallbacks.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrFillPathShader.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathShader.h
