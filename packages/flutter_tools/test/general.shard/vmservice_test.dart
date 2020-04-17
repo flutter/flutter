@@ -285,10 +285,10 @@ void main() {
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(method: 'streamListen', id: '1', params: <String, Object>{
+        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
           'streamId': 'Isolate'
         }),
-        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', params: <String, Object>{
+        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
           'viewId': '1234',
           'mainScript': 'main.dart',
           'assetDirectory': 'flutter_assets/',
@@ -327,16 +327,26 @@ class FakeVmServiceHost {
         throw Exception('Unexpected request: $request');
       }
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
-      expect(fakeRequest, isA<FakeVmServiceRequest>()
-        .having((FakeVmServiceRequest request) => request.method, 'method', request['method'])
-        .having((FakeVmServiceRequest request) => request.id, 'id', request['id'])
-        .having((FakeVmServiceRequest request) => request.params, 'params', request['params'])
+      expect(request, isA<Map<String, Object>>()
+        .having((Map<String, Object> request) => request['method'], 'method', fakeRequest.method)
+        .having((Map<String, Object> request) => request['id'], 'id', fakeRequest.id)
+        .having((Map<String, Object> request) => request['params'], 'args', fakeRequest.args)
       );
-      _input.add(json.encode(<String, Object>{
-        'jsonrpc': '2.0',
-        'id': fakeRequest.id,
-        'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
-      }));
+      if (fakeRequest.errorCode == null) {
+        _input.add(json.encode(<String, Object>{
+          'jsonrpc': '2.0',
+          'id': fakeRequest.id,
+          'result': fakeRequest.jsonResponse ?? <String, Object>{'type': 'Success'},
+        }));
+      } else {
+        _input.add(json.encode(<String, Object>{
+          'jsonrpc': '2.0',
+          'id': fakeRequest.id,
+          'error': <String, Object>{
+            'code': fakeRequest.errorCode,
+          }
+        }));
+      }
       _applyStreamListen();
     });
   }
@@ -375,13 +385,18 @@ class FakeVmServiceRequest implements VmServiceExpectation {
   const FakeVmServiceRequest({
     @required this.method,
     @required this.id,
-    @required this.params,
+    @required this.args,
     this.jsonResponse,
+    this.errorCode,
   });
 
   final String method;
   final String id;
-  final Map<String, Object> params;
+
+  /// If non-null, the error code for a [vm_service.RPCError] in place of a
+  /// standard response.
+  final int errorCode;
+  final Map<String, Object> args;
   final Map<String, Object> jsonResponse;
 
   @override
