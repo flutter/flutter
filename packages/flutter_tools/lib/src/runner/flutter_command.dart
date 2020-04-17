@@ -848,6 +848,23 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  @override
+  String get usage {
+    final String usageWithoutDescription = super.usage.substring(
+      // The description plus two newlines.
+      description.length + 2,
+    );
+    final String help = <String>[
+      description,
+      '',
+      'Global options:',
+      runner.argParser.usage,
+      '',
+      usageWithoutDescription,
+    ].join('\n');
+    return help;
+  }
+
   ApplicationPackageStore applicationPackages;
 
   /// Gets the parsed command-line option named [name] as `bool`.
