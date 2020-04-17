@@ -2,23 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:file/file.dart';
-import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
-
-import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/logger.dart';
-import '../base/process.dart';
-import '../build_system/exceptions.dart';
-import '../convert.dart';
-import '../devfs.dart';
-import '../flutter_manifest.dart';
-import '../flutter_project_metadata.dart';
-import '../project.dart';
-import '../version.dart';
+part of reporting;
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
