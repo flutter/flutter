@@ -5,87 +5,57 @@
 import '../src/common.dart';
 
 void main() {
-  final Map<dynamic, dynamic> stubMatchState = <dynamic, dynamic>{};
   group('containsIgnoreWhitespace Matcher', () {
     group('on item to be contained', () {
       test('matches simple case.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any text!');
-        final bool result =
-            testMatcher.matches('Give me any text!', stubMatchState);
-        expect(result, true);
+        expect('Give me any text!', containsIgnoringWhitespace('any text!'));
       });
 
       test("shouldn't match when it's only because of removing whitespaces", () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any text!');
-        final bool result =
-            testMatcher.matches('Give me anytext!', stubMatchState);
-        expect(result, false);
+        expect('Give me anytext!', isNot(containsIgnoringWhitespace('any text!')));
       });
 
       test('ignores trailing spaces.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any text!    ');
-        final bool result =
-            testMatcher.matches('Give me any text!', stubMatchState);
-        expect(result, true);
+        expect('Give me any text!', containsIgnoringWhitespace('any text!    '));
       });
 
       test('ignores leading spaces.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('   any text!');
-        final bool result =
-            testMatcher.matches('Give me any text!', stubMatchState);
-        expect(result, true);
+        expect('Give me any text!', containsIgnoringWhitespace('   any text!'));
       });
 
       test('ignores linebreaks.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any\n text!');
-        final bool result =
-            testMatcher.matches('Give me any text!', stubMatchState);
-        expect(result, true);
+        expect('Give me any text!', containsIgnoringWhitespace('any\n text!'));
       });
 
       test('ignores tabs.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any\t text!');
-        final bool result =
-            testMatcher.matches('Give me any text!', stubMatchState);
-        expect(result, true);
+        expect('Give me any text!', containsIgnoringWhitespace('any\t text!'));
       });
 
       test('is case sensitive.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any text!');
-        final bool result =
-            testMatcher.matches('Give me Any text!', stubMatchState);
-        expect(result, false);
+        expect('Give me Any text!', isNot(containsIgnoringWhitespace('any text!')));
       });
     });
 
     group('on value to match against', () {
 
       test('ignores trailing spaces.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any value to include!');
-        final bool result =
-            testMatcher.matches('Give  me  any value to include!   ', stubMatchState);
-        expect(result, true);
+        expect('Give  me  any value to include!   ',
+          containsIgnoringWhitespace('any value to include!'));
       });
 
       test('ignores leading spaces.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any value to include!');
-        final bool result =
-            testMatcher.matches('     Give me    any value to include!', stubMatchState);
-        expect(result, true);
+        expect('     Give me    any value to include!',
+          containsIgnoringWhitespace('any value to include!'));
       });
 
       test('ignores linebreaks.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any value to include!');
-        final bool result =
-            testMatcher.matches('Give me \n any \n value \n to \n include!', stubMatchState);
-        expect(result, true);
+        expect('Give me \n any \n value \n to \n include!',
+          containsIgnoringWhitespace('any value to include!'));
       });
 
       test('ignores tabs.', () {
-        final Matcher testMatcher = containsIgnoringWhitespace('any value to include!');
-        final bool result =
-            testMatcher.matches('\tGive\t me any\t value \t to \t include!', stubMatchState);
-        expect(result, true);
+        expect('\tGive\t me any\t value \t to \t include!',
+          containsIgnoringWhitespace('any value to include!'));
       });
     });
   });
