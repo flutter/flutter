@@ -39,14 +39,6 @@ common_libs = [
     path = rebase_path("$fuchsia_sdk_dist")
   },
   {
-    name = "libzircon.so"
-    path = rebase_path("$sysroot_lib")
-  },
-  {
-    name = "libc.so"
-    path = rebase_path("$sysroot_lib")
-  },
-  {
     name = "ld.so.1"
     path = rebase_path("$sysroot_dist_lib")
   },
