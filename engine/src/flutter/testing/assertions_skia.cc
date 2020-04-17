@@ -77,11 +77,6 @@ std::ostream& operator<<(std::ostream& os, const SkVector3& v) {
   return os << v.x() << ", " << v.y() << ", " << v.z();
 }
 
-std::ostream& operator<<(std::ostream& os, const SkVector4& v) {
-  return os << v.fData[0] << ", " << v.fData[1] << ", " << v.fData[2] << ", "
-            << v.fData[3];
-}
-
 std::ostream& operator<<(std::ostream& os, const SkRect& r) {
   return os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", "
             << r.fBottom;

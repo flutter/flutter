@@ -378,7 +378,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 
 - (CGRect)globalRect {
-  SkMatrix44 globalTransform = [self node].transform;
+  SkM44 globalTransform = [self node].transform;
   for (SemanticsObject* parent = [self parent]; parent; parent = parent.parent) {
     globalTransform = parent.node.transform * globalTransform;
   }
@@ -386,9 +386,8 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   SkPoint quad[4];
   [self node].rect.toQuad(quad);
   for (auto& point : quad) {
-    SkScalar vector[4] = {point.x(), point.y(), 0, 1};
-    globalTransform.mapScalars(vector);
-    point.set(vector[0] / vector[3], vector[1] / vector[3]);
+    SkV4 vector = globalTransform.map(point.x(), point.y(), 0, 1);
+    point.set(vector.x / vector.w, vector.y / vector.w);
   }
   SkRect rect;
   rect.setBounds(quad, 4);
