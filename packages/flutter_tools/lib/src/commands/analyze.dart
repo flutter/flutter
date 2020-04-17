@@ -60,6 +60,11 @@ class AnalyzeCommand extends FlutterCommand {
         negatable: false,
         hide: !verboseHelp,
         help: 'Also output the analysis time.');
+    // Hidden option to allow mix non-nullable support.
+    argParser.addFlag('permit-non-nullable',
+        hide: true,
+        help: 'Do not report experiment not enabled errors'
+    );
 
     usesPubOption();
 

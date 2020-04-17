@@ -133,6 +133,14 @@ class AnalyzeContinuously extends AnalyzeBase {
         errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }
+      // remove enabled experiment errors
+      final int enabledExperiments = errors.where((AnalysisError error) {
+        return error.code == 'experiment_not_enabled';
+      }).length;
+      if (argResults['permit-non-nullable'] as bool) {
+        errors.removeWhere((AnalysisError error) => error.code == 'experiment_not_enabled');
+        issueCount -= enabledExperiments;
+      }
 
       errors.sort();
 
