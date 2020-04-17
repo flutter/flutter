@@ -108,7 +108,7 @@ class AccessibilityBridge
     int32_t flags;
     SkRect rect;
     SkRect screen_rect;
-    SkMatrix44 transform;
+    SkM44 transform;
     std::vector<int32_t> children_in_hit_test_order;
   };
 
@@ -165,7 +165,7 @@ class AccessibilityBridge
   //
   // Update calls this via UpdateScreenRects().
   void UpdateScreenRects(int32_t node_id,
-                         SkMatrix44 parent_transform,
+                         SkM44 parent_transform,
                          std::unordered_set<int32_t>* visited_nodes);
 
   // Traverses the semantics tree to find the node_id hit by the given x,y

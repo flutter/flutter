@@ -10,7 +10,6 @@
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkPoint3.h"
@@ -23,7 +22,6 @@ extern std::ostream& operator<<(std::ostream& os, const SkClipOp& o);
 extern std::ostream& operator<<(std::ostream& os, const SkMatrix& m);
 extern std::ostream& operator<<(std::ostream& os, const SkM44& m);
 extern std::ostream& operator<<(std::ostream& os, const SkVector3& v);
-extern std::ostream& operator<<(std::ostream& os, const SkVector4& v);
 extern std::ostream& operator<<(std::ostream& os, const SkRect& r);
 extern std::ostream& operator<<(std::ostream& os, const SkRRect& r);
 extern std::ostream& operator<<(std::ostream& os, const SkPath& r);

@@ -95,7 +95,11 @@ void SemanticsUpdateBuilder::updateNode(
   node.increasedValue = increasedValue;
   node.decreasedValue = decreasedValue;
   node.textDirection = textDirection;
-  node.transform.setColMajord(transform.data());
+  SkScalar scalarTransform[16];
+  for (int i = 0; i < 16; ++i) {
+    scalarTransform[i] = transform.data()[i];
+  }
+  node.transform = SkM44::ColMajor(scalarTransform);
   node.childrenInTraversalOrder =
       std::vector<int32_t>(childrenInTraversalOrder.data(),
                            childrenInTraversalOrder.data() +

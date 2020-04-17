@@ -701,7 +701,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
          user_data](flutter::SemanticsNodeUpdates update) {
           for (const auto& value : update) {
             const auto& node = value.second;
-            SkMatrix transform = static_cast<SkMatrix>(node.transform);
+            SkMatrix transform = node.transform.asM33();
             FlutterTransformation flutter_transform{
                 transform.get(SkMatrix::kMScaleX),
                 transform.get(SkMatrix::kMSkewX),
