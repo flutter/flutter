@@ -11,6 +11,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Build;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -199,6 +200,12 @@ class VirtualDisplayController {
     if (presentation == null) return null;
     PlatformView platformView = presentation.getView();
     return platformView.getView();
+  }
+
+  /** Dispatches a motion event to the presentation for this controller. */
+  public void dispatchTouchEvent(MotionEvent event) {
+    if (presentation == null) return;
+    presentation.dispatchTouchEvent(event);
   }
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
