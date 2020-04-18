@@ -1,4 +1,4 @@
-Signature: a15387d361603f161618092ca43df1e2
+Signature: a2eb95f85835523706ad01aa7ee7085e
 
 UNUSED LICENSES:
 
@@ -7723,7 +7723,12 @@ FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/cquery_dri
 FILE: ../../../third_party/dart/runtime/tools/wiki/xref_extractor/lib/xref_extractor.dart
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/aot/dispatch_table_generator.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/api/deopt_id.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/api/print_filter.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/api/print_filter.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/api/type_check_mode.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_base.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/constant_propagator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/reachability_fence_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi/abi.h
