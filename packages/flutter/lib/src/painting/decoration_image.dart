@@ -131,9 +131,10 @@ class DecorationImage {
   /// in the top right.
   final bool matchTextDirection;
 
-  /// Defines image pixels to be shown per logical pixels
+  /// Defines image pixels to be shown per logical pixels.
   ///
-  /// By default the the value of scale is 1.0
+  /// By default the the value of scale is 1.0. The scale for the image is
+  /// calculated by multiplying [scale] with `scale` of the given [ImageProvider].
   final double scale;
 
   /// Creates a [DecorationImagePainter] for this [DecorationImage].
@@ -183,7 +184,7 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
-      '$scale'
+      'scale: $scale'
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -272,7 +273,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
-      scale: _details.scale,
+      scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
