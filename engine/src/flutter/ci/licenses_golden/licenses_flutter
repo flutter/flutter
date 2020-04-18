@@ -475,6 +475,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/offset.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/opacity.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/painting.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/path_metrics.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/platform_view.dart
@@ -482,6 +483,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/recording_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/surface.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/test_embedding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/text/font_collection.dart

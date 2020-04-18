@@ -103,6 +103,8 @@ part 'engine/surface/recording_canvas.dart';
 part 'engine/surface/scene.dart';
 part 'engine/surface/scene_builder.dart';
 part 'engine/surface/surface.dart';
+part 'engine/surface/path.dart';
+part 'engine/surface/surface_stats.dart';
 part 'engine/surface/transform.dart';
 part 'engine/test_embedding.dart';
 part 'engine/text/font_collection.dart';
@@ -187,8 +189,8 @@ void webOnlyInitializeEngine() {
         final int highResTimeMicroseconds = (1000 * highResTime).toInt();
 
         if (window._onBeginFrame != null) {
-          window
-              .invokeOnBeginFrame(Duration(microseconds: highResTimeMicroseconds));
+          window.invokeOnBeginFrame(
+              Duration(microseconds: highResTimeMicroseconds));
         }
 
         if (window._onDrawFrame != null) {
