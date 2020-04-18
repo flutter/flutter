@@ -145,13 +145,13 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
-Matcher containsIgnoringWhitespace(String toSearch){
-return predicate((String source)  {
-  final String sourceCollapsedWhitespaces = collapseWhitespace(source);
-  final String toSearcCollapsedWhitespaces = collapseWhitespace(toSearch);
-  return sourceCollapsedWhitespaces.contains(toSearcCollapsedWhitespaces);
-},
-    'contains "$toSearch" ignoring whitespaces.');
+Matcher containsIgnoringWhitespace(String toSearch) {
+  return predicate(
+    (String source) {
+      return collapseWhitespace(source).contains(collapseWhitespace(toSearch));
+    },
+    'contains "$toSearch" ignoring whitespace.',
+  );
 }
 
 /// Executes a test body in zone that does not allow context-based injection.
