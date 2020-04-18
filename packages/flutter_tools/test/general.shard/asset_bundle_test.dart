@@ -180,6 +180,71 @@ flutter:
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('ignores hidden files on Unix', () async {
+      globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
+      globals.fs
+        .file(globals.fs.path.join('assets', 'foo', '.hidden_unix_file'))
+        .createSync();
+      // Create a directory in the same path to test that we're only looking at File
+      // objects.
+      globals.fs
+          .directory(globals.fs.path.join('assets', 'foo', 'bar'))
+          .createSync();
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+          name: example
+          flutter:
+            assets:
+              - assets/foo/
+          '''
+        );
+        globals.fs.file('.packages').createSync();
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(manifestPath: 'pubspec.yaml');
+        // Expected assets:
+        //  - asset manifest
+        //  - font manifest
+        //  - license file
+        //  - assets/foo/bar.txt
+        expect(bundle.entries.length, 4);
+        expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('prints info regarding not included hidden file', () async {
+        globals.fs
+          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
+        globals.fs
+          .file(globals.fs.path.join('assets', 'foo', '.hidden_unix_file'))
+          .createSync();
+        // Create a directory in the same path to test that we're only looking at File
+        // objects.
+        globals.fs
+          .directory(globals.fs.path.join('assets', 'foo', 'bar'))
+          .createSync();
+        globals.fs.file('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+''');
+        globals.fs.file('.packages').createSync();
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(manifestPath: 'pubspec.yaml');
+        expect(testLogger.statusText.contains("File 'assets/foo/.hidden_unix_file' is hidden and won't be included in the bundle."), isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
   });
 
   testUsingContext('Failed directory delete shows message', () async {

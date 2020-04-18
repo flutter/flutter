@@ -683,6 +683,10 @@ void _parseAssetsFromFolder(
   for (final FileSystemEntity entity in lister) {
     if (entity is File) {
       final String relativePath = globals.fs.path.relative(entity.path, from: assetBase);
+      if (_isFileHidden(relativePath)) {
+        globals.printStatus("File '$relativePath' is hidden and won't be included in the bundle.");
+        continue;
+      }
 
       final Uri uri = Uri.file(relativePath, windows: globals.platform.isWindows);
 
@@ -769,4 +773,11 @@ _Asset _resolvePackageAsset(Uri assetUri, PackageConfig packageConfig) {
   globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
   globals.printError('Could not resolve package for asset $assetUri.\n');
   return null;
+}
+
+bool _isFileHidden(String relativeAssetFilePath){
+  if(globals.platform.isWindows){
+    return false;
+  }
+  return RegExp(r'(^|\/)\.[^\/\.]').hasMatch(relativeAssetFilePath);
 }
