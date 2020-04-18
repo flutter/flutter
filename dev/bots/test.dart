@@ -339,6 +339,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication, {
     <String>[
       'build',
       'apk',
+      ...additionalArgs,
       if (release)
         '--release'
       else
