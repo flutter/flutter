@@ -30,17 +30,38 @@ Future<void> main() async {
     await driver.tap(backButton);
   });
 
-  test('AlertDialog from platform view context', () async {
-    final SerializableFinder wmListTile =
-    find.byValueKey('WmIntegrationsListTile');
-    await driver.tap(wmListTile);
+  group('WindowManager', ()
+  {
+    setUpAll(() async {
+      final SerializableFinder wmListTile =
+      find.byValueKey('WmIntegrationsListTile');
+      await driver.tap(wmListTile);
+    });
 
-    final SerializableFinder showAlertDialog = find.byValueKey('ShowAlertDialog');
-    await driver.waitFor(showAlertDialog);
-    await driver.tap(showAlertDialog);
-    final String status = await driver.getText(find.byValueKey('Status'));
-    expect(status, 'Success');
-    await driver.waitFor(find.pageBack());
-    await driver.tap(find.pageBack());
+    tearDownAll(() async {
+      await driver.waitFor(find.pageBack());
+      await driver.tap(find.pageBack());
+    });
+
+    test('AlertDialog from platform view context', () async {
+      final SerializableFinder showAlertDialog = find.byValueKey(
+          'ShowAlertDialog');
+      await driver.waitFor(showAlertDialog);
+      await driver.tap(showAlertDialog);
+      final String status = await driver.getText(find.byValueKey('Status'));
+      expect(status, 'Success');
+    });
+
+    test('Child windows can handle touches', () async {
+      final SerializableFinder addWindow = find.byValueKey('AddWindow');
+      await driver.waitFor(addWindow);
+      await driver.tap(addWindow);
+      final SerializableFinder tapWindow = find.byValueKey('TapWindow');
+      await driver.tap(tapWindow);
+      final String windowClickCount = await driver.getText(find.byValueKey('WindowClickCount'));
+      expect(windowClickCount, 'Click count: 1');
+    },
+    // TODO(amirh): enable this after fixing https://github.com/flutter/flutter/issues/55066
+    skip:true);
   });
 }
