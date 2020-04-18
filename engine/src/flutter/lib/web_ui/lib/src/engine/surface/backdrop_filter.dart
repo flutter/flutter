@@ -65,8 +65,8 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       _invertedTransform = Matrix4.inverted(_transform);
       _previousTransform = _transform;
     }
-    final ui.Rect rect = transformLTRB(_invertedTransform, 0, 0,
-        ui.window.physicalSize.width, ui.window.physicalSize.height);
+    final ui.Rect rect = transformRect(_invertedTransform, ui.Rect.fromLTRB(0, 0,
+        ui.window.physicalSize.width, ui.window.physicalSize.height));
     final html.CssStyleDeclaration filterElementStyle = _filterElement.style;
     filterElementStyle
       ..position = 'absolute'

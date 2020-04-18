@@ -1927,46 +1927,47 @@ class _PaintBounds {
     _currentMatrix.multiply(skewMatrix);
   }
 
-  void clipRect(ui.Rect rect, DrawCommand command) {
+  static final Float64List _tempRectData = Float64List(4);
+
+  void clipRect(final ui.Rect rect, DrawCommand command) {
+    double left = rect.left;
+    double top = rect.top;
+    double right = rect.right;
+    double bottom = rect.bottom;
+
     // If we have an active transform, calculate screen relative clipping
     // rectangle and union with current clipping rectangle.
     if (!_currentMatrixIsIdentity) {
-      final Vector3 leftTop =
-          _currentMatrix.transform3(Vector3(rect.left, rect.top, 0.0));
-      final Vector3 rightTop =
-          _currentMatrix.transform3(Vector3(rect.right, rect.top, 0.0));
-      final Vector3 leftBottom =
-          _currentMatrix.transform3(Vector3(rect.left, rect.bottom, 0.0));
-      final Vector3 rightBottom =
-          _currentMatrix.transform3(Vector3(rect.right, rect.bottom, 0.0));
-      rect = ui.Rect.fromLTRB(
-          math.min(math.min(math.min(leftTop.x, rightTop.x), leftBottom.x),
-              rightBottom.x),
-          math.min(math.min(math.min(leftTop.y, rightTop.y), leftBottom.y),
-              rightBottom.y),
-          math.max(math.max(math.max(leftTop.x, rightTop.x), leftBottom.x),
-              rightBottom.x),
-          math.max(math.max(math.max(leftTop.y, rightTop.y), leftBottom.y),
-              rightBottom.y));
+      _tempRectData[0] = left;
+      _tempRectData[1] = top;
+      _tempRectData[2] = right;
+      _tempRectData[3] = bottom;
+
+      transformLTRB(_currentMatrix, _tempRectData);
+      left = _tempRectData[0];
+      top = _tempRectData[1];
+      right = _tempRectData[2];
+      bottom = _tempRectData[3];
     }
+
     if (!_clipRectInitialized) {
-      _currentClipLeft = rect.left;
-      _currentClipTop = rect.top;
-      _currentClipRight = rect.right;
-      _currentClipBottom = rect.bottom;
+      _currentClipLeft = left;
+      _currentClipTop = top;
+      _currentClipRight = right;
+      _currentClipBottom = bottom;
       _clipRectInitialized = true;
     } else {
-      if (rect.left > _currentClipLeft) {
-        _currentClipLeft = rect.left;
+      if (left > _currentClipLeft) {
+        _currentClipLeft = left;
       }
-      if (rect.top > _currentClipTop) {
-        _currentClipTop = rect.top;
+      if (top > _currentClipTop) {
+        _currentClipTop = top;
       }
-      if (rect.right < _currentClipRight) {
-        _currentClipRight = rect.right;
+      if (right < _currentClipRight) {
+        _currentClipRight = right;
       }
-      if (rect.bottom < _currentClipBottom) {
-        _currentClipBottom = rect.bottom;
+      if (bottom < _currentClipBottom) {
+        _currentClipBottom = bottom;
       }
     }
     if (_currentClipLeft >= _currentClipRight || _currentClipTop >= _currentClipBottom) {
@@ -1997,12 +1998,16 @@ class _PaintBounds {
     double transformedPointBottom = bottom;
 
     if (!_currentMatrixIsIdentity) {
-      final ui.Rect transformedRect =
-          transformLTRB(_currentMatrix, left, top, right, bottom);
-      transformedPointLeft = transformedRect.left;
-      transformedPointTop = transformedRect.top;
-      transformedPointRight = transformedRect.right;
-      transformedPointBottom = transformedRect.bottom;
+      _tempRectData[0] = left;
+      _tempRectData[1] = top;
+      _tempRectData[2] = right;
+      _tempRectData[3] = bottom;
+
+      transformLTRB(_currentMatrix, _tempRectData);
+      transformedPointLeft = _tempRectData[0];
+      transformedPointTop = _tempRectData[1];
+      transformedPointRight = _tempRectData[2];
+      transformedPointBottom = _tempRectData[3];
     }
 
     if (_clipRectInitialized) {
