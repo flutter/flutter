@@ -216,7 +216,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             throw new IllegalStateException(
                 "Sending touch to an unknown view with id: " + touch.viewId);
           }
-          View view = vdControllers.get(touch.viewId).getView();
 
           MotionEvent event =
               MotionEvent.obtain(
@@ -235,7 +234,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                   touch.source,
                   touch.flags);
 
-          view.dispatchTouchEvent(event);
+          vdControllers.get(touch.viewId).dispatchTouchEvent(event);
         }
 
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
