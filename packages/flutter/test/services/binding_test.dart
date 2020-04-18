@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -41,8 +45,8 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   BinaryMessenger createBinaryMessenger() {
     return super.createBinaryMessenger()
       ..setMockMessageHandler('flutter/assets', (ByteData message) async {
-        if (utf8.decode(message.buffer.asUint8List()) == 'LICENSE') {
-          return ByteData.view(Uint8List.fromList(utf8.encode(licenses)).buffer);
+        if (const StringCodec().decodeMessage(message) == 'LICENSE') {
+          return const StringCodec().encodeMessage(licenses);
         }
         return null;
       });
