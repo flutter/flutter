@@ -56,9 +56,43 @@ install_deps() {
 KERNEL_NAME=`uname`
 if [[ $KERNEL_NAME == *"Darwin"* ]]
 then
-  echo "Running on MacOS. Increase the user limits"
-  ulimit -n 50000
-  ulimit -u 4096
+  echo "Running on MacOS. Will check the file and user limits."
+  # Disable exit if the commands fails. We want to give more actionable
+  # error message.
+  set +e
+  ULIMIT_FILES=`ulimit -n`
+  # Increase the file limit if it is low. Note that these limits are changed
+  # only for this script (for this shell). After felt execution is completed
+  # no change is required to reset the original shell.
+  if [[ $ULIMIT_FILES < 50000 ]]
+  then
+    echo "File limits too low increasing the file limits"
+    # Get the max file limit.
+    MAX_ULIMIT_FILES=`launchctl limit maxfiles | sed -e 's/^[[:space:]]*//' | sed 's/ \{1,\}/ /g' | cut -d' ' -f2`
+    if [[ $MAX_ULIMIT_FILES < 50000 ]]
+    then
+      # Increase the maximum file limit.
+      sudo launchctl limit maxfiles 50000 200000
+    fi
+    ERROR=$(ulimit -n 50000 2>&1 >/dev/null)
+    if [[ ! -z $ERROR ]]
+    then
+      echo "Problem changing the file limit. Please try to reboot to use the higher limits. error: \n$ERROR" 1>&2
+    fi
+  fi
+  ULIMIT_USER=`ulimit -u`
+  # Increase the hard user limit if it is lower than 2048.
+  if [[ $ULIMIT_USER < 4096 ]]
+  then
+    echo "User limits too low increasing the user limits"
+    ERROR2=$(ulimit -u 4096 2>&1 >/dev/null)
+    if [[ ! -z $ERROR2 ]]
+    then
+      echo "Problem changing the user limit. Please try to reboot to use the higher limits. error: \n$ERROR2" 1>&2
+    fi
+  fi
+  # Set the value back to exit on non zero results.
+  set -e
 fi
 
 if [[ "$FELT_USE_SNAPSHOT" == "false" || "$FELT_USE_SNAPSHOT" == "0" ]]; then
