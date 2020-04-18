@@ -631,7 +631,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, contains('No supported devices connected'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -654,7 +654,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsToolExit(),
       );
-      expect(testLogger.statusText, contains('More than one device'));
+      expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
     }, overrides: <Type, Generator>{
