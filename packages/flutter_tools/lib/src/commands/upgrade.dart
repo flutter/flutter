@@ -236,7 +236,7 @@ class UpgradeCommandRunner {
   /// returns true, otherwise returns false.
   Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
     final int code = await processUtils.stream(
-      <String>['git', 'pull', '--ff'],
+      <String>['git', 'pull', '--ff-only'],
       workingDirectory: workingDirectory,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );

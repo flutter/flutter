@@ -418,6 +418,11 @@ class _ResidentWebRunner extends ResidentWebRunner {
           directory: globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools')
         );
 
+        final ExpressionCompiler expressionCompiler =
+          debuggingOptions.webEnableExpressionEvaluation
+              ? WebExpressionCompiler(device.generator)
+              : null;
+
         device.devFS = WebDevFS(
           hostname: effectiveHostname,
           port: hostPort,
@@ -427,7 +432,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           buildMode: debuggingOptions.buildInfo.mode,
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
-          expressionCompiler: WebExpressionCompiler(device.generator),
+          expressionCompiler: expressionCompiler,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {

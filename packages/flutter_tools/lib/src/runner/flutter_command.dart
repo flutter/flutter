@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -199,6 +198,11 @@ abstract class FlutterCommand extends Command<void> {
         'It serves the Chrome DevTools Protocol '
         '(https://chromedevtools.github.io/devtools-protocol/).',
       hide: true,
+    );
+    argParser.addFlag('web-enable-expression-evaluation',
+      defaultsTo: false,
+      help: 'Enables expression evaluation in the debugger.',
+      hide: hide,
     );
   }
 
@@ -762,7 +766,7 @@ abstract class FlutterCommand extends Command<void> {
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
-    if (!doctor.canLaunchAnything) {
+    if (!globals.doctor.canLaunchAnything) {
       globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
@@ -847,6 +851,23 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
       }
     }
+  }
+
+  @override
+  String get usage {
+    final String usageWithoutDescription = super.usage.substring(
+      // The description plus two newlines.
+      description.length + 2,
+    );
+    final String help = <String>[
+      description,
+      '',
+      'Global options:',
+      runner.argParser.usage,
+      '',
+      usageWithoutDescription,
+    ].join('\n');
+    return help;
   }
 
   ApplicationPackageStore applicationPackages;

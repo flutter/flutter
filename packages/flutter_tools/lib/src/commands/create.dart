@@ -19,7 +19,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
-import '../doctor.dart';
 import '../features.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
@@ -417,9 +416,9 @@ class CreateCommand extends FlutterCommand {
       final String relativeAppMain = globals.fs.path.join(relativeAppPath, 'lib', 'main.dart');
       final String relativePluginPath = globals.fs.path.normalize(globals.fs.path.relative(projectDirPath));
       final String relativePluginMain = globals.fs.path.join(relativePluginPath, 'lib', '$projectName.dart');
-      if (doctor.canLaunchAnything) {
+      if (globals.doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
-        await doctor.summary();
+        await globals.doctor.summary();
 
         globals.printStatus('''
 In order to run your $application, type:
@@ -443,7 +442,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus('');
 
         // Give the user more detailed analysis.
-        await doctor.diagnose();
+        await globals.doctor.diagnose();
         globals.printStatus('');
         globals.printStatus("After installing components, run 'flutter doctor' in order to "
             're-validate your setup.');

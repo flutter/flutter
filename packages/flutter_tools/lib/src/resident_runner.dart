@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -17,6 +18,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -93,6 +95,9 @@ class FlutterDevice {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
+        compilerMessageConsumer:
+          (String message, {bool emphasis, TerminalColor color, }) =>
+            globals.printTrace(message),
         initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
         targetModel: TargetModel.dartdevc,
         experimentalFlags: experimentalFlags,
@@ -289,17 +294,19 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  List<Future<Map<String, dynamic>>> reloadSources(
+  List<Future<vm_service.ReloadReport>> reloadSources(
     String entryPath, {
     bool pause = false,
   }) {
-    final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
-    return <Future<Map<String, dynamic>>>[
+    final String deviceEntryUri = devFS.baseUri
+      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+    return <Future<vm_service.ReloadReport>>[
       for (final Isolate isolate in vmService.vm.isolates)
-        isolate.reloadSources(
+        vmService.reloadSources(
+          isolate.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
-        ),
+        )
     ];
   }
 
