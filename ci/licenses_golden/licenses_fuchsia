@@ -1,4 +1,4 @@
-Signature: 944854b831c52ef73149bb2c2db2abe9
+Signature: a56231de01a99b54f74df7cf1574a27c
 
 UNUSED LICENSES:
 
@@ -471,6 +471,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
@@ -1388,6 +1389,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_zone.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/format.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/reader.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/selector.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/annotation.fidl
@@ -2213,6 +2218,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
@@ -3281,6 +3287,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
