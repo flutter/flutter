@@ -31,6 +31,8 @@ abstract class FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -62,6 +64,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -104,6 +108,10 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--plain-name', plainName],
       if (randomSeed != null)
         '--test-randomize-ordering-seed=$randomSeed',
+      if (tags != null)
+        ...<String>['--tags', tags],
+      if (excludeTags != null)
+        ...<String>['--exclude-tags', excludeTags],
     ];
     if (web) {
       final String tempBuildDir = globals.fs.systemTempDirectory

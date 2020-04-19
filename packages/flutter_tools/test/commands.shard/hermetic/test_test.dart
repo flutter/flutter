@@ -164,6 +164,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags,
+    String excludeTags,
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,

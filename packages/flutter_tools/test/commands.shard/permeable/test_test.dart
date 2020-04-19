@@ -96,6 +96,35 @@ void main() {
     expect(result.exitCode, 0);
   });
 
+  testUsingContext('flutter test should run a test with a given tag', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--tags', 'include-tag']);
+    if (!(result.stdout as String).contains('+1: All tests passed')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
+  testUsingContext('flutter test should not run a test with excluded tag', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--exclude-tags', 'exclude-tag']);
+    if (!(result.stdout as String).contains('+1: All tests passed')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
+  testUsingContext('flutter test should run all tests when tags are unspecified', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory);
+    if (!(result.stdout as String).contains('+1 -1: Some tests failed')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 1);
+  });
+
   testUsingContext('flutter test should test runs to completion', () async {
     Cache.flutterRoot = '../..';
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,

@@ -42,6 +42,14 @@ class TestCommand extends FlutterCommand {
         valueHelp: 'substring',
         splitCommas: false,
       )
+      ..addOption('tags',
+        abbr: 't',
+        help: 'Run only tests associated with tags',
+      )
+      ..addOption('exclude-tags',
+        abbr: 'x',
+        help: 'Run only tests WITHOUT given tags',
+      )
       ..addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
@@ -160,6 +168,8 @@ class TestCommand extends FlutterCommand {
     final bool buildTestAssets = boolArg('test-assets');
     final List<String> names = stringsArg('name');
     final List<String> plainNames = stringsArg('plain-name');
+    final String tags = stringArg('tags');
+    final String excludeTags = stringArg('exclude-tags');
     final FlutterProject flutterProject = FlutterProject.current();
 
     if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
@@ -250,6 +260,8 @@ class TestCommand extends FlutterCommand {
       workDir: workDir,
       names: names,
       plainNames: plainNames,
+      tags: tags,
+      excludeTags: excludeTags,
       watcher: watcher,
       enableObservatory: collector != null || startPaused || boolArg('enable-vmservice'),
       startPaused: startPaused,
