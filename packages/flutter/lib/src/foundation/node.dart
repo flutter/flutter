@@ -54,8 +54,8 @@ class AbstractNode {
   @protected
   void redepthChild(AbstractNode child) {
     assert(child.owner == owner);
-    if (child._depth <= _depth) {
-      child._depth = _depth + 1;
+    if (child.depth <= depth) {
+      child._depth = depth + 1;
       child.redepthChildren();
     }
   }

@@ -862,6 +862,8 @@ class PipelineOwner {
   bool get debugDoingLayout => _debugDoingLayout;
   bool _debugDoingLayout = false;
 
+  RenderObject _depthBarrier;
+
   /// Update the layout information for all dirty render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline. Layout
@@ -883,9 +885,14 @@ class PipelineOwner {
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
         for (final RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
-          if (node._needsLayout && node.owner == this)
-            node._layoutWithoutResize();
+          if (node._needsLayout && node.owner == this) {
+            if (_depthBarrier == null || _depthBarrier.depth > node.depth)
+              node._layoutWithoutResize();
+            else
+              _nodesNeedingLayout.add(node);
+          }
         }
+        _depthBarrier = null;
       }
     } finally {
       assert(() {
@@ -1444,6 +1451,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
   bool _needsLayout = true;
 
+  /// Whether this render object's layout needs to be deferred until all of its
+  /// dependencies have been laid out.
+  ///
+  /// This should only be set to true if this [RenderObject.sizedByParent] is
+  /// also true.
+  bool get shouldDeferLayout => false;
+
   RenderObject _relayoutBoundary;
   bool _doingThisLayoutWithCallback = false;
 
@@ -1543,6 +1557,44 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner._nodesNeedingLayout.add(this);
         owner.requestVisualUpdate();
       }
+    }
+  }
+
+  /// Marks [dependent]'s layout information as dirty, and register it with its
+  /// [PipelineOwner], if [dependent] hasn't been marked dirty already.
+  ///
+  /// The [dependent] must be [attached], has the same [PipelineOwner] as this
+  /// [RenderObject], and its [shouldDeferLayout] and [sizedByParent] must be true.
+  /// Additionally To prevent introducing circular dependencies, [dependent]'s
+  /// [depth] must be strictly greater than that of this [RenderObject], its
+  /// dependency.
+  void markDependentNeedsLayout(RenderObject dependent) {
+    assert(dependent != null);
+    assert(dependent.owner == owner);
+    assert(dependent._debugCanPerformMutations);
+    assert(dependent.depth > depth);
+    assert(attached);
+    assert(dependent.attached);
+    assert(dependent.sizedByParent);
+    assert(dependent.shouldDeferLayout);
+
+    // If the depedent is already marked dirty, it could be:
+    //
+    // 1. A different external dependency of it called markDependentNeedsLayout.
+    // 2. Regular dirty node, scheduled for this layout iteration.
+    // 3. Regular dirty node, scheduled for the next layout iteration.
+    //
+    // The only case that may result in a wrong layout order is 3, when there're
+    // nodes that already need to be laid out more than once (i.e., when the
+    // layout order is already wrong).
+    if (dependent._needsLayout)
+      return;
+
+    if (owner._depthBarrier == null || owner._depthBarrier.depth > dependent.depth) {
+      owner._depthBarrier = dependent;
+      dependent.markNeedsLayout();
+      if (debugPrintLayouts)
+        debugPrint('setting barrier to $dependent');
     }
   }
 
@@ -1755,7 +1807,20 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisResize = false;
         return true;
       }());
+      if (shouldDeferLayout) {
+        assert(() {
+          _debugMutationsLocked = false;
+          if (debugPrintLayouts)
+            debugPrint('Deferring laying out $this because deferLayoutIfSizedByParent is true');
+          return true;
+        }());
+        owner._nodesNeedingLayout.add(this);
+        if (owner._depthBarrier == null || owner._depthBarrier.depth > depth)
+          owner._depthBarrier = this;
+        return;
+      }
     }
+    assert(!shouldDeferLayout);
     RenderObject debugPreviousActiveLayout;
     assert(() {
       _debugDoingThisLayout = true;
