@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -490,7 +491,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    });
+    }, skip: Platform.isWindows); // https://github.com/flutter/flutter/issues/55173
 
     group('forwarding to given port', () {
       const int devicePort = 499;

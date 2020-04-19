@@ -290,14 +290,9 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
-      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
-      // on Windows.
-      final String suffix = Platform.isWindows && subshard == 'commands'
-        ? 'permeable'
-        : '';
       await _pubRunTest(
         toolsPath,
-        testPaths: <String>[path.join(kTest, '$subshard$kDotShard', suffix)],
+        testPaths: <String>[path.join(kTest, '$subshard$kDotShard')],
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
       );
@@ -783,7 +778,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, List<String> tests) asy
 Future<void> _pubRunTest(String workingDirectory, {
   List<String> testPaths,
   bool enableFlutterToolAsserts = true,
-  bool useBuildRunner = false,
   String coverage,
   bq.TabledataResourceApi tableData,
   bool forceSingleCore = false,
@@ -860,7 +854,6 @@ Future<void> _pubRunTest(String workingDirectory, {
       args,
       workingDirectory: workingDirectory,
       environment: pubEnvironment,
-      removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
     );
   }
 }
