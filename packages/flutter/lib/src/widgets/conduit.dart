@@ -432,7 +432,7 @@ class _RenderConduitAnchor extends RenderProxyBox with RenderConstrainedLayoutBu
     leader?._follower = this;
   }
 
-  int get minDepth => leader?.depth ?? 0;
+  int get minDepth => (leader?.depth ?? -1) + 1;
 
   @override
   int get depth => max(super.depth, minDepth);

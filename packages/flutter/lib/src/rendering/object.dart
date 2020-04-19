@@ -1572,7 +1572,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(dependent != null);
     assert(dependent.owner == owner);
     assert(dependent._debugCanPerformMutations);
-    assert(dependent.depth > depth);
+    assert(
+      dependent.depth > depth,
+      'dependent $dependent has a depth (${dependent.depth}) that is less than or equal to its dependency $this ($depth)',
+    );
     assert(attached);
     assert(dependent.attached);
     assert(dependent.sizedByParent);
@@ -1811,9 +1814,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         assert(() {
           _debugMutationsLocked = false;
           if (debugPrintLayouts)
-            debugPrint('Deferring laying out $this because deferLayoutIfSizedByParent is true');
+            debugPrint('Deferring laying out $this because shouldDeferLayout is true.');
           return true;
         }());
+        _needsLayout = true;
         owner._nodesNeedingLayout.add(this);
         if (owner._depthBarrier == null || owner._depthBarrier.depth > depth)
           owner._depthBarrier = this;
