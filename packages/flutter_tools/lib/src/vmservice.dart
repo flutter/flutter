@@ -475,6 +475,9 @@ class VMService implements vm_service.VmService {
     return _delegateService.callMethod(method, isolateId: isolateId, args: args);
   }
 
+  @override
+  Future<void> get onDone => _delegateService.onDone;
+
   StreamController<ServiceEvent> _getEventController(String eventName) {
     StreamController<ServiceEvent> controller = _eventControllers[eventName];
     if (controller == null) {
