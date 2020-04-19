@@ -32,6 +32,17 @@ enum PlatformViewHitTestBehavior {
   transparent,
 }
 
+/// How an Android view is composed along side with Flutter UI.
+enum AndroidViewCompositeMode {
+  /// The Android view is rendered as a texture and composed along side with the
+  /// Flutter UI as a single native Android view.
+  texture,
+
+  /// The Android view is rendered as an independent native Android view and
+  /// composed along side with the Flutter UI.
+  hybrid,
+}
+
 enum _PlatformViewState {
   uninitialized,
   resizing,
@@ -83,15 +94,20 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
     @required AndroidViewController viewController,
     @required PlatformViewHitTestBehavior hitTestBehavior,
     @required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    this.compositeMode = AndroidViewCompositeMode.texture,
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
+       assert(compositeMode != null),
        _viewController = viewController {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     this.hitTestBehavior = hitTestBehavior;
   }
+
+  /// How to compose the Android view.
+  final AndroidViewCompositeMode compositeMode;
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
 
@@ -185,6 +201,16 @@ class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // In hybrid composition, Android views are rendered as a native View.
+    if (compositeMode == AndroidViewCompositeMode.hybrid) {
+      context.addLayer(PlatformViewLayer(
+        rect: offset & size,
+        viewId: _viewController.id,
+      ));
+      return;
+    }
+    assert(compositeMode == AndroidViewCompositeMode.texture);
+    // In texture composition, Android views are rendered as a texture.
     if (_viewController.textureId == null)
       return;
 

@@ -71,9 +71,11 @@ class AndroidView extends StatefulWidget {
     this.gestureRecognizers,
     this.creationParams,
     this.creationParamsCodec,
+    this.compositeMode = AndroidViewCompositeMode.texture,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
        assert(creationParams == null || creationParamsCodec != null),
+       assert(compositeMode != null),
        super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
@@ -106,6 +108,9 @@ class AndroidView extends StatefulWidget {
   /// If this is null, the ambient [Directionality] is used instead.
   /// {@endtemplate}
   final TextDirection layoutDirection;
+
+  /// How to compose the Android view.
+  final AndroidViewCompositeMode compositeMode;
 
   /// Which gestures should be forwarded to the Android view.
   ///
@@ -182,7 +187,16 @@ class AndroidView extends StatefulWidget {
   final MessageCodec<dynamic> creationParamsCodec;
 
   @override
-  State<AndroidView> createState() => _AndroidViewState();
+  State<AndroidView> createState() {
+    switch (compositeMode) {
+      case AndroidViewCompositeMode.texture:
+        return _AndroidViewTextureState();
+      case AndroidViewCompositeMode.hybrid:
+        return _AndroidViewHybridState();
+    }
+    assert(false);
+    return null;
+  }
 }
 
 // TODO(amirh): describe the embedding mechanism.
@@ -416,7 +430,8 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 }
 
-class _AndroidViewState extends State<AndroidView> {
+/// The internal state for a Android view composed as a texture.
+class _AndroidViewTextureState extends State<AndroidView> {
   int _id;
   AndroidViewController _controller;
   TextDirection _layoutDirection;
@@ -435,6 +450,7 @@ class _AndroidViewState extends State<AndroidView> {
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+        compositeMode: AndroidViewCompositeMode.texture,
       ),
     );
   }
@@ -545,6 +561,103 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
+/// The internal state for a Android view composed as a independent native view.
+class _AndroidViewHybridState extends State<AndroidView> {
+  AndroidViewController _controller;
+  TextDirection _layoutDirection;
+  bool _initialized = false;
+
+  static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
+    <Factory<OneSequenceGestureRecognizer>>{};
+
+  @override
+  Widget build(BuildContext context) {
+    return _AndroidPlatformView(
+      controller: _controller,
+      hitTestBehavior: widget.hitTestBehavior,
+      gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+      compositeMode: AndroidViewCompositeMode.hybrid,
+    );
+  }
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _createNewAndroidView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    _initializeOnce();
+    if (didChangeLayoutDirection) {
+      // The native view will update asynchronously, in the meantime we don't want
+      // to block the framework. (so this is intentionally not awaiting).
+      _controller?.setLayoutDirection(_layoutDirection);
+    }
+  }
+
+  @override
+  void didUpdateWidget(AndroidView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (widget.viewType != oldWidget.viewType) {
+      _controller?.dispose();
+      _createNewAndroidView();
+      return;
+    }
+
+    if (didChangeLayoutDirection) {
+      _controller?.setLayoutDirection(_layoutDirection);
+    }
+  }
+
+  TextDirection _findLayoutDirection() {
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _createNewAndroidView() {
+    final int id = platformViewsRegistry.getNextPlatformViewId();
+    final AndroidViewController controller = PlatformViewsService.initAndroidView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        // TODO(egarciad): Handle focus in hybrid mode.
+      },
+    );
+    if (!mounted) {
+      controller.dispose();
+      return;
+    }
+    if (widget.onPlatformViewCreated != null) {
+      widget.onPlatformViewCreated(id);
+    }
+    setState(() {
+      _controller = controller;
+    });
+  }
+}
+
 class _UiKitViewState extends State<UiKitView> {
   UiKitViewController _controller;
   TextDirection _layoutDirection;
@@ -644,14 +757,19 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     @required this.controller,
     @required this.hitTestBehavior,
     @required this.gestureRecognizers,
+    @required this.compositeMode,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
+       assert(compositeMode != null),
        super(key: key);
 
   final AndroidViewController controller;
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// How to compose the Android view.
+  final AndroidViewCompositeMode compositeMode;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
@@ -659,6 +777,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
+        compositeMode: compositeMode,
       );
 
   @override
