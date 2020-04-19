@@ -64,7 +64,7 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
 
   window.\$dartLoader = {};
   window.\$dartLoader.rootDirectories = [];
-  if (window.\$requireloader) {
+  if (window.\$requireLoader) {
     window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
     if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
       window.\$dartStackTraceUtility.ready = true;
