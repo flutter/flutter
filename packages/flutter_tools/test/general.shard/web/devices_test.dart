@@ -18,14 +18,34 @@ void main() {
   testWithoutContext('GoogleChromeDevice defaults', () async {
     final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
       chromiumLauncher: null,
-      fileSystem: null,
-      logger: null,
-      platform: null,
-      processManager: null,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: FakeProcessManager.any(),
     );
 
     expect(chromeDevice.name, 'Chrome');
     expect(chromeDevice.id, 'chrome');
+    expect(chromeDevice.supportsHotReload, true);
+    expect(chromeDevice.supportsHotRestart, true);
+    expect(chromeDevice.supportsStartPaused, true);
+    expect(chromeDevice.supportsFlutterExit, true);
+    expect(chromeDevice.supportsScreenshot, false);
+    expect(await chromeDevice.isLocalEmulator, false);
+    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isA<NoOpDeviceLogReader>());
+    expect(await chromeDevice.portForwarder.forward(1), 1);
+  });
+
+  testWithoutContext('MicrosoftEdge defaults', () async {
+    final MicrosoftEdgeDevice chromeDevice = MicrosoftEdgeDevice(
+      chromiumLauncher: null,
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+    );
+
+    expect(chromeDevice.name, 'Edge');
+    expect(chromeDevice.id, 'edge');
     expect(chromeDevice.supportsHotReload, true);
     expect(chromeDevice.supportsHotRestart, true);
     expect(chromeDevice.supportsStartPaused, true);

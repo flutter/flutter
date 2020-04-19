@@ -264,25 +264,12 @@ class WebDevices extends PollingDeviceDiscovery {
         operatingSystemUtils: operatingSystemUtils,
       ),
     );
-    _edgeDevice = MicrosoftEdgeDevice(
-      fileSystem: fileSystem,
-      logger: logger,
-      chromiumLauncher: ChromiumLauncher(
-        browserFinder: findEdgeExecutable,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        operatingSystemUtils: operatingSystemUtils,
-      ),
-    );
     _webServerDevice = WebServerDevice(
       logger: logger,
     );
   }
 
   GoogleChromeDevice _chromeDevice;
-  MicrosoftEdgeDevice _edgeDevice;
   WebServerDevice _webServerDevice;
   final FeatureFlags _featureFlags;
 
@@ -297,8 +284,6 @@ class WebDevices extends PollingDeviceDiscovery {
     return <Device>[
       if (_chromeDevice.isSupported())
         _chromeDevice,
-      if (_edgeDevice.isSupported())
-        _edgeDevice,
       _webServerDevice,
     ];
   }
