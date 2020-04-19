@@ -95,7 +95,6 @@ void main() {
   setUp(() {
     resetChromeForTesting();
     mockDebugConnection = MockDebugConnection();
-    // mockVmService = MockVmService();
     mockDevice = MockDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();

@@ -211,7 +211,6 @@ void main() {
           }));
         });
 
-        print(observatoryLogs);
         expect(observatoryLogs.length, 9);
         expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
         expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
