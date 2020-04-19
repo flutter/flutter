@@ -529,9 +529,15 @@ class Timeseries {
 
     // Final statistics.
     final double cleanAverage = _computeAverage(name, cleanValues);
-    final double outlierAverage = _computeAverage(name, outliers);
     final double standardDeviation = _computeStandardDeviationForPopulation(name, cleanValues);
     final double noise = cleanAverage > 0.0 ? standardDeviation / cleanAverage : 0.0;
+
+    // Compute outlier average. If there are no outliers the outlier average is
+    // the same as clean value average. In other words, in a perfect benchmark
+    // with no noise the difference between average and outlier average is zero,
+    // which the best possible outcome. Noise produces a positive difference
+    // between the two.
+    final double outlierAverage = outliers.isNotEmpty ? _computeAverage(name, outliers) : cleanAverage;
 
     final List<AnnotatedSample> annotatedValues = <AnnotatedSample>[
       for (final double warmUpValue in warmUpValues)
