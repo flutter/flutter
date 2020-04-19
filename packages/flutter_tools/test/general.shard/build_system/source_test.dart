@@ -21,7 +21,6 @@ final Platform windowsPlatform = FakePlatform(
   operatingSystem: 'windows',
 );
 
-
 void main() {
   Testbed testbed;
   SourceVisitor visitor;
