@@ -362,6 +362,8 @@ class _WindowsUtils extends OperatingSystemUtils {
       return false;
     } on ArchiveException catch (_) {
       return false;
+    } on RangeError catch (_) {
+      return false;
     }
     return true;
   }

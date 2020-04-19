@@ -26,12 +26,26 @@ typedef ShardRunner = Future<void> Function();
 /// appropriate error message.
 typedef OutputChecker = String Function(CapturedOutput);
 
+final String exe = Platform.isWindows ? '.exe' : '';
+final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'pub$bat');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+
+String get platformFolderName {
+  if (Platform.isWindows)
+    return 'windows-x64';
+  if (Platform.isMacOS)
+    return 'darwin-x64';
+  if (Platform.isLinux)
+    return 'linux-x64';
+  throw UnsupportedError('The platform ${Platform.operatingSystem} is not supported by this script.');
+}
+final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', platformFolderName, 'flutter_tester$exe');
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
@@ -47,11 +61,16 @@ const int kDeviceLabShardCount = 4;
 
 /// The number of Cirrus jobs that run Web tests in parallel.
 ///
+/// The default is 8 shards. Typically .cirrus.yml would define the
+/// WEB_SHARD_COUNT environment variable rather than relying on the default.
+///
 /// WARNING: if you change this number, also change .cirrus.yml
 /// and make sure it runs _all_ shards.
 ///
 /// The last shard also runs the Web plugin tests.
-const int kWebShardCount = 8;
+int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
+  ? int.parse(Platform.environment['WEB_SHARD_COUNT'])
+  : 8;
 
 /// Tests that we don't run on Web for various reasons.
 //
@@ -113,6 +132,18 @@ Future<void> main(List<String> args) async {
 
 Future<void> _runSmokeTests() async {
   print('${green}Running smoketests...$reset');
+  // Verify the Flutter Engine is the revision we asked for.
+  final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
+  final CapturedOutput flutterTesterOutput = CapturedOutput();
+  await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
+  final String actualVersion = flutterTesterOutput.stderr.split('\n').firstWhere((final String line) {
+    return line.startsWith('Flutter Engine Version:');
+  });
+  if (!actualVersion.contains(expectedVersion)) {
+    print('${red}Expected "Flutter Engine Version: $expectedVersion", '
+          'but found "$actualVersion".');
+    exit(1);
+  }
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -539,12 +570,12 @@ Future<void> _runWebUnitTests() async {
     // We use a constant seed for repeatability.
     ..shuffle(math.Random(0));
 
-  assert(kWebShardCount >= 1);
-  final int testsPerShard = (allTests.length / kWebShardCount).ceil();
-  assert(testsPerShard * kWebShardCount >= allTests.length);
+  assert(webShardCount >= 1);
+  final int testsPerShard = (allTests.length / webShardCount).ceil();
+  assert(testsPerShard * webShardCount >= allTests.length);
 
   // This for loop computes all but the last shard.
-  for (int index = 0; index < kWebShardCount - 1; index += 1) {
+  for (int index = 0; index < webShardCount - 1; index += 1) {
     subshards['$index'] = () => _runFlutterWebTest(
       flutterPackageDirectory.path,
       allTests.sublist(
@@ -558,11 +589,11 @@ Future<void> _runWebUnitTests() async {
   //
   // We make sure the last shard ends in _last so it's easier to catch mismatches
   // between `.cirrus.yml` and `test.dart`.
-  subshards['${kWebShardCount - 1}_last'] = () async {
+  subshards['${webShardCount - 1}_last'] = () async {
     await _runFlutterWebTest(
       flutterPackageDirectory.path,
       allTests.sublist(
-        (kWebShardCount - 1) * testsPerShard,
+        (webShardCount - 1) * testsPerShard,
         allTests.length,
       ),
     );
@@ -585,6 +616,18 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
+  await _runWebReleaseTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -627,10 +670,56 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
   }
 }
 
+/// Run a web integration test in release mode.
+Future<void> _runWebReleaseTest(String target, {
+  List<String> additionalArguments = const<String>[],
+}) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
+
+  // Build the app.
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'build',
+      'web',
+      '--release',
+      ...additionalArguments,
+      '-t',
+      target,
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+
+  // Run the app.
+  final String result = await evalTestAppInChrome(
+    appUrl: 'http://localhost:8080/index.html',
+    appDirectory: appBuildDirectory,
+  );
+
+  if (result.contains('--- TEST SUCCEEDED ---')) {
+    print('${green}Web release mode test passed.$reset');
+  } else {
+    print(result);
+    print('${red}Web release mode test failed.$reset');
+    exit(1);
+  }
+}
+
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
-Future<void> _runWebDebugTest(String target) async {
+Future<void> _runWebDebugTest(String target, {
+  List<String> additionalArguments = const<String>[],
+}) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final CapturedOutput output = CapturedOutput();
   bool success = false;
@@ -642,6 +731,7 @@ Future<void> _runWebDebugTest(String target) async {
       '-d',
       'chrome',
       '--web-run-headless',
+      ...additionalArguments,
       '-t',
       target,
     ],
@@ -917,6 +1007,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
+    () => _runDevicelabTest('gradle_deprecated_settings_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_fat_apk_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_light_apk_test', environment: gradleEnvironment),
@@ -1087,7 +1178,6 @@ int get prNumber {
 }
 
 Future<String> _getAuthors() async {
-  final String exe = Platform.isWindows ? '.exe' : '';
   final String author = await runAndGetStdout(
     'git$exe', <String>['-c', 'log.showSignature=false', 'log', gitHash, '--pretty="%an <%ae>"'],
     workingDirectory: flutterRoot,

@@ -36,7 +36,7 @@ void main() {
 
   setUp(() {
     processManager = mocks.MockProcessManager();
-    platform = fakePlatform('macos');
+    platform = FakePlatform(operatingSystem: 'macos');
     fileSystem = MemoryFileSystem();
     fileSystem.file(xcodebuild).createSync(recursive: true);
     terminal = MockAnsiTerminal();
@@ -125,7 +125,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild isInstalled is false when not on MacOS', () {
-    final Platform platform = fakePlatform('notMacOS');
+    final Platform platform = FakePlatform(operatingSystem: 'notMacOS');
     xcodeProjectInterpreter = XcodeProjectInterpreter(
       logger: logger,
       fileSystem: fileSystem,
@@ -175,6 +175,7 @@ void main() {
   });
 
   testWithoutContext('xcodebuild build settings is empty when xcodebuild failed to get the build settings', () async {
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{});
     when(processManager.runSync(
               argThat(contains(xcodebuild)),
               workingDirectory: anyNamed('workingDirectory'),
@@ -190,6 +191,7 @@ void main() {
       flakes: 1,
       delay: delay + const Duration(seconds: 1),
     );
+    platform.environment = Map<String, String>.unmodifiable(<String, String>{});
 
     expect(await xcodeProjectInterpreter.getBuildSettings(
                 '', '', timeout: delay),
@@ -422,7 +424,7 @@ Information about project "Runner":
     FakePlatform platform;
 
     setUp(() {
-      platform = fakePlatform('ignored');
+      platform = FakePlatform();
     });
 
     testWithoutContext('environment variables as Xcode build settings', () {
@@ -447,7 +449,7 @@ Information about project "Runner":
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      macOS = fakePlatform('macos');
+      macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
@@ -801,10 +803,6 @@ flutter:
       );
     });
   });
-}
-
-FakePlatform fakePlatform(String name) {
-  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

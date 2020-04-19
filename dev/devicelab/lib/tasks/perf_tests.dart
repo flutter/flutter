@@ -189,6 +189,13 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
+TaskFunction createFadingChildAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/fading_child_animation_perf.dart',
+    'fading_child_animation_perf',
+  ).run;
+}
 
 /// Measure application startup performance.
 class StartupTest {
@@ -281,6 +288,9 @@ class PerfTest {
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        'average_vsync_transitions_missed',
+        '90th_percentile_vsync_transitions_missed',
+        '99th_percentile_vsync_transitions_missed',
         if (needsMeasureCpuGPu) 'cpu_percentage',
         if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
@@ -414,13 +424,8 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        String apkPath = '$cwd/build/app/outputs/apk/app.apk';
-        File apk = file(apkPath);
-        if (!apk.existsSync()) {
-          // Pre Android SDK 26 path
-          apkPath = '$cwd/build/app/outputs/apk/app-release.apk';
-          apk = file(apkPath);
-        }
+        final String apkPath = '$cwd/build/app/outputs/flutter-apk/app-release.apk';
+        final File apk = file(apkPath);
         releaseSizeInBytes = apk.lengthSync();
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -12,6 +13,7 @@ void main() {
   DateTime firstDate;
   DateTime lastDate;
   DateTime initialDate;
+  DateTime today;
   SelectableDayPredicate selectableDayPredicate;
   DatePickerEntryMode initialEntryMode;
   DatePickerMode initialCalendarMode;
@@ -37,6 +39,7 @@ void main() {
     firstDate = DateTime(2001, DateTime.january, 1);
     lastDate = DateTime(2031, DateTime.december, 31);
     initialDate = DateTime(2016, DateTime.january, 15);
+    today = DateTime(2016, DateTime.january, 3);
     selectableDayPredicate = null;
     initialEntryMode = DatePickerEntryMode.calendar;
     initialCalendarMode = DatePickerMode.day;
@@ -75,6 +78,7 @@ void main() {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      currentDate: today,
       selectableDayPredicate: selectableDayPredicate,
       initialDatePickerMode: initialCalendarMode,
       initialEntryMode: initialEntryMode,
@@ -504,7 +508,7 @@ void main() {
       });
     });
 
-    testWidgets('Can select initial date picker mode', (WidgetTester tester) async {
+    testWidgets('Can select initial calendar picker mode', (WidgetTester tester) async {
       initialDate = DateTime(2014, DateTime.january, 15);
       initialCalendarMode = DatePickerMode.year;
       await prepareDatePicker(tester, (Future<DateTime> date) async {
@@ -517,6 +521,18 @@ void main() {
       });
     });
 
+    testWidgets('currentDate is highlighted', (WidgetTester tester) async {
+      today = DateTime(2016, 1, 2);
+      await prepareDatePicker(tester, (Future<DateTime> date) async {
+        await tester.pump();
+        const Color todayColor = Color(0xff2196f3); // default primary color
+        expect(
+          Material.of(tester.element(find.text('2'))),
+          // The current day should be painted with a circle outline
+          paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0)
+        );
+      });
+    });
   });
 
   group('Input mode', () {

@@ -29,7 +29,6 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -109,7 +108,7 @@ void testUsingContext(
           AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
-          Doctor: () => FakeDoctor(),
+          Doctor: () => FakeDoctor(globals.logger),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -261,6 +260,8 @@ class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
 }
 
 class FakeDoctor extends Doctor {
+  FakeDoctor(Logger logger) : super(logger: logger);
+
   // True for testing.
   @override
   bool get canListAnything => true;

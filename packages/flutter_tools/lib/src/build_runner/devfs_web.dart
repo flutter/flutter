@@ -77,7 +77,8 @@ class WebExpressionCompiler implements ExpressionCompiler {
           content, compilerOutput.errorCount > 0);
     }
 
-    throw Exception('Failed to compile $expression');
+    return ExpressionCompilationResult(
+      'InternalError: frontend server failed to compile \'$expression\'', true);
   }
 }
 
@@ -136,7 +137,12 @@ class WebAssetServer implements AssetReader {
     DwdsLauncher dwdsLauncher = Dwds.start,
   }) async {
     try {
-      final InternetAddress address = (await InternetAddress.lookup(hostname)).first;
+      InternetAddress address;
+      if (hostname == 'any') {
+        address = InternetAddress.anyIPv4;
+      } else {
+        address = (await InternetAddress.lookup(hostname)).first;
+      }
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final PackageConfig packageConfig = await loadPackageConfigUri(
         globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
@@ -211,6 +217,7 @@ class WebAssetServer implements AssetReader {
           final Chrome chrome = await ChromeLauncher.connectedInstance;
           return chrome.chromeConnection;
         },
+        hostname: hostname,
         urlEncoder: urlTunneller,
         enableDebugging: true,
         useSseForDebugProxy: useSseForDebugProxy,
@@ -634,7 +641,11 @@ class WebDevFS implements DevFS {
       expressionCompiler,
       testMode: testMode,
     );
-    _baseUri = Uri.parse('http://$hostname:$port');
+    if (hostname == 'any') {
+      _baseUri = Uri.http('localhost:$port', '');
+    } else {
+      _baseUri = Uri.http('$hostname:$port', '');
+    }
     return _baseUri;
   }
 

@@ -126,7 +126,7 @@ Future<T> runInContext<T>(
       ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
-      Doctor: () => const Doctor(),
+      Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
       FeatureFlags: () => const FeatureFlags(),

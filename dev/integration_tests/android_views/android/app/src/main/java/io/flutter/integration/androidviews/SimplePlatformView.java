@@ -6,8 +6,13 @@ package io.flutter.integration.platformviews;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.PixelFormat;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import io.flutter.plugin.common.MethodCall;
@@ -24,7 +29,7 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
         view = new View(context) {
             @Override
             public boolean onTouchEvent(MotionEvent event) {
-                return super.onTouchEvent(event);
+                return true;
             }
         };
         view.setBackgroundColor(0xff0000ff);
@@ -52,21 +57,45 @@ public class SimplePlatformView implements PlatformView, MethodChannel.MethodCal
                 touchPipe.disable();
                 result.success(null);
                 return;
-            case "showAlertDialog":
-                showAlertDialog(result);
+            case "showAndHideAlertDialog":
+                showAndHideAlertDialog(result);
                 return;
+            case "addWindowAndWaitForClick":
+                addWindow(result);
+                return;
+
         }
         result.notImplemented();
     }
 
-    private void showAlertDialog(MethodChannel.Result result) {
+    private void showAndHideAlertDialog(MethodChannel.Result result) {
         Context context = view.getContext();
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         TextView textView = new TextView(context);
-        textView.setText("Alert!");
+        textView.setText("This alert dialog will close in 1 second");
         builder.setView(textView);
         final AlertDialog alertDialog = builder.show();
         result.success(null);
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.hide();
+            }
+        }, 1000);
+    }
+
+    private void addWindow(final MethodChannel.Result result) {
+        Context context = view.getContext();
+        final Button button = new Button(context);
+        button.setText("This view is added as a window");
+        final WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.OPAQUE);
+        layoutParams.gravity = Gravity.FILL;
+        windowManager.addView(button, layoutParams);
+        button.setOnClickListener(v -> {
+            windowManager.removeView(button);
+            result.success(null);
+        });
     }
 
 }

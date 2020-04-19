@@ -120,10 +120,10 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(color: sliderTheme.disabledActiveTrackColor)
         ..rect(color: sliderTheme.disabledInactiveTrackColor),
@@ -142,10 +142,10 @@ void main() {
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: true));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(color: customTheme.disabledActiveTrackColor)
         ..rrect(color: customTheme.disabledInactiveTrackColor),
@@ -164,10 +164,10 @@ void main() {
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(color: customTheme.disabledActiveTrackColor)
         ..rect(color: customTheme.disabledInactiveTrackColor),
@@ -266,7 +266,7 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     const Radius radius = Radius.circular(2);
     const Radius activatedRadius = Radius.circular(3);
@@ -274,7 +274,7 @@ void main() {
     // The enabled slider thumb has track segments that extend to and from
     // the center of the thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
@@ -285,7 +285,7 @@ void main() {
 
     // The disabled slider thumb is the same size as the enabled thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 297.0, 212.0, 303.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
@@ -300,12 +300,12 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // The enabled slider thumb has track segments that extend to and from
     // the center of the thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.activeTrackColor)
         ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.inactiveTrackColor),
@@ -316,7 +316,7 @@ void main() {
 
     // The disabled slider thumb is the same size as the enabled thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
         ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
@@ -331,11 +331,11 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // With no touch, paints only the thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(
           color: sliderTheme.thumbColor,
@@ -352,7 +352,7 @@ void main() {
 
     // After touch, paints thumb and overlay.
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(
           color: sliderTheme.overlayColor,
@@ -373,7 +373,7 @@ void main() {
 
     // After the gesture is up and complete, it again paints only the thumb.
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(
           color: sliderTheme.thumbColor,
@@ -392,20 +392,20 @@ void main() {
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
-    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 10.0));
+    expect(material, paints..circle(color: sliderTheme.thumbColor, radius: 10.0));
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor, radius: 10.0));
+    expect(material, paints..circle(color: sliderTheme.disabledThumbColor, radius: 10.0));
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3));
     await tester.pumpAndSettle(); // wait for enable animation
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.activeTickMarkColor)
@@ -418,7 +418,7 @@ void main() {
     await tester.pumpAndSettle(); // wait for disable animation
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
@@ -791,11 +791,11 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Top and bottom are centerY (300) + and - trackRadius (8).
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.activeTrackColor)
         ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.inactiveTrackColor),
@@ -807,7 +807,7 @@ void main() {
     // The disabled thumb is smaller so the active track has to paint longer to
     // get to the edge.
     expect(
-      sliderBox,
+      material,
       paints
         ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
         ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
@@ -821,11 +821,11 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Top and bottom are centerY (300) + and - trackRadius (8).
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.activeTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
@@ -837,7 +837,7 @@ void main() {
     // The disabled thumb is smaller so the active track has to paint longer to
     // get to the edge.
     expect(
-      sliderBox,
+      material,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 291.0, 212.0, 309.0, topLeft: activatedRadius, bottomLeft: activatedRadius), color: sliderTheme.disabledActiveTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
@@ -853,10 +853,10 @@ void main() {
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints..circle(x: 212, y: 300, radius: 7, color: sliderTheme.thumbColor),
     );
 
@@ -864,7 +864,7 @@ void main() {
     await tester.pumpAndSettle(); // wait for disable animation
 
     expect(
-      sliderBox,
+      material,
       paints..circle(x: 212, y: 300, radius: 11, color: sliderTheme.disabledThumbColor),
     );
   });
@@ -877,17 +877,17 @@ void main() {
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints..circle(x: 212, y: 300, radius: 9, color: sliderTheme.thumbColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
     expect(
-      sliderBox,
+      material,
       paints..circle(x: 212, y: 300, radius: 9, color: sliderTheme.disabledThumbColor),
     );
   });
@@ -903,10 +903,10 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
@@ -917,7 +917,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
@@ -936,10 +936,10 @@ void main() {
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2, useV2Slider: true));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 26, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
@@ -950,7 +950,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      sliderBox,
+      material,
       paints
         ..circle(x: 26, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
@@ -972,9 +972,9 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
     expect(
-      sliderBox,
+      material,
       paints..circle(
         x: center.dx,
         y: center.dy,
@@ -1005,9 +1005,11 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
-    expect(sliderBox, paintsNothing);
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the track', (WidgetTester tester) async {
@@ -1023,12 +1025,12 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Only 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
-    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+    expect(material, paintsExactlyCountTimes(#drawRect, 2));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the tick marks', (WidgetTester tester) async {
@@ -1047,12 +1049,12 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Only 5 tick marks.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 5));
-    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 5));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the thumb', (WidgetTester tester) async {
@@ -1068,12 +1070,12 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Only 1 thumb.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
-    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
   });
 
   testWidgets('The slider can skip all component painting except the overlay', (WidgetTester tester) async {
@@ -1089,7 +1091,7 @@ void main() {
       divisions: 4,
     ));
 
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
 
     // Tap the center of the track and wait for animations to finish.
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -1097,9 +1099,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Only 1 overlay.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 0));
-    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
-    expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 1));
+    expect(material, paintsExactlyCountTimes(#drawPath, 0));
 
     await gesture.up();
   });
@@ -1118,6 +1120,7 @@ void main() {
       divisions: 4,
     ));
 
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
 
     // Tap the center of the track and wait for animations to finish.
@@ -1126,8 +1129,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Only 1 value indicator.
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawRect, 0));
-    expect(valueIndicatorBox, paintsExactlyCountTimes(#drawCircle, 0));
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
 
     await gesture.up();
@@ -1148,6 +1151,7 @@ void main() {
       divisions: 4,
     ));
 
+    final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
 
     // Tap the center of the track to kick off the animation of the value indicator.
@@ -1156,6 +1160,8 @@ void main() {
 
     // Nothing to paint at scale 0.
     await tester.pump();
+    expect(material, paintsExactlyCountTimes(#drawRect, 0));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 0));
     expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
 
     // Painting a path for the value indicator.

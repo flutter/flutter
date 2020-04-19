@@ -20,7 +20,8 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Platform _kNoColorTerminalPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Platform _kNoColorTerminalPlatform = FakePlatform(
+  stdoutSupportsAnsi: false);
 
 void main() {
   String analyzerSeparator;
@@ -296,6 +297,32 @@ StringBuffer bar = StringBuffer('baz');
           terminal: terminal,
         ),
         arguments: <String>['analyze', '--no-pub'],
+        statusTextContains: <String>['No issues found!'],
+      );
+    } finally {
+      tryToDelete(tempDir);
+    }
+  });
+
+  testUsingContext('analyze once supports analyzing null-safe code', () async {
+    const String contents = '''
+int? bar;
+''';
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_analyze_once_test_null_safety.');
+    _createDotPackages(tempDir.path);
+
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    try {
+      await runCommand(
+        command: AnalyzeCommand(
+          workingDirectory: fileSystem.directory(tempDir),
+          platform: _kNoColorTerminalPlatform,
+          fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          terminal: terminal,
+        ),
+        arguments: <String>['analyze', '--no-pub', '--enable-experiment=non-nullable'],
         statusTextContains: <String>['No issues found!'],
       );
     } finally {

@@ -19,7 +19,6 @@ import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
-import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -242,12 +241,8 @@ Future<String> _doctorText() async {
       outputPreferences: globals.outputPreferences,
     );
 
-    await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true, showColor: false),
-      overrides: <Type, Generator>{
-        Logger: () => logger,
-      },
-    );
+    final Doctor doctor = Doctor(logger: logger);
+    await doctor.diagnose(verbose: true, showColor: false);
 
     return logger.statusText;
   } on Exception catch (error, trace) {
