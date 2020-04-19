@@ -75,19 +75,22 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'elevation: 10.0',
-      'selectedIconTheme: IconThemeData#ef33e(size: 1.0)',
-      'unselectedIconTheme: IconThemeData#f4cc2(size: 2.0)',
-      'selectedItemColor: Color(0xfffffff1)',
-      'unselectedItemColor: Color(0xfffffff2)',
-      'selectedLabelStyle: TextStyle(inherit: true, size: 3.0)',
-      'unselectedLabelStyle: TextStyle(inherit: true, size: 4.0)',
-      'showSelectedLabels: true',
-      'showUnselectedLabels: true',
-      'type: BottomNavigationBarType.fixed',
-    ]);
+    expect(description[0], 'backgroundColor: Color(0xfffffff0)');
+    expect(description[1], 'elevation: 10.0');
+
+    // Ignore instance address for IconThemeData.
+    expect(description[2].contains('selectedIconTheme: IconThemeData'), isTrue);
+    expect(description[2].contains('(size: 1.0)'), isTrue);
+    expect(description[3].contains('unselectedIconTheme: IconThemeData'), isTrue);
+    expect(description[3].contains('(size: 2.0)'), isTrue);
+
+    expect(description[4], 'selectedItemColor: Color(0xfffffff1)');
+    expect(description[5], 'unselectedItemColor: Color(0xfffffff2)');
+    expect(description[6], 'selectedLabelStyle: TextStyle(inherit: true, size: 3.0)');
+    expect(description[7], 'unselectedLabelStyle: TextStyle(inherit: true, size: 4.0)');
+    expect(description[8], 'showSelectedLabels: true');
+    expect(description[9], 'showUnselectedLabels: true');
+    expect(description[10], 'type: BottomNavigationBarType.fixed');
   });
 
   testWidgets('BottomNavigationBar is themable', (WidgetTester tester) async {
