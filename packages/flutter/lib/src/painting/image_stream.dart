@@ -516,7 +516,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Calls all the registered ImageChunkListeners (listeners with an
+  /// Calls all the registered image chunk listeners (listeners with an
   /// [ImageStreamListener.onChunk] specified) to notify them of a new
   /// [ImageChunkEvent].
   @protected
@@ -643,10 +643,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       );
     });
     if (chunkEvents != null) {
-      chunkEvents.listen(
-        (ImageChunkEvent event) {
-          reportImageChunkEvent(event);
-        }, onError: (dynamic error, StackTrace stack) {
+      chunkEvents.listen(reportImageChunkEvent,
+        onError: (dynamic error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
             exception: error,
