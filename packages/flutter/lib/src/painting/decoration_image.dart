@@ -47,10 +47,12 @@ class DecorationImage {
     this.centerSlice,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
+    this.scale = 1.0
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
-       assert(matchTextDirection != null);
+       assert(matchTextDirection != null),
+       assert(scale != null);
 
   /// The image to be painted into the decoration.
   ///
@@ -129,6 +131,12 @@ class DecorationImage {
   /// in the top right.
   final bool matchTextDirection;
 
+  /// Defines image pixels to be shown per logical pixels.
+  ///
+  /// By default the the value of scale is 1.0. The scale for the image is
+  /// calculated by multiplying [scale] with `scale` of the given [ImageProvider].
+  final double scale;
+
   /// Creates a [DecorationImagePainter] for this [DecorationImage].
   ///
   /// The `onChanged` argument must not be null. It will be called whenever the
@@ -152,11 +160,12 @@ class DecorationImage {
         && other.alignment == alignment
         && other.centerSlice == centerSlice
         && other.repeat == repeat
-        && other.matchTextDirection == matchTextDirection;
+        && other.matchTextDirection == matchTextDirection
+        && other.scale == scale;
   }
 
   @override
-  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat, matchTextDirection);
+  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat, matchTextDirection, scale);
 
   @override
   String toString() {
@@ -175,6 +184,7 @@ class DecorationImage {
         '$repeat',
       if (matchTextDirection)
         'match text direction',
+      'scale: $scale'
     ];
     return '${objectRuntimeType(this, 'DecorationImage')}(${properties.join(", ")})';
   }
@@ -263,7 +273,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
-      scale: _image.scale,
+      scale: _details.scale * _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
