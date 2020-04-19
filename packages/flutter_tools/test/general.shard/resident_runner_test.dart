@@ -30,7 +30,6 @@ import 'package:mockito/mockito.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/testbed.dart';
-import 'vmservice_test.dart';
 
 void main() {
   final Uri testUri = Uri.parse('foo://bar');
