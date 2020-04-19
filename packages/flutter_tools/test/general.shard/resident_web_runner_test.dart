@@ -51,7 +51,6 @@ void main() {
   MockDevice mockDevice;
 
   setUp(() {
-    resetChromeForTesting();
     mockDebugConnection = MockDebugConnection();
     mockVmService = MockVmService();
     mockDevice = MockDevice();
@@ -143,7 +142,9 @@ void main() {
   }
 
   test('runner with web server device does not support debugging without --start-paused', () => testbed.run(() {
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+      logger: BufferLogger.test(),
+    ));
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -161,7 +162,9 @@ void main() {
 
   test('runner with web server device supports debugging with --start-paused', () => testbed.run(() {
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+      logger: BufferLogger.test(),
+    ));
     final ResidentRunner profileResidentWebRunner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -311,7 +314,23 @@ void main() {
 
   test('Can hot reload after attaching', () => testbed.run(() async {
     _setupMocks();
-    launchChromeInstance(mockChrome);
+    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
+    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
+      .thenAnswer((Invocation invocation) async {
+        return mockChrome;
+      });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return mockChrome;
+    });
+    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+      fileSystem: globals.fs,
+      chromiumLauncher: chromiumLauncher,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    ));
+    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
+    chromiumLauncher.testLaunchChromium(mockChrome);
     when(mockWebDevFS.update(
       mainPath: anyNamed('mainPath'),
       target: anyNamed('target'),
@@ -350,7 +369,7 @@ void main() {
 
     expect(config, allOf(<Matcher>[
       containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', null),
+      containsPair('cd28', 'unknown'),
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
@@ -361,7 +380,23 @@ void main() {
 
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
-    launchChromeInstance(mockChrome);
+    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
+    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
+      .thenAnswer((Invocation invocation) async {
+        return mockChrome;
+      });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return mockChrome;
+    });
+    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
+    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+      fileSystem: globals.fs,
+      chromiumLauncher: chromiumLauncher,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    ));
+    chromiumLauncher.testLaunchChromium(mockChrome);
     String entrypointFileName;
     when(mockWebDevFS.update(
       mainPath: anyNamed('mainPath'),
@@ -403,7 +438,7 @@ void main() {
 
     expect(config, allOf(<Matcher>[
       containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', null),
+      containsPair('cd28', 'unknown'),
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
@@ -818,7 +853,22 @@ void main() {
 
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(ChromeDevice());
+    final ChromiumLauncher chromiumLauncher = MockChromeLauncher();
+    when(chromiumLauncher.launch(any, cacheDir: anyNamed('cacheDir')))
+      .thenAnswer((Invocation invocation) async {
+        return mockChrome;
+      });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return mockChrome;
+    });
+    when(mockFlutterDevice.device).thenReturn(GoogleChromeDevice(
+      fileSystem: globals.fs,
+      chromiumLauncher: chromiumLauncher,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    ));
+    when(chromiumLauncher.canFindExecutable()).thenReturn(true);
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
       return Uri.parse('http://localhost:8765/app/');
     });
@@ -833,7 +883,7 @@ void main() {
       return mockWipConnection;
     });
     when(chrome.chromeConnection).thenReturn(mockChromeConnection);
-    launchChromeInstance(chrome);
+    chromiumLauncher.testLaunchChromium(chrome);
 
     final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
@@ -865,12 +915,13 @@ void main() {
     )));
   }, overrides: <Type, Generator>{
     Logger: () => DelegateLogger(BufferLogger.test()),
-    ChromeLauncher: () => MockChromeLauncher(),
   }));
 
   test('Sends unlaunched app.webLaunchUrl event for Web Server device', () => testbed.run(() async {
     _setupMocks();
-    when(mockFlutterDevice.device).thenReturn(WebServerDevice());
+    when(mockFlutterDevice.device).thenReturn(WebServerDevice(
+      logger: globals.logger,
+    ));
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
       return Uri.parse('http://localhost:8765/app/');
     });
@@ -1014,9 +1065,9 @@ void main() {
   }));
 }
 
-class MockChromeLauncher extends Mock implements ChromeLauncher {}
+class MockChromeLauncher extends Mock implements ChromiumLauncher {}
 class MockFlutterUsage extends Mock implements Usage {}
-class MockChromeDevice extends Mock implements ChromeDevice {}
+class MockChromeDevice extends Mock implements ChromiumDevice {}
 class MockDebugConnection extends Mock implements DebugConnection {}
 class MockAppConnection extends Mock implements AppConnection {}
 class MockVmService extends Mock implements VmService {}
@@ -1024,7 +1075,7 @@ class MockStatus extends Mock implements Status {}
 class MockFlutterDevice extends Mock implements FlutterDevice {}
 class MockWebDevFS extends Mock implements WebDevFS {}
 class MockResidentCompiler extends Mock implements ResidentCompiler {}
-class MockChrome extends Mock implements Chrome {}
+class MockChrome extends Mock implements Chromium {}
 class MockChromeConnection extends Mock implements ChromeConnection {}
 class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}

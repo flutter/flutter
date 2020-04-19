@@ -113,6 +113,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event> _stdErrSub;
   bool _exited = false;
   WipConnection _wipConnection;
+  ChromiumLauncher _chromiumLauncher;
 
   vmservice.VmService get _vmService =>
       _connectionResult?.debugConnection?.vmService;
@@ -157,9 +158,8 @@ abstract class ResidentWebRunner extends ResidentRunner {
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory.path}',
       );
     }
-    if (ChromeLauncher.hasChromeInstance) {
-      final Chrome chrome = await ChromeLauncher.connectedInstance;
-      await chrome.close();
+    if (_chromiumLauncher != null) {
+      await (await _chromiumLauncher.connectedInstance).close();
     }
     _exited = true;
   }
@@ -408,6 +408,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
 
+    if (device.device is ChromiumDevice) {
+      _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
+    }
+
     try {
       return await asyncGuard(() async {
         // Ensure dwds resources are cached. If the .packages file is missing then
@@ -433,6 +437,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
+          chromiumLauncher: _chromiumLauncher,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -646,8 +651,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    if (device.device is ChromeDevice) {
-      final Chrome chrome = await ChromeLauncher.connectedInstance;
+    if (_chromiumLauncher != null) {
+      final Chromium chrome = await _chromiumLauncher.connectedInstance;
       final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
       });

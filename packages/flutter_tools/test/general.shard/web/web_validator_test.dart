@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
@@ -17,9 +18,9 @@ import '../../src/fake_process_manager.dart';
 void main() {
   Platform platform;
   ProcessManager processManager;
-  ChromeLauncher chromeLauncher;
+  ChromiumLauncher chromeLauncher;
   FileSystem fileSystem;
-  WebValidator webValidator;
+  ChromiumValidator webValidator;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -28,17 +29,17 @@ void main() {
       operatingSystem: 'macos',
       environment: <String, String>{},
     );
-    chromeLauncher = ChromeLauncher(
+    chromeLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       operatingSystemUtils: null,
-      logger: null,
+      logger: BufferLogger.test(),
+      browserFinder: findChromeExecutable,
     );
-    webValidator = webValidator = WebValidator(
+    webValidator = webValidator = ChromeValidator(
       platform: platform,
-      chromeLauncher: chromeLauncher,
-      fileSystem: fileSystem,
+      chromiumLauncher: chromeLauncher,
     );
   });
 

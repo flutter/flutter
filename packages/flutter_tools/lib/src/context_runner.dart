@@ -45,7 +45,6 @@ import 'persistent_tool_state.dart';
 import 'reporting/reporting.dart';
 import 'run_hot.dart';
 import 'version.dart';
-import 'web/chrome.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
@@ -97,13 +96,6 @@ Future<T> runInContext<T>(
       Cache: () => Cache(
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: globals.platform,
-      ),
-      ChromeLauncher: () => ChromeLauncher(
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        operatingSystemUtils: globals.os,
         platform: globals.platform,
       ),
       CocoaPods: () => CocoaPods(

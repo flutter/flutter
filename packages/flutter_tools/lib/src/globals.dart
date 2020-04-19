@@ -34,7 +34,6 @@ import 'persistent_tool_state.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
 import 'version.dart';
-import 'web/chrome.dart';
 
 Artifacts get artifacts => context.get<Artifacts>();
 BuildSystem get buildSystem => context.get<BuildSystem>();
@@ -182,9 +181,6 @@ PlistParser get plistParser => context.get<PlistParser>() ?? (
     logger: logger,
 ));
 PlistParser _plistInstance;
-
-/// The [ChromeLauncher] instance.
-ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// The global template renderer
 TemplateRenderer get templateRenderer => context.get<TemplateRenderer>();

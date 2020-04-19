@@ -75,7 +75,7 @@ void main() {
     overrides: <Type, Generator>{
       DeviceManager: () => DeviceManager(),
       Config: () => config,
-      ChromeLauncher: () => _DisabledChromeLauncher(),
+      ChromiumLauncher: () => _DisabledChromeLauncher(),
     });
   });
 }
@@ -85,11 +85,11 @@ void main() {
 // Also, Chrome may have different versions on different machines and
 // JSON will not match, because the `sdk` field of the Device contains version number
 // Mock the launcher to make it appear that we don't have Chrome.
-class _DisabledChromeLauncher implements ChromeLauncher {
+class _DisabledChromeLauncher extends ChromiumLauncher {
   @override
-  bool canFindChrome() => false;
+  bool canFindExecutable() => false;
 
   @override
-  Future<Chrome> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir})
-    => Future<Chrome>.error('Chrome disabled');
+  Future<Chromium> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir})
+    => Future<Chromium>.error('Chrome disabled');
 }

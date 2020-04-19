@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:meta/meta.dart';
 
 import 'android/android_studio_validator.dart';
@@ -82,10 +83,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (globals.iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode, userMessages: userMessages), cocoapodsValidator]),
       if (webWorkflow.appliesToHostPlatform)
-        WebValidator(
-          chromeLauncher: globals.chromeLauncher,
+        ChromeValidator(
+          chromiumLauncher: ChromiumLauncher(
+            browserFinder: findChromeExecutable,
+            fileSystem: globals.fs,
+            logger: globals.logger,
+            operatingSystemUtils: globals.os,
+            platform:  globals.platform,
+            processManager: globals.processManager,
+          ),
           platform: globals.platform,
-          fileSystem: globals.fs,
         ),
       if (linuxWorkflow.appliesToHostPlatform)
         LinuxDoctorValidator(
