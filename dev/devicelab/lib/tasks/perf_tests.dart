@@ -306,33 +306,15 @@ class WebCompileTest {
   Future<TaskResult> run() async {
     final Map<String, Object> metrics = <String, Object>{};
 
-    await inDirectory<void>('${flutterDirectory.path}/examples/hello_world', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
-      metrics.addAll(await getSize(output, metric: 'hello_world'));
-    });
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/examples/hello_world',
+      metric: 'hello_world',
+    ));
 
-    await inDirectory<void>('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery/build/web/main.dart.js';
-      metrics.addAll(await getSize(output, metric: 'flutter_gallery'));
-    });
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+      metric: 'flutter_gallery',
+    ));
 
     const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
@@ -344,18 +326,11 @@ class WebCompileTest {
         'FLUTTER_WEB': 'true',
       });
     });
-    await inDirectory<void>(sampleDir, () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      metrics.addAll(await getSize(path.join(sampleDir.path, 'build/web/main.dart.js'), metric: 'basic_material_app'));
-    });
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: sampleDir.path,
+      metric: 'basic_material_app',
+    ));
 
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
