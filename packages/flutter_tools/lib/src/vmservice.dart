@@ -480,7 +480,7 @@ class VMService implements vm_service.VmService {
 
   @override
   Future<vm_service.Response> callServiceExtension(String method,
-      {String isolateId, Map<Sring, Object> args}) {
+      {String isolateId, Map<String, Object> args}) {
     return _delegateService.callServiceExtension(method, isolateId: isolateId, args: args);
   }
 
