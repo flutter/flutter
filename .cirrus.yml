@@ -616,7 +616,7 @@ task:
     - name: verify_binaries_codesigned-macos # macos-only
       # TODO(fujino): remove this `only_if` after https://github.com/flutter/flutter/issues/44372
       # Only run pre/post submit for release branches
-      only_if: $CIRRUS_BASE_BRANCH == 'dev' || $CIRRUS_BRANCH == 'dev' || $CIRRUS_BASE_BRANCH == 'beta' || $CIRRUS_BRANCH == 'beta' || $CIRRUS_BASE_BRANCH == 'stable' || $CIRRUS_BRANCH == 'stable' || $CIRRUS_BASE_BRANCH =~ 'flutter-.*candidate\.' || $CIRRUS_BRANCH == 'flutter-.*candidate\.'
+      only_if: $CIRRUS_BASE_BRANCH == 'dev' || $CIRRUS_BRANCH == 'dev' || $CIRRUS_BASE_BRANCH == 'beta' || $CIRRUS_BRANCH == 'beta' || $CIRRUS_BASE_BRANCH == 'stable' || $CIRRUS_BRANCH == 'stable' || $CIRRUS_BASE_BRANCH =~ 'candidate' || $CIRRUS_BRANCH =~ 'candidate'
       depends_on:
         - analyze-linux
       script:
