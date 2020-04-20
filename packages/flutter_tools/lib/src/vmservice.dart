@@ -477,6 +477,9 @@ class VMService implements vm_service.VmService {
 
   @override
   Future<void> get onDone => _delegateService.onDone;
+  
+  @override
+  Future<vm_service.VM> getVM() => _delegateService.getVM();
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
     StreamController<ServiceEvent> controller = _eventControllers[eventName];
