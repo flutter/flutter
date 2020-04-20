@@ -358,6 +358,7 @@ class WebCompileTest {
       });
       metrics.addAll(await getSize(path.join(sampleDir.path, 'build/web/main.dart.js'), metric: 'basic_material_app'));
     });
+
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 
