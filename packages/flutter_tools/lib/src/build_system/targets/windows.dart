@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
@@ -25,7 +24,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_windows.h',
   'icudtl.dat',
-  'cpp_client_wrapper/',
+  'cpp_client_wrapper',
 ];
 
 /// Copies the Windows desktop embedding files to the copy directory.
