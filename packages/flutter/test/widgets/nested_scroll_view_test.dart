@@ -27,7 +27,6 @@ Widget buildTest({
   String title = 'TTTTTTTT',
   Key key,
   bool expanded = true,
-  ScrollPhysics physics,
 }) {
   return Localizations(
     locale: const Locale('en', 'US'),
@@ -45,7 +44,6 @@ Widget buildTest({
             length: 4,
             child: NestedScrollView(
               key: key,
-              physics: physics,
               dragStartBehavior: DragStartBehavior.down,
               controller: controller,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
