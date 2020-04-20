@@ -83,8 +83,8 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.oldVmService.httpAddress,
-        wsUri: flutterDevices.first.oldVmService.wsAddress,
+        httpUri: flutterDevices.first.flutterDeprecatedVmService.httpAddress,
+        wsUri: flutterDevices.first.flutterDeprecatedVmService.wsAddress,
       ));
     }
 
@@ -105,7 +105,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
-          device.oldVmService,
+          device.flutterDeprecatedVmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
@@ -197,7 +197,7 @@ class ColdRunner extends ResidentRunner {
         // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
           'An Observatory debugger and profiler on $dname is available at: '
-          '${device.oldVmService.httpAddress}',
+          '${device.flutterDeprecatedVmService.httpAddress}',
         );
       }
     }

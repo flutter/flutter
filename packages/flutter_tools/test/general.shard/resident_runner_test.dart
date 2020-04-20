@@ -110,7 +110,7 @@ void main() {
     when(mockFlutterDevice.vmService).thenAnswer((Invocation invocation) {
       return fakeVmServiceHost.vmService;
     });
-    when(mockFlutterDevice.oldVmService).thenAnswer((Invocation invocation) {
+    when(mockFlutterDevice.flutterDeprecatedVmService).thenAnswer((Invocation invocation) {
       return mockVMService;
     });
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });

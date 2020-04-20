@@ -250,8 +250,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.oldVmService.httpAddress,
-            wsUri: flutterDevices.first.oldVmService.wsAddress,
+            httpUri: flutterDevices.first.flutterDeprecatedVmService.httpAddress,
+            wsUri: flutterDevices.first.flutterDeprecatedVmService.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -550,7 +550,7 @@ class HotRunner extends ResidentRunner {
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
       // will not be restared, and so they must be manually killed.
-      for (final Isolate isolate in device?.oldVmService?.vm?.isolates ?? <Isolate>[]) {
+      for (final Isolate isolate in device?.flutterDeprecatedVmService?.vm?.isolates ?? <Isolate>[]) {
         if (!uiIsolates.contains(isolate)) {
           operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
             'isolateId': isolate.id,
@@ -1106,7 +1106,7 @@ class HotRunner extends ResidentRunner {
       // Caution: This log line is parsed by device lab tests.
       globals.printStatus(
         'An Observatory debugger and profiler on $dname is available at: '
-        '${device.oldVmService.httpAddress}',
+        '${device.flutterDeprecatedVmService.httpAddress}',
       );
     }
   }

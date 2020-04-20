@@ -219,27 +219,27 @@ class FlutterDevice {
   }
 
   // TODO(jonahwilliams): remove once all callsites are updated.
-  VMService get oldVmService => vmService as VMService;
+  VMService get flutterDeprecatedVmService => vmService as VMService;
 
   Future<void> refreshViews() async {
     if (vmService == null) {
       return;
     }
-    await oldVmService.vm.refreshViews(waitForViews: true);
+    await flutterDeprecatedVmService.vm.refreshViews(waitForViews: true);
   }
 
   List<FlutterView> get views {
-    if (vmService == null || oldVmService.isClosed) {
+    if (vmService == null || flutterDeprecatedVmService.isClosed) {
       return <FlutterView>[];
     }
 
 
     return (viewFilter != null
-        ? oldVmService.vm.allViewsWithName(viewFilter)
-        : oldVmService.vm.views).toList();
+        ? flutterDeprecatedVmService.vm.allViewsWithName(viewFilter)
+        : flutterDeprecatedVmService.vm.views).toList();
   }
 
-  Future<void> getVMs() => oldVmService.getVMOld();
+  Future<void> getVMs() => flutterDeprecatedVmService.getVMOld();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -284,7 +284,7 @@ class FlutterDevice {
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      oldVmService,
+      flutterDeprecatedVmService,
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
@@ -300,7 +300,7 @@ class FlutterDevice {
     final String deviceEntryUri = devFS.baseUri
       .resolveUri(globals.fs.path.toUri(entryPath)).toString();
     return <Future<vm_service.ReloadReport>>[
-      for (final Isolate isolate in oldVmService.vm.isolates)
+      for (final Isolate isolate in flutterDeprecatedVmService.vm.isolates)
         vmService.reloadSources(
           isolate.id,
           pause: pause,
@@ -842,7 +842,7 @@ abstract class ResidentRunner {
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first.oldVmService.wsAddress.toString();
+        final String address = flutterDevices.first.flutterDeprecatedVmService.wsAddress.toString();
         final File vmserviceOutFile = globals.fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -1097,7 +1097,7 @@ abstract class ResidentRunner {
         <String, dynamic>{
           'reuseWindows': true,
         },
-        flutterDevices.first.oldVmService.httpAddress,
+        flutterDevices.first.flutterDeprecatedVmService.httpAddress,
         'http://${_devtoolsServer.address.host}:${_devtoolsServer.port}',
         false,  // headless mode,
         false,  // machine mode
