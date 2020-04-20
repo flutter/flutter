@@ -42,6 +42,7 @@ void main() {
     MockDeviceManager mockDeviceManager;
     MockFlutterVersion mockStableFlutterVersion;
     MockFlutterVersion mockUnstableFlutterVersion;
+    MockStdio mockStdio;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -49,6 +50,10 @@ void main() {
       mockDeviceManager = MockDeviceManager();
       mockStableFlutterVersion = MockFlutterVersion(isStable: true);
       mockUnstableFlutterVersion = MockFlutterVersion(isStable: false);
+    });
+
+    setUp((){
+      mockStdio = MockStdio()..stdout.terminalColumns = 80;
     });
 
     testUsingContext('fails when target not found', () async {
@@ -145,7 +150,7 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => MockDeviceManager(),
-      Stdio: () => MockStdio(),
+      Stdio: () => mockStdio,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
