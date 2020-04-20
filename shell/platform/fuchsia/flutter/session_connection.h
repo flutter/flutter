@@ -68,6 +68,10 @@ class SessionConnection final {
   void OnSessionSizeChangeHint(float width_change_factor,
                                float height_change_factor);
 
+  VulkanSurfaceProducer* vulkan_surface_producer() {
+    return surface_producer_.get();
+  }
+
  private:
   const std::string debug_label_;
   scenic::Session session_wrapper_;
