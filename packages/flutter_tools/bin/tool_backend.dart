@@ -33,6 +33,7 @@ or
 ''');
     exit(1);
   }
+
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
   final String target = targetPlatform == 'windows-x64'
