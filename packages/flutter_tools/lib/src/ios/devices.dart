@@ -24,7 +24,6 @@ import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../vmservice.dart';
 import 'fallback_discovery.dart';
 import 'ios_deploy.dart';
 import 'ios_workflow.dart';
@@ -561,18 +560,18 @@ class IOSDeviceLogReader extends DeviceLogReader {
   Stream<String> get logLines => _linesController.stream;
 
   @override
-  VMService get connectedVMService => _connectedVMService;
-  VMService _connectedVMService;
+  vm_service.VmService get connectedVMService => _connectedVMService;
+  vm_service.VmService _connectedVMService;
 
   @override
-  set connectedVMService(VMService connectedVmService) {
+  set connectedVMService(vm_service.VmService connectedVmService) {
     _listenToUnifiedLoggingEvents(connectedVmService);
     _connectedVMService = connectedVmService;
   }
 
   static const int _minimumUniversalLoggingSdkVersion = 13;
 
-  Future<void> _listenToUnifiedLoggingEvents(VMService connectedVmService) async {
+  Future<void> _listenToUnifiedLoggingEvents(vm_service.VmService connectedVmService) async {
     if (_majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
