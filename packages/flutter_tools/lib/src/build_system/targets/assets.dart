@@ -63,11 +63,8 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
           inputs.add(content.file as File);
-          // Only tree shake MaterialIcons-Regular.ttf font.
-          final bool isMaterialIcons = globals.fs.path
-            .basename(content.file.path) == kMaterialIconsFontName;
-          if (!isMaterialIcons || !await iconTreeShaker.subsetFont(
-            inputPath: content.file.path,
+          if (!await iconTreeShaker.subsetFont(
+            input: content.file as File,
             outputPath: file.path,
             relativePath: entry.key,
           )) {
