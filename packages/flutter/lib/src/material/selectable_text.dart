@@ -218,6 +218,7 @@ class SelectableText extends StatefulWidget {
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollPhysics,
     this.textWidthBasis,
@@ -267,6 +268,7 @@ class SelectableText extends StatefulWidget {
     this.cursorColor,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection = true,
+    this.selectionControls,
     this.onTap,
     this.scrollPhysics,
     this.textWidthBasis,
@@ -384,6 +386,20 @@ class SelectableText extends StatefulWidget {
   bool get selectionEnabled {
     return enableInteractiveSelection;
   }
+  
+  /// Optional delegate for building the text selection handles and toolbar.
+  ///
+  /// If not specified, the platform default controls will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoTextField], which wraps an [EditableText] and which shows the
+  ///    selection toolbar upon user events that are appropriate on the iOS
+  ///    platform.
+  ///  * [TextField], a Material Design themed wrapper of [EditableText], which
+  ///    shows the selection toolbar upon appropriate user events based on the
+  ///    user's platform set in [ThemeData.platform].
+  final TextSelectionControls selectionControls;
 
   /// Called when the user taps on this selectable text.
   ///
@@ -565,7 +581,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         forcePressEnabled = true;
-        textSelectionControls = cupertinoTextSelectionControls;
+        textSelectionControls = widget.selectionControls ?? cupertinoTextSelectionControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor ??= CupertinoTheme.of(context).primaryColor;
@@ -578,7 +594,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls = materialTextSelectionControls;
+        textSelectionControls = widget.selectionControls ?? materialTextSelectionControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= themeData.cursorColor;
