@@ -421,6 +421,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
+          dartDefines: debuggingOptions.buildInfo.dartDefines,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {

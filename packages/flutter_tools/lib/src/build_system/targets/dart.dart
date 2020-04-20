@@ -60,6 +60,9 @@ const String kFileSystemRoots = 'FileSystemRoots';
 /// Defines specified via the `--dart-define` command-line option.
 const String kDartDefines = 'DartDefines';
 
+/// Use Path Strategy name that can be specified as a dart-define
+const String kUsePathStrategy = 'flutter.web.usePathStrategy';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not

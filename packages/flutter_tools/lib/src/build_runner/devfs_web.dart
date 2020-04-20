@@ -22,6 +22,7 @@ import '../base/io.dart';
 import '../base/net.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/dart.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
@@ -136,6 +137,7 @@ class WebAssetServer implements AssetReader {
     ExpressionCompiler expressionCompiler, {
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
+    List<String> dartDefines = const <String>[],
   }) async {
     try {
       InternetAddress address;
@@ -158,16 +160,25 @@ class WebAssetServer implements AssetReader {
         modules,
         digests,
       );
+
+      // Parse dart defines to find use path strategy flag
+      final bool usePathStrategy = dartDefines
+          .any((String el) => el.toLowerCase() == '$kUsePathStrategy=true');
+
+      server.enableIndexRewrite = usePathStrategy;
+
       if (testMode) {
         return server;
       }
 
       // In release builds deploy a simpler proxy server.
       if (buildMode != BuildMode.debug) {
-        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(entrypoint);
+        final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
+            entrypoint, usePathStrategy);
         shelf.serveRequests(httpServer, releaseAssetServer.handle);
         return server;
       }
+
       // Return the set of all active modules. This is populated by the
       // frontend_server update logic.
       Future<Map<String, String>> moduleProvider(String path) async {
@@ -332,6 +343,12 @@ class WebAssetServer implements AssetReader {
       file = globals.fs.file(webPath);
     }
 
+    if (!file.existsSync() && enableIndexRewrite) {
+      file = globals.fs.currentDirectory
+        .childDirectory('web')
+        .childFile('index.html');
+    }
+
     if (!file.existsSync()) {
       return shelf.Response.notFound('');
     }
@@ -430,6 +447,9 @@ class WebAssetServer implements AssetReader {
     }
     return modules;
   }
+
+  /// Whether to enable Index rewrite
+  bool enableIndexRewrite = false;
 
   /// Whether to use the cavaskit SDK for rendering.
   bool canvasKitRendering = false;
@@ -564,6 +584,7 @@ class WebDevFS implements DevFS {
     @required this.entrypoint,
     @required this.expressionCompiler,
     @required this.chromiumLauncher,
+    @required this.dartDefines,
     this.testMode = false,
   });
 
@@ -578,6 +599,7 @@ class WebDevFS implements DevFS {
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
   final ChromiumLauncher chromiumLauncher;
+  final List<String> dartDefines;
 
   WebAssetServer webAssetServer;
 
@@ -645,6 +667,7 @@ class WebDevFS implements DevFS {
       entrypoint,
       expressionCompiler,
       testMode: testMode,
+      dartDefines: dartDefines,
     );
     if (hostname == 'any') {
       _baseUri = Uri.http('localhost:$port', '');
@@ -794,9 +817,10 @@ class WebDevFS implements DevFS {
 }
 
 class ReleaseAssetServer {
-  ReleaseAssetServer(this.entrypoint);
+  ReleaseAssetServer(this.entrypoint, this.enableIndexRewrite);
 
   final Uri entrypoint;
+  final bool enableIndexRewrite;
 
   // Locations where source files, assets, or source maps may be located.
   final List<Uri> _searchPaths = <Uri>[
@@ -832,7 +856,7 @@ class ReleaseAssetServer {
         'Content-Type': mimeType,
       });
     }
-    if (request.url.path == '') {
+    if (request.url.path == '' || enableIndexRewrite) {
       final File file = globals.fs.file(globals.fs.path.join(getWebBuildDirectory(), 'index.html'));
       return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/html',

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
@@ -40,7 +42,7 @@ void main() {
   });
 
   test('release asset server serves correct mime type and content length for png', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base, false);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
@@ -54,7 +56,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base, false);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.js'))
       ..createSync(recursive: true)
       ..writeAsStringSync('function main() {}');
@@ -68,7 +70,7 @@ void main() {
   }));
 
   test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base, false);
     globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.html'))
       ..createSync(recursive: true)
       ..writeAsStringSync('<!doctype html><html></html>');
@@ -82,7 +84,7 @@ void main() {
   }));
 
   test('release asset server serves content from flutter root', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base, false);
     globals.fs.file(globals.fs.path.join('flutter', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -93,7 +95,7 @@ void main() {
   }));
 
   test('release asset server serves content from project directory', () => testbed.run(() async {
-    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base);
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base, false);
     globals.fs.file(globals.fs.path.join('bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
@@ -101,5 +103,18 @@ void main() {
       .handle(Request('GET', Uri.parse('http://localhost:8080/bar.dart')));
 
     expect(response.statusCode, HttpStatus.ok);
+  }));
+
+  test('release asset server serves index page when enableIndexRewrite is set', () => testbed.run(() async {
+    final File source = globals.fs.file(globals.fs.path.join('build', 'web', 'index.html'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html lang="en">content</html>');
+
+    final ReleaseAssetServer releaseServer = ReleaseAssetServer(Uri.parse('index.html'), true);
+    final Response response = await releaseServer
+      .handle(Request('GET', Uri.parse('http://foobar/some_route')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect((await response.read().toList()).first, source.readAsBytesSync());
   }));
 }

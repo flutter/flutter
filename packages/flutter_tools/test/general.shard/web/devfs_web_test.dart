@@ -13,6 +13,7 @@ import 'package:dwds/src/services/expression_compiler.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/build_runner/devfs_web.dart';
@@ -270,6 +271,20 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('Ensure serves index page when enableIndexRewrite is enabled for debug', () => testbed.run(() async {
+    final File source = globals.fs.file(globals.fs.path.join('web', 'index.html'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html lang="en">content</html>');
+
+    webAssetServer.enableIndexRewrite = true;
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/some_route')));
+    webAssetServer.enableIndexRewrite = false;
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect((await response.read().toList()).first, source.readAsBytesSync());
+  }));
+
   test('serves asset files from in filesystem with known mime type', () => testbed.run(() async {
     final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
@@ -346,6 +361,32 @@ void main() {
     verify(mockHttpServer.close()).called(1);
   }));
 
+
+  test('Ensure enableIndexRewrite is enabled for FLUTTER_WEB_USE_PATH dart define', () => testbed.run(() async {
+    globals.fs.file('.packages').writeAsStringSync('\n');
+    final WebDevFS webDevFS = WebDevFS(
+      hostname: 'localhost',
+      port: 0,
+      packagesFilePath: '.packages',
+      urlTunneller: null,
+      useSseForDebugProxy: true,
+      buildMode: BuildMode.debug,
+      enableDwds: false,
+      entrypoint: Uri.base,
+      testMode: true,
+      expressionCompiler: null,
+      dartDefines: const <String>[
+        '$kUsePathStrategy=true',
+      ],
+    );
+
+    await webDevFS.create();
+
+    expect(webDevFS.webAssetServer.enableIndexRewrite, true);
+
+    await webDevFS.destroy();
+  }));
+
   test('Can start web server with specified assets', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
@@ -377,6 +418,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      dartDefines: const <String>[],
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -471,6 +513,7 @@ void main() {
       testMode: true,
       expressionCompiler: null,
       chromiumLauncher: null,
+      dartDefines: const <String>[],
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
