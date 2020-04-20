@@ -201,6 +201,9 @@ class FakeTextInputClient implements TextInputClient {
   TextEditingValue currentTextEditingValue;
 
   @override
+  AutofillScope get currentAutofillScope => null;
+
+  @override
   void performAction(TextInputAction action) {
     latestMethodCall = 'performAction';
   }

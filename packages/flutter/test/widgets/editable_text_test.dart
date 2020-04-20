@@ -4116,8 +4116,17 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     // TextInput.show should be before TextInput.setEditingState
-    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
-    expect(tester.testTextInput.log.length, 7);
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, 8);
     int index = 0;
     for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
@@ -4156,6 +4165,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
@@ -4203,6 +4213,7 @@ void main() {
       'TextInput.setClient',
       'TextInput.show',
       'TextInput.setEditableSizeAndTransform',
+      'TextInput.requestAutofill',
       'TextInput.setStyle',
       'TextInput.setEditingState',
       'TextInput.setEditingState',
