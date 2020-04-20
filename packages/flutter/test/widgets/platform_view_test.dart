@@ -44,6 +44,7 @@ void main() {
         ]),
       );
     });
+
     testWidgets('Push a platform layer', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -64,6 +65,7 @@ void main() {
       final Layer platformLayer = tester.layers[tester.layers.length - 1];
       expect(platformLayer, isA<PlatformViewLayer>());
     });
+
     testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
