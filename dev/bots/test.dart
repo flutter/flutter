@@ -130,9 +130,19 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
-Future<void> _runSmokeTests() async {
-  print('${green}Running smoketests...$reset');
-  // Verify the Flutter Engine is the revision we asked for.
+/// Verify the Flutter Engine is the revision inin
+/// bin/cache/internal/engine.version.
+Future<void> _validateEngineHash() async {
+  final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+  if (luciBotId.startsWith('luci-dart-')) {
+    // The Dart HHH bots intentionally modify the local artifact cache
+    // and then use this script to run Flutter's test suites.
+    // Because the artifacts have been changed, this particular test will return
+    // a false positive and should be skipped.
+    print('${yellow}Skipping Flutter Engine Version Validation for swarming '
+          'bot $luciBotId.');
+    return;
+  }
   final String expectedVersion = File(engineVersionFile).readAsStringSync().trim();
   final CapturedOutput flutterTesterOutput = CapturedOutput();
   await runCommand(flutterTester, <String>['--help'], output: flutterTesterOutput, outputMode: OutputMode.capture);
@@ -144,6 +154,13 @@ Future<void> _runSmokeTests() async {
           'but found "$actualVersion".');
     exit(1);
   }
+}
+
+Future<void> _runSmokeTests() async {
+  print('${green}Running smoketests...$reset');
+
+  await _validateEngineHash();
+
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
