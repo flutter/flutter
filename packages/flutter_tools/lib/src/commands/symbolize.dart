@@ -145,6 +145,7 @@ class DwarfSymbolizationService {
   }) : _transformer = symbolsTransformer;
 
   /// Create a DwarfSymbolizationService with a no-op transformer for testing.
+  @visibleForTesting
   factory DwarfSymbolizationService.test() {
     return const DwarfSymbolizationService(
       symbolsTransformer: _testTransformer
