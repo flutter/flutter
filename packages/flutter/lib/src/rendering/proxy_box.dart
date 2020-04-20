@@ -4914,7 +4914,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   ///
   /// When the render object is not linked, then: if [showWhenUnlinked] is true,
   /// the child is visible and not repositioned; if it is false, then child is
-  /// hidden.
+  /// hidden, and its hit testing is also disabled.
   bool get showWhenUnlinked => _showWhenUnlinked;
   bool _showWhenUnlinked;
   set showWhenUnlinked(bool value) {
@@ -4962,6 +4962,9 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
+    // Disables the hit testing if this render object is hidden.
+    if (link.leader == null && !showWhenUnlinked)
+      return false;
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
