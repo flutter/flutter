@@ -360,6 +360,22 @@ class WebCompileTest {
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 
+  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric}) {
+    return inDirectory<Map<String, int>>(directory, () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
+      final String outputFileName = path.join(directory, 'build/web/main.dart.js');
+      return await getSize(outputFileName, metric: 'hello_world');
+    });
+  }
+
   /// Obtains the size and gzipped size of a file given by [fileName].
   static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
     final Map<String, int> sizeMetrics = {};
