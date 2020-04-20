@@ -130,7 +130,7 @@ Future<void> main(List<String> args) async {
   print('$clock ${bold}Test successful.$reset');
 }
 
-/// Verify the Flutter Engine is the revision inin
+/// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
   final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
