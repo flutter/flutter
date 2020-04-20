@@ -7,6 +7,7 @@ import 'dart:html' as html;
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
+import 'package:quiver/testing/async.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -289,6 +290,258 @@ void main() {
 
       Keyboard.instance.dispose();
     });
+
+    testFakeAsync(
+      'synthesize keyup when shortcut is handled by the system',
+      (FakeAsync async) {
+        // This can happen when the user clicks `cmd+alt+i` to open devtools. Here
+        // is the sequence we receive from the browser in such case:
+        //
+        // keydown(cmd) -> keydown(alt) -> keydown(i) -> keyup(alt) -> keyup(cmd)
+        //
+        // There's no `keyup(i)`. The web engine is expected to synthesize a
+        // `keyup(i)` event.
+        Keyboard.initialize();
+
+        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        ui.window.onPlatformMessage = (String channel, ByteData data,
+            ui.PlatformMessageResponseCallback callback) {
+          messages.add(const JSONMessageCodec().decodeMessage(data));
+        };
+
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Meta',
+          code: 'MetaLeft',
+          isMetaPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Alt',
+          code: 'AltLeft',
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'i',
+          code: 'KeyI',
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        async.elapse(Duration(milliseconds: 10));
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Meta',
+          code: 'MetaLeft',
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent('keyup', key: 'Alt', code: 'AltLeft');
+        // Notice no `keyup` for "i".
+
+        expect(messages, <Map<String, dynamic>>[
+          <String, dynamic>{
+            'type': 'keydown',
+            'keymap': 'web',
+            'key': 'Meta',
+            'code': 'MetaLeft',
+            //           meta
+            'metaState': 0x8,
+          },
+          <String, dynamic>{
+            'type': 'keydown',
+            'keymap': 'web',
+            'key': 'Alt',
+            'code': 'AltLeft',
+            //           alt   meta
+            'metaState': 0x2 | 0x8,
+          },
+          <String, dynamic>{
+            'type': 'keydown',
+            'keymap': 'web',
+            'key': 'i',
+            'code': 'KeyI',
+            //           alt   meta
+            'metaState': 0x2 | 0x8,
+          },
+          <String, dynamic>{
+            'type': 'keyup',
+            'keymap': 'web',
+            'key': 'Meta',
+            'code': 'MetaLeft',
+            //           alt
+            'metaState': 0x2,
+          },
+          <String, dynamic>{
+            'type': 'keyup',
+            'keymap': 'web',
+            'key': 'Alt',
+            'code': 'AltLeft',
+            'metaState': 0x0,
+          },
+        ]);
+        messages.clear();
+
+        // Still too eary to synthesize a keyup event.
+        async.elapse(Duration(milliseconds: 50));
+        expect(messages, isEmpty);
+
+        async.elapse(Duration(seconds: 3));
+        expect(messages, <Map<String, dynamic>>[
+          <String, dynamic>{
+            'type': 'keyup',
+            'keymap': 'web',
+            'key': 'i',
+            'code': 'KeyI',
+            'metaState': 0x0,
+          }
+        ]);
+
+        Keyboard.instance.dispose();
+      },
+    );
+
+    testFakeAsync(
+      'do not synthesize keyup when we receive repeat events',
+      (FakeAsync async) {
+        Keyboard.initialize();
+
+        List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+        ui.window.onPlatformMessage = (String channel, ByteData data,
+            ui.PlatformMessageResponseCallback callback) {
+          messages.add(const JSONMessageCodec().decodeMessage(data));
+        };
+
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Meta',
+          code: 'MetaLeft',
+          isMetaPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'Alt',
+          code: 'AltLeft',
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent(
+          'keydown',
+          key: 'i',
+          code: 'KeyI',
+          isMetaPressed: true,
+          isAltPressed: true,
+        );
+        async.elapse(Duration(milliseconds: 10));
+        dispatchKeyboardEvent(
+          'keyup',
+          key: 'Meta',
+          code: 'MetaLeft',
+          isAltPressed: true,
+        );
+        dispatchKeyboardEvent('keyup', key: 'Alt', code: 'AltLeft');
+        // Notice no `keyup` for "i".
+
+        messages.clear();
+
+        // Spend more than 2 seconds sending repeat events and make sure no
+        // keyup was synthesized.
+        for (int i = 0; i < 20; i++) {
+          async.elapse(Duration(milliseconds: 100));
+          dispatchKeyboardEvent(
+            'keydown',
+            key: 'i',
+            code: 'KeyI',
+            repeat: true,
+          );
+        }
+
+        // There should be no synthesized keyup.
+        expect(messages, hasLength(20));
+        for (int i = 0; i < 20; i++) {
+          expect(messages[i], <String, dynamic>{
+            'type': 'keydown',
+            'keymap': 'web',
+            'key': 'i',
+            'code': 'KeyI',
+            'metaState': 0x0,
+          });
+        }
+        messages.clear();
+
+        // When repeat events stop for a long-enough period of time, a keyup
+        // should be synthesized.
+        async.elapse(Duration(seconds: 3));
+        expect(messages, <Map<String, dynamic>>[
+          <String, dynamic>{
+            'type': 'keyup',
+            'keymap': 'web',
+            'key': 'i',
+            'code': 'KeyI',
+            'metaState': 0x0,
+          }
+        ]);
+
+        Keyboard.instance.dispose();
+      },
+    );
+
+    testFakeAsync('do not synthesize keyup for meta keys', (FakeAsync async) {
+      Keyboard.initialize();
+
+      List<Map<String, dynamic>> messages = <Map<String, dynamic>>[];
+      ui.window.onPlatformMessage = (String channel, ByteData data,
+          ui.PlatformMessageResponseCallback callback) {
+        messages.add(const JSONMessageCodec().decodeMessage(data));
+      };
+
+      dispatchKeyboardEvent(
+        'keydown',
+        key: 'Meta',
+        code: 'MetaLeft',
+        isMetaPressed: true,
+      );
+      dispatchKeyboardEvent(
+        'keydown',
+        key: 'Alt',
+        code: 'AltLeft',
+        isMetaPressed: true,
+        isAltPressed: true,
+      );
+      dispatchKeyboardEvent(
+        'keydown',
+        key: 'i',
+        code: 'KeyI',
+        isMetaPressed: true,
+        isAltPressed: true,
+      );
+      async.elapse(Duration(milliseconds: 10));
+      dispatchKeyboardEvent(
+        'keyup',
+        key: 'Meta',
+        code: 'MetaLeft',
+        isAltPressed: true,
+      );
+      // Notice no `keyup` for "AltLeft" and "i".
+
+      messages.clear();
+
+      // There has been no repeat events for "AltLeft" nor "i". Only "i" should
+      // synthesize a keyup event.
+      async.elapse(Duration(seconds: 3));
+      expect(messages, <Map<String, dynamic>>[
+        <String, dynamic>{
+          'type': 'keyup',
+          'keymap': 'web',
+          'key': 'i',
+          'code': 'KeyI',
+          //           alt
+          'metaState': 0x2,
+        }
+      ]);
+
+      Keyboard.instance.dispose();
+    });
   });
 }
 
@@ -340,4 +593,12 @@ html.KeyboardEvent dispatchKeyboardEvent(
   target.dispatchEvent(event);
 
   return event;
+}
+
+typedef FakeAsyncTest = void Function(FakeAsync);
+
+void testFakeAsync(String description, FakeAsyncTest fn) {
+  test(description, () {
+    FakeAsync().run(fn);
+  });
 }
