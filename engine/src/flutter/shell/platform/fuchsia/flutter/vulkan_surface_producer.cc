@@ -32,7 +32,7 @@ constexpr int kGrCacheMaxCount = 8192;
 //     "SkiaCacheBytes" field in the ("flutter", "SurfacePool") trace counter
 //     (compare it to the bytes value here)
 // then you should consider increasing the size of the GPU resource cache.
-constexpr size_t kGrCacheMaxByteSize = 16 * (1 << 20);
+constexpr size_t kGrCacheMaxByteSize = 1024 * 600 * 12 * 4;
 
 }  // namespace
 
