@@ -41,22 +41,7 @@ void main() {
   });
 
   testUsingContext('Regression test for type error in codec', () async {
-    StreamTransformer<String, String> testTransformer(Uint8List buffer) {
-      return StreamTransformer<String, String>.fromHandlers(
-        handleData: (String data, EventSink<String> sink) {
-          sink.add(data);
-        },
-        handleDone: (EventSink<String> sink) {
-          sink.close();
-        },
-        handleError: (dynamic error, StackTrace stackTrace, EventSink<String> sink) {
-          sink.addError(error, stackTrace);
-        }
-      );
-    }
-    final DwarfSymbolizationService symbolizationService = DwarfSymbolizationService(
-      symbolsTransformer: testTransformer,
-    );
+    final DwarfSymbolizationService symbolizationService = DwarfSymbolizationService.test();
     final StreamController<List<int>> output = StreamController<List<int>>();
 
     unawaited(symbolizationService.decode(
@@ -133,5 +118,3 @@ void main() {
     );
   });
 }
-
-class MockDwarfSymbolizationService extends Mock implements DwarfSymbolizationService {}

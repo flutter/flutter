@@ -123,11 +123,33 @@ StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
   return DwarfStackTraceDecoder(dwarf, includeInternalFrames: true);
 }
 
+// A no-op transformer for `DwarfSymbolizationService.test`
+StreamTransformer<String, String> _testTransformer(Uint8List buffer) {
+  return StreamTransformer<String, String>.fromHandlers(
+    handleData: (String data, EventSink<String> sink) {
+      sink.add(data);
+    },
+    handleDone: (EventSink<String> sink) {
+      sink.close();
+    },
+    handleError: (dynamic error, StackTrace stackTrace, EventSink<String> sink) {
+      sink.addError(error, stackTrace);
+    }
+  );
+}
+
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolizationService {
   const DwarfSymbolizationService({
     SymbolsTransformer symbolsTransformer = _defaultTransformer,
   }) : _transformer = symbolsTransformer;
+
+  /// Create a DwarfSymbolizationService with a no-op transformer for testing.
+  factory DwarfSymbolizationService.test() {
+    return const DwarfSymbolizationService(
+      symbolsTransformer: _testTransformer
+    );
+  }
 
   final SymbolsTransformer _transformer;
 
