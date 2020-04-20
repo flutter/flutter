@@ -316,7 +316,7 @@ class WebCompileTest {
         'FLUTTER_WEB': 'true',
       });
       final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
-      await _measureSize('hello_world', output, metrics);
+      metrics.addAll(await getSize(output, metric: 'hello_world'));
       return null;
     });
     await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', () async {
@@ -330,7 +330,7 @@ class WebCompileTest {
         'FLUTTER_WEB': 'true',
       });
       final String output = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery/build/web/main.dart.js';
-      await _measureSize('flutter_gallery', output, metrics);
+      metrics.addAll(await getSize(output, metric: 'flutter_gallery'));
       return null;
     });
     const String sampleAppName = 'sample_flutter_app';
@@ -352,18 +352,10 @@ class WebCompileTest {
         ], environment: <String, String>{
           'FLUTTER_WEB': 'true',
         });
-        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
+        metrics.addAll(await getSize(path.join(sampleDir.path, 'build/web/main.dart.js'), metric: 'basic_material_app'));
       });
     });
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
-  }
-
-  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
-    final ProcessResult result = await Process.run('du', <String>['-k', output]);
-    await Process.run('gzip',<String>['-k', '9', output]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
-    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
-    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
   }
 
   /// Obtains the size and gzipped size of a file given by [fileName].
