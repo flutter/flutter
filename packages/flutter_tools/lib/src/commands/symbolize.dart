@@ -113,9 +113,23 @@ class SymbolizeCommand extends FlutterCommand {
   }
 }
 
+typedef SymbolsTransformer = StreamTransformer<String, String> Function(Uint8List);
+
+StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
+  final Dwarf dwarf = Dwarf.fromBytes(symbols);
+  if (dwarf == null) {
+    throwToolExit('Failed to decode symbols file');
+  }
+  return DwarfStackTraceDecoder(dwarf, includeInternalFrames: true);
+}
+
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolizationService {
-  const DwarfSymbolizationService();
+  const DwarfSymbolizationService({
+    SymbolsTransformer symbolsTransformer = _defaultTransformer,
+  }) : _transformer = symbolsTransformer;
+
+  final SymbolsTransformer _transformer;
 
   /// Decode a stack trace from [input] and place the results in [output].
   ///
@@ -129,17 +143,13 @@ class DwarfSymbolizationService {
     @required IOSink output,
     @required Uint8List symbols,
   }) async {
-    final Dwarf dwarf = Dwarf.fromBytes(symbols);
-    if (dwarf == null) {
-      throwToolExit('Failed to decode symbols file');
-    }
-
     final Completer<void> onDone = Completer<void>();
     StreamSubscription<void> subscription;
     subscription = input
+      .cast<List<int>>()
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .transform(DwarfStackTraceDecoder(dwarf, includeInternalFrames: true))
+      .transform(_transformer(symbols))
       .listen((String line) {
         try {
           output.writeln(line);
