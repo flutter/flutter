@@ -343,20 +343,20 @@ class WebCompileTest {
 
     await inDirectory<void>(Directory.systemTemp, () async {
       await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-      await inDirectory(sampleDir, () async {
-        await flutter('packages', options: <String>['get']);
-        await evalFlutter('build', options: <String>[
-          'web',
-          '-v',
-          '--release',
-          '--no-pub',
-        ], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-        metrics.addAll(await getSize(path.join(sampleDir.path, 'build/web/main.dart.js'), metric: 'basic_material_app'));
+        'FLUTTER_WEB': 'true',
       });
+    });
+    await inDirectory(sampleDir, () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
+      metrics.addAll(await getSize(path.join(sampleDir.path, 'build/web/main.dart.js'), metric: 'basic_material_app'));
     });
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
