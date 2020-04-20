@@ -41,6 +41,7 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.padding,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -79,6 +80,11 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
+
+  /// Specifies padding for [title].
+  ///
+  /// When the value is null, padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  final EdgeInsetsGeometry padding;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -172,6 +178,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),
               ),
+              contentPadding: widget.padding,
             ),
           ),
           ClipRect(
