@@ -392,8 +392,8 @@ void main() {
     final OperationResult result = await residentWebRunner.restart(fullRestart: true);
 
     // Ensure that generated entrypoint is generated correctly.
-    expect(entrypointFileName, isNotNull);
-    final String entrypointContents = globals.fs.file(entrypointFileName).readAsStringSync();
+    expect(entrypointFileUri, isNotNull);
+    final String entrypointContents = globals.fs.file(entrypointFileUri).readAsStringSync();
     expect(entrypointContents, contains('// Flutter web bootstrap script'));
     expect(entrypointContents, contains("import 'dart:ui' as ui;"));
     expect(entrypointContents, contains('await ui.webOnlyInitializePlatform();'));
