@@ -335,6 +335,10 @@ class WebCompileTest {
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 
+  /// Run a single web compile test and return its metrics.
+  ///
+  /// Run a single web compile test for the app under [directory], and store
+  /// its metrics with prefix [metric].
   static Future<Map<String, int>> runSingleBuildTest({String directory, String metric}) {
     return inDirectory<Map<String, int>>(directory, () async {
       await flutter('packages', options: <String>['get']);
