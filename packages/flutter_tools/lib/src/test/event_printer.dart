@@ -24,17 +24,17 @@ class EventPrinter extends TestWatcher {
 
   @override
   Future<void> handleTestCrashed(ProcessEvent event) async {
-    return _parent.handleTestCrashed(event);
+    return _parent?.handleTestCrashed(event);
   }
 
   @override
   Future<void> handleTestTimedOut(ProcessEvent event) async {
-    return _parent.handleTestTimedOut(event);
+    return _parent?.handleTestTimedOut(event);
   }
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
-    return _parent.handleFinishedTest(event);
+    return _parent?.handleFinishedTest(event);
   }
 
   void _sendEvent(String name, [ dynamic params ]) {

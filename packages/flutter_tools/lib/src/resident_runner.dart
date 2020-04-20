@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:devtools_server/devtools_server.dart' as devtools_server;
 import 'package:meta/meta.dart';
 
@@ -286,17 +287,19 @@ class FlutterDevice {
     return devFS.create();
   }
 
-  List<Future<Map<String, dynamic>>> reloadSources(
+  List<Future<vm_service.ReloadReport>> reloadSources(
     String entryPath, {
     bool pause = false,
   }) {
-    final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
-    return <Future<Map<String, dynamic>>>[
+    final String deviceEntryUri = devFS.baseUri
+      .resolveUri(globals.fs.path.toUri(entryPath)).toString();
+    return <Future<vm_service.ReloadReport>>[
       for (final Isolate isolate in vmService.vm.isolates)
-        isolate.reloadSources(
+        vmService.reloadSources(
+          isolate.id,
           pause: pause,
           rootLibUri: deviceEntryUri,
-        ),
+        )
     ];
   }
 

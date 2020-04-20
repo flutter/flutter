@@ -590,6 +590,18 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
+  await _runWebReleaseTest('lib/web_define_loading.dart',
+    additionalArguments: <String>[
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
+    ]
+  );
 }
 
 Future<void> _runWebStackTraceTest(String buildMode) async {
@@ -632,10 +644,56 @@ Future<void> _runWebStackTraceTest(String buildMode) async {
   }
 }
 
+/// Run a web integration test in release mode.
+Future<void> _runWebReleaseTest(String target, {
+  List<String> additionalArguments = const<String>[],
+}) async {
+  final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
+  final String appBuildDirectory = path.join(testAppDirectory, 'build', 'web');
+
+  // Build the app.
+  await runCommand(
+    flutter,
+    <String>[ 'clean' ],
+    workingDirectory: testAppDirectory,
+  );
+  await runCommand(
+    flutter,
+    <String>[
+      'build',
+      'web',
+      '--release',
+      ...additionalArguments,
+      '-t',
+      target,
+    ],
+    workingDirectory: testAppDirectory,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
+
+  // Run the app.
+  final String result = await evalTestAppInChrome(
+    appUrl: 'http://localhost:8080/index.html',
+    appDirectory: appBuildDirectory,
+  );
+
+  if (result.contains('--- TEST SUCCEEDED ---')) {
+    print('${green}Web release mode test passed.$reset');
+  } else {
+    print(result);
+    print('${red}Web release mode test failed.$reset');
+    exit(1);
+  }
+}
+
 /// Debug mode is special because `flutter build web` doesn't build in debug mode.
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
-Future<void> _runWebDebugTest(String target) async {
+Future<void> _runWebDebugTest(String target, {
+  List<String> additionalArguments = const<String>[],
+}) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
   final CapturedOutput output = CapturedOutput();
   bool success = false;
@@ -647,6 +705,7 @@ Future<void> _runWebDebugTest(String target) async {
       '-d',
       'chrome',
       '--web-run-headless',
+      ...additionalArguments,
       '-t',
       target,
     ],

@@ -30,22 +30,54 @@ class ABTest {
     _addResult(result, _bResults);
   }
 
+  /// Returns unprocessed data collected by the A/B test formatted as
+  /// a tab-separated spreadsheet.
+  String rawResults() {
+    final StringBuffer buffer = StringBuffer();
+    for (final String scoreKey in _allScoreKeys) {
+      buffer.writeln('$scoreKey:');
+      buffer.write('  A:\t');
+      if (_aResults.containsKey(scoreKey)) {
+        for (final double score in _aResults[scoreKey]) {
+          buffer.write('${score.toStringAsFixed(2)}\t');
+        }
+      } else {
+        buffer.write('N/A');
+      }
+      buffer.writeln();
+
+      buffer.write('  B:\t');
+      if (_bResults.containsKey(scoreKey)) {
+        for (final double score in _bResults[scoreKey]) {
+          buffer.write('${score.toStringAsFixed(2)}\t');
+        }
+      } else {
+        buffer.write('N/A');
+      }
+      buffer.writeln();
+    }
+    return buffer.toString();
+  }
+
+  Set<String> get _allScoreKeys {
+    return <String>{
+      ..._aResults.keys,
+      ..._bResults.keys,
+    };
+  }
+
   /// Returns the summary as a tab-separated spreadsheet.
   ///
   /// This value can be copied straight to a Google Spreadsheet for further analysis.
   String printSummary() {
     final Map<String, _ScoreSummary> summariesA = _summarize(_aResults);
     final Map<String, _ScoreSummary> summariesB = _summarize(_bResults);
-    final Set<String> scoreKeyUnion = <String>{
-      ...summariesA.keys,
-      ...summariesB.keys,
-    };
 
     final StringBuffer buffer = StringBuffer(
       'Score\tAverage A (noise)\tAverage B (noise)\tSpeed-up\n',
     );
 
-    for (final String scoreKey in scoreKeyUnion) {
+    for (final String scoreKey in _allScoreKeys) {
       final _ScoreSummary summaryA = summariesA[scoreKey];
       final _ScoreSummary summaryB = summariesB[scoreKey];
       buffer.write('$scoreKey\t');
