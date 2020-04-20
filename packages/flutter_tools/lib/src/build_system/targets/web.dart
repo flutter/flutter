@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:crypto/crypto.dart';
+import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
-import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
@@ -56,35 +56,39 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
-    final String importPath = globals.fs.path.absolute(targetFile);
+    final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
+    final PackageConfig packageConfig = await loadPackageConfigUri(
+      environment.projectDir.childFile('.packages').absolute.uri,
+      loader: (Uri uri) {
+        final File file = environment.fileSystem.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
 
-    // Use the package uri mapper to find the correct package-scheme import path
+    // Use the PackageConfig to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
     // and relative imports for a library, then importing the entrypoint as a
     // file-scheme will cause said library to be recognized as two distinct
     // libraries. This can cause surprising behavior as types from that library
     // will be considered distinct from each other.
-    final PackageUriMapper packageUriMapper = PackageUriMapper(
-      importPath,
-      PackageMap.globalPackagesPath,
-      null,
-      null,
-    );
-
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
-    final String mainImport = packageUriMapper.map(importPath)?.toString()
-      ?? globals.fs.file(importPath).absolute.uri.toString();
+    final String mainImport = packageConfig.toPackageUri(importUri)?.toString()
+      ?? importUri.toString();
 
     String contents;
     if (hasPlugins) {
-      final String generatedPath = environment.projectDir
+      final Uri generatedUri = environment.projectDir
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
-        .absolute.path;
-      final String generatedImport = packageUriMapper.map(generatedPath)?.toString()
-        ?? globals.fs.file(generatedPath).absolute.uri.toString();
+        .absolute
+        .uri;
+      final String generatedImport = packageConfig.toPackageUri(generatedUri)?.toString()
+        ?? generatedUri.toString();
       contents = '''
 import 'dart:ui' as ui;
 

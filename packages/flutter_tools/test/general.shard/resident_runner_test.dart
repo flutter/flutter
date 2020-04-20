@@ -44,6 +44,7 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
+      globals.fs.file('.packages').writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
@@ -69,9 +70,8 @@ void main() {
     when(mockDevFS.assetPathsToEvict).thenReturn(<String>{});
     // FlutterDevice Mocks.
     when(mockFlutterDevice.updateDevFS(
-      // Intentionally provide empty list to match above mock.
-      invalidatedFiles: <Uri>[],
-      mainPath: anyNamed('mainPath'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -81,6 +81,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return UpdateFSReport(
         success: true,
@@ -225,7 +226,7 @@ void main() {
     ));
     await onAppStart.future;
     when(mockFlutterDevice.updateDevFS(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -236,6 +237,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
@@ -330,7 +332,7 @@ void main() {
     ));
     await onAppStart.future;
     when(mockFlutterDevice.updateDevFS(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -341,6 +343,7 @@ void main() {
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
       dillOutputPath: anyNamed('dillOutputPath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenThrow(vm_service.RPCError('something bad happened', 666, ''));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:platform/platform.dart';
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -151,13 +153,23 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<OperationResult> reloadMethod({String libraryId, String classId}) async {
+  Future<OperationResult> reloadMethod({ String libraryId, String classId }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
+    final PackageConfig packageConfig = await loadPackageConfigUri(
+      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+      loader: (Uri uri) {
+        final File file = globals.fs.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainPath: mainPath,
+        mainUri: globals.fs.file(mainPath).absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -167,6 +179,7 @@ class HotRunner extends ResidentRunner {
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: false),
         invalidatedFiles: invalidated,
+        packageConfig: packageConfig,
         dillOutputPath: dillOutputPath,
       ));
     }
@@ -345,6 +358,16 @@ class HotRunner extends ResidentRunner {
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
+    final PackageConfig packageConfig = await loadPackageConfigUri(
+      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+      loader: (Uri uri) {
+        final File file = globals.fs.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -353,11 +376,11 @@ class HotRunner extends ResidentRunner {
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
-            mainPath,
+            globals.fs.file(mainPath).uri,
             <Uri>[],
             outputPath: dillOutputPath ??
               getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
-            packagesFilePath : packagesFilePath,
+            packageConfig: packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
       }
@@ -405,18 +428,17 @@ class HotRunner extends ResidentRunner {
       }
     }
 
-    // Picking up first device's compiler as a source of truth - compilers
-    // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = await projectFileInvalidator.findInvalidated(
+    final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources,
       packagesPath: packagesFilePath,
       asyncScanning: hotRunnerConfig.asyncScanning,
+      packageConfig: flutterDevices[0].devFS.lastPackageConfig,
     );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
-        mainPath: mainPath,
+        mainUri: globals.fs.file(mainPath).absolute.uri,
         target: target,
         bundle: assetBundle,
         firstBuildTime: firstBuildTime,
@@ -425,7 +447,8 @@ class HotRunner extends ResidentRunner {
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
-        invalidatedFiles: invalidatedFiles,
+        invalidatedFiles: invalidationResult.uris,
+        packageConfig: invalidationResult.packageConfig,
         dillOutputPath: dillOutputPath,
       ));
     }
@@ -1156,6 +1179,17 @@ class HotRunner extends ResidentRunner {
   }
 }
 
+/// The result of an invalidation check from [ProjectFileInvalidator].
+class InvalidationResult {
+  const InvalidationResult({
+    this.uris,
+    this.packageConfig,
+  });
+
+  final List<Uri> uris;
+  final PackageConfig packageConfig;
+}
+
 /// The [ProjectFileInvalidator] track the dependencies for a running
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
@@ -1182,10 +1216,11 @@ class ProjectFileInvalidator {
   // ~2000 files.
   static const int _kMaxPendingStats = 8;
 
-  Future<List<Uri>> findInvalidated({
+  Future<InvalidationResult> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
     @required String packagesPath,
+    @required PackageConfig packageConfig,
     bool asyncScanning = false,
   }) async {
     assert(urisToMonitor != null);
@@ -1194,7 +1229,10 @@ class ProjectFileInvalidator {
     if (lastCompiled == null) {
       // Initial load.
       assert(urisToMonitor.isEmpty);
-      return <Uri>[];
+      return InvalidationResult(
+        packageConfig: await _createPackageConfig(packagesPath),
+        uris: <Uri>[]
+      );
     }
 
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -1202,9 +1240,6 @@ class ProjectFileInvalidator {
       // Don't watch pub cache directories to speed things up a little.
       for (final Uri uri in urisToMonitor)
         if (_isNotInPubCache(uri)) uri,
-
-      // We need to check the .packages file too since it is not used in compilation.
-      _fileSystem.file(packagesPath).uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
 
@@ -1233,16 +1268,41 @@ class ProjectFileInvalidator {
         }
       }
     }
+    // We need to check the .packages file too since it is not used in compilation.
+    final Uri packageUri = _fileSystem.file(packagesPath).uri;
+    final DateTime updatedAt = _fileSystem.statSync(
+      packageUri.toFilePath(windows: _platform.isWindows)).modified;
+    if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+      invalidatedFiles.add(packageUri);
+      packageConfig = await _createPackageConfig(packagesPath);
+    }
+
     _logger.printTrace(
       'Scanned through ${urisToScan.length} files in '
       '${stopwatch.elapsedMilliseconds}ms'
       '${asyncScanning ? " (async)" : ""}',
     );
-    return invalidatedFiles;
+    return InvalidationResult(
+      packageConfig: packageConfig,
+      uris: invalidatedFiles,
+    );
   }
 
   bool _isNotInPubCache(Uri uri) {
     return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows))
         && !uri.path.contains(_pubCachePathLinuxAndMac);
+  }
+
+  Future<PackageConfig> _createPackageConfig(String packagesPath) {
+    return loadPackageConfigUri(
+      _fileSystem.file(packagesPath).absolute.uri,
+      loader: (Uri uri) {
+        final File file = _fileSystem.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
   }
 }
