@@ -89,12 +89,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   Stream<LicenseEntry> _addLicenses() async* {
-    // We use timers here (rather than scheduleTask from the scheduler binding)
-    // because the services layer can't use the scheduler binding (the scheduler
-    // binding uses the services layer to manage its lifecycle events). Timers
-    // are what scheduleTask uses under the hood anyway. The only difference is
-    // that these will just run next, instead of being prioritized relative to
-    // the other tasks that might be running. Using _something_ here to break
+    // Using _something_ here to break
     // this into two parts is important because isolates take a while to copy
     // data at the moment, and if we receive the data in the same event loop
     // iteration as we send the data to the next isolate, we are definitely
@@ -105,14 +100,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     //      https://github.com/dart-lang/sdk/issues/31960
     // TODO(ianh): Remove this complexity once these bugs are fixed.
     final Completer<String> rawLicenses = Completer<String>();
-    Timer.run(() async {
+    scheduleTask(() async {
       rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
-    });
+    }, Priority.animation);
     await rawLicenses.future;
     final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
-    Timer.run(() async {
+    scheduleTask(() async {
       parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
-    });
+    }, Priority.animation);
     await parsedLicenses.future;
     yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
   }
