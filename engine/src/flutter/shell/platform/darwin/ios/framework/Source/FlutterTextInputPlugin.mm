@@ -819,7 +819,7 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
   if (self) {
     _nonAutofillInputView = [[FlutterTextInputView alloc] init];
     _nonAutofillInputView.secureTextEntry = NO;
-    _nonAutofillInputView = [[FlutterTextInputView alloc] init];
+    _nonAutofillSecureInputView = [[FlutterTextInputView alloc] init];
     _nonAutofillSecureInputView.secureTextEntry = YES;
     _inputViews = [[NSMutableArray alloc] init];
 

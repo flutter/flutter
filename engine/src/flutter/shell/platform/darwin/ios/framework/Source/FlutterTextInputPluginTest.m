@@ -14,7 +14,43 @@ FLUTTER_ASSERT_ARC
 @end
 
 @implementation FlutterTextInputPluginTest
+- (void)testSecureInput {
+  // Setup test.
+  id engine = OCMClassMock([FlutterEngine class]);
+  FlutterTextInputPlugin* textInputPlugin = [[FlutterTextInputPlugin alloc] init];
+  textInputPlugin.textInputDelegate = engine;
 
+  NSDictionary* config = @{
+    @"inputType" : @{@"name" : @"TextInuptType.text"},
+    @"keyboardAppearance" : @"Brightness.light",
+    @"obscureText" : @YES,
+    @"inputAction" : @"TextInputAction.unspecified",
+    @"smartDashesType" : @"0",
+    @"smartQuotesType" : @"0",
+    @"autocorrect" : @YES
+  };
+
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @123, config ]];
+
+  [textInputPlugin handleMethodCall:setClientCall
+                             result:^(id _Nullable result){
+                             }];
+
+  // Find all input views in the input hider view.
+  NSArray<FlutterTextInputView*>* inputFields =
+      [[[textInputPlugin textInputView] superview] subviews];
+
+  // Find the inactive autofillable input field.
+  FlutterTextInputView* inputView = inputFields[0];
+
+  // Verify secureTextEntry is set to the correct value.
+  XCTAssertTrue(inputView.secureTextEntry);
+
+  // Clean up mocks
+  [engine stopMocking];
+}
 - (void)testAutofillInputViews {
   // Setup test.
   id engine = OCMClassMock([FlutterEngine class]);
