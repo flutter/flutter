@@ -84,9 +84,11 @@ void main() {
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ];
+    final MockArtifacts artifacts = MockArtifacts();
+    when(artifacts.isLocalEngine).thenReturn(false);
     environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: MockArtifacts(),
+      artifacts: artifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

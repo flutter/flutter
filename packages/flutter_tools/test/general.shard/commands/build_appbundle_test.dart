@@ -361,8 +361,8 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText, contains("Your app isn't using AndroidX"));
-      expect(testLogger.statusText, contains(
+      expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
+      expect(testLogger.statusText, containsIgnoringWhitespace(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -412,13 +412,12 @@ void main() {
         );
       }, throwsToolExit());
 
-      expect(testLogger.statusText.contains("Your app isn't using AndroidX"), isFalse);
+      expect(testLogger.statusText,
+        not(containsIgnoringWhitespace("Your app isn't using AndroidX")));
       expect(
-        testLogger.statusText.contains(
+        testLogger.statusText, not(containsIgnoringWhitespace(
           'To avoid potential build failures, you can quickly migrate your app by '
-          'following the steps on https://goo.gl/CP92wY'
-        ),
-        isFalse,
+          'following the steps on https://goo.gl/CP92wY'))
       );
       verify(mockUsage.sendEvent(
         'build',
@@ -449,6 +448,10 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
     globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
+}
+
+Matcher not(Matcher target){
+  return isNot(target);
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}

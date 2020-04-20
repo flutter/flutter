@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -96,6 +97,22 @@ void main() {
     expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
 
+  testbed.test('flutter assemble does not inject engine revision with local-engine', () async {
+    Environment environment;
+    when(globals.artifacts.isLocalEngine).thenReturn(true);
+    when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        environment = invocation.positionalArguments[1] as Environment;
+        return BuildResult(success: true);
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
+
+    expect(environment.engineVersion, isNull);
+  }, overrides: <Type, Generator>{
+    Artifacts: () => MockLocalEngineArtifacts()
+  });
+
   testbed.test('flutter assemble only writes input and output files when the values change', () async {
     when(globals.buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
@@ -156,3 +173,4 @@ void main() {
 }
 
 class MockBuildSystem extends Mock implements BuildSystem {}
+class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

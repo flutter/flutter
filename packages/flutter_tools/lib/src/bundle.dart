@@ -122,6 +122,9 @@ Future<void> buildWithAssemble({
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
     cacheDir: globals.cache.getRoot(),
     flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    engineVersion: globals.artifacts.isLocalEngine
+      ? null
+      : globals.flutterVersion.engineRevision,
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
