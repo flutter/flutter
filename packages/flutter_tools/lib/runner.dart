@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
-import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
 
 import 'src/base/common.dart';
 import 'src/base/context.dart';
@@ -27,13 +27,13 @@ import 'src/runner/flutter_command_runner.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
-  bool muteCommandLogging = false,
-  bool verbose = false,
-  bool verboseHelp = false,
-  bool reportCrashes,
-  String flutterVersion,
-  Map<Type, Generator> overrides,
-}) async {
+    bool muteCommandLogging = false,
+    bool verbose = false,
+    bool verboseHelp = false,
+    bool reportCrashes,
+    String flutterVersion,
+    Map<Type, Generator> overrides,
+  }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
@@ -121,7 +121,14 @@ Future<int> _handleToolError(
 
     // Report to both [Usage] and [CrashReportSender].
     globals.flutterUsage.sendException(error);
-    await CrashReportSender.instance.sendReport(
+    final CrashReportSender crashReportSender = CrashReportSender(
+      client: http.Client(),
+      usage: globals.flutterUsage,
+      platform: globals.platform,
+      logger: globals.logger,
+      operatingSystemUtils: globals.os,
+    );
+    await crashReportSender.sendReport(
       error: error,
       stackTrace: stackTrace,
       getFlutterVersion: getFlutterVersion,
@@ -184,18 +191,10 @@ String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
 
 String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
-/// File system used by the crash reporting logic.
-///
-/// We do not want to use the file system stored in the context because it may
-/// be recording. Additionally, in the case of a crash we do not trust the
-/// integrity of the [AppContext].
-@visibleForTesting
-FileSystem crashFileSystem = const LocalFileSystem();
-
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
   File crashFile = globals.fsUtils.getUniqueFile(
-    crashFileSystem.currentDirectory,
+    globals.fs.currentDirectory,
     'flutter',
     'log',
   );
@@ -219,7 +218,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
     crashFile = globals.fsUtils.getUniqueFile(
-      crashFileSystem.systemTempDirectory,
+      globals.fs.systemTempDirectory,
       'flutter',
       'log',
     );
