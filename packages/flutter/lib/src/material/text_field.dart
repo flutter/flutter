@@ -346,6 +346,7 @@ class TextField extends StatefulWidget {
     this.buildCounter,
     this.scrollController,
     this.scrollPhysics,
+    this.autofillHints,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
@@ -710,6 +711,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.scrollController}
   final ScrollController scrollController;
 
+  /// {@macro flutter.widgets.editableText.autofillHints}
+  final Iterable<String> autofillHints;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -1049,6 +1053,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         dragStartBehavior: widget.dragStartBehavior,
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
+        autofillHints: widget.autofillHints,
         autocorrectionTextRectColor: autocorrectionTextRectColor,
       ),
     );
