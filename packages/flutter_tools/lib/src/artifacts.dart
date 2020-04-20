@@ -169,6 +169,9 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
+
+  /// Whether these artifacts correspond to a non-versioned local engine.
+  bool get isLocalEngine;
 }
 
 
@@ -405,6 +408,9 @@ class CachedArtifacts extends Artifacts {
     assert(false, 'Invalid platform $platform.');
     return null;
   }
+
+  @override
+  bool get isLocalEngine => false;
 }
 
 TargetPlatform _currentHostPlatform(Platform platform) {
@@ -576,6 +582,9 @@ class LocalEngineArtifacts extends Artifacts {
     }
     throw Exception('Unsupported platform $platform.');
   }
+
+  @override
+  bool get isLocalEngine => true;
 }
 
 /// An implementation of [Artifacts] that provides individual overrides.
@@ -618,4 +627,7 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) => parent.getEngineType(platform, mode);
+
+  @override
+  bool get isLocalEngine => parent.isLocalEngine;
 }

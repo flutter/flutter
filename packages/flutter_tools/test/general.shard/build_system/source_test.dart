@@ -17,15 +17,16 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+);
+
 void main() {
   Testbed testbed;
   SourceVisitor visitor;
   Environment environment;
-  MockPlatform mockPlatform;
 
   setUp(() {
-    mockPlatform = MockPlatform();
-    when(mockPlatform.isWindows).thenReturn(true);
     testbed = Testbed(setup: () {
       globals.fs.directory('cache').createSync();
       final Directory outputs = globals.fs.directory('outputs')
@@ -37,6 +38,7 @@ void main() {
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
         logger: globals.logger,
+        engineVersion: null, // simulate a local engine.
       );
       visitor = SourceVisitor(environment);
       environment.buildDir.createSync(recursive: true);
@@ -203,7 +205,7 @@ void main() {
     expect(visitor.sources.single.path, r'C:\foo\bar.txt');
     expect(visitor.containsNewDepfile, false);
   }, overrides: <Type, Generator>{
-    Platform: () => mockPlatform,
+    Platform: () => windowsPlatform,
   }));
 
   test('can parse depfile with spaces in paths', () => testbed.run(() {
@@ -214,7 +216,26 @@ void main() {
     expect(visitor.sources.single.path, r'foo bar.txt');
     expect(visitor.containsNewDepfile, false);
   }));
+
+  test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
+    final MockArtifacts artifacts = MockArtifacts();
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
+      artifacts: artifacts, // using real artifacts
+      processManager: FakeProcessManager.any(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      engineVersion: 'abcdefghijklmon' // Use a versioned engine.
+    );
+    visitor = SourceVisitor(environment);
+
+    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
+    fizzSource.accept(visitor);
+
+    expect(visitor.sources.single.path, contains('engine.version'));
+    verifyNever(artifacts.getArtifactPath(
+      any, platform: anyNamed('platform'), mode: anyNamed('mode')));
+  }));
 }
 
-class MockPlatform extends Mock implements Platform {}
 class MockArtifacts extends Mock implements Artifacts {}

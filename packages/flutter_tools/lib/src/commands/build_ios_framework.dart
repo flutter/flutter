@@ -462,6 +462,9 @@ end
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
+        engineVersion: globals.artifacts.isLocalEngine
+          ? null
+          : globals.flutterVersion.engineRevision,
       );
       final BuildResult result = await buildSystem.build(target, environment);
       if (!result.success) {
