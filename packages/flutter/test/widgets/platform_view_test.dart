@@ -96,6 +96,7 @@ void main() {
       const AndroidView view = AndroidView(viewType: 'maps', layoutDirection: TextDirection.rtl);
       expect(view.compositeMode, AndroidViewCompositeMode.texture);
     });
+
     testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
