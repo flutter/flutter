@@ -17,7 +17,83 @@ import 'package:flutter_test/flutter_test.dart';
 import '../services/fake_platform_views.dart';
 
 void main() {
-  group('AndroidView', () {
+  group('AndroidView - hybrid', () {
+    testWidgets('Create android view', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              compositeMode: AndroidViewCompositeMode.hybrid,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeAndroidPlatformView>[
+          FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
+              AndroidViewController.kAndroidLayoutDirectionLtr),
+        ]),
+      );
+    });
+    testWidgets('Push a platform layer', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              compositeMode: AndroidViewCompositeMode.hybrid,
+            ),
+          ),
+        ),
+      );
+
+      final Layer platformLayer = tester.layers[tester.layers.length - 1];
+      expect(platformLayer, isA<PlatformViewLayer>());
+    });
+    testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 0.0,
+            height: 0.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+              compositeMode: AndroidViewCompositeMode.hybrid,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        isEmpty,
+      );
+    });
+  });
+
+  group('AndroidView - texture', () {
+    testWidgets('Android view default composite mode', (WidgetTester tester) async {
+      const AndroidView view = AndroidView(viewType: 'maps', layoutDirection: TextDirection.rtl);
+      expect(view.compositeMode, AndroidViewCompositeMode.texture);
+    });
     testWidgets('Create Android view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
@@ -490,11 +566,6 @@ void main() {
               AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
-    });
-
-    testWidgets('Android view default composite mode', (WidgetTester tester) async {
-      const AndroidView view = AndroidView(viewType: 'maps', layoutDirection: TextDirection.rtl);
-      expect(view.compositeMode, AndroidViewCompositeMode.texture);
     });
 
     testWidgets('Android view ambient directionality', (WidgetTester tester) async {
