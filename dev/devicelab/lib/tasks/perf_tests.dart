@@ -339,9 +339,13 @@ class WebCompileTest {
   ///
   /// Run a single web compile test for the app under [directory], and store
   /// its metrics with prefix [metric].
-  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric}) {
+  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric, bool measureBuildTime = false}) {
     return inDirectory<Map<String, int>>(directory, () async {
+      final Map<String, int> metrics = <String, int>{};
+
       await flutter('packages', options: <String>['get']);
+      final Stopwatch watch = measureBuildTime ? Stopwatch() : null;
+      watch?.start();
       await evalFlutter('build', options: <String>[
         'web',
         '-v',
@@ -350,14 +354,21 @@ class WebCompileTest {
       ], environment: <String, String>{
         'FLUTTER_WEB': 'true',
       });
+      watch?.stop();
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
-      return await getSize(outputFileName, metric: metric);
+      metrics.addAll(await getSize(outputFileName, metric: metric));
+
+      if (measureBuildTime) {
+        metrics['${metric}_dart2js_millis'] = watch.elapsedMilliseconds;
+      }
+
+      return metrics;
     });
   }
 
   /// Obtains the size and gzipped size of a file given by [fileName].
   static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
-    final Map<String, int> sizeMetrics = {};
+    final Map<String, int> sizeMetrics = <String, int>{};
 
     final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
     sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
