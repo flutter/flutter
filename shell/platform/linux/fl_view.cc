@@ -20,6 +20,7 @@ struct _FlView {
 
   FlDartProject* flutter_project;
   FLUTTER_API_SYMBOL(FlutterEngine) flutter_engine;
+  int64_t button_state;
 };
 
 enum { PROP_FLUTTER_PROJECT = 1, PROP_LAST };
@@ -152,6 +153,56 @@ static gboolean run_flutter_engine(FlView* self) {
   return TRUE;
 }
 
+/* Convert a GDK button event into a Flutter event and send to the engine */
+static gboolean fl_view_send_pointer_button_event(FlView* self,
+                                                  GdkEventButton* event) {
+  FlutterPointerEvent fl_event = {};
+  fl_event.struct_size = sizeof(fl_event);
+  fl_event.timestamp = event->time * 1000;
+
+  int64_t button;
+  switch (event->button) {
+    case 1:
+      button = kFlutterPointerButtonMousePrimary;
+      break;
+    case 2:
+      button = kFlutterPointerButtonMouseMiddle;
+      break;
+    case 3:
+      button = kFlutterPointerButtonMouseSecondary;
+      break;
+    default:
+      return FALSE;
+  }
+  int old_button_state = self->button_state;
+  if (event->type == GDK_BUTTON_PRESS) {
+    // Drop the event if Flutter already thinks the button is down
+    if ((self->button_state & button) != 0)
+      return FALSE;
+    self->button_state ^= button;
+
+    fl_event.phase = old_button_state == 0 ? kDown : kMove;
+  } else if (event->type == GDK_BUTTON_RELEASE) {
+    // Drop the event if Flutter already thinks the button is up
+    if ((self->button_state & button) == 0)
+      return FALSE;
+    self->button_state ^= button;
+
+    fl_event.phase = self->button_state == 0 ? kUp : kMove;
+  }
+
+  if (self->flutter_engine == nullptr)
+    return FALSE;
+
+  fl_event.x = event->x;
+  fl_event.y = event->y;
+  fl_event.device_kind = kFlutterPointerDeviceKindMouse;
+  fl_event.buttons = self->button_state;
+  FlutterEngineSendPointerEvent(self->flutter_engine, &fl_event, 1);
+
+  return TRUE;
+}
+
 static void fl_view_set_property(GObject* object,
                                  guint prop_id,
                                  const GValue* value,
@@ -220,7 +271,8 @@ static void fl_view_realize(GtkWidget* widget) {
   window_attributes.wclass = GDK_INPUT_OUTPUT;
   window_attributes.visual = gtk_widget_get_visual(widget);
   window_attributes.event_mask =
-      gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
+      gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK |
+      GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK;
 
   gint window_attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL;
 
@@ -254,12 +306,54 @@ static void fl_view_size_allocate(GtkWidget* widget,
   FlutterEngineSendWindowMetricsEvent(self->flutter_engine, &event);
 }
 
+static gboolean fl_view_button_press_event(GtkWidget* widget,
+                                           GdkEventButton* event) {
+  FlView* self = FL_VIEW(widget);
+
+  // Flutter doesn't handle double and triple click events
+  if (event->type == GDK_DOUBLE_BUTTON_PRESS ||
+      event->type == GDK_TRIPLE_BUTTON_PRESS)
+    return FALSE;
+
+  return fl_view_send_pointer_button_event(self, event);
+}
+
+static gboolean fl_view_button_release_event(GtkWidget* widget,
+                                             GdkEventButton* event) {
+  FlView* self = FL_VIEW(widget);
+
+  return fl_view_send_pointer_button_event(self, event);
+}
+
+static gboolean fl_view_motion_notify_event(GtkWidget* widget,
+                                            GdkEventMotion* event) {
+  FlView* self = FL_VIEW(widget);
+
+  if (self->flutter_engine == nullptr)
+    return FALSE;
+
+  FlutterPointerEvent fl_event = {};
+  fl_event.struct_size = sizeof(fl_event);
+  fl_event.timestamp = event->time * 1000;
+  fl_event.phase = self->button_state != 0 ? kMove : kHover;
+  fl_event.x = event->x;
+  fl_event.y = event->y;
+  fl_event.device_kind = kFlutterPointerDeviceKindMouse;
+  fl_event.buttons = self->button_state;
+  FlutterEngineSendPointerEvent(self->flutter_engine, &fl_event, 1);
+
+  return TRUE;
+}
+
 static void fl_view_class_init(FlViewClass* klass) {
   G_OBJECT_CLASS(klass)->set_property = fl_view_set_property;
   G_OBJECT_CLASS(klass)->get_property = fl_view_get_property;
   G_OBJECT_CLASS(klass)->dispose = fl_view_dispose;
   GTK_WIDGET_CLASS(klass)->realize = fl_view_realize;
   GTK_WIDGET_CLASS(klass)->size_allocate = fl_view_size_allocate;
+  GTK_WIDGET_CLASS(klass)->button_press_event = fl_view_button_press_event;
+  GTK_WIDGET_CLASS(klass)->button_release_event = fl_view_button_release_event;
+  GTK_WIDGET_CLASS(klass)->motion_notify_event = fl_view_motion_notify_event;
 
   g_object_class_install_property(
       G_OBJECT_CLASS(klass), PROP_FLUTTER_PROJECT,
