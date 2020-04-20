@@ -56,7 +56,7 @@ class Tracing {
         for (final FlutterView view in vmService.vm.views) {
           if (await view.uiIsolate.vmService
               .flutterAlreadyPaintedFirstUsefulFrame(
-                isolateId: view.uiIsolate.id,    
+                isolateId: view.uiIsolate.id,
               )) {
             done = true;
             break;

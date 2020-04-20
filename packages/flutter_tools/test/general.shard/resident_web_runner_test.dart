@@ -33,7 +33,6 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/testbed.dart';
-import 'vmservice_test.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(
@@ -96,7 +95,6 @@ void main() {
   setUp(() {
     resetChromeForTesting();
     mockDebugConnection = MockDebugConnection();
-    // mockVmService = MockVmService();
     mockDevice = MockDevice();
     mockAppConnection = MockAppConnection();
     mockFlutterDevice = MockFlutterDevice();
