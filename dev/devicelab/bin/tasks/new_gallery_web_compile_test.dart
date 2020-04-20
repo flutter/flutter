@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+import 'package:flutter_devicelab/tasks/perf_tests.dart' show WebCompileTest;
+
 Future<void> main() async {
   await task(const NewGalleryWebCompileTest().run);
 }
