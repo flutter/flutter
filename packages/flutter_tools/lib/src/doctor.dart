@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:meta/meta.dart';
 
 import 'android/android_studio_validator.dart';
@@ -36,6 +35,7 @@ import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'web/chrome.dart';
 import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
