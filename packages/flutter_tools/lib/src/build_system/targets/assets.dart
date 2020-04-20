@@ -13,6 +13,8 @@ import '../depfile.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
 
+const String kMaterialIconsFontName = 'MaterialIcons-Regular.ttf';
+
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
@@ -60,8 +62,11 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          inputs.add(globals.fs.file(content.file.path));
-          if (!await iconTreeShaker.subsetFont(
+          inputs.add(content.file as File);
+          // Only tree shake MaterialIcons-Regular.ttf font.
+          final bool isMaterialIcons = globals.fs.path
+            .basename(content.file.path) == kMaterialIconsFontName;
+          if (!isMaterialIcons || !await iconTreeShaker.subsetFont(
             inputPath: content.file.path,
             outputPath: file.path,
             relativePath: entry.key,
