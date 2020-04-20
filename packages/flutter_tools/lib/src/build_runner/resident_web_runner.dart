@@ -158,6 +158,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory.path}',
       );
     }
+
     if (_chromiumLauncher != null) {
       await (await _chromiumLauncher.connectedInstance).close();
     }
