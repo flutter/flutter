@@ -24,7 +24,7 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     this.dartDefines = const <String>[],
-    this.experiments = const <String>[],
+    this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
   });
 
@@ -80,8 +80,8 @@ class BuildInfo {
   /// [bool], [String], [int], and [double].
   final List<String> dartDefines;
 
-  /// A list of dart experiments.
-  final List<String> experiments;
+  /// A list of Dart experiments.
+  final List<String> dartExperiments;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

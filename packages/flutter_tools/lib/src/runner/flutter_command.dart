@@ -609,7 +609,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
           ? stringsArg(FlutterOptions.kDartDefinesOption)
           : const <String>[],
-      experiments: experiments,
+      dartExperiments: experiments,
     );
   }
 
