@@ -351,7 +351,7 @@ class WebCompileTest {
         'FLUTTER_WEB': 'true',
       });
       final String outputFileName = path.join(directory, 'build/web/main.dart.js');
-      return await getSize(outputFileName, metric: 'hello_world');
+      return await getSize(outputFileName, metric: metric);
     });
   }
 
