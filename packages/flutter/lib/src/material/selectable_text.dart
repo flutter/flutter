@@ -386,7 +386,7 @@ class SelectableText extends StatefulWidget {
   bool get selectionEnabled {
     return enableInteractiveSelection;
   }
-  
+
   /// Optional delegate for building the text selection handles and toolbar.
   ///
   /// If not specified, the platform default controls will be used.
