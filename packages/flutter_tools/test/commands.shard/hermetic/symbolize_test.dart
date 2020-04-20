@@ -118,3 +118,5 @@ void main() {
     );
   });
 }
+
+class MockDwarfSymboliztionService extends Mock implements DwarfSymbolizationService {}
