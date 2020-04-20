@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -21,7 +22,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/build_runner/devfs_web.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -390,9 +390,10 @@ void main() {
 
     // Ensure that generated entrypoint is generated correctly.
     expect(entrypointFileName, isNotNull);
-    expect(globals.fs.file(entrypointFileName).readAsStringSync(), contains(
-      'await ui.webOnlyInitializePlatform();'
-    ));
+    final String entrypointContents = globals.fs.file(entrypointFileName).readAsStringSync();
+    expect(entrypointContents, contains('// Flutter web bootstrap script'));
+    expect(entrypointContents, contains("import 'dart:ui' as ui;"));
+    expect(entrypointContents, contains('await ui.webOnlyInitializePlatform();'));
 
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);

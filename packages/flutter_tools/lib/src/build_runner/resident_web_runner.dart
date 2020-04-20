@@ -584,18 +584,23 @@ class _ResidentWebRunner extends ResidentWebRunner {
       }
 
       final String entrypoint = <String>[
-        'import "$importedEntrypoint" as entrypoint;',
-        'import "dart:ui" as ui;',
+        '// Flutter web bootstrap script for $importedEntrypoint.',
+        '',
+        "import 'dart:ui' as ui;",
+        '',
+        "import '$importedEntrypoint' as entrypoint;",
         if (hasWebPlugins)
-          'import "package:flutter_web_plugins/flutter_web_plugins.dart";',
+          "import 'package:flutter_web_plugins/flutter_web_plugins.dart';",
         if (hasWebPlugins)
-          'import "$generatedImport";',
+          "import '$generatedImport';",
+        '',
         'Future<void> main() async {',
         if (hasWebPlugins)
           '  registerPlugins(webPluginRegistry);',
         '  await ui.webOnlyInitializePlatform();',
         '  entrypoint.main();',
         '}',
+        '',
       ].join('\n');
       result.writeAsStringSync(entrypoint);
     }
