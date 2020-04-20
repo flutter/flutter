@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:platform/platform.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/context.dart';
@@ -683,8 +684,8 @@ void _parseAssetsFromFolder(
   for (final FileSystemEntity entity in lister) {
     if (entity is File) {
       final String relativePath = globals.fs.path.relative(entity.path, from: assetBase);
-      if (_isFileHidden(relativePath)) {
-        globals.printStatus("File '$relativePath' is hidden and won't be included in the bundle.");
+      if (isFileHidden(relativePath, globals.fs, globals.platform)) {
+        globals.printTrace("File '$relativePath' is hidden and won't be included in the bundle.");
         continue;
       }
 
@@ -775,9 +776,14 @@ _Asset _resolvePackageAsset(Uri assetUri, PackageConfig packageConfig) {
   return null;
 }
 
-bool _isFileHidden(String relativeAssetFilePath){
-  if(globals.platform.isWindows){
+@visibleForTesting
+bool isFileHidden(
+  String relativeFilePath,
+  FileSystem fileSystem,
+  Platform platform,
+) {
+  if (platform.isWindows) {
     return false;
   }
-  return RegExp(r'(^|\/)\.[^\/\.]').hasMatch(relativeAssetFilePath);
+  return fileSystem.path.basename(relativeFilePath).startsWith('.');
 }

@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -191,8 +192,8 @@ flutter:
       // Create a directory in the same path to test that we're only looking at File
       // objects.
       globals.fs
-          .directory(globals.fs.path.join('assets', 'foo', 'bar'))
-          .createSync();
+        .directory(globals.fs.path.join('assets', 'foo', 'bar'))
+        .createSync();
       globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -202,49 +203,65 @@ flutter:
               - assets/foo/
           '''
         );
-        globals.fs.file('.packages').createSync();
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(manifestPath: 'pubspec.yaml');
-        // Expected assets:
-        //  - asset manifest
-        //  - font manifest
-        //  - license file
-        //  - assets/foo/bar.txt
-        expect(bundle.entries.length, 4);
-        expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
+      globals.fs.file('.packages').createSync();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+      expect(
+        testLogger.traceText.contains(
+          "File 'assets/foo/.hidden_unix_file' is "
+          "hidden and won't be included in the bundle.",
+        ),
+        isTrue,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
+    });
 
-      testUsingContext('prints info regarding not included hidden file', () async {
-        globals.fs
-          .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
-          .createSync(recursive: true);
-        globals.fs
-          .file(globals.fs.path.join('assets', 'foo', '.hidden_unix_file'))
-          .createSync();
-        // Create a directory in the same path to test that we're only looking at File
-        // objects.
-        globals.fs
-          .directory(globals.fs.path.join('assets', 'foo', 'bar'))
-          .createSync();
-        globals.fs.file('pubspec.yaml')
-          ..createSync()
-          ..writeAsStringSync(r'''
-name: example
-flutter:
-  assets:
-    - assets/foo/
-''');
-        globals.fs.file('.packages').createSync();
-        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
-        await bundle.build(manifestPath: 'pubspec.yaml');
-        expect(testLogger.statusText.contains("File 'assets/foo/.hidden_unix_file' is hidden and won't be included in the bundle."), isTrue);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => testFileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
+    testUsingContext("doesn't exclude files with dot on Windows", () async {
+      globals.fs
+        .file(globals.fs.path.join('assets', 'foo', 'bar.txt'))
+        .createSync(recursive: true);
+      globals.fs
+        .file(globals.fs.path.join('assets', 'foo', '.file_to_include'))
+        .createSync();
+      globals.fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+          name: example
+          flutter:
+            assets:
+              - assets/foo/
+          '''
+        );
+      globals.fs.file('.packages').createSync();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      //  - assets/foo/.file_to_include
+      expect(bundle.entries.length, 5);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () {
+        final MemoryFileSystem testFs = MemoryFileSystem(style: FileSystemStyle.windows);
+        testFs.currentDirectory = testFs.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+        return testFs;
+      },
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
+    });
   });
 
   testUsingContext('Failed directory delete shows message', () async {
