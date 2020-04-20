@@ -196,29 +196,29 @@ Win32Window::MessageHandler(HWND hwnd,
       case WM_CHAR:
       case WM_SYSCHAR: {
         char32_t code_point = static_cast<char32_t>(wparam);
-        static char32_t lead_surrogate = 0;
+        static char32_t s_pending_lead_surrogate = 0;
         // If code_point is LeadSurrogate, save to combine to potentially form
         // a complex Unicode character.
         if ((code_point & 0xFFFFFC00) == 0xD800) {
-          lead_surrogate = code_point;
-        } else if (lead_surrogate != 0 && (code_point & 0xFFFFFC00) == 0xDC00) {
+          s_pending_lead_surrogate = code_point;
+        } else if (s_pending_lead_surrogate != 0 &&
+                   (code_point & 0xFFFFFC00) == 0xDC00) {
           // Merge TrailSurrogate and LeadSurrogate.
-          code_point = 0x10000 + ((lead_surrogate & 0x000003FF) << 10) +
+          code_point = 0x10000 +
+                       ((s_pending_lead_surrogate & 0x000003FF) << 10) +
                        (code_point & 0x3FF);
-          lead_surrogate = 0;
+          s_pending_lead_surrogate = 0;
         }
 
-        // In an ENG-INTL keyboard, pressing "'" + "e" produces é. In this case,
-        // the "'" key is a dead char, and shouldn't be sent to window->OnChar
-        // for text input. However, the key event should still be sent to
-        // Flutter. The result would be:
-        // * Key event - key code: 222 (quote) - key label: '
-        // * Key event - key code: 69 (e) - key label: é
-        //
-        // As for text input, only the second key press will display a
-        // character.
-        if (wparam != VK_BACK && message != WM_DEADCHAR &&
-            message != WM_SYSDEADCHAR) {
+        // Of the messages handled here, only WM_CHAR should be treated as
+        // characters. WM_SYS*CHAR are not part of text input, and WM_DEADCHAR
+        // will be incorporated into a later WM_CHAR with the full character.
+        // Also filter out:
+        // - Lead surrogates, which like dead keys will be send once combined.
+        // - ASCII control characters, which are sent as WM_CHAR events for all
+        //   control key shortcuts.
+        if (message == WM_CHAR && code_point >= U' ' &&
+            s_pending_lead_surrogate == 0) {
           window->OnChar(code_point);
         }
 

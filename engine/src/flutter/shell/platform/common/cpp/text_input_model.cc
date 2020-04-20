@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/common/cpp/text_input_model.h"
 
+#include <algorithm>
 #include <codecvt>
 #include <iostream>
 #include <locale>
@@ -73,8 +74,13 @@ bool TextInputModel::SetEditingState(size_t selection_base,
   }
   std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> utf32conv;
   text_ = utf32conv.from_bytes(text);
-  selection_base_ = text_.begin() + selection_base;
-  selection_extent_ = text_.begin() + selection_extent;
+  // selection_base and selection_extent are relative to UTF-16, so don't
+  // necessarily line up. The full fix would be to use UTF-16 here so
+  // the models align, but for now just make sure it doesn't crash;
+  // longer term the goal is to eliminate having two sources of truth.
+  size_t length = text_.length();
+  selection_base_ = text_.begin() + std::min(selection_base, length);
+  selection_extent_ = text_.begin() + std::min(selection_extent, length);
   return true;
 }
 
