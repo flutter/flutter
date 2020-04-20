@@ -367,15 +367,15 @@ class WebCompileTest {
   }
 
   /// Obtains the size and gzipped size of a file given by [fileName].
-  static Future<Map<String, int>> getSize(String metricKeyPrefix, String fileName, Map<String, Object> metrics) async {
+  static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
     final Map<String, int> sizeMetrics = {};
 
     final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
-    sizeMetrics['${metricKeyPrefix}_dart2js_size'] = _parseDu(result.stdout as String);
+    sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
 
     await Process.run('gzip',<String>['-k', '9', fileName]);
     final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
-    sizeMetrics['${metricKeyPrefix}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
 
     return sizeMetrics;
   }
