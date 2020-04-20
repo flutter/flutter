@@ -46,7 +46,8 @@ class NewGalleryWebCompileTest {
       watch.stop();
 
       const String js = 'temp/gallery/build/web/main.dart.js';
-      await _measureSize(metricKeyPrefix, js, metrics);
+
+      metrics.addAll(await WebCompileTest.getSize(js, metric: metricKeyPrefix));
 
       metrics['${metricKeyPrefix}_dart2js_millis'] = watch.elapsedMilliseconds;
 
@@ -56,17 +57,5 @@ class NewGalleryWebCompileTest {
     rmTree(Directory('temp'));
 
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
-  }
-
-  static Future<void> _measureSize(String metric, String js, Map<String, Object> metrics) async {
-    final ProcessResult result = await Process.run('du', <String>['-k', js]);
-    await Process.run('gzip',<String>['-k', '9', js]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', js + '.gz']);
-    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
-    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
-  }
-
-  static int _parseDu(String source) {
-    return int.parse(source.split(RegExp(r'\s+')).first.trim());
   }
 }
