@@ -145,7 +145,7 @@ class WebAssetServer implements AssetReader {
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
       final PackageConfig packageConfig = await loadPackageConfigUri(
-        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+        globals.fs.file(globalPackagesPath).absolute.uri,
         loader: (Uri uri) {
           final File file = globals.fs.file(uri);
           if (!file.existsSync()) {

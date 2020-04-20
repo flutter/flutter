@@ -874,7 +874,7 @@ class TestGoldenComparator {
       shellPath,
       '--disable-observatory',
       '--non-interactive',
-      '--packages=${PackageMap.globalPackagesPath}',
+      '--packages=$globalPackagesPath',
       output,
     ];
 

@@ -125,7 +125,7 @@ class _ManifestAssetBundle implements AssetBundle {
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(

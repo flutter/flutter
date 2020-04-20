@@ -470,14 +470,14 @@ void restoreTestRunner() {
 Future<void> _runTests(List<String> testArgs, Map<String, String> environment) async {
   globals.printTrace('Running driver tests.');
 
-  PackageMap.globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
+  globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(globalPackagesPath));
   final String dartVmPath = globals.fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await processUtils.stream(
     <String>[
       dartVmPath,
       ...dartVmFlags,
       ...testArgs,
-      '--packages=${PackageMap.globalPackagesPath}',
+      '--packages=$globalPackagesPath',
       '-rexpanded',
     ],
     environment: environment,

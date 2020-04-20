@@ -16,7 +16,7 @@ import '../project.dart';
 Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDirectory, BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  refreshPluginsList(project);
+  await refreshPluginsList(project);
   if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
     return;
   }

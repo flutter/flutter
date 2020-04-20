@@ -46,7 +46,7 @@ void main() {
       final File packagesFile = globals.fs.file(globals.fs.path.join('foo', '.packages'))
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
-      PackageMap.globalPackagesPath = packagesFile.path;
+      globalPackagesPath = packagesFile.path;
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
 

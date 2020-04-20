@@ -158,7 +158,7 @@ class HotRunner extends ResidentRunner {
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
     final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+      globals.fs.file(globalPackagesPath).absolute.uri,
       loader: (Uri uri) {
         final File file = globals.fs.file(uri);
         if (!file.existsSync()) {
@@ -359,7 +359,7 @@ class HotRunner extends ResidentRunner {
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
+      globals.fs.file(globalPackagesPath).absolute.uri,
       loader: (Uri uri) {
         final File file = globals.fs.file(uri);
         if (!file.existsSync()) {

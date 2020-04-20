@@ -128,7 +128,7 @@ class FlutterTesterDevice extends Device {
       '--run-forever',
       '--non-interactive',
       '--enable-dart-profiling',
-      '--packages=${PackageMap.globalPackagesPath}',
+      '--packages=$globalPackagesPath',
     ];
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) {

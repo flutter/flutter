@@ -104,7 +104,7 @@ void main() {
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
+      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, globalPackagesPath));
       packagesFile..createSync(recursive: true)
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });

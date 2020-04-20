@@ -159,7 +159,7 @@ class Dart2JSTarget extends Target {
     final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = PackageMap.globalPackagesPath;
+    final String packageFile = globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
     final List<String> dartDefines = parseDartDefines(environment);

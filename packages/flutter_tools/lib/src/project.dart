@@ -226,7 +226,7 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
-    refreshPluginsList(this);
+    await refreshPluginsList(this);
     if ((android.existsSync() && checkProjects) || !checkProjects) {
       await android.ensureReadyForPlatformSpecificTooling();
     }

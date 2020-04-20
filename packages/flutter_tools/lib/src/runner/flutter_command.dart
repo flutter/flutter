@@ -818,7 +818,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
+    if (_requiresPubspecYaml && !isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
 
       // If there is no pubspec in the current directory, look in the parent
@@ -834,14 +834,6 @@ abstract class FlutterCommand extends Command<void> {
       }
       if (changedDirectory) {
         globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
-      }
-
-      // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        final String error = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).checkValid();
-        if (error != null) {
-          throw ToolExit(error);
-        }
       }
     }
 
