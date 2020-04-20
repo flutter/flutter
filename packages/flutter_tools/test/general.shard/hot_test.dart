@@ -103,7 +103,7 @@ void main() {
     MockLocalEngineArtifacts mockArtifacts;
 
     when(mockDevFs.update(
-      mainPath: anyNamed('mainPath'),
+      mainUri: anyNamed('mainUri'),
       target: anyNamed('target'),
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
@@ -115,6 +115,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
     when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});

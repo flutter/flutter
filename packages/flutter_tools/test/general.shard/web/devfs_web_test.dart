@@ -360,7 +360,7 @@ void main() {
       any,
       any,
       outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -402,11 +402,12 @@ void main() {
     webDevFS.webAssetServer.dartSdkSourcemap.createSync(recursive: true);
 
     await webDevFS.update(
-      mainPath: globals.fs.path.join('lib', 'main.dart'),
+      mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
       generator: residentCompiler,
       trackWidgetCreation: true,
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -452,7 +453,7 @@ void main() {
       any,
       any,
       outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide StackTrace;
@@ -21,7 +22,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../compile.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
@@ -558,7 +558,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
   // Flutter web projects need to include a generated main entrypoint to call the
   // appropriate bootstrap method and inject plugins.
   // Keep this in sync with build_system/targets/web.dart.
-  Future<String> _generateEntrypoint(String main, String packagesPath) async {
+  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig packageConfig) async {
     File result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
       _generatedEntrypointDirectory ??= globals.fs.systemTempDirectory.createTempSync('flutter_tools.')
@@ -569,18 +569,20 @@ class _ResidentWebRunner extends ResidentWebRunner {
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       await injectPlugins(flutterProject, checkProjects: true);
 
-      final PackageUriMapper packageUriMapper = PackageUriMapper(main, packagesPath, null, null);
-      final String generatedPath = globals.fs.currentDirectory
+      final Uri generatedUri = globals.fs.currentDirectory
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
-        .absolute.path;
-      final Uri generatedImport = packageUriMapper.map(generatedPath);
-      String importedEntrypoint = packageUriMapper.map(main)?.toString();
+        .absolute.uri;
+      final Uri generatedImport = packageConfig.toPackageUri(generatedUri);
+      Uri importedEntrypoint = packageConfig.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
-        final String parent = globals.fs.file(main).parent.path;
+        final String parent = globals.fs.file(mainUri).parent.path;
         flutterDevices.first.generator.addFileSystemRoot(parent);
-        importedEntrypoint = 'org-dartlang-app:///${globals.fs.path.basename(main)}';
+        importedEntrypoint = Uri(
+          scheme: 'org-dartlang-app',
+          path: '/' + mainUri.pathSegments.last,
+        );
       }
 
       final String entrypoint = <String>[
@@ -604,7 +606,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
       ].join('\n');
       result.writeAsStringSync(entrypoint);
     }
-    return result.path;
+    return result.absolute.uri;
   }
 
   Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
@@ -617,18 +619,21 @@ class _ResidentWebRunner extends ResidentWebRunner {
         return UpdateFSReport(success: false);
       }
     }
-    final List<Uri> invalidatedFiles =
-        await projectFileInvalidator.findInvalidated(
+    final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: device.devFS.lastCompiled,
       urisToMonitor: device.devFS.sources,
       packagesPath: packagesFilePath,
+      packageConfig: device.devFS.lastPackageConfig,
     );
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device.device.name}...',
       timeout: timeoutConfiguration.fastOperation,
     );
     final UpdateFSReport report = await device.devFS.update(
-      mainPath: await _generateEntrypoint(mainPath, packagesFilePath),
+      mainUri: await _generateEntrypoint(
+        globals.fs.file(mainPath).absolute.uri,
+        invalidationResult.packageConfig,
+      ),
       target: target,
       bundle: assetBundle,
       firstBuildTime: firstBuildTime,
@@ -638,7 +643,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
       dillOutputPath: dillOutputPath,
       projectRootPath: projectRootPath,
       pathToReload: getReloadPath(fullRestart: fullRestart),
-      invalidatedFiles: invalidatedFiles,
+      invalidatedFiles: invalidationResult.uris,
+      packageConfig: invalidationResult.packageConfig,
       trackWidgetCreation: true,
     );
     devFSStatus.stop();
