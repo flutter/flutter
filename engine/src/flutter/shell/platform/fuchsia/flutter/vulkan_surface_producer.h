@@ -66,6 +66,8 @@ class VulkanSurfaceProducer final
             width_change_factor, height_change_factor);
   }
 
+  GrContext* gr_context() { return context_.get(); }
+
  private:
   // VulkanProvider
   const vulkan::VulkanProcTable& vk() override { return *vk_.get(); }
