@@ -492,6 +492,11 @@ void main() {
       );
     });
 
+    testWidgets('Android view default composite mode', (WidgetTester tester) async {
+      const AndroidView view = AndroidView(viewType: 'maps', layoutDirection: TextDirection.rtl);
+      expect(view.compositeMode, AndroidViewCompositeMode.texture);
+    });
+
     testWidgets('Android view ambient directionality', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
