@@ -24,35 +24,18 @@ class NewGalleryWebCompileTest {
   Future<TaskResult> run() async {
     await gitClone(path: 'temp', repo: 'https://github.com/flutter/gallery.git');
 
-    final Map<String, Object> metrics = <String, Object>{};
+    final Map<String, Object> metrics = await inDirectory<Map<String, int>>(
+      'temp/gallery',
+      () async {
+        await flutter('doctor');
 
-    final Stopwatch watch = Stopwatch();
-
-    await inDirectory<TaskResult>('temp/gallery', () async {
-      await flutter('doctor');
-      await flutter('packages', options: <String>['get']);
-
-      watch.start();
-
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-
-      watch.stop();
-
-      const String js = 'temp/gallery/build/web/main.dart.js';
-
-      metrics.addAll(await WebCompileTest.getSize(js, metric: metricKeyPrefix));
-
-      metrics['${metricKeyPrefix}_dart2js_millis'] = watch.elapsedMilliseconds;
-
-      return null;
-    });
+        return await WebCompileTest.runSingleBuildTest(
+          directory: 'temp/gallery',
+          metric: metricKeyPrefix,
+          measureBuildTime: true,
+        );
+      },
+    );
 
     rmTree(Directory('temp'));
 
