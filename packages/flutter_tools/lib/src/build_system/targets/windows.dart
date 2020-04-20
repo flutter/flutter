@@ -51,7 +51,7 @@ class UnpackWindows extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
     final String outputPrefix = environment.fileSystem.path.join(
       environment.projectDir.path,
       'windows',
