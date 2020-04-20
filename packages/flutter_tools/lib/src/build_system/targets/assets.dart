@@ -13,8 +13,6 @@ import '../depfile.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
 
-const String kMaterialIconsFontName = 'MaterialIcons-Regular.ttf';
-
 /// A helper function to copy an asset bundle into an [environment]'s output
 /// directory.
 ///
