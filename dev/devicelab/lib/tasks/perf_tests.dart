@@ -305,6 +305,7 @@ class WebCompileTest {
 
   Future<TaskResult> run() async {
     final Map<String, Object> metrics = <String, Object>{};
+
     await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
       await flutter('packages', options: <String>['get']);
       await evalFlutter('build', options: <String>[
@@ -319,6 +320,7 @@ class WebCompileTest {
       metrics.addAll(await getSize(output, metric: 'hello_world'));
       return null;
     });
+
     await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', () async {
       await flutter('packages', options: <String>['get']);
       await evalFlutter('build', options: <String>[
@@ -333,6 +335,7 @@ class WebCompileTest {
       metrics.addAll(await getSize(output, metric: 'flutter_gallery'));
       return null;
     });
+
     const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
