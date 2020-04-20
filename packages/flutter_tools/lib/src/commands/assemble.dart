@@ -53,6 +53,8 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
+  // Windows
+  DebugBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -226,7 +228,6 @@ class AssembleCommand extends FlutterCommand {
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: globals.platform,
       );
       depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }

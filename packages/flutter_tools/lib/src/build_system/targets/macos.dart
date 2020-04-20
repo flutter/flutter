@@ -80,7 +80,6 @@ abstract class UnpackMacOS extends Target {
     final DepfileService depfileService = DepfileService(
       logger: globals.logger,
       fileSystem: globals.fs,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       Depfile(inputs, outputs),
@@ -295,7 +294,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,

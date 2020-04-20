@@ -68,7 +68,6 @@ flutter:
     final DepfileService depfileService = DepfileService(
       logger: null,
       fileSystem: fileSystem,
-      platform: platform,
     );
     final Depfile dependencies = depfileService.parse(depfile);
 

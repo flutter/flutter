@@ -65,7 +65,6 @@ void main() {
       depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
