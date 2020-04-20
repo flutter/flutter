@@ -1,4 +1,4 @@
-Signature: ef6b864f6879d951227fae3c2f82f942
+Signature: f56de1585f86fde1baf6efc4a80bfebf
 
 UNUSED LICENSES:
 
@@ -3885,6 +3885,7 @@ FILE: ../../../third_party/skia/include/private/GrD3DTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkIDChangeListener.h
 FILE: ../../../third_party/skia/modules/canvaskit/viewer_bindings.cpp
 FILE: ../../../third_party/skia/src/core/SkIDChangeListener.cpp
+FILE: ../../../third_party/skia/src/core/SkMatrixProvider.h
 FILE: ../../../third_party/skia/src/core/SkVM_fwd.h
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlockAllocator.h
