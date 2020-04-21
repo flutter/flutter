@@ -126,8 +126,10 @@ class ChromeLauncher {
 
     final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
 
-    if (userDataDir == null && cacheDir != null) {
-      userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+    final bool customUserDataDir = userDataDir != null;
+    userDataDir ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+
+    if (!customUserDataDir && cacheDir != null) {
       // Seed data dir with previous state.
       _restoreUserSessionInformation(cacheDir, userDataDir);
     }
@@ -158,7 +160,7 @@ class ChromeLauncher {
     final Process process = await _processManager.start(args);
 
     // When the process exits, copy the user settings back to the provided data-dir.
-    if (cacheDir != null) {
+    if (!customUserDataDir && cacheDir != null) {
       unawaited(process.exitCode.whenComplete(() {
         _cacheUserSessionInformation(userDataDir, cacheDir);
       }));
