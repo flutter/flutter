@@ -153,6 +153,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
   );
 
@@ -217,7 +218,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
     semanticsEnabled: true,
   );
 

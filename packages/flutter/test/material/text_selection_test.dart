@@ -124,6 +124,7 @@ void main() {
       expect(find.text('SELECT ALL'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -197,6 +198,7 @@ void main() {
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -261,6 +263,7 @@ void main() {
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -334,6 +337,7 @@ void main() {
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
@@ -439,6 +443,7 @@ void main() {
       final Offset newCutOffset = tester.getTopLeft(find.text('CUT'));
       expect(newCutOffset, equals(cutOffset));
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });
@@ -512,6 +517,7 @@ void main() {
       final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
     },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
   });

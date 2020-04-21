@@ -199,7 +199,10 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-  }, semanticsEnabled: true);
+  },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
+  );
 
   testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -261,7 +264,10 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-  }, semanticsEnabled: true);
+  },
+    skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
+    semanticsEnabled: true,
+  );
 
   testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
