@@ -153,7 +153,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser, // Reference needed
     semanticsEnabled: true,
   );
 
@@ -218,7 +217,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    skip: isBrowser, // Reference needed
+
     semanticsEnabled: true,
   );
 

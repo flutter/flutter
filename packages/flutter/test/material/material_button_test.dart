@@ -259,10 +259,7 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
-    semanticsEnabled: true,
-    skip: isBrowser,
-  );
+  }, semanticsEnabled: true);
 
   testWidgets('MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton');
@@ -596,7 +593,7 @@ void main() {
 
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
     Widget buildFrame({ double minWidth, double height, EdgeInsets padding = EdgeInsets.zero, Widget child }) {

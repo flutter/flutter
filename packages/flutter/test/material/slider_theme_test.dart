@@ -607,7 +607,7 @@ void main() {
         )
     );
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
@@ -784,7 +784,7 @@ void main() {
         ),
     );
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);

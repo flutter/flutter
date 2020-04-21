@@ -199,10 +199,7 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
-    semanticsEnabled: true,
-    skip: isBrowser,
-  );
+  }, semanticsEnabled: true);
 
   testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -264,10 +261,7 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-  },
-    skip: isBrowser,
-    semanticsEnabled: true,
-  );
+  }, semanticsEnabled: true);
 
   testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -747,7 +741,7 @@ void main() {
       clipPath: clipPath,
       clipRect: clipRect,
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
@@ -882,7 +876,7 @@ void main() {
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('OutlineButton pressed fillColor default', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {

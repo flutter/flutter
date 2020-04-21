@@ -1339,7 +1339,7 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
-  }, skip: isBrowser);
+  });
 
   testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
@@ -1438,7 +1438,7 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({
