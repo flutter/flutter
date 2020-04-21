@@ -1182,7 +1182,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     SemanticsNode semanticsNodeUnderCursor =
         getRootSemanticsNode().hitTest(new float[] {event.getX(), event.getY(), 0, 1});
-    if (semanticsNodeUnderCursor.platformViewId != -1) {
+    // semanticsNodeUnderCursor can be null when hovering over non-flutter UI such as
+    // the Android navigation bar due to hitTest() bounds checking.
+    if (semanticsNodeUnderCursor != null && semanticsNodeUnderCursor.platformViewId != -1) {
       return accessibilityViewEmbedder.onAccessibilityHoverEvent(
           semanticsNodeUnderCursor.id, event);
     }
