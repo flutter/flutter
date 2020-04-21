@@ -370,8 +370,8 @@ void main() {
       fileSystem: globals.fs,
       chromiumLauncher: chromiumLauncher,
       logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: FakeProcessManager.any(),
     ));
     when(chromiumLauncher.canFindExecutable()).thenReturn(true);
     chromiumLauncher.testLaunchChromium(mockChrome);
@@ -449,8 +449,8 @@ void main() {
       fileSystem: globals.fs,
       chromiumLauncher: chromiumLauncher,
       logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: FakeProcessManager.any(),
     ));
     chromiumLauncher.testLaunchChromium(mockChrome);
     Uri entrypointFileUri;
@@ -1109,8 +1109,8 @@ void main() {
       fileSystem: globals.fs,
       chromiumLauncher: chromiumLauncher,
       logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
+      platform: FakePlatform(operatingSystem: 'linux'),
+      processManager: FakeProcessManager.any(),
     ));
     when(chromiumLauncher.canFindExecutable()).thenReturn(true);
     when(mockWebDevFS.create()).thenAnswer((Invocation invocation) async {
