@@ -193,7 +193,7 @@ class UndoIntent extends Intent {
 
 class UndoAction extends Action<UndoIntent> {
   @override
-  bool get enabled {
+  bool isEnabled(UndoIntent intent) {
     final UndoableActionDispatcher manager = Actions.of(primaryFocus?.context ?? FocusDemo.appKey.currentContext, nullOk: true) as UndoableActionDispatcher;
     return manager.canUndo;
   }
@@ -211,7 +211,7 @@ class RedoIntent extends Intent {
 
 class RedoAction extends Action<RedoIntent> {
   @override
-  bool get enabled {
+  bool isEnabled(RedoIntent intent) {
     final UndoableActionDispatcher manager = Actions.of(primaryFocus.context, nullOk: true) as UndoableActionDispatcher;
     return manager.canRedo;
   }
