@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:package_config/package_config.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -662,7 +663,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, { String outputPath, PackageConfig packageConfig }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
