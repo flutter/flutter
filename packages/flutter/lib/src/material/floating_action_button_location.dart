@@ -519,6 +519,14 @@ class _CenterTopFabLocation extends StandardFabLocation
   String toString() => 'FloatingActionButtonLocation.centerTop';
 }
 
+class _MiniCenterTopFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabCenterOffsetX, FabTopOffsetY {
+  const _MiniCenterTopFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniCenterTop';
+}
+
 class _EndTopFabLocation extends StandardFabLocation
     with FabEndOffsetX, FabTopOffsetY {
   const _EndTopFabLocation();
@@ -605,6 +613,14 @@ class _CenterDockedFabLocation extends StandardFabLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.centerDocked';
+}
+
+class _MiniCenterDockedFabLocation extends StandardFabLocation
+    with FabMiniOffsetAdjustment, FabCenterOffsetX, FabDockedOffsetY {
+  const _MiniCenterDockedFabLocation();
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.miniCenterDocked';
 }
 
 class _EndDockedFabLocation extends StandardFabLocation
