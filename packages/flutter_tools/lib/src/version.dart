@@ -752,39 +752,30 @@ class GitTagVersion {
         _runGit('git fetch $_flutterGit --tags', processUtils, workingDirectory);
       }
     }
-    // `--match` glob must match old version tag `v1.2.3` and new `1.2.3-dev.4.5`
-    return parse(_runGit('git describe --match *.*.* --first-parent --long --tags', processUtils, workingDirectory));
-  }
+    final List<String> tags = _runGit(
+      'git tag --contains HEAD', processUtils, workingDirectory).split('\n');
+    // Check first for a stable tag
+    for (final String tag in tags) {
+      final String trimmedTag = tag.trim();
+      if (RegExp(r'^\d+\.\d+\.\d+$').hasMatch(trimmedTag)) {
+        return parse(trimmedTag);
+      }
+    }
+    // Next check for a dev tag
+    for (final String tag in tags) {
+      final String trimmedTag = tag.trim();
+      if (RegExp(r'^\d+\.\d+\.\d+-\d+\.\d+\.pre$').hasMatch(trimmedTag)) {
+        return parse(trimmedTag);
+      }
+    }
 
-  // TODO(fujino): Deprecate this https://github.com/flutter/flutter/issues/53850
-  /// Check for the release tag format of the form x.y.z-dev.m.n
-  static GitTagVersion parseLegacyVersion(String version) {
-    final RegExp versionPattern = RegExp(
-      r'^([0-9]+)\.([0-9]+)\.([0-9]+)(-dev\.[0-9]+\.[0-9]+)?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
-    if (parts == null) {
-      return const GitTagVersion.unknown();
-    }
-    final List<int> parsedParts = parts.take(5).map<int>(
-      (String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = <int>[null, null];
-    if (parts[3] != null) {
-      devParts = RegExp(r'^-dev\.(\d+)\.(\d+)')
-        .matchAsPrefix(parts[3])
-        ?.groups(<int>[1, 2])
-        ?.map<int>(
-          (String source) => source == null ? null : int.tryParse(source)
-        )?.toList() ?? <int>[null, null];
-    }
-    return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      devVersion: devParts[0],
-      devPatch: devParts[1],
-      commits: parsedParts[4],
-      hash: parts[5],
-      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-dev.m.n
+    // If we're not currently on a tag, 
+    return parse(
+      _runGit(
+        'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
+        processUtils,
+        workingDirectory,
+      )
     );
   }
 
@@ -822,10 +813,6 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
-    gitTagVersion = parseLegacyVersion(version);
-    if (gitTagVersion != const GitTagVersion.unknown()) {
-      return gitTagVersion;
-    }
     gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;

@@ -530,10 +530,18 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(109, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'tag', '--contains', 'HEAD'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
-    )).thenReturn(RunResult(ProcessResult(110, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+    )).thenReturn(
+      RunResult(ProcessResult(110, 0, '', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
+    when(processUtils.runSync(
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(ProcessResult(111, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
 
@@ -548,7 +556,7 @@ void main() {
       environment: anyNamed('environment'),
     )).called(1);
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -669,10 +677,15 @@ void fakeData(
     environment: anyNamed('environment'),
   )).thenReturn(ProcessResult(105, 0, '', ''));
   when(pm.runSync(
-    <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+    <String>['git', 'tag', '--contains', 'HEAD'],
     workingDirectory: anyNamed('workingDirectory'),
     environment: anyNamed('environment'),
-  )).thenReturn(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''));
+  )).thenReturn(ProcessResult(106, 0, '', ''));
+  when(pm.runSync(
+    <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+    workingDirectory: anyNamed('workingDirectory'),
+    environment: anyNamed('environment'),
+  )).thenReturn(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
