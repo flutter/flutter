@@ -3893,10 +3893,11 @@ void main() {
         // center of the top edge of the InputDecorator's outline border.
         fixTextFieldOutlineLabel: true,
         isEmpty: true,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'label',
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(width: 10),
+            borderSide: const BorderSide(width: 10),
+            borderRadius: BorderRadius.circular(0),
           ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
