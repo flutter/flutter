@@ -3896,8 +3896,7 @@ void main() {
         decoration: InputDecoration(
           labelText: 'label',
           enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(width: 10),
-            borderRadius: BorderRadius.circular(0),
+            borderSide: const BorderSide(width: 4),
           ),
           floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
@@ -3908,7 +3907,7 @@ void main() {
 
     // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
     // labelY = -floatingLabelHeight/2 + borderWidth/2
-    expect(tester.getTopLeft(find.text('label')).dy, -1.0);
+    expect(tester.getTopLeft(find.text('label')).dy, -4.0);
   });
 
 }
