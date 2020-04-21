@@ -146,9 +146,6 @@ class AnalyzeOnce extends AnalyzeBase {
     if (!(argResults['dartdocs'] as bool)) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
     }
-    if (argResults['permit-non-nullable'] as bool) {
-      errors.removeWhere((AnalysisError error) => error.code == 'experiment_not_enabled');
-    }
 
     // emit benchmarks
     if (isBenchmarking) {

@@ -134,15 +134,6 @@ class AnalyzeContinuously extends AnalyzeBase {
         issueCount -= undocumentedMembers;
       }
 
-      // remove enabled experiment errors
-      if (argResults['permit-non-nullable'] as bool) {
-        final int enabledExperiments = errors.where((AnalysisError error) {
-          return error.code == 'experiment_not_enabled';
-        }).length;
-        errors.removeWhere((AnalysisError error) => error.code == 'experiment_not_enabled');
-        issueCount -= enabledExperiments;
-      }
-
       errors.sort();
 
       for (final AnalysisError error in errors) {

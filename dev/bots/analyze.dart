@@ -87,7 +87,6 @@ Future<void> run(List<String> arguments) async {
   print('$clock Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
-    '--permit-non-nullable', // do not report non-nullable experiment errors.
     ...arguments,
   ]);
 
@@ -97,7 +96,6 @@ Future<void> run(List<String> arguments) async {
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     '--watch',
-    '--permit-non-nullable', // do not report non-nullable experiment errors.
     '--benchmark',
     ...arguments,
   ]);

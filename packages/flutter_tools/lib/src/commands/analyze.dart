@@ -61,17 +61,6 @@ class AnalyzeCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Also output the analysis time.');
 
-    // Hidden option to allow mixed non-nullable support.
-    // This is only used to permit non-nullable usage in the framework
-    // analysis tests from being flagged as an error before the experiment
-    // is officially rolled out.
-    // Users that use non-nullable features should instead enable the
-    // experiment with --enable-experiment=non-nullable.
-    argParser.addFlag('permit-non-nullable',
-        hide: true,
-        help: 'Do not report experiment_not_enabled errors.'
-    );
-
     usesPubOption();
 
     // Not used by analyze --watch
