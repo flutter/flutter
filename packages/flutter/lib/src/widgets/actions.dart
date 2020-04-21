@@ -649,7 +649,9 @@ class _ActionsState extends State<Actions> {
 
   void _handleActionChanged(Action<Intent> action) {
     // Generate a new key so that the marker notifies dependents.
-    rebuildKey = Object();
+    setState(() {
+      rebuildKey = Object();
+    });
   }
 
   void _updateActionListeners() {
