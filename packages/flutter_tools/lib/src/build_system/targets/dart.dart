@@ -184,7 +184,7 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[
+  List<Target> get dependencies => const <Target>[
     GenerateLocalizationsTarget(),
   ];
 
