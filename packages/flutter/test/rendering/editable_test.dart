@@ -14,10 +14,7 @@ import 'rendering_tester.dart';
 
 class FakeEditableTextState with TextSelectionDelegate {
   @override
-  TextEditingValue get textEditingValue { return const TextEditingValue(); }
-
-  @override
-  set textEditingValue(TextEditingValue value) { }
+  TextEditingValue textEditingValue = const TextEditingValue();
 
   @override
   void hideToolbar() { }
@@ -702,7 +699,6 @@ void main() {
     expect(editable.maxScrollExtent, equals(10));
   }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
 
-
   test('arrow keys and delete handle simple text correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final ViewportOffset viewportOffset = ViewportOffset.zero();
@@ -737,23 +733,20 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    if (!kIsWeb) {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 1);
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 1);
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 0);
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-      pumpFrame();
-      expect(editable.text.text, 'est');
-    }
-  });
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, 'est');
+  }, skip: kIsWeb);
 
   test('arrow keys and delete handle surrogate pairs correctly', () async {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -789,20 +782,18 @@ void main() {
     editable.selection = const TextSelection.collapsed(offset: 0);
     pumpFrame();
 
-    if (!kIsWeb) {
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 2);
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowRight, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 2);
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
-      expect(currentSelection.isCollapsed, true);
-      expect(currentSelection.baseOffset, 0);
+    await simulateKeyDownEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.arrowLeft, platform: 'android');
+    expect(currentSelection.isCollapsed, true);
+    expect(currentSelection.baseOffset, 0);
 
-      await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
-      await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
-      expect(editable.text.text, '');
-    }
-  });
+    await simulateKeyDownEvent(LogicalKeyboardKey.delete, platform: 'android');
+    await simulateKeyUpEvent(LogicalKeyboardKey.delete, platform: 'android');
+    expect(delegate.textEditingValue.text, '');
+  }, skip: kIsWeb); // Key simulation doesn't work on web.
 }
