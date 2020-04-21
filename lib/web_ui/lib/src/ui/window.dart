@@ -699,6 +699,20 @@ abstract class Window {
   // TODO(flutter_web): Get the real locale from the browser.
   List<Locale> _locales = const [_enUS];
 
+  /// The locale that the platform's native locale resolution system resolves to.
+  ///
+  /// This value may differ between platforms and is meant to allow flutter locale
+  /// resoltion algorithms to into resolving consistently with other apps on the
+  /// device.
+  ///
+  /// This value may be used in a custom [localeListResolutionCallback] or used directly
+  /// in order to arrive at the most appropriate locale for the app.
+  ///
+  /// See [locales], which is the list of locales the user/device prefers.
+  Locale get platformResolvedLocale => _platformResolvedLocale;
+  // TODO(flutter_web): Compute the browser locale resolution and set it here.
+  Locale _platformResolvedLocale;
+
   /// A callback that is invoked whenever [locale] changes value.
   ///
   /// The framework invokes this callback in the same zone in which the

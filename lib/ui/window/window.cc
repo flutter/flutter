@@ -227,6 +227,19 @@ void Window::UpdateLocales(const std::vector<std::string>& locales) {
       }));
 }
 
+void Window::UpdatePlatformResolvedLocale(
+    const std::vector<std::string>& locale) {
+  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+  tonic::LogIfError(tonic::DartInvokeField(
+      library_.value(), "_updatePlatformResolvedLocale",
+      {
+          tonic::ToDart<std::vector<std::string>>(locale),
+      }));
+}
+
 void Window::UpdateUserSettingsData(const std::string& data) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state)
