@@ -21,6 +21,7 @@ Widget buildInputDecorator({
   TextStyle baseStyle,
   TextAlignVertical textAlignVertical,
   VisualDensity visualDensity,
+  bool fixTextFieldOutlineLabel = false,
   Widget child = const Text(
     'text',
     style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
@@ -34,6 +35,7 @@ Widget buildInputDecorator({
             data: Theme.of(context).copyWith(
               inputDecorationTheme: inputDecorationTheme,
               visualDensity: visualDensity,
+              fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
             ),
             child: Align(
               alignment: Alignment.topLeft,
@@ -3881,4 +3883,31 @@ void main() {
     // Ideographic (incorrect) value is 50.299999713897705
     expect(tester.getBottomLeft(find.text('hint')).dy, isBrowser ? 45.75 : 47.75);
   });
+
+  testWidgets('InputDecorator floating label Y coordinate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/54028
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
+        // Ensures that the floating label is vertically centered relative to
+        // center of the top edge of the InputDecorator's outline border.
+        fixTextFieldOutlineLabel: true,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(width: 4),
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // floatingLabelGeight = 12 (ahem font size 16dps * 0.75 = 12)
+    // labelY = -floatingLabelHeight/2 + borderWidth/2
+    expect(tester.getTopLeft(find.text('label')).dy, -4.0);
+  });
+
 }
