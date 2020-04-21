@@ -189,7 +189,7 @@ void main() {
     expect(storageDir.childFile('LOG').existsSync(), true);
     expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
   });
-  
+
   test('can use existing user data dir', () async {
     final Completer<void> exitCompleter = Completer<void>.sync();
     final Directory userDataDir = fileSystem.directory('/.tmp_rand1/flutter_tools_chrome_device.rand1');
