@@ -296,8 +296,17 @@ abstract class FloatingActionButtonLocation {
 ///
 /// {@tool dartpad --template=stateless_widget_material}
 ///
-/// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] a
-/// [FloatingActionButton] using a user-defined [FloatingActionButtonLocation].
+/// This is an example of a user-defined [FloatingActionButtonLocation].
+///
+/// The example shows a [Scaffold] with an [AppBar], a [BottomAppBar], and a
+/// [FloatingActionButton] using a custom [FloatingActionButtonLocation].
+///
+/// The new [FloatingActionButtonLocation] is defined
+/// by extending [StandardFabLocation] with two mixins,
+/// [FabEndOffsetX] and [FabFloatOffsetY], and overriding the
+/// [getOffsetX] method to adjust the FAB's x-coordinate, creating a
+/// [FloatingActionButtonLocation] slightly different from
+/// [FloatingActionButtonLocation.endFloat].
 ///
 /// ```dart preamble
 /// class AlmostEndFloatFabLocation extends StandardFabLocation
