@@ -53,11 +53,7 @@ void DidDrawCanvas::willRestore() {}
 
 void DidDrawCanvas::didConcat(const SkMatrix& matrix) {}
 
-#ifdef SK_SUPPORT_LEGACY_DIDCONCAT44
-void DidDrawCanvas::didConcat44(const SkScalar[]) {}
-#else
 void DidDrawCanvas::didConcat44(const SkM44&) {}
-#endif
 
 void DidDrawCanvas::didScale(SkScalar, SkScalar) {}
 

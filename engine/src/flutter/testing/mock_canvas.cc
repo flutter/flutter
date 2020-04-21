@@ -60,17 +60,10 @@ void MockCanvas::didConcat(const SkMatrix& matrix) {
   draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrixData{matrix}});
 }
 
-#ifdef SK_SUPPORT_LEGACY_DIDCONCAT44
-void MockCanvas::didConcat44(const SkScalar matrix[]) {
-  SkM44 m44 = SkM44::ColMajor(matrix);
-  draw_calls_.emplace_back(DrawCall{current_layer_, ConcatMatrix44Data{m44}});
-}
-#else
 void MockCanvas::didConcat44(const SkM44& matrix) {
   draw_calls_.emplace_back(
       DrawCall{current_layer_, ConcatMatrix44Data{matrix}});
 }
-#endif
 
 void MockCanvas::didScale(SkScalar x, SkScalar y) {
   SkMatrix m;

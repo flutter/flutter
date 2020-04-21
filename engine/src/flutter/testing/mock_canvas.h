@@ -145,11 +145,7 @@ class MockCanvas : public SkCanvasVirtualEnforcer<SkCanvas> {
   void willRestore() override;
   void didRestore() override {}
   void didConcat(const SkMatrix& matrix) override;
-#ifdef SK_SUPPORT_LEGACY_DIDCONCAT44
-  void didConcat44(const SkScalar matrix[]) override;
-#else
   void didConcat44(const SkM44&) override;
-#endif
   void didScale(SkScalar x, SkScalar y) override;
   void didTranslate(SkScalar x, SkScalar y) override;
   void didSetMatrix(const SkMatrix& matrix) override;
