@@ -301,8 +301,12 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
 
 Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final List<Plugin> plugins = <Plugin>[];
+  final String packagesFile = globals.fs.path.join(
+    project.directory.path,
+    globalPackagesPath,
+  );
   final PackageConfig packageConfig = await loadPackageConfigOrFail(
-    globals.fs.file(globalPackagesPath),
+    globals.fs.file(packagesFile),
     logger: globals.logger,
   );
   for (final Package package in packageConfig.packages) {

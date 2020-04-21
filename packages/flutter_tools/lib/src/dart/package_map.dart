@@ -39,6 +39,7 @@ Future<PackageConfig> loadPackageConfigOrFail(File file, {
       return Future<Uint8List>.value(configFile.readAsBytesSync());
     },
     onError: (dynamic error) {
+      logger.printTrace(error.toString());
       String message = '${file.path} does not exist.';
       final String pubspecPath = fileSystem.path.absolute(fileSystem.path.dirname(file.path), 'pubspec.yaml');
       if (fileSystem.isFileSync(pubspecPath)) {
