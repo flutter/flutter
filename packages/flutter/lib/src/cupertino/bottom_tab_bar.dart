@@ -7,6 +7,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'localizations.dart';
 import 'theme.dart';
 
 // Standard iOS 10 tab bar height.
@@ -204,6 +205,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   List<Widget> _buildTabItems(BuildContext context) {
     final List<Widget> result = <Widget>[];
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     for (int index = 0; index < items.length; index += 1) {
       final bool active = index == currentIndex;
@@ -213,8 +215,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
-              hint: 'tab, ${index + 1} of ${items.length}',
+              hint: localizations.tabLabel(
+                tabIndex: index + 1,
+                tabCount: items.length,
+              ),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onTap == null ? null : () { onTap(index); },

@@ -251,6 +251,21 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     }
   }
 
+  /// The raw version of [tabLabel], with `$tabIndex` and `$tabCount` verbatim
+  /// in the string.
+  @protected
+  String get tabLabelRaw;
+
+  @override
+  String tabLabel({ int tabIndex, int tabCount }) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    final String template = tabLabelRaw;
+    return template
+      .replaceFirst(r'$tabIndex', _decimalFormat.format(tabIndex))
+      .replaceFirst(r'$tabCount', _decimalFormat.format(tabCount));
+  }
+
   @override
   String timerPickerHour(int hour) {
     return _singleDigitHourFormat.format(DateTime.utc(0, 0, 0, hour));
