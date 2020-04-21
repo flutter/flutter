@@ -189,6 +189,14 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
+TaskFunction createFadingChildAnimationPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/fading_child_animation_perf.dart',
+    'fading_child_animation_perf',
+  ).run;
+}
+
 /// Measure application startup performance.
 class StartupTest {
   const StartupTest(this.testDirectory, { this.reportMetrics = true });

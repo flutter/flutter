@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(shihaohong): remove ignoring deprecated member use analysis
-// when Scaffold.shouldSnackBarIgnoreFABRect parameter is removed.
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
@@ -556,15 +552,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       double snackBarYOffsetBase;
-      if (Scaffold.shouldSnackBarIgnoreFABRect) {
-        if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating)
-          snackBarYOffsetBase = floatingActionButtonRect.top;
-        else
-          snackBarYOffsetBase = contentBottom;
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+        snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
-        snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
-          ? floatingActionButtonRect.top
-          : contentBottom;
+        snackBarYOffsetBase = contentBottom;
       }
 
       positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
@@ -1333,17 +1324,6 @@ class Scaffold extends StatefulWidget {
   ///
   /// By default, the drag gesture is enabled.
   final bool endDrawerEnableOpenDragGesture;
-
-  /// This flag is deprecated and fixes and issue with incorrect clipping
-  /// and positioning of the [SnackBar] set to [SnackBarBehavior.floating].
-  @Deprecated(
-    'This property controls whether to clip and position the snackbar as '
-    'if there is always a floating action button, even if one is not present. '
-    'It exists to provide backwards compatibility to ease migrations, and will '
-    'eventually be removed. '
-    'This feature was deprecated after v1.15.3.'
-  )
-  static bool shouldSnackBarIgnoreFABRect = true;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///

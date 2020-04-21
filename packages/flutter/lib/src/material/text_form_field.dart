@@ -310,6 +310,14 @@ class _TextFormFieldState extends FormFieldState<String> {
   }
 
   @override
+  void didChange(String value) {
+    super.didChange(value);
+
+    if (_effectiveController.text != value)
+      _effectiveController.text = value;
+  }
+
+  @override
   void reset() {
     super.reset();
     setState(() {

@@ -448,7 +448,7 @@ class FlutterPlatform extends PlatformPlugin {
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
         compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject);
-        mainDart = await compiler.compile(mainDart);
+        mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
           controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));

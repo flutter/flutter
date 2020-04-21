@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
+import 'bottom_navigation_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
@@ -266,6 +267,7 @@ class ThemeData with Diagnosticable {
     MaterialBannerThemeData bannerTheme,
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
+    BottomNavigationBarThemeData bottomNavigationBarTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -374,6 +376,7 @@ class ThemeData with Diagnosticable {
     bannerTheme ??= const MaterialBannerThemeData();
     dividerTheme ??= const DividerThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
+    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -440,6 +443,7 @@ class ThemeData with Diagnosticable {
       bannerTheme: bannerTheme,
       dividerTheme: dividerTheme,
       buttonBarTheme: buttonBarTheme,
+      bottomNavigationBarTheme: bottomNavigationBarTheme,
     );
   }
 
@@ -518,6 +522,7 @@ class ThemeData with Diagnosticable {
     @required this.bannerTheme,
     @required this.dividerTheme,
     @required this.buttonBarTheme,
+    @required this.bottomNavigationBarTheme,
   }) : assert(brightness != null),
        assert(visualDensity != null),
        assert(primaryColor != null),
@@ -578,7 +583,8 @@ class ThemeData with Diagnosticable {
        assert(popupMenuTheme != null),
        assert(bannerTheme != null),
        assert(dividerTheme != null),
-       assert(buttonBarTheme != null);
+       assert(buttonBarTheme != null),
+       assert(bottomNavigationBarTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1025,6 +1031,10 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
+  /// A theme for customizing the appearance and layout of [BottomNavigationBar]
+  /// widgets.
+  final BottomNavigationBarThemeData bottomNavigationBarTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -1091,6 +1101,7 @@ class ThemeData with Diagnosticable {
     MaterialBannerThemeData bannerTheme,
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
+    BottomNavigationBarThemeData bottomNavigationBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1158,6 +1169,7 @@ class ThemeData with Diagnosticable {
       bannerTheme: bannerTheme ?? this.bannerTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
+      bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
     );
   }
 
@@ -1303,6 +1315,7 @@ class ThemeData with Diagnosticable {
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
     );
   }
 
@@ -1375,7 +1388,8 @@ class ThemeData with Diagnosticable {
         && other.popupMenuTheme == popupMenuTheme
         && other.bannerTheme == bannerTheme
         && other.dividerTheme == dividerTheme
-        && other.buttonBarTheme == buttonBarTheme;
+        && other.buttonBarTheme == buttonBarTheme
+        && other.bottomNavigationBarTheme == bottomNavigationBarTheme;
   }
 
   @override
@@ -1448,6 +1462,7 @@ class ThemeData with Diagnosticable {
       bannerTheme,
       dividerTheme,
       buttonBarTheme,
+      bottomNavigationBarTheme,
     ];
     return hashList(values);
   }
@@ -1516,6 +1531,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<BottomNavigationBarThemeData>('bottomNavigationBarTheme', bottomNavigationBarTheme, defaultValue: defaultData.bottomNavigationBarTheme, level: DiagnosticLevel.debug));
   }
 }
 

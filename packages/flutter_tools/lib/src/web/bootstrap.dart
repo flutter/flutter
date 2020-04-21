@@ -62,20 +62,22 @@ define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_
   /* MAIN_EXTENSION_MARKER */
   child.main();
 
-window.\$dartLoader = {};
-window.\$dartLoader.rootDirectories = [];
-window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
-  if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
-    window.\$dartStackTraceUtility.ready = true;
-    let dart = dart_sdk.dart;
-    window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-      url = url.replace(window.\$dartUriBase + '/', '');
-      if (url == 'dart_sdk.js') {
-        return dart.getSourceMap('dart_sdk');
-      }
-      url = url.replace(".lib.js", "");
-      return dart.getSourceMap(url);
-    });
+  window.\$dartLoader = {};
+  window.\$dartLoader.rootDirectories = [];
+  if (window.\$requireLoader) {
+    window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
+    if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
+      window.\$dartStackTraceUtility.ready = true;
+      let dart = dart_sdk.dart;
+      window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
+        url = url.replace(window.\$dartUriBase + '/', '');
+        if (url == 'dart_sdk.js') {
+          return dart.getSourceMap('dart_sdk');
+        }
+        url = url.replace(".lib.js", "");
+        return dart.getSourceMap(url);
+      });
+    }
   }
 });
 ''';
