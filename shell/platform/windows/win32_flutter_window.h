@@ -57,7 +57,7 @@ class Win32FlutterWindow : public Win32Window {
   void OnPointerLeave() override;
 
   // |Win32Window|
-  void OnChar(char32_t code_point) override;
+  void OnText(const std::u16string& text) override;
 
   // |Win32Window|
   void OnKey(int key, int scancode, int action, char32_t character) override;
@@ -112,8 +112,8 @@ class Win32FlutterWindow : public Win32Window {
   // event is called.
   void SendPointerLeave();
 
-  // Reports a keyboard character to Flutter engine.
-  void SendChar(char32_t code_point);
+  // Reports text input to Flutter engine.
+  void SendText(const std::u16string& text);
 
   // Reports a raw keyboard message to Flutter engine.
   void SendKey(int key, int scancode, int action, char32_t character);

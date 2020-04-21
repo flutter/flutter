@@ -8,6 +8,13 @@
 
 namespace flutter {
 
+namespace {
+char32_t CodePointFromSurrogatePair(wchar_t high, wchar_t low) {
+  return 0x10000 + ((static_cast<char32_t>(high) & 0x000003FF) << 10) +
+         (low & 0x3FF);
+}
+}  // namespace
+
 Win32Window::Win32Window() {
   // Get the DPI of the primary monitor as the initial DPI. If Per-Monitor V2 is
   // supported, |current_dpi_| should be updated in the
@@ -195,19 +202,21 @@ Win32Window::MessageHandler(HWND hwnd,
       case WM_SYSDEADCHAR:
       case WM_CHAR:
       case WM_SYSCHAR: {
-        char32_t code_point = static_cast<char32_t>(wparam);
-        static char32_t s_pending_lead_surrogate = 0;
-        // If code_point is LeadSurrogate, save to combine to potentially form
-        // a complex Unicode character.
-        if ((code_point & 0xFFFFFC00) == 0xD800) {
-          s_pending_lead_surrogate = code_point;
-        } else if (s_pending_lead_surrogate != 0 &&
-                   (code_point & 0xFFFFFC00) == 0xDC00) {
-          // Merge TrailSurrogate and LeadSurrogate.
-          code_point = 0x10000 +
-                       ((s_pending_lead_surrogate & 0x000003FF) << 10) +
-                       (code_point & 0x3FF);
-          s_pending_lead_surrogate = 0;
+        static wchar_t s_pending_high_surrogate = 0;
+
+        wchar_t character = static_cast<wchar_t>(wparam);
+        std::u16string text({character});
+        char32_t code_point = character;
+        if (IS_HIGH_SURROGATE(character)) {
+          // Save to send later with the trailing surrogate.
+          s_pending_high_surrogate = character;
+        } else if (IS_LOW_SURROGATE(character) &&
+                   s_pending_high_surrogate != 0) {
+          text.insert(text.begin(), s_pending_high_surrogate);
+          // Merge the surrogate pairs for the key event.
+          code_point =
+              CodePointFromSurrogatePair(s_pending_high_surrogate, character);
+          s_pending_high_surrogate = 0;
         }
 
         // Of the messages handled here, only WM_CHAR should be treated as
@@ -217,9 +226,9 @@ Win32Window::MessageHandler(HWND hwnd,
         // - Lead surrogates, which like dead keys will be send once combined.
         // - ASCII control characters, which are sent as WM_CHAR events for all
         //   control key shortcuts.
-        if (message == WM_CHAR && code_point >= U' ' &&
-            s_pending_lead_surrogate == 0) {
-          window->OnChar(code_point);
+        if (message == WM_CHAR && s_pending_high_surrogate == 0 &&
+            character >= u' ') {
+          window->OnText(text);
         }
 
         // All key presses that generate a character should be sent from

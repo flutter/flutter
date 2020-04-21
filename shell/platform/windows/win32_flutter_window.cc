@@ -161,9 +161,9 @@ void Win32FlutterWindow::OnPointerLeave() {
   }
 }
 
-void Win32FlutterWindow::OnChar(char32_t code_point) {
+void Win32FlutterWindow::OnText(const std::u16string& text) {
   if (process_events_) {
-    SendChar(code_point);
+    SendText(text);
   }
 }
 
@@ -264,9 +264,9 @@ void Win32FlutterWindow::SendPointerLeave() {
   SendPointerEventWithData(event);
 }
 
-void Win32FlutterWindow::SendChar(char32_t code_point) {
+void Win32FlutterWindow::SendText(const std::u16string& text) {
   for (const auto& handler : keyboard_hook_handlers_) {
-    handler->CharHook(this, code_point);
+    handler->TextHook(this, text);
   }
 }
 
