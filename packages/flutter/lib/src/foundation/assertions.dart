@@ -330,19 +330,15 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// [FlutterError.reportError].
 ///
 /// ```dart
-/// _runningAsyncTasks = true;
 /// try {
-///   return await callback();
+///   // Try to do something!
 /// } catch (error, stack) {
+///   // Catch & report error.
 ///   FlutterError.reportError(FlutterErrorDetails(
 ///     exception: error,
-///     stack: stack,
 ///     library: 'Flutter test framework',
 ///     context: ErrorSummary('while running async test code'),
 ///   ));
-///   return null;
-/// } finally {
-///   _runningAsyncTasks = false;
 /// }
 /// ```
 /// {@end-tool}
@@ -421,6 +417,7 @@ class FlutterErrorDetails with Diagnosticable {
   /// ```
   ///
   /// See also:
+  ///
   ///   * [ErrorDescription], which provides an explanation of the problem and its
   ///    cause, any information that may help track down the problem, background
   ///    information, etc.
