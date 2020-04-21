@@ -379,10 +379,10 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
 
 /// Mixin for a "top" floating action button location, such as [FloatingActionButtonLocation.startTop].
 mixin FabTopOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
+  /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
-    /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
     final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
     return scaffoldGeometry.contentTop - fabHalfHeight;
   }
@@ -390,11 +390,10 @@ mixin FabTopOffsetY on StandardFabLocation {
 
 /// Mixin for a "float" floating action button location, such as [FloatingActionButtonLocation.centerFloat].
 mixin FabFloatOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating at
+  /// the bottom of the screen.
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates y-offset for [FloatingActionButtonLocation]s floating at
-    /// the bottom of the screen.
-
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -412,12 +411,11 @@ mixin FabFloatOffsetY on StandardFabLocation {
 
 /// Mixin for a "docked" floating action button location, such as [FloatingActionButtonLocation.endDocked].
 mixin FabDockedOffsetY on StandardFabLocation {
+  /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
   @override
   double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates y-offset for [FloatingActionButtonLocation]s floating over the
-    /// [Scaffold.bottomNavigationBar] so that the center of the floating
-    /// action button lines up with the top of the bottom navigation bar.
-
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
     final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -438,9 +436,9 @@ mixin FabDockedOffsetY on StandardFabLocation {
 
 /// Mixin for a "start" floating action button location, such as [FloatingActionButtonLocation.startTop].
 mixin FabStartOffsetX on StandardFabLocation {
+  /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
@@ -454,18 +452,18 @@ mixin FabStartOffsetX on StandardFabLocation {
 
 /// Mixin for a "center" floating action button location, such as [FloatingActionButtonLocation.centerFloat].
 mixin FabCenterOffsetX on StandardFabLocation {
+  /// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
     return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
   }
 }
 
 /// Mixin for an "end" floating action button location, such as [FloatingActionButtonLocation.endDocked].
 mixin FabEndOffsetX on StandardFabLocation {
+  /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
   @override
   double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-    /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
