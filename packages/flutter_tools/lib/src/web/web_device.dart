@@ -243,7 +243,7 @@ class WebDevices extends PollingDeviceDiscovery {
     @required ProcessManager processManager,
     @required FeatureFlags featureFlags,
   }) : _featureFlags = featureFlags,
-       super('Web') {
+       super('Chrome') {
     final OperatingSystemUtils operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,
       platform: platform,
@@ -282,9 +282,9 @@ class WebDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     return <Device>[
+      _webServerDevice,
       if (_chromeDevice.isSupported())
         _chromeDevice,
-      _webServerDevice,
     ];
   }
 
