@@ -104,6 +104,9 @@ abstract class FloatingActionButtonLocation {
   /// or that use a [SliverAppBar] in the scaffold body itself.
   static const FloatingActionButtonLocation centerTop = _CenterTopFabLocation();
 
+  /// TODO: Document.
+  static const FloatingActionButtonLocation miniCenterTop = _MiniCenterTopFabLocation();
+
   /// End-aligned [FloatingActionButton], floating over the transition between
   /// the [Scaffold.appBar] and the [Scaffold.body].
   ///
@@ -234,6 +237,9 @@ abstract class FloatingActionButtonLocation {
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
   static const FloatingActionButtonLocation centerDocked = _CenterDockedFabLocation();
+
+  /// TODO: Document.
+  static const FloatingActionButtonLocation miniCenterDocked = _MiniCenterDockedFabLocation();
 
   /// End-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
