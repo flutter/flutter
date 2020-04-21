@@ -373,7 +373,11 @@ class WebAssetServer implements AssetReader {
 
   /// Write a single file into the in-memory cache.
   void writeFile(String filePath, String contents) {
-    _files[filePath] = Uint8List.fromList(utf8.encode(contents));
+    writeBytes(filePath, utf8.encode(contents) as Uint8List);
+  }
+
+  void writeBytes(String filePath, Uint8List contents) {
+    _files[filePath] = contents;
   }
 
   /// Update the in-memory asset server with the provided source and manifest files.
@@ -620,6 +624,9 @@ class WebDevFS implements DevFS {
   @override
   DateTime lastCompiled;
 
+  @override
+  PackageConfig lastPackageConfig;
+
   // We do not evict assets on the web.
   @override
   Set<String> get assetPathsToEvict => const <String>{};
@@ -668,7 +675,7 @@ class WebDevFS implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    String mainPath,
+    Uri mainUri,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
@@ -681,20 +688,23 @@ class WebDevFS implements DevFS {
     String pathToReload,
     List<Uri> invalidatedFiles,
     bool skipAssets = false,
+    @required PackageConfig packageConfig,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
-    final String outputDirectoryPath = globals.fs.file(mainPath).parent.path;
+    lastPackageConfig = packageConfig;
+    final File mainFile = globals.fs.file(mainUri);
+    final String outputDirectoryPath = mainFile.parent.path;
 
     if (bundleFirstUpload) {
       webAssetServer.entrypointCacheDirectory = globals.fs.directory(outputDirectoryPath);
       generator.addFileSystemRoot(outputDirectoryPath);
-      final String entrypoint = globals.fs.path.basename(mainPath);
-      webAssetServer.writeFile(entrypoint, globals.fs.file(mainPath).readAsStringSync());
+      final String entrypoint = globals.fs.path.basename(mainFile.path);
+      webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
+      webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
+      webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
       webAssetServer.writeFile('flutter_service_worker.js', '// Service worker not loaded in run mode.');
-      webAssetServer.writeFile('require.js', requireJS.readAsStringSync());
-      webAssetServer.writeFile('stack_trace_mapper.js', stackTraceMapper.readAsStringSync());
       webAssetServer.writeFile(
         'main.dart.js',
         generateBootstrapScript(
@@ -727,11 +737,14 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // specicial hard-coded scheme.
     final CompilerOutput compilerOutput = await generator.recompile(
-     'org-dartlang-app:///' + globals.fs.path.basename(mainPath),
+      Uri(
+        scheme: 'org-dartlang-app',
+        path: '/' + mainUri.pathSegments.last,
+      ),
       invalidatedFiles,
       outputPath: dillOutputPath ??
         getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath: packagesFilePath,
+      packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
