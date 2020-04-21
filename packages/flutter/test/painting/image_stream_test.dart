@@ -147,7 +147,7 @@ void main() {
     );
 
     imageStream.addListener(ImageStreamListener(
-          (ImageInfo image, bool synchronousCall) { },
+      (ImageInfo image, bool synchronousCall) { },
       onChunk: (ImageChunkEvent event) {
         chunkEvents.add(event);
       },
@@ -173,7 +173,7 @@ void main() {
     streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
     await tester.idle();
     imageStream.addListener(ImageStreamListener(
-          (ImageInfo image, bool synchronousCall) { },
+      (ImageInfo image, bool synchronousCall) { },
       onChunk: (ImageChunkEvent event) {
         chunkEvents.add(event);
       },
