@@ -735,6 +735,11 @@ abstract class PersistedContainerSurface extends PersistedSurface {
     }
   }
 
+  // Children should override if they are performing clipping.
+  //
+  // Used by BackdropFilter to locate it's ancestor clip element.
+  bool get isClipping => false;
+
   void _debugValidateContainerUpdate(PersistedContainerSurface oldSurface) {
     // At the end of this all children should have an element each, and it
     // should be attached to this container's element.
