@@ -49,7 +49,7 @@ class NewGalleryChromeRunTest {
         'FLUTTER_WEB': 'true',
       });
 
-      final List<String> options = ['-d', 'chrome', '--verbose', '--resident'];
+      final List<String> options = <String>['-d', 'chrome', '--verbose', '--resident'];
       final Process process = await startProcess(
         'flutter',
         flutterCommandArgs('run', options),
