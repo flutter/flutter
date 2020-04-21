@@ -282,6 +282,10 @@ abstract class FloatingActionButtonLocation {
   String toString() => objectRuntimeType(this, 'FloatingActionButtonLocation');
 }
 
+/// A base class that simplifies building [FloatingActionButtonLocation]s when
+/// used with mixins [FabTopOffsetY], [FabFloatOffsetY], [FabDockedOffsetY],
+/// [FabStartOffsetX], [FabCenterOffsetX], [FabEndOffsetX], and [FabMiniOffsetAdjustment].
+///
 /// A subclass of [FloatingActionButtonLocation] which implements its [getOffset] method
 /// using three other methods: [getOffsetX], [getOffsetY], and [isMini].
 ///
