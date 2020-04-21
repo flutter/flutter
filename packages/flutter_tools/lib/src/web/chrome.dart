@@ -125,9 +125,9 @@ class ChromeLauncher {
     }
 
     final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
-    userDataDir ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
 
-    if (cacheDir != null) {
+    if (userDataDir == null && cacheDir != null) {
+      userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
       // Seed data dir with previous state.
       _restoreUserSessionInformation(cacheDir, userDataDir);
     }
