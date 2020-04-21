@@ -92,8 +92,8 @@ KeyEventHandler::KeyEventHandler(flutter::BinaryMessenger* messenger)
 
 KeyEventHandler::~KeyEventHandler() = default;
 
-void KeyEventHandler::CharHook(Win32FlutterWindow* window,
-                               char32_t code_point) {}
+void KeyEventHandler::TextHook(Win32FlutterWindow* window,
+                               const std::u16string& code_point) {}
 
 void KeyEventHandler::KeyboardHook(Win32FlutterWindow* window,
                                    int key,

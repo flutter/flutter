@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_KEY_EVENT_HANDLER_H_
 
 #include <memory>
+#include <string>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h"
@@ -34,7 +35,8 @@ class KeyEventHandler : public KeyboardHookHandler {
                     char32_t character) override;
 
   // |KeyboardHookHandler|
-  void CharHook(Win32FlutterWindow* window, char32_t code_point) override;
+  void TextHook(Win32FlutterWindow* window,
+                const std::u16string& text) override;
 
  private:
   // The Flutter system channel for key event messages.
