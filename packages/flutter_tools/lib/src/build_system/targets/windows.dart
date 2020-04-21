@@ -25,7 +25,7 @@ const List<String> _kWindowsArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_windows.h',
   'icudtl.dat',
-  'cpp_client_wrapper/',
+  'cpp_client_wrapper',
 ];
 
 /// Copies the Windows desktop embedding files to the copy directory.
