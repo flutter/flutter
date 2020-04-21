@@ -287,9 +287,10 @@ abstract class FloatingActionButtonLocation {
 ///
 /// Different mixins on this class override different methods, so that combining
 /// a set of mixins creates a floating action button location.
-/// For example: the class [_MiniEndTopFabLocation] extends
-/// [StandardFabLocation] with mixins [FabMiniOffsetAdjustment],
-/// [FabEndOffsetX], and [FabTopOffsetY].
+///
+/// For example: the location [FloatingActionButtonLocation.miniEndTop]
+/// is based on a class that extends [StandardFabLocation]
+/// with mixins [FabMiniOffsetAdjustment], [FabEndOffsetX], and [FabTopOffsetY].
 ///
 /// You can create your own subclass of [StandardFabLocation]
 /// to implement a custom [FloatingActionButtonLocation].
