@@ -250,8 +250,8 @@ void main() {
     expect(expansionTileRect.left, titleRect.left - 8);
     expect(expansionTileRect.right, trailingRect.right + 4);
 
-    // Default height of ListTile is 56.0, top and bottom padding are 12.0 and 10.0
-    // respectively.
+    // The height of ListTile should be 78.0, considering the default height of
+    // ListTile is 56.0, and top and bottom padding are 12.0 and 10.0 respectively.
     expect(tester.getRect(find.byType(ListTile)).height, 78.0);
   });
 }
