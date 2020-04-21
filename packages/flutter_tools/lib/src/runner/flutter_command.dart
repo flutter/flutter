@@ -205,8 +205,13 @@ abstract class FlutterCommand extends Command<void> {
       hide: hide,
     );
     argParser.addOption('web-user-data-dir',
-      help: 'The path the browser should use for its user data dir.',
-      hide: true,
+      help: 'The path the browser should use for its user data directory. '
+        'This directory stores the user\'s browser settings, bookmarks, '
+        'saved passwords, etc. If the directory doesn\'t exist, a new one '
+        'will be created with the correct structure, otherwise the data '
+        'in the existing directory will be loaded.',
+      hide: hide,
+      valueHelp: '/home/username/.config/google-chrome/'
     );
   }
 
