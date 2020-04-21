@@ -38,7 +38,7 @@ void TextInputPlugin::CharHook(GLFWwindow* window, unsigned int code_point) {
   if (active_model_ == nullptr) {
     return;
   }
-  active_model_->AddCharacter(code_point);
+  active_model_->AddCodePoint(code_point);
   SendStateUpdate(*active_model_);
 }
 
@@ -181,7 +181,7 @@ void TextInputPlugin::SendStateUpdate(const TextInputModel& model) {
 
 void TextInputPlugin::EnterPressed(TextInputModel* model) {
   if (model->input_type() == kMultilineInputType) {
-    model->AddCharacter('\n');
+    model->AddCodePoint('\n');
     SendStateUpdate(*model);
   }
   auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);

@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <codecvt>
-#include <iostream>
 #include <locale>
 
 // TODO(awdavies): Need to fix this regarding issue #47.
@@ -32,10 +31,23 @@ static constexpr char kTextInputTypeName[] = "name";
 #if defined(_MSC_VER)
 // TODO(naifu): This temporary code is to solve link error.(VS2015/2017)
 // https://social.msdn.microsoft.com/Forums/vstudio/en-US/8f40dcd8-c67f-4eba-9134-a19b9178e481/vs-2015-rc-linker-stdcodecvt-error
-std::locale::id std::codecvt<char32_t, char, _Mbstatet>::id;
+std::locale::id std::codecvt<char16_t, char, _Mbstatet>::id;
 #endif  // defined(_MSC_VER)
 
 namespace flutter {
+
+namespace {
+
+// Returns true if |code_point| is a leading surrogate of a surrogate pair.
+bool IsLeadingSurrogate(char32_t code_point) {
+  return (code_point & 0xFFFFFC00) == 0xD800;
+}
+// Returns true if |code_point| is a trailing surrogate of a surrogate pair.
+bool IsTrailingSurrogate(char32_t code_point) {
+  return (code_point & 0xFFFFFC00) == 0xDC00;
+}
+
+}  // namespace
 
 TextInputModel::TextInputModel(int client_id, const rapidjson::Value& config)
     : client_id_(client_id),
@@ -72,15 +84,11 @@ bool TextInputModel::SetEditingState(size_t selection_base,
   if (selection_extent > text.size()) {
     return false;
   }
-  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> utf32conv;
-  text_ = utf32conv.from_bytes(text);
-  // selection_base and selection_extent are relative to UTF-16, so don't
-  // necessarily line up. The full fix would be to use UTF-16 here so
-  // the models align, but for now just make sure it doesn't crash;
-  // longer term the goal is to eliminate having two sources of truth.
-  size_t length = text_.length();
-  selection_base_ = text_.begin() + std::min(selection_base, length);
-  selection_extent_ = text_.begin() + std::min(selection_extent, length);
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf16_converter;
+  text_ = utf16_converter.from_bytes(text);
+  selection_base_ = text_.begin() + selection_base;
+  selection_extent_ = text_.begin() + selection_extent;
   return true;
 }
 
@@ -90,12 +98,26 @@ void TextInputModel::DeleteSelected() {
   selection_extent_ = selection_base_;
 }
 
-void TextInputModel::AddCharacter(char32_t c) {
+void TextInputModel::AddCodePoint(char32_t c) {
+  if (c <= 0xFFFF) {
+    AddText(std::u16string({static_cast<char16_t>(c)}));
+  } else {
+    char32_t to_decompose = c - 0x10000;
+    AddText(std::u16string({
+        // High surrogate.
+        static_cast<char16_t>((to_decompose >> 10) + 0xd800),
+        // Low surrogate.
+        static_cast<char16_t>((to_decompose % 0x400) + 0xdc00),
+    }));
+  }
+}
+
+void TextInputModel::AddText(const std::u16string& text) {
   if (selection_base_ != selection_extent_) {
     DeleteSelected();
   }
-  selection_extent_ = text_.insert(selection_extent_, c);
-  selection_extent_++;
+  selection_extent_ = text_.insert(selection_extent_, text.begin(), text.end());
+  selection_extent_ += text.length();
   selection_base_ = selection_extent_;
 }
 
@@ -105,7 +127,8 @@ bool TextInputModel::Backspace() {
     return true;
   }
   if (selection_base_ != text_.begin()) {
-    selection_base_ = text_.erase(selection_base_ - 1, selection_base_);
+    int count = IsTrailingSurrogate(*(selection_base_ - 1)) ? 2 : 1;
+    selection_base_ = text_.erase(selection_base_ - count, selection_base_);
     selection_extent_ = selection_base_;
     return true;
   }
@@ -118,7 +141,8 @@ bool TextInputModel::Delete() {
     return true;
   }
   if (selection_base_ != text_.end()) {
-    selection_base_ = text_.erase(selection_base_, selection_base_ + 1);
+    int count = IsLeadingSurrogate(*selection_base_) ? 2 : 1;
+    selection_base_ = text_.erase(selection_base_, selection_base_ + count);
     selection_extent_ = selection_base_;
     return true;
   }
@@ -143,8 +167,9 @@ bool TextInputModel::MoveCursorForward() {
   }
   // If not at the end, move the extent forward.
   if (selection_extent_ != text_.end()) {
-    selection_extent_++;
-    selection_base_++;
+    int count = IsLeadingSurrogate(*selection_base_) ? 2 : 1;
+    selection_base_ += count;
+    selection_extent_ = selection_base_;
     return true;
   }
   return false;
@@ -159,8 +184,9 @@ bool TextInputModel::MoveCursorBack() {
   }
   // If not at the start, move the beginning backward.
   if (selection_base_ != text_.begin()) {
-    selection_base_--;
-    selection_extent_--;
+    int count = IsTrailingSurrogate(*(selection_base_ - 1)) ? 2 : 1;
+    selection_base_ -= count;
+    selection_extent_ = selection_base_;
     return true;
   }
   return false;
@@ -186,9 +212,11 @@ std::unique_ptr<rapidjson::Document> TextInputModel::GetState() const {
                           static_cast<int>(selection_extent_ - text_.begin()),
                           allocator);
   editing_state.AddMember(kSelectionIsDirectionalKey, false, allocator);
-  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> utf8conv;
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>
+      utf8_converter;
   editing_state.AddMember(
-      kTextKey, rapidjson::Value(utf8conv.to_bytes(text_), allocator).Move(),
+      kTextKey,
+      rapidjson::Value(utf8_converter.to_bytes(text_), allocator).Move(),
       allocator);
   args->PushBack(editing_state, allocator);
   return args;

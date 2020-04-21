@@ -102,8 +102,8 @@ class Win32Window {
   // Called when the mouse leaves the window.
   virtual void OnPointerLeave() = 0;
 
-  // Called when character input occurs.
-  virtual void OnChar(char32_t code_point) = 0;
+  // Called when text input occurs.
+  virtual void OnText(const std::u16string& text) = 0;
 
   // Called when raw keyboard input occurs.
   virtual void OnKey(int key, int scancode, int action, char32_t character) = 0;
