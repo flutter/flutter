@@ -100,6 +100,9 @@ class PersistedClipRect extends PersistedContainerSurface
       apply();
     }
   }
+
+  @override
+  bool get isClipping => true;
 }
 
 /// A surface that creates a rounded rectangular clip.
@@ -153,6 +156,9 @@ class PersistedClipRRect extends PersistedContainerSurface
       apply();
     }
   }
+
+  @override
+  bool get isClipping => true;
 }
 
 class PersistedPhysicalShape extends PersistedContainerSurface
@@ -395,6 +401,9 @@ class PersistedClipPath extends PersistedContainerSurface
     _clipElement = null;
     super.discard();
   }
+
+  @override
+  bool get isClipping => true;
 }
 
 /// Creates an svg clipPath and applies it to [element].
