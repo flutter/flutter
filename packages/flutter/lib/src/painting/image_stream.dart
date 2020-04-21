@@ -516,7 +516,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Calls all the registered image chunk listeners (listeners with an
+  /// Calls all the registered [ImageChunkListener]s (listeners with an
   /// [ImageStreamListener.onChunk] specified) to notify them of a new
   /// [ImageChunkEvent].
   @protected
