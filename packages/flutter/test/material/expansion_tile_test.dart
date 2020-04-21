@@ -236,7 +236,7 @@ void main() {
         child: Center(
           child: ExpansionTile(
             title: Text('Hello'),
-            padding: EdgeInsets.fromLTRB(8, 12, 4, 10),
+            tilePadding: EdgeInsets.fromLTRB(8, 12, 4, 10),
           ),
         ),
       ),
@@ -245,15 +245,13 @@ void main() {
     final Rect expansionTileRect = tester.getRect(find.byType(ExpansionTile));
     final Rect titleRect = tester.getRect(find.text('Hello'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
-    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
     expect(expansionTileRect.left, titleRect.left - 8);
     expect(expansionTileRect.right, trailingRect.right + 4);
 
-    // Height of ListTile is 56.0, Border of ExpansionTile is 1.0, and top
-    // padding is 12.0 .
-    expect(expansionTileRect.top, tallerWidget.top - (56 - tallerWidget.height) / 2 - 12 - 1);
-    expect(expansionTileRect.bottom, tallerWidget.bottom + (56 - tallerWidget.height) / 2 + 10 + 1);
+    // Default height of ListTile is 56.0, top and bottom padding are 12.0 and 10.0
+    // respectively.
+    expect(tester.getRect(find.byType(ListTile)).height, 78.0);
   });
 }
