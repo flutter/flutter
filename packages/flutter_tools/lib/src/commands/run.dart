@@ -346,7 +346,9 @@ class RunCommand extends RunCommandBase {
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
-    final String browserUserDataDir = featureFlags.isWebEnabled ? stringArg('web-user-data-dir') : null;
+    final String browserUserDataDir = featureFlags.isWebEnabled
+      ? stringArg('web-user-data-dir')
+      : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
