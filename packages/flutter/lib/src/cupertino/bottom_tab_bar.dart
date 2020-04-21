@@ -213,7 +213,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              // Change what?
+              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
               hint: 'tab, ${index + 1} of ${items.length}',
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
