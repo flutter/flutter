@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
@@ -128,6 +129,32 @@ public class AccessibilityBridgeTest {
         .requestSendAccessibilityEvent(eq(mockRootView), eventCaptor.capture());
     AccessibilityEvent event = eventCaptor.getAllValues().get(0);
     assertEquals(event.getEventType(), AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
+  }
+
+  @Test
+  public void itHoverOverOutOfBoundsDoesNotCrash() {
+    // SementicsNode.hitTest() returns null when out of bounds.
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
+
+    // Sent a11y tree with platform view.
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    TestSemanticsNode platformView = new TestSemanticsNode();
+    platformView.id = 1;
+    platformView.platformViewId = 42;
+    root.children.add(platformView);
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    accessibilityBridge.updateSemantics(testSemanticsUpdate.buffer, testSemanticsUpdate.strings);
+
+    // Pass an out of bounds MotionEvent.
+    accessibilityBridge.onAccessibilityHoverEvent(MotionEvent.obtain(1, 1, 1, -10, -10, 0));
   }
 
   AccessibilityBridge setUpBridge() {
