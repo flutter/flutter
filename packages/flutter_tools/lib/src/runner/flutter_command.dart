@@ -209,7 +209,8 @@ abstract class FlutterCommand extends Command<void> {
         'This directory stores the user\'s browser settings, bookmarks, '
         'saved passwords, etc. If the directory doesn\'t exist, a new one '
         'will be created with the correct structure, otherwise the data '
-        'in the existing directory will be loaded.',
+        'in the existing directory will be loaded. If not provided, a temporary '
+        'one will be used.',
       hide: hide,
       valueHelp: '/home/username/.config/google-chrome/'
     );
