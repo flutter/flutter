@@ -301,26 +301,10 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
 
 Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final List<Plugin> plugins = <Plugin>[];
-  PackageConfig packageConfig;
-  try {
-    final String packagesFile = globals.fs.path.join(
-      project.directory.path,
-      globalPackagesPath,
-    );
-    packageConfig = await loadPackageConfigUri(
-      globals.fs.file(packagesFile).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
-    );
-  } on FormatException catch (e) {
-    globals.printTrace('Invalid .packages file: $e');
-    return plugins;
-  }
+  final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    globals.fs.file(globalPackagesPath),
+    logger: globals.logger,
+  );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
     final Plugin plugin = _pluginFromPackage(package.name, packageRoot);

@@ -152,15 +152,9 @@ class _ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(packagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      },
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
 

@@ -97,32 +97,15 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final Future<PackageConfig> _packagesFuture = loadPackageConfigUri(
-    Uri.base.resolve('.packages'),
-    loader: (Uri uri) {
-      final File file = globals.fs.file(uri);
-      if (!file.existsSync()) {
-        return null;
-      }
-      return file.readAsBytes();
-    }
+  final Future<PackageConfig> _packagesFuture = loadPackageConfigOrFail(
+    globals.fs.file(globalPackagesPath),
+    logger: globals.logger,
   );
 
-  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigUri(
-    globals.fs.file(globals.fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      'flutter_tools',
-      '.packages',
-    )).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
-    );
+  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigOrFail(
+    globals.fs.file(globalPackagesPath),
+    logger: globals.logger,
+  );
 
   /// Uri of the test package.
   Future<Uri> get testUri async => (await _flutterToolsPackageMap)['test']?.packageUriRoot;
