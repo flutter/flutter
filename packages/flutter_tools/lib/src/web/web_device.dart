@@ -216,6 +216,7 @@ class GoogleChromeDevice extends ChromiumDevice {
 }
 
 /// The Microsoft Edge browser based on Chromium.
+// This is not currently used, see https://github.com/flutter/flutter/issues/55322
 class MicrosoftEdgeDevice extends ChromiumDevice {
   MicrosoftEdgeDevice({
     @required ChromiumLauncher chromiumLauncher,

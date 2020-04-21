@@ -15,6 +15,21 @@ import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
+  testWithoutContext('No web devices listed if feature is disabled', () async {
+    final WebDevices webDevices = WebDevices(
+      featureFlags: TestFeatureFlags(isWebEnabled: false),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{}
+      ),
+      processManager:  FakeProcessManager.any(),
+    );
+
+    expect(await webDevices.pollingGetDevices(), isEmpty);
+  });
+
   testWithoutContext('GoogleChromeDevice defaults', () async {
     final GoogleChromeDevice chromeDevice = GoogleChromeDevice(
       chromiumLauncher: null,
