@@ -138,6 +138,9 @@ void main() {
     when(mockChromeTab.connect()).thenAnswer((Invocation invocation) async {
       return mockWipConnection;
     });
+    when(chromiumLauncher.connectedInstance).thenAnswer((Invocation invocation) async {
+      return chrome;
+    });
     when(chrome.chromeConnection).thenReturn(mockChromeConnection);
     when(chromeDevice.chromeLauncher).thenReturn(chromiumLauncher);
     when(mockFlutterDevice.device).thenReturn(chromeDevice);

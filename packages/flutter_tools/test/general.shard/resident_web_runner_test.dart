@@ -414,7 +414,7 @@ void main() {
 
     expect(config, allOf(<Matcher>[
       containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', 'unknown'),
+      containsPair('cd28', ''),
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
@@ -496,7 +496,7 @@ void main() {
 
     expect(config, allOf(<Matcher>[
       containsPair('cd27', 'web-javascript'),
-      containsPair('cd28', 'unknown'),
+      containsPair('cd28', ''),
       containsPair('cd29', 'false'),
       containsPair('cd30', 'true'),
     ]));
