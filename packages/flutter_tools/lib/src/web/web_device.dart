@@ -146,6 +146,9 @@ class ChromeDevice extends Device {
             .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
+        userDataDir: debuggingOptions.webUserDataDir != null
+            ? globals.fs.directory(debuggingOptions.webUserDataDir)
+            : null,
       );
     }
 

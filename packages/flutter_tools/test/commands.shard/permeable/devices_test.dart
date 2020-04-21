@@ -90,6 +90,6 @@ class _DisabledChromeLauncher implements ChromeLauncher {
   bool canFindChrome() => false;
 
   @override
-  Future<Chrome> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir})
+  Future<Chrome> launch(String url, {bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir, Directory userDataDir})
     => Future<Chrome>.error('Chrome disabled');
 }

@@ -204,6 +204,10 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enables expression evaluation in the debugger.',
       hide: hide,
     );
+    argParser.addOption('web-user-data-dir',
+      help: 'The path the browser should use for its user data dir.',
+      hide: true,
+    );
   }
 
   void usesTargetOption() {

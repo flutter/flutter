@@ -611,6 +611,7 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webEnableExpressionEvaluation = false,
+    this.webUserDataDir,
     this.vmserviceOutFile,
     this.fastStart = false,
    }) : debuggingEnabled = true;
@@ -623,6 +624,7 @@ class DebuggingOptions {
       this.webUseSseForDebugProxy = true,
       this.webRunHeadless = false,
       this.webBrowserDebugPort,
+      this.webUserDataDir,
       this.cacheSkSL = false,
       this.traceWhitelist,
     }) : debuggingEnabled = false,
@@ -680,6 +682,9 @@ class DebuggingOptions {
 
   /// Enable expression evaluation for web target
   final bool webEnableExpressionEvaluation;
+
+  /// The path the browser should use for its user data dir.
+  final String webUserDataDir;
 
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;

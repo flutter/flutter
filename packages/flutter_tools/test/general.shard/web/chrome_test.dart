@@ -189,6 +189,25 @@ void main() {
     expect(storageDir.childFile('LOG').existsSync(), true);
     expect(storageDir.childFile('LOG').readAsStringSync(), 'contents');
   });
+  
+  test('can use existing user data dir', () async {
+    final Completer<void> exitCompleter = Completer<void>.sync();
+    final Directory userDataDir = fileSystem.directory('/.tmp_rand1/flutter_tools_chrome_device.rand1');
+
+    processManager.addCommand(FakeCommand(command: const <String>[
+      'example_chrome',
+      '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
+      '--remote-debugging-port=1234',
+      ..._kChromeArgs,
+      'example_url',
+    ], completer: exitCompleter));
+
+    await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      userDataDir: userDataDir,
+    );
+  });
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

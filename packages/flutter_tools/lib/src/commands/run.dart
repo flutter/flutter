@@ -346,6 +346,7 @@ class RunCommand extends RunCommandBase {
     final int browserDebugPort = featureFlags.isWebEnabled && argResults.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port'))
       : null;
+    final String browserUserDataDir = featureFlags.isWebEnabled ? stringArg('web-user-data-dir') : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -356,6 +357,7 @@ class RunCommand extends RunCommandBase {
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
+        webUserDataDir: browserUserDataDir,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -383,6 +385,7 @@ class RunCommand extends RunCommandBase {
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
         webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
+        webUserDataDir: browserUserDataDir,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.

@@ -116,13 +116,16 @@ class ChromeLauncher {
   /// port is picked automatically.
   ///
   /// `skipCheck` does not attempt to make a devtools connection before returning.
-  Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir }) async {
+  ///
+  /// `userDataDir` is Chrome's user data dir. If null, a temporary directory
+  /// is created automatically.
+  Future<Chrome> launch(String url, { bool headless = false, int debugPort, bool skipCheck = false, Directory cacheDir, Directory userDataDir}) async {
     if (_currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
     }
 
     final String chromeExecutable = findChromeExecutable(_platform, _fileSystem);
-    final Directory userDataDir = _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+    userDataDir ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
 
     if (cacheDir != null) {
       // Seed data dir with previous state.
