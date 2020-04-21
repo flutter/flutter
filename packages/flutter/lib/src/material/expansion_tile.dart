@@ -173,9 +173,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           ListTileTheme.merge(
             iconColor: _iconColor.value,
             textColor: _headerColor.value,
-            contentPadding: widget.tilePadding,
             child: ListTile(
               onTap: _handleTap,
+              contentPadding: widget.tilePadding,
               leading: widget.leading,
               title: widget.title,
               subtitle: widget.subtitle,
