@@ -676,3 +676,18 @@ void checkFileContains(List<Pattern> patterns, String filePath) {
     }
   }
 }
+
+/// Clones a git repository.
+///
+/// Removes the directory [path], then clones the git repository
+/// specified by [repo] to the directory [path].
+Future<int> gitClone({String path, String repo}) async {
+  rmTree(Directory(path));
+
+  await Directory(path).create(recursive: true);
+
+  return await inDirectory<int>(
+    path,
+        () => exec('git', <String>['clone', repo]),
+  );
+}
