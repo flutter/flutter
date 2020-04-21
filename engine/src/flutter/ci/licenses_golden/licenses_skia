@@ -1,4 +1,4 @@
-Signature: 4d778ae5c10f8b6d2c4ea57beaa4393d
+Signature: 592eea93cb473b3219d7c7ca52e0e91b
 
 UNUSED LICENSES:
 
@@ -3092,6 +3092,10 @@ FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
+FILE: ../../../third_party/skia/src/gpu/GrSpirvUniformHandler.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSpirvUniformHandler.h
+FILE: ../../../third_party/skia/src/gpu/GrSpirvVaryingHandler.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSpirvVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.h
@@ -3119,12 +3123,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTextureRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTextureRenderTarget.h
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.cpp
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.h
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnVaryingHandler.cpp
-FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrOverrideInputFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMixerEffect.cpp
