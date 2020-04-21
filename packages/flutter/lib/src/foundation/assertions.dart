@@ -325,7 +325,6 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
-/// {@tool snippet}
 /// This is an example of using [FlutterErrorDetails] when calling
 /// [FlutterError.reportError].
 ///
@@ -341,7 +340,6 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 ///   ));
 /// }
 /// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
