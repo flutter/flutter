@@ -799,6 +799,8 @@ class DropdownButton<T> extends StatefulWidget {
   /// defaults, so do not need to be specified). The boolean [isDense] and
   /// [isExpanded] arguments must not be null.
   ///
+  /// The [autofocus] argument must not be null.
+  ///
   /// The [dropdownColor] argument specifies the background color of the
   /// dropdown when it is open. If it is null, the current theme's
   /// [ThemeData.canvasColor] will be used instead.
@@ -825,6 +827,8 @@ class DropdownButton<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.dropdownColor,
+    // When adding new arguments, consider adding similar arguments to
+    // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1426,25 +1430,26 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 }
 
-/// A convenience widget that wraps a [DropdownButton] in a [FormField].
+/// A convenience widget that makes a [DropdownButton] into a [FormField].
 class DropdownButtonFormField<T> extends FormField<T> {
-  /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] and
-  /// [FormField].
+  /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
+  /// [InputDecorator].
   ///
-  /// The [DropdownButton] [items] parameters must not be null.
+  /// For a description of the `onSaved`, `validator`, or `autovalidate`
+  /// parameters, see [FormField]. For the rest (other than [decoration]), see
+  /// [DropdownButton].
+  ///
+  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
+  /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     Key key,
-    T value,
     @required List<DropdownMenuItem<T>> items,
     DropdownButtonBuilder selectedItemBuilder,
+    T value,
     Widget hint,
+    Widget disabledHint,
     @required this.onChanged,
     VoidCallback onTap,
-    this.decoration = const InputDecoration(),
-    FormFieldSetter<T> onSaved,
-    FormFieldValidator<T> validator,
-    bool autovalidate = false,
-    Widget disabledHint,
     int elevation = 8,
     TextStyle style,
     Widget icon,
@@ -1454,6 +1459,14 @@ class DropdownButtonFormField<T> extends FormField<T> {
     bool isDense = true,
     bool isExpanded = false,
     double itemHeight,
+    Color focusColor,
+    FocusNode focusNode,
+    bool autofocus = false,
+    Color dropdownColor,
+    InputDecoration decoration,
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+    bool autovalidate = false,
   }) : assert(items == null || items.isEmpty || value == null ||
               items.where((DropdownMenuItem<T> item) {
                 return item.value == value;
@@ -1463,12 +1476,13 @@ class DropdownButtonFormField<T> extends FormField<T> {
                 'Either zero or 2 or more [DropdownMenuItem]s were detected '
                 'with the same value',
               ),
-       assert(decoration != null),
        assert(elevation != null),
        assert(iconSize != null),
        assert(isDense != null),
        assert(isExpanded != null),
-       assert(itemHeight == null || itemHeight > 0),
+       assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(autofocus != null),
+       decoration = decoration ?? InputDecoration(focusColor: focusColor),
        super(
          key: key,
          onSaved: onSaved,
@@ -1477,32 +1491,46 @@ class DropdownButtonFormField<T> extends FormField<T> {
          autovalidate: autovalidate,
          builder: (FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
-           final InputDecoration effectiveDecoration = decoration.applyDefaults(
+           final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
+           final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
              Theme.of(field.context).inputDecorationTheme,
            );
-           return InputDecorator(
-             decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: state.value == null,
-             child: DropdownButtonHideUnderline(
-               child: DropdownButton<T>(
-                 value: state.value,
-                 items: items,
-                 selectedItemBuilder: selectedItemBuilder,
-                 hint: hint,
-                 onChanged: onChanged == null ? null : state.didChange,
-                 onTap: onTap,
-                 disabledHint: disabledHint,
-                 elevation: elevation,
-                 style: style,
-                 icon: icon,
-                 iconDisabledColor: iconDisabledColor,
-                 iconEnabledColor: iconEnabledColor,
-                 iconSize: iconSize,
-                 isDense: isDense,
-                 isExpanded: isExpanded,
-                 itemHeight: itemHeight,
-               ),
-             ),
+           // An unfocusable Focus widget so that this widget can detect if its
+           // descendants have focus or not.
+           return Focus(
+             canRequestFocus: false,
+             skipTraversal: true,
+             child: Builder(builder: (BuildContext context) {
+               return InputDecorator(
+                 decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                 isEmpty: state.value == null,
+                 isFocused: Focus.of(context).hasFocus,
+                 child: DropdownButtonHideUnderline(
+                   child: DropdownButton<T>(
+                     items: items,
+                     selectedItemBuilder: selectedItemBuilder,
+                     value: state.value,
+                     hint: hint,
+                     disabledHint: disabledHint,
+                     onChanged: onChanged == null ? null : state.didChange,
+                     onTap: onTap,
+                     elevation: elevation,
+                     style: style,
+                     icon: icon,
+                     iconDisabledColor: iconDisabledColor,
+                     iconEnabledColor: iconEnabledColor,
+                     iconSize: iconSize,
+                     isDense: isDense,
+                     isExpanded: isExpanded,
+                     itemHeight: itemHeight,
+                     focusColor: focusColor,
+                     focusNode: focusNode,
+                     autofocus: autofocus,
+                     dropdownColor: dropdownColor,
+                   ),
+                 ),
+               );
+             }),
            );
          },
        );
@@ -1512,11 +1540,11 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
   /// The decoration to show around the dropdown button form field.
   ///
-  /// By default, draws a horizontal line under the dropdown button field but can be
-  /// configured to show an icon, label, hint text, and error text.
+  /// By default, draws a horizontal line under the dropdown button field but
+  /// can be configured to show an icon, label, hint text, and error text.
   ///
-  /// Specify null to remove the decoration entirely (including the
-  /// extra padding introduced by the decoration to save space for the labels).
+  /// If not specified, an [InputDecorator] with the `focusColor` set to the
+  /// supplied `focusColor` (if any) will be used.
   final InputDecoration decoration;
 
   @override
