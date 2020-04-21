@@ -357,6 +357,24 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
       getOffsetY(scaffoldGeometry, adjustment),
     );
   }
+
+  /// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
+  static double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return kFloatingActionButtonMargin
+        + scaffoldGeometry.minInsets.left
+        - adjustment;
+  }
+
+  /// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
+  static double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+    return scaffoldGeometry.scaffoldSize.width
+        - kFloatingActionButtonMargin
+        - scaffoldGeometry.minInsets.right
+        - scaffoldGeometry.floatingActionButtonSize.width
+        + adjustment;
+  }
+
+
 }
 
 /// Mixin for a "top" floating action button location, such as [FloatingActionButtonLocation.startTop].
@@ -426,9 +444,9 @@ mixin FabStartOffsetX on StandardFabLocation {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        return _rightOffsetX(scaffoldGeometry, adjustment);
+        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
       case TextDirection.ltr:
-        return _leftOffsetX(scaffoldGeometry, adjustment);
+        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
     }
     return null;
   }
@@ -451,9 +469,9 @@ mixin FabEndOffsetX on StandardFabLocation {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        return _leftOffsetX(scaffoldGeometry, adjustment);
+        return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
       case TextDirection.ltr:
-        return _rightOffsetX(scaffoldGeometry, adjustment);
+        return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
     }
     return null;
   }
@@ -591,22 +609,6 @@ class _MiniEndDockedFabLocation extends StandardFabLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.miniEndDocked';
-}
-
-/// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
-double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-  return kFloatingActionButtonMargin
-       + scaffoldGeometry.minInsets.left
-       - adjustment;
-}
-
-/// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
-double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
-  return scaffoldGeometry.scaffoldSize.width
-       - kFloatingActionButtonMargin
-       - scaffoldGeometry.minInsets.right
-       - scaffoldGeometry.floatingActionButtonSize.width
-       + adjustment;
 }
 
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.
