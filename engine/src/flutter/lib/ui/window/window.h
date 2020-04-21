@@ -77,6 +77,7 @@ class Window final {
   void DidCreateIsolate();
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
   void UpdateLocales(const std::vector<std::string>& locales);
+  void UpdatePlatformResolvedLocale(const std::vector<std::string>& locale);
   void UpdateUserSettingsData(const std::string& data);
   void UpdateLifecycleState(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);

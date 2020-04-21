@@ -98,6 +98,22 @@ void _updateLocales(List<String> locales) {
 
 @pragma('vm:entry-point')
 // ignore: unused_element
+void _updatePlatformResolvedLocale(List<String> localeData) {
+  if (localeData.length != 4) {
+    return;
+  }
+  final String countryCode = localeData[1];
+  final String scriptCode = localeData[2];
+
+  window._platformResolvedLocale = Locale.fromSubtags(
+    languageCode: localeData[0],
+    countryCode: countryCode.isEmpty ? null : countryCode,
+    scriptCode: scriptCode.isEmpty ? null : scriptCode,
+  );
+}
+
+@pragma('vm:entry-point')
+// ignore: unused_element
 void _updateUserSettingsData(String jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData) as Map<String, dynamic>;
   if (data.isEmpty) {

@@ -40,6 +40,7 @@ import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.AccessibilityBridge;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -859,7 +860,22 @@ public class FlutterView extends FrameLayout {
     } else {
       locales.add(config.locale);
     }
-    flutterEngine.getLocalizationChannel().sendLocales(locales);
+
+    List<Locale.LanguageRange> languageRanges = new ArrayList<>();
+    Locale platformResolvedLocale = null;
+    if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      LocaleList localeList = config.getLocales();
+      int localeCount = localeList.size();
+      for (int index = 0; index < localeCount; ++index) {
+        Locale locale = localeList.get(index);
+        languageRanges.add(new Locale.LanguageRange(locale.toLanguageTag()));
+      }
+      // TODO(garyq) implement a real locale resolution.
+      platformResolvedLocale =
+          Locale.lookup(languageRanges, Arrays.asList(Locale.getAvailableLocales()));
+    }
+
+    flutterEngine.getLocalizationChannel().sendLocales(locales, platformResolvedLocale);
   }
 
   /**
