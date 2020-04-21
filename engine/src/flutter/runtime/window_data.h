@@ -36,6 +36,7 @@ struct WindowData {
   std::string script_code;
   std::string variant_code;
   std::vector<std::string> locale_data;
+  std::vector<std::string> platform_resolved_locale_data;
   std::string user_settings_data = "{}";
   std::string lifecycle_state;
   bool semantics_enabled = false;
