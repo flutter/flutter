@@ -1432,8 +1432,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
 /// A convenience widget that makes a [DropdownButton] into a [FormField].
 class DropdownButtonFormField<T> extends FormField<T> {
-  /// Creates a [DropdownButton] widget wrapped in an [InputDecorator] that is a
-  /// [FormField].
+  /// Creates a [DropdownButton] widget that is a [FormField], wrapped in an
+  /// [InputDecorator].
   ///
   /// For a description of the `onSaved`, `validator`, or `autovalidate`
   /// parameters, see [FormField]. For the rest (other than [decoration]), see
@@ -1542,6 +1542,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
   ///
   /// By default, draws a horizontal line under the dropdown button field but
   /// can be configured to show an icon, label, hint text, and error text.
+  ///
+  /// If not specified, an [InputDecorator] with the `focusColor` set to the
+  /// supplied `focusColor` (if any) will be used.
   final InputDecoration decoration;
 
   @override
