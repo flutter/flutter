@@ -53,8 +53,9 @@ class Tracing {
           }
         });
         bool done = false;
-        for (final FlutterView view in vmService.vm.views) {
-          if (await view.uiIsolate.vmService
+        final List<FlutterView> views = await vmService.getFlutterViews();
+        for (final FlutterView view in views) {
+          if (await vmService
               .flutterAlreadyPaintedFirstUsefulFrame(
                 isolateId: view.uiIsolate.id,
               )) {

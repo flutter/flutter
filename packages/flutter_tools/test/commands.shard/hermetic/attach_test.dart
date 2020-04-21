@@ -806,10 +806,10 @@ VMServiceConnector getFakeVmServiceFactory({
       );
     });
 
-    when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))
-      .thenAnswer((_) => Future<void>.value(null));
-    when(vm.views)
-      .thenReturn(<FlutterView>[FlutterViewMock()]);
+    // when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))
+    //   .thenAnswer((_) => Future<void>.value(null));
+    // when(vm.views)
+    //   .thenReturn(<FlutterView>[FlutterViewMock()]);
     when(vm.createDevFS(any))
       .thenAnswer((_) => Future<Map<String, dynamic>>.value(<String, dynamic>{'uri': '/',}));
 

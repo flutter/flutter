@@ -19,6 +19,7 @@ const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
 const String kFlushUIThreadTasksMethod = '_flutter.flushUIThreadTasks';
 const String kRunInViewMethod = '_flutter.runInView';
+const String kListViewsMethod = '_flutter.listViews';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -532,8 +533,6 @@ class VMService implements vm_service.VmService {
   /// Reloads the VM.
   Future<void> getVMOld() async => await vm.reload();
 
-  Future<void> refreshViews({ bool waitForViews = false }) => vm.refreshViews(waitForViews: waitForViews);
-
   Future<void> close() async {
     _delegateService?.dispose();
   }
@@ -553,6 +552,11 @@ class VMService implements vm_service.VmService {
       rootLibUri: rootLibUri,
       packagesUri: packagesUri,
     );
+  }
+
+  @override
+  Future<vm_service.Isolate> getIsolate(String isolateId) {
+    return _delegateService.getIsolate(isolateId);
   }
 
   // To enable a gradual migration to package:vm_service
@@ -643,9 +647,6 @@ abstract class ServiceObject {
     switch (type) {
       case 'Event':
         serviceObject = ServiceEvent._empty(owner);
-        break;
-      case 'FlutterView':
-        serviceObject = FlutterView._empty(owner.vm);
         break;
       case 'Isolate':
         serviceObject = Isolate._empty(owner.vm);
@@ -917,9 +918,6 @@ class VM extends ServiceObjectOwner {
   /// The list of live isolates, ordered by isolate start time.
   final List<Isolate> isolates = <Isolate>[];
 
-  /// The set of live views.
-  final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
-
   /// The number of bytes allocated (e.g. by malloc) in the native heap.
   int _heapAllocatedMemoryUsage;
   int get heapAllocatedMemoryUsage => _heapAllocatedMemoryUsage ?? 0;
@@ -1008,16 +1006,6 @@ class VM extends ServiceObjectOwner {
           isolate.updateFromMap(map);
         }
         return isolate;
-      case 'FlutterView':
-        FlutterView view = _viewCache[mapId];
-        if (view == null) {
-          // Add new view to the cache.
-          view = ServiceObject._fromMap(this, map) as FlutterView;
-          _viewCache[mapId] = view;
-        } else {
-          view.updateFromMap(map);
-        }
-        return view;
       default:
         // If we don't have a model object for this service object type, as a
         // fallback return a ServiceMap object.
@@ -1093,47 +1081,6 @@ class VM extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> getVMTimeline() {
     return invokeRpcRaw('getVMTimeline');
-  }
-
-  Future<void> refreshViews({ bool waitForViews = false }) async {
-    assert(waitForViews != null);
-    assert(loaded);
-    if (!isFlutterEngine) {
-      return;
-    }
-    int failCount = 0;
-    while (true) {
-      _viewCache.clear();
-      // When the future returned by invokeRpc() below returns,
-      // the _viewCache will have been updated.
-      // This message updates all the views of every isolate.
-      await vmService.vm.invokeRpc<ServiceObject>(
-          '_flutter.listViews', truncateLogs: false);
-      if (_viewCache.values.isNotEmpty || !waitForViews) {
-        return;
-      }
-      failCount += 1;
-      if (failCount == 5) { // waited 200ms
-        globals.printStatus('Flutter is taking longer than expected to report its views. Still trying...');
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      await reload();
-    }
-  }
-
-  Iterable<FlutterView> get views => _viewCache.values;
-
-  FlutterView get firstView {
-    return _viewCache.values.isEmpty ? null : _viewCache.values.first;
-  }
-
-  List<FlutterView> allViewsWithName(String isolateFilter) {
-    if (_viewCache.values.isEmpty) {
-      return null;
-    }
-    return _viewCache.values.where(
-      (FlutterView v) => v.uiIsolate.name.contains(isolateFilter)
-    ).toList();
   }
 }
 
@@ -1284,23 +1231,39 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
 }
 
 /// Peered to an Android/iOS FlutterView widget on a device.
-class FlutterView extends ServiceObject {
-  FlutterView._empty(ServiceObjectOwner owner) : super._empty(owner);
+class FlutterView {
+  FlutterView({
+    @required this.id,
+    @required this.uiIsolate,
+  });
 
-  Isolate _uiIsolate;
-  Isolate get uiIsolate => _uiIsolate;
-
-  @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
-    _loaded = !mapIsRef;
-    _upgradeCollection(map, owner);
-    _uiIsolate = map['isolate'] as Isolate;
+  factory FlutterView.parse(Map<String, Object> json) {
+    final Map<String, Object> rawIsolate = json['isolate'] as Map<String, Object>;
+    vm_service.Isolate isolate;
+    if (rawIsolate != null) {
+      rawIsolate['number'] = rawIsolate['number']?.toString();
+      isolate = vm_service.Isolate.parse(rawIsolate);
+    }
+    return FlutterView(
+      id: json['id'] as String,
+      uiIsolate: isolate,
+    );
   }
 
-  bool get hasIsolate => _uiIsolate != null;
+  final vm_service.Isolate uiIsolate;
+  final String id;
+
+  bool get hasIsolate => uiIsolate != null;
 
   @override
   String toString() => id;
+
+  Map<String, Object> toJson() {
+    return <String, Object>{
+      'id': id,
+      'isolate': uiIsolate?.toJson(),
+    };
+  }
 }
 
 /// Flutter specific VM Service functionality.
@@ -1588,4 +1551,28 @@ extension FlutterVmService on vm_service.VmService {
       rethrow;
     }
   }
+
+  /// List all [FlutterView]s attached to the current VM.
+  Future<List<FlutterView>> getFlutterViews() async {
+    final vm_service.Response response = await callMethod(
+      kListViewsMethod,
+    );
+    final List<Object> rawViews = response.json['views'] as List<Object>;
+    return <FlutterView>[
+      for (final Object rawView in rawViews)
+        FlutterView.parse(rawView as Map<String, Object>)
+    ];
+  }
+}
+
+/// Whether the event attached to an [Isolate.pauseEvent] should be considered
+/// a "pause" event.
+bool isPauseEvent(String kind) {
+  return kind == vm_service.EventKind.kPauseStart ||
+         kind == vm_service.EventKind.kPauseExit ||
+         kind == vm_service.EventKind.kPauseBreakpoint ||
+         kind == vm_service.EventKind.kPauseInterrupted ||
+         kind == vm_service.EventKind.kPauseException ||
+         kind == vm_service.EventKind.kPausePostRequest ||
+         kind == vm_service.EventKind.kNone;
 }
