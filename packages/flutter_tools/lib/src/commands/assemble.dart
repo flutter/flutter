@@ -87,6 +87,7 @@ class AssembleCommand extends FlutterCommand {
         'root of the current Flutter project.',
     );
     argParser.addOption(kExtraGenSnapshotOptions);
+    argParser.addOption(kDartDefines);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -163,6 +164,9 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: globals.fs,
       logger: globals.logger,
       processManager: globals.processManager,
+      engineVersion: globals.artifacts.isLocalEngine
+        ? null
+        : globals.flutterVersion.engineRevision
     );
     return result;
   }
@@ -181,6 +185,10 @@ class AssembleCommand extends FlutterCommand {
     // Workaround for extraGenSnapshot formatting.
     if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
       results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
+    }
+    // Workaround for dart-define formatting
+    if (argResults.wasParsed(kDartDefines)) {
+      results[kDartDefines] = argResults[kDartDefines] as String;
     }
     return results;
   }

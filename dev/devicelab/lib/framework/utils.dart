@@ -189,11 +189,18 @@ void mkdirs(Directory directory) {
 bool exists(FileSystemEntity entity) => entity.existsSync();
 
 void section(String title) {
-  title = '╡ ••• $title ••• ╞';
-  final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
-  String output = '$line$title$line';
-  if (output.length == 79)
-    output += '═';
+  String output;
+  if (Platform.isWindows) {
+    // Windows doesn't cope well with characters produced for *nix systems, so
+    // just output the title with no decoration.
+    output = title;
+  } else {
+    title = '╡ ••• $title ••• ╞';
+    final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
+    output = '$line$title$line';
+    if (output.length == 79)
+      output += '═';
+  }
   print('\n\n$output\n');
 }
 
@@ -494,30 +501,6 @@ String jsonEncode(dynamic data) {
   return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
-Future<void> getFlutter(String revision) async {
-  section('Get Flutter!');
-
-  if (exists(flutterDirectory)) {
-    flutterDirectory.deleteSync(recursive: true);
-  }
-
-  await inDirectory<void>(flutterDirectory.parent, () async {
-    await exec('git', <String>['clone', 'https://github.com/flutter/flutter.git']);
-  });
-
-  await inDirectory<void>(flutterDirectory, () async {
-    await exec('git', <String>['checkout', revision]);
-  });
-
-  await flutter('config', options: <String>['--no-analytics']);
-
-  section('flutter doctor');
-  await flutter('doctor');
-
-  section('flutter update-packages');
-  await flutter('update-packages');
-}
-
 void checkNotNull(Object o1,
     [Object o2 = 1,
     Object o3 = 1,
@@ -692,4 +675,19 @@ void checkFileContains(List<Pattern> patterns, String filePath) {
       );
     }
   }
+}
+
+/// Clones a git repository.
+///
+/// Removes the directory [path], then clones the git repository
+/// specified by [repo] to the directory [path].
+Future<int> gitClone({String path, String repo}) async {
+  rmTree(Directory(path));
+
+  await Directory(path).create(recursive: true);
+
+  return await inDirectory<int>(
+    path,
+        () => exec('git', <String>['clone', repo]),
+  );
 }

@@ -382,6 +382,7 @@ class RunCommand extends RunCommandBase {
         webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: browserDebugPort,
+        webEnableExpressionEvaluation: featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.

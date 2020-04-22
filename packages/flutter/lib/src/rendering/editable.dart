@@ -297,9 +297,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
 
-  /// If true [handleEvent] does nothing and it's assumed that this
-  /// renderer will be notified of input gestures via [handleTapDown],
-  /// [handleTap], [handleDoubleTap], and [handleLongPress].
+  /// Whether the [handleEvent] will propagate pointer events to selection
+  /// handlers.
+  ///
+  /// If this property is true, the [handleEvent] assumes that this renderer
+  /// will be notified of input gestures via [handleTapDown], [handleTap],
+  /// [handleDoubleTap], and [handleLongPress].
+  ///
+  /// If there are any gesture recognizers in the text span, the [handleEvent]
+  /// will still propagate pointer events to those recognizers
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -1544,12 +1550,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    if (ignorePointer)
-      return;
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && onSelectionChanged != null) {
-      _tap.addPointer(event);
-      _longPress.addPointer(event);
+    if (event is PointerDownEvent) {
+      assert(!debugNeedsLayout);
+      // Checks if there is any gesture recognizer in the text span.
+      final Offset offset = entry.localPosition;
+      final TextPosition position = _textPainter.getPositionForOffset(offset);
+      final InlineSpan span = _textPainter.text.getSpanForPosition(position);
+      if (span != null && span is TextSpan) {
+        final TextSpan textSpan = span;
+        textSpan.recognizer?.addPointer(event);
+      }
+
+      if (!ignorePointer && onSelectionChanged != null) {
+        // Propagates the pointer event to selection handlers.
+        _tap.addPointer(event);
+        _longPress.addPointer(event);
+      }
     }
   }
 

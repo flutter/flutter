@@ -17,7 +17,6 @@ import 'build_system/depfile.dart';
 import 'build_system/targets/dart.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'cache.dart';
-import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart' as globals;
@@ -123,6 +122,9 @@ Future<void> buildWithAssemble({
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
     cacheDir: globals.cache.getRoot(),
     flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    engineVersion: globals.artifacts.isLocalEngine
+      ? null
+      : globals.flutterVersion.engineRevision,
     defines: <String, String>{
       kTargetFile: mainPath,
       kBuildMode: getNameForBuildMode(buildMode),
@@ -130,7 +132,7 @@ Future<void> buildWithAssemble({
       kTrackWidgetCreation: trackWidgetCreation?.toString(),
       kIconTreeShakerFlag: treeShakeIcons ? 'true' : null,
       if (dartDefines != null && dartDefines.isNotEmpty)
-        kDartDefines: jsonEncode(dartDefines),
+        kDartDefines: dartDefines.join(','),
     },
     artifacts: globals.artifacts,
     fileSystem: globals.fs,

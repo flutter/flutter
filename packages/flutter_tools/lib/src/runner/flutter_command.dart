@@ -199,6 +199,11 @@ abstract class FlutterCommand extends Command<void> {
         '(https://chromedevtools.github.io/devtools-protocol/).',
       hide: true,
     );
+    argParser.addFlag('web-enable-expression-evaluation',
+      defaultsTo: false,
+      help: 'Enables expression evaluation in the debugger.',
+      hide: hide,
+    );
   }
 
   void usesTargetOption() {
@@ -846,6 +851,23 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
       }
     }
+  }
+
+  @override
+  String get usage {
+    final String usageWithoutDescription = super.usage.substring(
+      // The description plus two newlines.
+      description.length + 2,
+    );
+    final String help = <String>[
+      description,
+      '',
+      'Global options:',
+      runner.argParser.usage,
+      '',
+      usageWithoutDescription,
+    ].join('\n');
+    return help;
   }
 
   ApplicationPackageStore applicationPackages;

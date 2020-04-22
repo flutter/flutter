@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:package_config/package_config.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
-import '../../convert.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
@@ -197,7 +198,7 @@ class KernelSnapshot extends Target {
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String targetFile = environment.defines[kTargetFile] ?? globals.fs.path.join('lib', 'main.dart');
-    final String packagesPath = environment.projectDir.childFile('.packages').path;
+    final File packagesFile = environment.projectDir.childFile('.packages');
     final String targetFileAbsolute = globals.fs.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final bool trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
@@ -230,6 +231,17 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
+    final PackageConfig packageConfig = await loadPackageConfigUri(
+     packagesFile.absolute.uri,
+      loader: (Uri uri) {
+        final File file = globals.fs.file(uri);
+        if (!file.existsSync()) {
+          return null;
+        }
+        return file.readAsBytes();
+      }
+    );
+
     final CompilerOutput output = await compiler.compile(
       sdkRoot: globals.artifacts.getArtifactPath(
         Artifact.flutterPatchedSdkPath,
@@ -241,7 +253,7 @@ class KernelSnapshot extends Target {
       trackWidgetCreation: trackWidgetCreation && buildMode == BuildMode.debug,
       targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
-      packagesPath: packagesPath,
+      packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
       depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
@@ -249,6 +261,7 @@ class KernelSnapshot extends Target {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       dartDefines: parseDartDefines(environment),
+      packageConfig: packageConfig,
     );
     if (output == null || output.errorCount != 0) {
       throw Exception('Errors during snapshot creation: $output');
@@ -390,21 +403,10 @@ abstract class CopyFlutterAotBundle extends Target {
   }
 }
 
-/// Dart defines are encoded inside [Environment] as a JSON array.
+/// Dart defines are encoded inside [Environment] as a comma-separated list.
 List<String> parseDartDefines(Environment environment) {
   if (!environment.defines.containsKey(kDartDefines) || environment.defines[kDartDefines].isEmpty) {
     return const <String>[];
   }
-
-  final String dartDefinesJson = environment.defines[kDartDefines];
-  try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
-    return parsedDefines.cast<String>();
-  } on FormatException {
-    throw Exception(
-      'The value of -D$kDartDefines is not formatted correctly.\n'
-      'The value must be a JSON-encoded list of strings but was:\n'
-      '$dartDefinesJson'
-    );
-  }
+  return environment.defines[kDartDefines].split(',');
 }

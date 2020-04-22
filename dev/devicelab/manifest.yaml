@@ -201,6 +201,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  fading_child_animation_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of opacity filter with fade on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -644,7 +650,6 @@ tasks:
       Checks that an iOS app with a watchOS companion can be build for physical and simulated devices.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   # Tests running on Windows host
 
@@ -729,12 +734,14 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__image_cache_memory:
     description: >
@@ -804,3 +811,18 @@ tasks:
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
   #   flaky: true
+
+  flutter_gallery_v2_chrome_run_test:
+    description: >
+      Checks that the New Flutter Gallery runs successfully on Chrome.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  flutter_gallery_v2_web_compile_test:
+    description: >
+      Measures the time to compile the New Flutter Gallery to JavaScript
+      and the size of the compiled code.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true

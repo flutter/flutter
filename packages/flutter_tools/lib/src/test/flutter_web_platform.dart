@@ -869,7 +869,7 @@ class TestGoldenComparator {
 
     // Lazily create the compiler
     _compiler = _compiler ?? compilerFactory();
-    final String output = await _compiler.compile(listenerFile.path);
+    final String output = await _compiler.compile(listenerFile.uri);
     final List<String> command = <String>[
       shellPath,
       '--disable-observatory',

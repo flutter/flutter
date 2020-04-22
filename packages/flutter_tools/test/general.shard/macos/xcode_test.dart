@@ -443,6 +443,50 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => macPlatform,
       });
+
+      testUsingContext('handles unknown architectures', () async {
+        when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+
+        when(processManager.runSync(<String>['xcrun', '--find', 'xcdevice']))
+          .thenReturn(ProcessResult(1, 0, '/path/to/xcdevice', ''));
+
+        const String devicesOutput = '''
+[
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    "architecture" : "armv7x",
+    "modelName" : "iPad 3 BOGUS",
+    "name" : "iPad"
+  },
+  {
+    "simulator" : false,
+    "operatingSystemVersion" : "13.3 (17C54)",
+    "interface" : "usb",
+    "available" : true,
+    "platform" : "com.apple.platform.iphoneos",
+    "modelCode" : "iPhone8,1",
+    "identifier" : "d83d5bc53967baa0ee18626ba87b6254b2ab5418",
+    "architecture" : "BOGUS",
+    "modelName" : "Future iPad",
+    "name" : "iPad"
+  }
+]
+''';
+
+        when(processManager.run(<String>['xcrun', 'xcdevice', 'list', '--timeout', '2']))
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, devicesOutput, '')));
+        final List<IOSDevice> devices = await xcdevice.getAvailableTetheredIOSDevices();
+        expect(devices[0].cpuArchitecture, DarwinArch.armv7);
+        expect(devices[1].cpuArchitecture, DarwinArch.arm64);
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
+      });
     });
 
     group('diagnostics', () {

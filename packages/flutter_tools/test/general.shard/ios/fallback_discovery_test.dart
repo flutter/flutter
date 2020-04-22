@@ -42,6 +42,7 @@ void main() {
       vmServiceConnectUri: (String uri, {Log log}) async {
         return mockVmService;
       },
+      pollingDelay: Duration.zero,
     );
     when(mockPortForwarder.forward(23, hostPort: anyNamed('hostPort')))
       .thenAnswer((Invocation invocation) async => 1);

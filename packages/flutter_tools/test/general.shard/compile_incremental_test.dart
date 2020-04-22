@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
@@ -58,9 +59,10 @@ void main() {
         ));
 
     final CompilerOutput output = await generator.recompile(
-      '/path/to/main.dart',
+      Uri.parse('/path/to/main.dart'),
         null /* invalidatedFiles */,
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -78,9 +80,10 @@ void main() {
     );
 
     expect(asyncGuard(() => generator.recompile(
-      '/path/to/main.dart',
+      Uri.parse('/path/to/main.dart'),
       null, /* invalidatedFiles */
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     )), throwsToolExit());
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -96,9 +99,10 @@ void main() {
     );
 
     expect(asyncGuard(() => generator.recompile(
-      '/path/to/main.dart',
+      Uri.parse('/path/to/main.dart'),
       null, /* invalidatedFiles */
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     )), throwsToolExit());
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -112,9 +116,10 @@ void main() {
         .thenAnswer((Invocation invocation) => streamController.stream);
     streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
     await generator.recompile(
-      '/path/to/main.dart',
+      Uri.parse('/path/to/main.dart'),
       null, /* invalidatedFiles */
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -153,7 +158,12 @@ void main() {
     streamController.add(utf8.encode(
       'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'
     ));
-    await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */, outputPath: '/build/');
+    await generator.recompile(
+      Uri.parse('/path/to/main.dart'),
+      null /* invalidatedFiles */,
+      outputPath: '/build/',
+       packageConfig: PackageConfig.empty,
+    );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
     await _recompile(streamController, generator, mockFrontendServerStdIn,
@@ -187,16 +197,18 @@ Future<void> _recompile(
     streamController.add(utf8.encode(mockCompilerOutput));
   });
   final CompilerOutput output = await generator.recompile(
-    null /* mainPath */,
+    Uri.parse('/path/to/main.dart'),
     <Uri>[Uri.parse('/path/to/main.dart')],
     outputPath: '/build/',
+    packageConfig: PackageConfig.empty,
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = RegExp(r'^recompile (.*)\n/path/to/main.dart\n(.*)\n$');
-  expect(commands, matches(re));
-  final Match match = re.firstMatch(commands);
-  expect(match[1] == match[2], isTrue);
+  final RegExp whitespace = RegExp(r'\s+');
+  final List<String> parts = commands.split(whitespace);
+
+  // Test that uuid matches at beginning and end.
+  expect(parts[2], equals(parts[4]));
   mockFrontendServerStdIn.stdInWrites.clear();
 }
 

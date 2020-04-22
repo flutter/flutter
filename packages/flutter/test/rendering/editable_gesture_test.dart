@@ -36,6 +36,8 @@ void main() {
       ),
       onSelectionChanged: (_, __, ___) { },
     );
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
     final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () { });
     final _PointerRouterSpy spy = GestureBinding.instance.pointerRouter as _PointerRouterSpy;
     editable.attach(owner);

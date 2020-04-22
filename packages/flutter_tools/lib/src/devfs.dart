@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 
 import 'asset.dart';
@@ -17,7 +18,6 @@ import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
 import 'convert.dart' show base64, utf8;
-import 'dart/package_map.dart';
 import 'globals.dart' as globals;
 import 'vmservice.dart';
 
@@ -395,32 +395,28 @@ class DevFS {
     VMService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    String packagesFilePath,
     @required OperatingSystemUtils osUtils,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(
         fsName,
         serviceProtocol,
         osUtils: osUtils,
-      ),
-       _packagesFilePath = packagesFilePath ?? globals.fs.path.join(rootDirectory.path, kPackagesFileName);
+      );
 
   DevFS.operations(
     this._operations,
     this.fsName,
-    this.rootDirectory, {
-    String packagesFilePath,
-  }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? globals.fs.path.join(rootDirectory.path, kPackagesFileName);
+    this.rootDirectory,
+  ) : _httpWriter = null;
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
-  final String _packagesFilePath;
   final Set<String> assetPathsToEvict = <String>{};
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
+  PackageConfig lastPackageConfig;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -462,23 +458,25 @@ class DevFS {
   ///
   /// Returns the number of bytes synced.
   Future<UpdateFSReport> update({
-    @required String mainPath,
+    @required Uri mainUri,
+    @required ResidentCompiler generator,
+    @required bool trackWidgetCreation,
+    @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
+    @required PackageConfig packageConfig,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    @required ResidentCompiler generator,
     String dillOutputPath,
-    @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
-    @required String pathToReload,
-    @required List<Uri> invalidatedFiles,
     bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
     final DateTime candidateCompileTime = DateTime.now();
+    lastPackageConfig = packageConfig;
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
@@ -514,10 +512,10 @@ class DevFS {
     // dill files that depend on the invalidated files.
     globals.printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
-      mainPath,
+      mainUri,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath : _packagesFilePath,
+      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);

@@ -123,7 +123,10 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsOneWidget);
       expect(find.byType(IconButton), findsNothing);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
 
     testWidgets('When menu items don\'t fit, an overflow menu is used.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that SELECT ALL can't fit.
@@ -194,7 +197,10 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
 
     testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
       // Set the screen size so narrow that only CUT and COPY can fit.
@@ -256,7 +262,10 @@ void main() {
       expect(find.text('PASTE'), findsNothing);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
 
     testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that SELECT ALL can't fit.
@@ -327,7 +336,10 @@ void main() {
       expect(find.text('PASTE'), findsOneWidget);
       expect(find.text('SELECT ALL'), findsNothing);
       expect(find.byType(IconButton), findsOneWidget);
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
 
     testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that SELECT ALL can't fit.
@@ -430,7 +442,10 @@ void main() {
       expect(find.byType(IconButton), findsNothing);
       final Offset newCutOffset = tester.getTopLeft(find.text('CUT'));
       expect(newCutOffset, equals(cutOffset));
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 
   group('menu position', () {
@@ -501,7 +516,10 @@ void main() {
       final Offset bottomHandlePos = endpoints[1].point;
       final Offset cutOffset = tester.getTopLeft(find.text('CUT'));
       expect(cutOffset.dy, greaterThan(bottomHandlePos.dy));
-    }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
+    },
+      skip: isBrowser, // We do not use Flutter-rendered context menu on the Web
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 
   group('material handles', () {

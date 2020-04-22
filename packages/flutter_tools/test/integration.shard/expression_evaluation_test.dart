@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:matcher/matcher.dart';
 
 import 'package:vm_service/vm_service.dart';
 
@@ -146,32 +147,51 @@ void batch2() {
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
-  InstanceRef res;
+  ObjRef res;
 
   res = await flutter.evaluateInFrame('"test"');
-  expect(res.kind == InstanceKind.kString && res.valueAsString == 'test', isTrue);
+  expectValueOfType(res, InstanceKind.kString, 'test');
 
   res = await flutter.evaluateInFrame('1');
-  expect(res.kind == InstanceKind.kInt && res.valueAsString == 1.toString(), isTrue);
+  expectValueOfType(res, InstanceKind.kInt, 1.toString());
 
   res = await flutter.evaluateInFrame('true');
-  expect(res.kind == InstanceKind.kBool && res.valueAsString == true.toString(), isTrue);
+  expectValueOfType(res, InstanceKind.kBool, true.toString());
 }
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
-  final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-  expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  final ObjRef res = await flutter.evaluateInFrame('new DateTime.now().year');
+  expectValueOfType(res, InstanceKind.kInt, DateTime.now().year.toString());
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
   final DateTime now = DateTime.now();
-  final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
-  expect(resp.classRef.name, equals('DateTime'));
+  final ObjRef resp = await flutter.evaluateInFrame('new DateTime.now()');
+  expectInstanceOfClass(resp, 'DateTime');
   // Ensure we got a reasonable approximation. The more accurate we try to
   // make this, the more likely it'll fail due to differences in the time
   // in the remote VM and the local VM at the time the code runs.
   final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
-  expect(res.valueAsString, equals('${now.year}-${now.month}-${now.day}'));
+  expectValue(res, '${now.year}-${now.month}-${now.day}');
+}
+
+void expectInstanceOfClass(ObjRef result, String name) {
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.classRef.name, 'resp.classRef.name', name));
+}
+
+void expectValueOfType(ObjRef result, String kind, String message) {
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.kind, 'kind', kind)
+      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+}
+
+void expectValue(ObjRef result, String message) {
+  expect(result,
+    const TypeMatcher<InstanceRef>()
+      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
 void main() {
