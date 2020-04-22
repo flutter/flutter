@@ -18,13 +18,18 @@ import '../../src/context.dart';
 
 const List<String> _kChromeArgs = <String>[
   '--disable-background-timer-throttling',
+  '--no-default-browser-check',
   '--disable-extensions',
   '--disable-popup-blocking',
   '--bwsi',
   '--no-first-run',
-  '--no-default-browser-check',
   '--disable-default-apps',
   '--disable-translate',
+];
+
+const List<String> _kChromeArgsForCustomUserDataDir = <String>[
+  '--disable-background-timer-throttling',
+  '--no-default-browser-check',
 ];
 
 const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
@@ -198,7 +203,7 @@ void main() {
       'example_chrome',
       '--user-data-dir=/.tmp_rand1/flutter_tools_chrome_device.rand1',
       '--remote-debugging-port=1234',
-      ..._kChromeArgs,
+      ..._kChromeArgsForCustomUserDataDir,
       'example_url',
     ], completer: exitCompleter));
 
