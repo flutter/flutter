@@ -450,6 +450,29 @@ void main() {
     );
   });
 
+  testUsingContext('determine favors stable tags over dev tags', () {
+    final MockProcessUtils mockProcessUtils = MockProcessUtils();
+    when(mockProcessUtils.runSync(
+      <String>['git', 'tag', '--contains', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(RunResult(
+      ProcessResult(1, 0, '1.2.3-0.0.pre\n1.2.3\n1.2.3-0.1.pre', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
+    final GitTagVersion version = GitTagVersion.determine(mockProcessUtils, workingDirectory: '.');
+    expect(version.gitTag, '1.2.3');
+    expect(version.devPatch, null);
+    expect(version.devVersion, null);
+    // We shouldn't have to fallback to git describe, because we are exactly
+    // on a release tag.
+    verifyNever(mockProcessUtils.runSync(
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    ));
+  });
+
   testUsingContext('determine does not call fetch --tags', () {
     final MockProcessUtils processUtils = MockProcessUtils();
     when(processUtils.runSync(
