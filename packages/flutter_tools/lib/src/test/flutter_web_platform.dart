@@ -103,7 +103,12 @@ class FlutterWebPlatform extends PlatformPlugin {
   );
 
   final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigOrFail(
-    globals.fs.file(globalPackagesPath),
+    globals.fs.file(globals.fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      '.packages',
+    )),
     logger: globals.logger,
   );
 
