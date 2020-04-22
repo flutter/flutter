@@ -150,23 +150,28 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
   auto empty_config = RunConfiguration::InferFromSettings(empty_settings);
   std::unique_ptr<Shell> empty_shell = CreateShell(empty_settings);
 
+  // The SkSL key is Base32 encoded. "IE" is the encoding of "A" and "II" is the
+  // encoding of "B".
+  //
+  // The SkSL data is Base64 encoded. "eA==" is the encoding of "x" and "eQ=="
+  // is the encoding of "y".
+  const std::string kTestJson =
+      "{\n"
+      "  \"data\": {\n"
+      "    \"IE\": \"eA==\",\n"
+      "    \"II\": \"eQ==\"\n"
+      "  }\n"
+      "}\n";
+
   // Temp dir for the asset.
   fml::ScopedTemporaryDirectory asset_dir;
   fml::UniqueFD sksl_asset_dir =
       fml::OpenDirectory(asset_dir.fd(), PersistentCache::kSkSLSubdirName, true,
                          fml::FilePermission::kReadWrite);
 
-  // The SkSL filenames are Base32 encoded strings. "IE" is the encoding of "A"
-  // and "II" is the encoding of "B".
-  const std::string kFileNames[2] = {"IE", "II"};
-  const std::string kFileData[2] = {"x", "y"};
-
-  // Prepare 2 SkSL files in the asset directory.
-  for (int i = 0; i < 2; i += 1) {
-    auto data = std::make_unique<fml::DataMapping>(
-        std::vector<uint8_t>{kFileData[i].begin(), kFileData[i].end()});
-    fml::WriteAtomically(sksl_asset_dir, kFileNames[i].c_str(), *data);
-  }
+  auto data = std::make_unique<fml::DataMapping>(
+      std::vector<uint8_t>{kTestJson.begin(), kTestJson.end()});
+  fml::WriteAtomically(sksl_asset_dir, PersistentCache::kAssetFileName, *data);
 
   // 1st, test that RunConfiguration::InferFromSettings sets the path.
   ResetAssetPath();
@@ -213,8 +218,7 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
 
   // Cleanup.
   DestroyShell(std::move(empty_shell));
-  fml::UnlinkFile(sksl_asset_dir, kFileNames[0].c_str());
-  fml::UnlinkFile(sksl_asset_dir, kFileNames[1].c_str());
+  fml::UnlinkFile(sksl_asset_dir, PersistentCache::kAssetFileName);
   fml::UnlinkDirectory(asset_dir.fd(), PersistentCache::kSkSLSubdirName);
 }
 
