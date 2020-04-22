@@ -191,7 +191,7 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
-    this.debugShowCheckedModeBanner = true,
+    this.debugShowCheckedModeBanner = false,
     this.inspectorSelectButtonBuilder,
     this.shortcuts,
     this.actions,
