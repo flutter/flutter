@@ -106,7 +106,7 @@ void main() {
     expect(error, isNull);
   });
 
-  testUsingContext('pub get 66 shows message from pub', () async {
+  testWithoutContext('pub get 66 shows message from pub', () async {
     final BufferLogger logger = BufferLogger.test();
     final Pub pub = Pub(
       platform: FakePlatform(environment: const <String, String>{}),
@@ -218,7 +218,7 @@ void main() {
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
 
-  testUsingContext('analytics sent on failure', () async {
+  testWithoutContext('analytics sent on failure', () async {
     MockDirectory.findCache = true;
     final MockUsage usage = MockUsage();
     final Pub pub = Pub(
