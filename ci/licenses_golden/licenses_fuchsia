@@ -1,4 +1,4 @@
-Signature: c4a966aeb51365b57424025bd7b84675
+Signature: 32747df89452052199e57ef9f8a95d39
 
 UNUSED LICENSES:
 
@@ -446,6 +446,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
@@ -1336,6 +1337,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/node.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/semantics_manager.fidl
@@ -2193,6 +2195,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
@@ -3260,6 +3263,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/launch.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/gesture_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/audio_mode.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/connection_options.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.camera3/device.fidl
@@ -3288,6 +3292,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_installed.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
