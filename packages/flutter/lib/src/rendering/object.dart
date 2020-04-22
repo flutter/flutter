@@ -332,6 +332,11 @@ class PaintingContext extends ClipContext {
     _currentLayer?.willChangeHint = true;
   }
 
+  /// Hints that any text painted in the current layer is selectable.
+  void setIsSelectableHint() {
+    _currentLayer?.isSelectableHint = true;
+  }
+
   /// Adds a composited leaf layer to the recording.
   ///
   /// After calling this function, the [canvas] property will change to refer to

@@ -528,9 +528,28 @@ class PictureLayer extends Layer {
     }
   }
 
+  /// Hints that any text painted in the current layer is selectable.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  bool get isSelectableHint => _isSelectableHint;
+  bool _isSelectableHint = false;
+  set isSelectableHint(bool value) {
+    if (value != _isSelectableHint) {
+      _isSelectableHint = value;
+      markNeedsAddToScene();
+    }
+  }
+
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
+    builder.addPicture(
+      layerOffset,
+      picture,
+      isComplexHint: isComplexHint,
+      willChangeHint: willChangeHint,
+      isSelectableHint: isSelectableHint,
+    );
   }
 
   @override
@@ -540,7 +559,7 @@ class PictureLayer extends Layer {
     properties.add(DiagnosticsProperty<String>('picture', describeIdentity(_picture)));
     properties.add(DiagnosticsProperty<String>(
       'raster cache hints',
-      'isComplex = $isComplexHint, willChange = $willChangeHint'),
+      'isComplex = $isComplexHint, willChange = $willChangeHint, isSelectable = $isSelectableHint'),
     );
   }
 

@@ -509,7 +509,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
   /// Toggle the toolbar when a selection handle is tapped.
   void _handleSelectionHandleTapped() {
     if (_controller.selection.isCollapsed) {
-      _editableText.toggleToolbar();
+      _editableText?.toggleToolbar();
     }
   }
 
@@ -591,43 +591,61 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
     if (MediaQuery.boldTextOverride(context))
       effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
-    final Widget child = RepaintBoundary(
-      child: EditableText(
-        key: editableTextKey,
-        style: effectiveTextStyle,
-        readOnly: true,
-        textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
-        showSelectionHandles: _showSelectionHandles,
-        showCursor: widget.showCursor,
-        controller: _controller,
-        focusNode: focusNode,
-        strutStyle: widget.strutStyle ?? const StrutStyle(),
-        textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-        textDirection: widget.textDirection,
-        textScaleFactor: widget.textScaleFactor,
-        autofocus: widget.autofocus,
-        forceLine: false,
-        toolbarOptions: widget.toolbarOptions,
-        minLines: widget.minLines,
-        maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
-        selectionColor: themeData.textSelectionColor,
-        selectionControls: widget.selectionEnabled ? textSelectionControls : null,
-        onSelectionChanged: _handleSelectionChanged,
-        onSelectionHandleTapped: _handleSelectionHandleTapped,
-        rendererIgnoresPointer: true,
-        cursorWidth: widget.cursorWidth,
-        cursorRadius: cursorRadius,
-        cursorColor: cursorColor,
-        cursorOpacityAnimates: cursorOpacityAnimates,
-        cursorOffset: cursorOffset,
-        paintCursorAboveText: paintCursorAboveText,
-        backgroundCursorColor: CupertinoColors.inactiveGray,
-        enableInteractiveSelection: widget.enableInteractiveSelection,
-        dragStartBehavior: widget.dragStartBehavior,
-        scrollPhysics: widget.scrollPhysics,
-      ),
-    );
-
+    Widget child;
+    if(kIsWeb) {
+      child = AbsorbPointer(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (BuildContext context, Widget child) {
+            return _UseSelectableHint(
+              child: Text(_controller.text,
+                style: effectiveTextStyle,
+                textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+                textDirection: widget.textDirection,
+                textScaleFactor: widget.textScaleFactor,
+                maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
+                textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
+              ),
+            );
+          },
+        ),
+      );
+    }else{
+      child = EditableText(
+          key: editableTextKey,
+          style: effectiveTextStyle,
+          readOnly: true,
+          textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
+          showSelectionHandles: _showSelectionHandles,
+          showCursor: widget.showCursor,
+          controller: _controller,
+          focusNode: focusNode,
+          strutStyle: widget.strutStyle ?? const StrutStyle(),
+          textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+          textDirection: widget.textDirection,
+          textScaleFactor: widget.textScaleFactor,
+          autofocus: widget.autofocus,
+          forceLine: false,
+          toolbarOptions: widget.toolbarOptions,
+          minLines: widget.minLines,
+          maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
+          selectionColor: themeData.textSelectionColor,
+          selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+          onSelectionChanged: _handleSelectionChanged,
+          onSelectionHandleTapped: _handleSelectionHandleTapped,
+          rendererIgnoresPointer: true,
+          cursorWidth: widget.cursorWidth,
+          cursorRadius: cursorRadius,
+          cursorColor: cursorColor,
+          cursorOpacityAnimates: cursorOpacityAnimates,
+          cursorOffset: cursorOffset,
+          paintCursorAboveText: paintCursorAboveText,
+          backgroundCursorColor: CupertinoColors.inactiveGray,
+          enableInteractiveSelection: widget.enableInteractiveSelection,
+          dragStartBehavior: widget.dragStartBehavior,
+          scrollPhysics: widget.scrollPhysics,
+        );
+    }
     return Semantics(
       onTap: () {
         if (!_controller.selection.isValid)
@@ -639,8 +657,34 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
       },
       child: _selectionGestureDetectorBuilder.buildGestureDetector(
         behavior: HitTestBehavior.translucent,
-        child: child,
+        child: RepaintBoundary(
+          child : child,
+        ),
       ),
     );
+  }
+}
+
+class _UseSelectableHint extends SingleChildRenderObjectWidget {
+  const _UseSelectableHint({
+    Key key,
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderUseSelectableHint();
+  }
+}
+
+class _RenderUseSelectableHint extends RenderProxyBox {
+  _RenderUseSelectableHint([RenderBox child]) : super(child);
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.canvas.save();
+    context.setIsSelectableHint();
+    super.paint(context, offset);
+    context.canvas.restore();
   }
 }
