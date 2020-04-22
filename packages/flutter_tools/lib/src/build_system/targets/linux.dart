@@ -25,6 +25,8 @@ const List<String> _kLinuxArtifacts = <String>[
   'cpp_client_wrapper_glfw/',
 ];
 
+const String _kLinuxDepfile = 'linux_engine_sources.d';
+
 /// Copies the Linux desktop embedding files to the copy directory.
 class UnpackLinuxDebug extends Target {
   const UnpackLinuxDebug();
@@ -41,26 +43,25 @@ class UnpackLinuxDebug extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => <String>[
-    'linux_engine_sources.d'
-  ];
+  List<String> get depfiles => const <String>[_kLinuxDepfile];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   Future<void> build(Environment environment) async {
-    final String artifactPath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
-    final String outputPrefix = globals.fs.path.join(
+    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final Directory outputDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(
       environment.projectDir.path,
       'linux',
       'flutter',
       'ephemeral',
-    );
+    ));
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
       artifactPath: artifactPath,
-      outputPrefix: outputPrefix,
+      outputDirectory: outputDirectory,
       artifacts: _kLinuxArtifacts,
     );
     final DepfileService depfileService = DepfileService(
@@ -69,7 +70,7 @@ class UnpackLinuxDebug extends Target {
     );
     depfileService.writeToFile(
       depfile,
-      environment.buildDir.childFile('linux_engine_sources.d'),
+      environment.buildDir.childFile(_kLinuxDepfile),
     );
   }
 }

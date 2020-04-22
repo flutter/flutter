@@ -8,21 +8,28 @@ import '../../base/file_system.dart';
 import '../depfile.dart';
 
 /// Unpack the artifact list [artifacts] from [artifactPath] into a directory
-/// named [outputPrefix], returning a [Depfile] including all copied files.
+/// [outputDirectory], returning a [Depfile] including all copied files.
 Depfile unpackDesktopArtifacts({
   @required FileSystem fileSystem,
   @required List<String> artifacts,
-  @required String outputPrefix,
+  @required Directory outputDirectory,
   @required String artifactPath,
 }) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];
   for (final String artifact in artifacts) {
     final String entityPath = fileSystem.path.join(artifactPath, artifact);
-    // If this artifact is a file, just copy the source over.
-    if (fileSystem.isFileSync(entityPath)) {
+    final FileSystemEntityType entityType = fileSystem.typeSync(entityPath);
+
+    if (entityType == FileSystemEntityType.notFound
+     || entityType == FileSystemEntityType.link) {
+      throw Exception('Unsupported file type: $entityType');
+    }
+
+    // If this artifact is a file then copy the source over.
+    if (entityType == FileSystemEntityType.file) {
       final String outputPath = fileSystem.path.join(
-        outputPrefix,
+        outputDirectory.path,
         fileSystem.path.relative(entityPath, from: artifactPath),
       );
       final File destinationFile = fileSystem.file(outputPath);
@@ -36,13 +43,12 @@ Depfile unpackDesktopArtifacts({
       continue;
     }
 
-    // If the artifact is a directory, recursively
-    // copy every file from it.
+    // If the artifact is a directory, recursively copy every file from it.
     for (final File input in fileSystem.directory(entityPath)
       .listSync(recursive: true)
       .whereType<File>()) {
       final String outputPath = fileSystem.path.join(
-        outputPrefix,
+        outputDirectory.path,
         fileSystem.path.relative(input.path, from: artifactPath),
       );
       final File destinationFile = fileSystem.file(outputPath);

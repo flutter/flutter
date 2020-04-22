@@ -79,7 +79,8 @@ class DepfileService {
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
     for (final File outputFile in files) {
       if (_fileSystem.path.style.separator == r'\') {
-        // Foward slashes and spaces in a depfile have to be escaped on windows.
+        // backslashes and spaces in a depfile have to be escaped if the
+        // platform separator is a backslash.
         final String path = outputFile.path
           .replaceAll(r'\', r'\\')
           .replaceAll(r' ', r'\ ');

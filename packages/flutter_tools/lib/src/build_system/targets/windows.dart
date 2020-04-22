@@ -13,7 +13,7 @@ import 'dart.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 
-/// The only files/subdirectories we care out.
+/// The only files/subdirectories we care about.
 const List<String> _kWindowsArtifacts = <String>[
   'flutter_windows.dll',
   'flutter_windows.dll.exp',
@@ -26,6 +26,8 @@ const List<String> _kWindowsArtifacts = <String>[
   'icudtl.dat',
   'cpp_client_wrapper',
 ];
+
+const String _kWindowsDepfile = 'windows_engine_sources.d';
 
 /// Copies the Windows desktop embedding files to the copy directory.
 class UnpackWindows extends Target {
@@ -43,7 +45,7 @@ class UnpackWindows extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => <String>['windows_engine_sources.d'];
+  List<String> get depfiles => const <String>[_kWindowsDepfile];
 
   @override
   List<Target> get dependencies => const <Target>[];
@@ -51,17 +53,19 @@ class UnpackWindows extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String artifactPath = environment.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    final String outputPrefix = environment.fileSystem.path.join(
-      environment.projectDir.path,
-      'windows',
-      'flutter',
-      'ephemeral',
+    final Directory outputDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(
+        environment.projectDir.path,
+        'windows',
+        'flutter',
+        'ephemeral',
+      ),
     );
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
       artifacts: _kWindowsArtifacts,
       artifactPath: artifactPath,
-      outputPrefix: outputPrefix,
+      outputDirectory: outputDirectory,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -69,7 +73,7 @@ class UnpackWindows extends Target {
     );
     depfileService.writeToFile(
       depfile,
-      environment.buildDir.childFile('windows_engine_sources.d'),
+      environment.buildDir.childFile(_kWindowsDepfile),
     );
   }
 }

@@ -42,7 +42,7 @@ or
 
   // TODO(jonahwilliams): currently all builds are debug builds. Remove the
   // hardcoded mode when profile and release support is added.
-  final Process unpackProcess = await Process.start(
+  final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
       if (verbose)
@@ -59,17 +59,16 @@ or
       target,
     ],
   );
-  unpackProcess.stdout
+  assembleProcess.stdout
     .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen(stdout.writeln);
-  unpackProcess.stderr
+  assembleProcess.stderr
     .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen(stderr.writeln);
 
-  if (await unpackProcess.exitCode != 0) {
+  if (await assembleProcess.exitCode != 0) {
     exit(1);
   }
-  return;
 }

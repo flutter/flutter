@@ -24,7 +24,7 @@ void main() {
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: fileSystem,
       artifactPath: 'inputs',
-      outputPrefix: 'outputs',
+      outputDirectory: fileSystem.directory('outputs'),
       artifacts: <String>[
         'a.txt',
         'b.txt',
@@ -49,5 +49,18 @@ void main() {
       'outputs/b.txt',
       'outputs/foo/c.txt',
     ]));
+  });
+
+  testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing file', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+
+    expect(() => unpackDesktopArtifacts(
+      fileSystem: fileSystem,
+      artifactPath: 'inputs',
+      outputDirectory: fileSystem.directory('outputs'),
+      artifacts: <String>[
+        'a.txt',
+      ],
+    ), throwsA(isA<Exception>()));
   });
 }
