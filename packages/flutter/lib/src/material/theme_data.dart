@@ -268,6 +268,7 @@ class ThemeData with Diagnosticable {
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
+    bool fixTextFieldOutlineLabel,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -378,6 +379,8 @@ class ThemeData with Diagnosticable {
     buttonBarTheme ??= const ButtonBarThemeData();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
 
+    fixTextFieldOutlineLabel ??= false;
+
     return ThemeData.raw(
       brightness: brightness,
       visualDensity: visualDensity,
@@ -444,6 +447,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: dividerTheme,
       buttonBarTheme: buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
     );
   }
 
@@ -523,6 +527,7 @@ class ThemeData with Diagnosticable {
     @required this.dividerTheme,
     @required this.buttonBarTheme,
     @required this.bottomNavigationBarTheme,
+    @required this.fixTextFieldOutlineLabel,
   }) : assert(brightness != null),
        assert(visualDensity != null),
        assert(primaryColor != null),
@@ -584,7 +589,8 @@ class ThemeData with Diagnosticable {
        assert(bannerTheme != null),
        assert(dividerTheme != null),
        assert(buttonBarTheme != null),
-       assert(bottomNavigationBarTheme != null);
+       assert(bottomNavigationBarTheme != null),
+       assert(fixTextFieldOutlineLabel != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -1035,6 +1041,18 @@ class ThemeData with Diagnosticable {
   /// widgets.
   final BottomNavigationBarThemeData bottomNavigationBarTheme;
 
+  /// A temporary flag to allow apps to opt-in to a
+  /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
+  /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
+  ///
+  /// Setting this flag to true causes the floating label to be more precisely
+  /// vertically centered relative to the border's outline.
+  ///
+  /// The flag is currently false by default. It will be default true and
+  /// deprecated before the next beta release (1.18), and removed before the next
+  /// stable release (1.19).
+  final bool fixTextFieldOutlineLabel;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -1102,6 +1120,7 @@ class ThemeData with Diagnosticable {
     DividerThemeData dividerTheme,
     ButtonBarThemeData buttonBarTheme,
     BottomNavigationBarThemeData bottomNavigationBarTheme,
+    bool fixTextFieldOutlineLabel,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1170,6 +1189,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: dividerTheme ?? this.dividerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? this.fixTextFieldOutlineLabel,
     );
   }
 
@@ -1316,6 +1336,7 @@ class ThemeData with Diagnosticable {
       dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
       bottomNavigationBarTheme: BottomNavigationBarThemeData.lerp(a.bottomNavigationBarTheme, b.bottomNavigationBarTheme, t),
+      fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
     );
   }
 
@@ -1389,7 +1410,8 @@ class ThemeData with Diagnosticable {
         && other.bannerTheme == bannerTheme
         && other.dividerTheme == dividerTheme
         && other.buttonBarTheme == buttonBarTheme
-        && other.bottomNavigationBarTheme == bottomNavigationBarTheme;
+        && other.bottomNavigationBarTheme == bottomNavigationBarTheme
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
 
   @override
@@ -1463,6 +1485,7 @@ class ThemeData with Diagnosticable {
       dividerTheme,
       buttonBarTheme,
       bottomNavigationBarTheme,
+      fixTextFieldOutlineLabel,
     ];
     return hashList(values);
   }
