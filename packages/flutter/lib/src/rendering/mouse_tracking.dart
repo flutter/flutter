@@ -174,9 +174,15 @@ class MouseTrackerAnnotation with Diagnosticable {
 /// varying callbacks and cursors.
 ///
 /// A [RenderObject] that has [MouseTrackedRenderObjectMixin] should push itself
-/// as and annotation, then assign the callbacks or [cursor] as desired.
-/// This mixin will monitor the value of [cursor] and properly notify
-/// listeners or call [markNeedsPaint] when necessary.
+/// as an annotation after assigning callbacks or [cursor] as desired. This mixin
+/// will monitor the value of [cursor] and properly notify listeners or call
+/// [markNeedsPaint] when necessary.
+/// 
+/// If you just want to use [PreparedMouseCursor] on the render object layer,
+/// usually the easiest way is [RenderMouseRegion]. The
+/// [MouseTrackedRenderObjectMixin] should be used if you want to define your own
+/// render object class that includes cursor configuration, especially if the
+/// cursor of this render object might change.
 ///
 /// See also:
 ///

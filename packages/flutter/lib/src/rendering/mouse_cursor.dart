@@ -278,8 +278,9 @@ abstract class MouseCursor with Diagnosticable {
 /// calling the methods from [MouseCursorController].
 ///
 /// [PreparedMouseCursor] can be assigned to more places than [MouseCursor].
-/// Besides widgets, it can also be assigned to a [RenderObject], or to a
-/// [MouseTrackerAnnotation], which will be pushed to the layer tree.
+/// Besides widgets, it can also be assigned to a [RenderObject], such as
+/// [RenderMouseRegion], or be assigned to [MouseTrackerAnnotation] if you want
+/// to directly handle annoations.
 abstract class PreparedMouseCursor extends MouseCursor {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
