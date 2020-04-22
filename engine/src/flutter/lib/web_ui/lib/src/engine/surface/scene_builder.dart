@@ -541,15 +541,19 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// cannot be used further.
   @override
   SurfaceScene build() {
-    _persistedScene.preroll();
-    if (_lastFrameScene == null) {
-      _persistedScene.build();
-    } else {
-      _persistedScene.update(_lastFrameScene);
-    }
-    commitScene(_persistedScene);
-    _lastFrameScene = _persistedScene;
-    return SurfaceScene(_persistedScene.rootElement);
+    timeAction<void>(kProfilePrerollFrame, () {
+      _persistedScene.preroll();
+    });
+    return timeAction<SurfaceScene>(kProfileApplyFrame, () {
+      if (_lastFrameScene == null) {
+        _persistedScene.build();
+      } else {
+        _persistedScene.update(_lastFrameScene);
+      }
+      commitScene(_persistedScene);
+      _lastFrameScene = _persistedScene;
+      return SurfaceScene(_persistedScene.rootElement);
+    });
   }
 
   /// Set properties on the linked scene.  These properties include its bounds,

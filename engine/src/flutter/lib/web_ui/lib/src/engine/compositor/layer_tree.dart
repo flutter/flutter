@@ -69,8 +69,12 @@ class Frame {
 
   /// Rasterize the given layer tree into this frame.
   bool raster(LayerTree layerTree, {bool ignoreRasterCache = false}) {
-    layerTree.preroll(this, ignoreRasterCache: ignoreRasterCache);
-    layerTree.paint(this, ignoreRasterCache: ignoreRasterCache);
+    timeAction<void>(kProfilePrerollFrame, () {
+      layerTree.preroll(this, ignoreRasterCache: ignoreRasterCache);
+    });
+    timeAction<void>(kProfileApplyFrame, () {
+      layerTree.paint(this, ignoreRasterCache: ignoreRasterCache);
+    });
     return true;
   }
 }
