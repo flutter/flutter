@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
-import 'package:path/path.dart' as path;
 
 
 import '../framework/framework.dart';
