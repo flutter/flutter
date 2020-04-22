@@ -240,6 +240,7 @@ class SkCanvas {
   }
 
   void saveLayer(ui.Rect bounds, SkPaint paint) {
+    assert(bounds != null, 'Use saveLayerWithoutBounds');
     skCanvas.callMethod('saveLayer', <js.JsObject>[
       makeSkRect(bounds),
       paint.skiaObject,
@@ -247,7 +248,7 @@ class SkCanvas {
   }
 
   void saveLayerWithoutBounds(SkPaint paint) {
-    skCanvas.callMethod('saveLayer', <js.JsObject>[null, paint.skiaObject]);
+    skCanvas.callMethod('saveLayer', <js.JsObject>[paint.skiaObject]);
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
