@@ -384,12 +384,10 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
 
     try {
       await _runCompleter.future;
-
-      stopListeningToEngineBenchmarkValues(kProfilePrerollFrame);
-      stopListeningToEngineBenchmarkValues(kProfileApplyFrame);
-
       return localProfile;
     } finally {
+      stopListeningToEngineBenchmarkValues(kProfilePrerollFrame);
+      stopListeningToEngineBenchmarkValues(kProfileApplyFrame);
       _runCompleter = null;
       profile = null;
     }
@@ -1027,6 +1025,14 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
     throw ArgumentError(
       'Listener must not be null. To stop listening to engine benchmark values '
       'under label "$name", call stopListeningToEngineBenchmarkValues(\'$name\').',
+    );
+  }
+
+  if (_engineBenchmarkListeners.containsKey(name)) {
+    throw StateError(
+      'A listener for "$name" is already registered.\n'
+      'Call `stopListeningToEngineBenchmarkValues` to unregister the previous '
+      'listener before registering a new one.'
     );
   }
 
