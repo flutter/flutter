@@ -186,6 +186,7 @@ BuildApp() {
     -dTrackWidgetCreation="${track_widget_creation_flag}"                 \
     -dDartObfuscation="${dart_obfuscation_flag}"                          \
     -dEnableBitcode="${bitcode_flag}"                                     \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"             \
     --DartDefines="${DART_DEFINES}"                                       \
     -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                   \
     "${build_mode}_ios_bundle_flutter_assets"
