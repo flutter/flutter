@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   file: 5.1.0
-  json_rpc_2: 2.1.0
+  json_rpc_2: 2.1.1
   meta: 1.1.8
   path: 1.7.0
   web_socket_channel: 1.1.0
@@ -51,4 +51,4 @@ dev_dependencies:
   mockito: 4.1.1
   quiver: 2.1.3
 
-# PUBSPEC CHECKSUM: 6770
+# PUBSPEC CHECKSUM: 1371
