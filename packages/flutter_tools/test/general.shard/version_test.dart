@@ -404,7 +404,9 @@ void main() {
     // Stable channel
     gitTagVersion = GitTagVersion.parse('1.2.3');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3');
-    expect(gitTagVersion.gitTag, '1.2.3');
+    expect(gitTagVersion.x, 1);
+    expect(gitTagVersion.y, 2);
+    expect(gitTagVersion.z, 3);
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
