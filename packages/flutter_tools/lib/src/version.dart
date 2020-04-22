@@ -769,7 +769,7 @@ class GitTagVersion {
       }
     }
 
-    // If we're not currently on a tag, 
+    // If we're not currently on a tag, use git describe
     return parse(
       _runGit(
         'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
