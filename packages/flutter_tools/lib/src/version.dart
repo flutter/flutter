@@ -779,6 +779,28 @@ class GitTagVersion {
     );
   }
 
+  /// Check for the release tag format of the form x.y.z
+  static GitTagVersion parseStableVersion(String version) {
+    final RegExp versionPattern = RegExp(
+      r'^(\d+)\.(\d+)\.(\d+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3]);
+    if (parts == null) {
+      return const GitTagVersion.unknown();
+    }
+    final List<int> parsedParts = parts.map<int>(
+      (String source) => source == null ? null : int.tryParse(source)).toList();
+    return GitTagVersion(
+      x: parsedParts[0],
+      y: parsedParts[1],
+      z: parsedParts[2],
+      devVersion: null,
+      devPatch: null,
+      commits: 0,
+      hash: '',
+      gitTag: version,
+    );
+  }
+
   /// Check for the release tag format of the form x.y.z-m.n.pre
   static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
@@ -813,6 +835,10 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
+    gitTagVersion = parseStableVersion(version);
+    if (gitTagVersion != const GitTagVersion.unknown()) {
+      return gitTagVersion;
+    }
     gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
