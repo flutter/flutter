@@ -14,7 +14,7 @@ bool _offsetIsValid(Offset offset) {
 }
 
 // ignore: unused_element, Used in Shader assert.
-bool _matrix4IsValid(Float64List matrix4) {
+bool _matrix4IsValid(Float32List matrix4) {
   assert(matrix4 != null, 'Matrix4 argument was null.');
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
   return true;
@@ -1092,8 +1092,8 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    Float64List
-        matrix4, // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
+    // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
+    Float64List matrix4,
   ]) =>
       engine.GradientLinear(from, to, colors, colorStops, tileMode);
 
@@ -1136,14 +1136,15 @@ abstract class Gradient extends Shader {
     _validateColorStops(colors, colorStops);
     // If focal is null or focal radius is null, this should be treated as a regular radial gradient
     // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
+    final Float32List matrix32 = matrix4 != null ? engine.toMatrix32(matrix4) : null;
     if (focal == null || (focal == center && focalRadius == 0.0)) {
       return engine.GradientRadial(
-          center, radius, colors, colorStops, tileMode, matrix4);
+          center, radius, colors, colorStops, tileMode, matrix32);
     } else {
       assert(center != Offset.zero ||
           focal != Offset.zero); // will result in exception(s) in Skia side
       return engine.GradientConical(focal, focalRadius, center, radius, colors,
-          colorStops, tileMode, matrix4);
+          colorStops, tileMode, matrix32);
     }
   }
 
@@ -1183,7 +1184,7 @@ abstract class Gradient extends Shader {
     Float64List matrix4,
   ]) =>
       engine.GradientSweep(
-          center, colors, colorStops, tileMode, startAngle, endAngle, matrix4);
+          center, colors, colorStops, tileMode, startAngle, endAngle, engine.toMatrix32(matrix4));
 }
 
 /// Opaque handle to raw decoded image data (pixels).

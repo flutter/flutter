@@ -31,7 +31,7 @@ abstract class EngineCanvas {
 
   void skew(double sx, double sy);
 
-  void transform(Float64List matrix4);
+  void transform(Float32List matrix4);
 
   void clipRect(ui.Rect rect);
 
@@ -205,7 +205,7 @@ mixin SaveStackTracking on EngineCanvas {
   @override
   void skew(double sx, double sy) {
     final Matrix4 skewMatrix = Matrix4.identity();
-    final Float64List storage = skewMatrix.storage;
+    final Float32List storage = skewMatrix.storage;
     storage[1] = sy;
     storage[4] = sx;
     _currentTransform.multiply(skewMatrix);
@@ -215,8 +215,8 @@ mixin SaveStackTracking on EngineCanvas {
   ///
   /// Classes that override this method must call `super.transform()`.
   @override
-  void transform(Float64List matrix4) {
-    _currentTransform.multiply(Matrix4.fromFloat64List(matrix4));
+  void transform(Float32List matrix4) {
+    _currentTransform.multiply(Matrix4.fromFloat32List(matrix4));
   }
 
   /// Adds a rectangle to clipping stack.

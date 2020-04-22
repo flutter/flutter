@@ -63,7 +63,7 @@ void main() {
       final SceneBuilder builder1 = SceneBuilder();
       final PersistedOpacity opacityLayer = builder1.pushOpacity(100);
       final PersistedTransform transformLayer =
-          builder1.pushTransform(Matrix4.identity().storage);
+          builder1.pushTransform(Matrix4.identity().toFloat64());
       builder1.pop();
       builder1.pop();
       builder1.build();
@@ -154,10 +154,10 @@ void main() {
       final _LoggingTestSurface logger = _LoggingTestSurface();
       final SurfaceSceneBuilder builder1 = SurfaceSceneBuilder();
       final PersistedTransform a1 =
-          builder1.pushTransform(Matrix4.identity().storage);
+          builder1.pushTransform(Matrix4.identity().toFloat64());
       final PersistedOpacity b1 = builder1.pushOpacity(100);
       final PersistedTransform c1 =
-          builder1.pushTransform(Matrix4.identity().storage);
+          builder1.pushTransform(Matrix4.identity().toFloat64());
       builder1.debugAddSurface(logger);
       builder1.pop();
       builder1.pop();
@@ -174,9 +174,9 @@ void main() {
 
       final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
       final PersistedTransform a2 =
-          builder2.pushTransform(Matrix4.identity().storage, oldLayer: a1);
+          builder2.pushTransform(Matrix4.identity().toFloat64(), oldLayer: a1);
       final PersistedTransform c2 =
-          builder2.pushTransform(Matrix4.identity().storage, oldLayer: c1);
+          builder2.pushTransform(Matrix4.identity().toFloat64(), oldLayer: c1);
       builder2.addRetained(logger);
       builder2.pop();
       builder2.pop();
@@ -245,7 +245,7 @@ void main() {
       final SceneBuilder builder1 = SceneBuilder();
       final PersistedOpacity opacityLayer = builder1.pushOpacity(100);
       final PersistedTransform transformLayer =
-          builder1.pushTransform(Matrix4.identity().storage);
+          builder1.pushTransform(Matrix4.identity().toFloat64());
       builder1.pop();
       builder1.pop();
       builder1.build();

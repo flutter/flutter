@@ -58,7 +58,7 @@ String matrix4ToCssTransform(Matrix4 matrix) {
 /// Applies a transform to the [element].
 ///
 /// See [float64ListToCssTransform] for details on how the CSS value is chosen.
-void setElementTransform(html.Element element, Float64List matrix4) {
+void setElementTransform(html.Element element, Float32List matrix4) {
   element.style
     ..transformOrigin = '0 0 0'
     ..transform = float64ListToCssTransform(matrix4);
@@ -73,7 +73,7 @@ void setElementTransform(html.Element element, Float64List matrix4) {
 /// See also:
 ///  * https://github.com/flutter/flutter/issues/32274
 ///  * https://bugs.chromium.org/p/chromium/issues/detail?id=1040222
-String float64ListToCssTransform(Float64List matrix) {
+String float64ListToCssTransform(Float32List matrix) {
   assert(matrix.length == 16);
   final TransformKind transformKind = transformKindOf(matrix);
   if (transformKind == TransformKind.transform2d) {
@@ -105,9 +105,9 @@ enum TransformKind {
 }
 
 /// Detects the kind of transform the [matrix] performs.
-TransformKind transformKindOf(Float64List matrix) {
+TransformKind transformKindOf(Float32List matrix) {
   assert(matrix.length == 16);
-  final Float64List m = matrix;
+  final Float32List m = matrix;
 
   // If matrix contains scaling, rotation, z translation or
   // perspective transform, it is not considered simple.
@@ -152,7 +152,7 @@ TransformKind transformKindOf(Float64List matrix) {
 }
 
 /// Returns `true` is the [matrix] describes an identity transformation.
-bool isIdentityFloat64ListTransform(Float64List matrix) {
+bool isIdentityFloat32ListTransform(Float32List matrix) {
   assert(matrix.length == 16);
   return transformKindOf(matrix) == TransformKind.identity;
 }
@@ -164,15 +164,15 @@ bool isIdentityFloat64ListTransform(Float64List matrix) {
 /// permitted. However, it is inefficient to construct a matrix for an identity
 /// transform. Consider removing the CSS `transform` property from elements
 /// that apply identity transform.
-String float64ListToCssTransform2d(Float64List matrix) {
+String float64ListToCssTransform2d(Float32List matrix) {
   assert (transformKindOf(matrix) != TransformKind.complex);
   return 'matrix(${matrix[0]},${matrix[1]},${matrix[4]},${matrix[5]},${matrix[12]},${matrix[13]})';
 }
 
 /// Converts [matrix] to a 3D CSS transform value.
-String float64ListToCssTransform3d(Float64List matrix) {
+String float64ListToCssTransform3d(Float32List matrix) {
   assert(matrix.length == 16);
-  final Float64List m = matrix;
+  final Float32List m = matrix;
   if (m[0] == 1.0 &&
       m[1] == 0.0 &&
       m[2] == 0.0 &&
@@ -203,7 +203,7 @@ bool get assertionsEnabled {
   return k;
 }
 
-final Float64List _tempRectData = Float64List(4);
+final Float32List _tempRectData = Float32List(4);
 
 /// Transforms a [ui.Rect] given the effective [transform].
 ///
@@ -228,14 +228,14 @@ ui.Rect transformRect(Matrix4 transform, ui.Rect rect) {
 ///
 /// WARNING: do not use this outside [transformLTRB]. Sharing this variable in
 /// other contexts will lead to bugs.
-final Float64List _tempPointData = Float64List(16);
-final Matrix4 _tempPointMatrix = Matrix4.fromFloat64List(_tempPointData);
+final Float32List _tempPointData = Float32List(16);
+final Matrix4 _tempPointMatrix = Matrix4.fromFloat32List(_tempPointData);
 
 /// Transforms a rectangle given the effective [transform].
 ///
 /// This is the same as [transformRect], except that the rect is specified
 /// in terms of left, top, right, and bottom edge offsets.
-void transformLTRB(Matrix4 transform, Float64List ltrb) {
+void transformLTRB(Matrix4 transform, Float32List ltrb) {
   // Construct a matrix where each row represents a vector pointing at
   // one of the four corners of the (left, top, right, bottom) rectangle.
   // Using the row-major order allows us to multiply the matrix in-place
@@ -243,14 +243,14 @@ void transformLTRB(Matrix4 transform, Float64List ltrb) {
   // library has a convenience function `multiplyTranspose` that performs
   // the multiplication without copying. This way we compute the positions
   // of all four points in a single matrix-by-matrix multiplication at the
-  // cost of one `Matrix4` instance and one `Float64List` instance.
+  // cost of one `Matrix4` instance and one `Float32List` instance.
   //
   // The rejected alternative was to use `Vector3` for each point and
   // multiply by the current transform. However, that would cost us four
-  // `Vector3` instances, four `Float64List` instances, and four
+  // `Vector3` instances, four `Float32List` instances, and four
   // matrix-by-vector multiplications.
   //
-  // `Float64List` initializes the array with zeros, so we do not have to
+  // `Float32List` initializes the array with zeros, so we do not have to
   // fill in every single element.
 
   // Row 0: top-left
