@@ -13,7 +13,9 @@
 namespace flutter {
 
 AndroidSurfaceVulkan::AndroidSurfaceVulkan()
-    : proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {}
+    : proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {
+  external_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder>();
+}
 
 AndroidSurfaceVulkan::~AndroidSurfaceVulkan() = default;
 
@@ -73,7 +75,7 @@ bool AndroidSurfaceVulkan::SetNativeWindow(
 }
 
 ExternalViewEmbedder* AndroidSurfaceVulkan::GetExternalViewEmbedder() {
-  return nullptr;
+  return external_view_embedder_.get();
 }
 
 fml::RefPtr<vulkan::VulkanProcTable> AndroidSurfaceVulkan::vk() {
