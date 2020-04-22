@@ -37,9 +37,11 @@ reboot() {
       -c "log_listener --dump_logs yes" \
       --identity-file $pkey
 
+  echo "$(date) START:REBOOT ------------------------------------------"
   # note: this will set an exit code of 255, which we can ignore.
   ./fuchsia_ctl -d $device_name ssh -c "dm reboot-recovery" \
       --identity-file $pkey || true
+  echo "$(date) END:REBOOT --------------------------------------------"
 }
 
 trap reboot EXIT
@@ -58,6 +60,12 @@ for i in {1..10}; do
 done
 echo "$(date) END:WAIT_DEVICE_READY ---------------------------------"
 
+echo "$(date) START:EXTRACT_PACKAGES  ---------------------------------"
+mkdir -p packages
+tar -xvzf $2 -C packages 1> /dev/null
+echo "$(date) END:EXTRACT_PACKAGES  -----------------------------------"
+
+
 # TODO(gw280): Enable tests using JIT runner
 
 echo "$(date) START:flutter_runner_tests ----------------------------"
@@ -66,14 +74,18 @@ echo "$(date) START:flutter_runner_tests ----------------------------"
     -f flutter_runner_tests-0.far  \
     -t flutter_runner_tests        \
     --identity-file $pkey \
-    --timeout-seconds 300
+    --timeout-seconds 300 \
+    --packages-directory packages
 
 # TODO(https://bugs.fuchsia.dev/p/fuchsia/issues/detail?id=47081)
 # Re-enable once the crash is resolved
 #./fuchsia_ctl -d $device_name test \
 #    -f flutter_aot_runner-0.far    \
 #    -f flutter_runner_scenic_tests-0.far  \
-#    -t flutter_runner_scenic_tests
+#    -t flutter_runner_scenic_tests \
+#    --identity-file $pkey \
+#    --timeout-seconds 300 \
+#    --packages-directory packages
 
 # TODO(https://github.com/flutter/flutter/issues/50032) Enable after the
 # Fuchsia message loop migration is complete.
@@ -83,21 +95,24 @@ echo "$(date) START:fml_tests ---------------------------------------"
     -t fml_tests \
     -a "--gtest_filter=-MessageLoop*:Message*:FileTest*" \
     --identity-file $pkey \
-    --timeout-seconds 300
+    --timeout-seconds 300 \
+    --packages-directory packages
 
 echo "$(date) START:flow_tests --------------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f flow_tests-0.far  \
     -t flow_tests \
     --identity-file $pkey \
-    --timeout-seconds 300
+    --timeout-seconds 300 \
+    --packages-directory packages
 
 echo "$(date) START:runtime_tests -----------------------------------"
 ./fuchsia_ctl -d $device_name test \
     -f runtime_tests-0.far  \
     -t runtime_tests \
     --identity-file $pkey \
-    --timeout-seconds 300
+    --timeout-seconds 300 \
+    --packages-directory packages
 
 # TODO(https://github.com/flutter/flutter/issues/53399): Re-enable
 # OnServiceProtocolGetSkSLsWorks and CanLoadSkSLsFromAsset once they pass on
@@ -108,5 +123,6 @@ echo "$(date) START:shell_tests -------------------------------------"
     -t shell_tests \
     -a "--gtest_filter=-ShellTest.CacheSkSLWorks:ShellTest.SetResourceCacheSize*:ShellTest.OnServiceProtocolGetSkSLsWorks:ShellTest.CanLoadSkSLsFromAsset" \
     --identity-file $pkey \
-    --timeout-seconds 300
+    --timeout-seconds 300 \
+    --packages-directory packages
 
