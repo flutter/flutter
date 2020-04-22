@@ -4568,13 +4568,21 @@ abstract class ComponentElement extends Element {
   }
 }
 
+T unsafeCast<T>(Object any) => any; // ignore: return_of_invalid_type
+
 /// An [Element] that uses a [StatelessWidget] as its configuration.
 class StatelessElement extends ComponentElement {
   /// Creates an element that uses the given widget as its configuration.
   StatelessElement(StatelessWidget widget) : super(widget);
 
   @override
-  StatelessWidget get widget => super.widget as StatelessWidget;
+  StatelessWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as StatelessWidget;
+    }
+  }
 
   @override
   Widget build() => widget.build(this);
@@ -4849,7 +4857,13 @@ abstract class ProxyElement extends ComponentElement {
   ProxyElement(ProxyWidget widget) : super(widget);
 
   @override
-  ProxyWidget get widget => super.widget as ProxyWidget;
+  ProxyWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as ProxyWidget;
+    }
+  }
 
   @override
   Widget build() => widget.child;
@@ -4956,7 +4970,13 @@ class InheritedElement extends ProxyElement {
   InheritedElement(InheritedWidget widget) : super(widget);
 
   @override
-  InheritedWidget get widget => super.widget as InheritedWidget;
+  InheritedWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as InheritedWidget;
+    }
+  }
 
   final Map<Element, Object> _dependents = HashMap<Element, Object>();
 
@@ -5296,7 +5316,13 @@ abstract class RenderObjectElement extends Element {
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 
   @override
-  RenderObjectWidget get widget => super.widget as RenderObjectWidget;
+  RenderObjectWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as RenderObjectWidget;
+    }
+  }
 
   /// The underlying [RenderObject] for this element.
   @override
@@ -5811,7 +5837,13 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   SingleChildRenderObjectElement(SingleChildRenderObjectWidget widget) : super(widget);
 
   @override
-  SingleChildRenderObjectWidget get widget => super.widget as SingleChildRenderObjectWidget;
+  SingleChildRenderObjectWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as SingleChildRenderObjectWidget;
+    }
+  }
 
   Element _child;
 
@@ -5884,7 +5916,13 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
       super(widget);
 
   @override
-  MultiChildRenderObjectWidget get widget => super.widget as MultiChildRenderObjectWidget;
+  MultiChildRenderObjectWidget get widget {
+    if (kIsWeb) {
+      return unsafeCast(super.widget);
+    } else {
+      return super.widget as MultiChildRenderObjectWidget;
+    }
+  }
 
   /// The current list of children of this element.
   ///
