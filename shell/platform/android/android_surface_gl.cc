@@ -32,6 +32,8 @@ AndroidSurfaceGL::AndroidSurfaceGL() {
   if (!offscreen_context_ || !offscreen_context_->IsValid()) {
     offscreen_context_ = nullptr;
   }
+
+  external_view_embedder_ = std::make_unique<AndroidExternalViewEmbedder>();
 }
 
 AndroidSurfaceGL::~AndroidSurfaceGL() = default;
@@ -127,7 +129,7 @@ intptr_t AndroidSurfaceGL::GLContextFBO() const {
 
 // |GPUSurfaceGLDelegate|
 ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
-  return nullptr;
+  return external_view_embedder_.get();
 }
 
 }  // namespace flutter
