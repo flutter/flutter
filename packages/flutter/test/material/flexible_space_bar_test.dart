@@ -216,7 +216,7 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
 
-  }, skip: isBrowser);
+  });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
     Widget buildFrame(TargetPlatform platform, bool centerTitle) {
@@ -284,7 +284,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.linux, true));
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
-  }, skip: isBrowser);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
