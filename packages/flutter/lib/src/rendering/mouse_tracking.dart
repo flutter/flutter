@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import 'mouse_cursor.dart';
 import 'object.dart';
@@ -30,16 +29,16 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
 /// The annotation object used to annotate regions that are interested in mouse
 /// movements.
-/// 
+///
 /// To use an annotation, push it with [AnnotatedRegionLayer] during painting.
 /// The annotation's callbacks or configurations will be used depending on the
 /// relationship between annotations and mouse pointers.
-/// 
+///
 /// This class is also the type parameter of the annotation search started by
 /// [MouseTracker].
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [MouseTracker], which uses [MouseTrackerAnnotation].
 ///  * [MouseTrackedRenderObjectMixin], which is a convenient mixin for render
 ///    objects that implements this class while supporting varying cursor and
@@ -109,10 +108,10 @@ class MouseTrackerAnnotation with Diagnosticable {
   /// control cursors, but defers the choice to the next annotation behind this
   /// one on the screen in hit-test order, or [SystemMouseCursors.basic] if no
   /// others can be found.
-  /// 
+  ///
   /// The [MouseTrackerAnnotation] is immutable and does not support varying
   /// [cursor].
-  /// 
+  ///
   /// For a subclass that wishes to support varying [cursor], it must implement
   /// [addStatusListener] and [removeStatusListener].
   ///
@@ -122,21 +121,21 @@ class MouseTrackerAnnotation with Diagnosticable {
   ///  * [SystemMouseCursors], which is a collection of system cursors of all
   ///    platforms.
   ///  * [RenderMouseRegion.cursor] and [MouseRegion.cursor], which provide
-  ///    values to this field. 
+  ///    values to this field.
   ///  * [MouseTrackedRenderObjectMixin], which is a utility class that simplifies
   ///    defining annotations that support varying [cursor].
   final PreparedMouseCursor cursor;
 
   /// Calls listener every time the cursor changes.
-  /// 
-  /// This is listened to by [MouseTracker], so that when [cursor] changes 
+  ///
+  /// This is listened to by [MouseTracker], so that when [cursor] changes
   /// mouse pointers that are hovering over this region are properly updated.
-  /// 
+  ///
   /// The [MouseTrackerAnnotation] is immutable and does not support varying
   /// [cursor], therefore this method has no effect. For a subclass that allows
   /// varying [cursor], this method should forward this call to a
   /// [ChangeNotifier] and behave as follows:
-  /// 
+  ///
   ///  * If the change of [cursor] is from null to non-null or vice versa, trigger
   ///    a device update (e.g. [RenderObject.markNeedsPaint]).
   ///  * Otherwise, fire all listeners.
@@ -145,7 +144,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   void addCursorListener(VoidCallback listener) { }
 
   /// Stops calling the listener every time the cursor changes.
-  /// 
+  ///
   /// This is listened to by [MouseTracker]. The [MouseTrackerAnnotation] is
   /// immutable and does not support varying [cursor], therefore this method has
   /// no effect. For a subclass that allows varying [cursor], this method should
@@ -173,16 +172,16 @@ class MouseTrackerAnnotation with Diagnosticable {
 
 /// A mixin for render objects that wants to push a [MouseTrackerAnnotation] with
 /// varying callbacks and cursors.
-/// 
+///
 /// A [RenderObject] that has [MouseTrackedRenderObjectMixin] should push itself
 /// as and annotation, then assign the callbacks or [cursor] as desired.
-/// This mixin will monitor the value of [cursor] and properly notify 
+/// This mixin will monitor the value of [cursor] and properly notify
 /// listeners or call [markNeedsPaint] when necessary.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [MouseTracker], which uses [MouseTrackerAnnotation].
-///  * [MouseTrackerAnnotation], which is an immutable implementation of 
+///  * [MouseTrackerAnnotation], which is an immutable implementation of
 ///    this class, and the interface thereof.
 mixin MouseTrackedRenderObjectMixin on RenderObject implements MouseTrackerAnnotation {
   @override
@@ -302,28 +301,6 @@ class _MouseState {
   }
 }
 
-class _MouseCursorState {
-  MouseTrackerAnnotation currentAnnotation;
-  VoidCallback onCursorChange;
-}
-
-class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation {
-  const _FallbackAnnotation();
-
-  @override
-  PointerEnterEventListener get onEnter => null;
-  @override
-  PointerHoverEventListener get onHover => null;
-  @override
-  PointerExitEventListener get onExit => null;
-  @override
-  PreparedMouseCursor get cursor => SystemMouseCursors.basic;
-  @override
-  void addCursorListener(VoidCallback listener) { }
-  @override
-  void removeCursorListener(VoidCallback listener) { }
-}
-
 /// Used by [MouseTracker] to provide the details of an update of a mouse
 /// device.
 ///
@@ -331,11 +308,11 @@ class _FallbackAnnotation with Diagnosticable implements MouseTrackerAnnotation 
 /// change the state of a mouse device, or the [MouseTrackerAnnotation]s that
 /// the mouse device is hovering.
 @immutable
-class _MouseTrackerUpdateDetails with Diagnosticable {
+class MouseTrackerUpdateDetails with Diagnosticable {
   /// When device update is triggered by a new frame.
   ///
   /// All parameters are required.
-  const _MouseTrackerUpdateDetails.byNewFrame({
+  const MouseTrackerUpdateDetails.byNewFrame({
     @required this.lastAnnotations,
     @required this.nextAnnotations,
     @required this.previousEvent,
@@ -348,7 +325,7 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   ///
   /// The [lastAnnotations], [nextAnnotations], and [triggeringEvent] are
   /// required.
-  const _MouseTrackerUpdateDetails.byPointerEvent({
+  const MouseTrackerUpdateDetails.byPointerEvent({
     @required this.lastAnnotations,
     @required this.nextAnnotations,
     this.previousEvent,
@@ -406,19 +383,19 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
   }
 }
 
-/// Maintains the relationship between mouse devices and
-/// [MouseTrackerAnnotation]s, and notifies interested callbacks of the changes
-/// thereof.
+/// A base class that tracks the relationship between mouse devices and
+/// [MouseTrackerAnnotation]s.
 ///
-/// An instance of [MouseTracker] is owned by the global singleton of
-/// [RendererBinding].
+/// A _device update_ is defined as an event that changes the relationship
+/// between mouse devices and [MouseTrackerAnnotation]s. Subclasses should
+/// override [handleDeviceUpdate] to process the updates.
 ///
 /// This class is a [ChangeNotifier] that notifies its listeners if the value of
 /// [mouseIsConnected] changes.
 ///
-/// ### Details
+/// ### States and device updates
 ///
-/// The state of [MouseTracker] consists of two parts:
+/// The state of [BaseMouseTracker] consists of two parts:
 ///
 ///  * The mouse devices that are connected.
 ///  * In which annotations each device is contained.
@@ -428,29 +405,30 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 ///
 ///  * An eligible [PointerEvent] has been observed, e.g. a device is added,
 ///    removed, or moved. In this case, the state related to this device will
-///    be immediately updated.
+///    be immediately updated, and triggers [handleDeviceUpdate] on this device.
 ///  * A frame has been painted. In this case, a callback will be scheduled for
-///    the upcoming post-frame phase to update all devices.
+///    the upcoming post-frame phase to update all devices, and triggers
+///    [handleDeviceUpdate] on each device separately.
 ///
 /// See also:
 ///
-///   * [MouseTracker], which is a subclass of [MouseTracker] with definition
+///   * [MouseTracker], which is a subclass of [BaseMouseTracker] with definition
 ///     of how to process mouse event callbacks and mouse cursors.
-///   * [MouseCursorMixin], which is a mixin for [MouseTracker] that defines
+///   * [MouseCursorMixin], which is a mixin for [BaseMouseTracker] that defines
 ///     how to process mouse cursors.
-class MouseTracker extends ChangeNotifier {
-  /// Creates a mouse tracker to keep track of mouse locations.
+class BaseMouseTracker extends ChangeNotifier {
+  /// Creates a [BaseMouseTracker] to keep track of mouse locations.
   ///
-  /// The first parameter is a [PointerRouter], which [MouseTracker] will
+  /// The first parameter is a [PointerRouter], which [BaseMouseTracker] will
   /// subscribe to and receive events from. Usually it is the global singleton
   /// instance [GestureBinding.pointerRouter].
   ///
-  /// The second parameter is a function with which the [MouseTracker] can
+  /// The second parameter is a function with which the [BaseMouseTracker] can
   /// search for [MouseTrackerAnnotation]s at a given position.
   /// Usually it is [Layer.findAllAnnotations] of the root layer.
   ///
   /// All of the parameters must be non-null.
-  MouseTracker(this._router, this.annotationFinder)
+  BaseMouseTracker(this._router, this.annotationFinder)
       : assert(_router != null),
         assert(annotationFinder != null) {
     _router.addGlobalRoute(_handleEvent);
@@ -523,7 +501,7 @@ class MouseTracker extends ChangeNotifier {
   }
 
   bool _debugDuringDeviceUpdate = false;
-  // Used to wrap any procedure that might call [_handleDeviceUpdate].
+  // Used to wrap any procedure that might call [handleDeviceUpdate].
   //
   // In debug mode, this method uses `_debugDuringDeviceUpdate` to prevent
   // `_deviceUpdatePhase` being recursively called.
@@ -571,32 +549,31 @@ class MouseTracker extends ChangeNotifier {
       : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
   }
 
-  // A callback that is called on the update of a device.
-  //
-  // This method should be called only by [MouseTracker].
-  //
-  // Override this method to receive updates when the relationship between a
-  // device and annotations have changed. Subclasses should override this method
-  // to first call to their inherited [_handleDeviceUpdate] method, and then
-  // process the update as desired,
-  // 
-  // The update can be caused by two kinds of triggers:
-  //
-  //   * Triggered by the addition, movement, or removal of a pointer. Such
-  //     calls occur during the handler of the event, indicated by
-  //     `details.triggeringEvent` being non-null.
-  //   * Triggered by the appearance, movement, or disappearance of an annotation.
-  //     Such calls occur after each new frame, during the post-frame callbacks,
-  //     indicated by `details.triggeringEvent` being null.
-  // 
-  // This method is not triggered if the [MouseTrackerAnnotation] is mutated.
-  // 
-  // Calling of this method must be wrapped in `_deviceUpdatePhase`.
-  void _handleDeviceUpdate(_MouseTrackerUpdateDetails details) {
+  /// A callback that is called on the update of a device.
+  ///
+  /// This method should be called only by [MouseTracker].
+  ///
+  /// Override this method to receive updates when the relationship between a
+  /// device and annotations have changed. Subclasses should override this method
+  /// to first call to their inherited [handleDeviceUpdate] method, and then
+  /// process the update as desired,
+  ///
+  /// The update can be caused by two kinds of triggers:
+  ///
+  ///   * Triggered by the addition, movement, or removal of a pointer. Such
+  ///     calls occur during the handler of the event, indicated by
+  ///     `details.triggeringEvent` being non-null.
+  ///   * Triggered by the appearance, movement, or disappearance of an annotation.
+  ///     Such calls occur after each new frame, during the post-frame callbacks,
+  ///     indicated by `details.triggeringEvent` being null.
+  ///
+  /// This method is not triggered if the [MouseTrackerAnnotation] is mutated.
+  ///
+  /// Calling of this method must be wrapped in `_deviceUpdatePhase`.
+  @protected
+  @mustCallSuper
+  void handleDeviceUpdate(MouseTrackerUpdateDetails details) {
     assert(_debugDuringDeviceUpdate);
-
-    _handleDeviceUpdateMouseEvents(details);
-    _handleDeviceUpdateMouseCursor(details);
   }
 
   // Handler for events coming from the PointerRouter.
@@ -630,7 +607,7 @@ class MouseTracker extends ChangeNotifier {
         final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(targetState);
         final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = targetState.replaceAnnotations(nextAnnotations);
 
-        _handleDeviceUpdate(_MouseTrackerUpdateDetails.byPointerEvent(
+        handleDeviceUpdate(MouseTrackerUpdateDetails.byPointerEvent(
           lastAnnotations: lastAnnotations,
           nextAnnotations: nextAnnotations,
           previousEvent: lastEvent,
@@ -651,7 +628,7 @@ class MouseTracker extends ChangeNotifier {
         final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
         final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
 
-        _handleDeviceUpdate(_MouseTrackerUpdateDetails.byNewFrame(
+        handleDeviceUpdate(MouseTrackerUpdateDetails.byNewFrame(
           lastAnnotations: lastAnnotations,
           nextAnnotations: nextAnnotations,
           previousEvent: lastEvent,
@@ -659,11 +636,11 @@ class MouseTracker extends ChangeNotifier {
       }
     });
   }
+}
 
-  /// MOUSE EVENTS
-
+mixin _MouseTrackerEventMixin on BaseMouseTracker {
   // Handles device update and dispatches mouse event callbacks.
-  static void _handleDeviceUpdateMouseEvents(_MouseTrackerUpdateDetails details) {
+  static void _handleDeviceUpdateMouseEvents(MouseTrackerUpdateDetails details) {
     final PointerEvent previousEvent = details.previousEvent;
     final PointerEvent triggeringEvent = details.triggeringEvent;
     final PointerEvent latestEvent = details.latestEvent;
@@ -713,110 +690,49 @@ class MouseTracker extends ChangeNotifier {
     }
   }
 
-  /// MOUSE CURSOR
-
-  /// Returns the current mouse cursor of a device.
-  /// 
-  /// Only valid when asserts are enabled. In release builds, always returns
-  /// null.
-  PreparedMouseCursor debugDeviceCursor(int device) {
-    PreparedMouseCursor result;
-    assert(() {
-      result = _mouseCursorStates[device]?.currentAnnotation?.cursor;
-      return true;
-    }());
-    return result;
+  @protected
+  @override
+  void handleDeviceUpdate(MouseTrackerUpdateDetails details) {
+    super.handleDeviceUpdate(details);
+    _handleDeviceUpdateMouseEvents(details);
   }
-  final Map<int, _MouseCursorState> _mouseCursorStates = <int, _MouseCursorState>{};
+}
 
-  // Find the mouse cursor, which fallbacks to _fallbackAnnotation.
-  // The `annotations` is the current annotations that the device is
-  // hovering in visual order from front the back.
-  // The return value is never null.
-  MouseTrackerAnnotation _findCursorAnnotation(LinkedHashSet<MouseTrackerAnnotation> annotations) {
-    MouseTrackerAnnotation result;
-    for (final MouseTrackerAnnotation annotation in annotations) {
-      if (annotation.cursor != null) {
-        result = annotation;
-        break;
-      }
-    }
-    return result ?? const _FallbackAnnotation();
-  }
-
-  // Define the actions when a pointer should change to a prepared cursor by
-  // calling system functions.
-  Future<void> _handleActivateCursor(int device, PreparedMouseCursor cursor) async {
-    if (cursor is NoopMouseCursor)
-      return;
-
-    if (cursor is SystemMouseCursor) {
-      return _cursorChannel.invokeMethod<void>(
-        'activateSystemCursor',
-        <String, dynamic>{
-          'device': device,
-          'shapeCode': cursor.shapeCode,
-        },
-      );
-    }
-
-    throw UnimplementedError('Unsupported mouse cursor type: ${cursor.runtimeType}');
-  }
-
-  // Handles device update and changes mouse cursors.
-  void _handleDeviceUpdateMouseCursor(_MouseTrackerUpdateDetails details) {
-    final int device = details.device;
-
-    if (details.triggeringEvent is PointerRemovedEvent) {
-      _mouseCursorStates.remove(device);
-      return;
-    }
-
-    final bool hadState = _mouseCursorStates.containsKey(device);
-    _mouseCursorStates.putIfAbsent(device, () {
-      final _MouseCursorState state = _MouseCursorState();
-      state.onCursorChange = () {
-        assert(state.currentAnnotation?.cursor != null);
-        _handleActivateCursor(device, state.currentAnnotation.cursor);
-      };
-      return state;
-    });
-
-    final _MouseCursorState state = _mouseCursorStates[device];
-    final MouseTrackerAnnotation lastAnnotation = state.currentAnnotation;
-    assert(lastAnnotation != null || !hadState);
-    final MouseTrackerAnnotation nextAnnotation = _findCursorAnnotation(details.nextAnnotations);
-    if (lastAnnotation == nextAnnotation)
-      return;
-
-    lastAnnotation?.removeCursorListener(state.onCursorChange);
-    state.currentAnnotation = nextAnnotation;
-    nextAnnotation.addCursorListener(state.onCursorChange);
-
-    final PreparedMouseCursor lastCursor = lastAnnotation?.cursor;
-    final PreparedMouseCursor nextCursor = nextAnnotation.cursor;
-    if (nextCursor != lastCursor) {
-      state.onCursorChange();
-    }
-  }
-
-  /// The code of [PlatformException]s that are caused by unsupported
-  /// features.
+/// Trackes the relationship between mouse devices and annotations, and
+/// triggers mouse events and cursor changes accordingly.
+///
+/// The [MouseTracker] trackes the relationship between mouse devices and
+/// [MouseTrackerAnnotation]s, and when such relationship changes, triggers
+/// the following changes if applicable:
+///
+///  * Dispatches mouse-related pointer events (pointer enter, hover, and exit).
+///  * Notifies changes of [mouseIsConnected].
+///  * Changes mouse cursors.
+///
+/// An instance of [MouseTracker] is owned by the global singleton of
+/// [RendererBinding].
+///
+/// This class is a [ChangeNotifier] that notifies its listeners if the value of
+/// [mouseIsConnected] changes.
+///
+/// See also:
+///
+///   * [BaseMouseTracker], which introduces more details about the timing of
+///     device updates.
+class MouseTracker extends BaseMouseTracker with MouseTrackerCursorMixin, _MouseTrackerEventMixin {
+  /// Creates a [MouseTracker] to keep track of mouse locations.
   ///
-  /// See also:
+  /// The first parameter is a [PointerRouter], which [MouseTracker] will
+  /// subscribe to and receive events from. Usually it is the global singleton
+  /// instance [GestureBinding.pointerRouter].
   ///
-  ///  * [isUnsupportedFeature], which introduces the situation of this code,
-  ///    and detects this type of exceptions.
-  static const String kUnsupportedFeatureCode = 'unsupported';
-
-  /// Whether the thrown error indicates that a feature is not supported by the
-  /// platform, and a fallback is requested.
+  /// The second parameter is a function with which the [MouseTracker] can
+  /// search for [MouseTrackerAnnotation]s at a given position.
+  /// Usually it is [Layer.findAllAnnotations] of the root layer.
   ///
-  /// This kind of error is thrown when the platform supports mouse cursor, but
-  /// is unable to fully fulfill the request.
-  static bool isUnsupportedFeature(Object e) {
-    return e is PlatformException && e.code == kUnsupportedFeatureCode;
-  }
-
-  static MethodChannel get _cursorChannel => SystemChannels.mouseCursor;
+  /// All of the parameters must be non-null.
+  MouseTracker(
+    PointerRouter router,
+    MouseDetectorAnnotationFinder annotationFinder,
+  ) : super(router, annotationFinder);
 }
