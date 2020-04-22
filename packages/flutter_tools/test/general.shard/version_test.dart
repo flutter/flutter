@@ -394,14 +394,6 @@ void main() {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
 
-    // legacy tag format (x.y.z-dev.m.n), master channel
-    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-4-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.4');
-    expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
-    expect(gitTagVersion.devVersion, 4);
-    expect(gitTagVersion.devPatch, 5);
-
-    // new tag release format, master channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.13');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
@@ -456,10 +448,18 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(105, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+    when(processUtils.runSync(
+      <String>['git', 'tag', '--contains', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(
+      RunResult(ProcessResult(110, 0, '', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
 
     GitTagVersion.determine(processUtils, workingDirectory: '.');
 
@@ -474,7 +474,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
@@ -493,10 +493,18 @@ void main() {
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(106, 0, '', ''), <String>['git', 'fetch']));
     when(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).thenReturn(RunResult(ProcessResult(107, 0, 'v0.1.2-3-1234abcd', ''), <String>['git', 'describe']));
+    when(processUtils.runSync(
+      <String>['git', 'tag', '--contains', 'HEAD'],
+      workingDirectory: anyNamed('workingDirectory'),
+      environment: anyNamed('environment'),
+    )).thenReturn(
+      RunResult(ProcessResult(108, 0, '', ''),
+      <String>['git', 'tag', '--contains', 'HEAD'],
+    ));
 
     GitTagVersion.determine(processUtils, workingDirectory: '.', fetchTags: true);
 
@@ -511,7 +519,7 @@ void main() {
       environment: anyNamed('environment'),
     ));
     verify(processUtils.runSync(
-      <String>['git', 'describe', '--match', '*.*.*', '--first-parent', '--long', '--tags'],
+      <String>['git', 'describe', '--match', '*.*.*-*.*.pre', '--first-parent', '--long', '--tags'],
       workingDirectory: anyNamed('workingDirectory'),
       environment: anyNamed('environment'),
     )).called(1);
