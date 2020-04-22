@@ -10,8 +10,9 @@ import 'package:package_config/package_config.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../globals.dart' as globals;
 
-const String kPackagesFileName = '.packages';
+final String kPackagesFileName = globals.fs.path.join('.dart_tool/package_config.json');
 
 String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
