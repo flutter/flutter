@@ -23,7 +23,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/mocks.dart' as mocks;
 
-final Platform _kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
+final Platform kNoAnsiPlatform = FakePlatform(stdoutSupportsAnsi: false);
 const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
 
 const String dartPath = '/flutter/dart';
@@ -94,7 +94,7 @@ void main() {
     logger = BufferLogger(
       terminal: AnsiTerminal(
         stdio: mocks.MockStdio(),
-        platform: _kNoAnsiPlatform,
+        platform: kNoAnsiPlatform,
       ),
       outputPreferences: OutputPreferences.test(showColor: false),
     );
@@ -227,7 +227,7 @@ void main() {
     );
   });
 
-  testWithoutContext('The happy path', () async {
+  testWithoutContext('Can subset a font', () async {
     final Environment environment = _createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -267,6 +267,75 @@ void main() {
 
     verify(mockProcessManager.run(getConstFinderArgs(appDill.path))).called(1);
     verify(mockProcessManager.start(fontSubsetArgs)).called(2);
+  });
+
+  testWithoutContext('Does not subset a non-ttf font', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')
+      ..createSync(recursive: true);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: mockProcessManager,
+      fileSystem: fileSystem,
+      artifacts: mockArtifacts,
+    );
+
+    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    _resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File notAFont = fileSystem.file('input/foo/bar.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('I could not think of a better string');
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: notAFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+    expect(subsetted, false);
+
+    verifyNever(mockProcessManager.run(getConstFinderArgs(appDill.path)));
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
+  });
+
+  testWithoutContext('Does not subset an invalid ttf font', () async {
+    final Environment environment = _createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')
+      ..createSync(recursive: true);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: mockProcessManager,
+      fileSystem: fileSystem,
+      artifacts: mockArtifacts,
+    );
+
+    final mocks.CompleterIOSink stdinSink = mocks.CompleterIOSink();
+    _addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
+    _resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File notAFont = fileSystem.file(inputPath)
+      ..writeAsBytesSync(<int>[0, 1, 2]);
+    final bool subsetted = await iconTreeShaker.subsetFont(
+      input: notAFont,
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(subsetted, false);
+    verifyNever(mockProcessManager.run(getConstFinderArgs(appDill.path)));
+    verifyNever(mockProcessManager.start(fontSubsetArgs));
   });
 
   testWithoutContext('Non-constant instances', () async {
