@@ -471,14 +471,14 @@ class EditableText extends StatefulWidget {
   ///
   ///  Must be only a single character.
   ///
-  /// Defaults to •.
+  /// Defaults to the character U+2022 BULLET (•).
   final String obscuringCharacter;
 
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
   /// When this is set to true, all the characters in the text field are
-  /// replaced by U+2022 BULLET characters (•).
+  /// replaced by [obscuringCharacter].
   ///
   /// Defaults to false. Cannot be null.
   /// {@endtemplate}
