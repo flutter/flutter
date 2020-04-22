@@ -249,9 +249,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   void _toggleFrontLayer() {
-    final AnimationStatus status = _controller.status;
-    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
-    _controller.fling(velocity: isOpen ? -2.0 : 2.0);
+    setState(() {
+      final AnimationStatus status = _controller.status;
+      final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
+      _controller.fling(velocity: isOpen ? -2.0 : 2.0);
+    });
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
