@@ -555,7 +555,7 @@ class BrowserManager {
   }
 
   /// The browser instance that this is connected to via [_channel].
-  final Chrome _browser;
+  final Chromium _browser;
 
   // TODO(nweiz): Consider removing the duplication between this and
   // [_browser.name].
@@ -623,8 +623,16 @@ class BrowserManager {
     bool debug = false,
     bool headless = true,
   }) async {
-    final Chrome chrome =
-        await globals.chromeLauncher.launch(url.toString(), headless: headless);
+    final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
+      browserFinder: findChromeExecutable,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
+    final Chromium chrome =
+      await chromiumLauncher.launch(url.toString(), headless: headless);
 
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
