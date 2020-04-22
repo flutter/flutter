@@ -779,30 +779,40 @@ class GitTagVersion {
     );
   }
 
-  /// Check for the release tag format of the form x.y.z
-  static GitTagVersion parseStableVersion(String version) {
+  /// Check for the release tag format of the forms x.y.z or x.y.z-m.n.pre
+  static GitTagVersion parseTaggedVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3]);
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?$');
+    final Match match = versionPattern.matchAsPrefix(version);
+    final List<String> parts = match?.groups(<int>[1, 2, 3, 4]);
     if (parts == null) {
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.map<int>(
       (String source) => source == null ? null : int.tryParse(source)).toList();
+    List<int> devParts = <int>[null, null];
+    if (parts[3] != null) {
+      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
+        .matchAsPrefix(parts[3])
+        ?.groups(<int>[1, 2])
+        ?.map<int>(
+          (String source) => source == null ? null : int.tryParse(source)
+        )?.toList() ?? <int>[null, null];
+    }
     return GitTagVersion(
       x: parsedParts[0],
       y: parsedParts[1],
       z: parsedParts[2],
-      devVersion: null,
-      devPatch: null,
+      devVersion: devParts[0],
+      devPatch: devParts[1],
       commits: 0,
       hash: '',
       gitTag: version,
     );
   }
 
-  /// Check for the release tag format of the form x.y.z-m.n.pre
-  static GitTagVersion parseVersion(String version) {
+  /// Detect output of git describe, of the form x.y.z-m.n.pre-c-g<revision>
+  static GitTagVersion parseGitVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
@@ -835,11 +845,11 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
-    gitTagVersion = parseStableVersion(version);
+    gitTagVersion = parseTaggedVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }
-    gitTagVersion = parseVersion(version);
+    gitTagVersion = parseGitVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }

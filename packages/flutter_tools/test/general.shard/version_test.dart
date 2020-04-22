@@ -412,7 +412,7 @@ void main() {
 
     // Dev channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
