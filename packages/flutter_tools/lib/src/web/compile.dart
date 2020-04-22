@@ -32,7 +32,7 @@ Future<void> buildWeb(
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
-  final bool hasWebPlugins = findPlugins(flutterProject)
+  final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);

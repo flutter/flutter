@@ -111,7 +111,7 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     globals.fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
-    PackageMap.globalPackagesPath =
+    globalPackagesPath =
         globals.fs.path.normalize(globals.fs.path.absolute(argResults[_kOptionPackages] as String));
 
     Directory testDirectory;

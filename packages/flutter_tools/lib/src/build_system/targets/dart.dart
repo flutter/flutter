@@ -9,6 +9,7 @@ import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
+import '../../dart/package_map.dart';
 import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
@@ -231,15 +232,9 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-     packagesFile.absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      environment.projectDir.childFile('.packages'),
+      logger: environment.logger,
     );
 
     final CompilerOutput output = await compiler.compile(
