@@ -585,7 +585,7 @@ class BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.from(messages);
+    final List<String> actualMessages = List<String>.of(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
