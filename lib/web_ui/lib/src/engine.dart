@@ -123,6 +123,16 @@ part 'engine/vector_math.dart';
 part 'engine/web_experiments.dart';
 part 'engine/window.dart';
 
+/// A benchmark metric that includes frame-related computations prior to
+/// submitting layer and picture operations to the underlying renderer, such as
+/// HTML and CanvasKit. During this phase we compute transforms, clips, and
+/// other information needed for rendering.
+const String kProfilePrerollFrame = 'preroll_frame';
+
+/// A benchmark metric that includes submitting layer and picture information
+/// to the renderer.
+const String kProfileApplyFrame = 'apply_frame';
+
 bool _engineInitialized = false;
 
 final List<ui.VoidCallback> _hotRestartListeners = <ui.VoidCallback>[];
