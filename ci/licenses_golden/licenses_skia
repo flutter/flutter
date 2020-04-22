@@ -1,4 +1,4 @@
-Signature: 350c950071a9b05ba68955b25259904c
+Signature: 0974d63c1886a9a3b4632a88cf1d0ae7
 
 UNUSED LICENSES:
 
@@ -5635,7 +5635,6 @@ FILE: ../../../third_party/skia/modules/sksg/include/SkSGDashEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGDashEffect.cpp
 FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper_coretext.cpp
 FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
-FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkCompressedDataUtils.h
