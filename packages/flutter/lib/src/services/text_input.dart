@@ -25,9 +25,6 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
-// Whether we're compiled to JavaScript in a web browser.
-const bool _kIsBrowser = identical(0, 0.0);
-
 /// Indicates how to handle the intelligent replacement of dashes in text input.
 ///
 /// See also:
@@ -1056,7 +1053,7 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
-      if (_kIsBrowser) {
+      if (kIsWeb) {
         // TODO(flutterweb): what makes sense here?
         return true;
       }
