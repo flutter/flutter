@@ -587,4 +587,30 @@ void main() {
     await tester.pump();
     expect(hitCounts, const <int> [0, 0, 0]);
   });
+
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+    int builderInvocationCount = 0;
+    final LayoutWidgetBuilder builder = (BuildContext context, BoxConstraints constraints) {
+      builderInvocationCount += 1;
+      return Container();
+    };
+    await tester.pumpWidget(LayoutBuilder(builder: builder));
+
+    // The initial `pumpWidget` will trigger `performRebuild`, asking for
+    // builder invocation.
+    expect(builderInvocationCount, 1);
+
+    // Invalidate the layout without chaning the constraints.
+    tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
+    // The second pump will not go through the `performRebuild` or `update`, and
+    // only judge the need for builder invocation based on constraints, which
+    // didn't change, so we don't expect the counter to go up.
+    await tester.pump();
+    expect(builderInvocationCount, 1);
+
+    // Cause the `update` to be called (but not `performRebuild`), triggering
+    // builder invocation.
+    await tester.pumpWidget(LayoutBuilder(builder: builder));
+    expect(builderInvocationCount, 2);
+  });
 }

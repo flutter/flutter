@@ -74,6 +74,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
+
+    // Force the callback to be called, even if the layout constraints are the
+    // same, because the logic in the callback might have changed.
+    renderObject._mustCallCallback = true;
     renderObject.updateCallback(_layout);
     renderObject.markNeedsLayout();
   }
@@ -82,6 +86,12 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   void performRebuild() {
     // This gets called if markNeedsBuild() is called on us.
     // That might happen if, e.g., our builder uses Inherited widgets.
+
+    // Force the callback to be called, even if the layout constraints are the
+    // same. This is because that callback may depend on the updated widget
+    // configuration, or an inherited widget.
+    renderObject._mustCallCallback = true;
+
     renderObject.markNeedsLayout();
     super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
@@ -168,10 +178,24 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
     markNeedsLayout();
   }
 
+  // Whether `_callback` must be called upon next layout.
+  //
+  // Normally the callback is only called when layout constraints change.
+  // However, we must also call the callback when widget updates, e.g. after
+  // `setState`, or `didChangeDependencies`.
+  bool _mustCallCallback = true;
+
+  // The constraints that were passed to the [ConstrainedLayoutBuilder] last time.
+  Constraints _previousConstraints;
+
   /// Invoke the layout callback.
   void layoutAndBuildChild() {
     assert(_callback != null);
-    invokeLayoutCallback(_callback);
+    if (_mustCallCallback || constraints != _previousConstraints) {
+      _previousConstraints = constraints;
+      _mustCallCallback = false;
+      invokeLayoutCallback(_callback);
+    }
   }
 }
 
