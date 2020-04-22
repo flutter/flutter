@@ -79,7 +79,7 @@ class ItemListNotifier<T> {
   }
 
   ItemListNotifier.from(List<T> items) {
-    _items = Set<T>.from(items);
+    _items = Set<T>.of(items);
   }
 
   Set<T> _items;
@@ -93,7 +93,7 @@ class ItemListNotifier<T> {
   List<T> get items => _items.toList();
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = Set<T>.from(updatedList);
+    final Set<T> updatedSet = Set<T>.of(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);

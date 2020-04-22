@@ -279,7 +279,7 @@ void main() {
       '   direction provided in the ImageConfiguration object to match.\n'
       '   The DecorationImage was:\n'
       '     DecorationImage(SynchronousTestImageProvider(), center, match\n'
-      '     text direction)\n'
+      '     text direction, scale: 1.0)\n'
       '   The ImageConfiguration was:\n'
       '     ImageConfiguration(size: Size(100.0, 100.0))\n'
     );
@@ -582,5 +582,35 @@ void main() {
       // Image should be positioned in the center of the container
       expect(call.positionalArguments[2].center, outputRect.center);
     }
+  });
+
+  test('scale cannot be null in DecorationImage', () {
+    try {
+      DecorationImage(scale: null, image: SynchronousTestImageProvider());
+    } on AssertionError catch (error) {
+      expect(error.toString(), contains('scale != null'));
+      expect(error.toString(), contains('is not true'));
+      return;
+    }
+    fail('DecorationImage did not throw AssertionError when scale was null');
+  });
+
+  test('DecorationImage scale test', () {
+    final DecorationImage backgroundImage = DecorationImage(
+      image: SynchronousTestImageProvider(),
+      scale: 4,
+      alignment: Alignment.topLeft
+    );
+
+    final BoxDecoration boxDecoration = BoxDecoration(image: backgroundImage);
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
+    final TestCanvas canvas = TestCanvas(<Invocation>[]);
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
+
+    final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+    // The image should scale down to Size(25.0, 25.0) from Size(100.0, 100.0)
+    // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
+    expect(call.positionalArguments[2].size, const Size(25.0, 25.0));
+    expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
   });
 }

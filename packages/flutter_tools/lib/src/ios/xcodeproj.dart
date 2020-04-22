@@ -239,7 +239,16 @@ List<String> _xcodeBuildSettingsLines({
   }
 
   if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('EXTRA_FRONT_END_OPTIONS=${buildInfo.extraFrontEndOptions.join(',')}');
+    xcodeBuildSettings.add(
+      'EXTRA_FRONT_END_OPTIONS='
+      '${buildInfo.extraFrontEndOptions.join(',')}',
+    );
+  }
+  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add(
+      'EXTRA_GEN_SNAPSHOT_OPTIONS='
+      '${buildInfo.extraGenSnapshotOptions.join(',')}',
+    );
   }
 
   return xcodeBuildSettings;
