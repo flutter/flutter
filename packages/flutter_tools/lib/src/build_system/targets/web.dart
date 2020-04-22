@@ -225,7 +225,6 @@ class Dart2JSTarget extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     final Depfile depfile = depfileService.parseDart2js(
       environment.buildDir.childFile('app.dill.deps'),
@@ -289,7 +288,6 @@ class WebReleaseBundle extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,
@@ -384,7 +382,6 @@ class WebServiceWorker extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,
