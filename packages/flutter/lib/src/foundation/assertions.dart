@@ -325,27 +325,30 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
+///  {@tool --snippet}
 /// This is an example of using [FlutterErrorDetails] when calling
 /// [FlutterError.reportError].
 ///
 /// ```dart
-/// try {
-///   // Try to do something!
-/// } catch (error, stack) {
-///   // Catch & report error.
-///   FlutterError.reportError(FlutterErrorDetails(
-///     exception: error,
-///     library: 'Flutter test framework',
-///     context: ErrorSummary('while running async test code'),
-///   ));
+/// void main() {
+///   try {
+///     // Try to do something!
+///   } catch (error, stack) {
+///     // Catch & report error.
+///     FlutterError.reportError(FlutterErrorDetails(
+///       exception: error,
+///       library: 'Flutter test framework',
+///       context: ErrorSummary('while running async test code'),
+///     ));
+///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///   * [FlutterError.onError], which is called whenever the Flutter framework
 ///     catches an error
-
 class FlutterErrorDetails with Diagnosticable {
   /// Creates a [FlutterErrorDetails] object with the given arguments setting
   /// the object's properties.
@@ -410,15 +413,31 @@ class FlutterErrorDetails with Diagnosticable {
   /// obtaining the image from the network" (for the context "while obtaining
   /// the image from the network").
   ///
+  ///  {@tool --snippet}
+  /// This is an example of using and [ErrorDescription] as the
+  /// [FlutterErrorDetails.context] when calling [FlutterError.reportError].
+  ///
   /// ```dart
-  /// ErrorDescription('while running async test code');
+  /// void main() {
+  ///   try {
+  ///     // Try to do something!
+  ///   } catch (error, stack) {
+  ///     // Catch & report error.
+  ///     FlutterError.reportError(FlutterErrorDetails(
+  ///       exception: error,
+  ///       library: 'Flutter test framework',
+  ///       context: ErrorDescription('while dispatching notifications for $runtimeType'),
+  ///     ));
+  ///   }
+  /// }
   /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
-  ///   * [ErrorDescription], which provides an explanation of the problem and its
-  ///    cause, any information that may help track down the problem, background
-  ///    information, etc.
+  ///  * [ErrorDescription], which provides an explanation of the problem and
+  ///    its cause, any information that may help track down the problem,
+  ///    background information, etc.
   ///  * [ErrorSummary], which provides a short (one line) description of the
   ///    problem that was detected.
   ///  * [ErrorHint], which provides specific, non-obvious advice that may be
