@@ -911,7 +911,7 @@ class ScrollAction extends Action<ScrollIntent> {
   static const LocalKey key = ValueKey<Type>(ScrollAction);
 
   @override
-  bool get enabled {
+  bool isEnabled(ScrollIntent intent) {
     final FocusNode focus = primaryFocus;
     return focus != null && focus.context != null && Scrollable.of(focus.context) != null;
   }

@@ -157,15 +157,9 @@ class HotRunner extends ResidentRunner {
     final Stopwatch stopwatch = Stopwatch()..start();
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -361,15 +355,9 @@ class HotRunner extends ResidentRunner {
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
     );
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
@@ -1301,15 +1289,9 @@ class ProjectFileInvalidator {
   }
 
   Future<PackageConfig> _createPackageConfig(String packagesPath) {
-    return loadPackageConfigUri(
-      _fileSystem.file(packagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = _fileSystem.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    return loadPackageConfigOrFail(
+      _fileSystem.file(globalPackagesPath),
+      logger: _logger,
     );
   }
 }

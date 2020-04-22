@@ -46,7 +46,7 @@ void main() {
       final File packagesFile = globals.fs.file(globals.fs.path.join('foo', '.packages'))
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
-      PackageMap.globalPackagesPath = packagesFile.path;
+      globalPackagesPath = packagesFile.path;
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
 
@@ -228,7 +228,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -252,6 +253,39 @@ void main() {
   }));
 
 
+  test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kEnableExperiment] = 'non-nullable';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-O4',
+        '-Ddart.vm.profile=true',
+        '--no-minify',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await const Dart2JSTarget().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     processManager.addCommand(FakeCommand(
@@ -259,7 +293,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -288,7 +323,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -317,7 +353,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -365,10 +402,11 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '--cfe-only',
+       '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
@@ -398,9 +436,10 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]

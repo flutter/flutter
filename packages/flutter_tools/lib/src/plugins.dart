@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
@@ -298,26 +299,23 @@ Plugin _pluginFromPackage(String name, Uri packageRoot) {
   );
 }
 
-List<Plugin> findPlugins(FlutterProject project) {
+Future<List<Plugin>> findPlugins(FlutterProject project) async {
   final List<Plugin> plugins = <Plugin>[];
-  Map<String, Uri> packages;
-  try {
-    final String packagesFile = globals.fs.path.join(
-      project.directory.path,
-      PackageMap.globalPackagesPath,
-    );
-    packages = PackageMap(packagesFile, fileSystem: globals.fs).map;
-  } on FormatException catch (e) {
-    globals.printTrace('Invalid .packages file: $e');
-    return plugins;
-  }
-  packages.forEach((String name, Uri uri) {
-    final Uri packageRoot = uri.resolve('..');
-    final Plugin plugin = _pluginFromPackage(name, packageRoot);
+  final String packagesFile = globals.fs.path.join(
+    project.directory.path,
+    globalPackagesPath,
+  );
+  final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    globals.fs.file(packagesFile),
+    logger: globals.logger,
+  );
+  for (final Package package in packageConfig.packages) {
+    final Uri packageRoot = package.packageUriRoot.resolve('..');
+    final Plugin plugin = _pluginFromPackage(package.name, packageRoot);
     if (plugin != null) {
       plugins.add(plugin);
     }
-  });
+  }
   return plugins;
 }
 
@@ -1065,8 +1063,8 @@ void _createPlatformPluginSymlinks(Directory symlinkDirectory, List<dynamic> pla
 /// which already exist.
 ///
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
-void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
-  final List<Plugin> plugins = findPlugins(project);
+Future<void> refreshPluginsList(FlutterProject project, {bool checkProjects = false}) async {
+  final List<Plugin> plugins = await findPlugins(project);
 
   // TODO(franciscojma): Remove once migration is complete.
   // Write the legacy plugin files to avoid breaking existing apps.
@@ -1093,7 +1091,7 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false}) async {
-  final List<Plugin> plugins = findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project);
   if ((checkProjects && project.android.existsSync()) || !checkProjects) {
     await _writeAndroidPluginRegistrant(project, plugins);
   }

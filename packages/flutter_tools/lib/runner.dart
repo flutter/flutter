@@ -37,7 +37,7 @@ Future<int> run(
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
-    args = List<String>.from(args);
+    args = List<String>.of(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 

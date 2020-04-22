@@ -74,7 +74,7 @@ class BundleBuilder {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     final FlutterProject flutterProject = FlutterProject.current();
     await buildWithAssemble(
       buildMode: buildInfo.mode,
@@ -176,7 +176,7 @@ Future<AssetBundle> buildAssets({
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
