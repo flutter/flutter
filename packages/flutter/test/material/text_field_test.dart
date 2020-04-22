@@ -7451,7 +7451,6 @@ void main() {
       });
     });
   });
-  
   testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController();
     final TextEditingController controller2 = TextEditingController();
