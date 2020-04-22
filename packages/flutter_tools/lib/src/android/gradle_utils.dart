@@ -21,7 +21,7 @@ import 'android_studio.dart';
 
 /// The environment variables needed to run Gradle.
 Map<String, String> get gradleEnvironment {
-  final Map<String, String> environment = Map<String, String>.from(globals.platform.environment);
+  final Map<String, String> environment = Map<String, String>.of(globals.platform.environment);
   if (javaPath != null) {
     // Use java bundled with Android Studio.
     environment['JAVA_HOME'] = javaPath;

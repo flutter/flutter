@@ -249,7 +249,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 46.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -257,7 +257,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -281,7 +281,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -289,7 +289,7 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(14.0, 72.0));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
     final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: TabController(length: 1, vsync: tester));
@@ -412,7 +412,7 @@ void main() {
 
     // Scrolling the TabBar doesn't change the selection
     expect(controller.index, 0);
-  }, skip: isBrowser);
+  });
 
   testWidgets('TabBarView maintains state', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE'];
@@ -1671,7 +1671,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('correct scrolling semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1939,7 +1939,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
-  }, skip: isBrowser);
+  });
 
   testWidgets('can be notified of TabBar onTap behavior', (WidgetTester tester) async {
     int tabIndex = -1;

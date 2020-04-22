@@ -82,7 +82,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// If the enabled state changes, overriding subclasses must call
   /// [notifyActionListeners] to notify any listeners of the change.
-  bool get enabled => true;
+  bool isEnabled(covariant T intent) => true;
 
   /// Called when the action is to be performed.
   ///
@@ -379,7 +379,7 @@ class ActionDispatcher with Diagnosticable {
     assert(action != null);
     assert(intent != null);
     context ??= primaryFocus?.context;
-    if (action.enabled) {
+    if (action.isEnabled(intent)) {
       if (action is ContextAction) {
         return action.invoke(intent, context);
       } else {
@@ -486,7 +486,7 @@ class Actions extends StatefulWidget {
   /// updated action.
   static VoidCallback handler<T extends Intent>(BuildContext context, T intent, {bool nullOk = false}) {
     final Action<T> action = Actions.find<T>(context, nullOk: nullOk);
-    if (action != null && action.enabled) {
+    if (action != null && action.isEnabled(intent)) {
       return () {
         Actions.of(context).invokeAction(action, intent, context);
       };
@@ -635,12 +635,10 @@ class Actions extends StatefulWidget {
 }
 
 class _ActionsState extends State<Actions> {
-  // Keeps the last-known enabled state of each action in the action map in
-  // order to be able to appropriately notify dependents that the state has
-  // changed.
-  Map<Action<Intent>, bool> enabledState = <Action<Intent>, bool>{};
-  // Used to tell the marker to rebuild when the enabled state of an action in
-  // the map changes.
+  // The set of actions that this Actions widget is current listening to.
+  Set<Action<Intent>> listenedActions = <Action<Intent>>{};
+  // Used to tell the marker to rebuild its dependencies when the state of an
+  // action in the map changes.
   Object rebuildKey = Object();
 
   @override
@@ -650,42 +648,24 @@ class _ActionsState extends State<Actions> {
   }
 
   void _handleActionChanged(Action<Intent> action) {
-    assert(enabledState.containsKey(action));
-    final bool actionEnabled = action.enabled;
-    if (enabledState[action] == null || enabledState[action] != actionEnabled) {
-      setState(() {
-        enabledState[action] = actionEnabled;
-        // Generate a new key so that the marker notifies dependents.
-        rebuildKey = Object();
-      });
-    }
+    // Generate a new key so that the marker notifies dependents.
+    setState(() {
+      rebuildKey = Object();
+    });
   }
 
   void _updateActionListeners() {
-    final Map<Action<Intent>, bool> newState = <Action<Intent>, bool>{};
-    final Set<Action<Intent>> foundActions = <Action<Intent>>{};
-    for (final Action<Intent> action in widget.actions.values) {
-      if (enabledState.containsKey(action)) {
-        // Already subscribed to this action, just copy over the current enabled state.
-        newState[action] = enabledState[action];
-        foundActions.add(action);
-      } else {
-        // New action to subscribe to.
-        // Don't set the new state to action.enabled, since that can cause
-        // problems when the enabled accessor looks up other widgets (which may
-        // have already been removed from the tree).
-        newState[action] = null;
-        action.addActionListener(_handleActionChanged);
-      }
+    final Set<Action<Intent>> widgetActions = widget.actions.values.toSet();
+    final Set<Action<Intent>> removedActions = listenedActions.difference(widgetActions);
+    final Set<Action<Intent>> addedActions = widgetActions.difference(listenedActions);
+
+    for (final Action<Intent> action in removedActions) {
+      action.removeActionListener(_handleActionChanged);
     }
-    // Unregister from any actions in the previous enabledState map that aren't
-    // going to be transferred to the new one.
-    for (final Action<Intent> action in enabledState.keys) {
-      if (!foundActions.contains(action)) {
-        action.removeActionListener(_handleActionChanged);
-      }
+    for (final Action<Intent> action in addedActions) {
+      action.addActionListener(_handleActionChanged);
     }
-    enabledState = newState;
+    listenedActions = widgetActions;
   }
 
   @override
@@ -697,10 +677,10 @@ class _ActionsState extends State<Actions> {
   @override
   void dispose() {
     super.dispose();
-    for (final Action<Intent> action in enabledState.keys) {
+    for (final Action<Intent> action in listenedActions) {
       action.removeActionListener(_handleActionChanged);
     }
-    enabledState = null;
+    listenedActions = null;
   }
 
   @override
