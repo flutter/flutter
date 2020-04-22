@@ -127,6 +127,7 @@ abstract class Pub {
   Future<void> interactively(
     List<String> arguments, {
     String directory,
+    @required io.Stdio stdio,
   });
 }
 
