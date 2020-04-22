@@ -26,7 +26,6 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'mockito': '^4.1.0',  // Prevent mockito from downgrading to 4.0.0
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
   'video_player': '0.10.6', // 0.10.7 fails a gallery smoke test for toString.
-  'package_config': '1.9.1',
   'flutter_template_images': '1.0.1', // Must always exactly match flutter_tools template.
 };
 
