@@ -46,7 +46,7 @@ void main() async {
 
     builder.pushOffset(0, 60);
     builder.pushTransform(
-      Matrix4.diagonal3Values(1, -1, 1).storage,
+      Matrix4.diagonal3Values(1, -1, 1).toFloat64(),
     );
     builder.pushClipRect(
       const Rect.fromLTRB(10, 10, 60, 60),
@@ -347,7 +347,7 @@ void _testCullRectComputation() {
     builder.pushOffset(80, 50);
 
     builder.pushTransform(
-      Matrix4.rotationZ(-math.pi / 4).storage,
+      Matrix4.rotationZ(-math.pi / 4).toFloat64(),
     );
 
     builder.pushClipRect(
@@ -355,7 +355,7 @@ void _testCullRectComputation() {
     );
 
     builder.pushTransform(
-      Matrix4.rotationZ(math.pi / 4).storage,
+      Matrix4.rotationZ(math.pi / 4).toFloat64(),
     );
 
     drawWithBitmapCanvas(builder, (RecordingCanvas canvas) {
@@ -408,7 +408,7 @@ void _testCullRectComputation() {
 
     builder.pushTransform(Matrix4.diagonal3Values(
         EngineWindow.browserDevicePixelRatio,
-        EngineWindow.browserDevicePixelRatio, 1.0).storage);
+        EngineWindow.browserDevicePixelRatio, 1.0).toFloat64());
 
     // TODO(yjbanov): see the TODO below.
     // final double screenWidth = html.window.innerWidth.toDouble();
@@ -416,7 +416,7 @@ void _testCullRectComputation() {
 
     final Matrix4 scaleTransform = Matrix4.identity().scaled(0.5, 0.2);
     builder.pushTransform(
-      scaleTransform.storage,
+      scaleTransform.toFloat64(),
     );
 
     builder.pushOffset(400, 200);
@@ -426,14 +426,14 @@ void _testCullRectComputation() {
     );
 
     builder.pushTransform(
-      Matrix4.rotationY(45.0 * math.pi / 180.0).storage,
+      Matrix4.rotationY(45.0 * math.pi / 180.0).toFloat64()
     );
 
     builder.pushClipRect(
       const Rect.fromLTRB(-140, -140, 140, 140),
     );
 
-    builder.pushTransform(Matrix4.translationValues(0, 0, -50).storage);
+    builder.pushTransform(Matrix4.translationValues(0, 0, -50).toFloat64());
 
     drawWithBitmapCanvas(builder, (RecordingCanvas canvas) {
       canvas.drawPaint(Paint()

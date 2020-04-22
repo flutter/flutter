@@ -34,7 +34,7 @@ bool offsetIsValid(ui.Offset offset) {
   return true;
 }
 
-bool matrix4IsValid(Float64List matrix4) {
+bool matrix4IsValid(Float32List matrix4) {
   assert(matrix4 != null, 'Matrix4 argument was null.');
   assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
   return true;

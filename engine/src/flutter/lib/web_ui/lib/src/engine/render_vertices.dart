@@ -219,7 +219,7 @@ ui.Rect _computeVerticesBounds(Float32List positions, Matrix4 transform) {
 
 ui.Rect _transformBounds(
     Matrix4 transform, double left, double top, double right, double bottom) {
-  final Float64List storage = transform.storage;
+  final Float32List storage = transform.storage;
   final double m0 = storage[0];
   final double m1 = storage[1];
   final double m4 = storage[4];
@@ -525,7 +525,7 @@ class _GlContext {
   }
 
   /// Sets mat4 uniform values.
-  void setUniformMatrix4fv(Object uniform, bool transpose, Float64List value) {
+  void setUniformMatrix4fv(Object uniform, bool transpose, Float32List value) {
     return js_util.callMethod(
         glContext, 'uniformMatrix4fv', <dynamic>[uniform, transpose, value]);
   }
