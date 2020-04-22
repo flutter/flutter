@@ -394,29 +394,44 @@ void main() {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
 
-    // legacy tag release format
-    gitTagVersion = GitTagVersion.parse('v1.2.3-4-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.4');
-    expect(gitTagVersion.devVersion, null);
-    expect(gitTagVersion.devPatch, null);
-
-    // new dev tag release format
-    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    // legacy tag format (x.y.z-dev.m.n), master channel
+    gitTagVersion = GitTagVersion.parse('1.2.3-dev.4.5-4-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.4');
+    expect(gitTagVersion.gitTag, '1.2.3-dev.4.5');
     expect(gitTagVersion.devVersion, 4);
     expect(gitTagVersion.devPatch, 5);
 
-    // new stable tag release format
+    // new tag release format, master channel
+    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-5.0.pre.13');
+    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
     gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
-    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4-pre.13');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4.pre.13');
+    expect(gitTagVersion.gitTag, '1.2.3');
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
-    expect(GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
+    // new tag release format, dev channel
+    gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-0-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
+    expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
+    expect(gitTagVersion.devVersion, 4);
+    expect(gitTagVersion.devPatch, 5);
+
+    // new tag release format, stable channel
+    gitTagVersion = GitTagVersion.parse('1.2.3-13-g$hash');
+    expect(gitTagVersion.frameworkVersionFor(hash), '1.2.4.pre.13');
+    expect(gitTagVersion.gitTag, '1.2.3');
+    expect(gitTagVersion.devVersion, null);
+    expect(gitTagVersion.devPatch, null);
+
+    expect(GitTagVersion.parse('98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55.pre.32');
     expect(GitTagVersion.parse('10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
-    expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3+hotfix.2-pre.4');
     expect(testLogger.traceText, '');
-    expect(GitTagVersion.parse('1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('beta-1-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
@@ -425,7 +440,7 @@ void main() {
     expect(testLogger.errorText, '');
     expect(
       testLogger.traceText,
-      'Could not interpret results of "git describe": 1.2.3+hotfix.1-4-gabcdef\n'
+      'Could not interpret results of "git describe": v1.2.3+hotfix.1-4-gabcdef\n'
       'Could not interpret results of "git describe": x1.2.3-4-gabcdef\n'
       'Could not interpret results of "git describe": 1.0.0-unknown-0-gabcdef\n'
       'Could not interpret results of "git describe": beta-1-gabcdef\n'
