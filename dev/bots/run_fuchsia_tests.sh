@@ -52,7 +52,7 @@ $script_dir/fuchsia_ctl -d $device_name pave  -i $1 --public-key "key.pub"
 echo "$(date) END:PAVING --------------------------------------------"
 
 
-$script_dir/fuchsia_ctl push-packages -d $device_name --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
+$script_dir/fuchsia_ctl push-packages -d $device_name --identity-file $pkey --repoArchive generic-x64.tar.gz -p tiles -p tiles_ctl
 
 # set fuchsia ssh config
 cat > $script_dir/fuchsia_ssh_config << EOF
