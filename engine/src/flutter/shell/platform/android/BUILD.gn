@@ -29,6 +29,8 @@ shared_library("flutter_shell_native") {
     "android_environment_gl.h",
     "android_external_texture_gl.cc",
     "android_external_texture_gl.h",
+    "android_external_view_embedder.cc",
+    "android_external_view_embedder.h",
     "android_native_window.cc",
     "android_native_window.h",
     "android_shell_holder.cc",
