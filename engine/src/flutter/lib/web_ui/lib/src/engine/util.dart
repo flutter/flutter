@@ -331,7 +331,22 @@ String colorToCssString(ui.Color color) {
   }
   final int value = color.value;
   if ((0xff000000 & value) == 0xff000000) {
-    return _colorToCssStringRgbOnly(color);
+    final String hexValue = (value & 0xFFFFFF).toRadixString(16);
+    final int hexValueLength = hexValue.length;
+    switch (hexValueLength) {
+      case 1:
+        return '#00000$hexValue';
+      case 2:
+        return '#0000$hexValue';
+      case 3:
+        return '#000$hexValue';
+      case 4:
+        return '#00$hexValue';
+      case 5:
+        return '#0$hexValue';
+      default:
+        return '#$hexValue';
+    }
   } else {
     final double alpha = ((value >> 24) & 0xFF) / 255.0;
     final StringBuffer sb = StringBuffer();
@@ -346,16 +361,6 @@ String colorToCssString(ui.Color color) {
     sb.write(')');
     return sb.toString();
   }
-}
-
-/// Returns the CSS value of this color without the alpha component.
-///
-/// This is useful when painting shadows as on the Web shadow opacity combines
-/// with the paint opacity.
-String _colorToCssStringRgbOnly(ui.Color color) {
-  final int value = color.value;
-  final String paddedValue = '00000${value.toRadixString(16)}';
-  return '#${paddedValue.substring(paddedValue.length - 6)}';
 }
 
 /// Converts color components to a CSS compatible attribute value.
