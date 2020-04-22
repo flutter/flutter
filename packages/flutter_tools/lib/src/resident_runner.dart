@@ -59,7 +59,7 @@ class FlutterDevice {
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
          dartDefines: buildInfo.dartDefines,
-         packagesPath: PackageMap.globalPackagesPath,
+         packagesPath: globalPackagesPath,
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
@@ -107,7 +107,7 @@ class FlutterDevice {
         dartDefines: buildInfo.dartDefines,
         librariesSpec: globals.fs.file(globals.artifacts
           .getArtifactPath(Artifact.flutterWebLibrariesJson)).uri.toString(),
-        packagesPath: PackageMap.globalPackagesPath,
+        packagesPath: globalPackagesPath,
       );
     } else {
       generator = ResidentCompiler(
@@ -124,7 +124,7 @@ class FlutterDevice {
         experimentalFlags: experimentalFlags,
         dartDefines: buildInfo.dartDefines,
         initializeFromDill: globals.fs.path.join(getBuildDirectory(), 'cache.dill'),
-        packagesPath: PackageMap.globalPackagesPath,
+        packagesPath: globalPackagesPath,
       );
     }
 
@@ -665,7 +665,7 @@ abstract class ResidentRunner {
     String dillOutputPath,
   }) : mainPath = findMainDartFile(target),
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
-       packagesFilePath = packagesFilePath ?? globals.fs.path.absolute(PackageMap.globalPackagesPath),
+       packagesFilePath = packagesFilePath ?? globals.fs.path.absolute(globalPackagesPath),
        _dillOutputPath = dillOutputPath,
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')

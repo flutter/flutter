@@ -2,86 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-// TODO(bkonyi): remove deprecated member usage, https://github.com/flutter/flutter/issues/51951
-// ignore: deprecated_member_use
-import 'package:package_config/packages_file.dart' as packages_file;
+import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+
+import '../base/common.dart';
 import '../base/file_system.dart';
-import '../globals.dart' as globals hide fs;
+import '../base/logger.dart';
 
 const String kPackagesFileName = '.packages';
 
-Map<String, Uri> _parse(String packagesPath, FileSystem fileSystem) {
-  final List<int> source = fileSystem.file(packagesPath).readAsBytesSync();
-  return packages_file.parse(source,
-      Uri.file(packagesPath, windows: globals.platform.isWindows));
+String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+
+set globalPackagesPath(String value) {
+  _globalPackagesPath = value;
 }
 
-class PackageMap {
-  PackageMap(this.packagesPath, {
-    @required FileSystem fileSystem,
-  }) : _fileSystem = fileSystem;
+bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
 
-  /// Create a [PackageMap] for testing.
-  PackageMap.test(Map<String, Uri> input, {
-    @required FileSystem fileSystem,
-  }) : packagesPath = '.packages',
-       _map = input,
-       _fileSystem = fileSystem;
+String _globalPackagesPath;
 
-  final FileSystem _fileSystem;
-
-  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
-
-  static set globalPackagesPath(String value) {
-    _globalPackagesPath = value;
-  }
-
-  static bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
-
-  static String _globalPackagesPath;
-
-  final String packagesPath;
-
-  /// Load and parses the .packages file.
-  void load() {
-    _map ??= _parse(packagesPath, _fileSystem);
-  }
-
-  Map<String, Uri> get map {
-    load();
-    return _map;
-  }
-  Map<String, Uri> _map;
-
-  /// Returns the path to [packageUri].
-  String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
-
-  /// Returns the path to [packageUri] as URL.
-  Uri uriForPackage(Uri packageUri) {
-    assert(packageUri.scheme == 'package');
-    final List<String> pathSegments = packageUri.pathSegments.toList();
-    final String packageName = pathSegments.removeAt(0);
-    final Uri packageBase = map[packageName];
-    if (packageBase == null) {
-      return null;
+/// Load the package configuration from [file] or throws a [ToolExit]
+/// if the operation would fail.
+Future<PackageConfig> loadPackageConfigOrFail(File file, {
+  @required Logger logger,
+}) {
+  final FileSystem fileSystem = file.fileSystem;
+  return loadPackageConfigUri(
+    file.absolute.uri,
+    loader: (Uri uri) {
+      final File configFile = fileSystem.file(uri);
+      if (!configFile.existsSync()) {
+        return null;
+      }
+      return Future<Uint8List>.value(configFile.readAsBytesSync());
+    },
+    onError: (dynamic error) {
+      logger.printTrace(error.toString());
+      String message = '${file.path} does not exist.';
+      final String pubspecPath = fileSystem.path.absolute(fileSystem.path.dirname(file.path), 'pubspec.yaml');
+      if (fileSystem.isFileSync(pubspecPath)) {
+        message += '\nDid you run "flutter pub get" in this directory?';
+      } else {
+        message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+      }
+      logger.printError(message);
+      throwToolExit(null);
     }
-    final String packageRelativePath = _fileSystem.path.joinAll(pathSegments);
-    return packageBase.resolveUri(_fileSystem.path.toUri(packageRelativePath));
-  }
-
-  String checkValid() {
-    if (_fileSystem.isFileSync(packagesPath)) {
-      return null;
-    }
-    String message = '$packagesPath does not exist.';
-    final String pubspecPath = _fileSystem.path.absolute(_fileSystem.path.dirname(packagesPath), 'pubspec.yaml');
-    if (_fileSystem.isFileSync(pubspecPath)) {
-      message += '\nDid you run "flutter pub get" in this directory?';
-    } else {
-      message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
-    }
-    return message;
-  }
+  );
 }

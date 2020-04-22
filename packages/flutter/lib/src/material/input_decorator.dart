@@ -514,10 +514,12 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
+    this.fixTextFieldOutlineLabel = false,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null);
+       assert(floatingLabelProgress != null),
+       assert(fixTextFieldOutlineLabel != null);
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -539,6 +541,7 @@ class _Decoration {
   final Widget helperError;
   final Widget counter;
   final Widget container;
+  final bool fixTextFieldOutlineLabel;
 
   @override
   bool operator ==(Object other) {
@@ -566,7 +569,8 @@ class _Decoration {
         && other.suffixIcon == suffixIcon
         && other.helperError == helperError
         && other.counter == counter
-        && other.container == container;
+        && other.container == container
+        && other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel;
   }
 
   @override
@@ -591,6 +595,7 @@ class _Decoration {
       helperError,
       counter,
       container,
+      fixTextFieldOutlineLabel,
     );
   }
 }
@@ -1433,12 +1438,18 @@ class _RenderDecoration extends RenderBox {
     if (label != null) {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
+      final double borderWeight = decoration.border.borderSide.width;
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
-      final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double scale = lerpDouble(1.0, 0.75, t);
+      // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
+      // Center the scaled label relative to the border.
+      const double finalLabelScale = 0.75;
+      final double floatingY = decoration.fixTextFieldOutlineLabel
+        ? isOutlineBorder ? (-labelHeight * finalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top
+        : isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
+      final double scale = lerpDouble(1.0, finalLabelScale, t);
       double dx;
       switch (textDirection) {
         case TextDirection.rtl:
@@ -2073,9 +2084,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ? decoration.errorStyle?.color ?? themeData.errorColor
       : _getActiveColor(themeData);
     final TextStyle style = themeData.textTheme.subtitle1.merge(widget.baseStyle);
-    return style
-      .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
-      .merge(decoration.labelStyle);
+    // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
+    // Setting TextStyle.height to 1 ensures that the label's height will equal
+    // its font size.
+    return themeData.fixTextFieldOutlineLabel
+      ? style
+        .copyWith(height: 1, color: decoration.enabled ? color : themeData.disabledColor)
+        .merge(decoration.labelStyle)
+      : style
+        .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
+        .merge(decoration.labelStyle);
+
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
@@ -2154,7 +2173,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       isHovering: isHovering,
     );
 
-    final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
+    // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
+    // Setting TextStyle.height to 1 ensures that the label's height will equal
+    // its font size.
+    final TextStyle inlineLabelStyle = themeData.fixTextFieldOutlineLabel
+      ? inlineStyle.merge(decoration.labelStyle).copyWith(height: 1)
+      : inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
       child: AnimatedOpacity(
@@ -2331,6 +2355,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         helperError: helperError,
         counter: counter,
         container: container,
+        fixTextFieldOutlineLabel: themeData.fixTextFieldOutlineLabel,
       ),
       textDirection: textDirection,
       textBaseline: textBaseline,

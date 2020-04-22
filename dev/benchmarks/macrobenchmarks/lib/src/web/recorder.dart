@@ -529,9 +529,15 @@ class Timeseries {
 
     // Final statistics.
     final double cleanAverage = _computeAverage(name, cleanValues);
-    final double outlierAverage = _computeAverage(name, outliers);
     final double standardDeviation = _computeStandardDeviationForPopulation(name, cleanValues);
     final double noise = cleanAverage > 0.0 ? standardDeviation / cleanAverage : 0.0;
+
+    // Compute outlier average. If there are no outliers the outlier average is
+    // the same as clean value average. In other words, in a perfect benchmark
+    // with no noise the difference between average and outlier average is zero,
+    // which the best possible outcome. Noise produces a positive difference
+    // between the two.
+    final double outlierAverage = outliers.isNotEmpty ? _computeAverage(name, outliers) : cleanAverage;
 
     final List<AnnotatedSample> annotatedValues = <AnnotatedSample>[
       for (final double warmUpValue in warmUpValues)
@@ -631,6 +637,15 @@ class TimeseriesStats {
   /// See [AnnotatedSample] for more details.
   final List<AnnotatedSample> samples;
 
+  /// Outlier average divided by clean average.
+  ///
+  /// This is a measure of performance consistency. The higher this number the
+  /// worse is jank when it happens. Smaller is better, with 1.0 being the
+  /// perfect score. If [average] is zero, this value defaults to 1.0.
+  double get outlierRatio => average > 0.0
+    ? outlierAverage / average
+    : 1.0; // this can only happen in perfect benchmark that reports only zeros
+
   @override
   String toString() {
     final StringBuffer buffer = StringBuffer();
@@ -640,6 +655,7 @@ class TimeseriesStats {
       '${samples.length} total)');
     buffer.writeln(' | average: $average μs');
     buffer.writeln(' | outlier average: $outlierAverage μs');
+    buffer.writeln(' | outlier/clean ratio: ${outlierRatio}x');
     buffer.writeln(' | noise: ${_ratioToPercent(noise)}');
     return buffer.toString();
   }
@@ -730,6 +746,7 @@ class Profile {
       final TimeseriesStats stats = timeseries.computeStats();
       json['$key.average'] = stats.average;
       json['$key.outlierAverage'] = stats.outlierAverage;
+      json['$key.outlierRatio'] = stats.outlierRatio;
       json['$key.noise'] = stats.noise;
     }
 

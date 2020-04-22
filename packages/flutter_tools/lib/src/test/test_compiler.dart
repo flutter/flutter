@@ -103,7 +103,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
-      packagesPath: PackageMap.globalPackagesPath,
+      packagesPath: globalPackagesPath,
     );
     if (flutterProject.hasBuilders) {
       return CodeGeneratingResidentCompiler.create(
@@ -126,15 +126,9 @@ class TestCompiler {
     if (!isEmpty) {
       return;
     }
-    _packageConfig ??= await loadPackageConfigUri(
-      globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-      loader: (Uri uri) async {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    _packageConfig ??= await loadPackageConfigOrFail(
+      globals.fs.file(globalPackagesPath),
+      logger: globals.logger,
     );
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;

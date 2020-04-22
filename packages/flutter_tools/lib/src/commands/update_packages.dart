@@ -1290,7 +1290,7 @@ class PubDependencyTree {
           dependencies = const <String>[];
         }
         _versions[package] = version;
-        _dependencyTree[package] = Set<String>.from(dependencies);
+        _dependencyTree[package] = Set<String>.of(dependencies);
       }
     }
     return null;
