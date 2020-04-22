@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
@@ -592,51 +593,102 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotRestart;
 
-  Future<OperationResult> _inProgressHotReload;
+  Future<void> _inProgressHotReload;
+  final Map<String, RestartableTimer> _reloadDebounceTimers = <String, RestartableTimer>{};
+  final Map<String, Future<OperationResult>> _reloadOperationQueue = <String, Future<OperationResult>>{};
+  final Duration _hotReloadDebounceDuration = const Duration(milliseconds: 50);
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
     final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
     final String restartReason = _getStringArg(args, 'reason');
+    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
       throw "app '$appId' not found";
     }
 
-    if (_inProgressHotReload != null) {
-      throw 'hot restart already in progress';
-    }
-
-    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pause: pauseAfterRestart, reason: restartReason);
-    });
-    return _inProgressHotReload.whenComplete(() {
-      _inProgressHotReload = null;
-    });
+    return _queueAndDebounceReloadAction(
+      app,
+      fullRestart ? 'restart' : 'reload',
+      debounce,
+      () {
+        return app.restart(
+            fullRestart: fullRestart,
+            pause: pauseAfterRestart,
+            reason: restartReason);
+      },
+    );
   }
 
   Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String classId = _getStringArg(args, 'class', required: true);
-    final String libraryId =  _getStringArg(args, 'library', required: true);
+    final String libraryId = _getStringArg(args, 'library', required: true);
+    final bool debounce = _getBoolArg(args, 'debounce') ?? false;
 
     final AppInstance app = _getApp(appId);
     if (app == null) {
       throw "app '$appId' not found";
     }
 
-    if (_inProgressHotReload != null) {
-      throw 'hot restart already in progress';
+    return _queueAndDebounceReloadAction(
+      app,
+      'reloadMethod',
+      debounce,
+      () {
+        return app.reloadMethod(classId: classId, libraryId: libraryId);
+      },
+    );
+  }
+
+  /// Debounce and queue reload actions.
+  ///
+  /// Only one reload action will run at a time. Actions requested in quick
+  /// succession (within [_hotReloadDebounceDuration]) will be merged together
+  /// and all return the same result. If an action is requested after an identical
+  /// action has already started, it will be queued and run again once the first
+  /// action completes.
+  Future<OperationResult> _queueAndDebounceReloadAction(
+    AppInstance app,
+    String operationType,
+    bool debounce,
+    Future<OperationResult> Function() action,
+  ) {
+    // If there is already an operation of this type waiting to run, reset its
+    // debounce timer and return its future.
+    if (_reloadOperationQueue[operationType] != null) {
+      _reloadDebounceTimers[operationType]?.reset();
+      return _reloadOperationQueue[operationType];
     }
 
-    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.reloadMethod(classId: classId, libraryId: libraryId);
-    });
-    return _inProgressHotReload.whenComplete(() {
-      _inProgressHotReload = null;
-    });
+    // Otherwise, put one in the queue with a timer.
+    final Completer<OperationResult> completer = Completer<OperationResult>();
+    _reloadOperationQueue[operationType] = completer.future;
+    _reloadDebounceTimers[operationType] = RestartableTimer(
+      debounce ? _hotReloadDebounceDuration : Duration.zero,
+      () async {
+        // Remove us from the queue so we can't be reset now we've started.
+        _reloadOperationQueue[operationType] = null;
+        _reloadDebounceTimers[operationType] = null;
+
+        // It's possible there are other reload types running when we get here,
+        // so wait until any current async reload operations to complete.
+        while (_inProgressHotReload != null) {
+          await _inProgressHotReload;
+        }
+
+        // Now it's safe for us to run
+        _inProgressHotReload = app
+            ._runInZone<OperationResult>(this, action)
+            .then(completer.complete, onError: completer.completeError)
+            .whenComplete(() => _inProgressHotReload = null);
+      },
+    );
+
+    return completer.future;
   }
 
   /// Returns an error, or the service extension result (a map with two fixed

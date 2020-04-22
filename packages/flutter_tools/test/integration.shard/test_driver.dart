@@ -554,8 +554,8 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     return prematureExitGuard.future;
   }
 
-  Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload() => _restart(fullRestart: false);
+  Future<void> hotRestart({ bool pause = false, bool debounce = false }) => _restart(fullRestart: true, pause: pause);
+  Future<void> hotReload({ bool debounce = false }) => _restart(fullRestart: false, debounce: debounce);
 
   Future<void> scheduleFrame() async {
     if (_currentRunningAppId == null) {
@@ -580,7 +580,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     }
   }
 
-  Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
+  Future<void> _restart({ bool fullRestart = false, bool pause = false, bool debounce = false }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');
     }
@@ -588,7 +588,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _debugPrint('Performing ${ pause ? "paused " : "" }${ fullRestart ? "hot restart" : "hot reload" }...');
     final dynamic hotReloadResponse = await _sendRequest(
       'app.restart',
-      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
+      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause, 'debounce': debounce},
     );
     _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
