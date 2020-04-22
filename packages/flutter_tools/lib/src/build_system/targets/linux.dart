@@ -50,7 +50,7 @@ class UnpackLinuxDebug extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final String artifactPath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
     final Directory outputDirectory = environment.fileSystem.directory(
       environment.fileSystem.path.join(
       environment.projectDir.path,
