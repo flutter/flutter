@@ -130,7 +130,12 @@ class _CanvasPool extends _SaveStackTracking {
     if (isFirstChildElement) {
       _canvas.style.zIndex = '-1';
     }
-    _rootElement.append(_canvas);
+    // Before appending canvas, check if canvas is already on rootElement. This
+    // optimization prevents DOM .append call when a PersistentSurface is
+    // reused. Reading lastChild is faster than append call.
+    if (_rootElement.lastChild != _canvas) {
+      _rootElement.append(_canvas);
+    }
     _context = _canvas.context2D;
     _contextHandle = ContextStateHandle(_context);
     _initializeViewport(requiresClearRect);
