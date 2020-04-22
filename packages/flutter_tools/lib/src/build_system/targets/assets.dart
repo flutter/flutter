@@ -60,9 +60,9 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          inputs.add(globals.fs.file(content.file.path));
+          inputs.add(content.file as File);
           if (!await iconTreeShaker.subsetFont(
-            inputPath: content.file.path,
+            input: content.file as File,
             outputPath: file.path,
             relativePath: entry.key,
           )) {
