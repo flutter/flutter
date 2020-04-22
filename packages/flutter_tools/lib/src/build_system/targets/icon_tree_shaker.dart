@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:mime/mime.dart' as mime;
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
@@ -21,7 +20,7 @@ import 'dart.dart';
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = true;
+const bool kIconTreeShakerEnabledDefault = false;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
@@ -67,12 +66,6 @@ class IconTreeShaker {
     }
   }
 
-  /// The MIME type for ttf fonts.
-  static const Set<String> kTtfMimeTypes = <String>{
-    'font/ttf', // based on internet search
-    'application/x-font-ttf', // based on running locally.
-  };
-
   /// The [Source] inputs that targets using this should depend on.
   ///
   /// See [Target.inputs].
@@ -84,7 +77,6 @@ class IconTreeShaker {
 
   final Environment _environment;
   final String _fontManifest;
-  Future<void> _iconDataProcessing;
   Map<String, _IconTreeShakerData> _iconData;
 
   final ProcessManager _processManager;
@@ -97,10 +89,10 @@ class IconTreeShaker {
                    && _environment.defines[kIconTreeShakerFlag] == 'true'
                    && _environment.defines[kBuildMode] != 'debug';
 
-  // Fills the [_iconData] map.
-  Future<void> _getIconData(Environment environment) async {
+  /// Fills the [_iconData] map.
+  Future<Map<String, _IconTreeShakerData>> _getIconData(Environment environment) async {
     if (!enabled) {
-      return;
+      return null;
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
@@ -143,11 +135,13 @@ class IconTreeShaker {
         codePoints: iconData[entry.key],
       );
     }
-    _iconData = result;
+    return result;
   }
 
-  /// Calls font-subset, which transforms the [input] font file to a
-  /// subsetted version at [outputPath].
+  /// Calls font-subset, which transforms the `inputPath` font file to a
+  /// subsetted version at `outputPath`.
+  ///
+  /// The `relativePath` parameter
   ///
   /// All parameters are required.
   ///
@@ -156,24 +150,15 @@ class IconTreeShaker {
   /// If the font-subset subprocess fails, it will [throwToolExit].
   /// Otherwise, it will return true.
   Future<bool> subsetFont({
-    @required File input,
+    @required String inputPath,
     @required String outputPath,
     @required String relativePath,
   }) async {
     if (!enabled) {
       return false;
     }
-    if (input.lengthSync() < 12) {
-      return false;
-    }
-    final String mimeType = mime.lookupMimeType(
-      input.path,
-      headerBytes: await input.openRead(0, 12).first,
-    );
-    if (!kTtfMimeTypes.contains(mimeType)) {
-      return false;
-    }
-    await (_iconDataProcessing ??= _getIconData(_environment));
+
+    _iconData ??= await _getIconData(_environment);
     assert(_iconData != null);
 
     final _IconTreeShakerData iconTreeShakerData = _iconData[relativePath];
@@ -191,7 +176,7 @@ class IconTreeShaker {
     final List<String> cmd = <String>[
       fontSubset.path,
       outputPath,
-      input.path,
+      inputPath,
     ];
     final String codePoints = iconTreeShakerData.codePoints.join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
@@ -201,7 +186,9 @@ class IconTreeShaker {
       fontSubsetProcess.stdin.writeln(codePoints);
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
-    } on Exception {
+    } on Exception catch (_) {
+      // handled by checking the exit code.
+    } on OSError catch (_) {  // ignore: dead_code_on_catch_subtype
       // handled by checking the exit code.
     }
 
