@@ -99,7 +99,7 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
   return true;
 }
 
-// Change what now?
+// TODO(dnfield): This can be removed in favor of using the vm_service package, https://github.com/flutter/flutter/issues/55411
 class TimelineObtainer {
   WebSocket _observatorySocket;
   int _lastCallId = 0;

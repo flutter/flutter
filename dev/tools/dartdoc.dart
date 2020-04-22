@@ -50,7 +50,8 @@ Future<void> main(List<String> arguments) async {
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
   buf.writeln('homepage: https://flutter.dev');
-  buf.writeln('version: 0.0.0'); // Change this?
+  // TODO(dnfield): Re-factor for proper versioning, https://github.com/flutter/flutter/issues/55409
+  buf.writeln('version: 0.0.0');
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
