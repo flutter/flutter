@@ -80,6 +80,8 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
+    usesExtraFrontendOptions();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -208,11 +210,6 @@ class RunCommand extends RunCommandBase {
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
-      )
-      ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addMultiOption(FlutterOptions.kEnableExperiment,
-        splitCommas: true,
-        hide: true,
       );
   }
 
