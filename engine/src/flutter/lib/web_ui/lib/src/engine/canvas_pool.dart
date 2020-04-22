@@ -374,7 +374,7 @@ class _CanvasPool extends _SaveStackTracking {
   }
 
   @override
-  void transform(Float64List matrix4) {
+  void transform(Float32List matrix4) {
     super.transform(matrix4);
     // Canvas2D transform API:
     //
@@ -838,7 +838,7 @@ class _SaveStackTracking {
   @mustCallSuper
   void skew(double sx, double sy) {
     final Matrix4 skewMatrix = Matrix4.identity();
-    final Float64List storage = skewMatrix.storage;
+    final Float32List storage = skewMatrix.storage;
     storage[1] = sy;
     storage[4] = sx;
     _currentTransform.multiply(skewMatrix);
@@ -846,8 +846,8 @@ class _SaveStackTracking {
 
   /// Multiplies the [currentTransform] matrix by another matrix.
   @mustCallSuper
-  void transform(Float64List matrix4) {
-    _currentTransform.multiply(Matrix4.fromFloat64List(matrix4));
+  void transform(Float32List matrix4) {
+    _currentTransform.multiply(Matrix4.fromFloat32List(matrix4));
   }
 
   /// Adds a rectangle to clipping stack.

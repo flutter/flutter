@@ -84,10 +84,10 @@ class CanvasKitCanvas implements ui.Canvas {
     if (matrix4.length != 16) {
       throw ArgumentError('"matrix4" must have 16 entries.');
     }
-    _transform(matrix4);
+    _transform(toMatrix32(matrix4));
   }
 
-  void _transform(Float64List matrix4) {
+  void _transform(Float32List matrix4) {
     _canvas.transform(matrix4);
   }
 

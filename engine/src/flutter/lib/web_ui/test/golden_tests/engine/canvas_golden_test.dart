@@ -223,8 +223,8 @@ void main() async {
 
     final SceneBuilder sb = SceneBuilder();
     sb.pushTransform(Matrix4.diagonal3Values(EngineWindow.browserDevicePixelRatio,
-        EngineWindow.browserDevicePixelRatio, 1.0).storage);
-    sb.pushTransform(Matrix4.rotationZ(math.pi / 2).storage);
+        EngineWindow.browserDevicePixelRatio, 1.0).toFloat64());
+    sb.pushTransform(Matrix4.rotationZ(math.pi / 2).toFloat64());
     sb.pushOffset(0, -500);
     sb.pushClipRect(canvasSize);
     sb.pop();

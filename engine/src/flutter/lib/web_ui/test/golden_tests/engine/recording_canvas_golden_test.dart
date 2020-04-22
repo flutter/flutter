@@ -171,7 +171,7 @@ void main() async {
 
   test('Computes paint bounds for a complex transform', () async {
     final RecordingCanvas rc = RecordingCanvas(screenRect);
-    final Float64List matrix = Float64List(16);
+    final Float32List matrix = Float32List(16);
     // translate(210, 220) , scale(2, 3), rotate(math.pi / 4.0)
     matrix[0] = 1.4;
     matrix[1] = 2.12;
@@ -193,7 +193,7 @@ void main() async {
     rc.drawRect(const Rect.fromLTRB(10, 20, 30, 40), testPaint);
     rc.endRecording();
     expect(rc.pictureBounds,
-        const Rect.fromLTRB(168.0, 283.6, 224.0, 368.4));
+        within(distance: 0.001, from: const Rect.fromLTRB(168.0, 283.6, 224.0, 368.4)));
     await _checkScreenshot(rc, 'complex_transform');
   });
 
@@ -422,7 +422,7 @@ void main() async {
 
     expect(
       rc.pictureBounds,
-      Rect.fromCircle(center: const Offset(50, 50), radius: 20 * math.sqrt(2)),
+      within(distance: 0.001, from: Rect.fromCircle(center: const Offset(50, 50), radius: 20 * math.sqrt(2))),
     );
     await _checkScreenshot(rc, 'clip_rect_rotated');
   });

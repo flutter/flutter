@@ -61,7 +61,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, 20);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()
@@ -86,7 +86,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, 20);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()
@@ -112,7 +112,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, -80);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()
@@ -149,7 +149,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, -80);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()
@@ -183,7 +183,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, 10);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()
@@ -211,7 +211,7 @@ void main() async {
     final Matrix4 testMatrixTranslateRotate =
         Matrix4.rotationZ(math.pi * 30.0 / 180.0)..translate(100, -80);
     transformedPath.addPath(path, Offset.zero,
-        matrix4: testMatrixTranslateRotate.storage);
+        matrix4: testMatrixTranslateRotate.toFloat64());
     rc.drawPath(
         transformedPath,
         Paint()

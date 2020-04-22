@@ -104,7 +104,7 @@ void _testEngineSemanticsOwner() {
       id: 0,
       actions: 0,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -114,7 +114,7 @@ void _testEngineSemanticsOwner() {
       actions: 0,
       flags: 0,
       label: label,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
     );
     semantics().updateSemantics(builder.build());
@@ -233,7 +233,7 @@ void _testHeader() {
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isHeader.index,
       label: 'Header of the page',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -308,7 +308,7 @@ void _testContainer() {
       id: 0,
       actions: 0,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: zeroOffsetRect,
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -347,7 +347,7 @@ void _testContainer() {
       id: 0,
       actions: 0,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -388,7 +388,7 @@ void _testVerticalScrolling() {
       id: 0,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
 
@@ -414,7 +414,7 @@ void _testVerticalScrolling() {
       id: 0,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -474,7 +474,7 @@ void _testVerticalScrolling() {
           ui.SemanticsAction.scrollUp.index |
           ui.SemanticsAction.scrollDown.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
@@ -485,7 +485,7 @@ void _testVerticalScrolling() {
         id: id,
         actions: 0,
         flags: 0,
-        transform: Matrix4.translationValues(0, 50.0 * id, 0).storage,
+        transform: Matrix4.translationValues(0, 50.0 * id, 0).toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
       );
     }
@@ -540,7 +540,7 @@ void _testHorizontalScrolling() {
       id: 0,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -566,7 +566,7 @@ void _testHorizontalScrolling() {
       id: 0,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -607,7 +607,7 @@ void _testHorizontalScrolling() {
           ui.SemanticsAction.scrollLeft.index |
           ui.SemanticsAction.scrollRight.index,
       flags: 0,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
@@ -618,7 +618,7 @@ void _testHorizontalScrolling() {
         id: id,
         actions: 0,
         flags: 0,
-        transform: Matrix4.translationValues(50.0 * id, 0, 0).storage,
+        transform: Matrix4.translationValues(50.0 * id, 0, 0).toFloat64(),
         rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
       );
     }
@@ -674,7 +674,7 @@ void _testIncrementables() {
       actions: 0 | ui.SemanticsAction.increase.index,
       flags: 0,
       value: 'd',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -702,7 +702,7 @@ void _testIncrementables() {
       flags: 0,
       value: 'd',
       increasedValue: 'e',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -738,7 +738,7 @@ void _testIncrementables() {
       flags: 0,
       value: 'd',
       decreasedValue: 'c',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -776,7 +776,7 @@ void _testIncrementables() {
       value: 'd',
       increasedValue: 'e',
       decreasedValue: 'c',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -804,7 +804,7 @@ void _testTextField() {
       actions: 0 | ui.SemanticsAction.tap.index,
       flags: 0 | ui.SemanticsFlag.isTextField.index,
       value: 'hello',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -833,7 +833,7 @@ void _testTextField() {
       actions: 0 | ui.SemanticsAction.tap.index,
       flags: 0 | ui.SemanticsFlag.isTextField.index,
       value: 'hello',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -872,7 +872,7 @@ void _testCheckables() {
           ui.SemanticsFlag.isEnabled.index |
           ui.SemanticsFlag.hasToggledState.index |
           ui.SemanticsFlag.isToggled.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -898,7 +898,7 @@ void _testCheckables() {
       flags: 0 |
           ui.SemanticsFlag.hasToggledState.index |
           ui.SemanticsFlag.isToggled.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -924,7 +924,7 @@ void _testCheckables() {
       flags: 0 |
           ui.SemanticsFlag.hasToggledState.index |
           ui.SemanticsFlag.isEnabled.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -951,7 +951,7 @@ void _testCheckables() {
           ui.SemanticsFlag.isEnabled.index |
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isChecked.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -977,7 +977,7 @@ void _testCheckables() {
       flags: 0 |
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isChecked.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1003,7 +1003,7 @@ void _testCheckables() {
       flags: 0 |
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isEnabled.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1031,7 +1031,7 @@ void _testCheckables() {
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isInMutuallyExclusiveGroup.index |
           ui.SemanticsFlag.isChecked.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1058,7 +1058,7 @@ void _testCheckables() {
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isInMutuallyExclusiveGroup.index |
           ui.SemanticsFlag.isChecked.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1085,7 +1085,7 @@ void _testCheckables() {
           ui.SemanticsFlag.isEnabled.index |
           ui.SemanticsFlag.hasCheckedState.index |
           ui.SemanticsFlag.isInMutuallyExclusiveGroup.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1114,7 +1114,7 @@ void _testTappable() {
           ui.SemanticsFlag.hasEnabledState.index |
           ui.SemanticsFlag.isEnabled.index |
           ui.SemanticsFlag.isButton.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1140,7 +1140,7 @@ void _testTappable() {
       flags: 0 |
           ui.SemanticsFlag.hasEnabledState.index |
           ui.SemanticsFlag.isButton.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1169,7 +1169,7 @@ void _testImage() {
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isImage.index,
       label: 'Test Image Label',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1194,7 +1194,7 @@ void _testImage() {
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isImage.index,
       label: 'Test Image Label',
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -1225,7 +1225,7 @@ void _testImage() {
       id: 0,
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isImage.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
 
@@ -1248,7 +1248,7 @@ void _testImage() {
       id: 0,
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isImage.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
       childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -1282,7 +1282,7 @@ void _testLiveRegion() {
       actions: 0,
       label: 'This is a snackbar',
       flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
     semantics().updateSemantics(builder.build());
@@ -1306,7 +1306,7 @@ void _testLiveRegion() {
       id: 0,
       actions: 0,
       flags: 0 | ui.SemanticsFlag.isLiveRegion.index,
-      transform: Matrix4.identity().storage,
+      transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
     semantics().updateSemantics(builder.build());

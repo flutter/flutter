@@ -273,7 +273,7 @@ class BitmapCanvas extends EngineCanvas {
   }
 
   @override
-  void transform(Float64List matrix4) {
+  void transform(Float32List matrix4) {
     _canvasPool.transform(matrix4);
   }
 

@@ -122,7 +122,7 @@ class SemanticsNodeUpdate {
   final ui.TextDirection textDirection;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final Float64List transform;
+  final Float32List transform;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final Int32List childrenInTraversalOrder;
@@ -471,8 +471,8 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  Float64List get transform => _transform;
-  Float64List _transform;
+  Float32List get transform => _transform;
+  Float32List _transform;
 
   static const int _transformIndex = 1 << 16;
 
@@ -828,7 +828,7 @@ class SemanticsObject {
 
     final bool hasZeroRectOffset = _rect.top == 0.0 && _rect.left == 0.0;
     final bool hasIdentityTransform =
-        _transform == null || isIdentityFloat64ListTransform(_transform);
+        _transform == null || isIdentityFloat32ListTransform(_transform);
 
     if (hasZeroRectOffset &&
         hasIdentityTransform &&
@@ -855,12 +855,12 @@ class SemanticsObject {
         effectiveTransformIsIdentity = left == 0.0 && top == 0.0;
       } else {
         // Clone to avoid mutating _transform.
-        effectiveTransform = Matrix4.fromFloat64List(_transform).clone()
+        effectiveTransform = Matrix4.fromFloat32List(_transform).clone()
           ..translate(_rect.left, _rect.top, 0.0);
         effectiveTransformIsIdentity = effectiveTransform.isIdentity();
       }
     } else if (!hasIdentityTransform) {
-      effectiveTransform = Matrix4.fromFloat64List(_transform);
+      effectiveTransform = Matrix4.fromFloat32List(_transform);
       effectiveTransformIsIdentity = false;
     }
 

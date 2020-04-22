@@ -94,7 +94,7 @@ class MockEngineCanvas implements EngineCanvas {
   }
 
   @override
-  void transform(Float64List matrix4) {
+  void transform(Float32List matrix4) {
     _called('transform', arguments: matrix4);
   }
 

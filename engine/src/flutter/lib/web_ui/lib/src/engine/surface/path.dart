@@ -508,8 +508,7 @@ class SurfacePath implements ui.Path {
     assert(path != null); // path is checked on the engine side
     assert(offsetIsValid(offset));
     if (matrix4 != null) {
-      assert(matrix4IsValid(matrix4));
-      _addPathWithMatrix(path, offset.dx, offset.dy, matrix4);
+      _addPathWithMatrix(path, offset.dx, offset.dy, toMatrix32(matrix4));
     } else {
       _addPath(path, offset.dx, offset.dy);
     }
@@ -520,16 +519,17 @@ class SurfacePath implements ui.Path {
       subpaths.addAll(path.subpaths);
     } else {
       subpaths.addAll(path
-          .transform(Matrix4.translationValues(dx, dy, 0.0).storage)
+          ._transform(Matrix4.translationValues(dx, dy, 0.0).storage)
           .subpaths);
     }
   }
 
   void _addPathWithMatrix(
-      SurfacePath path, double dx, double dy, Float64List matrix) {
-    final Matrix4 transform = Matrix4.fromFloat64List(matrix);
+      SurfacePath path, double dx, double dy, Float32List matrix) {
+    assert(matrix4IsValid(matrix));
+    final Matrix4 transform = Matrix4.fromFloat32List(matrix);
     transform.translate(dx, dy);
-    subpaths.addAll(path.transform(transform.storage).subpaths);
+    subpaths.addAll(path._transform(transform.storage).subpaths);
   }
 
   /// Adds the given path to this path by extending the current segment of this
@@ -543,8 +543,9 @@ class SurfacePath implements ui.Path {
     assert(path != null); // path is checked on the engine side
     assert(offsetIsValid(offset));
     if (matrix4 != null) {
-      assert(matrix4IsValid(matrix4));
-      _extendWithPathAndMatrix(path, offset.dx, offset.dy, matrix4);
+      final Float32List matrix32 = toMatrix32(matrix4);
+      assert(matrix4IsValid(matrix32));
+      _extendWithPathAndMatrix(path, offset.dx, offset.dy, matrix32);
     } else {
       _extendWithPath(path, offset.dx, offset.dy);
     }
@@ -563,7 +564,7 @@ class SurfacePath implements ui.Path {
   }
 
   void _extendWithPathAndMatrix(
-      SurfacePath path, double dx, double dy, Float64List matrix) {
+      SurfacePath path, double dx, double dy, Float32List matrix) {
     throw UnimplementedError('Cannot extend path with transform matrix');
   }
 
@@ -702,11 +703,15 @@ class SurfacePath implements ui.Path {
   /// sub path transformed by the given matrix.
   @override
   SurfacePath transform(Float64List matrix4) {
-    assert(matrix4IsValid(matrix4));
+    return _transform(toMatrix32(matrix4));
+  }
+
+  SurfacePath _transform(Float32List matrix) {
+    assert(matrix4IsValid(matrix));
     final SurfacePath transformedPath = SurfacePath();
     for (final Subpath subPath in subpaths) {
       for (final PathCommand cmd in subPath.commands) {
-        cmd.transform(matrix4, transformedPath);
+        cmd.transform(matrix, transformedPath);
       }
     }
     return transformedPath;

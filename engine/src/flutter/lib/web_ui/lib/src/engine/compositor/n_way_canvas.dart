@@ -58,7 +58,7 @@ class SkNWayCanvas {
   }
 
   /// Calls [transform] on all canvases.
-  void transform(Float64List matrix) {
+  void transform(Float32List matrix) {
     for (int i = 0; i < _canvases.length; i++) {
       _canvases[i].transform(matrix);
     }

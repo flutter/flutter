@@ -25,7 +25,7 @@ void main() {
     test('pushTransform implements surface lifecycle', () {
       testLayerLifeCycle((SceneBuilder sceneBuilder, EngineLayer oldLayer) {
         return sceneBuilder.pushTransform(
-            Matrix4.translationValues(10, 20, 0).storage,
+            Matrix4.translationValues(10, 20, 0).toFloat64(),
             oldLayer: oldLayer);
       }, () {
         return '''<s><flt-transform></flt-transform></s>''';
