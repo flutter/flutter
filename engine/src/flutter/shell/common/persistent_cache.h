@@ -73,6 +73,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static void MarkStrategySet() { strategy_set_ = true; }
 
   static constexpr char kSkSLSubdirName[] = "sksl";
+  static constexpr char kAssetFileName[] = "io.flutter.shaders.json";
 
  private:
   static std::string cache_base_path_;
