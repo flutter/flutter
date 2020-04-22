@@ -91,7 +91,7 @@ class CupertinoApp extends StatefulWidget {
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
-    this.debugShowCheckedModeBanner = true,
+    this.debugShowCheckedModeBanner = false,
     this.shortcuts,
     this.actions,
   }) : assert(routes != null),
