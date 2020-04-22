@@ -144,15 +144,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final PackageConfig packageConfig = await loadPackageConfigUri(
-        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-        loader: (Uri uri) {
-          final File file = globals.fs.file(uri);
-          if (!file.existsSync()) {
-            return null;
-          }
-          return file.readAsBytes();
-        }
+      final PackageConfig packageConfig = await loadPackageConfigOrFail(
+        globals.fs.file(globalPackagesPath),
+        logger: globals.logger,
       );
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};

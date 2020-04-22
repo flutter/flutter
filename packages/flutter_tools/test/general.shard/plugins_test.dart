@@ -104,7 +104,7 @@ void main() {
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
+      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, globalPackagesPath));
       packagesFile..createSync(recursive: true)
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
@@ -359,8 +359,9 @@ EndGlobal''');
     }
 
     group('refreshPlugins', () {
-      testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
-        refreshPluginsList(flutterProject);
+      testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () async {
+        await refreshPluginsList(flutterProject);
+
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -368,11 +369,12 @@ EndGlobal''');
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
+      testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () async {
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
 
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
+
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -380,11 +382,12 @@ EndGlobal''');
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
+      testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () async {
         configureDummyPackageAsPlugin();
         when(iosProject.existsSync()).thenReturn(true);
 
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
+
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -392,7 +395,9 @@ EndGlobal''');
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+      testUsingContext(
+        'Refreshing the plugin list modifies .flutter-plugins '
+        'and .flutter-plugins-dependencies when there are plugins', () async {
         final Directory pluginA = createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         final Directory pluginB = createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         final Directory pluginC = createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
@@ -407,7 +412,7 @@ EndGlobal''');
           (Invocation _) => version
         );
 
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
 
         // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -494,13 +499,14 @@ EndGlobal''');
         FlutterVersion: () => mockVersion
       });
 
-      testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
+      testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
         configureDummyPackageAsPlugin();
         when(iosProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
-        refreshPluginsList(flutterProject);
+
+        await refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), false);
         expect(macosProject.podManifestLock.existsSync(), false);
       }, overrides: <Type, Generator>{
@@ -510,7 +516,7 @@ EndGlobal''');
         FlutterVersion: () => mockVersion
       });
 
-      testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () {
+      testUsingContext('No changes to the plugin list does not invalidate the Cocoapod lockfiles', () async {
         configureDummyPackageAsPlugin();
         when(iosProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
@@ -519,11 +525,11 @@ EndGlobal''');
         // Since there was no plugins list, the lock files will be invalidated.
         // The second call is where the plugins list is compared to the existing one, and if there is no change,
         // the podfiles shouldn't be invalidated.
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
 
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), true);
         expect(macosProject.podManifestLock.existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1081,11 +1087,11 @@ flutter:
         when(featureFlags.isWindowsEnabled).thenReturn(true);
       });
 
-      testUsingContext('Symlinks are created for Linux plugins', () {
+      testUsingContext('Symlinks are created for Linux plugins', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         configureDummyPackageAsPlugin();
         // refreshPluginsList should call createPluginSymlinks.
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
 
         expect(linuxProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1094,11 +1100,11 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Symlinks are created for Windows plugins', () {
+      testUsingContext('Symlinks are created for Windows plugins', () async {
         when(windowsProject.existsSync()).thenReturn(true);
         configureDummyPackageAsPlugin();
         // refreshPluginsList should call createPluginSymlinks.
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
 
         expect(windowsProject.pluginSymlinkDirectory.childLink('apackage').existsSync(), true);
       }, overrides: <Type, Generator>{
@@ -1130,7 +1136,7 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () {
+      testUsingContext('Existing symlinks are removed automatically on refresh when no longer in use', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(windowsProject.existsSync()).thenReturn(true);
 
@@ -1144,7 +1150,7 @@ flutter:
 
         // refreshPluginsList should remove existing links and recreate on changes.
         configureDummyPackageAsPlugin();
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
 
         for (final File file in dummyFiles) {
           expect(file.existsSync(), false);
@@ -1179,11 +1185,11 @@ flutter:
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('createPluginSymlinks repairs missing links', () {
+      testUsingContext('createPluginSymlinks repairs missing links', () async {
         when(linuxProject.existsSync()).thenReturn(true);
         when(windowsProject.existsSync()).thenReturn(true);
         configureDummyPackageAsPlugin();
-        refreshPluginsList(flutterProject);
+        await refreshPluginsList(flutterProject);
 
         final List<Link> links = <Link>[
           linuxProject.pluginSymlinkDirectory.childLink('apackage'),
