@@ -357,6 +357,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -413,6 +414,7 @@ class EditableText extends StatefulWidget {
     this.autofillHints,
   }) : assert(controller != null),
        assert(focusNode != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -463,6 +465,14 @@ class EditableText extends StatefulWidget {
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
+
+  /// {@template flutter.widgets.editableText.obscuringCharacter}
+  /// Character used to obscure text if [obscureText] is true.
+  ///
+  ///  Must be only a single character.
+  ///
+  /// Defaults to •.
+  final String obscuringCharacter;
 
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -2029,6 +2039,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textDirection: _textDirection,
               locale: widget.locale,
               textWidthBasis: widget.textWidthBasis,
+              obscuringCharacter: widget.obscuringCharacter,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               smartDashesType: widget.smartDashesType,
@@ -2063,7 +2074,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSpan buildTextSpan() {
     if (widget.obscureText) {
       String text = _value.text;
-      text = RenderEditable.obscuringCharacter * text.length;
+      text = widget.obscuringCharacter * text.length;
       final int o =
         _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
@@ -2101,6 +2112,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.locale,
+    this.obscuringCharacter = '•',
     this.obscureText,
     this.autocorrect,
     this.smartDashesType,
@@ -2144,6 +2156,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale locale;
+  final String obscuringCharacter;
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
@@ -2192,6 +2205,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscuringCharacter: obscuringCharacter,
       obscureText: obscureText,
       textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
@@ -2234,6 +2248,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textWidthBasis = textWidthBasis
+      .. obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
