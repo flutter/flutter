@@ -250,7 +250,7 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
-  }, skip: isBrowser);
+  });
 
   testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert'; // ignore: dart_convert_import.
 import 'dart:io'; // ignore: dart_io_import.
 import 'package:path/path.dart' as path; // ignore: package_path_import.
 
@@ -32,65 +33,42 @@ or
 ''');
     exit(1);
   }
+
   final String flutterExecutable = path.join(
     flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  final String target = targetPlatform == 'windows-x64'
+    ? 'debug_bundle_windows_assets'
+    : 'debug_bundle_linux_assets';
 
-  if (targetPlatform == 'linux-x64') {
-    // TODO(jonahwilliams): currently all builds are debug builds. Remove the
-    // hardcoded mode when profile and release support is added.
-    final ProcessResult unpackResult = await Process.run(
-        flutterExecutable,
-        <String>[
-          '--suppress-analytics',
-          '--verbose',
-          if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-          if (localEngine != null) '--local-engine=$localEngine',
-          'assemble',
-          '-dTargetPlatform=$targetPlatform',
-          '-dBuildMode=debug',
-          '-dTargetFile=$flutterTarget',
-          '--output=build',
-          'debug_bundle_linux_assets',
-        ]);
-    if (unpackResult.exitCode != 0) {
-      stderr.write(unpackResult.stderr);
-      exit(1);
-    }
-    return;
-  }
-
-  const String cacheDirectory = 'windows/flutter/ephemeral';
-  final ProcessResult unpackResult = await Process.run(
+  // TODO(jonahwilliams): currently all builds are debug builds. Remove the
+  // hardcoded mode when profile and release support is added.
+  final Process assembleProcess = await Process.start(
     flutterExecutable,
     <String>[
-      '--suppress-analytics',
-      if (verbose) '--verbose',
-      'unpack',
-      '--target-platform=$targetPlatform',
-      '--cache-dir=$cacheDirectory',
+      if (verbose)
+        '--verbose',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
-    ]);
-  if (unpackResult.exitCode != 0) {
-    stderr.write(unpackResult.stderr);
+      'assemble',
+      if (trackWidgetCreation)
+        '-dTrackWidgetCreation=$trackWidgetCreation',
+      '-dTargetPlatform=$targetPlatform',
+      '-dBuildMode=debug',
+      '-dTargetFile=$flutterTarget',
+      '--output=build',
+      target,
+    ],
+  );
+  assembleProcess.stdout
+    .transform(utf8.decoder)
+    .transform(const LineSplitter())
+    .listen(stdout.writeln);
+  assembleProcess.stderr
+    .transform(utf8.decoder)
+    .transform(const LineSplitter())
+    .listen(stderr.writeln);
+
+  if (await assembleProcess.exitCode != 0) {
     exit(1);
   }
-  final ProcessResult buildResult = await Process.run(
-    flutterExecutable,
-    <String>[
-      '--suppress-analytics',
-      if (verbose) '--verbose',
-      'build',
-      'bundle',
-      '--target=$flutterTarget',
-      '--target-platform=$targetPlatform',
-      if (trackWidgetCreation) '--track-widget-creation',
-      if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
-      if (localEngine != null) '--local-engine=$localEngine',
-    ]);
-  if (buildResult.exitCode != 0) {
-    stderr.write(buildResult.stderr);
-    exit(1);
-  }
-  exit(0);
 }

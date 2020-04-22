@@ -54,7 +54,7 @@ class AnalyzeOnce extends AnalyzeBase {
         (workingDirectory ?? fileSystem.currentDirectory).path;
 
     // find directories from argResults.rest
-    final Set<String> directories = Set<String>.from(argResults.rest
+    final Set<String> directories = Set<String>.of(argResults.rest
         .map<String>((String path) => fileSystem.path.canonicalize(path)));
     if (directories.isNotEmpty) {
       for (final String directory in directories) {

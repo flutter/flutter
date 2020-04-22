@@ -24,25 +24,29 @@ import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
 const List<Target> _kDefaultTargets = <Target>[
-  UnpackWindows(),
+  // Shared targets
   CopyAssets(),
   KernelSnapshot(),
   AotElfProfile(),
   AotElfRelease(),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
+  // macOS targets
   DebugMacOSFramework(),
   DebugMacOSBundleFlutterAssets(),
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
+  // Linux targets
   DebugBundleLinuxAssets(),
+  // Web targets
   WebServiceWorker(),
-  DebugAndroidApplication(),
-  FastStartAndroidApplication(),
-  ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   CopyFlutterBundle(),
+  // Android targets,
+  DebugAndroidApplication(),
+  FastStartAndroidApplication(),
+  ProfileAndroidApplication(),
   // Android ABI specific AOT rules.
   androidArmProfileBundle,
   androidArm64ProfileBundle,
@@ -50,9 +54,13 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  // iOS targets
   DebugIosApplicationBundle(),
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
+  // Windows targets
+  UnpackWindows(),
+  DebugBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -229,7 +237,6 @@ class AssembleCommand extends FlutterCommand {
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: globals.platform,
       );
       depfileService.writeToFile(depfile, globals.fs.file(depfileFile));
     }

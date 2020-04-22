@@ -314,7 +314,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         }
 
         if (topLevelResults.wasParsed('packages')) {
-          PackageMap.globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
+          globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.
@@ -354,19 +354,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final PackageConfig packageConfig = await loadPackageConfigUri(
-          globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-          onError: (dynamic error) {
-            // Errors indicate the automatic detection will fail, but are not
-            // fatal.
-          },
-          loader: (Uri uri) {
-            final File file = globals.fs.file(uri);
-            if (!file.existsSync()) {
-              return null;
-            }
-            return file.readAsBytes();
-          },
+        final PackageConfig packageConfig = await loadPackageConfigOrFail(
+          globals.fs.file(globalPackagesPath),
+          logger: globals.logger,
         );
         Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
         // Skip if sky_engine is the self-contained one.

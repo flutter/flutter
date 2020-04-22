@@ -15,6 +15,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
+import 'ios.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -80,7 +81,6 @@ abstract class UnpackMacOS extends Target {
     final DepfileService depfileService = DepfileService(
       logger: globals.logger,
       fileSystem: globals.fs,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       Depfile(inputs, outputs),
@@ -198,6 +198,7 @@ class CompileMacOSFramework extends Target {
     }
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
       fileSystem: globals.fs,
@@ -216,6 +217,7 @@ class CompileMacOSFramework extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -295,7 +297,6 @@ abstract class MacOSBundleFlutterAssets extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,

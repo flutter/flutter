@@ -114,6 +114,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event> _stdErrSub;
   bool _exited = false;
   WipConnection _wipConnection;
+  ChromiumLauncher _chromiumLauncher;
 
   vmservice.VmService get _vmService =>
       _connectionResult?.debugConnection?.vmService;
@@ -157,10 +158,6 @@ abstract class ResidentWebRunner extends ResidentRunner {
       globals.printTrace(
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory.path}',
       );
-    }
-    if (ChromeLauncher.hasChromeInstance) {
-      final Chrome chrome = await ChromeLauncher.connectedInstance;
-      await chrome.close();
     }
     _exited = true;
   }
@@ -394,6 +391,10 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ? await globals.os.findFreePort()
         : int.tryParse(debuggingOptions.port);
 
+    if (device.device is ChromiumDevice) {
+      _chromiumLauncher = (device.device as ChromiumDevice).chromeLauncher;
+    }
+
     try {
       return await asyncGuard(() async {
         // Ensure dwds resources are cached. If the .packages file is missing then
@@ -419,6 +420,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           enableDwds: _enableDwds,
           entrypoint: globals.fs.file(target).uri,
           expressionCompiler: expressionCompiler,
+          chromiumLauncher: _chromiumLauncher,
         );
         final Uri url = await device.devFS.create();
         if (debuggingOptions.buildInfo.isDebug) {
@@ -435,6 +437,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
             debuggingOptions.buildInfo,
             debuggingOptions.initializePlatform,
             false,
+            debuggingOptions.buildInfo.dartExperiments,
           );
         }
         await device.device.startApp(
@@ -496,6 +499,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
           debuggingOptions.buildInfo,
           debuggingOptions.initializePlatform,
           false,
+          debuggingOptions.buildInfo.dartExperiments,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -551,7 +555,7 @@ class _ResidentWebRunner extends ResidentWebRunner {
         ..createSync();
       result = _generatedEntrypointDirectory.childFile('web_entrypoint.dart');
 
-      final bool hasWebPlugins = findPlugins(flutterProject)
+      final bool hasWebPlugins = (await findPlugins(flutterProject))
         .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       await injectPlugins(flutterProject, checkProjects: true);
 
@@ -643,8 +647,8 @@ class _ResidentWebRunner extends ResidentWebRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    if (device.device is ChromeDevice) {
-      final Chrome chrome = await ChromeLauncher.connectedInstance;
+    if (_chromiumLauncher != null) {
+      final Chromium chrome = await _chromiumLauncher.connectedInstance;
       final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
       });

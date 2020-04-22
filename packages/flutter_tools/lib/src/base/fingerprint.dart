@@ -28,7 +28,7 @@ class Fingerprinter {
     Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
-       _properties = Map<String, String>.from(properties),
+       _properties = Map<String, String>.of(properties),
        _depfilePaths = depfilePaths.toList(),
        _pathFilter = pathFilter,
        assert(fingerprintPath != null),

@@ -28,11 +28,12 @@ Future<void> buildWeb(
   BuildInfo buildInfo,
   bool initializePlatform,
   bool csp,
+  List<String> experiments,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
   }
-  final bool hasWebPlugins = findPlugins(flutterProject)
+  final bool hasWebPlugins = (await findPlugins(flutterProject))
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
@@ -52,6 +53,8 @@ Future<void> buildWeb(
         kDartDefines: buildInfo.dartDefines.join(','),
         kCspMode: csp.toString(),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
+        if (experiments.isNotEmpty)
+          kEnableExperiment: experiments?.join(','),
       },
       artifacts: globals.artifacts,
       fileSystem: globals.fs,
