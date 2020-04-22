@@ -387,7 +387,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isPrerelease'] = true;
       setMockCompatibleVisualStudioInstallation(
         null,
@@ -448,7 +448,7 @@ void main() {
         fixture.processManager,
       );
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isComplete'] = false;
       setMockAnyVisualStudioInstallation(
         response,
@@ -476,7 +476,7 @@ void main() {
         fixture.processManager,
       );
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isLaunchable'] = false;
       setMockAnyVisualStudioInstallation(
         response,
@@ -503,7 +503,7 @@ void main() {
         fixture.processManager,
       );
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isRebootRequired'] = true;
       setMockAnyVisualStudioInstallation(
         response,
@@ -565,7 +565,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
@@ -585,7 +585,7 @@ void main() {
       final VisualStudioFixture fixture = setUpVisualStudio();
       final VisualStudio visualStudio = fixture.visualStudio;
 
-      final Map<String, dynamic> response = Map<String, dynamic>.from(_defaultResponse)
+      final Map<String, dynamic> response = Map<String, dynamic>.of(_defaultResponse)
         ..['isRebootRequired'] = true;
       setMockCompatibleVisualStudioInstallation(
         response,
