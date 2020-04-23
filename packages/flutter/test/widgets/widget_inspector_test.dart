@@ -2280,7 +2280,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       List<Map<Object, Object>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
       expect(flutterErrorEvents, isEmpty);
 
-      final FlutterExceptionHandler oldHandler = FlutterError.presentError;
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
 
       try {
         // Enable structured errors.
@@ -2337,7 +2337,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 0);
       } finally {
-        FlutterError.presentError = oldHandler;
+        FlutterError.onError = oldHandler;
       }
     });
 

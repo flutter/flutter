@@ -572,9 +572,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }) {
     assert(description != null);
     assert(inTest);
-    _oldExceptionHandler = FlutterError.presentError;
+    _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
-    FlutterError.presentError = (FlutterErrorDetails details) {
+    FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {
@@ -800,7 +800,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);
-    FlutterError.presentError = _oldExceptionHandler;
+    FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
