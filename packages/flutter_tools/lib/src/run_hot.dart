@@ -565,7 +565,9 @@ class HotRunner extends ResidentRunner {
         if (!uiIsolates.contains(isolate)) {
           operations.add(isolate.invokeRpcRaw('kill', params: <String, dynamic>{
             'isolateId': isolate.id,
-          }));
+          }).catchError((dynamic error, StackTrace stackTrace) {
+            // Do nothing, the isolate was already collected.
+          }, test: (dynamic error) => error is Exception));
         }
       }
     }

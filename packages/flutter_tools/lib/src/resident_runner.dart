@@ -988,9 +988,9 @@ abstract class ResidentRunner {
               isolateId: view.uiIsolate.id,
             );
           }
-        } on Exception catch (error) {
+        } on Exception catch (error, stackTrace) {
           status.cancel();
-          globals.printError('Error communicating with Flutter on the device: $error');
+          globals.printError('Error communicating with Flutter on the device: $error$stackTrace');
           return;
         }
       }
