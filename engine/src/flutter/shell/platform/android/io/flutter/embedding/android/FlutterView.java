@@ -861,9 +861,9 @@ public class FlutterView extends FrameLayout {
       locales.add(config.locale);
     }
 
-    List<Locale.LanguageRange> languageRanges = new ArrayList<>();
     Locale platformResolvedLocale = null;
     if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+      List<Locale.LanguageRange> languageRanges = new ArrayList<>();
       LocaleList localeList = config.getLocales();
       int localeCount = localeList.size();
       for (int index = 0; index < localeCount; ++index) {
