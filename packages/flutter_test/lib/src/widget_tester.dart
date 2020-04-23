@@ -561,6 +561,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
+  // By default: 59.94Hz
+  Future<void> pumpFrames(
+    Widget target, {
+    @required Duration fullDuration,
+    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+  }) {
+    assert(fullDuration != null);
+    final int frameNum = (fullDuration.inMicroseconds / interval.inMicroseconds).floor();
+    return TestAsyncUtils.guard<void>(() async {
+      for (int currentFrame = 0; currentFrame < frameNum; currentFrame++) {
+        binding.attachRootWidget(target);
+        binding.scheduleFrame();
+        await binding.pump(interval);
+      }
+    });
+  }
+
   /// Runs a [callback] that performs real asynchronous work.
   ///
   /// This is intended for callers who need to call asynchronous methods where
