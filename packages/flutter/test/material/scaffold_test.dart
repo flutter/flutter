@@ -1840,7 +1840,7 @@ void main() {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         const Key buttonKey = Key('button');
         final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-        FlutterError.presentError = (FlutterErrorDetails error) => errors.add(error);
+        FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
         int state = 0;
         await tester.pumpWidget(
           MaterialApp(
