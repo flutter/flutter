@@ -580,9 +580,9 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
     final BuildMode buildMode = getBuildMode();
-    final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons') && buildMode.isPrecompiled
-      ? boolArg('tree-shake-icons')
-      : false;
+    final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
+      && buildMode.isPrecompiled
+      && boolArg('tree-shake-icons');
 
     return BuildInfo(buildMode,
       argParser.options.containsKey('flavor')
