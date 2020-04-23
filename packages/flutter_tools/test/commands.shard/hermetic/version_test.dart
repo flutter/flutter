@@ -71,6 +71,27 @@ void main() {
       FlutterVersion: () => mockVersion,
     });
 
+    testUsingContext('dev version switch prompt is accepted', () async {
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      const String version = '30.0.0-dev.0.0';
+      final VersionCommand command = VersionCommand();
+      when(globals.terminal.promptForCharInput(<String>['y', 'n'],
+              logger: anyNamed('logger'), prompt: 'Are you sure you want to proceed?'))
+          .thenAnswer((Invocation invocation) async => 'y');
+
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+        '--no-pub',
+        version,
+      ]);
+      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
+    });
+
     testUsingContext('version switch prompt is declined', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
       const String version = '10.0.0';
