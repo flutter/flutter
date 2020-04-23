@@ -52,9 +52,6 @@ class UnpackWindows extends Target {
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    if (buildMode == null) {
-      throw MissingDefineException(kBuildMode, 'unpack_windows');
-    }
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,

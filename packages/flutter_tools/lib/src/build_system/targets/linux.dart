@@ -49,9 +49,6 @@ class UnpackLinux extends Target {
   @override
   Future<void> build(Environment environment) async {
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    if (buildMode == null) {
-      throw MissingDefineException(kBuildMode, 'unpack_linux');
-    }
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.linuxDesktopPath,
