@@ -57,6 +57,9 @@ source_set("flutter_linux") {
 
   sources = [
     "fl_dart_project.cc",
+    "fl_engine.cc",
+    "fl_renderer.cc",
+    "fl_renderer_x11.cc",
     "fl_view.cc",
   ]
 
