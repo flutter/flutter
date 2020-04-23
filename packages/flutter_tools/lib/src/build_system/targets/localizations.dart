@@ -35,16 +35,16 @@ Future<void> generateLocalizations({
     genL10nPath,
     if (options.arbDirectory != null)
       '--arb-dir=${options.arbDirectory}',
-    if (options.templateArb != null)
-      '--template-arb-file=${options.templateArb}',
-    if (options.output != null)
-      '--output-localization-file=${options.output}',
-    if (options.untranslatedMessages != null)
-      '--untranslated-messages-file=${options.untranslatedMessages}',
+    if (options.templateArbFile != null)
+      '--template-arb-file=${options.templateArbFile}',
+    if (options.outputLocalizationsFile != null)
+      '--output-localization-file=${options.outputLocalizationsFile}',
+    if (options.untranslatedMessagesFile != null)
+      '--untranslated-messages-file=${options.untranslatedMessagesFile}',
     if (options.outputClass != null)
       '--output-class=${options.outputClass}',
-    if (options.headerContext != null)
-      '--header=${options.headerContext}',
+    if (options.headerFile != null)
+      '--header=${options.headerFile}',
     if (options.header != null)
       '--header-file=${options.header}',
     if (options.deferredLoading != null)
@@ -58,6 +58,8 @@ Future<void> generateLocalizations({
   }
 }
 
+/// A build step that runs the generate localizations script from
+/// dev/tool/localizations.
 class GenerateLocalizationsTarget extends Target {
   const GenerateLocalizationsTarget();
 
@@ -93,28 +95,36 @@ class GenerateLocalizationsTarget extends Target {
     final DepfileService depfileService = DepfileService(
       logger: environment.logger,
       fileSystem: environment.fileSystem,
-      platform: globals.platform,
     );
 
-    // Setup project dependencies.
-    final List<File> inputs = <File>[configFile];
-    final List<File> outputs = <File>[];
-
-    final Uri defaultArb = environment.projectDir
-      .childDirectory('lib')
-      .childFile('l10n').uri;
-    inputs.addAll(environment.fileSystem
-      .directory(options.arbDirectory ?? defaultArb)
-      .listSync()
-      .whereType<File>()
-      .where((File file) => environment.fileSystem.path.extension(file.path) == 'arb'));
-
-    final Uri defaultLocaliations = environment.projectDir
-      .childDirectory('lib')
-      .childFile('app_localizations.dart').uri;
-    outputs.add(environment.fileSystem.file(
-      options.output ?? defaultLocaliations)
+    // Setup project inputs and outputs. This currently makes some
+    // guess about the output and does not include all files.
+    final Directory inputArb = environment.fileSystem.directory(
+      options.arbDirectory ?? environment.projectDir
+        .childDirectory('lib')
+        .childFile('l10n').uri,
     );
+    final File outputLocalizations = environment.fileSystem.file(
+      options.outputLocalizationsFile ?? environment.projectDir
+      .childDirectory('lib')
+      .childFile('app_localizations.dart').uri,
+    );
+
+    final List<File> inputs = <File>[
+      configFile,
+      if (options.headerFile != null)
+        environment.fileSystem.file(options.headerFile).absolute,
+      // Include all arb files as build inputs.
+      for (final File file in inputArb.listSync().whereType<File>())
+        if (environment.fileSystem.path.extension(file.path) == '.arb')
+          file,
+    ];
+    final List<File> outputs = <File>[
+      if (options.untranslatedMessagesFile != null)
+        environment.fileSystem.file(options.untranslatedMessagesFile).absolute,
+      outputLocalizations,
+    ];
+
     final Depfile depfile = Depfile(inputs, outputs);
 
     await generateLocalizations(
@@ -136,41 +146,57 @@ class GenerateLocalizationsTarget extends Target {
 class LocalizationOptions {
   const LocalizationOptions({
     @required this.arbDirectory,
-    @required this.templateArb,
-    @required this.output,
-    @required this.untranslatedMessages,
+    @required this.templateArbFile,
+    @required this.outputLocalizationsFile,
+    @required this.untranslatedMessagesFile,
     @required this.header,
     @required this.outputClass,
     @required this.preferredSupportedLocales,
-    @required this.headerContext,
+    @required this.headerFile,
     @required this.deferredLoading,
   });
 
   /// The `--arb-dir` argument.
+  ///
+  /// The directory where all localization files should reside.
   final Uri arbDirectory;
 
   /// The `--template-arb-file` argument.
   ///
   /// This URI is relative to [arbDirectory].
-  final Uri templateArb;
+  final Uri templateArbFile;
 
   /// The `--output-localization-file` argument.
   ///
   /// This URI is relative to [arbDirectory].
-  final Uri output;
+  final Uri outputLocalizationsFile;
 
   /// The `--untranslated-messages-file` argument.
   ///
   /// This URI is relative to [arbDirectory].
-  final Uri untranslatedMessages;
+  final Uri untranslatedMessagesFile;
 
+  /// The `--header` argument.
   ///
-  final Uri header;
+  /// The header to prepend to the generated Dart localizations
+  final String header;
 
   /// The `--output-class` argument.
   final String outputClass;
+
+  /// The `--preferred-supported-locales` argument.
   final String preferredSupportedLocales;
-  final String headerContext;
+
+  /// The `--header-file` argument.
+  ///
+  /// A file containing the header to preprend to the generated
+  /// Dart localizations.
+  final Uri headerFile;
+
+  /// The `--use-deferred-loading` argument.
+  ///
+  /// Whether to generate the Dart localization file with locales imported
+  /// as deferred.
   final bool deferredLoading;
 }
 
@@ -188,14 +214,14 @@ LocalizationOptions parseLocalizationsOptions({
   }
   final YamlMap yamlMap = yamlNode as YamlMap;
   return LocalizationOptions(
-    arbDirectory: tryReadUri(yamlMap, 'arb-directory', logger),
-    templateArb: tryReadUri(yamlMap, 'template-arb-file', logger),
-    output: tryReadUri(yamlMap, 'output-localization-file', logger),
-    untranslatedMessages: tryReadUri(yamlMap, 'arb-directory', logger),
-    header: tryReadUri(yamlMap, 'header-file', logger),
+    arbDirectory: tryReadUri(yamlMap, 'arb-dir', logger),
+    templateArbFile: tryReadUri(yamlMap, 'template-arb-file', logger),
+    outputLocalizationsFile: tryReadUri(yamlMap, 'output-localization-file', logger),
+    untranslatedMessagesFile: tryReadUri(yamlMap, 'untranslated-messages-file', logger),
+    header: tryReadString(yamlMap, 'header', logger),
     outputClass: tryReadString(yamlMap, 'output-class', logger),
     preferredSupportedLocales: tryReadString(yamlMap, 'preferred-supported-locales', logger),
-    headerContext: tryReadString(yamlMap, 'header', logger),
+    headerFile: tryReadUri(yamlMap, 'header-file', logger),
     deferredLoading: tryReadBool(yamlMap, 'use-deferred-loading', logger),
   );
 }
