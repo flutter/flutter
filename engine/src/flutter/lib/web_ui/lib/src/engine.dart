@@ -115,6 +115,7 @@ part 'engine/text/ruler.dart';
 part 'engine/text/unicode_range.dart';
 part 'engine/text/word_break_properties.dart';
 part 'engine/text/word_breaker.dart';
+part 'engine/text_editing/autofill_hint.dart';
 part 'engine/text_editing/input_type.dart';
 part 'engine/text_editing/text_editing.dart';
 part 'engine/util.dart';
