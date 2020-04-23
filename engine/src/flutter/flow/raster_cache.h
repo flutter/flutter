@@ -86,9 +86,20 @@ class RasterCache {
 
   void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
-  RasterCacheResult Get(const SkPicture& picture, const SkMatrix& ctm) const;
+  // Find the raster cache for the picture and draw it to the canvas.
+  //
+  // Return true if it's found and drawn.
+  bool Draw(const SkPicture& picture, SkCanvas& canvas) const;
 
-  RasterCacheResult Get(Layer* layer, const SkMatrix& ctm) const;
+  // Find the raster cache for the layer and draw it to the canvas.
+  //
+  // Addional paint can be given to change how the raster cache is drawn (e.g.,
+  // draw the raster cache with some opacity).
+  //
+  // Return true if the layer raster cache is found and drawn.
+  bool Draw(const Layer* layer,
+            SkCanvas& canvas,
+            SkPaint* paint = nullptr) const;
 
   void SweepAfterFrame();
 

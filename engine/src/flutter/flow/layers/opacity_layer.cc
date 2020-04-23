@@ -74,14 +74,10 @@ void OpacityLayer::Paint(PaintContext& context) const {
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
-  if (context.raster_cache) {
-    ContainerLayer* container = GetChildContainer();
-    const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
-    RasterCacheResult child_cache = context.raster_cache->Get(container, ctm);
-    if (child_cache.is_valid()) {
-      child_cache.draw(*context.leaf_nodes_canvas, &paint);
-      return;
-    }
+  if (context.raster_cache &&
+      context.raster_cache->Draw(GetChildContainer(),
+                                 *context.leaf_nodes_canvas, &paint)) {
+    return;
   }
 
   // Skia may clip the content with saveLayerBounds (although it's not a

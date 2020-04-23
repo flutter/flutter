@@ -39,26 +39,28 @@ TEST(RasterCache, ThresholdIsRespected) {
 
   sk_sp<SkImage> image;
 
+  SkCanvas dummy_canvas;
+
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
       cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
   // 1st access.
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 
   cache.SweepAfterFrame();
 
   ASSERT_FALSE(
       cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
 
-  // 2st access.
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  // 2nd access.
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 
   cache.SweepAfterFrame();
 
   // Now Prepare should cache it.
   ASSERT_TRUE(
       cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
-  ASSERT_TRUE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_TRUE(cache.Draw(*picture, dummy_canvas));
 }
 
 TEST(RasterCache, AccessThresholdOfZeroDisablesCaching) {
@@ -71,11 +73,13 @@ TEST(RasterCache, AccessThresholdOfZeroDisablesCaching) {
 
   sk_sp<SkImage> image;
 
+  SkCanvas dummy_canvas;
+
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
       cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
 
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 }
 
 TEST(RasterCache, PictureCacheLimitPerFrameIsRespectedWhenZero) {
@@ -88,11 +92,13 @@ TEST(RasterCache, PictureCacheLimitPerFrameIsRespectedWhenZero) {
 
   sk_sp<SkImage> image;
 
+  SkCanvas dummy_canvas;
+
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
       cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true, false));
 
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 }
 
 TEST(RasterCache, SweepsRemoveUnusedFrames) {
@@ -105,21 +111,23 @@ TEST(RasterCache, SweepsRemoveUnusedFrames) {
 
   sk_sp<SkImage> image;
 
+  SkCanvas dummy_canvas;
+
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
                              false));  // 1
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 
   cache.SweepAfterFrame();
 
   ASSERT_TRUE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
                             false));  // 2
-  ASSERT_TRUE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_TRUE(cache.Draw(*picture, dummy_canvas));
 
   cache.SweepAfterFrame();
   cache.SweepAfterFrame();  // Extra frame without a Get image access.
 
-  ASSERT_FALSE(cache.Get(*picture, matrix).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, dummy_canvas));
 }
 
 // Construct a cache result whose device target rectangle rounds out to be one
@@ -139,19 +147,22 @@ TEST(RasterCache, DeviceRectRoundOut) {
 
   SkMatrix ctm = SkMatrix::MakeAll(1.3312, 0, 233, 0, 1.3312, 206, 0, 0, 1);
 
+  SkCanvas canvas(100, 100, nullptr);
+  canvas.setMatrix(ctm);
+
   sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
       cache.Prepare(NULL, picture.get(), ctm, srgb.get(), true, false));
-  ASSERT_FALSE(cache.Get(*picture, ctm).is_valid());
+  ASSERT_FALSE(cache.Draw(*picture, canvas));
   cache.SweepAfterFrame();
   ASSERT_TRUE(cache.Prepare(NULL, picture.get(), ctm, srgb.get(), true, false));
-  ASSERT_TRUE(cache.Get(*picture, ctm).is_valid());
+  ASSERT_TRUE(cache.Draw(*picture, canvas));
 
-  SkCanvas canvas(100, 100, nullptr);
-  canvas.setMatrix(ctm);
   canvas.translate(248, 0);
-
-  cache.Get(*picture, ctm).draw(canvas);
+#ifndef SUPPORT_FRACTIONAL_TRANSLATION
+  canvas.setMatrix(RasterCache::GetIntegralTransCTM(canvas.getTotalMatrix()));
+#endif
+  ASSERT_TRUE(cache.Draw(*picture, canvas));
 }
 
 }  // namespace testing
