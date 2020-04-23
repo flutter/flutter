@@ -75,6 +75,10 @@ public class TextInputChannel {
                 result.error("error", exception.getMessage(), null);
               }
               break;
+            case "TextInput.requestAutofill":
+              textInputMethodHandler.requestAutofill();
+              result.success(null);
+              break;
             case "TextInput.setPlatformViewClient":
               final int id = (int) args;
               textInputMethodHandler.setPlatformViewClient(id);
