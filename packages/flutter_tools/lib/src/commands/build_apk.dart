@@ -30,7 +30,7 @@ class BuildApkCommand extends BuildSubCommand {
     addDartObfuscationOption();
     usesDartDefineOption();
     usesExtraFrontendOptions();
-    addBundleSkSLPathOption();
+    addBundleSkSLPathOption(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('split-per-abi',
