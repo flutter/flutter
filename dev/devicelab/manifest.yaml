@@ -749,6 +749,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  new_gallery__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   fast_scroll_large_images__memory:
     description: >
       Measures memory usage for scrolling through a list of large images.
