@@ -39,6 +39,23 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     echo
     exit 1
   }
+  command -v unzip > /dev/null 2>&1 || {
+    echo
+    echo 'Missing "unzip" tool. Unable to extract Dart SDK.'
+    case "$(uname -s)" in
+      Darwin)
+        echo 'Consider running "brew install unzip".'
+        ;;
+      Linux)
+        echo 'Consider running "sudo apt-get install unzip".'
+        ;;
+      *)
+        echo "Please install unzip."
+        ;;
+    esac
+    echo
+    exit 1
+  }
   echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
   case "$(uname -s)" in
