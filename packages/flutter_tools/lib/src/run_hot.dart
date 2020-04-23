@@ -1270,7 +1270,9 @@ class ProjectFileInvalidator {
     if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
       packageConfig = await _createPackageConfig(packagesPath);
-      // The frontend_server might be monitoring the package_config.json file.
+      // The frontend_server might be monitoring the package_config.json file,
+      // Pub should always produce both files.
+      // TODO(jonahwilliams): remove after https://github.com/flutter/flutter/issues/55249
       if (_fileSystem.path.basename(packagesPath) == '.packages') {
         final File packageConfigFile = _fileSystem.file(packagesPath)
           .parent.childDirectory('.dart_tool')
