@@ -426,12 +426,12 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBundleSkSLPathOption() {
+  void addBundleSkSLPathOption({ @required bool hide }) {
     argParser.addOption(FlutterOptions.kBundleSkSLPathOption,
       help: 'A path to a file containing precompiled SkSL shaders generated '
         'during "flutter run". These can be included in an application to '
         'impove the first frame render times.',
-      hide: true,
+      hide: hide,
       valueHelp: '/project-name/flutter_1.sksl'
     );
   }
