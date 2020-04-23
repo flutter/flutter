@@ -424,7 +424,6 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       // child count check for situation when height of first child in run over available height
       if (runHeight + childHeight + spaceWidth > height && childCount > 0) {
         width += runWidth + runSpacing;
-        runCount += 1;
         runHeight = 0.0;
         runWidth = 0.0;
         childCount = 0;
