@@ -177,6 +177,39 @@ void main() {
     }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
         skip: (browserEngine == BrowserEngine.firefox));
   });
+
+  group('Compositing order', () {
+    // Regression test for https://github.com/flutter/flutter/issues/55058
+    //
+    // When BitmapCanvas uses multiple elements to paint, the very first
+    // canvas needs to have a -1 zIndex so it can preserve compositing order.
+    test('First canvas element should retain -1 zIndex after update', () async {
+      final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+      final Picture picture1 = _drawPicture();
+      EngineLayer oldLayer = builder.pushClipRect(
+        const Rect.fromLTRB(10, 10, 300, 300),
+      );
+      builder.addPicture(Offset.zero, picture1);
+      builder.pop();
+
+      html.HtmlElement content = builder.build().webOnlyRootElement;
+      expect(content.querySelector('canvas').style.zIndex, '-1');
+
+      // Force update to scene which will utilize reuse code path.
+      final SurfaceSceneBuilder builder2 = SurfaceSceneBuilder();
+      builder2.pushClipRect(
+          const Rect.fromLTRB(5, 10, 300, 300),
+          oldLayer: oldLayer
+      );
+      final Picture picture2 = _drawPicture();
+      builder2.addPicture(Offset.zero, picture2);
+      builder2.pop();
+
+      html.HtmlElement contentAfterReuse = builder2.build().webOnlyRootElement;
+      expect(contentAfterReuse.querySelector('canvas').style.zIndex, '-1');
+    });
+  });
+
 }
 
 typedef TestLayerBuilder = EngineLayer Function(
@@ -311,4 +344,33 @@ class MockPersistedPicture extends PersistedPicture {
 
   @override
   int get bitmapPixelCount => 0;
+}
+
+Picture _drawPicture() {
+  const double offsetX = 50;
+  const double offsetY = 50;
+  final EnginePictureRecorder recorder = PictureRecorder();
+  final RecordingCanvas canvas =
+  recorder.beginRecording(const Rect.fromLTRB(0, 0, 400, 400));
+  canvas.drawCircle(
+      Offset(offsetX + 10, offsetY + 10), 10, Paint()..style = PaintingStyle.fill);
+  canvas.drawCircle(
+      Offset(offsetX + 60, offsetY + 10),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(255, 0, 0, 1));
+  canvas.drawCircle(
+      Offset(offsetX + 10, offsetY + 60),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(0, 255, 0, 1));
+  canvas.drawCircle(
+      Offset(offsetX + 60, offsetY + 60),
+      10,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color.fromRGBO(0, 0, 255, 1));
+  return recorder.endRecording();
 }
