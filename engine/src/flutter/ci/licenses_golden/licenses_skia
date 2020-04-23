@@ -1,4 +1,4 @@
-Signature: 5f026c60ac43d985f213b304b4ae8c7d
+Signature: 7dc34ba1944f5dc2435e61eb03f9c48b
 
 UNUSED LICENSES:
 
@@ -3899,11 +3899,15 @@ FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DOpsRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateBuilder.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DPipelineStateBuilder.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DResourceState.h
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRootSignature.cpp
+FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DRootSignature.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/d3d/GrD3DTexture.cpp
@@ -5620,6 +5624,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/animator/Vec2KeyframeAnimato
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/animator/VectorKeyframeAnimator.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/CornerPinEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/GlowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/ShadowStyles.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/Ellipse.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/shapelayer/FillStroke.cpp
