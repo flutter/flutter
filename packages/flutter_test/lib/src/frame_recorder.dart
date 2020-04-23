@@ -8,20 +8,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-class _IndexedImage {
-  _IndexedImage({this.image, this.index});
-
-  final ui.Image image;
-  final int index;
-}
-
 class FrameRecorder {
   FrameRecorder({@required this.frameSize})
     : assert(frameSize != null);
 
   final Size frameSize;
 
-  final List<Future<_IndexedImage>> _frameTasks = <Future<_IndexedImage>>[];
+  final List<Future<ui.Image>> _frameTasks = <Future<ui.Image>>[];
 
   Widget record({
     Key key,
@@ -34,22 +27,20 @@ class FrameRecorder {
         key: key,
         child: child,
         size: frameSize,
-        handleRecorded: recording ? (Future<ui.Image> getImage) {
-          final int index = _frameTasks.length;
-          _frameTasks.add(getImage.then((ui.Image image) => _IndexedImage(image: image, index: index)));
-        } : null,
+        handleRecorded: recording ? _frameTasks.add : null,
       ),
     );
   }
 
   Future<Widget> display({Key key}) async {
-    final List<ui.Image> frames = List<ui.Image>.filled(_frameTasks.length, null);
-    await Future.forEach<Future<_IndexedImage>>(_frameTasks, (Future<_IndexedImage> task) async {
-      final _IndexedImage indexedImage = await task;
-      assert(indexedImage.image.width == frameSize.width);
-      assert(indexedImage.image.height == frameSize.height);
-      frames[indexedImage.index] = indexedImage.image;
-    });
+    final List<ui.Image> frames = await Future.wait<ui.Image>(_frameTasks, eagerError: true);
+    assert(() {
+      for (final ui.Image frame in frames) {
+        assert(frame.width == frameSize.width);
+        assert(frame.height == frameSize.height);
+      }
+      return true;
+    }());
     return _CellGrid(
       key: key,
       cellSize: frameSize,
@@ -119,8 +110,7 @@ class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderPostFrameCallbacker renderObject) {
-    renderObject
-      .callback = callback;
+    renderObject.callback = callback;
   }
 }
 
