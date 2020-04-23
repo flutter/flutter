@@ -2331,6 +2331,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // The run test overrides the flutter error handler, so we should
         // restore it back for the structure error to continue working.
         FlutterError.onError = oldHandler;
+        // Cleans up the fake async so it does not bleed into next test.
+        binding.postTest();
 
         // Send another error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
