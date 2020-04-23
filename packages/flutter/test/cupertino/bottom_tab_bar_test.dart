@@ -17,7 +17,6 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
         DefaultWidgetsLocalizations.delegate,
         DefaultCupertinoLocalizations.delegate,
       ],
-      // Directionality(
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: widget,
