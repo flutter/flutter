@@ -238,10 +238,10 @@ class LinearProgressIndicator extends ProgressIndicator {
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-    this.minHeight = 4.0,
+    this.minHeight,
     String semanticsLabel,
     String semanticsValue,
-  }) : assert(minHeight != null && minHeight > 0),
+  }) : assert(minHeight == null || minHeight > 0),
        super(
         key: key,
         value: value,
@@ -295,7 +295,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       child: Container(
         constraints: BoxConstraints(
           minWidth: double.infinity,
-          minHeight: widget.minHeight,
+          minHeight: widget.minHeight ?? 4.0,
         ),
         child: CustomPaint(
           painter: _LinearProgressIndicatorPainter(
