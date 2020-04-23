@@ -510,10 +510,10 @@ class VMService implements vm_service.VmService {
       // getFromMap creates the Isolate if necessary.
       final Isolate isolate = vm.getFromMap(eventIsolate) as Isolate;
       event = ServiceObject._fromMap(isolate, eventData) as ServiceEvent;
-      if (event.kind == ServiceEvent.kIsolateExit) {
+      if (event.kind == vm_service.EventKind.kIsolateExit) {
         vm._isolateCache.remove(isolate.id);
         vm._buildIsolateList();
-      } else if (event.kind == ServiceEvent.kIsolateRunnable) {
+      } else if (event.kind == vm_service.EventKind.kIsolateRunnable) {
         // Force reload once the isolate becomes runnable so that we
         // update the root library.
         isolate.reload();
@@ -557,6 +557,11 @@ class VMService implements vm_service.VmService {
   @override
   Future<vm_service.Isolate> getIsolate(String isolateId) {
     return _delegateService.getIsolate(isolateId);
+  }
+
+  @override
+  Future<vm_service.Success> resume(String isolateId, {String step, int frameIndex}) {
+    return _delegateService.resume(isolateId, step: step, frameIndex: frameIndex);
   }
 
   // To enable a gradual migration to package:vm_service
@@ -791,34 +796,6 @@ class ServiceEvent extends ServiceObject {
   String _message;
   String get message => _message;
 
-  // The possible 'kind' values.
-  static const String kVMUpdate               = 'VMUpdate';
-  static const String kIsolateStart           = 'IsolateStart';
-  static const String kIsolateRunnable        = 'IsolateRunnable';
-  static const String kIsolateExit            = 'IsolateExit';
-  static const String kIsolateUpdate          = 'IsolateUpdate';
-  static const String kIsolateReload          = 'IsolateReload';
-  static const String kIsolateSpawn           = 'IsolateSpawn';
-  static const String kServiceExtensionAdded  = 'ServiceExtensionAdded';
-  static const String kPauseStart             = 'PauseStart';
-  static const String kPauseExit              = 'PauseExit';
-  static const String kPauseBreakpoint        = 'PauseBreakpoint';
-  static const String kPauseInterrupted       = 'PauseInterrupted';
-  static const String kPauseException         = 'PauseException';
-  static const String kPausePostRequest       = 'PausePostRequest';
-  static const String kNone                   = 'None';
-  static const String kResume                 = 'Resume';
-  static const String kBreakpointAdded        = 'BreakpointAdded';
-  static const String kBreakpointResolved     = 'BreakpointResolved';
-  static const String kBreakpointRemoved      = 'BreakpointRemoved';
-  static const String kGraph                  = '_Graph';
-  static const String kGC                     = 'GC';
-  static const String kInspect                = 'Inspect';
-  static const String kDebuggerSettingsUpdate = '_DebuggerSettingsUpdate';
-  static const String kConnectionClosed       = 'ConnectionClosed';
-  static const String kLogging                = '_Logging';
-  static const String kExtension              = 'Extension';
-
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {
     _loaded = true;
@@ -842,16 +819,6 @@ class ServiceEvent extends ServiceObject {
      if (base64Bytes != null) {
        _message = utf8.decode(base64.decode(base64Bytes)).trim();
      }
-  }
-
-  bool get isPauseEvent {
-    return kind == kPauseStart ||
-           kind == kPauseExit ||
-           kind == kPauseBreakpoint ||
-           kind == kPauseInterrupted ||
-           kind == kPauseException ||
-           kind == kPausePostRequest ||
-           kind == kNone;
   }
 }
 
@@ -1239,10 +1206,10 @@ class FlutterView {
 
   factory FlutterView.parse(Map<String, Object> json) {
     final Map<String, Object> rawIsolate = json['isolate'] as Map<String, Object>;
-    vm_service.Isolate isolate;
+    vm_service.IsolateRef isolate;
     if (rawIsolate != null) {
       rawIsolate['number'] = rawIsolate['number']?.toString();
-      isolate = vm_service.Isolate.parse(rawIsolate);
+      isolate = vm_service.IsolateRef.parse(rawIsolate);
     }
     return FlutterView(
       id: json['id'] as String,
@@ -1250,7 +1217,7 @@ class FlutterView {
     );
   }
 
-  final vm_service.Isolate uiIsolate;
+  final vm_service.IsolateRef uiIsolate;
   final String id;
 
   bool get hasIsolate => uiIsolate != null;

@@ -76,6 +76,7 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
+        print('LOG: $line');
         if (line.contains('((((TICK 1))))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
@@ -97,6 +98,7 @@ void main() {
       _project.scheduledBreakpointUri,
       _project.scheduledBreakpointLine,
     );
+    await Future<void>.delayed(const Duration(seconds: 2));
     await _flutter.hotReload(); // reload triggers code which eventually hits the breakpoint
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));

@@ -514,7 +514,7 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    if (!_isPaused()) {
+    if (!await _isPaused()) {
       globals.printTrace('Refreshing active FlutterViews before restarting.');
       await refreshViews();
     }
@@ -816,7 +816,7 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch reloadTimer = Stopwatch()..start();
 
-    if (!_isPaused()) {
+    if (!await _isPaused()) {
       globals.printTrace('Refreshing active FlutterViews before reloading.');
       await refreshVM();
       await refreshViews();
@@ -933,7 +933,8 @@ class HotRunner extends ResidentRunner {
       for (final FlutterView view in device.views) {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
-        final vm_service.Event pauseEvent = view.uiIsolate.pauseEvent;
+        final vm_service.Isolate isolate = await device.vmService.getIsolate(view.uiIsolate.id);
+        final vm_service.Event pauseEvent = isolate.pauseEvent;
         if (pauseEvent != null
           && isPauseEvent(pauseEvent.kind)
           && pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -1062,25 +1063,41 @@ class HotRunner extends ResidentRunner {
     }
     assert(serviceEventKind != null);
     switch (serviceEventKind) {
-      case ServiceEvent.kPauseStart: message.write('paused (probably due to --start-paused)'); break;
-      case ServiceEvent.kPauseExit: message.write('paused because ${ plural ? 'they have' : 'it has' } terminated'); break;
-      case ServiceEvent.kPauseBreakpoint: message.write('paused in the debugger on a breakpoint'); break;
-      case ServiceEvent.kPauseInterrupted: message.write('paused due in the debugger'); break;
-      case ServiceEvent.kPauseException: message.write('paused in the debugger after an exception was thrown'); break;
-      case ServiceEvent.kPausePostRequest: message.write('paused'); break;
-      case '': message.write('paused for various reasons'); break;
+      case vm_service.EventKind.kPauseStart:
+        message.write('paused (probably due to --start-paused)');
+        break;
+      case vm_service.EventKind.kPauseExit:
+        message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
+        break;
+      case vm_service.EventKind.kPauseBreakpoint:
+        message.write('paused in the debugger on a breakpoint');
+        break;
+      case vm_service.EventKind.kPauseInterrupted:
+        message.write('paused due in the debugger');
+        break;
+      case vm_service.EventKind.kPauseException:
+        message.write('paused in the debugger after an exception was thrown');
+        break;
+      case vm_service.EventKind.kPausePostRequest:
+        message.write('paused');
+        break;
+      case '':
+        message.write('paused for various reasons');
+        break;
       default:
         message.write('paused');
     }
     return message.toString();
   }
 
-  bool _isPaused() {
+  Future<bool> _isPaused() async {
     for (final FlutterDevice device in flutterDevices) {
       for (final FlutterView view in device.views) {
+        final vm_service.Isolate isolate = await device.vmService
+          .getIsolate(view.uiIsolate.id);
         if (view.uiIsolate != null) {
-          if (view.uiIsolate.pauseEvent != null
-            && isPauseEvent(view.uiIsolate.pauseEvent.kind)) {
+          if (isolate.pauseEvent != null
+            && isPauseEvent(isolate.pauseEvent.kind)) {
             return true;
           }
         }
