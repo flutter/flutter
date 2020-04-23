@@ -959,13 +959,13 @@ mixin WidgetInspectorService {
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
 
     final FlutterExceptionHandler structuredExceptionHandler = _reportError;
-    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.presentError;
+    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.onError;
 
     _registerBoolServiceExtension(
       name: 'structuredErrors',
-      getter: () async => FlutterError.presentError == structuredExceptionHandler,
+      getter: () async => FlutterError.onError == structuredExceptionHandler,
       setter: (bool value) {
-        FlutterError.presentError = value ? structuredExceptionHandler : defaultExceptionHandler;
+        FlutterError.onError = value ? structuredExceptionHandler : defaultExceptionHandler;
         return Future<void>.value();
       },
     );
