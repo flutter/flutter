@@ -10,6 +10,9 @@ import 'diagnostics.dart';
 import 'print.dart';
 import 'stack_frame.dart';
 
+// Examples can assume:
+// String runtimeType;
+
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
@@ -325,7 +328,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
-///  {@tool --snippet}
+///  {@tool snippet}
 /// This is an example of using [FlutterErrorDetails] when calling
 /// [FlutterError.reportError].
 ///
@@ -333,7 +336,7 @@ class ErrorSpacer extends DiagnosticsProperty<void> {
 /// void main() {
 ///   try {
 ///     // Try to do something!
-///   } catch (error, stack) {
+///   } catch (error) {
 ///     // Catch & report error.
 ///     FlutterError.reportError(FlutterErrorDetails(
 ///       exception: error,
@@ -413,15 +416,15 @@ class FlutterErrorDetails with Diagnosticable {
   /// obtaining the image from the network" (for the context "while obtaining
   /// the image from the network").
   ///
-  ///  {@tool --snippet}
+  /// {@tool snippet}
   /// This is an example of using and [ErrorDescription] as the
   /// [FlutterErrorDetails.context] when calling [FlutterError.reportError].
   ///
   /// ```dart
-  /// void main() {
+  /// void maybeDoSomething() {
   ///   try {
   ///     // Try to do something!
-  ///   } catch (error, stack) {
+  ///   } catch (error) {
   ///     // Catch & report error.
   ///     FlutterError.reportError(FlutterErrorDetails(
   ///       exception: error,
