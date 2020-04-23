@@ -6,6 +6,28 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../build_system.dart';
+import '../depfile.dart';
+import '../exceptions.dart';
+import 'assets.dart';
+import 'dart.dart';
+import 'desktop.dart';
+import 'icon_tree_shaker.dart';
+
+/// The only files/subdirectories we care about.
+const List<String> _kWindowsArtifacts = <String>[
+  'flutter_windows.dll',
+  'flutter_windows.dll.exp',
+  'flutter_windows.dll.lib',
+  'flutter_windows.dll.pdb',
+  'flutter_export.h',
+  'flutter_messenger.h',
+  'flutter_plugin_registrar.h',
+  'flutter_windows.h',
+  'icudtl.dat',
+  'cpp_client_wrapper',
+];
+
+const String _kWindowsDepfile = 'windows_engine_sources.d';
 
 /// Copies the Windows desktop embedding files to the copy directory.
 class UnpackWindows extends Target {
@@ -17,46 +39,101 @@ class UnpackWindows extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
-    Source.artifact(Artifact.windowsDesktopPath, mode: BuildMode.debug),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.exp'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.lib'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.pdb'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_export.h'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_messenger.h'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_plugin_registrar.h'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.h'),
-    Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
-  ];
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[_kWindowsDepfile];
 
   @override
   List<Target> get dependencies => const <Target>[];
 
   @override
   Future<void> build(Environment environment) async {
-    // This path needs to match the prefix in the rule below.
-    final String basePath = environment.artifacts
-      .getArtifactPath(Artifact.windowsDesktopPath);
-    for (final File input in environment.fileSystem.directory(basePath)
-        .listSync(recursive: true)
-        .whereType<File>()) {
-      final String outputPath = environment.fileSystem.path.join(
+    final String artifactPath = environment.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
+    final Directory outputDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(
         environment.projectDir.path,
         'windows',
         'flutter',
-        environment.fileSystem.path
-          .relative(input.path, from: basePath),
-      );
-      final File destinationFile = environment.fileSystem.file(outputPath);
-      if (!destinationFile.parent.existsSync()) {
-        destinationFile.parent.createSync(recursive: true);
-      }
-      environment.fileSystem
-        .file(input).copySync(destinationFile.path);
+        'ephemeral',
+      ),
+    );
+    final Depfile depfile = unpackDesktopArtifacts(
+      fileSystem: environment.fileSystem,
+      artifacts: _kWindowsArtifacts,
+      artifactPath: artifactPath,
+      outputDirectory: outputDirectory,
+    );
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile(_kWindowsDepfile),
+    );
+  }
+}
+
+/// Creates a debug bundle for the Windows desktop target.
+class DebugBundleWindowsAssets extends Target {
+  const DebugBundleWindowsAssets();
+
+  @override
+  String get name => 'debug_bundle_windows_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+    UnpackWindows(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'debug_bundle_windows_assets');
     }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final Directory outputDirectory = environment.outputDir
+      .childDirectory('flutter_assets');
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync();
+    }
+
+    // Only copy the kernel blob in debug mode.
+    if (buildMode == BuildMode.debug) {
+      environment.buildDir.childFile('app.dill')
+        .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+    }
+    final Depfile depfile = await copyAssets(environment, outputDirectory);
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 }

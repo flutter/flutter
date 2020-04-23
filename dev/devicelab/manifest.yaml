@@ -749,6 +749,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  new_gallery__transition_perf:
+    description: >
+      Measures the performance of screen transitions in the new Flutter Gallery on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   fast_scroll_large_images__memory:
     description: >
       Measures memory usage for scrolling through a list of large images.
@@ -811,3 +817,18 @@ tasks:
   #   stage: devicelab_ios
   #   required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
   #   flaky: true
+
+  flutter_gallery_v2_chrome_run_test:
+    description: >
+      Checks that the New Flutter Gallery runs successfully on Chrome.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  flutter_gallery_v2_web_compile_test:
+    description: >
+      Measures the time to compile the New Flutter Gallery to JavaScript
+      and the size of the compiled code.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true

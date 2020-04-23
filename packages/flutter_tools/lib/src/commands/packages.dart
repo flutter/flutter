@@ -205,7 +205,7 @@ class PackagesPublishCommand extends FlutterCommand {
       if (boolArg('force')) '--force',
     ];
     Cache.releaseLockEarly();
-    await pub.interactively(<String>['publish', ...args]);
+    await pub.interactively(<String>['publish', ...args], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
 }
@@ -236,7 +236,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub.interactively(<String>[_commandName, ...argResults.rest]);
+    await pub.interactively(<String>[_commandName, ...argResults.rest], stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
 
@@ -264,7 +264,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    await pub.interactively(argResults.rest);
+    await pub.interactively(argResults.rest, stdio: globals.stdio);
     return FlutterCommandResult.success();
   }
 }

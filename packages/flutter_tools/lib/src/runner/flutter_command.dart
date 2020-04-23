@@ -470,14 +470,14 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableExperimentation({ bool verbose }) {
+  void addEnableExperimentation({ bool hide = false }) {
     argParser.addMultiOption(
       FlutterOptions.kEnableExperiment,
       help:
         'The name of an experimental Dart feature to enable. For more info '
         'see: https://github.com/dart-lang/sdk/blob/master/docs/process/'
         'experimental-flags.md',
-      hide: !verbose,
+      hide: hide,
     );
   }
 
@@ -542,18 +542,27 @@ abstract class FlutterCommand extends Command<void> {
       boolArg('track-widget-creation');
 
     final String buildNumber = argParser.options.containsKey('build-number')
-        ? stringArg('build-number')
-        : null;
+      ? stringArg('build-number')
+      : null;
 
+    final List<String> experiments =
+      argParser.options.containsKey(FlutterOptions.kEnableExperiment)
+        ? stringsArg(FlutterOptions.kEnableExperiment)
+        : <String>[];
+    final List<String> extraGenSnapshotOptions =
+      argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
+        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+        : <String>[];
     final List<String> extraFrontEndOptions =
-        argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
-            : <String>[];
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment] != null) {
-      for (final String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
+      argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
+          ? stringsArg(FlutterOptions.kExtraFrontEndOptions)
+          : <String>[];
+
+    if (experiments.isNotEmpty) {
+      for (final String expFlag in experiments) {
         final String flag = '--enable-experiment=' + expFlag;
         extraFrontEndOptions.add(flag);
+        extraGenSnapshotOptions.add(flag);
       }
     }
 
@@ -579,8 +588,8 @@ abstract class FlutterCommand extends Command<void> {
       extraFrontEndOptions: extraFrontEndOptions?.isNotEmpty ?? false
         ? extraFrontEndOptions
         : null,
-      extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-        ? stringsArg(FlutterOptions.kExtraGenSnapshotOptions)
+      extraGenSnapshotOptions: extraGenSnapshotOptions?.isNotEmpty ?? false
+        ? extraGenSnapshotOptions
         : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? stringsArg(FlutterOptions.kFileSystemRoot)
@@ -600,6 +609,7 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines: argParser.options.containsKey(FlutterOptions.kDartDefinesOption)
           ? stringsArg(FlutterOptions.kDartDefinesOption)
           : const <String>[],
+      dartExperiments: experiments,
     );
   }
 
@@ -818,7 +828,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
+    if (_requiresPubspecYaml && !isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
 
       // If there is no pubspec in the current directory, look in the parent
@@ -834,14 +844,6 @@ abstract class FlutterCommand extends Command<void> {
       }
       if (changedDirectory) {
         globals.printStatus('Changing current working directory to: ${globals.fs.currentDirectory.path}');
-      }
-
-      // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
-        final String error = PackageMap(PackageMap.globalPackagesPath, fileSystem: globals.fs).checkValid();
-        if (error != null) {
-          throw ToolExit(error);
-        }
       }
     }
 

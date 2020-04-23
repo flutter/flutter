@@ -21,19 +21,19 @@ import 'build_ios_framework.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
-  BuildCommand({bool verboseHelp = false}) {
+  BuildCommand({ bool verboseHelp = false }) {
     addSubcommand(BuildAarCommand());
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand());
-    addSubcommand(BuildIOSCommand());
+    addSubcommand(BuildIOSCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSFrameworkCommand(
       buildSystem: globals.buildSystem,
       bundleBuilder: BundleBuilder(),
     ));
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildWebCommand());
-    addSubcommand(BuildMacosCommand());
+    addSubcommand(BuildWebCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildLinuxCommand());
     addSubcommand(BuildWindowsCommand());
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));

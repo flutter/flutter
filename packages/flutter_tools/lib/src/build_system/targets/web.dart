@@ -28,6 +28,11 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// Allow specifying experiments for dart2js.
+///
+/// Multiple values should be encoded as a comma-separated list.
+const String kEnableExperiment = 'EnableExperiment';
+
 /// Whether to disable dynamic generation code to satisfy csp policies.
 const String kCspMode = 'cspMode';
 
@@ -58,15 +63,9 @@ class WebEntrypointTarget extends Target {
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      environment.projectDir.childFile('.packages').absolute.uri,
-      loader: (Uri uri) {
-        final File file = environment.fileSystem.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      }
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      environment.projectDir.childFile('.packages'),
+      logger: environment.logger,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -160,11 +159,13 @@ class Dart2JSTarget extends Target {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
     final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
-    final String packageFile = PackageMap.globalPackagesPath;
+    final String specPath = globals.fs.path.join(
+      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
+    final String packageFile = globalPackagesPath;
     final File outputKernel = environment.buildDir.childFile('app.dill');
     final File outputFile = environment.buildDir.childFile('main.dart.js');
     final List<String> dartDefines = parseDartDefines(environment);
+    final String enabledExperiments = environment.defines[kEnableExperiment];
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
@@ -172,11 +173,17 @@ class Dart2JSTarget extends Target {
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
+      if (enabledExperiments != null)
+        '--enable-experiment=$enabledExperiments',
       '-o',
       outputKernel.path,
+      '--packages=$packageFile',
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
       for (final String dartDefine in dartDefines)
         '-D$dartDefine',
-      '--packages=$packageFile',
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path,
     ]);
@@ -187,6 +194,8 @@ class Dart2JSTarget extends Target {
       globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
+      if (enabledExperiments != null)
+        '--enable-experiment=$enabledExperiments',
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
       else
@@ -218,7 +227,6 @@ class Dart2JSTarget extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     final Depfile depfile = depfileService.parseDart2js(
       environment.buildDir.childFile('app.dill.deps'),
@@ -282,7 +290,6 @@ class WebReleaseBundle extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,
@@ -377,7 +384,6 @@ class WebServiceWorker extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,

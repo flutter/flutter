@@ -447,7 +447,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
@@ -496,7 +496,9 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
+  );
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -625,7 +627,14 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  }, skip: isBrowser, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -2917,7 +2926,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -7407,6 +7416,48 @@ void main() {
 
       final RenderBox renderBox = tester.renderObject(find.byType(TextField));
       expect(renderBox.size.height, lessThan(kMinInteractiveDimension));
+    });
+
+    group('intrinsics', () {
+      Widget _buildTest({ bool isDense }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Column(
+                    children: <Widget>[
+                      TextField(
+                        decoration: InputDecoration(
+                          isDense: isDense,
+                        )
+                      ),
+                      Container(
+                        height: 1000,
+                      ),
+                    ],
+                  )
+                )
+              ],
+            )
+          )
+        );
+      }
+
+      testWidgets('By default, intrinsic height is at least kMinInteractiveDimension high', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/54729
+        // If the intrinsic height does not match that of the height after
+        // performLayout, this will fail.
+        tester.pumpWidget(_buildTest(isDense: false));
+      });
+
+      testWidgets('When isDense, intrinsic height can go below kMinInteractiveDimension height', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/54729
+        // If the intrinsic height does not match that of the height after
+        // performLayout, this will fail.
+        tester.pumpWidget(_buildTest(isDense: true));
+      });
     });
   });
   testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {

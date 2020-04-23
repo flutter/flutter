@@ -376,6 +376,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
+      chromiumLauncher: null,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -469,6 +470,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
+      chromiumLauncher: null,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -482,6 +484,7 @@ void main() {
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
+      null,
       'any',
       8123,
       (String url) => null,

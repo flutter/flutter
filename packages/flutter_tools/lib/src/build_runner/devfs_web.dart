@@ -125,6 +125,7 @@ class WebAssetServer implements AssetReader {
   /// Unhandled exceptions will throw a [ToolExit] with the error and stack
   /// trace.
   static Future<WebAssetServer> start(
+    ChromiumLauncher chromiumLauncher,
     String hostname,
     int port,
     UrlTunneller urlTunneller,
@@ -144,15 +145,9 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final PackageConfig packageConfig = await loadPackageConfigUri(
-        globals.fs.file(PackageMap.globalPackagesPath).absolute.uri,
-        loader: (Uri uri) {
-          final File file = globals.fs.file(uri);
-          if (!file.existsSync()) {
-            return null;
-          }
-          return file.readAsBytes();
-        }
+      final PackageConfig packageConfig = await loadPackageConfigOrFail(
+        globals.fs.file(globalPackagesPath),
+        logger: globals.logger,
       );
       final Map<String, String> digests = <String, String>{};
       final Map<String, String> modules = <String, String>{};
@@ -214,8 +209,8 @@ class WebAssetServer implements AssetReader {
         enableDebugExtension: true,
         buildResults: const Stream<BuildResult>.empty(),
         chromeConnection: () async {
-          final Chrome chrome = await ChromeLauncher.connectedInstance;
-          return chrome.chromeConnection;
+          final Chromium chromium = await chromiumLauncher.connectedInstance;
+          return chromium.chromeConnection;
         },
         hostname: hostname,
         urlEncoder: urlTunneller,
@@ -568,6 +563,7 @@ class WebDevFS implements DevFS {
     @required this.enableDwds,
     @required this.entrypoint,
     @required this.expressionCompiler,
+    @required this.chromiumLauncher,
     this.testMode = false,
   });
 
@@ -581,6 +577,7 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final bool testMode;
   final ExpressionCompiler expressionCompiler;
+  final ChromiumLauncher chromiumLauncher;
 
   WebAssetServer webAssetServer;
 
@@ -638,6 +635,7 @@ class WebDevFS implements DevFS {
   @override
   Future<Uri> create() async {
     webAssetServer = await WebAssetServer.start(
+      chromiumLauncher,
       hostname,
       port,
       urlTunneller,
