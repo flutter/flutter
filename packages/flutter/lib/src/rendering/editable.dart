@@ -332,15 +332,18 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     markNeedsTextLayout();
   }
 
-  /// Character used to obscure text if [obscureText] is true.
+  /// Character used for obscuring text if [obscureText] is true.
+  ///
+  /// Cannot be null, and must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
   String _obscuringCharacter;
   set obscuringCharacter(String value) {
     if (_obscuringCharacter == value) {
       return;
     }
+    assert(value != null && value.length == 1);
     _obscuringCharacter = value;
-    markNeedsSemanticsUpdate();
+    markNeedsLayout();
   }
 
   /// Whether to hide the text being edited (e.g., for passwords).

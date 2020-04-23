@@ -467,11 +467,12 @@ class EditableText extends StatefulWidget {
   final FocusNode focusNode;
 
   /// {@template flutter.widgets.editableText.obscuringCharacter}
-  /// Character used to obscure text if [obscureText] is true.
+  /// Character used for obscuring text if [obscureText] is true.
   ///
   ///  Must be only a single character.
   ///
   /// Defaults to the character U+2022 BULLET (•).
+  /// {@endtemplate}
   final String obscuringCharacter;
 
   /// {@template flutter.widgets.editableText.obscureText}
