@@ -242,16 +242,18 @@ void main() {
       ),
     ));
 
-    final Rect expansionTileRect = tester.getRect(find.byType(ExpansionTile));
     final Rect titleRect = tester.getRect(find.text('Hello'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
+    final Rect listTileRect = tester.getRect(find.byType(ListTile));
+    final Rect tallerWidget = titleRect.height > trailingRect.height ? titleRect : trailingRect;
 
     // Check the positions of title and trailing Widgets, after padding is applied.
-    expect(expansionTileRect.left, titleRect.left - 8);
-    expect(expansionTileRect.right, trailingRect.right + 4);
+    expect(listTileRect.left, titleRect.left - 8);
+    expect(listTileRect.right, trailingRect.right + 4);
 
-    // The height of ListTile should be 78.0, considering the default height of
-    // ListTile is 56.0, and top and bottom padding are 12.0 and 10.0 respectively.
-    expect(tester.getRect(find.byType(ListTile)).height, 78.0);
+    // Calculate the remaining height of ListTile from the default height.
+    final double remainingHeight = 56 - tallerWidget.height;
+    expect(listTileRect.top, tallerWidget.top - remainingHeight / 2 - 12);
+    expect(listTileRect.bottom, tallerWidget.bottom + remainingHeight / 2 + 10);
   });
 }
