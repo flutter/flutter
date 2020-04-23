@@ -241,14 +241,15 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight = 4.0,
     String semanticsLabel,
     String semanticsValue,
-  }) : super(
-         key: key,
-         value: value,
-         backgroundColor: backgroundColor,
-         valueColor: valueColor,
-         semanticsLabel: semanticsLabel,
-         semanticsValue: semanticsValue,
-       );
+  }) : assert(minHeight != null && minHeight > 0),
+       super(
+        key: key,
+        value: value,
+        backgroundColor: backgroundColor,
+        valueColor: valueColor,
+        semanticsLabel: semanticsLabel,
+        semanticsValue: semanticsValue,
+      );
 
   /// The minimum height of the line used to draw the indicator.
   ///
