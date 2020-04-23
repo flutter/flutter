@@ -469,7 +469,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.obscuringCharacter}
   /// Character used for obscuring text if [obscureText] is true.
   ///
-  ///  Must be only a single character.
+  /// Must be only a single character.
   ///
   /// Defaults to the character U+2022 BULLET (•).
   /// {@endtemplate}
@@ -2113,7 +2113,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textAlign,
     @required this.textDirection,
     this.locale,
-    this.obscuringCharacter = '•',
+    this.obscuringCharacter,
     this.obscureText,
     this.autocorrect,
     this.smartDashesType,
@@ -2249,7 +2249,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..textWidthBasis = textWidthBasis
-      .. obscuringCharacter = obscuringCharacter
+      ..obscuringCharacter = obscuringCharacter
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
