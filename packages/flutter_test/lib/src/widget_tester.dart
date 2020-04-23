@@ -220,6 +220,58 @@ class DefaultTestVariant extends TestVariant<void> {
   Future<void> tearDown(void value, void memento) async {}
 }
 
+typedef ListVariantValueToString<T> = String Function(T value);
+
+/// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
+/// set to different values of [TargetPlatform].
+class ListVariant<T> extends TestVariant<T> {
+  /// Creates a [TargetPlatformVariant] that tests the given [values].
+  const ListVariant({
+    @required this.values,
+    @required this.onVariant,
+    this.initialValue,
+    this.valueToString,
+  }) : assert(onVariant != null),
+       assert(values.length != 0); // ignore: prefer_is_empty
+
+  @override
+  final List<T> values;
+
+  /// A closure that will set the variable to a given value.
+  ///
+  /// This will be called each time a test is run, once at the beginning of the
+  /// test with the value used for the test, and once after the test has run,
+  /// giving it the [initialValue] again.
+  final ValueChanged<T> onVariant;
+
+  /// The value to call [onVariant] with once the test is finished.
+  final T initialValue;
+
+  /// If set, is used to describe the value for each test description.
+  ///
+  /// If not set, will default to the value's `toString` method.
+  final ListVariantValueToString<T> valueToString;
+
+  @override
+  String describeValue(T value) {
+    if (valueToString != null) {
+      return valueToString(value);
+    }
+    return value.toString();
+  }
+
+  @override
+  Future<T> setUp(T value) async {
+    onVariant(value);
+    return initialValue;
+  }
+
+  @override
+  Future<void> tearDown(T value, T memento) async {
+    onVariant(memento);
+  }
+}
+
 /// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
 /// set to different values of [TargetPlatform].
 class TargetPlatformVariant extends TestVariant<TargetPlatform> {

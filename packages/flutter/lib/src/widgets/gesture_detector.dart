@@ -189,6 +189,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapUp,
     this.onTap,
     this.onTapCancel,
+    this.onSecondaryTap,
     this.onSecondaryTapDown,
     this.onSecondaryTapUp,
     this.onSecondaryTapCancel,
@@ -303,6 +304,18 @@ class GestureDetector extends StatelessWidget {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCancelCallback onTapCancel;
+
+  /// A tap with a secondary button has occurred.
+  ///
+  /// This triggers when the tap gesture wins. If the tap gesture did not win,
+  /// [onTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
+  ///  * [onSecondaryTapUp], which is called at the same time but includes details
+  ///    regarding the pointer position.
+  final GestureTapCallback onSecondaryTap;
 
   /// A pointer that might cause a tap with a secondary button has contacted the
   /// screen at a particular location.
@@ -601,6 +614,7 @@ class GestureDetector extends StatelessWidget {
       onTapUp != null ||
       onTap != null ||
       onTapCancel != null ||
+      onSecondaryTap != null ||
       onSecondaryTapDown != null ||
       onSecondaryTapUp != null ||
       onSecondaryTapCancel != null
@@ -613,6 +627,7 @@ class GestureDetector extends StatelessWidget {
             ..onTapUp = onTapUp
             ..onTap = onTap
             ..onTapCancel = onTapCancel
+            ..onSecondaryTap = onSecondaryTap
             ..onSecondaryTapDown = onSecondaryTapDown
             ..onSecondaryTapUp = onSecondaryTapUp
             ..onSecondaryTapCancel = onSecondaryTapCancel;
