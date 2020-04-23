@@ -181,7 +181,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               padding: EdgeInsets.only(bottom: bottomPadding),
               child: Semantics(
                 explicitChildNodes: true,
-                child:Row(
+                child: Row(
                   // Align bottom since we want the labels to be aligned.
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: _buildTabItems(context),
