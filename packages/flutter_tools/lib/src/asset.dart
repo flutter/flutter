@@ -125,7 +125,7 @@ class _ManifestAssetBundle implements AssetBundle {
     bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= globals.fs.path.absolute(globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
       flutterManifest = FlutterManifest.createFromPath(
@@ -152,15 +152,9 @@ class _ManifestAssetBundle implements AssetBundle {
     }
 
     final String assetBasePath = globals.fs.path.dirname(globals.fs.path.absolute(manifestPath));
-    final PackageConfig packageConfig = await loadPackageConfigUri(
-      globals.fs.file(packagesPath).absolute.uri,
-      loader: (Uri uri) {
-        final File file = globals.fs.file(uri);
-        if (!file.existsSync()) {
-          return null;
-        }
-        return file.readAsBytes();
-      },
+    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      globals.fs.file(packagesPath),
+      logger: globals.logger,
     );
     final List<Uri> wildcardDirectories = <Uri>[];
 

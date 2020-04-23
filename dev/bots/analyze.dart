@@ -605,6 +605,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.jpg')
     .where((File file) => path.extension(file.path) != '.ico')
     .where((File file) => path.extension(file.path) != '.jar')
+    .where((File file) => path.extension(file.path) != '.swp')
     .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
@@ -1299,5 +1300,6 @@ bool _isGeneratedPluginRegistrant(File file) {
   return !file.path.contains('.pub-cache')
       && (filename == 'GeneratedPluginRegistrant.java' ||
           filename == 'GeneratedPluginRegistrant.h' ||
-          filename == 'GeneratedPluginRegistrant.m');
+          filename == 'GeneratedPluginRegistrant.m' ||
+          filename == 'generated_plugin_registrant.dart');
 }

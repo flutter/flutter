@@ -305,34 +305,17 @@ class WebCompileTest {
 
   Future<TaskResult> run() async {
     final Map<String, Object> metrics = <String, Object>{};
-    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
-      await _measureSize('hello_world', output, metrics);
-      return null;
-    });
-    await inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', () async {
-      await flutter('packages', options: <String>['get']);
-      await evalFlutter('build', options: <String>[
-        'web',
-        '-v',
-        '--release',
-        '--no-pub',
-      ], environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-      });
-      final String output = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery/build/web/main.dart.js';
-      await _measureSize('flutter_gallery', output, metrics);
-      return null;
-    });
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/examples/hello_world',
+      metric: 'hello_world',
+    ));
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+      metric: 'flutter_gallery',
+    ));
+
     const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
@@ -340,30 +323,61 @@ class WebCompileTest {
 
     await inDirectory<void>(Directory.systemTemp, () async {
       await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-      await inDirectory(sampleDir, () async {
-        await flutter('packages', options: <String>['get']);
-        await evalFlutter('build', options: <String>[
-          'web',
-          '-v',
-          '--release',
-          '--no-pub',
-        ], environment: <String, String>{
-          'FLUTTER_WEB': 'true',
-        });
-        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
+        'FLUTTER_WEB': 'true',
       });
     });
+
+    metrics.addAll(await runSingleBuildTest(
+      directory: sampleDir.path,
+      metric: 'basic_material_app',
+    ));
+
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 
-  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
-    final ProcessResult result = await Process.run('du', <String>['-k', output]);
-    await Process.run('gzip',<String>['-k', '9', output]);
-    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
-    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
-    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+  /// Run a single web compile test and return its metrics.
+  ///
+  /// Run a single web compile test for the app under [directory], and store
+  /// its metrics with prefix [metric].
+  static Future<Map<String, int>> runSingleBuildTest({String directory, String metric, bool measureBuildTime = false}) {
+    return inDirectory<Map<String, int>>(directory, () async {
+      final Map<String, int> metrics = <String, int>{};
+
+      await flutter('packages', options: <String>['get']);
+      final Stopwatch watch = measureBuildTime ? Stopwatch() : null;
+      watch?.start();
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
+      watch?.stop();
+      final String outputFileName = path.join(directory, 'build/web/main.dart.js');
+      metrics.addAll(await getSize(outputFileName, metric: metric));
+
+      if (measureBuildTime) {
+        metrics['${metric}_dart2js_millis'] = watch.elapsedMilliseconds;
+      }
+
+      return metrics;
+    });
+  }
+
+  /// Obtains the size and gzipped size of a file given by [fileName].
+  static Future<Map<String, int>> getSize(String fileName, {String metric}) async {
+    final Map<String, int> sizeMetrics = <String, int>{};
+
+    final ProcessResult result = await Process.run('du', <String>['-k', fileName]);
+    sizeMetrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+
+    await Process.run('gzip',<String>['-k', '9', fileName]);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', fileName + '.gz']);
+    sizeMetrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+
+    return sizeMetrics;
   }
 
   static int _parseDu(String source) {
