@@ -10,7 +10,9 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import 'package:platform/platform.dart';
 
@@ -74,12 +76,13 @@ void main() {
     )));
 
     await generator.recompile(
-      '/path/to/main.dart',
+      globals.fs.file('/path/to/main.dart').uri,
       null, /* invalidatedFiles */
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     ).then((CompilerOutput output) {
       expect(mockFrontendServerStdIn.getAndClear(),
-          'compile /path/to/main.dart\n');
+          'compile file:///path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(testLogger.errorText,
           equals('\nCompiler message:\nline1\nline2\n'));
@@ -122,9 +125,10 @@ void main() {
     // The test manages timing via completers.
     unawaited(
       generator.recompile(
-        '/path/to/main.dart',
+        Uri.parse('/path/to/main.dart'),
         null, /* invalidatedFiles */
         outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
       ).then((CompilerOutput outputCompile) {
         expect(testLogger.errorText,
             equals('\nCompiler message:\nline1\nline2\n'));

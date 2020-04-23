@@ -213,7 +213,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
       child.size.height,
     ));
 
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     childParentData.offset = Offset(
       size.width - child.size.width,
       0.0,
@@ -223,7 +223,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   // Paint at the offset set in the parent data.
   @override
   void paint(PaintingContext context, Offset offset) {
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
@@ -231,7 +231,7 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
@@ -244,14 +244,14 @@ class _TextSelectionToolbarContainerRenderBox extends RenderProxyBox {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ToolbarParentData) {
-      child.parentData = _ToolbarParentData();
+    if (child.parentData is! ToolbarItemsParentData) {
+      child.parentData = ToolbarItemsParentData();
     }
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+    final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
     transform.translate(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
   }
@@ -292,24 +292,13 @@ class _TextSelectionToolbarItems extends MultiChildRenderObjectWidget {
   _TextSelectionToolbarItemsElement createElement() => _TextSelectionToolbarItemsElement(this);
 }
 
-class _ToolbarParentData extends ContainerBoxParentData<RenderBox> {
-  /// Whether or not this child is painted.
-  ///
-  /// Children in the selection toolbar may be laid out for measurement purposes
-  /// but not painted. This allows these children to be identified.
-  bool shouldPaint;
-
-  @override
-  String toString() => '${super.toString()}; shouldPaint=$shouldPaint';
-}
-
 class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   _TextSelectionToolbarItemsElement(
     MultiChildRenderObjectWidget widget,
   ) : super(widget);
 
   static bool _shouldPaint(Element child) {
-    return (child.renderObject.parentData as _ToolbarParentData).shouldPaint;
+    return (child.renderObject.parentData as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
@@ -318,7 +307,7 @@ class _TextSelectionToolbarItemsElement extends MultiChildRenderObjectElement {
   }
 }
 
-class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, _ToolbarParentData> {
+class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
   _TextSelectionToolbarItemsRenderBox({
     @required bool isAbove,
     @required bool overflowOpen,
@@ -425,7 +414,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
       i++;
 
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       // Handle placing the navigation button after iterating all children.
       if (renderObjectChild == navButton) {
@@ -457,7 +446,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     });
 
     // Place the navigation button if needed.
-    final _ToolbarParentData navButtonParentData = navButton.parentData as _ToolbarParentData;
+    final ToolbarItemsParentData navButtonParentData = navButton.parentData as ToolbarItemsParentData;
     if (_shouldPaintChild(firstChild, 0)) {
       navButtonParentData.shouldPaint = true;
       if (overflowOpen) {
@@ -495,7 +484,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
   void paint(PaintingContext context, Offset offset) {
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
-      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
         return;
       }
@@ -506,8 +495,8 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! _ToolbarParentData) {
-      child.parentData = _ToolbarParentData();
+    if (child.parentData is! ToolbarItemsParentData) {
+      child.parentData = ToolbarItemsParentData();
     }
   }
 
@@ -516,7 +505,7 @@ class _TextSelectionToolbarItemsRenderBox extends RenderBox with ContainerRender
     // The x, y parameters have the top left of the node's box as the origin.
     RenderBox child = lastChild;
     while (child != null) {
-      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
+      final ToolbarItemsParentData childParentData = child.parentData as ToolbarItemsParentData;
 
       // Don't hit test children aren't shown.
       if (!childParentData.shouldPaint) {

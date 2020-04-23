@@ -28,6 +28,7 @@ abstract class AnalyzeBase {
     @required this.platform,
     @required this.processManager,
     @required this.terminal,
+    @required this.experiments,
   });
 
   /// The parsed argument results for execution.
@@ -46,6 +47,8 @@ abstract class AnalyzeBase {
   final Platform platform;
   @protected
   final AnsiTerminal terminal;
+  @protected
+  final List<String> experiments;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();

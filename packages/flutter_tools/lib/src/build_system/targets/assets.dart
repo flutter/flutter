@@ -29,14 +29,11 @@ const String kBundleSkSLPath = 'BundleSkSLPath';
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
-  Map<String, String> skSLBundle,
+  Map<String, DevFSContent> additionalContent,
 }) async {
   final File pubspecFile =  environment.projectDir.childFile('pubspec.yaml');
   final ManifestAssetBundle assetBundle = AssetBundleFactory.instance.createBundle()
     as ManifestAssetBundle;
-  if (skSLBundle != null) {
-    assetBundle.skSLBundle = skSLBundle;
-  }
   final int resultCode = await assetBundle.build(
     manifestPath: pubspecFile.path,
     packagesPath: environment.projectDir.childFile('.packages').path,
@@ -61,8 +58,13 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
     artifacts: globals.artifacts,
   );
 
+  final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
+    ...assetBundle.entries,
+    ...?additionalContent,
+  };
+
   await Future.wait<void>(
-    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`
@@ -93,7 +95,10 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
   return Depfile(inputs + assetBundle.additionalDependencies, outputs);
 }
 
-/// Validate and process an SkSL asset bundle.
+/// The path of the SkSL JSON bundle included in flutter_assets.
+const String kSkSLShaderBundlePath = 'sksl/io.flutter.shaders.json';
+
+/// Validate and process an SkSL asset bundle in a [DevFSContent].
 ///
 /// Returns `null` if the bundle was not provided, otherwise attempts to
 /// validate the bundle.
@@ -102,7 +107,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory, {
 ///
 /// If the current target platform is different than the platform constructed
 /// for the bundle, a warning will be printed.
-Map<String, String> processSkSLBundle(String bundlePath, {
+DevFSContent processSkSLBundle(String bundlePath, {
   @required TargetPlatform targetPlatform,
   @required FileSystem fileSystem,
   @required Logger logger,
@@ -150,7 +155,7 @@ Map<String, String> processSkSLBundle(String bundlePath, {
       'caching.'
     );
   }
-  return (bundle['data'] as Map<String, Object>).cast<String, String>();
+  return DevFSStringContent(json.encode(bundle['data']));
 }
 
 /// Copy the assets defined in the flutter manifest into a build directory.
@@ -185,26 +190,10 @@ class CopyAssets extends Target {
       .buildDir
       .childDirectory('flutter_assets');
     output.createSync(recursive: true);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(
-      environment.defines[kTargetPlatform]);
-    final String skSLBundlePath = environment.inputs[kBundleSkSLPath];
-    final Map<String, String> skSLBundle = processSkSLBundle(
-      skSLBundlePath,
-      engineRevision: globals.flutterVersion.engineRevision,
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      targetPlatform: targetPlatform,
-    );
-    final Depfile depfile = await copyAssets(environment, output, skSLBundle: skSLBundle);
-    if (skSLBundlePath != null) {
-      final File skSLBundleFile = environment.fileSystem
-        .file(skSLBundlePath).absolute;
-      depfile.inputs.add(skSLBundleFile);
-    }
+    final Depfile depfile = await copyAssets(environment, output);
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,

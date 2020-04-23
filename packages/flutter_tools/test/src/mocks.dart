@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:package_config/package_config.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -29,6 +30,7 @@ import 'package:process/process.dart';
 
 import 'common.dart';
 
+// TODO(fujino): replace FakePlatform.fromPlatform() with FakePlatform()
 final Generator kNoColorTerminalPlatform = () {
   return FakePlatform.fromPlatform(
     const LocalPlatform()
@@ -583,7 +585,7 @@ class BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = List<String>.from(messages);
+    final List<String> actualMessages = List<String>.of(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -661,7 +663,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
+  Future<CompilerOutput> recompile(Uri mainPath, List<Uri> invalidatedFiles, { String outputPath, PackageConfig packageConfig }) async {
     globals.fs.file(outputPath).createSync(recursive: true);
     globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);

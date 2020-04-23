@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:clock/clock.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -13,8 +15,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
-import 'package:quiver/testing/async.dart';
-import 'package:quiver/time.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
@@ -572,9 +572,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }) {
     assert(description != null);
     assert(inTest);
-    _oldExceptionHandler = FlutterError.onError;
+    _oldExceptionHandler = FlutterError.presentError;
     int _exceptionCount = 0; // number of un-taken exceptions
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
         debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {
@@ -800,7 +800,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);
-    FlutterError.onError = _oldExceptionHandler;
+    FlutterError.presentError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
@@ -1123,16 +1123,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
 
       debugPrint('Pending timers:');
-      for (final String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
-        final int firstLineEnd = timerInfo.indexOf('\n');
-        assert(firstLineEnd != -1);
-
-        // No need to include the newline.
-        final String firstLine = timerInfo.substring(0, firstLineEnd);
-        final String stackTrace = timerInfo.substring(firstLineEnd + 1);
-
-        debugPrint(firstLine);
-        debugPrintStack(stackTrace: StackTrace.fromString(stackTrace));
+      for (final FakeTimer timer in _currentFakeAsync.pendingTimers) {
+        debugPrint(
+          'Timer (duration: ${timer.duration}, '
+          'periodic: ${timer.isPeriodic}), created:');
+        debugPrintStack(stackTrace: timer.creationStackTrace);
         debugPrint('');
       }
       return false;

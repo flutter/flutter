@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../doctor.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -47,7 +46,7 @@ class DoctorCommand extends FlutterCommand {
     if (argResults.wasParsed('check-for-remote-artifacts')) {
       final String engineRevision = stringArg('check-for-remote-artifacts');
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
-        final bool success = await doctor.checkRemoteArtifacts(engineRevision);
+        final bool success = await globals.doctor.checkRemoteArtifacts(engineRevision);
         if (!success) {
           throwToolExit('Artifacts for engine $engineRevision are missing or are '
               'not yet available.', exitCode: 1);
@@ -57,7 +56,7 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final bool success = await doctor.diagnose(androidLicenses: boolArg('android-licenses'), verbose: verbose);
+    final bool success = await globals.doctor.diagnose(androidLicenses: boolArg('android-licenses'), verbose: verbose);
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

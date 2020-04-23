@@ -77,6 +77,10 @@ class CalendarDatePicker extends StatefulWidget {
   /// [initialDate] must be between [firstDate] and [lastDate] or equal to
   /// one of them.
   ///
+  /// [currentDate] represents the current day (i.e. today). This
+  /// date will be highlighted in the day grid. If null, the date of
+  /// `DateTime.now()` will be used.
+  ///
   /// If [selectableDayPredicate] is non-null, it must return `true` for the
   /// [initialDate].
   CalendarDatePicker({
@@ -84,6 +88,7 @@ class CalendarDatePicker extends StatefulWidget {
     @required DateTime initialDate,
     @required DateTime firstDate,
     @required DateTime lastDate,
+    DateTime currentDate,
     @required this.onDateChanged,
     this.onDisplayedMonthChanged,
     this.initialCalendarMode = DatePickerMode.day,
@@ -94,6 +99,7 @@ class CalendarDatePicker extends StatefulWidget {
        initialDate = utils.dateOnly(initialDate),
        firstDate = utils.dateOnly(firstDate),
        lastDate = utils.dateOnly(lastDate),
+       currentDate = utils.dateOnly(currentDate ?? DateTime.now()),
        assert(onDateChanged != null),
        assert(initialCalendarMode != null),
        super(key: key) {
@@ -123,6 +129,9 @@ class CalendarDatePicker extends StatefulWidget {
 
   /// The latest allowable [DateTime] that the user can select.
   final DateTime lastDate;
+
+  /// The [DateTime] representing today. It will be highlighted in the day grid.
+  final DateTime currentDate;
 
   /// Called when the user selects a date in the picker.
   final ValueChanged<DateTime> onDateChanged;
@@ -243,7 +252,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         return _MonthPicker(
           key: _monthPickerKey,
           initialMonth: _currentDisplayedMonthDate,
-          currentDate: DateTime.now(),
+          currentDate: widget.currentDate,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           selectedDate: _selectedDate,
@@ -256,7 +265,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           padding: const EdgeInsets.only(top: _subHeaderHeight),
           child: _YearPicker(
             key: _yearPickerKey,
-            currentDate: DateTime.now(),
+            currentDate: widget.currentDate,
             firstDate: widget.firstDate,
             lastDate: widget.lastDate,
             initialDate: _currentDisplayedMonthDate,

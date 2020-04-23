@@ -21,7 +21,8 @@ Future<TaskResult> runDartDefinesTask() async {
       '--verbose',
       '-d',
       deviceId,
-      '--dart-define=test.value=ExampleValue',
+      '--dart-define=test.valueA=Example',
+      '--dart-define=test.valueB=Value',
       'lib/defines.dart',
     ]);
   });

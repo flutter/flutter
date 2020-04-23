@@ -16,6 +16,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance,
     ::AllocConsole();
   }
 
+  // Initialize COM, so that it is available for use in the library and/or plugins.
+  ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+
   RunLoop run_loop;
 
   flutter::DartProject project(L"data");
@@ -29,5 +32,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance,
 
   run_loop.Run();
 
+  ::CoUninitialize();
   return EXIT_SUCCESS;
 }

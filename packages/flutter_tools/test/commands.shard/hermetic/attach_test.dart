@@ -5,12 +5,17 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+import 'package:quiver/testing/async.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -22,10 +27,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-import 'package:quiver/testing/async.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -142,7 +143,7 @@ void main() {
           final Process dartProcess = MockProcess();
           final StreamController<List<int>> compilerStdoutController = StreamController<List<int>>();
 
-          when(dartProcess.stdout).thenAnswer((_) => compilerStdoutController.stream);
+        when(dartProcess.stdout).thenAnswer((_) => compilerStdoutController.stream);
         when(dartProcess.stderr)
           .thenAnswer((_) => Stream<List<int>>.fromFuture(Future<List<int>>.value(const <int>[])));
 
@@ -786,6 +787,23 @@ VMServiceConnector getFakeVmServiceFactory({
     when(vmService.isClosed).thenReturn(false);
     when(vmService.done).thenAnswer((_) {
       return Future<void>.value(null);
+    });
+    when(vmService.onDone).thenAnswer((_) {
+      return Future<void>.value(null);
+    });
+    when(vmService.getVM()).thenAnswer((_) async {
+      return vm_service.VM(
+        pid: 1,
+        architectureBits: 64,
+        hostCPU: '',
+        name: '',
+        isolates: <vm_service.IsolateRef>[],
+        isolateGroups: <vm_service.IsolateGroupRef>[],
+        startTime: 0,
+        targetCPU: '',
+        operatingSystem: '',
+        version: '',
+      );
     });
 
     when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))

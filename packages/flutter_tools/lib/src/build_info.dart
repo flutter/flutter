@@ -25,6 +25,7 @@ class BuildInfo {
     this.dartObfuscation = false,
     this.dartDefines = const <String>[],
     this.bundleSkSLPath,
+    this.dartExperiments = const <String>[],
     @required this.treeShakeIcons,
   });
 
@@ -75,6 +76,8 @@ class BuildInfo {
   final bool dartObfuscation;
 
   /// An optional path to a JSON containing precompiled SkSL shaders
+  ///
+  /// Currently this is only supported for Android builds.
   final String bundleSkSLPath;
 
   /// Additional constant values to be made available in the Dart program.
@@ -82,6 +85,9 @@ class BuildInfo {
   /// These values can be used with the const `fromEnvironment` constructors of
   /// [bool], [String], [int], and [double].
   final List<String> dartDefines;
+
+  /// A list of Dart experiments.
+  final List<String> dartExperiments;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);
@@ -404,6 +410,7 @@ DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
     case 'armv7f': // iPhone 4S.
+    case 'armv7s': // iPad 4.
       return DarwinArch.armv7;
     case 'arm64':
     case 'arm64e': // iPhone XS/XS Max/XR and higher. arm64 runs on arm64e devices.

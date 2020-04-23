@@ -14,7 +14,6 @@ import 'build_system/targets/dart.dart';
 import 'build_system/targets/icon_tree_shaker.dart';
 import 'build_system/targets/ios.dart';
 import 'cache.dart';
-import 'convert.dart';
 import 'globals.dart' as globals;
 import 'ios/bitcode.dart';
 import 'project.dart';
@@ -82,12 +81,15 @@ class AotBuilder {
       buildDir: FlutterProject.current().dartTool.childDirectory('flutter_build'),
       cacheDir: null,
       flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+      engineVersion: globals.artifacts.isLocalEngine
+        ? null
+        : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         kTargetFile: mainDartFile ?? globals.fs.path.join('lib', 'main.dart'),
         kBuildMode: getNameForBuildMode(buildInfo.mode),
         kTargetPlatform: getNameForTargetPlatform(platform),
         kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-        kDartDefines: jsonEncode(buildInfo.dartDefines),
+        kDartDefines: buildInfo.dartDefines.join(','),
         kBitcodeFlag: bitcode.toString(),
         if (buildInfo?.extraGenSnapshotOptions?.isNotEmpty ?? false)
           kExtraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions.join(','),

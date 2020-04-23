@@ -31,6 +31,7 @@ class BuildApkCommand extends BuildSubCommand {
     usesDartDefineOption();
     usesExtraFrontendOptions();
     addBundleSkSLPathOption();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser
       ..addFlag('split-per-abi',
         negatable: false,

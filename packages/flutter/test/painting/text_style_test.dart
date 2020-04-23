@@ -374,14 +374,16 @@ void main() {
   });
 
   test('TextStyle apply', () {
-    const TextStyle style = TextStyle(fontSize: 10);
-    expect(style.apply().shadows, isNull);
+    const TextStyle style = TextStyle(fontSize: 10, shadows: <ui.Shadow>[], fontStyle: FontStyle.normal, fontFeatures: <ui.FontFeature>[], textBaseline: TextBaseline.alphabetic);
+    expect(style.apply().shadows, const <ui.Shadow>[]);
     expect(style.apply(shadows: const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]).shadows, const <ui.Shadow>[ui.Shadow(blurRadius: 2.0)]);
-    expect(style.apply().fontStyle, isNull);
+    expect(style.apply().fontStyle, FontStyle.normal);
     expect(style.apply(fontStyle: FontStyle.italic).fontStyle, FontStyle.italic);
     expect(style.apply().locale, isNull);
     expect(style.apply(locale: const Locale.fromSubtags(languageCode: 'es')).locale, const Locale.fromSubtags(languageCode: 'es'));
-    expect(style.apply().fontFeatures, isNull);
+    expect(style.apply().fontFeatures, const <ui.FontFeature>[]);
     expect(style.apply(fontFeatures: const <ui.FontFeature>[ui.FontFeature.enable('test')]).fontFeatures, const <ui.FontFeature>[ui.FontFeature.enable('test')]);
+    expect(style.apply().textBaseline, TextBaseline.alphabetic);
+    expect(style.apply(textBaseline: TextBaseline.ideographic).textBaseline, TextBaseline.ideographic);
   });
 }

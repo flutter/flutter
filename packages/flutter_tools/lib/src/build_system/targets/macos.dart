@@ -15,6 +15,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 import 'icon_tree_shaker.dart';
+import 'ios.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -80,7 +81,6 @@ abstract class UnpackMacOS extends Target {
     final DepfileService depfileService = DepfileService(
       logger: globals.logger,
       fileSystem: globals.fs,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       Depfile(inputs, outputs),
@@ -198,6 +198,7 @@ class CompileMacOSFramework extends Target {
     }
     final String splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
+    final List<String> extraGenSnapshotOptions = parseExtraGenSnapshotOptions(environment);
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       reportTimings: false,
       fileSystem: globals.fs,
@@ -216,6 +217,7 @@ class CompileMacOSFramework extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (result != 0) {
       throw Exception('gen shapshot failed.');
@@ -292,25 +294,10 @@ abstract class MacOSBundleFlutterAssets extends Target {
       .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final String skSLBundlePath = environment.inputs[kBundleSkSLPath];
-    final Map<String, String> skSLBundle = processSkSLBundle(
-      skSLBundlePath,
-      engineRevision: globals.flutterVersion.engineRevision,
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      targetPlatform: TargetPlatform.ios,
-    );
-    final Depfile assetDepfile = await copyAssets(
-      environment, assetDirectory, skSLBundle: skSLBundle);
-    if (skSLBundlePath != null) {
-      final File skSLBundleFile = environment.fileSystem
-        .file(skSLBundlePath).absolute;
-      assetDepfile.inputs.add(skSLBundleFile);
-    }
+    final Depfile assetDepfile = await copyAssets(environment, assetDirectory);
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       assetDepfile,

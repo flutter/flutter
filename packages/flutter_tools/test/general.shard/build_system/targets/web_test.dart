@@ -46,7 +46,7 @@ void main() {
       final File packagesFile = globals.fs.file(globals.fs.path.join('foo', '.packages'))
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
-      PackageMap.globalPackagesPath = packagesFile.path;
+      globalPackagesPath = packagesFile.path;
       globals.fs.currentDirectory.childDirectory('bar').createSync();
       processManager = FakeProcessManager.list(<FakeCommand>[]);
 
@@ -65,7 +65,6 @@ void main() {
       depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
@@ -140,7 +139,7 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'file:///other/lib/main.dart' as entrypoint;"));
-    expect(generated, contains("import 'file:///foo/lib/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
   }));
 
 
@@ -229,7 +228,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -253,6 +253,39 @@ void main() {
   }));
 
 
+  test('Dart2JSTarget calls dart2js with expected args with enabled experiment', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kEnableExperiment] = 'non-nullable';
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-o',
+        environment.buildDir.childFile('app.dill').absolute.path,
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '--cfe-only',
+        environment.buildDir.childFile('main.dart').absolute.path,
+      ]
+    ));
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ...kDart2jsLinuxArgs,
+        '--enable-experiment=non-nullable',
+        '-O4',
+        '-Ddart.vm.profile=true',
+        '--no-minify',
+        '-o',
+        environment.buildDir.childFile('main.dart.js').absolute.path,
+        environment.buildDir.childFile('app.dill').absolute.path,
+      ]
+    ));
+
+    await const Dart2JSTarget().build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
+
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     processManager.addCommand(FakeCommand(
@@ -260,7 +293,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -289,7 +323,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -318,7 +353,8 @@ void main() {
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -360,14 +396,17 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in release mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
-        '--cfe-only',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.product=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
+       '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
@@ -391,13 +430,16 @@ void main() {
 
   test('Dart2JSTarget calls dart2js with Dart defines in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = '["FOO=bar","BAZ=qux"]';
+    environment.defines[kDartDefines] = 'FOO=bar,BAZ=qux';
     processManager.addCommand(FakeCommand(
       command: <String>[
         ...kDart2jsLinuxArgs,
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
-         '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '--packages=${globals.fs.path.join('foo', '.packages')}',
+        '-Ddart.vm.profile=true',
+        '-DFOO=bar',
+        '-DBAZ=qux',
         '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
@@ -419,27 +461,6 @@ void main() {
     await const Dart2JSTarget().build(environment);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
-  }));
-
-  test('Dart2JSTarget throws developer-friendly exception on misformatted DartDefines', () => testbed.run(() async {
-    environment.defines[kBuildMode] = 'profile';
-    environment.defines[kDartDefines] = '[misformatted json';
-    try {
-      await const Dart2JSTarget().build(environment);
-      fail('Call to build() must not have succeeded.');
-    } on Exception catch(exception) {
-      expect(
-        '$exception',
-        'Exception: The value of -D$kDartDefines is not formatted correctly.\n'
-        'The value must be a JSON-encoded list of strings but was:\n'
-        '[misformatted json',
-      );
-    }
-
-    // Should not attempt to run any processes.
-    verifyNever(globals.processManager.run(any));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
   }));
 
   test('Generated service worker correctly inlines file hashes', () {

@@ -12,6 +12,7 @@ import 'android/gradle_utils.dart' as gradle;
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'features.dart';
@@ -24,7 +25,14 @@ import 'plugins.dart';
 import 'template.dart';
 
 class FlutterProjectFactory {
-  FlutterProjectFactory();
+  FlutterProjectFactory({
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) : _logger = logger,
+       _fileSystem = fileSystem;
+
+  final Logger _logger;
+  final FileSystem _fileSystem;
 
   @visibleForTesting
   final Map<String, FlutterProject> projects =
@@ -34,14 +42,18 @@ class FlutterProjectFactory {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    return projects.putIfAbsent(directory.path, /* ifAbsent */ () {
+    return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
+        logger: _logger,
+        fileSystem: _fileSystem,
       );
       final FlutterManifest exampleManifest = FlutterProject._readManifest(
         FlutterProject._exampleDirectory(directory)
             .childFile(bundle.defaultManifestPath)
             .path,
+        logger: _logger,
+        fileSystem: _fileSystem,
       );
       return FlutterProject(directory, manifest, exampleManifest);
     });
@@ -96,7 +108,7 @@ class FlutterProject {
       example.android.applicationId,
       await example.ios.productBundleIdentifier,
     ];
-    return Set<String>.from(candidates
+    return Set<String>.of(candidates
         .map<String>(_organizationNameFromPackageName)
         .where((String name) => name != null));
   }
@@ -167,7 +179,7 @@ class FlutterProject {
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
-    FlutterManifest.empty(),
+    FlutterManifest.empty(logger: globals.logger),
   );
 
   /// True if this project is a Flutter module project.
@@ -187,13 +199,20 @@ class FlutterProject {
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static FlutterManifest _readManifest(String path) {
+  static FlutterManifest _readManifest(String path, {
+    @required Logger logger,
+    @required FileSystem fileSystem,
+  }) {
     FlutterManifest manifest;
     try {
-      manifest = FlutterManifest.createFromPath(path);
+      manifest = FlutterManifest.createFromPath(
+        path,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
     } on YamlException catch (e) {
-      globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      globals.printError('$e');
+      logger.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      logger.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
@@ -207,7 +226,7 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
-    refreshPluginsList(this);
+    await refreshPluginsList(this);
     if ((android.existsSync() && checkProjects) || !checkProjects) {
       await android.ensureReadyForPlatformSpecificTooling();
     }
@@ -465,6 +484,25 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
       return;
     }
     await _updateGeneratedXcodeConfigIfNeeded();
+  }
+
+  /// Check if one the [targets] of the project is a watchOS companion app target.
+  Future<bool> containsWatchCompanion(List<String> targets) async {
+    final String bundleIdentifier = await productBundleIdentifier;
+    // A bundle identifier is required for a companion app.
+    if (bundleIdentifier == null) {
+      return false;
+    }
+    for (final String target in targets) {
+      // Create Info.plist file of the target.
+      final File infoFile = hostAppRoot.childDirectory(target).childFile('Info.plist');
+      // The Info.plist file of a target contains the key WKCompanionAppBundleIdentifier,
+      // if it is a watchOS companion app.
+      if (infoFile.existsSync() && globals.plistParser.getValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier') == bundleIdentifier) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {

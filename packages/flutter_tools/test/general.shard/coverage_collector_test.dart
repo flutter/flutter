@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 
@@ -19,10 +20,8 @@ void main() {
   });
 
   test('Coverage collector Can handle coverage sentinenl data', () async {
-    when(mockVMService.vm.isolates.first.invokeRpcRaw('getScripts', params: anyNamed('params')))
-      .thenAnswer((Invocation invocation) async {
-        return <String, Object>{'type': 'Sentinel', 'kind': 'Collected', 'valueAsString': '<collected>'};
-      });
+    when(mockVMService.getScripts(any))
+      .thenThrow(vm_service.SentinelException.parse('getScripts', <String, Object>{}));
     final Map<String, Object> result = await collect(null, (String predicate) => true, connector: (Uri uri) async {
       return mockVMService;
     });
