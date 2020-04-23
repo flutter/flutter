@@ -460,7 +460,7 @@ class HotRunner extends ResidentRunner {
         // We ignore any errors, because it's not clear what we would do anyway.
         futures.add(device.devFS.destroy()
           .timeout(const Duration(milliseconds: 250))
-          .catchError((dynamic error) {
+          .catchError((dynamic error, StackTrace stackTrace) {
             globals.printTrace('Ignored error while cleaning up DevFS: $error');
           }));
       }
@@ -955,7 +955,7 @@ class HotRunner extends ResidentRunner {
           reassembleViews.add(view);
           reassembleFutures.add(device.vmService.flutterReassemble(
             isolateId: view.uiIsolate.id,
-          ).catchError((dynamic error) {
+          ).catchError((dynamic error, StackTrace stackTrace) {
             failedReassemble = true;
             globals.printError('Reassembling ${view.uiIsolate.name} failed: $error');
           }, test: (dynamic error) => error is Exception));
