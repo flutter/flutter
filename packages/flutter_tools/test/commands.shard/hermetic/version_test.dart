@@ -76,8 +76,9 @@ void main() {
       const String version = '30.0.0-dev.0.0';
       final VersionCommand command = VersionCommand();
       when(globals.terminal.promptForCharInput(<String>['y', 'n'],
-              logger: anyNamed('logger'), prompt: 'Are you sure you want to proceed?'))
-          .thenAnswer((Invocation invocation) async => 'y');
+        logger: anyNamed('logger'),
+        prompt: 'Are you sure you want to proceed?')
+      ).thenAnswer((Invocation invocation) async => 'y');
 
       await createTestCommandRunner(command).run(<String>[
         'version',
