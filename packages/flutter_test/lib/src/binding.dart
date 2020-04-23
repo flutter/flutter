@@ -423,10 +423,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
+  RenderViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = window.devicePixelRatio;
     final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
-    return ViewConfiguration(
+    return RenderViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
     );
@@ -976,7 +976,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void ensureFrameCallbacksRegistered() {
-    // Leave Window alone, do nothing.
+    // Leave FlutterWindow alone, do nothing.
     assert(window.onDrawFrame == null);
     assert(window.onBeginFrame == null);
   }
@@ -1219,7 +1219,7 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// pipeline directly. It tells the binding to entirely ignore requests for a
   /// frame to be scheduled, while still allowing frames that are pumped
   /// directly to run (either by using [WidgetTester.pumpBenchmark] or invoking
-  /// [Window.onBeginFrame] and [Window.onDrawFrame]).
+  /// [FlutterWindow.onBeginFrame] and [FlutterWindow.onDrawFrame]).
   ///
   /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
   /// this mode. This can cause unexpected effects. For instance,
@@ -1528,7 +1528,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  ViewConfiguration createViewConfiguration() {
+  RenderViewConfiguration createViewConfiguration() {
     return TestViewConfiguration(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
       window: window,
@@ -1551,26 +1551,26 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 }
 
-/// A [ViewConfiguration] that pretends the display is of a particular size. The
+/// A [RenderViewConfiguration] that pretends the display is of a particular size. The
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
-class TestViewConfiguration extends ViewConfiguration {
+class TestViewConfiguration extends RenderViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   ///
   /// If a [window] instance is not provided it defaults to [ui.window].
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
-    ui.Window window,
+    ui.FlutterWindow window,
   }) {
     return TestViewConfiguration._(size, window ?? ui.window);
   }
 
-  TestViewConfiguration._(Size size, ui.Window window)
+  TestViewConfiguration._(Size size, ui.FlutterWindow window)
     : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
       _hitTestMatrix = _getMatrix(size, 1.0, window),
       super(size: size);
 
-  static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.Window window) {
+  static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterWindow window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
     final double actualWidth = window.physicalSize.width * inverseRatio;
     final double actualHeight = window.physicalSize.height * inverseRatio;
@@ -1630,9 +1630,9 @@ class _LiveTestPointerRecord {
 
 class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
-    ViewConfiguration configuration,
+    RenderViewConfiguration configuration,
     this.onNeedPaint,
-    @required ui.Window window,
+    @required ui.SingletonFlutterWindow window,
   }) : super(configuration: configuration, window: window);
 
   @override

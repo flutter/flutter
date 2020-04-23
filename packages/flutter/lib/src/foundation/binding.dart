@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui' as ui show saveCompilationTrace, SingletonFlutterWindow, window, PlatformDispatcher;
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -73,19 +73,41 @@ abstract class BindingBase {
   ///
   /// A number of additional bindings are defined as extensions of [BindingBase],
   /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
-  /// these bindings define behaviors that interact with a [ui.Window], e.g.,
-  /// [ServicesBinding] registers a [ui.Window.onPlatformMessage] handler, and
-  /// [RendererBinding] registers [ui.Window.onMetricsChanged],
-  /// [ui.Window.onTextScaleFactorChanged], [ui.Window.onSemanticsEnabledChanged],
-  /// and [ui.Window.onSemanticsAction] handlers.
+  /// these bindings define behaviors that interact with a [ui.FlutterWindow], e.g.,
+  /// [ServicesBinding] registers a [ui.FlutterWindow.onPlatformMessage] handler, and
+  /// [RendererBinding] registers [ui.FlutterWindow.onMetricsChanged],
+  /// [ui.FlutterWindow.onTextScaleFactorChanged], [ui.FlutterWindow.onSemanticsEnabledChanged],
+  /// and [ui.FlutterWindow.onSemanticsAction] handlers.
   ///
-  /// Each of these other bindings could individually access a [Window] statically,
+  /// Each of these other bindings could individually access a [FlutterWindow] statically,
   /// but that would preclude the ability to test these behaviors with a fake
   /// window for verification purposes.  Therefore, [BindingBase] exposes this
-  /// [Window] for use by other bindings.  A subclass of [BindingBase], such as
+  /// [FlutterWindow] for use by other bindings.  A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
-  /// different [Window] implementation, such as a [TestWindow].
-  ui.Window get window => ui.window;
+  /// different [FlutterWindow] implementation, such as a [TestWindow].
+  ui.SingletonFlutterWindow get window => ui.window;
+
+  /// The platform dispatcher to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of
+  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
+  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers a
+  /// [ui.PlatformDispatcher.onPlatformMessage] handler, and [RendererBinding]
+  /// registers [ui.PlatformDispatcher.onMetricsChanged],
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
+  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
+  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  ///
+  /// Each of these other bindings could individually access the
+  /// [PlatformDispatcher] singleton statically, but that would preclude the
+  /// ability to test these behaviors with a fake platform dispatcher for
+  /// verification purposes.  Therefore, [BindingBase] exposes this
+  /// [PlatformDispatcher] for use by other bindings.  A subclass of
+  /// [BindingBase], such as [TestWidgetsFlutterBinding], can override this
+  /// accessor to return a different [ui.PlatformDispatcher] implementation,
+  /// such as a [TestPlatformDispatcher].
+  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call

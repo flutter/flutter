@@ -400,8 +400,8 @@ class _FocusDemoState extends State<FocusDemo> {
         policy: ReadingOrderTraversalPolicy(),
         child: Shortcuts(
           shortcuts: <LogicalKeySet, Intent>{
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): const RedoIntent(),
-            LogicalKeySet(Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): const UndoIntent(),
+            LogicalKeySet(!kIsWeb && Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): const RedoIntent(),
+            LogicalKeySet(!kIsWeb && Platform.isMacOS ? LogicalKeyboardKey.meta : LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): const UndoIntent(),
           },
           child: FocusScope(
             key: FocusDemo.appKey,

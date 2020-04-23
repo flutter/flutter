@@ -217,14 +217,14 @@ abstract class SceneBuilderRecorder extends Recorder {
   Profile get profile => _profile;
   Profile _profile;
 
-  /// Called from [Window.onBeginFrame].
+  /// Called from [FlutterWindow.onBeginFrame].
   @mustCallSuper
   void onBeginFrame() {}
 
   /// Called on every frame.
   ///
   /// An implementation should exercise the [sceneBuilder] to build a frame.
-  /// However, it must not call [SceneBuilder.build] or [Window.render].
+  /// However, it must not call [SceneBuilder.build] or [FlutterWindow.render].
   /// Instead the benchmark harness will call them and time them appropriately.
   void onDrawFrame(SceneBuilder sceneBuilder);
 
@@ -233,7 +233,7 @@ abstract class SceneBuilderRecorder extends Recorder {
     final Completer<Profile> profileCompleter = Completer<Profile>();
     _profile = Profile(name: name);
 
-    window.onBeginFrame = (_) {
+    RendererBinding.instance.platformDispatcher.onBeginFrame = (_) {
       try {
         startMeasureFrame();
         onBeginFrame();
@@ -242,7 +242,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.onDrawFrame = () {
+    RendererBinding.instance.platformDispatcher.onDrawFrame = () {
       try {
         _profile.record('drawFrameDuration', () {
           final SceneBuilder sceneBuilder = SceneBuilder();
@@ -250,14 +250,14 @@ abstract class SceneBuilderRecorder extends Recorder {
           _profile.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
             _profile.record('windowRenderDuration', () {
-              window.render(scene);
+              RendererBinding.instance.platformDispatcher.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
         endMeasureFrame();
 
         if (shouldContinue()) {
-          window.scheduleFrame();
+          RendererBinding.instance.platformDispatcher.scheduleFrame();
         } else {
           profileCompleter.complete(_profile);
         }
@@ -266,7 +266,7 @@ abstract class SceneBuilderRecorder extends Recorder {
         rethrow;
       }
     };
-    window.scheduleFrame();
+    RendererBinding.instance.platformDispatcher.scheduleFrame();
     return profileCompleter.future;
   }
 }
@@ -365,7 +365,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     profile.addDataPoint('drawFrameDuration', _drawFrameStopwatch.elapsed, reported: true);
 
     if (shouldContinue()) {
-      window.scheduleFrame();
+      RendererBinding.instance.platformDispatcher.scheduleFrame();
     } else {
       didStop();
       _runCompleter.complete();

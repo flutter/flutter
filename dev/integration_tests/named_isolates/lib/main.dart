@@ -18,7 +18,7 @@ void second() {
 }
 
 void _run(String name) {
-  ui.window.setIsolateDebugName(name);
+  ui.PlatformDispatcher.instance.setIsolateDebugName(name);
   runApp(Center(child: Text(name, textDirection: TextDirection.ltr)));
 }
 

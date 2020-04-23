@@ -10,7 +10,7 @@ const Size _kTestViewSize = Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(
-    configuration: const ViewConfiguration(size: _kTestViewSize),
+    configuration: const RenderViewConfiguration(size: _kTestViewSize),
     window: WidgetsBinding.instance.window,
   );
 

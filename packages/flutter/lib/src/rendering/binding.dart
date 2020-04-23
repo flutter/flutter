@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -34,18 +35,27 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
     );
-    window
-      ..onMetricsChanged = handleMetricsChanged
+    platformDispatcher
+      ..onPlatformConfigurationChanged = handleConfigurationChanged
+      ..onSemanticsAction = _handleSemanticsAction
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
-      ..onSemanticsAction = _handleSemanticsAction;
+      ..onSemanticsAction = _handleSemanticsAction
+      ..onViewCreated = handleViewCreated
+      ..onViewDisposed = handleViewDisposed
+      ..onMetricsChanged = handleMetricsChanged;
+
     initRenderView();
     _handleSemanticsEnabledChanged();
     assert(renderView != null);
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
   }
+
+  /// Called if the platform configuration changed.
+  @protected
+  void handleConfigurationChanged() { }
 
   /// The current [RendererBinding], if one has been created.
   static RendererBinding get instance => _instance;
@@ -167,9 +177,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _pipelineOwner.rootNode = value;
   }
 
+  @protected
+  void handleViewCreated(ui.FlutterView view) { }
+
+  @protected
+  void handleViewDisposed(ui.FlutterView view) { }
+
   /// Called when the system metrics change.
   ///
-  /// See [Window.onMetricsChanged].
+  /// See [ui.PlatformDispatcher.onMetricsChanged].
   @protected
   void handleMetricsChanged() {
     assert(renderView != null);
@@ -179,7 +195,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   /// Called when the platform text scale factor changes.
   ///
-  /// See [Window.onTextScaleFactorChanged].
+  /// See [FlutterWindow.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
 
@@ -191,7 +207,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// changes.
   ///
   /// {@tool snippet}
-  /// Querying [Window.platformBrightness].
+  /// Querying [FlutterWindow.platformBrightness].
   ///
   /// ```dart
   /// final Brightness brightness = WidgetsBinding.instance.window.platformBrightness;
@@ -215,11 +231,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ```
   /// {@end-tool}
   ///
-  /// See [Window.onPlatformBrightnessChanged].
+  /// See [FlutterWindow.onPlatformBrightnessChanged].
   @protected
   void handlePlatformBrightnessChanged() { }
 
-  /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
+  /// Returns a [RenderViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///
   /// This is called during construction and also in response to changes to the
@@ -229,10 +245,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// ratio the [RenderView] will use. For example, the testing framework uses
   /// this to force the display into 800x600 when a test is run on the device
   /// using `flutter run`.
-  ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    return ViewConfiguration(
-      size: window.physicalSize / devicePixelRatio,
+  RenderViewConfiguration createViewConfiguration() {
+    final double devicePixelRatio = platformDispatcher.views.isEmpty ? 1.0 : window.devicePixelRatio;
+    final Size physicalSize = platformDispatcher.views.isEmpty ? Size.zero : window.physicalSize;
+    return RenderViewConfiguration(
+      size: physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
   }
@@ -250,7 +267,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   void _handleSemanticsEnabledChanged() {
-    setSemanticsEnabled(window.semanticsEnabled);
+    setSemanticsEnabled(platformDispatcher.semanticsEnabled);
   }
 
   /// Whether the render tree associated with this binding should produce a tree
@@ -349,7 +366,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
+  /// with [FlutterWindow.onBeginFrame], invokes all the transient frame callbacks
   /// registered with [scheduleFrameCallback], in registration order. This
   /// includes all the [Ticker] instances that are driving [AnimationController]
   /// objects, which means all of the active [Animation] objects tick at this
@@ -361,7 +378,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
+  /// [FlutterWindow.onDrawFrame], is called, which invokes all the persistent frame
   /// callbacks, of which the most notable is this method, [drawFrame], which
   /// proceeds as follows:
   ///

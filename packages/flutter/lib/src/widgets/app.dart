@@ -401,7 +401,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.initialRoute}
   /// The name of the first route to show, if a [Navigator] is built.
   ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
+  /// Defaults to [FlutterWindow.initialRouteName], which may be overridden by the code
   /// that launched the application.
   ///
   /// If the route name starts with a slash and has multiple slashes in it, then
@@ -953,7 +953,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     _updateNavigator();
-    _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
+    _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -1282,12 +1282,12 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (_navigator != null) {
       navigator = Navigator(
         key: _navigator,
-        // If window.defaultRouteName isn't '/', we should assume it was set
+        // If platformDispatcher.initialRouteName isn't '/', we should assume it was set
         // intentionally via `setInitialRoute`, and should override whatever
-        // is in [widget.initialRoute].
-        initialRoute: WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
-            ? WidgetsBinding.instance.window.defaultRouteName
-            : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
+        // is in [platformDispatcher.initialRoute].
+        initialRoute: WidgetsBinding.instance.platformDispatcher.initialRouteName != Navigator.defaultRouteName
+            ? WidgetsBinding.instance.platformDispatcher.initialRouteName
+            : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.initialRouteName,
         onGenerateRoute: _onGenerateRoute,
         onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
           ? Navigator.defaultGenerateInitialRoutes

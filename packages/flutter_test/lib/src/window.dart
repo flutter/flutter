@@ -7,12 +7,12 @@ import 'dart:ui' hide window;
 
 import 'package:meta/meta.dart';
 
-/// [Window] that wraps another [Window] and allows faking of some properties
+/// [FlutterWindow] that wraps another [FlutterWindow] and allows faking of some properties
 /// for testing purposes.
 ///
 /// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
-/// properties of a [Window]. [TestWindow] facilitates the faking of these
-/// properties by overriding the properties of a real [Window] with desired fake
+/// properties of a [FlutterWindow]. [TestWindow] facilitates the faking of these
+/// properties by overriding the properties of a real [FlutterWindow] with desired fake
 /// values. The binding used within tests, [TestWidgetsFlutterBinding], contains
 /// a [TestWindow] that is used by all tests.
 ///
@@ -38,21 +38,21 @@ import 'package:meta/meta.dart';
 /// therefore any fake values defined in one test will not persist
 /// to the next.
 ///
-/// If a test needs to override a real [Window] property and then later
-/// return to using the real [Window] property, [TestWindow] provides
+/// If a test needs to override a real [FlutterWindow] property and then later
+/// return to using the real [FlutterWindow] property, [TestWindow] provides
 /// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues()].
-class TestWindow implements Window {
-  /// Constructs a [TestWindow] that defers all behavior to the given [Window]
+class TestWindow implements SingletonFlutterWindow {
+  /// Constructs a [TestWindow] that defers all behavior to the given [SingletonFlutterWindow]
   /// unless explicitly overridden for test purposes.
   TestWindow({
-    @required Window window,
+    @required SingletonFlutterWindow window,
   }) : _window = window;
 
-  /// The [Window] that is wrapped by this [TestWindow].
-  final Window _window;
+  /// The [SingletonFlutterWindow] that is wrapped by this [TestWindow].
+  final SingletonFlutterWindow _window;
 
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
@@ -300,17 +300,17 @@ class TestWindow implements Window {
   }
 
   @override
-  String get defaultRouteName => _defaultRouteNameTestValue ?? _window.defaultRouteName;
-  String _defaultRouteNameTestValue;
+  String get initialRouteName => _initialRouteNameTestValue ?? _window.initialRouteName;
+  String _initialRouteNameTestValue;
   /// Hides the real default route name and reports the given
-  /// [defaultRouteNameTestValue] instead.
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
-    _defaultRouteNameTestValue = defaultRouteNameTestValue;
+  /// [initialRouteNameTestValue] instead.
+  set initialRouteNameTestValue(String initialRouteNameTestValue) {
+    _initialRouteNameTestValue = initialRouteNameTestValue;
   }
   /// Deletes any existing test default route name and returns to using the real
   /// default route name.
   void clearDefaultRouteNameTestValue() {
-    _defaultRouteNameTestValue = null;
+    _initialRouteNameTestValue = null;
   }
 
   @override
@@ -382,11 +382,6 @@ class TestWindow implements Window {
   }
 
   @override
-  void setIsolateDebugName(String name) {
-    _window.setIsolateDebugName(name);
-  }
-
-  @override
   void sendPlatformMessage(
     String name,
     ByteData data,
@@ -403,7 +398,7 @@ class TestWindow implements Window {
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]
-  /// and return to reporting the real [Window] values for all [Window]
+  /// and return to reporting the real [FlutterWindow] values for all [FlutterWindow]
   /// properties.
   ///
   /// If desired, clearing of properties can be done on an individual basis,
@@ -425,7 +420,7 @@ class TestWindow implements Window {
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
-  /// Window, and makes things easier when we do rolls to give us time to catch
+  /// FlutterWindow, and makes things easier when we do rolls to give us time to catch
   /// up.
   @override
   dynamic noSuchMethod(Invocation invocation) {

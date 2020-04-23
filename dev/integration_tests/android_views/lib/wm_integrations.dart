@@ -12,7 +12,7 @@ import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
   const WindowManagerIntegrationsPage()
-      : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'));
+      : super('FlutterWindow Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'));
 
   @override
   Widget build(BuildContext context) => WindowManagerBody();
@@ -42,7 +42,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Window Manager Integrations'),
+        title: const Text('FlutterWindow Manager Integrations'),
       ),
       body: Column(
         children: <Widget>[

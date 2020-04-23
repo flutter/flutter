@@ -29,7 +29,7 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// Converts from engine pointer data to framework pointer events.
 ///
 /// This takes [PointerDataPacket] objects, as received from the engine via
-/// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
+/// [dart:ui.FlutterWindow.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
   // This class is not meant to be instatiated or extended; this constructor
@@ -41,7 +41,7 @@ class PointerEventConverter {
   /// pointer events.
   ///
   /// The `devicePixelRatio` argument (usually given the value from
-  /// [dart:ui.Window.devicePixelRatio]) is used to convert the incoming data
+  /// [dart:ui.FlutterWindow.devicePixelRatio]) is used to convert the incoming data
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
