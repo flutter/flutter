@@ -9,12 +9,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 class FrameRecorder {
-  FrameRecorder({@required this.frameSize})
-    : assert(frameSize != null);
+  FrameRecorder({@required this.size})
+    : assert(size != null);
 
-  final Size frameSize;
+  final Size size;
 
-  final List<Future<ui.Image>> _frameTasks = <Future<ui.Image>>[];
+  final List<Future<ui.Image>> _recordedFrames = <Future<ui.Image>>[];
 
   Widget record({
     Key key,
@@ -26,28 +26,28 @@ class FrameRecorder {
       child: _FrameRecorderContainer(
         key: key,
         child: child,
-        size: frameSize,
-        handleRecorded: recording ? _frameTasks.add : null,
+        size: size,
+        handleRecorded: recording ? _recordedFrames.add : null,
       ),
     );
   }
 
   Future<Widget> display({Key key}) async {
-    final List<ui.Image> frames = await Future.wait<ui.Image>(_frameTasks, eagerError: true);
+    final List<ui.Image> frames = await Future.wait<ui.Image>(_recordedFrames, eagerError: true);
     assert(() {
       for (final ui.Image frame in frames) {
-        assert(frame.width == frameSize.width);
-        assert(frame.height == frameSize.height);
+        assert(frame.width == size.width);
+        assert(frame.height == size.height);
       }
       return true;
     }());
     return _CellGrid(
       key: key,
-      cellSize: frameSize,
+      cellSize: size,
       children: frames.map((ui.Image image) => RawImage(
         image: image,
-        width: frameSize.width,
-        height: frameSize.height,
+        width: size.width,
+        height: size.height,
       )).toList(),
     );
   }
@@ -94,6 +94,15 @@ class _FrameRecorderContainerState extends State<_FrameRecorderContainer> {
   }
 }
 
+// Calls `callback` and [markNeedsPaint] during the post-frame callback phase of
+// every frame.
+// 
+// If `callback` is non-null, `_PostFrameCallbacker` adds a post-frame callback
+// every time it paints, during which it calls the provided `callback` then
+// invokes [markNeedsPaint].
+// 
+// If `callback` is null, `_PostFrameCallbacker` is equivalent to a
+// [RenderProxyBox].
 class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   const _PostFrameCallbacker({
     Key key,
@@ -142,10 +151,9 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('callback', value: callback != null, ifTrue: 'has callback'));
+    properties.add(FlagProperty('callback', value: callback != null, ifTrue: 'has a callback'));
   }
 }
-
 
 // A grid of fixed-sized cells that are positioned from top left, horizontal-first,
 // until the the entire grid is filled, discarding the remaining children.
