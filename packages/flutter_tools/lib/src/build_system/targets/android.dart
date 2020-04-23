@@ -66,7 +66,7 @@ abstract class AndroidAssetBundle extends Target {
       final String shaderBundlePath = environment.inputs[kBundleSkSLPath];
       final DevFSContent skslBundle = processSkSLBundle(
         shaderBundlePath,
-        engineRevision: globals.flutterVersion.engineRevision,
+        engineVersion: environment.engineVersion,
         fileSystem: environment.fileSystem,
         logger: environment.logger,
         targetPlatform: TargetPlatform.android,

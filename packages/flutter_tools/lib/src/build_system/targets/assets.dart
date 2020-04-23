@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../../asset.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -111,7 +111,7 @@ DevFSContent processSkSLBundle(String bundlePath, {
   @required TargetPlatform targetPlatform,
   @required FileSystem fileSystem,
   @required Logger logger,
-  @required String engineRevision,
+  @required String engineVersion,
 }) {
   if (bundlePath == null) {
     return null;
@@ -131,6 +131,9 @@ DevFSContent processSkSLBundle(String bundlePath, {
   } on FormatException {
     logger.printError('"$bundle" was not a JSON object.');
     throw Exception('SkSL bundle was invalid.');
+  } on TypeError {
+    logger.printError('"$bundle" was not a JSON object.');
+    throw Exception('SkSL bundle was invalid.');
   }
 
   // Step 3: Validate that:
@@ -138,9 +141,10 @@ DevFSContent processSkSLBundle(String bundlePath, {
   //   is the same as the current revision.
   // * The target platform is the same (this one is a warning only).
   final String bundleEngineRevision = bundle['engineRevision'] as String;
-  if (bundleEngineRevision != engineRevision) {
+  if (bundleEngineRevision != engineVersion) {
     logger.printError(
-      'The SkSL bundle was produced with a different engine revision. It must '
+      'Expected Flutter $bundleEngineRevision, but found $engineVersion\n'
+      'The SkSL bundle was produced with a different engine version. It must '
       'be recreated for the current Flutter version.'
     );
     throw Exception('SkSL bundle was invalid');
