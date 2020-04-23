@@ -783,50 +783,15 @@ class GitTagVersion {
     );
   }
 
-  /// Check for the release tag format.
+  /// Parse a version string.
   ///
-  /// Release tags can be either stable format like '1.2.3' or dev format, like
-  /// '1.2.3-4.5.pre'.
-  static GitTagVersion parseTaggedVersion(String version) {
+  /// The version string can either be an exact release tag (e.g. '1.2.3' for
+  /// stable or 1.2.3-4.5.pre for a dev) or the output of `git describe` (e.g.
+  /// for commit abc123 that is 6 commits after tag 1.2.3-4.5.pre, git would
+  /// return '1.2.3-4.5.pre-6-gabc123').
+  static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?$');
-    final Match match = versionPattern.firstMatch(version.trim());
-    if (match == null) {
-      return const GitTagVersion.unknown();
-    }
-
-    final List<String> matchGroups = match.groups(<int>[1, 2, 3, 4]);
-    final int x = matchGroups[0] == null ? null : int.tryParse(matchGroups[0]);
-    final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
-    final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
-    final String devString = matchGroups[3];
-    int devVersion, devPatch;
-    if (devString != null) {
-      final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre')
-        .firstMatch(devString);
-      final List<String> devGroups = devMatch.groups(<int>[1, 2]);
-      devVersion = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
-      devPatch = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
-    }
-    return GitTagVersion(
-      x: x,
-      y: y,
-      z: z,
-      devVersion: devVersion,
-      devPatch: devPatch,
-      commits: 0,
-      hash: '',
-      gitTag: version,
-    );
-  }
-
-  /// Detect output of git describe
-  ///
-  /// For example, for commit abc123 that is 6 commits after tag 1.2.3-4.5.pre
-  /// git would return '1.2.3-4.5.pre-6-gabc123'.
-  static GitTagVersion parseGitVersion(String version) {
-    final RegExp versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
+      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:-(\d+)-g([a-f0-9]+))?$');
     final Match match = versionPattern.firstMatch(version.trim());
     if (match == null) {
       return const GitTagVersion.unknown();
@@ -846,8 +811,8 @@ class GitTagVersion {
       devPatch = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
     // count of commits past last tagged version
-    final int commits = matchGroups[4] == null ? null : int.tryParse(matchGroups[4]);
-    final String hash = matchGroups[5];
+    final int commits = matchGroups[4] == null ? 0 : int.tryParse(matchGroups[4]);
+    final String hash = matchGroups[5] ?? '';
 
     return GitTagVersion(
       x: x,
@@ -864,11 +829,7 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     GitTagVersion gitTagVersion;
 
-    gitTagVersion = parseTaggedVersion(version);
-    if (gitTagVersion != const GitTagVersion.unknown()) {
-      return gitTagVersion;
-    }
-    gitTagVersion = parseGitVersion(version);
+    gitTagVersion = parseVersion(version);
     if (gitTagVersion != const GitTagVersion.unknown()) {
       return gitTagVersion;
     }
