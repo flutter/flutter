@@ -47,6 +47,9 @@ void main() {
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
+      defines: <String, String>{
+        kBuildMode: 'debug',
+      }
     );
     final DepfileService depfileService = DepfileService(
       logger: BufferLogger.test(),
@@ -54,8 +57,16 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
 
-    when(artifacts.getArtifactPath(Artifact.windowsDesktopPath))
-      .thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\');
+    when(artifacts.getArtifactPath(
+      Artifact.windowsDesktopPath,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\');
+    when(artifacts.getArtifactPath(
+      Artifact.windowsCppClientWrapper,
+      mode: anyNamed('mode'),
+      platform: anyNamed('platform')
+    )).thenReturn(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\');
     for (final String path in kRequiredFiles) {
       fileSystem.file(path).createSync(recursive: true);
     }
