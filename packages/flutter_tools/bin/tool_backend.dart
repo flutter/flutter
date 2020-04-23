@@ -11,13 +11,21 @@ Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
-  final String projectDirectory = Platform.environment['PROJECT_DIR'];
-  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] != null;
-  final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] != null;
-  final String flutterTarget = Platform.environment['FLUTTER_TARGET'] ?? path.join('lib', 'main.dart');
+  final String dartDefines = Platform.environment['DART_DEFINES'];
+  final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
+  final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
+  final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
-  final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String flutterTarget = Platform.environment['FLUTTER_TARGET']
+    ?? path.join('lib', 'main.dart');
+  final String localEngine = Platform.environment['LOCAL_ENGINE'];
+  final String projectDirectory = Platform.environment['PROJECT_DIR'];
+  final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
+  final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
+  final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
+  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
+
   Directory.current = projectDirectory;
 
   if (localEngine != null && !localEngine.contains(buildMode)) {
@@ -50,12 +58,21 @@ or
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
       'assemble',
-      if (trackWidgetCreation)
-        '-dTrackWidgetCreation=$trackWidgetCreation',
+      '--output=build',
       '-dTargetPlatform=$targetPlatform',
+      '-dTrackWidgetCreation=$trackWidgetCreation',
       '-dBuildMode=debug',
       '-dTargetFile=$flutterTarget',
-      '--output=build',
+      '-dTreeShakeIcons="$treeShakeIcons"',
+      '-dDartObfuscation=$dartObfuscation',
+      if (splitDebugInfo != null)
+        '-dSplitDebugInfo=$splitDebugInfo',
+      if (dartDefines != null)
+        '--DartDefines=$dartDefines',
+      if (extraGenSnapshotOptions != null)
+        '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
+      if (extraFrontEndOptions != null)
+        '-dExtraFrontEndOptions=$extraFrontEndOptions',
       target,
     ],
   );
