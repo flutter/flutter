@@ -97,7 +97,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(json.encode(<String, Object>{
             'configVersion': 2,
-            'packages': <Object>[]
+            'packages': <Object>[],
         }));
 
       final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
@@ -119,7 +119,7 @@ void main() {
       );
       expect(secondInvalidation.uris, unorderedEquals(<Uri>[
         Uri.parse('.packages'),
-        Uri.parse('.dart_tool/package_config.json')
+        Uri.parse('.dart_tool/package_config.json'),
       ]));
     });
 
