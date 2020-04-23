@@ -783,7 +783,10 @@ class GitTagVersion {
     );
   }
 
-  /// Check for the release tag format of the forms x.y.z or x.y.z-m.n.pre
+  /// Check for the release tag format.
+  ///
+  /// Release tags can be either stable format like '1.2.3' or dev format, like
+  /// '1.2.3-4.5.pre'.
   static GitTagVersion parseTaggedVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?$');
@@ -797,27 +800,30 @@ class GitTagVersion {
     final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
     final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
     final String devString = matchGroups[3];
-    int m, n;
+    int devVersion, devPatch;
     if (devString != null) {
       final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre')
         .firstMatch(devString);
       final List<String> devGroups = devMatch.groups(<int>[1, 2]);
-      m = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
-      n = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
+      devVersion = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
+      devPatch = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
     return GitTagVersion(
       x: x,
       y: y,
       z: z,
-      devVersion: m,
-      devPatch: n,
+      devVersion: devVersion,
+      devPatch: devPatch,
       commits: 0,
       hash: '',
       gitTag: version,
     );
   }
 
-  /// Detect output of git describe, of the form x.y.z-m.n.pre-<commits>-g<hash>
+  /// Detect output of git describe
+  ///
+  /// For example, for commit abc123 that is 6 commits after tag 1.2.3-4.5.pre
+  /// git would return '1.2.3-4.5.pre-6-gabc123'.
   static GitTagVersion parseGitVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
@@ -831,13 +837,13 @@ class GitTagVersion {
     final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
     final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
     final String devString = matchGroups[3];
-    int m, n;
+    int devVersion, devPatch;
     if (devString != null) {
       final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre$')
         .firstMatch(devString);
       final List<String> devGroups = devMatch.groups(<int>[1, 2]);
-      m = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
-      n = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
+      devVersion = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
+      devPatch = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
     // count of commits past last tagged version
     final int commits = matchGroups[4] == null ? null : int.tryParse(matchGroups[4]);
@@ -847,8 +853,8 @@ class GitTagVersion {
       x: x,
       y: y,
       z: z,
-      devVersion: m,
-      devPatch: n,
+      devVersion: devVersion,
+      devPatch: devPatch,
       commits: commits,
       hash: hash,
       gitTag: '$x.$y.$z${devString ?? ''}', // e.g. 1.2.3-4.5.pre
