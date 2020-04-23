@@ -196,7 +196,7 @@ flutter:
       logger: logger,
       engineVersion: '2',
     ), throwsA(isA<Exception>()));
-    expect(logger.errorText, contains('produced with a different engine revision'));
+    expect(logger.errorText, contains('produced with a different engine version'));
   });
 
   testWithoutContext('processSkSLBundle warns if the bundle target platform is '
