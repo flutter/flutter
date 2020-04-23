@@ -19,5 +19,5 @@
   "copyButtonLabel": "복사",
   "pasteButtonLabel": "붙여넣기",
   "selectAllButtonLabel": "전체 선택",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

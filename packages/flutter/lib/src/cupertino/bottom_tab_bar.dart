@@ -218,7 +218,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
           Expanded(
             child: Semantics(
               selected: active,
-              hint: localizations.tabLabel(
+              hint: localizations.tabSemanticsLabel(
                 tabIndex: index + 1,
                 tabCount: items.length,
               ),

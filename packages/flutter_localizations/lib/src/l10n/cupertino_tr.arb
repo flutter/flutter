@@ -19,5 +19,5 @@
   "copyButtonLabel": "Kopyala",
   "pasteButtonLabel": "Yapıştır",
   "selectAllButtonLabel": "Tümünü Seç",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

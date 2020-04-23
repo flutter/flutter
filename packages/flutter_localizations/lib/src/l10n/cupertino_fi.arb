@@ -19,5 +19,5 @@
   "copyButtonLabel": "Kopioi",
   "pasteButtonLabel": "Liitä",
   "selectAllButtonLabel": "Valitse kaikki",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

@@ -251,16 +251,16 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     }
   }
 
-  /// The raw version of [tabLabel], with `$tabIndex` and `$tabCount` verbatim
+  /// The raw version of [tabSemanticsLabel], with `$tabIndex` and `$tabCount` verbatim
   /// in the string.
   @protected
-  String get tabLabelRaw;
+  String get tabSemanticsLabelRaw;
 
   @override
-  String tabLabel({ int tabIndex, int tabCount }) {
+  String tabSemanticsLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
-    final String template = tabLabelRaw;
+    final String template = tabSemanticsLabelRaw;
     return template
       .replaceFirst(r'$tabIndex', _decimalFormat.format(tabIndex))
       .replaceFirst(r'$tabCount', _decimalFormat.format(tabCount));

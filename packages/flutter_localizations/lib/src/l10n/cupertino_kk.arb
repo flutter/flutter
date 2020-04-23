@@ -19,5 +19,5 @@
   "copyButtonLabel": "Көшіру",
   "pasteButtonLabel": "Қою",
   "selectAllButtonLabel": "Барлығын таңдау",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

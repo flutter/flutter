@@ -156,7 +156,7 @@ abstract class CupertinoLocalizations {
   /// there are, e.g. 'tab, 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({int tabIndex, int tabCount});
+  String tabSemanticsLabel({int tabIndex, int tabCount});
 
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
@@ -357,7 +357,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get alertDialogLabel => 'Alert';
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabSemanticsLabel({int tabIndex, int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'tab, $tabIndex of $tabCount';

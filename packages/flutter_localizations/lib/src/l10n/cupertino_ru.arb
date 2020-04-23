@@ -29,5 +29,5 @@
   "copyButtonLabel": "Копировать",
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

@@ -19,5 +19,5 @@
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Pegar",
   "selectAllButtonLabel": "Seleccionar todos",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

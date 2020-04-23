@@ -19,5 +19,5 @@
   "copyButtonLabel": "Kopeeri",
   "pasteButtonLabel": "Kleebi",
   "selectAllButtonLabel": "Vali kõik",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

@@ -19,5 +19,5 @@
   "copyButtonLabel": "Sao chép",
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

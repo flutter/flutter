@@ -19,5 +19,5 @@
   "copyButtonLabel": "Копиране",
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }

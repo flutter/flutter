@@ -19,5 +19,5 @@
   "copyButtonLabel": "Salin",
   "pasteButtonLabel": "Tampal",
   "selectAllButtonLabel": "Pilih Semua",
-  "tabLabel": "TBD"
+  "tabSemanticsLabel": "TBD"
 }
