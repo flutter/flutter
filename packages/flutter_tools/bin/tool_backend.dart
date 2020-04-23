@@ -11,20 +11,20 @@ Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
-  final String projectDirectory = Platform.environment['PROJECT_DIR'];
+  final String dartDefines = Platform.environment['DART_DEFINES'];
+  final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
+  final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
+  final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
+  final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
+  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
   final String flutterTarget = Platform.environment['FLUTTER_TARGET']
     ?? path.join('lib', 'main.dart');
-  final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
-  final String flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final String splitDebugInfo = Platform.environment['SPLIT_DEBUG_INFO'];
-  final String dartDefines = Platform.environment['DART_DEFINES'];
-  final String extraGenSnapshotOptions = Platform.environment['EXTRA_GEN_SNAPSHOT_OPTIONS'];
-  final String extraFrontEndOptions = Platform.environment['EXTRA_FRONT_END_OPTIONS'];
-  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] == 'true';
-  final bool dartObfuscation = Platform.environment['DART_OBFUSCATION'] == 'true';
   final bool treeShakeIcons = Platform.environment['TREE_SHAKE_ICONS'] == 'true';
+  final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] == 'true';
 
   Directory.current = projectDirectory;
 

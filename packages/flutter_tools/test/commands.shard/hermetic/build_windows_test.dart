@@ -312,7 +312,8 @@ void main() {
     setUpMockProjectFilesForBuild();
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
 
-    when(mockProcessManager.start(<String>[
+    when(mockProcessManager.start(
+      <String>[
         fileSystem.path.join(flutterRoot, 'packages', 'flutter_tools', 'bin', 'vs_build.bat'),
         vcvarsPath,
         fileSystem.path.basename(solutionPath),
