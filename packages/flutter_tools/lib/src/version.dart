@@ -772,7 +772,8 @@ class GitTagVersion {
       }
     }
 
-    // If we're not currently on a tag, use git describe
+    // If we're not currently on a tag, use git describe to find the most
+    // recent tag and number of commits past.
     return parse(
       _runGit(
         'git describe --match *.*.*-*.*.pre --first-parent --long --tags',
@@ -786,62 +787,71 @@ class GitTagVersion {
   static GitTagVersion parseTaggedVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?$');
-    final Match match = versionPattern.matchAsPrefix(version);
-    final List<String> parts = match?.groups(<int>[1, 2, 3, 4]);
-    if (parts == null) {
+    final Match match = versionPattern.firstMatch(version.trim());
+    if (match == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.map<int>(
-      (String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = <int>[null, null];
-    if (parts[3] != null) {
-      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
-        .matchAsPrefix(parts[3])
-        ?.groups(<int>[1, 2])
-        ?.map<int>(
-          (String source) => source == null ? null : int.tryParse(source)
-        )?.toList() ?? <int>[null, null];
+
+    final List<String> matchGroups = match.groups(<int>[1, 2, 3, 4]);
+    final int x = matchGroups[0] == null ? null : int.tryParse(matchGroups[0]);
+    final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
+    final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
+    final String devString = matchGroups[3];
+    int m, n;
+    if (devString != null) {
+      final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre')
+        .firstMatch(devString);
+      final List<String> devGroups = devMatch.groups(<int>[1, 2]);
+      m = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
+      n = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
     return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      devVersion: devParts[0],
-      devPatch: devParts[1],
+      x: x,
+      y: y,
+      z: z,
+      devVersion: m,
+      devPatch: n,
       commits: 0,
       hash: '',
       gitTag: version,
     );
   }
 
-  /// Detect output of git describe, of the form x.y.z-m.n.pre-c-g<revision>
+  /// Detect output of git describe, of the form x.y.z-m.n.pre-<commits>-g<hash>
   static GitTagVersion parseGitVersion(String version) {
     final RegExp versionPattern = RegExp(
       r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?-(\d+)-g([a-f0-9]+)$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
-    if (parts == null) {
+    final Match match = versionPattern.firstMatch(version.trim());
+    if (match == null) {
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(5).map<int>(
-      (String source) => source == null ? null : int.tryParse(source)).toList();
-    List<int> devParts = <int>[null, null];
-    if (parts[3] != null) {
-      devParts = RegExp(r'^-(\d+)\.(\d+)\.pre')
-        .matchAsPrefix(parts[3])
-        ?.groups(<int>[1, 2])
-        ?.map<int>(
-          (String source) => source == null ? null : int.tryParse(source)
-        )?.toList() ?? <int>[null, null];
+
+    final List<String> matchGroups = match.groups(<int>[1, 2, 3, 4, 5, 6]);
+    final int x = matchGroups[0] == null ? null : int.tryParse(matchGroups[0]);
+    final int y = matchGroups[1] == null ? null : int.tryParse(matchGroups[1]);
+    final int z = matchGroups[2] == null ? null : int.tryParse(matchGroups[2]);
+    final String devString = matchGroups[3];
+    int m, n;
+    if (devString != null) {
+      final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre$')
+        .firstMatch(devString);
+      final List<String> devGroups = devMatch.groups(<int>[1, 2]);
+      m = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
+      n = devGroups[1] == null ? null : int.tryParse(devGroups[1]);
     }
+    // count of commits past last tagged version
+    final int commits = matchGroups[4] == null ? null : int.tryParse(matchGroups[4]);
+    final String hash = matchGroups[5];
+
     return GitTagVersion(
-      x: parsedParts[0],
-      y: parsedParts[1],
-      z: parsedParts[2],
-      devVersion: devParts[0],
-      devPatch: devParts[1],
-      commits: parsedParts[4],
-      hash: parts[5],
-      gitTag: '${parts[0]}.${parts[1]}.${parts[2]}${parts[3] ?? ''}', // x.y.z-m.n.pre
+      x: x,
+      y: y,
+      z: z,
+      devVersion: m,
+      devPatch: n,
+      commits: commits,
+      hash: hash,
+      gitTag: '$x.$y.$z${devString ?? ''}', // e.g. 1.2.3-4.5.pre
     );
   }
 
