@@ -212,8 +212,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     assert(
       localizations != null,
       'CupertinoTabBar requires a Localizations parent in order to provide an'
-        'appropriate Semantics hint for tab indexing. A CupertinoApp will'
-        'provide the DefaultCupertinoLocalizations, or you can instantiate your'
+        'appropriate Semantics hint for tab indexing. A CupertinoApp will '
+        'provide the DefaultCupertinoLocalizations, or you can instantiate your '
         'own Localizations.'
     );
 
