@@ -240,16 +240,17 @@ class UpgradeCommandRunner {
 
   /// Attempts a hard reset to the given revision.
   ///
-  /// If there haven't been any hot fixes or local changes, this is equivalent
-  /// to a fast-forward.
+  /// This is a reset instead of fast forward because if we are on a release
+  /// branch with cherry picks, there may not be a direct fast-forward route
+  /// to the next release.
   Future<void> attemptReset(FlutterVersion oldFlutterVersion, String newRevision) async {
-    final int code = await processUtils.stream(
+    final RunResult result = await processUtils.run(
       <String>['git', 'reset', '--hard', newRevision],
+      throwOnError: true,
       workingDirectory: workingDirectory,
-      mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
+    if (result.exitCode != 0) {
+      throwToolExit(null, exitCode: result.exitCode);
     }
   }
 
@@ -296,19 +297,5 @@ class UpgradeCommandRunner {
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
-  }
-
-  //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
-  static final RegExp _gitDiffRegex = RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
-
-  //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
-  //  delete mode 100644 doc/index.html
-  //  create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart
-  static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
-
-  static bool matchesGitLine(String line) {
-    return _gitDiffRegex.hasMatch(line)
-      || _gitChangedRegex.hasMatch(line)
-      || line == 'Fast-forward';
   }
 }
