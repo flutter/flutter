@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "AppDelegate.h"
+#import "AppDelegate.h"
+
 #import "FlutterEngine+ScenariosTest.h"
 #import "ScreenBeforeFlutter.h"
 #import "TextPlatformView.h"
@@ -23,11 +24,8 @@
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 
-  // This argument is used by the XCUITest for Platform Views so that the app
-  // under test will create platform views.
-  // If the test is one of the platform view golden tests,
-  // the launchArgsMap should match the one in the `PlatformVieGoldenTestManager`.
   NSDictionary<NSString*, NSString*>* launchArgsMap = @{
+    // The Platform view golden test args should match `PlatformViewGoldenTestManager`.
     @"--platform-view" : @"platform_view",
     @"--platform-view-no-overlay-intersection" : @"platform_view_no_overlay_intersection",
     @"--platform-view-two-intersecting-overlays" : @"platform_view_two_intersecting_overlays",
@@ -49,18 +47,19 @@
     @"--gesture-reject-eager" : @"platform_view_gesture_reject_eager",
     @"--gesture-accept" : @"platform_view_gesture_accept",
     @"--tap-status-bar" : @"tap_status_bar",
+    @"--text-semantics-focus" : @"text_semantics_focus"
   };
-  __block NSString* platformViewTestName = nil;
+  __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
       enumerateKeysAndObjectsUsingBlock:^(NSString* argument, NSString* testName, BOOL* stop) {
         if ([[[NSProcessInfo processInfo] arguments] containsObject:argument]) {
-          platformViewTestName = testName;
+          flutterViewControllerTestName = testName;
           *stop = YES;
         }
       }];
 
-  if (platformViewTestName) {
-    [self readyContextForPlatformViewTests:platformViewTestName];
+  if (flutterViewControllerTestName) {
+    [self setupFlutterViewControllerTest:flutterViewControllerTestName];
   } else if ([[[NSProcessInfo processInfo] arguments] containsObject:@"--screen-before-flutter"]) {
     self.window.rootViewController = [[ScreenBeforeFlutter alloc] initWithEngineRunCompletion:nil];
   } else {
@@ -71,22 +70,24 @@
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (void)readyContextForPlatformViewTests:(NSString*)scenarioIdentifier {
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"PlatformViewTest" project:nil];
-  [engine runWithEntrypoint:nil];
-
-  FlutterViewController* flutterViewController;
+- (FlutterViewController*)flutterViewControllerForTest:(NSString*)scenarioIdentifier
+                                            withEngine:(FlutterEngine*)engine {
   if ([scenarioIdentifier isEqualToString:@"tap_status_bar"]) {
-    flutterViewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                  nibName:nil
-                                                                   bundle:nil];
+    return [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   } else {
-    flutterViewController = [[NoStatusBarFlutterViewController alloc] initWithEngine:engine
-                                                                             nibName:nil
-                                                                              bundle:nil];
+    return [[NoStatusBarFlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
   }
+}
+
+- (void)setupFlutterViewControllerTest:(NSString*)scenarioIdentifier {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"FlutterControllerTest" project:nil];
+  [engine run];
+
+  FlutterViewController* flutterViewController =
+      [self flutterViewControllerForTest:scenarioIdentifier withEngine:engine];
+
   [engine.binaryMessenger
-      setMessageHandlerOnChannel:@"scenario_status"
+      setMessageHandlerOnChannel:@"waiting_for_status"
             binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply _Nonnull reply) {
               [engine.binaryMessenger
                   sendOnChannel:@"set_scenario"
@@ -103,9 +104,9 @@
               [flutterViewController.view addSubview:text];
             }];
   TextPlatformViewFactory* textPlatformViewFactory =
-      [[TextPlatformViewFactory alloc] initWithMessenger:flutterViewController.binaryMessenger];
+      [[TextPlatformViewFactory alloc] initWithMessenger:engine.binaryMessenger];
   NSObject<FlutterPluginRegistrar>* registrar =
-      [flutterViewController.engine registrarForPlugin:@"scenarios/TextPlatformViewPlugin"];
+      [engine registrarForPlugin:@"scenarios/TextPlatformViewPlugin"];
   [registrar registerViewFactory:textPlatformViewFactory
                                 withId:@"scenarios/textPlatformView"
       gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];

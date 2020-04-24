@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */; };
 		0A57B3BD2323C4BD00DD9521 /* ScreenBeforeFlutter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */; };
 		0A57B3BF2323C74200DD9521 /* FlutterEngine+ScenariosTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */; };
 		0A57B3C22323D2D700DD9521 /* AppLifecycleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A57B3C12323D2D700DD9521 /* AppLifecycleTests.m */; };
@@ -110,6 +111,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextSemanticsFocusTest.m; sourceTree = "<group>"; };
+		0A42BFB52447E19F007E212E /* TextSemanticsFocusTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextSemanticsFocusTest.h; sourceTree = "<group>"; };
 		0A57B3BB2323C4BD00DD9521 /* ScreenBeforeFlutter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScreenBeforeFlutter.h; sourceTree = "<group>"; };
 		0A57B3BC2323C4BD00DD9521 /* ScreenBeforeFlutter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScreenBeforeFlutter.m; sourceTree = "<group>"; };
 		0A57B3BE2323C74200DD9521 /* FlutterEngine+ScenariosTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FlutterEngine+ScenariosTest.m"; sourceTree = "<group>"; };
@@ -280,6 +283,8 @@
 				68A5B63323EB71D300BDBCDB /* PlatformViewGestureRecognizerTests.m */,
 				0D8470A2240F0B1F0030B565 /* StatusBarTest.h */,
 				0D8470A3240F0B1F0030B565 /* StatusBarTest.m */,
+				0A42BFB32447E179007E212E /* TextSemanticsFocusTest.m */,
+				0A42BFB52447E19F007E212E /* TextSemanticsFocusTest.h */,
 			);
 			path = ScenariosUITests;
 			sourceTree = "<group>";
@@ -498,6 +503,7 @@
 				6816DBA42318358200A51400 /* PlatformViewGoldenTestManager.m in Sources */,
 				248D76EF22E388380012F0C1 /* PlatformViewUITests.m in Sources */,
 				0D8470A4240F0B1F0030B565 /* StatusBarTest.m in Sources */,
+				0A42BFB42447E179007E212E /* TextSemanticsFocusTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
