@@ -26,6 +26,53 @@ const String _kStackTraceFileField = 'DartError';
 /// it must be supplied in the request.
 const String _kStackTraceFilename = 'stacktrace_file';
 
+class CrashDetails {
+  CrashDetails({
+    @required this.command,
+    @required this.error,
+    @required this.stackTrace,
+    @required this.doctorText,
+  });
+
+  String command;
+  dynamic error;
+  StackTrace stackTrace;
+  String doctorText;
+}
+
+/// Reports information about the crash to the user.
+class CrashReporter {
+  CrashReporter();
+
+  /// Prints instructions for filing a bug about the crash.
+  Future<void> informUser(CrashDetails details, File crashFile) async {
+    globals.printError('A crash report has been written to ${crashFile.path}.');
+    globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+
+    final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
+    final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      flutterProjectFactory: globals.projectFactory,
+      client: clientFactory != null ? clientFactory() : HttpClient(),
+    );
+    final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL('${details.error}');
+    globals.printStatus('$similarIssuesURL\n', wrap: false);
+    globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+    globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+    globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+
+    final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+      details.command,
+      details.error,
+      details.stackTrace,
+      details.doctorText,
+    );
+    globals.printStatus('$gitHubTemplateURL\n', wrap: false);
+  }
+
+}
+
 /// Sends crash reports to Google.
 ///
 /// There are two ways to override the behavior of this class:

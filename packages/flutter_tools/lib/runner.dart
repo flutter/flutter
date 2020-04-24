@@ -8,14 +8,12 @@ import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
 
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/net.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
@@ -146,7 +144,7 @@ Future<int> _handleToolError(
         doctorText: await _doctorText(),
       );
       final File file = await _createLocalCrashReport(details);
-      await _informUserOfCrash(details, file);
+      await CrashReporter().informUser(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.
@@ -162,46 +160,6 @@ Future<int> _handleToolError(
       throw ProcessExit(1, immediate: true);
     }
   }
-}
-
-class CrashDetails {
-  CrashDetails({
-    @required this.command,
-    @required this.error,
-    @required this.stackTrace,
-    @required this.doctorText,
-  });
-
-  String command;
-  dynamic error;
-  StackTrace stackTrace;
-  String doctorText;
-}
-
-Future<void> _informUserOfCrash(CrashDetails details, File crashFile) async {
-  globals.printError('A crash report has been written to ${crashFile.path}.');
-  globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
-
-  final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
-  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    flutterProjectFactory: globals.projectFactory,
-    client: clientFactory != null ? clientFactory() : HttpClient(),
-  );
-  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL('${details.error}');
-  globals.printStatus('$similarIssuesURL\n', wrap: false);
-  globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
-  globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
-  globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
-
-  final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
-    details.command,
-    details.error,
-    details.stackTrace,
-    details.doctorText,
-  );
-  globals.printStatus('$gitHubTemplateURL\n', wrap: false);
 }
 
 String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
