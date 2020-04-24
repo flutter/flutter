@@ -61,13 +61,14 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   const _ManifestAssetBundleFactory();
 
   @override
-  AssetBundle createBundle() => _ManifestAssetBundle();
+  AssetBundle createBundle() => ManifestAssetBundle();
 }
 
-class _ManifestAssetBundle implements AssetBundle {
-  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
+/// An asset bundle based on a pubspec.yaml
+class ManifestAssetBundle implements AssetBundle {
+  /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  _ManifestAssetBundle();
+  ManifestAssetBundle();
 
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
@@ -493,7 +494,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   return <Map<String, dynamic>>[
     if (manifest.usesMaterialDesign && includeDefaultFonts)
-      ..._getMaterialFonts(_ManifestAssetBundle._fontSetMaterial),
+      ..._getMaterialFonts(ManifestAssetBundle._fontSetMaterial),
     if (packageName == null)
       ...manifest.fontsDescriptor
     else
