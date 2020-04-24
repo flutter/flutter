@@ -127,7 +127,7 @@ class IconTreeShaker {
     );
 
     if (fonts.length != iconData.length) {
-      _logger.printError(
+      _logger.printTrace(
         'Expected to find fonts for ${iconData.keys}, but found '
         '${fonts.keys}. This usually means you are refering to '
         'font families in an IconData class but not including them '
