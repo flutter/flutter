@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/host_validator.dart';
 import 'package:meta/meta.dart';
-
 import 'android/android_studio_validator.dart';
+
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/async_guard.dart';
@@ -24,6 +23,7 @@ import 'device.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
+import 'host_validator.dart';
 import 'intellij/intellij.dart';
 import 'ios/plist_parser.dart';
 import 'linux/linux_doctor.dart';
