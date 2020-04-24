@@ -50,7 +50,7 @@ void main() {
       'ph': 'b',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
+        'num_vsync_transitions_missed': vsyncsMissed.toString()
       }
     };
 
@@ -59,7 +59,7 @@ void main() {
       'ph': 'e',
       'ts': timeStamp,
       'args': <String, String>{
-        'vsync_transitions_missed': vsyncsMissed.toString()
+        'num_vsync_transitions_missed': vsyncsMissed.toString()
       }
     };
 

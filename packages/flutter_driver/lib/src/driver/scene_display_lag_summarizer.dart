@@ -7,7 +7,8 @@ import 'timeline.dart';
 /// Key for SceneDisplayLag timeline events.
 const String kSceneDisplayLagEvent = 'SceneDisplayLag';
 
-const String _kVsyncTransitionsMissed = 'vsync_transitions_missed';
+/// Argument Key for SceneDisplayLag transitions missed.
+const String kVsyncTransitionsMissed = 'num_vsync_transitions_missed';
 
 /// Returns the [p]-th percentile element from the [doubles].
 ///
@@ -74,8 +75,8 @@ class SceneDisplayLagSummarizer {
 
   double _getVsyncTransitionsMissed(TimelineEvent e) {
     assert(e.name == kSceneDisplayLagEvent);
-    assert(e.arguments.containsKey(_kVsyncTransitionsMissed));
-    final dynamic transitionsMissed = e.arguments[_kVsyncTransitionsMissed];
+    assert(e.arguments.containsKey(kVsyncTransitionsMissed));
+    final dynamic transitionsMissed = e.arguments[kVsyncTransitionsMissed];
     assert(transitionsMissed is String);
     return double.parse(transitionsMissed as String);
   }

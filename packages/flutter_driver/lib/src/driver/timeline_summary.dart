@@ -15,6 +15,8 @@ import 'timeline.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
+typedef _TimelineEventFilter = bool Function(TimelineEvent event);
+
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
 const Duration kBuildBudget = Duration(milliseconds: 16);
@@ -145,10 +147,14 @@ class TimelineSummary {
       : json.encode(jsonObject);
   }
 
-  List<TimelineEvent> _extractNamedEvents(String name) {
-    return _timeline.events
-      .where((TimelineEvent event) => event.name == name)
-      .toList();
+  List<TimelineEvent> _extractNamedEvents(String name, {_TimelineEventFilter filter}) {
+    final Iterable<TimelineEvent> namedEvents = _timeline.events
+        .where((TimelineEvent event) => event.name == name);
+    if (filter == null) {
+      return namedEvents.toList();
+    } else {
+      return namedEvents.where(filter).toList();
+    }
   }
 
   List<Duration> _extractDurations(
@@ -225,7 +231,12 @@ class TimelineSummary {
         .reduce(math.max);
   }
 
-  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
+  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() =>
+      SceneDisplayLagSummarizer(_extractNamedEvents(
+        kSceneDisplayLagEvent,
+        filter: (TimelineEvent event) =>
+            event.arguments.containsKey(kVsyncTransitionsMissed),
+      ));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
 
