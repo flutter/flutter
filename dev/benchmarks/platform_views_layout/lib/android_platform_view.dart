@@ -45,6 +45,7 @@ class AndroidPlatformView extends StatelessWidget {
   }
 }
 
+// TODO(egarciad): The Android view controller should be defined in the framework.
 class _AndroidViewController extends PlatformViewController {
   _AndroidViewController(
     this.viewId,
