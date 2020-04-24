@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -65,7 +66,15 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
-      await const Pub().get(context: PubContext.flutterTests, directory: tempDir.path);
+      final Pub pub = Pub(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: const LocalPlatform(),
+        botDetector: globals.botDetector,
+        usage: globals.flutterUsage,
+      );
+      await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
         fileSystem: fileSystem,
@@ -90,7 +99,15 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     _createSampleProject(tempDir, brokenCode: true);
 
-    await const Pub().get(context: PubContext.flutterTests, directory: tempDir.path);
+    final Pub pub = Pub(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: const LocalPlatform(),
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+    );
+    await pub.get(context: PubContext.flutterTests, directory: tempDir.path);
 
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path],
       fileSystem: fileSystem,

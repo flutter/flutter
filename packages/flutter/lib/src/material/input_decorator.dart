@@ -1243,11 +1243,16 @@ class _RenderDecoration extends RenderBox {
     double subtextHeight = _lineHeight(width, <RenderBox>[helperError, counter]);
     if (subtextHeight > 0.0)
       subtextHeight += subtextGap;
-    return contentPadding.top
+    final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
+    final double containerHeight = contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
       + subtextHeight
       + contentPadding.bottom;
+    final double minContainerHeight = decoration.isDense || expands
+      ? 0.0
+      : kMinInteractiveDimension + densityOffset.dy;
+    return math.max(containerHeight, minContainerHeight);
   }
 
   @override
