@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/host_validator.dart';
 import 'package:meta/meta.dart';
 
 import 'android/android_studio_validator.dart';
@@ -108,6 +109,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         ProxyValidator(),
       if (deviceManager.canListAnything)
         DeviceValidator(),
+      HostValidator(
+        platform: globals.platform,
+      ),
     ];
     return _validators;
   }
