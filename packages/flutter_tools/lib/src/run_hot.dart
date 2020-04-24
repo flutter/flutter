@@ -566,7 +566,11 @@ class HotRunner extends ResidentRunner {
       final vm_service.VM vm = await device.vmService.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
         if (!uiIsolatesIds.contains(isolateRef.id)) {
-          operations.add(device.vmService.kill(isolateRef.id));
+          operations.add(device.vmService.kill(isolateRef.id)
+            .catchError((dynamic error, StackTrace stackTrace) {
+              // Do nothing on a SentinelException since it means the isolate
+              // has already been killed.
+            }, test: (dynamic error) => error is vm_service.SentinelException));
         }
       }
     }
