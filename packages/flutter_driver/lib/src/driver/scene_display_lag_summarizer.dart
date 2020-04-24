@@ -58,7 +58,9 @@ class SceneDisplayLagSummarizer {
     final double total = sceneDisplayLagEvents
         .map(_getVsyncTransitionsMissed)
         .reduce((double a, double b) => a + b);
-    return total * 2 / sceneDisplayLagEvents.length;
+    // Note that the length here counts both begin and end events which means
+    // the average is half of what it should be...
+    return total / sceneDisplayLagEvents.length;
   }
 
   /// The [percentile]-th percentile `vsync_transitions_missed` over the lag events.
@@ -76,7 +78,9 @@ class SceneDisplayLagSummarizer {
     assert(e.name == kSceneDisplayLagEvent);
     assert(e.arguments.containsKey(_kVsyncTransitionsMissed));
     final dynamic transitionsMissed = e.arguments[_kVsyncTransitionsMissed];
-    if (transitionsMissed == null) return 0.0;
+    if (transitionsMissed == null) {
+      return 0.0;
+    }
     assert(transitionsMissed is String);
     return double.parse(transitionsMissed as String);
   }
