@@ -75,12 +75,10 @@ void main() {
     testWithoutContext('ipv6 formatting logic of FuchsiaPackageServer', () {
       const String host = 'fe80::ec4:7aff:fecc:ea8f%eno2';
       const int port = 23;
-      // Test determination used in fuchsia_pm.
-      final bool isIpv6 = host.contains(':');
 
       expect(
-        FuchsiaPackageServer('a', 'b', host, port, isIpv6).url,
-        'http://[fe80::ec4:7aff:fecc:ea8f%eno2]:23',
+        FuchsiaPackageServer('a', 'b', host, port).url,
+        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
       );
     });
   });

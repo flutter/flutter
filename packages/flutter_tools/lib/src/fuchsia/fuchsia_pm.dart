@@ -180,7 +180,7 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this.name, this._host, this._port, this._ipv6);
+  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
   static const String toolHost = 'flutter_tool';
@@ -188,14 +188,11 @@ class FuchsiaPackageServer {
   final String _repo;
   final String _host;
   final int _port;
-  final bool _ipv6;
 
   Process _process;
 
   /// The URL that can be used by the device to access this package server.
-  String get url => _ipv6
-    ? 'http://[$_host]:$_port'
-    : 'http://$_host:$_port';
+  String get url => Uri(scheme: 'http', host: _host, port: _port).toString();
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;

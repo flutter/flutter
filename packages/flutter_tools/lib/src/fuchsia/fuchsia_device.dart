@@ -299,9 +299,8 @@ class FuchsiaDevice extends Device {
 
       // Start up a package server.
       const String packageServerName = FuchsiaPackageServer.toolHost;
-      final bool isIpv6 = host.contains(':');
       fuchsiaPackageServer = FuchsiaPackageServer(
-          packageRepo.path, packageServerName, host, port, isIpv6);
+          packageRepo.path, packageServerName, host, port);
       if (!await fuchsiaPackageServer.start()) {
         globals.printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
