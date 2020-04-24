@@ -473,7 +473,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
-  ///   return WidgetsApp(
+  ///   return MaterialApp(
   ///     shortcuts: <LogicalKeySet, Intent>{
   ///       ... WidgetsApp.defaultShortcuts,
   ///       LogicalKeySet(LogicalKeyboardKey.select): const ActivateIntent(),

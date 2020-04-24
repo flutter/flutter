@@ -334,7 +334,10 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
 
-    visitGroups(groups[scopeGroupMarker?.focusNode]);
+    final _FocusTraversalGroupInfo groupInfo = groups[scopeGroupMarker?.focusNode];
+    if (groupInfo != null) {
+      visitGroups(groupInfo);
+    }
     assert(
       sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
       'sorted descendants contains more nodes than it should: (${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())})'
@@ -380,6 +383,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
     final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope);
+    if (sortedNodes.isEmpty) {
+      return false;
+    }
     if (forward && focusedChild == sortedNodes.last) {
       _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
       return true;

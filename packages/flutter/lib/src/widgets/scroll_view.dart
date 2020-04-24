@@ -4,12 +4,16 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
@@ -18,6 +22,7 @@ import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'shortcuts.dart';
 import 'sliver.dart';
 import 'viewport.dart';
 
@@ -79,6 +84,7 @@ abstract class ScrollView extends StatelessWidget {
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
+    this.limitFocusTraversal = true,
     this.controller,
     bool primary,
     ScrollPhysics physics,
@@ -91,6 +97,7 @@ abstract class ScrollView extends StatelessWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
+       assert(limitFocusTraversal != null),
        assert(shrinkWrap != null),
        assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
@@ -123,6 +130,15 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// Defaults to false.
   final bool reverse;
+
+  /// Limits the focus traversal allowed in the list to be in the axis of the
+  /// [scrollDirection].
+  ///
+  /// If false, focus traversal is allowed in either axis. For example, this
+  /// value is set to true for a [GridView].
+  ///
+  /// Default is true;
+  final bool limitFocusTraversal;
 
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
@@ -333,9 +349,34 @@ abstract class ScrollView extends StatelessWidget {
         return buildViewport(context, offset, axisDirection, slivers);
       },
     );
-    final Widget scrollableResult = primary && scrollController != null
+    Widget scrollableResult = primary && scrollController != null
         ? PrimaryScrollController.none(child: scrollable)
         : scrollable;
+
+    // Enable focus traversal in the scrolling direction only.
+    final TextDirection textDirection = Directionality.of(context);
+    bool swapTraversalDirection;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        swapTraversalDirection = true;
+        break;
+      case TextDirection.ltr:
+        swapTraversalDirection = false;
+        break;
+    }
+    scrollableResult = Shortcuts(
+      shortcuts: <LogicalKeySet, Intent> {
+          if (scrollDirection == Axis.horizontal || !limitFocusTraversal)
+            LogicalKeySet(LogicalKeyboardKey.arrowLeft): swapTraversalDirection ? const PreviousFocusIntent() : const NextFocusIntent(),
+          if (scrollDirection == Axis.horizontal || !limitFocusTraversal)
+            LogicalKeySet(LogicalKeyboardKey.arrowRight): swapTraversalDirection ? const NextFocusIntent() : const PreviousFocusIntent(),
+          if (scrollDirection == Axis.vertical || !limitFocusTraversal)
+            LogicalKeySet(LogicalKeyboardKey.arrowDown): const NextFocusIntent(),
+          if (scrollDirection == Axis.vertical || !limitFocusTraversal)
+            LogicalKeySet(LogicalKeyboardKey.arrowUp): const PreviousFocusIntent(),
+        },
+      child: FocusTraversalGroup(child: scrollableResult),
+    );
 
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       return NotificationListener<ScrollUpdateNotification>(
@@ -534,6 +575,7 @@ abstract class BoxScrollView extends ScrollView {
     Key key,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
+    bool limitFocusTraversal = true,
     ScrollController controller,
     bool primary,
     ScrollPhysics physics,
@@ -547,6 +589,7 @@ abstract class BoxScrollView extends ScrollView {
     key: key,
     scrollDirection: scrollDirection,
     reverse: reverse,
+    limitFocusTraversal: limitFocusTraversal,
     controller: controller,
     primary: primary,
     physics: physics,
@@ -1524,6 +1567,7 @@ class GridView extends BoxScrollView {
          key: key,
          scrollDirection: scrollDirection,
          reverse: reverse,
+         limitFocusTraversal: false,
          controller: controller,
          primary: primary,
          physics: physics,
@@ -1581,6 +1625,7 @@ class GridView extends BoxScrollView {
          key: key,
          scrollDirection: scrollDirection,
          reverse: reverse,
+         limitFocusTraversal: false,
          controller: controller,
          primary: primary,
          physics: physics,
@@ -1617,6 +1662,7 @@ class GridView extends BoxScrollView {
          key: key,
          scrollDirection: scrollDirection,
          reverse: reverse,
+         limitFocusTraversal: false,
          controller: controller,
          primary: primary,
          physics: physics,
@@ -1677,6 +1723,7 @@ class GridView extends BoxScrollView {
          key: key,
          scrollDirection: scrollDirection,
          reverse: reverse,
+         limitFocusTraversal: false,
          controller: controller,
          primary: primary,
          physics: physics,
@@ -1736,6 +1783,7 @@ class GridView extends BoxScrollView {
          key: key,
          scrollDirection: scrollDirection,
          reverse: reverse,
+         limitFocusTraversal: false,
          controller: controller,
          primary: primary,
          physics: physics,

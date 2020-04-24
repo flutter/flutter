@@ -5,9 +5,10 @@
 import 'dart:async';
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'colors.dart';
@@ -1087,16 +1088,22 @@ class _TabBarState extends State<TabBar> {
 
     Widget tabBar = CustomPaint(
       painter: _indicatorPainter,
-      child: _TabStyle(
-        animation: kAlwaysDismissedAnimation,
-        selected: false,
-        labelColor: widget.labelColor,
-        unselectedLabelColor: widget.unselectedLabelColor,
-        labelStyle: widget.labelStyle,
-        unselectedLabelStyle: widget.unselectedLabelStyle,
-        child: _TabLabelBar(
-          onPerformLayout: _saveTabOffsets,
-          children: wrappedTabs,
+      child: Shortcuts(
+        shortcuts: <LogicalKeySet, Intent> {
+          LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+          LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+        },
+        child: _TabStyle(
+          animation: kAlwaysDismissedAnimation,
+          selected: false,
+          labelColor: widget.labelColor,
+          unselectedLabelColor: widget.unselectedLabelColor,
+          labelStyle: widget.labelStyle,
+          unselectedLabelStyle: widget.unselectedLabelStyle,
+          child: _TabLabelBar(
+            onPerformLayout: _saveTabOffsets,
+            children: wrappedTabs,
+          ),
         ),
       ),
     );

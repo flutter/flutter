@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -321,9 +322,20 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       );
     }
 
+    // Find the parent menu so we can find what the initial value of the route is.
+    final _PopupMenu<T> parentMenu = context.findAncestorWidgetOfExactType<_PopupMenu<T>>();
+    // If there is no initial value, then we set all of them to autofocus, since
+    // the first one added to the parent will get focus then. If there is an
+    // initial value, then only set autofocus on that one item.
+    bool autofocus = true;
+    if (parentMenu.route.initialValue != null) {
+      autofocus = widget.represents(parentMenu.route.initialValue);
+    }
+
     return InkWell(
       onTap: widget.enabled ? handleTap : null,
       canRequestFocus: widget.enabled,
+      autofocus: autofocus,
       child: item,
     );
   }
@@ -541,26 +553,33 @@ class _PopupMenu<T> extends StatelessWidget {
       ),
     );
 
-    return AnimatedBuilder(
-      animation: route.animation,
-      builder: (BuildContext context, Widget child) {
-        return Opacity(
-          opacity: opacity.evaluate(route.animation),
-          child: Material(
-            shape: route.shape ?? popupMenuTheme.shape,
-            color: route.color ?? popupMenuTheme.color,
-            type: MaterialType.card,
-            elevation: route.elevation ?? popupMenuTheme.elevation ?? 8.0,
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              widthFactor: width.evaluate(route.animation),
-              heightFactor: height.evaluate(route.animation),
-              child: child,
-            ),
-          ),
-        );
+    return Shortcuts(
+      debugLabel: 'PopupMenu shortcuts',
+      shortcuts: <LogicalKeySet, Intent> {
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
       },
-      child: child,
+      child: AnimatedBuilder(
+        animation: route.animation,
+        builder: (BuildContext context, Widget child) {
+          return Opacity(
+            opacity: opacity.evaluate(route.animation),
+            child: Material(
+              shape: route.shape ?? popupMenuTheme.shape,
+              color: route.color ?? popupMenuTheme.color,
+              type: MaterialType.card,
+              elevation: route.elevation ?? popupMenuTheme.elevation ?? 8.0,
+              child: Align(
+                alignment: AlignmentDirectional.topEnd,
+                widthFactor: width.evaluate(route.animation),
+                heightFactor: height.evaluate(route.animation),
+                child: child,
+              ),
+            ),
+          );
+        },
+        child: child,
+      ),
     );
   }
 }
