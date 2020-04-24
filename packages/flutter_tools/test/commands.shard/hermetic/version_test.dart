@@ -42,7 +42,7 @@ void main() {
         'version',
         '--no-pub',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -74,6 +74,28 @@ void main() {
     testUsingContext('dev version switch prompt is accepted', () async {
       when(mockStdio.stdinHasTerminal).thenReturn(true);
       const String version = '30.0.0-dev.0.0';
+      final VersionCommand command = VersionCommand();
+      when(globals.terminal.promptForCharInput(<String>['y', 'n'],
+        logger: anyNamed('logger'),
+        prompt: 'Are you sure you want to proceed?')
+      ).thenAnswer((Invocation invocation) async => 'y');
+
+      await createTestCommandRunner(command).run(<String>[
+        'version',
+        '--no-pub',
+        version,
+      ]);
+      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(),
+      Stdio: () => mockStdio,
+      AnsiTerminal: () => MockTerminal(),
+      FlutterVersion: () => mockVersion,
+    });
+
+    testUsingContext('dev version switch prompt is accepted', () async {
+      when(mockStdio.stdinHasTerminal).thenReturn(true);
+      const String version = '31.0.0-0.0.pre';
       final VersionCommand command = VersionCommand();
       when(globals.terminal.promptForCharInput(<String>['y', 'n'],
         logger: anyNamed('logger'),
@@ -209,7 +231,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>[
         'version',
       ]);
-      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\n'));
+      expect(testLogger.statusText, equals('v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre\n'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
       Stdio: () => mockStdio,
@@ -258,7 +280,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       if (failGitTag) {
         return ProcessResult(0, 1, '', '');
       }
-      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0', '');
+      return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0\r\n30.0.0-dev.0.0\r\n31.0.0-0.0.pre', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {
       version = (command[2] as String).replaceFirst(RegExp('^v'), '');
