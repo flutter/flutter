@@ -19,15 +19,12 @@ import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/host_validator.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:http/http.dart';
-import 'package:http/testing.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
@@ -240,56 +237,6 @@ void main() {
           'HTTP_PROXY': 'fakeproxy.local',
           'NO_PROXY': 'localhost',
         },
-    });
-  });
-
-  group('host validator', () {
-    test('all the hosts are available', () async {
-      final HostValidator hostValidator = HostValidator();
-      hostValidator.httpClient = MockClient((_) async {
-        return Response('', 200);
-      });
-
-      final ValidationResult validatorResult = await hostValidator.validate();
-      expect(validatorResult.messages..removeWhere(
-
-              /// remove every information message
-              (ValidationMessage msg) => !msg.isHint && !msg.isError),
-          hasLength(0));
-    });
-
-    test('all the hosts are not available', () async {
-      final HostValidator hostValidator = HostValidator();
-      hostValidator.httpClient = MockClient((_) async {
-        throw Exception('No internet connection');
-      });
-
-      final ValidationResult validatorResult = await hostValidator.validate();
-      expect(validatorResult.messages.toList()..removeWhere(
-
-              /// remove every information message
-              (ValidationMessage msg) => !msg.isHint && !msg.isError),
-          equals(validatorResult.messages));
-    });
-
-    test('one host is not available', () async {
-      final HostValidator hostValidator = HostValidator();
-      bool firstResponseWithException = false;
-      hostValidator.httpClient = MockClient((_) async {
-        if (firstResponseWithException) {
-          return Response('', 200);
-        } else {
-          firstResponseWithException = true;
-          throw Exception('No internet connection');
-        }
-      });
-
-      final ValidationResult validatorResult = await hostValidator.validate();
-      expect(validatorResult.messages..removeWhere(
-
-              /// remove every information message
-              (ValidationMessage msg) => !msg.isHint && !msg.isError),
-          hasLength(1));
     });
   });
 
