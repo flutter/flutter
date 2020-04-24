@@ -42,7 +42,12 @@ fi;
 
 BASE_SHA="$(git fetch $UPSTREAM master > /dev/null 2>&1 && \
            (git merge-base --fork-point FETCH_HEAD HEAD || git merge-base FETCH_HEAD HEAD))"
+# Disable glob matching otherwise a file in the current directory that matches
+# $CLANG_FILETYPES will cause git to query for that exact file instead of doing
+# a match.
+set -f
 CLANG_FILES_TO_CHECK="$(git ls-files $CLANG_FILETYPES)"
+set +f
 FAILED_CHECKS=0
 for f in $CLANG_FILES_TO_CHECK; do
   set +e
