@@ -461,6 +461,7 @@ void main() {
     final Widget slider = Scaffold(
       body: Center(
         child: Slider(
+          useV2Slider: false,
           value: 0.5,
           onChanged: (double value) { },
         ),

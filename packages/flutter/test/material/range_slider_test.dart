@@ -1601,6 +1601,7 @@ void main() {
                 child: Theme(
                   data: theme,
                   child: RangeSlider(
+                    useV2Slider: false,
                     values: values,
                     labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
                     divisions: divisions,
@@ -2105,6 +2106,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
+      useV2Slider: false,
       activeColor: Colors.blue,
       divisions: 4,
       inactiveColor: Colors.grey,

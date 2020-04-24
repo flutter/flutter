@@ -857,6 +857,7 @@ void main() {
                 child: Theme(
                   data: theme,
                   child: Slider(
+                    useV2Slider: false,
                     value: value,
                     label: '$value',
                     divisions: divisions,
@@ -1368,6 +1369,7 @@ void main() {
                         maxWidth: double.infinity,
                         maxHeight: double.infinity,
                         child: Slider(
+                          useV2Slider: false,
                           key: sliderKey,
                           min: 0.0,
                           max: 100.0,
@@ -1632,6 +1634,7 @@ void main() {
     Widget buildSlider(int parents) {
       Widget createParents(int parents, StateSetter setState) {
         Widget slider = Slider(
+          useV2Slider: false,
           key: sliderKey,
           value: value,
           divisions: 4,
@@ -2496,6 +2499,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(
+      useV2Slider: false,
       activeColor: Colors.blue,
       divisions: 10,
       inactiveColor: Colors.grey,

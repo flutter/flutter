@@ -1673,7 +1673,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
-  const RoundedRectSliderTrackShape({ this.useV2Slider = false });
+  const RoundedRectSliderTrackShape({ this.useV2Slider = true });
 
   /// {@macro flutter.material.slider.useV2Slider}
   final bool useV2Slider;
@@ -2123,7 +2123,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// Create a slider tick mark that draws a circle.
   const RoundSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider = false,
+    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round tick mark.
@@ -2225,7 +2225,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   /// Create a range slider tick mark that draws a circle.
   const RoundRangeSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider = false,
+    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round tick mark.
@@ -2379,7 +2379,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-    this.useV2Slider = false,
+    this.useV2Slider = true,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2496,7 +2496,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-    this.useV2Slider = false,
+    this.useV2Slider = true,
   }) : assert(enabledThumbRadius != null);
 
   /// {@macro flutter.material.slider.useV2Slider}
