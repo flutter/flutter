@@ -88,6 +88,7 @@ void main() {
     expect(output.childFile('AssetManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
