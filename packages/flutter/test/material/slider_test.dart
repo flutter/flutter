@@ -641,7 +641,6 @@ void main() {
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onChanged: onChanged,
-                    useV2Slider: true,
                   ),
                 ),
               ),
@@ -878,43 +877,47 @@ void main() {
     final RenderBox valueIndicatorBox = tester.firstRenderObject(find.byType(Overlay));
 
     // Check default theme for enabled widget.
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
+    expect(material, paints..shadow(color: const Color(0xff000000)));
     expect(material, paints..circle(color: sliderTheme.thumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
     // Test setting only the activeColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(material, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(material, paints..rrect(color: customColor1)..rrect(color: sliderTheme.inactiveTrackColor));
+    expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: customColor1));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting only the inactiveColor.
     await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: customColor1));
+    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: customColor1));
+    expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: sliderTheme.thumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting both activeColor and inactiveColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
-    expect(material, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
+    expect(material, paints..shadow(color: Colors.black));
     expect(material, paints..circle(color: customColor1));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider.
     await tester.pumpWidget(buildApp(divisions: 3));
-    expect(material, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
+    expect(material, paints..rrect(color: sliderTheme.activeTrackColor)..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
         material,
         paints
@@ -922,10 +925,12 @@ void main() {
           ..circle(color: sliderTheme.activeTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.thumbColor));
+          ..shadow(color: Colors.black)
+          ..circle(color: sliderTheme.thumbColor)
+    );
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider with inactiveColor and activeColor set.
     await tester.pumpWidget(buildApp(
@@ -933,7 +938,7 @@ void main() {
       inactiveColor: customColor2,
       divisions: 3,
     ));
-    expect(material, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(material, paints..rrect(color: customColor1)..rrect(color: customColor2));
     expect(
         material,
         paints
@@ -941,11 +946,12 @@ void main() {
           ..circle(color: customColor2)
           ..circle(color: customColor1)
           ..circle(color: customColor1)
+          ..shadow(color: Colors.black)
           ..circle(color: customColor1));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(material, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
@@ -955,24 +961,24 @@ void main() {
     expect(
         material,
         paints
-          ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
-    expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
+          ..rrect(color: sliderTheme.disabledActiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
+    expect(material, paints..shadow(color: Colors.black)..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
 
     // Test setting the activeColor and inactiveColor for disabled widget.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
         material,
         paints
-          ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
+          ..rrect(color: sliderTheme.disabledActiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
     expect(material, paints..circle(color: sliderTheme.disabledThumbColor));
     expect(material, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
-    expect(material, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.activeTrackColor)));
+    expect(material, isNot(paints..rrect(color: sliderTheme.inactiveTrackColor)));
 
     // Test that the default value indicator has the right colors.
     await tester.pumpWidget(buildApp(divisions: 3));
@@ -982,18 +988,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(2.0 / 3.0));
     expect(
-      material,
+      valueIndicatorBox,
       paints
-        ..rect(color: sliderTheme.activeTrackColor)
-        ..rect(color: sliderTheme.inactiveTrackColor)
+        ..rrect(color: sliderTheme.activeTrackColor)
+        ..rrect(color: sliderTheme.inactiveTrackColor)
         ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.thumbColor),
+        ..shadow(color: Colors.black)
+        ..circle(color: sliderTheme.thumbColor)
+        ..path(color: sliderTheme.valueIndicatorColor),
     );
-    expect(valueIndicatorBox, paints..path(color: sliderTheme.valueIndicatorColor));
     await gesture.up();
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
@@ -1010,18 +1017,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals(2.0 / 3.0));
     expect(
-      material,
+      valueIndicatorBox,
       paints
-        ..rect(color: customColor1) // active track
-        ..rect(color: customColor2) // inactive track
+        ..rrect(color: customColor1) // active track
+        ..rrect(color: customColor2) // inactive track
         ..circle(color: customColor1.withOpacity(0.12)) // overlay
         ..circle(color: customColor2) // 1st tick mark
         ..circle(color: customColor2) // 2nd tick mark
         ..circle(color: customColor2) // 3rd tick mark
         ..circle(color: customColor1) // 4th tick mark
-        ..circle(color: customColor1) // thumb,
+        ..shadow(color: Colors.black)
+        ..circle(color: customColor1) // thumb
+        ..path(color: sliderTheme.valueIndicatorColor), // indicator
     );
-    expect(valueIndicatorBox, paints..path(color: customColor1));
     await gesture.up();
   });
 
@@ -1232,7 +1240,6 @@ void main() {
                               value = newValue;
                             });
                           },
-                          useV2Slider: true,
                         ),
                       ),
                     ),
@@ -1396,7 +1403,19 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 1.0, y: 1.0));
+    expect(
+      tester.firstRenderObject(find.byType(Overlay)),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -38.0),
+            Offset(-30.0, -16.0),
+            Offset(30.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1406,7 +1425,19 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 2.0, y: 2.0));
+    expect(
+      tester.firstRenderObject(find.byType(Overlay)),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -52.0),
+            Offset(-44.0, -16.0),
+            Offset(44.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1421,7 +1452,18 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 1.0, y: 1.0));
+    expect(tester.firstRenderObject(find.byType(Overlay)),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -38.0),
+            Offset(-30.0, -16.0),
+            Offset(30.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1435,7 +1477,19 @@ void main() {
     gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-    expect(tester.firstRenderObject(find.byType(Overlay)), paints..scale(x: 2.0, y: 2.0));
+    expect(
+      tester.firstRenderObject(find.byType(Overlay)),
+      paints
+        ..path(
+          includes: const <Offset>[
+            Offset(0.0, 0.0),
+            Offset(0.0, -52.0),
+            Offset(-44.0, -16.0),
+            Offset(44.0, -16.0),
+          ],
+          color: const Color(0xf55f5f5f),
+        ),
+    );
 
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1507,7 +1561,6 @@ void main() {
               value = newValue;
             });
           },
-          useV2Slider: true,
         );
 
         for (int i = 0; i < parents; ++i) {
@@ -1677,11 +1730,11 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 24.0, y: 24.0, radius: 10.0),
       );
 
@@ -1694,11 +1747,11 @@ void main() {
         material,
         paints
           ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
       );
 
@@ -1714,11 +1767,11 @@ void main() {
         material,
         paints
           ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
       );
       // Wait for animations to finish.
@@ -1728,11 +1781,11 @@ void main() {
         material,
         paints
           ..circle(x: 400.0, y: 24.0, radius: 24.0)
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
       await gesture.up();
@@ -1741,11 +1794,11 @@ void main() {
       expect(
         material,
         paints
-          ..circle(x: 25.0, y: 24.0, radius: 1.0)
-          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 26.0, y: 24.0, radius: 1.0)
+          ..circle(x: 213.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 1.0)
-          ..circle(x: 587.5, y: 24.0, radius: 1.0)
-          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.0, y: 24.0, radius: 1.0)
+          ..circle(x: 774.0, y: 24.0, radius: 1.0)
           ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
     }
@@ -2522,7 +2575,6 @@ void main() {
       'label: "Set a value"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'useV1Slider',
     ]);
   });
 }

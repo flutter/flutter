@@ -1031,7 +1031,6 @@ void main() {
     Color inactiveColor,
     int divisions,
     bool enabled = true,
-    bool useV2Slider = false,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
     final ValueChanged<RangeValues> onChanged = !enabled ? null : (RangeValues newValues) {
@@ -1053,7 +1052,6 @@ void main() {
                   activeColor: activeColor,
                   inactiveColor: inactiveColor,
                   onChanged: onChanged,
-                  useV2Slider: useV2Slider,
                 ),
               ),
             ),
@@ -1067,7 +1065,7 @@ void main() {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, useV2Slider: true));
+    await tester.pumpWidget(_buildThemedApp(theme: theme));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1098,9 +1096,9 @@ void main() {
 
     // Check default theme for enabled widget.
     expect(sliderBox, paints
-      ..rect(color: sliderTheme.inactiveTrackColor)
+      ..rrect(color: sliderTheme.inactiveTrackColor)
       ..rect(color: sliderTheme.activeTrackColor)
-      ..rect(color: sliderTheme.inactiveTrackColor));
+      ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(sliderBox, paints
       ..circle(color: sliderTheme.thumbColor)
       ..circle(color: sliderTheme.thumbColor));
@@ -1116,7 +1114,7 @@ void main() {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, activeColor: activeColor, useV2Slider: true));
+    await tester.pumpWidget(_buildThemedApp(theme: theme, activeColor: activeColor));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1151,9 +1149,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.inactiveTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor)
           ..rect(color: activeColor)
-          ..rect(color: sliderTheme.inactiveTrackColor));
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
         sliderBox,
         paints
@@ -1170,7 +1168,7 @@ void main() {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, inactiveColor: inactiveColor, useV2Slider: true));
+    await tester.pumpWidget(_buildThemedApp(theme: theme, inactiveColor: inactiveColor));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1204,9 +1202,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: sliderTheme.activeTrackColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
@@ -1227,7 +1225,6 @@ void main() {
       theme: theme,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
-      useV2Slider: true,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
@@ -1266,9 +1263,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: activeColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
@@ -1284,7 +1281,7 @@ void main() {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, divisions: 3, useV2Slider: true));
+    await tester.pumpWidget(_buildThemedApp(theme: theme, divisions: 3));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1321,9 +1318,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.inactiveTrackColor)
+          ..rrect(color: sliderTheme.inactiveTrackColor)
           ..rect(color: sliderTheme.activeTrackColor)
-          ..rect(color: sliderTheme.inactiveTrackColor));
+          ..rrect(color: sliderTheme.inactiveTrackColor));
     expect(
         sliderBox,
         paints
@@ -1350,7 +1347,6 @@ void main() {
       activeColor: activeColor,
       inactiveColor: inactiveColor,
       divisions: 3,
-      useV2Slider: true,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
@@ -1399,9 +1395,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: inactiveColor)
+          ..rrect(color: inactiveColor)
           ..rect(color: activeColor)
-          ..rect(color: inactiveColor));
+          ..rrect(color: inactiveColor));
     expect(
         sliderBox,
         paints
@@ -1423,7 +1419,7 @@ void main() {
     final ThemeData theme = _buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildThemedApp(theme: theme, enabled: false, useV2Slider: true));
+    await tester.pumpWidget(_buildThemedApp(theme: theme, enabled: false));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
@@ -1451,9 +1447,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
           ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
@@ -1471,7 +1467,6 @@ void main() {
       activeColor: activeColor,
       inactiveColor: inactiveColor,
       enabled: false,
-      useV2Slider: true,
     ));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
@@ -1507,9 +1502,9 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledInactiveTrackColor)
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor)
           ..rect(color: sliderTheme.disabledActiveTrackColor)
-          ..rect(color: sliderTheme.disabledInactiveTrackColor));
+          ..rrect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
@@ -1545,7 +1540,6 @@ void main() {
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onChanged: onChanged,
-                    useV2Slider: true,
                   ),
                 ),
               ),
@@ -1635,23 +1629,6 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
 
-    // Testing the custom colors are used for the indicator.
-    await tester.pumpWidget(buildApp(
-      divisions: 3,
-      activeColor: customColor1,
-      inactiveColor: customColor2,
-    ));
-    gesture = await tester.startGesture(topRight);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-    expect(values.end, equals(1));
-    expect(
-      valueIndicatorBox,
-      paints
-        ..path(color: customColor1)
-        ..path(color: customColor1),
-    );
-    await gesture.up();
   });
 
   testWidgets('Range Slider V2 top thumb gets stroked when overlapping', (WidgetTester tester) async {
@@ -1686,7 +1663,6 @@ void main() {
                             values = newValues;
                           });
                         },
-                        useV2Slider: true,
                       ),
                     ),
                   ),
@@ -1829,7 +1805,6 @@ void main() {
                             values = newValues;
                           });
                         },
-                        useV2Slider: true,
                       ),
                     ),
                   ),
@@ -1982,7 +1957,6 @@ void main() {
                             values = newValues;
                           });
                         },
-                        useV2Slider: true,
                       ),
                     ),
                   ),
@@ -2133,7 +2107,6 @@ void main() {
       'labelEnd: "upperValue"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
       'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
-      'useV1Slider',
     ]);
   });
 }
