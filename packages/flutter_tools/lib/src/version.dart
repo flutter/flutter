@@ -791,7 +791,7 @@ class GitTagVersion {
   /// return '1.2.3-4.5.pre-6-gabc123').
   static GitTagVersion parseVersion(String version) {
     final RegExp versionPattern = RegExp(
-      r'^(\d+)\.(\d+)\.(\d+)(-\d+\.\d+\.pre)?(?:-(\d+)-g([a-f0-9]+))?$');
+      r'^(\d+)\.(\d+)\.(\d+)(-(?:dev\.)?\d+\.\d+(?:\.pre)?)?(?:-(\d+)-g([a-f0-9]+))?$');
     final Match match = versionPattern.firstMatch(version.trim());
     if (match == null) {
       return const GitTagVersion.unknown();
@@ -804,7 +804,7 @@ class GitTagVersion {
     final String devString = matchGroups[3];
     int devVersion, devPatch;
     if (devString != null) {
-      final Match devMatch = RegExp(r'^-(\d+)\.(\d+)\.pre$')
+      final Match devMatch = RegExp(r'^-(?:dev\.)?(\d+)\.(\d+)(?:\.pre)?$')
         .firstMatch(devString);
       final List<String> devGroups = devMatch.groups(<int>[1, 2]);
       devVersion = devGroups[0] == null ? null : int.tryParse(devGroups[0]);
