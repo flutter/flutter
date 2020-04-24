@@ -450,7 +450,7 @@ void main() {
             return const Placeholder();
           },
         ),
-      )
+      ),
     );
 
     await tester.pumpWidget(
