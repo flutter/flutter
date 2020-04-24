@@ -415,6 +415,25 @@ void main() async {
     );
   });
 
+  testEachMeasurement('getBoxesForRange returns a box for rich text', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+      textDirection: TextDirection.ltr,
+    ));
+    builder.addText('abcd');
+    builder.pushStyle(TextStyle(fontWeight: FontWeight.bold));
+    builder.addText('xyz');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 1000));
+    expect(
+      paragraph.getBoxesForRange(1, 2).single,
+      const TextBox.fromLTRBD(0, 0, 0, 10, TextDirection.ltr),
+    );
+  });
+
   testEachMeasurement(
       'getBoxesForRange return empty list for zero-length range', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
