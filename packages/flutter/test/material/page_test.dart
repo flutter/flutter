@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 
 void main() {
   testWidgets('test page transition', (WidgetTester tester) async {

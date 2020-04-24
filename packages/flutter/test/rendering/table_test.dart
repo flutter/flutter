@@ -4,8 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 
 class TestCanvas implements Canvas {
   TestCanvas([this.invocations]);

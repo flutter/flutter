@@ -11,8 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{

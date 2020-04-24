@@ -8,8 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-import '../rendering/recording_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
+import 'package:_flutter_test_helpers/recording_canvas.dart';
 import 'rendering_tester.dart';
 
 class FakeEditableTextState with TextSelectionDelegate {

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 import 'editable_text_utils.dart';
 
 final TextEditingController controller = TextEditingController();

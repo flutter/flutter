@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 

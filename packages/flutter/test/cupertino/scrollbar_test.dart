@@ -5,8 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 
 const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),

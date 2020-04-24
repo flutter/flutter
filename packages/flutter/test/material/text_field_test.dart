@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
-import '../rendering/mock_canvas.dart';
+import 'package:_flutter_test_helpers/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text.dart' show findRenderEditable, globalize, textOffsetToPosition;
 import 'feedback_tester.dart';
