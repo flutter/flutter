@@ -87,7 +87,7 @@ void main() {
     setUpMockCoreProjectFiles();
 
     expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
+      const <String>['build', 'linux', '--no-pub']
     ), throwsToolExit(message: 'No Linux desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
