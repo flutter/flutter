@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:http/http.dart' as http;
+
+import 'doctor.dart';
+import 'globals.dart';
 
 /// Verify that the required hosts ( they are stored at [_requiredHosts] ) are reachable
 class HostValidator extends DoctorValidator {
