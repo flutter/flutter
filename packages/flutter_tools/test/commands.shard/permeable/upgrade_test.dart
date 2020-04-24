@@ -164,7 +164,7 @@ void main() {
     testUsingContext('fetchRemoteRevision', () async {
       const String revision = 'abc123';
       when(processManager.run(
-        <String>['git', 'fetch'],
+        <String>['git', 'fetch', '--tags'],
         environment:anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory')),
       ).thenAnswer((Invocation invocation) async {
