@@ -359,13 +359,23 @@ class EngineParagraph implements ui.Paragraph {
   }) {
     assert(boxHeightStyle != null);
     assert(boxWidthStyle != null);
-    if (_plainText == null || start == end) {
+    // Zero-length ranges and invalid ranges return an empty list.
+    if (start == end || start < 0 || end < 0) {
       return <ui.TextBox>[];
+    }
+
+    // For rich text, we can't measure the boxes. So for now, we'll just return
+    // a placeholder box to stop exceptions from being thrown in the framework.
+    // https://github.com/flutter/flutter/issues/55587
+    if (_plainText == null) {
+      return <ui.TextBox>[
+        ui.TextBox.fromLTRBD(0, 0, 0, _lineHeight, _textDirection)
+      ];
     }
 
     final int length = _plainText.length;
     // Ranges that are out of bounds should return an empty list.
-    if (start < 0 || end < 0 || start > length || end > length) {
+    if (start > length || end > length) {
       return <ui.TextBox>[];
     }
 
