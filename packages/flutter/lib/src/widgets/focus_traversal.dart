@@ -1587,14 +1587,10 @@ class FocusTraversalGroup extends StatefulWidget {
   FocusTraversalGroup({
     Key key,
     FocusTraversalPolicy policy,
+    this.excludeFocus,
     @required this.child,
   })  : policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
-
-  /// The child widget of this [FocusTraversalGroup].
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
 
   /// The policy used to move the focus from one focus node to another when
   /// traversing them using a keyboard.
@@ -1612,6 +1608,16 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    nodes in the reading order defined in the widget tree, and then top to
   ///    bottom.
   final FocusTraversalPolicy policy;
+
+  /// If true, then the children of this group will be marked as not focusable.
+  ///
+  /// If any children of this group are currently focused, they will lose focus.
+  final bool excludeFocus;
+
+  /// The child widget of this [FocusTraversalGroup].
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   /// Returns the focus policy set by the [FocusTraversalGroup] that most
   /// tightly encloses the given [BuildContext].
@@ -1691,6 +1697,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
         canRequestFocus: false,
         skipTraversal: true,
         includeSemantics: false,
+        overrideChildren: widget.excludeFocus,
         child: widget.child,
       ),
     );
