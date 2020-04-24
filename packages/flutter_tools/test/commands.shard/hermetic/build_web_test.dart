@@ -69,26 +69,6 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Refuses to build using runner when missing index.html', () async {
-    fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
-
-    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
-      null,
-      flutterProject: FlutterProject.current(),
-      ipv6: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      stayResident: true,
-      urlTunneller: null,
-    ) as ResidentWebRunner;
-    expect(await runner.run(), 1);
-  }, overrides: <Type, Generator>{
-    Platform: () => fakePlatform,
-    FileSystem: () => fileSystem,
-    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    Pub: () => MockPub(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
-
   testUsingContext('Refuses to build a debug build for web', () async {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
