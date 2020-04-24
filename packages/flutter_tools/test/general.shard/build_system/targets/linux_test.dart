@@ -55,8 +55,13 @@ void main() {
     expect(fileSystem.file('linux/flutter/ephemeral/unrelated-stuff'), isNot(exists));
   });
 
+  // Only required for the test below that still depends on the context.
+  FileSystem fileSystem;
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+  });
+
   testUsingContext('DebugBundleLinuxAssets copies artifacts to out directory', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
@@ -81,6 +86,8 @@ void main() {
     // No bundled fonts or assets
     expect(output.childFile('FontManifest.json'), isNot(exists));
     expect(output.childFile('AssetManifest.json'), isNot(exists));
+  }, overrides: <String, Generator>{
+    FileSystem: () => fileSystem,
   });
 }
 
