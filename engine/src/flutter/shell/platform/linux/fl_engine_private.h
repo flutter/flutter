@@ -66,7 +66,7 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
  * fl_engine_send_mouse_pointer_event:
  * @engine: a #FlEngine
  * @phase: mouse phase.
- * @timestamp: time when event occurred in nanoseconds.
+ * @timestamp: time when event occurred in microseconds.
  * @x: x location of mouse cursor.
  * @y: y location of mouse cursor.
  * @buttons: buttons that are pressed.
