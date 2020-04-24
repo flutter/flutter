@@ -86,8 +86,6 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
-    final SceneDisplayLagSummarizer sceneDisplayLagSummarizer = _sceneDisplayLagSummarizer();
-
     return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
@@ -109,9 +107,6 @@ class TimelineSummary {
       'frame_begin_times': _extractBeginTimestamps('Frame')
         .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
-      'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
-      '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
-      '99th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(99.0)
     };
   }
 
@@ -224,8 +219,6 @@ class TimelineSummary {
         .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
   }
-
-  SceneDisplayLagSummarizer _sceneDisplayLagSummarizer() => SceneDisplayLagSummarizer(_extractNamedEvents(kSceneDisplayLagEvent));
 
   List<Duration> _extractGpuRasterizerDrawDurations() => _extractBeginEndEvents('GPURasterizer::Draw');
 
