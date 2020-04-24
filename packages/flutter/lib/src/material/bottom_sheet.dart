@@ -399,7 +399,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           child: ClipRect(
             child: CustomSingleChildLayout(
               delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
-              child: child
+              child: child,
             ),
           ),
         );
