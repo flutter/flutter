@@ -87,7 +87,7 @@ class VersionCommand extends FlutterCommand {
       }
     }
 
-    final String version = argResults.rest[0].replaceFirst(RegExp('^v'), '');
+    final String version = argResults.rest[0].replaceFirst('v', '');
     final List<String> matchingTags = tags.where((String tag) => tag.contains(version)).toList();
     String matchingTag;
     // TODO(fujino): make this a tool exit and fix tests
