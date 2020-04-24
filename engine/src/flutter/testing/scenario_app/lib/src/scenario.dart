@@ -17,7 +17,7 @@ abstract class Scenario {
   /// Called by the program when a frame is ready to be drawn.
   ///
   /// See [Window.onBeginFrame] for more details.
-  void onBeginFrame(Duration duration);
+  void onBeginFrame(Duration duration) {}
 
   /// Called by the program when the microtasks from [onBeginFrame] have been
   /// flushed.

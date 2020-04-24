@@ -13,9 +13,6 @@ class TouchesScenario extends Scenario {
   TouchesScenario(Window window) : super(window);
 
   @override
-  void onBeginFrame(Duration duration) {}
-
-  @override
   void onPointerDataPacket(PointerDataPacket packet) {
     window.sendPlatformMessage(
       'touches_scenario',

@@ -38,18 +38,30 @@ FLUTTER_ASSERT_ARC
                              result:^(id _Nullable result){
                              }];
 
-  // Find all input views in the input hider view.
-  NSArray<FlutterTextInputView*>* inputFields =
-      [[[textInputPlugin textInputView] superview] subviews];
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = [[[[textInputPlugin textInputView] superview]
+      subviews]
+      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"class == %@",
+                                                                   [FlutterTextInputView class]]];
 
-  // Find the inactive autofillable input field.
+  // There are no autofill and the mock framework requested a secure entry. The first and only
+  // inserted FlutterTextInputView should be a secure text entry one.
   FlutterTextInputView* inputView = inputFields[0];
 
   // Verify secureTextEntry is set to the correct value.
   XCTAssertTrue(inputView.secureTextEntry);
 
-  // Clean up mocks
+  // We should have only ever created one FlutterTextInputView.
+  XCTAssertEqual(inputFields.count, 1);
+
+  // The one FlutterTextInputView we inserted into the view hierarchy should be the text input
+  // plugin's active text input view.
+  XCTAssertEqual(inputView, textInputPlugin.textInputView);
+
+  // Clean up.
   [engine stopMocking];
+  [[[[textInputPlugin textInputView] superview] subviews]
+      makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 - (void)testAutofillInputViews {
   // Setup test.
@@ -94,9 +106,11 @@ FLUTTER_ASSERT_ARC
                              result:^(id _Nullable result){
                              }];
 
-  // Find all input views in the input hider view.
-  NSArray<FlutterTextInputView*>* inputFields =
-      [[[textInputPlugin textInputView] superview] subviews];
+  // Find all the FlutterTextInputViews we created.
+  NSArray<FlutterTextInputView*>* inputFields = [[[[textInputPlugin textInputView] superview]
+      subviews]
+      filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"class == %@",
+                                                                   [FlutterTextInputView class]]];
 
   XCTAssertEqual(inputFields.count, 2);
 
@@ -108,8 +122,10 @@ FLUTTER_ASSERT_ARC
   // Verify behavior.
   OCMVerify([engine updateEditingClient:0 withState:[OCMArg isNotNil] withTag:@"field2"]);
 
-  // Clean up mocks
+  // Clean up.
   [engine stopMocking];
+  [[[[textInputPlugin textInputView] superview] subviews]
+      makeObjectsPerformSelector:@selector(removeFromSuperview)];
 }
 
 - (void)testAutocorrectionPromptRectAppears {

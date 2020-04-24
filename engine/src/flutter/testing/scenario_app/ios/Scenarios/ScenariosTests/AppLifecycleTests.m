@@ -6,6 +6,8 @@
 #import <XCTest/XCTest.h>
 #import "ScreenBeforeFlutter.h"
 
+FLUTTER_ASSERT_ARC
+
 @interface XCAppLifecycleTestExpectation : XCTestExpectation
 
 - (instancetype)initForLifecycle:(NSString*)expectedLifecycle forStep:(NSString*)step;

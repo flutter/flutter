@@ -780,22 +780,16 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
     [self replaceRange:_selectedTextRange withText:@""];
 }
 
-@end
-
-/**
- * Hides `FlutterTextInputView` from iOS accessibility system so it
- * does not show up twice, once where it is in the `UIView` hierarchy,
- * and a second time as part of the `SemanticsObject` hierarchy.
- */
-@interface FlutterTextInputViewAccessibilityHider : UIView {
-}
-
-@end
-
-@implementation FlutterTextInputViewAccessibilityHider {
-}
-
 - (BOOL)accessibilityElementsHidden {
+  // We are hiding this accessibility element.
+  // There are 2 accessible elements involved in text entry in 2 different parts of the view
+  // hierarchy. This `FlutterTextInputView` is injected at the top of key window. We use this as a
+  // `UITextInput` protocol to bridge text edit events between Flutter and iOS.
+  //
+  // We also create ur own custom `UIAccessibilityElements` tree with our `SemanticsObject` to
+  // mimic the semantics tree from Flutter. We want the text field to be represented as a
+  // `TextInputSemanticsObject` in that `SemanticsObject` tree rather than in this
+  // `FlutterTextInputView` bridge which doesn't appear above a text field from the Flutter side.
   return YES;
 }
 
@@ -806,7 +800,6 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
 @property(nonatomic, retain) FlutterTextInputView* nonAutofillSecureInputView;
 @property(nonatomic, retain) NSMutableArray<FlutterTextInputView*>* inputViews;
 @property(nonatomic, assign) FlutterTextInputView* activeView;
-@property(nonatomic, retain) FlutterTextInputViewAccessibilityHider* inputHider;
 @end
 
 @implementation FlutterTextInputPlugin
@@ -824,7 +817,6 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
     _inputViews = [[NSMutableArray alloc] init];
 
     _activeView = _nonAutofillInputView;
-    _inputHider = [[FlutterTextInputViewAccessibilityHider alloc] init];
   }
 
   return self;
@@ -834,7 +826,6 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
   [self hideTextInput];
   [_nonAutofillInputView release];
   [_nonAutofillSecureInputView release];
-  [_inputHider release];
   [_inputViews release];
 
   [super dealloc];
@@ -873,19 +864,19 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
            @"The application must have a key window since the keyboard client "
            @"must be part of the responder chain to function");
   _activeView.textInputDelegate = _textInputDelegate;
-  if (![_activeView isDescendantOfView:_inputHider]) {
-    [_inputHider addSubview:_activeView];
+
+  if (_activeView.window != keyWindow) {
+    [keyWindow addSubview:_activeView];
   }
-  [keyWindow addSubview:_inputHider];
   [_activeView becomeFirstResponder];
 }
 
 - (void)hideTextInput {
   [_activeView resignFirstResponder];
-  [_inputHider removeFromSuperview];
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
+  UIWindow* keyWindow = [UIApplication sharedApplication].keyWindow;
   NSArray* fields = configuration[@"fields"];
   NSString* clientUniqueId = uniqueIdFromDictionary(configuration);
   bool isSecureTextEntry = [configuration[@"obscureText"] boolValue];
@@ -894,16 +885,19 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
     _activeView = isSecureTextEntry ? _nonAutofillSecureInputView : _nonAutofillInputView;
     [FlutterTextInputPlugin setupInputView:_activeView withConfiguration:configuration];
 
-    if (![_activeView isDescendantOfView:_inputHider]) {
-      [_inputHider addSubview:_activeView];
+    if (_activeView.window != keyWindow) {
+      [keyWindow addSubview:_activeView];
     }
   } else {
     NSAssert(clientUniqueId != nil, @"The client's unique id can't be null");
     for (FlutterTextInputView* view in _inputViews) {
       [view removeFromSuperview];
     }
-    for (UIView* subview in _inputHider.subviews) {
-      [subview removeFromSuperview];
+
+    for (UIView* view in keyWindow.subviews) {
+      if ([view isKindOfClass:[FlutterTextInputView class]]) {
+        [view removeFromSuperview];
+      }
     }
 
     [_inputViews removeAllObjects];
@@ -921,7 +915,7 @@ static NSString* uniqueIdFromDictionary(NSDictionary* dictionary) {
       }
 
       [FlutterTextInputPlugin setupInputView:newInputView withConfiguration:field];
-      [_inputHider addSubview:newInputView];
+      [keyWindow addSubview:newInputView];
     }
   }
 
