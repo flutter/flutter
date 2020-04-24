@@ -76,7 +76,6 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
-        print('LOG: $line');
         if (line.contains('((((TICK 1))))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();

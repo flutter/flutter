@@ -548,10 +548,7 @@ class HotRunner extends ResidentRunner {
         uiIsolatesIds.add(view.uiIsolate.id);
         // Reload the isolate.
         final Future<vm_service.Isolate> reloadIsolate = device.vmService
-          .getIsolate(view.uiIsolate.id)
-          .catchError((dynamic error, StackTrace stackTrace) {
-            return null;
-          }, test: (dynamic error) => error is vm_service.SentinelException);
+          .getIsolateOrNull(view.uiIsolate.id);
         operations.add(reloadIsolate.then((vm_service.Isolate isolate) async {
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent.kind)) {
             // Resume the isolate so that it can be killed by the embedder.
@@ -565,13 +562,14 @@ class HotRunner extends ResidentRunner {
       // will not be restared, and so they must be manually killed.
       final vm_service.VM vm = await device.vmService.getVM();
       for (final vm_service.IsolateRef isolateRef in vm.isolates) {
-        if (!uiIsolatesIds.contains(isolateRef.id)) {
-          operations.add(device.vmService.kill(isolateRef.id)
-            .catchError((dynamic error, StackTrace stackTrace) {
-              // Do nothing on a SentinelException since it means the isolate
-              // has already been killed.
-            }, test: (dynamic error) => error is vm_service.SentinelException));
+        if (uiIsolatesIds.contains(isolateRef.id)) {
+          continue;
         }
+        operations.add(device.vmService.kill(isolateRef.id)
+          .catchError((dynamic error, StackTrace stackTrace) {
+            // Do nothing on a SentinelException since it means the isolate
+            // has already been killed.
+          }, test: (dynamic error) => error is vm_service.SentinelException));
       }
     }
     await Future.wait(operations);
@@ -937,11 +935,8 @@ class HotRunner extends ResidentRunner {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
         final vm_service.Isolate isolate = await device.vmService
-          .getIsolate(view.uiIsolate.id)
-          .catchError((dynamic error, StackTrace stackTrace) {
-            return null;
-          }, test: (dynamic error) => error is vm_service.SentinelException);
-        final vm_service.Event pauseEvent = isolate.pauseEvent;
+          .getIsolateOrNull(view.uiIsolate.id);
+        final vm_service.Event pauseEvent = isolate?.pauseEvent;
         if (pauseEvent != null
           && isPauseEvent(pauseEvent.kind)
           && pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -990,10 +985,7 @@ class HotRunner extends ResidentRunner {
         String serviceEventKind;
         for (final FlutterView view in reassembleViews.keys) {
           final vm_service.Isolate isolate = await reassembleViews[view]
-            .getIsolate(view.uiIsolate.id)
-            .catchError((dynamic error, StackTrace stackTrace) {
-              return null;
-            }, test: (dynamic error) => error is vm_service.SentinelException);
+            .getIsolateOrNull(view.uiIsolate.id);
           if (isolate == null) {
             continue;
           }

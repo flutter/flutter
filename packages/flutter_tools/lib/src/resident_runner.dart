@@ -233,10 +233,10 @@ class FlutterDevice {
     if (vmService == null) {
       return;
     }
-    final List<FlutterView> newViews = await vmService.getFlutterViews();
+    final List<FlutterView> updatedViews = await vmService.getFlutterViews();
     _views
       ..clear()
-      ..addAll(newViews);
+      ..addAll(updatedViews);
   }
   final List<FlutterView> _views = <FlutterView>[];
 
@@ -269,10 +269,7 @@ class FlutterDevice {
     // cleanly exit since the service extension may not have been registered.
     for (final FlutterView flutterView in views) {
       final vm_service.Isolate isolate = await vmService
-        .getIsolate(flutterView.uiIsolate.id)
-        .catchError((dynamic error, StackTrace stackTrace) {
-          return null;
-        }, test: (dynamic error) => error is vm_service.SentinelException);
+        .getIsolateOrNull(flutterView.uiIsolate.id);
       if (isolate == null) {
         continue;
       }

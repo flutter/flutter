@@ -1530,6 +1530,15 @@ extension FlutterVmService on vm_service.VmService {
         FlutterView.parse(rawView as Map<String, Object>)
     ];
   }
+
+  /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has
+  /// been collected.
+  Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
+    return getIsolate(isolateId)
+    .catchError((dynamic error, StackTrace stackTrace) {
+        return null;
+    }, test: (dynamic error) => error is vm_service.SentinelException);
+  }
 }
 
 /// Whether the event attached to an [Isolate.pauseEvent] should be considered
