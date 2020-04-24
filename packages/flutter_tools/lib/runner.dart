@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 import 'src/base/common.dart';
 import 'src/base/context.dart';
@@ -135,11 +136,17 @@ Future<int> _handleToolError(
       command: args.join(' '),
     );
 
-    final String errorString = error.toString();
-    globals.printError('Oops; flutter has exited unexpectedly: "$errorString".');
+    globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
     try {
-      await _informUserOfCrash(args, error, stackTrace, errorString);
+      final CrashDetails details = CrashDetails(
+        command: _crashCommand(args),
+        error: error,
+        stackTrace: stackTrace,
+        doctorText: await _doctorText(),
+      );
+      final File file = await _createLocalCrashReport(details);
+      await _informUserOfCrash(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.
@@ -157,11 +164,22 @@ Future<int> _handleToolError(
   }
 }
 
-Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace stackTrace, String errorString) async {
-  final String doctorText = await _doctorText();
-  final File file = await _createLocalCrashReport(args, error, stackTrace, doctorText);
+class CrashDetails {
+  CrashDetails({
+    @required this.command,
+    @required this.error,
+    @required this.stackTrace,
+    @required this.doctorText,
+  });
 
-  globals.printError('A crash report has been written to ${file.path}.');
+  String command;
+  dynamic error;
+  StackTrace stackTrace;
+  String doctorText;
+}
+
+Future<void> _informUserOfCrash(CrashDetails details, File crashFile) async {
+  globals.printError('A crash report has been written to ${crashFile.path}.');
   globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
   final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
@@ -171,18 +189,17 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
     flutterProjectFactory: globals.projectFactory,
     client: clientFactory != null ? clientFactory() : HttpClient(),
   );
-  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(errorString);
+  final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL('${details.error}');
   globals.printStatus('$similarIssuesURL\n', wrap: false);
   globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
   globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
   globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
-  final String command = _crashCommand(args);
   final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
-    command,
-    error,
-    stackTrace,
-    doctorText
+    details.command,
+    details.error,
+    details.stackTrace,
+    details.doctorText,
   );
   globals.printStatus('$gitHubTemplateURL\n', wrap: false);
 }
@@ -192,7 +209,7 @@ String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
 String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
+Future<File> _createLocalCrashReport(CrashDetails details) async {
   File crashFile = globals.fsUtils.getUniqueFile(
     globals.fs.currentDirectory,
     'flutter',
@@ -204,14 +221,14 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
   buffer.writeln('## command\n');
-  buffer.writeln('${_crashCommand(args)}\n');
+  buffer.writeln('${details.command}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('${_crashException(error)}\n');
-  buffer.writeln('```\n$stackTrace```\n');
+  buffer.writeln('${_crashException(details.error)}\n');
+  buffer.writeln('```\n${details.stackTrace}```\n');
 
   buffer.writeln('## flutter doctor\n');
-  buffer.writeln('```\n$doctorText```');
+  buffer.writeln('```\n${details.doctorText}```');
 
   try {
     crashFile.writeAsStringSync(buffer.toString());
