@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:meta/meta.dart';
 
 class ThrowingPub implements Pub {
   @override
@@ -34,7 +36,7 @@ class ThrowingPub implements Pub {
   }
 
   @override
-  Future<void> interactively(List<String> arguments, {String directory}) {
+  Future<void> interactively(List<String> arguments, {String directory, @required Stdio stdio,}) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 }

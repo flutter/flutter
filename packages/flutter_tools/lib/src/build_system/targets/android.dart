@@ -66,7 +66,6 @@ abstract class AndroidAssetBundle extends Target {
       final DepfileService depfileService = DepfileService(
         fileSystem: globals.fs,
         logger: globals.logger,
-        platform: globals.platform,
       );
       depfileService.writeToFile(
         assetDepfile,

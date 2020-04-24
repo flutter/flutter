@@ -41,6 +41,7 @@ class ExpansionTile extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.initiallyExpanded = false,
+    this.tilePadding,
   }) : assert(initiallyExpanded != null),
        super(key: key);
 
@@ -79,6 +80,15 @@ class ExpansionTile extends StatefulWidget {
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
+
+  /// Specifies padding for the [ListTile].
+  ///
+  /// Analogous to [ListTile.contentPadding], this property defines the insets for
+  /// the [leading], [title], [subtitle] and [trailing] widgets. It does not inset
+  /// the expanded [children] widgets.
+  ///
+  /// When the value is null, the tile's padding is `EdgeInsets.symmetric(horizontal: 16.0)`.
+  final EdgeInsetsGeometry tilePadding;
 
   @override
   _ExpansionTileState createState() => _ExpansionTileState();
@@ -165,6 +175,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
             textColor: _headerColor.value,
             child: ListTile(
               onTap: _handleTap,
+              contentPadding: widget.tilePadding,
               leading: widget.leading,
               title: widget.title,
               subtitle: widget.subtitle,
