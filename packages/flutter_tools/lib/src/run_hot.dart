@@ -8,14 +8,18 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:platform/platform.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
-import 'base/async_guard.dart';
 
+import 'artifacts.dart';
+import 'base/async_guard.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_system/depfile.dart';
+import 'build_system/targets/localizations.dart';
 import 'bundle.dart';
+import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -1194,7 +1198,13 @@ class ProjectFileInvalidator {
     @required Logger logger,
   }): _fileSystem = fileSystem,
       _platform = platform,
-      _logger = logger;
+      _logger = logger {
+    if (_fileSystem.file(_kLocalizationDependency).existsSync()) {
+      _generateLocalizations = true;
+      _logger.printTrace('$_kLocalizationDependency detected, enabling localization generation.');
+    }
+  }
+  bool _generateLocalizations = false;
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -1202,9 +1212,10 @@ class ProjectFileInvalidator {
 
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
+  static const String _kLocalizationDependency = 'l10n.yaml';
 
   // As of writing, Dart supports up to 32 asynchronous I/O threads per
-  // isolate.  We also want to avoid hitting platform limits on open file
+  // isolate. We also want to avoid hitting platform limits on open file
   // handles/descriptors.
   //
   // This value was chosen based on empirical tests scanning a set of
@@ -1230,6 +1241,10 @@ class ProjectFileInvalidator {
       );
     }
 
+    if (_generateLocalizations) {
+      await _runCodeGenerators(lastCompiled);
+    }
+
     final Stopwatch stopwatch = Stopwatch()..start();
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
@@ -1237,7 +1252,6 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-
     if (asyncScanning) {
       final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
@@ -1293,5 +1307,56 @@ class ProjectFileInvalidator {
       _fileSystem.file(globalPackagesPath),
       logger: _logger,
     );
+  }
+
+  Depfile _depfile;
+  Future<void> _runCodeGenerators(DateTime lastCompiled) async {
+    final File configFile = _fileSystem.file(_kLocalizationDependency);
+    _generateLocalizations = configFile.existsSync();
+    if (!_generateLocalizations) {
+      return;
+    }
+
+    final List<Uri> urisToScan = <Uri>[
+      configFile.uri,
+      if (_depfile != null)
+        ..._depfile.inputs.map((File file) => file.uri),
+      if (_depfile != null)
+        ..._depfile.outputs.map((File file) => file.uri),
+    ];
+
+    // Short-circuit as soon as a changed value is detected.
+    bool dirty = false;
+    for (final Uri uri in urisToScan) {
+      final DateTime updatedAt = _fileSystem.statSync(
+        uri.toFilePath(windows: _platform.isWindows)).modified;
+      if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+        dirty = true;
+        break;
+      }
+    }
+    // If the depfile doesn't exist, we need to run at least once.
+    if (dirty || _depfile == null) {
+      final LocalizationOptions options = parseLocalizationsOptions(
+        file: configFile,
+        logger: _logger,
+      );
+      _logger.printTrace('Pausing scanning to update localizations');
+      try {
+        _depfile = await generateLocalizations(
+          fileSystem: _fileSystem,
+          flutterRoot: Cache.flutterRoot,
+          logger: _logger,
+          processManager: globals.processManager,
+          options: options,
+          projectDir: _fileSystem.currentDirectory,
+          dartBinaryPath: globals.artifacts
+            .getArtifactPath(Artifact.engineDartBinary),
+        );
+      } on Exception {
+        _logger.printError('Error generating localizations.');
+        _depfile = null;
+      }
+    }
   }
 }

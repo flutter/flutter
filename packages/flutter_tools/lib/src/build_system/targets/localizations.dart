@@ -14,14 +14,49 @@ import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 
-Future<void> generateLocalizations({
+/// Run the localizations generation script with the configuration [options].
+Future<Depfile> generateLocalizations({
   @required LocalizationOptions options,
   @required String flutterRoot,
   @required FileSystem fileSystem,
   @required ProcessManager processManager,
-  @required Artifacts artifacts,
   @required Logger logger,
+  @required Directory projectDir,
+  @required String dartBinaryPath,
 }) async {
+  // Setup project inputs and outputs. This currently makes some
+  // guess about the output and does not include all files.
+  final Directory inputArb = fileSystem.directory(
+    options.arbDirectory ?? projectDir
+      .childDirectory('lib')
+      .childFile('l10n').uri,
+  );
+  final File outputLocalizations = fileSystem.file(
+    options.outputLocalizationsFile ?? projectDir
+    .childDirectory('lib')
+    .childFile('app_localizations.dart').uri,
+  );
+
+  if (!inputArb.existsSync()) {
+    logger.printError('arb-dir: ${inputArb.path} does not exist.');
+    throw Exception();
+  }
+
+  final List<File> inputs = <File>[
+    if (options.headerFile != null)
+      fileSystem.file(options.headerFile).absolute,
+    // Include all arb files as build inputs.
+    for (final File file in inputArb.listSync().whereType<File>())
+      if (fileSystem.path.extension(file.path) == '.arb')
+        file,
+  ];
+  final List<File> outputs = <File>[
+    if (options.untranslatedMessagesFile != null)
+      fileSystem.file(options.untranslatedMessagesFile).absolute,
+    outputLocalizations,
+  ];
+
+  final Depfile depfile = Depfile(inputs, outputs);
   final String genL10nPath = fileSystem.path.join(
     flutterRoot,
     'dev',
@@ -31,22 +66,22 @@ Future<void> generateLocalizations({
     'gen_l10n.dart',
   );
   final ProcessResult result = await processManager.run(<String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    dartBinaryPath,
     genL10nPath,
     if (options.arbDirectory != null)
-      '--arb-dir=${options.arbDirectory}',
+      '--arb-dir=${options.arbDirectory.toFilePath()}',
     if (options.templateArbFile != null)
-      '--template-arb-file=${options.templateArbFile}',
+      '--template-arb-file=${options.templateArbFile.toFilePath()}',
     if (options.outputLocalizationsFile != null)
-      '--output-localization-file=${options.outputLocalizationsFile}',
+      '--output-localization-file=${options.outputLocalizationsFile.toFilePath()}',
     if (options.untranslatedMessagesFile != null)
-      '--untranslated-messages-file=${options.untranslatedMessagesFile}',
+      '--untranslated-messages-file=${options.untranslatedMessagesFile.toFilePath()}',
     if (options.outputClass != null)
       '--output-class=${options.outputClass}',
     if (options.headerFile != null)
-      '--header=${options.headerFile}',
+      '--header-file=${options.headerFile.toFilePath()}',
     if (options.header != null)
-      '--header-file=${options.header}',
+      '--header=${options.header}',
     if (options.deferredLoading != null)
       '--use-deferred-loading',
     if (options.preferredSupportedLocales != null)
@@ -56,6 +91,7 @@ Future<void> generateLocalizations({
     logger.printError(result.stdout + result.stderr as String);
     throw Exception();
   }
+  return depfile;
 }
 
 /// A build step that runs the generate localizations script from
@@ -97,44 +133,17 @@ class GenerateLocalizationsTarget extends Target {
       fileSystem: environment.fileSystem,
     );
 
-    // Setup project inputs and outputs. This currently makes some
-    // guess about the output and does not include all files.
-    final Directory inputArb = environment.fileSystem.directory(
-      options.arbDirectory ?? environment.projectDir
-        .childDirectory('lib')
-        .childFile('l10n').uri,
-    );
-    final File outputLocalizations = environment.fileSystem.file(
-      options.outputLocalizationsFile ?? environment.projectDir
-      .childDirectory('lib')
-      .childFile('app_localizations.dart').uri,
-    );
-
-    final List<File> inputs = <File>[
-      configFile,
-      if (options.headerFile != null)
-        environment.fileSystem.file(options.headerFile).absolute,
-      // Include all arb files as build inputs.
-      for (final File file in inputArb.listSync().whereType<File>())
-        if (environment.fileSystem.path.extension(file.path) == '.arb')
-          file,
-    ];
-    final List<File> outputs = <File>[
-      if (options.untranslatedMessagesFile != null)
-        environment.fileSystem.file(options.untranslatedMessagesFile).absolute,
-      outputLocalizations,
-    ];
-
-    final Depfile depfile = Depfile(inputs, outputs);
-
-    await generateLocalizations(
-      artifacts: environment.artifacts,
+    final Depfile depfile = await generateLocalizations(
       fileSystem: environment.fileSystem,
       flutterRoot: environment.flutterRootDir.path,
       logger: environment.logger,
       processManager: environment.processManager,
       options: options,
+      projectDir: environment.projectDir,
+      dartBinaryPath: environment.artifacts
+        .getArtifactPath(Artifact.engineDartBinary),
     );
+    depfile.inputs.add(configFile);
     depfileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
@@ -214,21 +223,20 @@ LocalizationOptions parseLocalizationsOptions({
   }
   final YamlMap yamlMap = yamlNode as YamlMap;
   return LocalizationOptions(
-    arbDirectory: tryReadUri(yamlMap, 'arb-dir', logger),
-    templateArbFile: tryReadUri(yamlMap, 'template-arb-file', logger),
-    outputLocalizationsFile: tryReadUri(yamlMap, 'output-localization-file', logger),
-    untranslatedMessagesFile: tryReadUri(yamlMap, 'untranslated-messages-file', logger),
-    header: tryReadString(yamlMap, 'header', logger),
-    outputClass: tryReadString(yamlMap, 'output-class', logger),
-    preferredSupportedLocales: tryReadString(yamlMap, 'preferred-supported-locales', logger),
-    headerFile: tryReadUri(yamlMap, 'header-file', logger),
-    deferredLoading: tryReadBool(yamlMap, 'use-deferred-loading', logger),
+    arbDirectory: _tryReadUri(yamlMap, 'arb-dir', logger),
+    templateArbFile: _tryReadUri(yamlMap, 'template-arb-file', logger),
+    outputLocalizationsFile: _tryReadUri(yamlMap, 'output-localization-file', logger),
+    untranslatedMessagesFile: _tryReadUri(yamlMap, 'untranslated-messages-file', logger),
+    header: _tryReadString(yamlMap, 'header', logger),
+    outputClass: _tryReadString(yamlMap, 'output-class', logger),
+    preferredSupportedLocales: _tryReadString(yamlMap, 'preferred-supported-locales', logger),
+    headerFile: _tryReadUri(yamlMap, 'header-file', logger),
+    deferredLoading: _tryReadBool(yamlMap, 'use-deferred-loading', logger),
   );
 }
 
-/// Try to read a `bool` value or null from `yamlMap`, otherwise throw.
-@visibleForTesting
-bool tryReadBool(YamlMap yamlMap, String key, Logger logger) {
+// Try to read a `bool` value or null from `yamlMap`, otherwise throw.
+bool _tryReadBool(YamlMap yamlMap, String key, Logger logger) {
   final Object value = yamlMap[key];
   if (value == null) {
     return null;
@@ -240,9 +248,8 @@ bool tryReadBool(YamlMap yamlMap, String key, Logger logger) {
   return value as bool;
 }
 
-/// Try to read a `String` value or null from `yamlMap`, otherwise throw.
-@visibleForTesting
-String tryReadString(YamlMap yamlMap, String key, Logger logger) {
+// Try to read a `String` value or null from `yamlMap`, otherwise throw.
+String _tryReadString(YamlMap yamlMap, String key, Logger logger) {
   final Object value = yamlMap[key];
   if (value == null) {
     return null;
@@ -254,10 +261,9 @@ String tryReadString(YamlMap yamlMap, String key, Logger logger) {
   return value as String;
 }
 
-/// Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
-@visibleForTesting
-Uri tryReadUri(YamlMap yamlMap, String key, Logger logger) {
-  final String value = tryReadString(yamlMap, key, logger);
+// Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
+Uri _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
+  final String value = _tryReadString(yamlMap, key, logger);
   if (value == null) {
     return null;
   }
