@@ -312,9 +312,12 @@ void main() {
               onSecondaryTapCancel: button == kSecondaryButton ? () {
                 tapCancel += 1;
               } : null,
-              onLongPress: () {
+              onLongPress: button == kPrimaryButton ? () {
                 longPress += 1;
-              },
+              } : null,
+              onSecondaryLongPress: button == kSecondaryButton ? () {
+                longPress += 1;
+              } : null,
             ),
           ),
         ),
@@ -333,14 +336,11 @@ void main() {
         await gesture.up();
       }
 
-      // TODO(gspencergoog): This should probably also be run for secondary
-      if (button == kPrimaryButton) {
-        await dragOut(kPressTimeout * 0.5); // generates nothing
-        expect(tapDown, 0);
-        expect(tapCancel, 0);
-        expect(tap, 0);
-        expect(longPress, 0);
-      }
+      await dragOut(kPressTimeout * 0.5); // generates nothing
+      expect(tapDown, 0);
+      expect(tapCancel, 0);
+      expect(tap, 0);
+      expect(longPress, 0);
 
       await dragOut(kPressTimeout); // generates tapDown, tapCancel
       expect(tapDown, 1);
@@ -352,37 +352,40 @@ void main() {
       expect(tapDown, 2);
       expect(tapCancel, 2);
       expect(tap, 0);
-      expect(longPress, button == kPrimaryButton ? 1 : 0);
+      expect(longPress, 1);
     }, variant: buttonVariant);
-  });
 
-  testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
-    int longPressUp = 0;
+    testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+      int longPressUp = 0;
 
-    await tester.pumpWidget(
-      Container(
-        alignment: Alignment.topLeft,
-        child: Container(
-          alignment: Alignment.center,
-          height: 100.0,
-          color: const Color(0xFF00FF00),
-          child: GestureDetector(
-            onLongPressUp: () {
-              longPressUp += 1;
-            },
+      await tester.pumpWidget(
+        Container(
+          alignment: Alignment.topLeft,
+          child: Container(
+            alignment: Alignment.center,
+            height: 100.0,
+            color: const Color(0xFF00FF00),
+            child: GestureDetector(
+              onLongPressUp: button == kPrimaryButton ? () {
+                longPressUp += 1;
+              } : null,
+              onSecondaryLongPressUp: button == kSecondaryButton ? () {
+                longPressUp += 1;
+              } : null,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    Future<void> longPress(Duration timeout) async {
-      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      await tester.pump(timeout);
-      await gesture.up();
-    }
+      Future<void> longPress(Duration timeout) async {
+        final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: button);
+        await tester.pump(timeout);
+        await gesture.up();
+      }
 
-    await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
-    expect(longPressUp, 1);
+      await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
+      expect(longPressUp, 1);
+    }, variant: buttonVariant);
   });
 
   testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
