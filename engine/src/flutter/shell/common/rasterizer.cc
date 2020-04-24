@@ -286,7 +286,6 @@ RasterStatus Rasterizer::DoDraw(
   timing.Set(FrameTiming::kRasterFinish, raster_finish_time);
   delegate_.OnFrameRasterized(timing);
 
-  std::string vsync_transitions_missed = "0";
   if (raster_finish_time > frame_target_time) {
     fml::TimePoint latest_frame_target_time =
         delegate_.GetLatestFrameTargetTime();
@@ -298,15 +297,20 @@ RasterStatus Rasterizer::DoDraw(
     }
     const auto frame_lag =
         (latest_frame_target_time - frame_target_time).ToMillisecondsF();
-    vsync_transitions_missed =
-        std::to_string(round(frame_lag / frame_budget_millis));
+    const int vsync_transitions_missed = round(frame_lag / frame_budget_millis);
+    fml::tracing::TraceEventAsyncComplete(
+        "flutter",                    // category
+        "SceneDisplayLag",            // name
+        raster_finish_time,           // begin_time
+        latest_frame_target_time,     // end_time
+        "frame_target_time",          // arg_key_1
+        frame_target_time,            // arg_val_1
+        "current_frame_target_time",  // arg_key_2
+        latest_frame_target_time,     // arg_val_2
+        "vsync_transitions_missed",   // arg_key_3
+        vsync_transitions_missed      // arg_val_3
+    );
   }
-
-  TRACE_EVENT1("flutter",                        // cateogry
-               "SceneDisplayLag",                // name
-               "vsync_transitions_missed",       // arg1_key
-               vsync_transitions_missed.c_str()  // arg1_val
-  );
 
   // Pipeline pressure is applied from a couple of places:
   // rasterizer: When there are more items as of the time of Consume.
