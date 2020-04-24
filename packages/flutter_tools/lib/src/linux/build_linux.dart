@@ -14,7 +14,11 @@ import '../plugins.dart';
 import '../project.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+Future<void> buildLinux(
+  LinuxProject linuxProject,
+  BuildInfo buildInfo, {
+    String target = 'lib/main.dart',
+  }) async {
   if (!linuxProject.makeFile.existsSync()) {
     throwToolExit('No Linux desktop project configured. See '
       'https://github.com/flutter/flutter/wiki/Desktop-shells#create '
@@ -38,10 +42,38 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String 
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
 export FLUTTER_ROOT=${Cache.flutterRoot}
-export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
+  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
+    buffer.write('export DART_DEFINES=');
+    buffer.writeln(buildInfo.dartDefines.join(','));
+  }
+  if (buildInfo.dartObfuscation != null) {
+    buffer.writeln('export DART_OBFUSCATION=${buildInfo.dartObfuscation}');
+  }
+  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
+    buffer.write('export EXTRA_FRONT_END_OPTIONS=');
+    buffer.writeln(buildInfo.extraFrontEndOptions.join(','));
+  }
+  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
+    buffer.write('export EXTRA_GEN_SNAPSHOT_OPTIONS=');
+    buffer.writeln(buildInfo.extraGenSnapshotOptions.join(','));
+  }
+  if (buildInfo.splitDebugInfoPath != null) {
+    buffer.writeln('export SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
+  }
+  if (buildInfo.trackWidgetCreation != null) {
+    buffer.writeln(
+      'export TRACK_WIDGET_CREATION=${buildInfo.trackWidgetCreation}',
+    );
+  }
+  if (buildInfo.treeShakeIcons != null) {
+    buffer.writeln(
+      'export TREE_SHAKE_ICONS=${buildInfo.treeShakeIcons}',
+    );
+  }
+
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
@@ -73,12 +105,18 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
-      'make',
-      '-C',
-      linuxProject.makeFile.parent.path,
-      'BUILD=$buildFlag',
-    ], trace: true);
+    result = await processUtils.stream(
+      <String>[
+        'make',
+        '-C',
+        linuxProject.makeFile.parent.path,
+        'BUILD=$buildFlag',
+      ],
+      environment: <String, String>{
+        if (globals.logger.isVerbose)
+          'VERBOSE_SCRIPT_LOGGING': 'true'
+      }, trace: true,
+    );
   } on ArgumentError {
     throwToolExit("make not found. Run 'flutter doctor' for more information.");
   } finally {
