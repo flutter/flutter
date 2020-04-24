@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 // @dart = 2.6
-import 'dart:convert';
 import 'dart:ui';
+
+import 'package:scenario_app/src/channel_util.dart';
 
 import 'platform_echo_mixin.dart';
 import 'scenario.dart';
@@ -72,22 +73,15 @@ class PoppableScreenScenario extends Scenario with PlatformEchoMixin {
   }
 
   void _pop() {
-    window.sendPlatformMessage(
+    sendJsonMethodCall(
+      window: window,
       // 'flutter/platform' is the hardcoded name of the 'platform'
       // `SystemChannel` from the `SystemNavigator` API.
       // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/system_navigator.dart.
-      'flutter/platform',
-      // This recreates a combination of OptionalMethodChannel, JSONMethodCodec,
-      // and _DefaultBinaryMessenger in the framework.
-      utf8.encoder.convert(
-        const JsonCodec().encode(<String, dynamic>{
-          'method': 'SystemNavigator.pop',
-          'args': null,
-        })
-      ).buffer.asByteData(),
+      channel: 'flutter/platform',
+      method: 'SystemNavigator.pop',
       // Don't care about the response. If it doesn't go through, the test
       // will fail.
-      null,
     );
   }
 }
