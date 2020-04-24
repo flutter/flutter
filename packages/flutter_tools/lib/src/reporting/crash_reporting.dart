@@ -59,17 +59,19 @@ class CrashReporter {
     logger.printStatus('$similarIssuesURL\n', wrap: false);
     logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
     logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
-    logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
-    final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
-      details.command,
-      details.error,
-      details.stackTrace,
-      details.doctorText,
-    );
-    logger.printStatus('$gitHubTemplateURL\n', wrap: false);
+    if (gitHubTemplateCreator != null) {
+      logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+
+      final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+        details.command,
+        details.error,
+        details.stackTrace,
+        details.doctorText,
+      );
+      logger.printStatus('$gitHubTemplateURL\n', wrap: false);
+    }
   }
-
 }
 
 /// Sends crash reports to Google.

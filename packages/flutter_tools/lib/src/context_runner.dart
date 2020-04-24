@@ -116,6 +116,10 @@ Future<T> runInContext<T>(
         logger: globals.logger,
         platform: globals.platform,
       ),
+      CrashReporter: () => CrashReporter(
+        gitHubTemplateCreator: globals.gitHubTemplateCreator,
+        logger: globals.logger,
+      ),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => Doctor(logger: globals.logger),
@@ -127,6 +131,12 @@ Future<T> runInContext<T>(
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
+      GitHubTemplateCreator: () => GitHubTemplateCreator(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        flutterProjectFactory: globals.projectFactory,
+        client: globals.httpClientFactory?.call() ?? HttpClient(),
+      ),
       GradleUtils: () => GradleUtils(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
