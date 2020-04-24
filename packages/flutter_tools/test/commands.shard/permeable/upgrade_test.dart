@@ -134,7 +134,10 @@ void main() {
     });
 
     testUsingContext("Doesn't continue on known tag, dev branch, no force, already up-to-date", () async {
+      const String revision = 'abc123';
+      when(flutterVersion.frameworkRevision).thenReturn(revision);
       fakeCommandRunner.alreadyUpToDate = true;
+      fakeCommandRunner.remoteRevision = revision;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         force: false,
         continueFlow: false,
@@ -159,16 +162,26 @@ void main() {
       Platform: () => fakePlatform,
     });
 
-    testUsingContext('verifyUpstreamConfigured', () async {
-      when(globals.processManager.run(
-        <String>['git', 'rev-parse', '@{u}'],
+    testUsingContext('fetchRemoteRevision', () async {
+      const String revision = 'abc123';
+      when(processManager.run(
+        <String>['git', 'fetch'],
         environment:anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory')),
       ).thenAnswer((Invocation invocation) async {
         return FakeProcessResult()
           ..exitCode = 0;
       });
-      await realCommandRunner.verifyUpstreamConfigured();
+      when(processManager.run(
+        <String>['git', 'rev-parse', '--verify', '@{u}'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory')),
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()
+          ..exitCode = 0
+          ..stdout = revision;
+      });
+      expect(await realCommandRunner.fetchRemoteRevision(), revision);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -343,8 +356,10 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   bool alreadyUpToDate = false;
 
+  String remoteRevision = '';
+
   @override
-  Future<void> verifyUpstreamConfigured() async {}
+  Future<String> fetchRemoteRevision() async => remoteRevision;
 
   @override
   Future<bool> hasUncomittedChanges() async => willHaveUncomittedChanges;
@@ -353,7 +368,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<bool> attemptFastForward(FlutterVersion flutterVersion) async => alreadyUpToDate;
+  Future<bool> attemptReset(FlutterVersion flutterVersion, String newRevision) async => alreadyUpToDate;
 
   @override
   Future<void> precacheArtifacts() async {}

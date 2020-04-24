@@ -100,7 +100,12 @@ class UpgradeCommandRunner {
     @required FlutterVersion flutterVersion,
     @required bool testFlow,
   }) async {
-    await verifyUpstreamConfigured();
+    final String upstreamRevision = await fetchRemoteRevision();
+    if (flutterVersion.frameworkRevision == upstreamRevision) {
+      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      globals.printStatus('$flutterVersion');
+      return;
+    }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
@@ -132,12 +137,8 @@ class UpgradeCommandRunner {
     }
     recordState(flutterVersion);
     await upgradeChannel(flutterVersion);
-    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
-    if (alreadyUpToDate) {
-      // If the upgrade was a no op, then do not continue with the second half.
-      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
-      globals.printStatus('$flutterVersion');
-    } else if (!testFlow) {
+    await attemptReset(flutterVersion, upstreamRevision);
+    if (!testFlow) {
       await flutterUpgradeContinue();
     }
   }
@@ -199,16 +200,25 @@ class UpgradeCommandRunner {
     return false;
   }
 
-  /// Check if there is an upstream repository configured.
+  /// Returns the remote HEAD revision.
   ///
   /// Exits tool if there is no upstream.
-  Future<void> verifyUpstreamConfigured() async {
+  Future<String> fetchRemoteRevision() async {
+    String revision;
     try {
+      // Make sure upstream is up to date
       await processUtils.run(
-        <String>[ 'git', 'rev-parse', '@{u}'],
+        <String>['git', 'fetch'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
+      // '@{u}' means upstream HEAD
+      final RunResult result = await processUtils.run(
+          <String>[ 'git', 'rev-parse', '--verify', '@{u}'],
+          throwOnError: true,
+          workingDirectory: workingDirectory,
+      );
+      revision = result.stdout.trim();
     } on Exception {
       throwToolExit(
         'Unable to upgrade Flutter: no origin repository configured. '
@@ -216,6 +226,7 @@ class UpgradeCommandRunner {
         "https://github.com/flutter/flutter' in $workingDirectory",
       );
     }
+    return revision;
   }
 
   /// Attempts to upgrade the channel.
@@ -227,33 +238,19 @@ class UpgradeCommandRunner {
     await ChannelCommand.upgradeChannel();
   }
 
-  /// Attempts to rebase the upstream onto the local branch.
+  /// Attempts a hard reset to the given revision.
   ///
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
-  ///
-  /// If the fast forward lands us on the same channel and revision, then
-  /// returns true, otherwise returns false.
-  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
+  Future<void> attemptReset(FlutterVersion oldFlutterVersion, String newRevision) async {
     final int code = await processUtils.stream(
-      <String>['git', 'pull', '--ff-only'],
+      <String>['git', 'reset', '--hard', newRevision],
       workingDirectory: workingDirectory,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
     }
-
-    // Check if the upgrade did anything.
-    bool alreadyUpToDate = false;
-    try {
-      final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
-      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
-        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
-    } on Exception catch (e) {
-      globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
-    }
-    return alreadyUpToDate;
   }
 
   /// Update the engine repository and precache all artifacts.
