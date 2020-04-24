@@ -83,9 +83,9 @@ void main() {
       .childDirectory('flutter_assets');
 
     expect(output.childFile('kernel_blob.bin'), exists);
-    // No bundled fonts or assets
-    expect(output.childFile('FontManifest.json'), isNot(exists));
-    expect(output.childFile('AssetManifest.json'), isNot(exists));
+    expect(output.childFile('AssetManifest.json'), exists);
+    // No bundled fonts
+    expect(output.childFile('FontManifest.json'), isNot(exists))
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
