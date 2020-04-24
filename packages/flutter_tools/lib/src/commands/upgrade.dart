@@ -206,9 +206,9 @@ class UpgradeCommandRunner {
   Future<String> fetchRemoteRevision() async {
     String revision;
     try {
-      // Make sure upstream is up to date
+      // Fetch upstream branch's commits and tags
       await processUtils.run(
-        <String>['git', 'fetch'],
+        <String>['git', 'fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
