@@ -561,7 +561,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((_) => count);
   }
 
-  // By default: 59.94Hz
+  /// Repeatedly pump frames that renders the `target` widget with a fixed
+  /// time `interval`, until `fullDuration` has passed.
+  /// 
+  /// The `fullDuration` argument is required. The `interval` argument defaults
+  /// to 16.683 milliseconds (59.94 FPS).
   Future<void> pumpFrames(
     Widget target, {
     @required Duration fullDuration,
