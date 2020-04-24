@@ -291,7 +291,6 @@ class WebAssetServer implements AssetReader {
         headers[HttpHeaders.contentLengthHeader] = _kDefaultIndex.length.toString();
         return shelf.Response.ok(_kDefaultIndex, headers: headers);
       }
-      return shelf.Response.notFound('');
     }
 
     // Track etag headers for better caching of resources.
