@@ -14,6 +14,7 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
+import 'src/base/net.dart';
 import 'src/base/process.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
@@ -136,6 +137,14 @@ Future<int> _handleToolError(
 
     globals.printError('Oops; flutter has exited unexpectedly: "$error".');
 
+    final HttpClientFactory clientFactory = context.get<HttpClientFactory>();
+    final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      flutterProjectFactory: globals.projectFactory,
+      client: clientFactory?.call() ?? HttpClient(),
+    );
+
     try {
       final CrashDetails details = CrashDetails(
         command: _crashCommand(args),
@@ -144,7 +153,10 @@ Future<int> _handleToolError(
         doctorText: await _doctorText(),
       );
       final File file = await _createLocalCrashReport(details);
-      await CrashReporter().informUser(details, file);
+      await CrashReporter(
+        gitHubTemplateCreator: gitHubTemplateCreator,
+        logger: globals.logger,
+      ).informUser(details, file);
 
       return _exit(1);
     // This catch catches all exceptions to ensure the message below is printed.

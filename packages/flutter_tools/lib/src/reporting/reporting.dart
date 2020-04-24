@@ -13,11 +13,9 @@ import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:usage/usage_io.dart';
 
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/net.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/time.dart';
