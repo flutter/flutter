@@ -1,4 +1,4 @@
-Signature: 7dc34ba1944f5dc2435e61eb03f9c48b
+Signature: abfbdd9057ce2648064f6b0e8d9b5dba
 
 UNUSED LICENSES:
 
@@ -5659,8 +5659,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelperWithStencil.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/tessellate/GrDrawAtlasPathOp.h
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.cpp
-FILE: ../../../third_party/skia/src/gpu/tessellate/GrPathParser.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrInnerPolygonContourParser.h
+FILE: ../../../third_party/skia/src/gpu/tessellate/GrMidpointContourParser.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 Google Inc.
 
