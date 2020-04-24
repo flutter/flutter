@@ -299,7 +299,7 @@ class FuchsiaDevice extends Device {
 
       // Start up a package server.
       const String packageServerName = FuchsiaPackageServer.toolHost;
-      final bool isIpv6 = InternetAddress(host).type == InternetAddressType.IPv6;
+      final bool isIpv6 = host.contains(':');
       fuchsiaPackageServer = FuchsiaPackageServer(
           packageRepo.path, packageServerName, host, port, isIpv6);
       if (!await fuchsiaPackageServer.start()) {
