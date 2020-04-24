@@ -30,11 +30,27 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
-TaskFunction createPlatformViewsScrollPerfTest() {
+TaskFunction createUiKitViewScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
-    'test_driver/scroll_perf.dart',
+    'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
+  ).run;
+}
+
+TaskFunction createAndroidTextureScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_texture_scroll_perf.dart',
+    'platform_views_scroll_perf',
+  ).run;
+}
+
+TaskFunction createAndroidViewScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/android_view_scroll_perf.dart',
+    'android_view_scroll_perf',
   ).run;
 }
 
