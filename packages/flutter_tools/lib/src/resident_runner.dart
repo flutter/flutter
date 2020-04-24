@@ -268,7 +268,14 @@ class FlutterDevice {
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
     for (final FlutterView flutterView in views) {
-      final vm_service.Isolate isolate = await vmService.getIsolate(flutterView.uiIsolate.id);
+      final vm_service.Isolate isolate = await vmService
+        .getIsolate(flutterView.uiIsolate.id)
+        .catchError((dynamic error, StackTrace stackTrace) {
+          return null;
+        }, test: (dynamic error) => error is vm_service.SentinelException);
+      if (isolate == null) {
+        continue;
+      }
       if (isPauseEvent(isolate.pauseEvent.kind)) {
         await device.stopApp(package);
         return;

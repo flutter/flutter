@@ -514,10 +514,8 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
-    if (!await _isPaused()) {
-      globals.printTrace('Refreshing active FlutterViews before restarting.');
-      await refreshViews();
-    }
+    globals.printTrace('Refreshing active FlutterViews before restarting.');
+    await refreshViews();
 
     final Stopwatch restartTimer = Stopwatch()..start();
     // TODO(aam): Add generator reset logic once we switch to using incremental
@@ -550,7 +548,10 @@ class HotRunner extends ResidentRunner {
         uiIsolatesIds.add(view.uiIsolate.id);
         // Reload the isolate.
         final Future<vm_service.Isolate> reloadIsolate = device.vmService
-          .getIsolate(view.uiIsolate.id);
+          .getIsolate(view.uiIsolate.id)
+          .catchError((dynamic error, StackTrace stackTrace) {
+            return null;
+          }, test: (dynamic error) => error is vm_service.SentinelException);
         operations.add(reloadIsolate.then((vm_service.Isolate isolate) async {
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent.kind)) {
             // Resume the isolate so that it can be killed by the embedder.
@@ -816,11 +817,9 @@ class HotRunner extends ResidentRunner {
 
     final Stopwatch reloadTimer = Stopwatch()..start();
 
-    if (!await _isPaused()) {
-      globals.printTrace('Refreshing active FlutterViews before reloading.');
-      await refreshVM();
-      await refreshViews();
-    }
+    globals.printTrace('Refreshing active FlutterViews before reloading.');
+    await refreshVM();
+    await refreshViews();
 
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
@@ -933,7 +932,11 @@ class HotRunner extends ResidentRunner {
       for (final FlutterView view in device.views) {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
-        final vm_service.Isolate isolate = await device.vmService.getIsolate(view.uiIsolate.id);
+        final vm_service.Isolate isolate = await device.vmService
+          .getIsolate(view.uiIsolate.id)
+          .catchError((dynamic error, StackTrace stackTrace) {
+            return null;
+          }, test: (dynamic error) => error is vm_service.SentinelException);
         final vm_service.Event pauseEvent = isolate.pauseEvent;
         if (pauseEvent != null
           && isPauseEvent(pauseEvent.kind)
@@ -982,7 +985,14 @@ class HotRunner extends ResidentRunner {
         int postReloadPausedIsolatesFound = 0;
         String serviceEventKind;
         for (final FlutterView view in reassembleViews.keys) {
-          final vm_service.Isolate isolate = await reassembleViews[view].getIsolate(view.uiIsolate.id);
+          final vm_service.Isolate isolate = await reassembleViews[view]
+            .getIsolate(view.uiIsolate.id)
+            .catchError((dynamic error, StackTrace stackTrace) {
+              return null;
+            }, test: (dynamic error) => error is vm_service.SentinelException);
+          if (isolate == null) {
+            continue;
+          }
           if (isolate.pauseEvent != null && isPauseEvent(isolate.pauseEvent.kind)) {
             postReloadPausedIsolatesFound += 1;
             if (serviceEventKind == null) {
@@ -1090,21 +1100,6 @@ class HotRunner extends ResidentRunner {
     return message.toString();
   }
 
-  Future<bool> _isPaused() async {
-    for (final FlutterDevice device in flutterDevices) {
-      for (final FlutterView view in device.views) {
-        final vm_service.Isolate isolate = await device.vmService
-          .getIsolate(view.uiIsolate.id);
-        if (view.uiIsolate != null) {
-          if (isolate.pauseEvent != null
-            && isPauseEvent(isolate.pauseEvent.kind)) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
 
   @override
   void printHelp({ @required bool details }) {

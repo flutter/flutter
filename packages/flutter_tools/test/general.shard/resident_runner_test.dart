@@ -321,6 +321,14 @@ void main() {
       // Not all requests are present due to existing mocks
       FakeVmServiceRequest(
         id: '1',
+        method: 'getIsolate',
+        args: <String, Object>{
+          'isolateId': '1',
+        },
+        jsonResponse: fakeUnpausedIsolate.toJson(),
+      ),
+      FakeVmServiceRequest(
+        id: '2',
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
           'isolateId': fakeUnpausedIsolate.id,
