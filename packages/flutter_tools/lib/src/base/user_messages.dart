@@ -10,6 +10,11 @@ UserMessages get userMessages => context.get<UserMessages>();
 
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
+  // Common messages.
+  String get flutterToolBugInstructions =>
+      'Please file a bug at https://github.com/flutter/flutter/issues.';
+
+
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
       'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';

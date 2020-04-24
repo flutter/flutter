@@ -151,9 +151,8 @@ Future<int> _handleToolError(
     } catch (error) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
         'Unable to generate crash report due to secondary error: $error\n'
-        'please let us know at https://github.com/flutter/flutter/issues.\n',
-      );
-      // Any exception throw here (including one thrown by `_exit()`) will
+        '${globals.userMessages.flutterToolBugInstructions}\n');
+      // Any exception thrown here (including one thrown by `_exit()`) will
       // get caught by our zone's `onError` handler. In order to avoid an
       // infinite error loop, we throw an error that is recognized above
       // and will trigger an immediate exit.
@@ -176,7 +175,8 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
 
   final StringBuffer buffer = StringBuffer();
 
-  buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+  buffer.writeln('Flutter crash report.');
+  buffer.writeln('${globals.userMessages.flutterToolBugInstructions}\n');
 
   buffer.writeln('## command\n');
   buffer.writeln('${details.command}\n');

@@ -76,13 +76,11 @@ class CrashReporter {
 
 /// Sends crash reports to Google.
 ///
-/// There are two ways to override the behavior of this class:
-///
-/// * Define a `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points
-///   to a custom crash reporting server. This is useful if your development
-///   environment is behind a firewall and unable to send crash reports to
-///   Google, or when you wish to use your own server for collecting crash
-///   reports from Flutter Tools.
+/// To override the behavior of this class, define a
+/// `FLUTTER_CRASH_SERVER_BASE_URL` environment variable that points to a custom
+/// crash reporting server. This is useful if your development environment is
+/// behind a firewall and unable to send crash reports to Google, or when you
+/// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
     @required http.Client client,
