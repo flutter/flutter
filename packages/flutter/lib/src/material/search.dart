@@ -473,9 +473,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-    ?? MaterialLocalizations.of(context).searchFieldLabel;
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     final TextStyle searchFieldStyle = widget.delegate.searchFieldStyle
-    ?? theme.inputDecorationTheme.hintStyle;
+      ?? theme.inputDecorationTheme.hintStyle;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
