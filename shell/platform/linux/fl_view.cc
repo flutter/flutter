@@ -10,7 +10,7 @@
 
 #include <gdk/gdkx.h>
 
-#define NSEC_PER_MSEC 1000000
+static constexpr int kMicrosecondsPerMillisecond = 1000;
 
 struct _FlView {
   GtkWidget parent_instance;
@@ -63,8 +63,8 @@ static gboolean fl_view_send_pointer_button_event(FlView* self,
     return FALSE;
 
   fl_engine_send_mouse_pointer_event(self->engine, phase,
-                                     event->time * NSEC_PER_MSEC, event->x,
-                                     event->y, self->button_state);
+                                     event->time * kMicrosecondsPerMillisecond,
+                                     event->x, event->y, self->button_state);
   return TRUE;
 }
 
@@ -188,9 +188,10 @@ static gboolean fl_view_motion_notify_event(GtkWidget* widget,
   if (self->engine == nullptr)
     return FALSE;
 
-  fl_engine_send_mouse_pointer_event(
-      self->engine, self->button_state != 0 ? kMove : kHover,
-      event->time * NSEC_PER_MSEC, event->x, event->y, self->button_state);
+  fl_engine_send_mouse_pointer_event(self->engine,
+                                     self->button_state != 0 ? kMove : kHover,
+                                     event->time * kMicrosecondsPerMillisecond,
+                                     event->x, event->y, self->button_state);
 
   return TRUE;
 }
