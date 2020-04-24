@@ -86,7 +86,7 @@ void main() {
     // No bundled fonts or assets
     expect(output.childFile('FontManifest.json'), isNot(exists));
     expect(output.childFile('AssetManifest.json'), isNot(exists));
-  }, overrides: <String, Generator>{
+  }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
   });
 }
