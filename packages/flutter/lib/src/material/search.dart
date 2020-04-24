@@ -267,7 +267,7 @@ abstract class SearchDelegate<T> {
 
   /// The style of the [searchFieldLabel].
   ///
-  /// If this value is set to null, the value of theme.inputDecorationTheme.hintStyle will be used instead.
+  /// If this value is set to null, the value of the ambient [Theme]'s [ThemeData.inputDecorationTheme.hintStyle] will be used instead.
   final TextStyle searchFieldStyle;
 
   /// The type of action button to use for the keyboard.
