@@ -45,33 +45,10 @@ export FLUTTER_ROOT=${Cache.flutterRoot}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
-  if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    buffer.write('export DART_DEFINES=');
-    buffer.writeln(buildInfo.dartDefines.join(','));
-  }
-  if (buildInfo.dartObfuscation != null) {
-    buffer.writeln('export DART_OBFUSCATION=${buildInfo.dartObfuscation}');
-  }
-  if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    buffer.write('export EXTRA_FRONT_END_OPTIONS=');
-    buffer.writeln(buildInfo.extraFrontEndOptions.join(','));
-  }
-  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
-    buffer.write('export EXTRA_GEN_SNAPSHOT_OPTIONS=');
-    buffer.writeln(buildInfo.extraGenSnapshotOptions.join(','));
-  }
-  if (buildInfo.splitDebugInfoPath != null) {
-    buffer.writeln('export SPLIT_DEBUG_INFO=${buildInfo.splitDebugInfoPath}');
-  }
-  if (buildInfo.trackWidgetCreation != null) {
-    buffer.writeln(
-      'export TRACK_WIDGET_CREATION=${buildInfo.trackWidgetCreation}',
-    );
-  }
-  if (buildInfo.treeShakeIcons != null) {
-    buffer.writeln(
-      'export TREE_SHAKE_ICONS=${buildInfo.treeShakeIcons}',
-    );
+  final Map<String, String> environmentConfig = toEnvironmentConfig(buildInfo);
+  for (final String key in environmentConfig.values) {
+    final String value = environmentConfig[key];
+    buffer.writeln('export $key=$value');
   }
 
   if (globals.artifacts is LocalEngineArtifacts) {
