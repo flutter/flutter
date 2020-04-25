@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ffi' as ffi;
-
 import 'package:file/file.dart';
-import 'package:ffi/ffi.dart' as ffi;
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 
 import 'common.dart' show throwToolExit;
+import 'ffi.dart';
 
 export 'package:file/file.dart';
 export 'package:file/local.dart';
@@ -24,35 +22,18 @@ class FileNotFoundException implements IOException {
   String toString() => 'File not found: $path';
 }
 
-// Windows specific ffi functionality.
-ffi.DynamicLibrary _windowsKernel;
-typedef GetFileAttributes = int Function(ffi.Pointer<ffi.Utf16>);
-typedef GetFileAttributesNative = ffi.Uint32 Function(ffi.Pointer<ffi.Utf16>);
-GetFileAttributes _getFileAttributes;
-const int kWindowsFileAttributeHidden = 0x2;
-const int kWindowsFileAttributeInvalid = 4294967295;
+extension Utils on File {
 
-/// Check whether a file is hidden.
-///
-/// on macOS and Linux, this checks whether the file name is prepended
-/// with a `.`. On windows, this reads the file attribute contents to look
-/// for `FILE_ATTRIBUTE_HIDDEN`.
-bool isHiddenFile(File file, {
-  @required bool windows,
-}) {
-  if (windows) {
-    _windowsKernel ??= ffi.DynamicLibrary.open('Kernel32.dll');
-    _getFileAttributes ??= _windowsKernel
-      .lookupFunction<GetFileAttributesNative, GetFileAttributes>('GetFileAttributesW');
-    final ffi.Pointer<ffi.Utf16> fileName = ffi.Utf16.toUtf16(file.path);
-    final int attributes = _getFileAttributes(fileName);
-    if (attributes == kWindowsFileAttributeInvalid) {
-      throw FileSystemException('Failed to get file attributes', file.path);
+  /// Check whether a file is hidden.
+  bool isHiddenFile({
+    @required bool windows,
+  }) {
+    if (windows) {
+      return FFIService().isFileHidden(path);
     }
-    return (attributes & kWindowsFileAttributeHidden) == kWindowsFileAttributeHidden;
+    return fileSystem.path.basename(path)
+      .startsWith('.');
   }
-  return file.fileSystem.path.basename(file.path)
-    .startsWith('.');
 }
 
 /// Various convenience file system methods.

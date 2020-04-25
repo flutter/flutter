@@ -83,6 +83,30 @@ void main() {
     }
   });
 
+  test('no unauthorized imports of dart:ffi', () {
+    final List<String> whitelistedPaths = <String>[
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'base', '_ffi_supported.dart'),
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
+
+    for (final String dirName in <String>['lib', 'bin']) {
+      final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotWhitelisted)
+        .map(_asFile);
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*dart:ffi')) &&
+              !line.contains('ignore: dart_ffi_import')) {
+            final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'dart:ffi'; import 'lib/src/base/ffi.dart' instead");
+          }
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of test_api', () {
     final List<String> whitelistedPaths = <String>[
       globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
