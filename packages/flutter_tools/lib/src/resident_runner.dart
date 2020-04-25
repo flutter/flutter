@@ -1592,7 +1592,7 @@ class SourceCodeGenerator {
   final Artifacts _artifacts;
   final ProcessManager _processManager;
 
-  bool _generateLocalizations;
+  bool _generateLocalizations = true;
   DateTime _lastCompiled;
   Depfile _depfile;
 

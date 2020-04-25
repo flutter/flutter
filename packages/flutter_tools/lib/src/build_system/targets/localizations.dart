@@ -154,15 +154,15 @@ class GenerateLocalizationsTarget extends Target {
 /// Typed configuration from the localizations config file.
 class LocalizationOptions {
   const LocalizationOptions({
-    @required this.arbDirectory,
-    @required this.templateArbFile,
-    @required this.outputLocalizationsFile,
-    @required this.untranslatedMessagesFile,
-    @required this.header,
-    @required this.outputClass,
-    @required this.preferredSupportedLocales,
-    @required this.headerFile,
-    @required this.deferredLoading,
+    this.arbDirectory,
+    this.templateArbFile,
+    this.outputLocalizationsFile,
+    this.untranslatedMessagesFile,
+    this.header,
+    this.outputClass,
+    this.preferredSupportedLocales,
+    this.headerFile,
+    this.deferredLoading,
   });
 
   /// The `--arb-dir` argument.
@@ -211,11 +211,17 @@ class LocalizationOptions {
 
 /// Parse the localizations configuration options from [file].
 ///
-/// Throws [Exception] if any of the contents are invalid.
+/// Throws [Exception] if any of the contents are invalid. Returns a
+/// [LocalizationOptions] will all fields as `null` if the config file exists
+/// but is empty.
 LocalizationOptions parseLocalizationsOptions({
   @required File file,
   @required Logger logger,
 }) {
+  final String contents = file.readAsStringSync();
+  if (contents.trim().isEmpty) {
+    return const LocalizationOptions();
+  }
   final YamlNode yamlNode = loadYamlNode(file.readAsStringSync());
   if (yamlNode is! YamlMap) {
     logger.printError('Expected ${file.path} to contain a map, instead was $yamlNode');
