@@ -1678,7 +1678,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -1819,7 +1819,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -1952,7 +1952,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -2148,7 +2148,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -2254,7 +2254,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -2438,7 +2438,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
@@ -2526,7 +2526,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   /// {@macro flutter.material.slider.useV2Slider}
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 

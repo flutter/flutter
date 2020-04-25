@@ -353,7 +353,7 @@ class RangeSlider extends StatefulWidget {
   /// value will be defaulted to true in the future.
   @Deprecated(
     'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0'
+    'This feature was deprecated after v1.18.0.'
   )
   final bool useV2Slider;
 
