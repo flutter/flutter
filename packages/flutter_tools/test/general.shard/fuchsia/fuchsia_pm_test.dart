@@ -78,7 +78,7 @@ void main() {
 
       expect(
         FuchsiaPackageServer('a', 'b', host, port).url,
-        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
+        'http://[fe80::ec4:7aff:fecc:ea8f]:23',
       );
     });
   });
