@@ -105,7 +105,7 @@ void main() {
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
     );
 
-    expect(toEnvironmentConfig(buildInfo), <String, String>{
+    expect(buildInfo.toEnvironmentConfig(), <String, String>{
       'TREE_SHAKE_ICONS': 'true',
       'TRACK_WIDGET_CREATION': 'true',
       'DART_DEFINES': 'foo=2,bar=2',

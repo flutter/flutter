@@ -45,7 +45,7 @@ export FLUTTER_ROOT=${Cache.flutterRoot}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
-  final Map<String, String> environmentConfig = toEnvironmentConfig(buildInfo);
+  final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   for (final String key in environmentConfig.keys) {
     final String value = environmentConfig[key];
     buffer.writeln('export $key=$value');

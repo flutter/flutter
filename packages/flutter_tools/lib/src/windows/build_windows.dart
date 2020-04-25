@@ -121,7 +121,7 @@ void _writeGeneratedFlutterProperties(
     'PROJECT_DIR': windowsProject.project.directory.path,
     if (target != null)
       'FLUTTER_TARGET': target,
-    ...toEnvironmentConfig(buildInfo),
+    ...buildInfo.toEnvironmentConfig(),
   };
   if (globals.artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
