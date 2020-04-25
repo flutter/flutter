@@ -35,6 +35,7 @@ TaskFunction createUiKitViewScrollPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
     'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
 
@@ -43,6 +44,7 @@ TaskFunction createAndroidTextureScrollPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_texture_scroll_perf.dart',
     'platform_views_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
 
@@ -51,6 +53,7 @@ TaskFunction createAndroidViewScrollPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_view_scroll_perf.dart',
     'android_view_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_test.dart',
   ).run;
 }
 
@@ -251,15 +254,22 @@ class StartupTest {
 /// performance.
 class PerfTest {
   const PerfTest(
-      this.testDirectory,
-      this.testTarget,
-      this.timelineFileName,
-      {this.needsMeasureCpuGPu = false});
+    this.testDirectory,
+    this.testTarget,
+    this.timelineFileName, {
+    this.needsMeasureCpuGPu = false,
+    this.testDriver,
+  });
 
+  /// The directory where the app under test is defined.
   final String testDirectory;
+  /// The main entry-point file of the application, as run on the device.
   final String testTarget;
+  // The prefix name of the filename such as `<timelineFileName>.timeline_summary.json`.
   final String timelineFileName;
-
+  /// The test file to run on the host.
+  final String testDriver;
+  /// Whether to collect CPU and GPU metrics.
   final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
@@ -275,6 +285,8 @@ class PerfTest {
         '--trace-startup', // Enables "endless" timeline event buffering.
         '-t',
         testTarget,
+        if (testDriver != null)
+          '--driver', testDriver,
         '-d',
         deviceId,
       ]);
