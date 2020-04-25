@@ -34,21 +34,25 @@ class CrashDetails {
     @required this.doctorText,
   });
 
-  String command;
-  dynamic error;
-  StackTrace stackTrace;
-  String doctorText;
+  final String command;
+  final dynamic error;
+  final StackTrace stackTrace;
+  final String doctorText;
 }
 
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
+    @required this.fileSystem,
     @required this.logger,
-    this.gitHubTemplateCreator,
+    @required this.flutterProjectFactory,
+    @required this.client,
   });
 
-  final GitHubTemplateCreator gitHubTemplateCreator;
+  final FileSystem fileSystem;
   final Logger logger;
+  final FlutterProjectFactory flutterProjectFactory;
+  final HttpClient client;
 
   /// Prints instructions for filing a bug about the crash.
   Future<void> informUser(CrashDetails details, File crashFile) async {
@@ -60,17 +64,22 @@ class CrashReporter {
     logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
     logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
 
-    if (gitHubTemplateCreator != null) {
-      logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+    logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
-      final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
-        details.command,
-        details.error,
-        details.stackTrace,
-        details.doctorText,
-      );
-      logger.printStatus('$gitHubTemplateURL\n', wrap: false);
-    }
+    final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
+      fileSystem: fileSystem,
+      logger: logger,
+      flutterProjectFactory: flutterProjectFactory,
+      client: client,
+    );
+
+    final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+      details.command,
+      details.error,
+      details.stackTrace,
+      details.doctorText,
+    );
+    logger.printStatus('$gitHubTemplateURL\n', wrap: false);
   }
 }
 

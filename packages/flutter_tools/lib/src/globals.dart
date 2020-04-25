@@ -41,7 +41,6 @@ Cache get cache => context.get<Cache>();
 Config get config => context.get<Config>();
 CrashReporter get crashReporter => context.get<CrashReporter>();
 Doctor get doctor => context.get<Doctor>();
-GitHubTemplateCreator get gitHubTemplateCreator => context.get<GitHubTemplateCreator>();
 HttpClientFactory get httpClientFactory => context.get<HttpClientFactory>();
 Logger get logger => context.get<Logger>();
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
