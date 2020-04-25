@@ -180,7 +180,14 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
+  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
+    if (host.contains('%')) {
+      host = host.split('%').first;
+    }
+    return FuchsiaPackageServer._(repo, name, host, port);
+  }
+
+  FuchsiaPackageServer._(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
   static const String toolHost = 'flutter_tool';
