@@ -49,8 +49,12 @@ enum Artifact {
   iproxy,
   /// The root of the Linux desktop sources.
   linuxDesktopPath,
+  // The root of the cpp client code for Linux desktop.
+  linuxCppClientWrapper,
   /// The root of the Windows desktop sources.
   windowsDesktopPath,
+  /// The root of the cpp client code for Windows desktop.
+  windowsCppClientWrapper,
   /// The root of the sky_engine package
   skyEnginePath,
   /// The location of the macOS engine podspec file.
@@ -116,6 +120,10 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.windowsDesktopPath:
       return '';
+    case Artifact.windowsCppClientWrapper:
+      return 'cpp_client_wrapper';
+    case Artifact.linuxCppClientWrapper:
+      return 'cpp_client_wrapper_glfw';
     case Artifact.skyEnginePath:
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
@@ -169,6 +177,9 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
+
+  /// Whether these artifacts correspond to a non-versioned local engine.
+  bool get isLocalEngine;
 }
 
 
@@ -354,6 +365,12 @@ class CachedArtifacts extends Artifacts {
         }
         final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
         return _fileSystem.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
+      case Artifact.windowsCppClientWrapper:
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        return _fileSystem.path.join(engineArtifactsPath, 'windows-x64', _artifactToFileName(artifact, platform, mode));
+      case Artifact.linuxCppClientWrapper:
+        final String engineArtifactsPath = _cache.getArtifactDirectory('engine').path;
+        return _fileSystem.path.join(engineArtifactsPath, 'linux-x64', _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
@@ -405,6 +422,9 @@ class CachedArtifacts extends Artifacts {
     assert(false, 'Invalid platform $platform.');
     return null;
   }
+
+  @override
+  bool get isLocalEngine => false;
 }
 
 TargetPlatform _currentHostPlatform(Platform platform) {
@@ -511,7 +531,11 @@ class LocalEngineArtifacts extends Artifacts {
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
+      case Artifact.linuxCppClientWrapper:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
+        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
+      case Artifact.windowsCppClientWrapper:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
@@ -576,6 +600,9 @@ class LocalEngineArtifacts extends Artifacts {
     }
     throw Exception('Unsupported platform $platform.');
   }
+
+  @override
+  bool get isLocalEngine => true;
 }
 
 /// An implementation of [Artifacts] that provides individual overrides.
@@ -618,4 +645,7 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) => parent.getEngineType(platform, mode);
+
+  @override
+  bool get isLocalEngine => parent.isLocalEngine;
 }

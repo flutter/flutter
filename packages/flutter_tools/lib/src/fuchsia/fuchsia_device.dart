@@ -809,7 +809,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   @override
   Future<void> dispose() async {
     final List<ForwardedPort> forwardedPortsCopy =
-      List<ForwardedPort>.from(forwardedPorts);
+      List<ForwardedPort>.of(forwardedPorts);
     for (final ForwardedPort port in forwardedPortsCopy) {
       await unforward(port);
     }

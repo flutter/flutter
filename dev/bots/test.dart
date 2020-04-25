@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'package:googleapis/bigquery/v2.dart' as bq;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'browser.dart';
@@ -287,21 +288,27 @@ Future<void> _runToolTests() async {
 /// we can build when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
-  final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
-  await for (final FileSystemEntity fileEntity in exampleDirectories) {
+  final List<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')));
+  for (final FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
       continue;
     }
     final String examplePath = fileEntity.path;
+    final bool hasNullSafety = File(path.join(examplePath, 'null_safety')).existsSync();
+    final List<String> additionalArgs = hasNullSafety
+      ? <String>['--enable-experiment', 'non-nullable']
+      : <String>[];
     if (Directory(path.join(examplePath, 'android')).existsSync()) {
-      await _flutterBuildAot(examplePath);
-      await _flutterBuildApk(examplePath);
+      await _flutterBuildApk(examplePath, release: false, additionalArgs: additionalArgs);
+      await _flutterBuildApk(examplePath, release: true, additionalArgs: additionalArgs);
     } else {
-      print('Example project ${path.basename(examplePath)} has no android directory, skipping aot and apk');
+      print('Example project ${path.basename(examplePath)} has no android directory, skipping apk');
     }
     if (Platform.isMacOS) {
       if (Directory(path.join(examplePath, 'ios')).existsSync()) {
-        await _flutterBuildIpa(examplePath);
+        await _flutterBuildIpa(examplePath, release: false, additionalArgs: additionalArgs);
+        await _flutterBuildIpa(examplePath, release: true, additionalArgs: additionalArgs);
       } else {
         print('Example project ${path.basename(examplePath)} has no ios directory, skipping ipa');
       }
@@ -323,23 +330,30 @@ Future<void> _runBuildTests() async {
   }
 }
 
-Future<void> _flutterBuildAot(String relativePathToApplication) async {
-  print('${green}Testing AOT build$reset for $cyan$relativePathToApplication$reset...');
-  await runCommand(flutter,
-    <String>['build', 'aot', '-v'],
-    workingDirectory: path.join(flutterRoot, relativePathToApplication),
-  );
-}
-
-Future<void> _flutterBuildApk(String relativePathToApplication) async {
+Future<void> _flutterBuildApk(String relativePathToApplication, {
+  @required bool release,
+  List<String> additionalArgs = const <String>[],
+}) async {
   print('${green}Testing APK --debug build$reset for $cyan$relativePathToApplication$reset...');
   await runCommand(flutter,
-    <String>['build', 'apk', '--debug', '-v'],
+    <String>[
+      'build',
+      'apk',
+      ...additionalArgs,
+      if (release)
+        '--release'
+      else
+        '--debug',
+      '-v',
+    ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+Future<void> _flutterBuildIpa(String relativePathToApplication, {
+  @required bool release,
+  List<String> additionalArgs = const <String>[],
+}) async {
   assert(Platform.isMacOS);
   print('${green}Testing IPA build$reset for $cyan$relativePathToApplication$reset...');
   // Install Cocoapods.  We don't have these checked in for the examples,
@@ -355,7 +369,17 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     );
   }
   await runCommand(flutter,
-    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
+    <String>[
+      'build',
+      'ios',
+      ...additionalArgs,
+      '--no-codesign',
+      if (release)
+        '--release'
+      else
+        '--debug',
+      '-v',
+    ],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
   );
 }
@@ -590,6 +614,7 @@ Future<void> _runWebIntegrationTests() async {
   await _runWebDebugTest('lib/stack_trace.dart');
   await _runWebDebugTest('lib/web_directory_loading.dart');
   await _runWebDebugTest('test/test.dart');
+  await _runWebDebugTest('lib/null_safe_main.dart', enableNullSafety: true);
   await _runWebDebugTest('lib/web_define_loading.dart',
     additionalArguments: <String>[
       '--dart-define=test.valueA=Example',
@@ -692,6 +717,7 @@ Future<void> _runWebReleaseTest(String target, {
 ///
 /// Instead, we use `flutter run --debug` and sniff out the standard output.
 Future<void> _runWebDebugTest(String target, {
+  bool enableNullSafety = false,
   List<String> additionalArguments = const<String>[],
 }) async {
   final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'web');
@@ -702,6 +728,11 @@ Future<void> _runWebDebugTest(String target, {
     <String>[
       'run',
       '--debug',
+      if (enableNullSafety)
+        ...<String>[
+          '--enable-experiment',
+          'non-nullable',
+        ],
       '-d',
       'chrome',
       '--web-run-headless',

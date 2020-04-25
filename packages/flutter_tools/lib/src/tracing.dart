@@ -54,7 +54,10 @@ class Tracing {
         });
         bool done = false;
         for (final FlutterView view in vmService.vm.views) {
-          if (await view.uiIsolate.flutterAlreadyPaintedFirstUsefulFrame()) {
+          if (await view.uiIsolate.vmService
+              .flutterAlreadyPaintedFirstUsefulFrame(
+                isolateId: view.uiIsolate.id,
+              )) {
             done = true;
             break;
           }
@@ -99,7 +102,7 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
 
   int extractInstantEventTimestamp(String eventName) {
     final List<Map<String, dynamic>> events =
-        List<Map<String, dynamic>>.from((timeline['traceEvents'] as List<dynamic>).cast<Map<String, dynamic>>());
+        List<Map<String, dynamic>>.from(timeline['traceEvents'] as List<dynamic>);
     final Map<String, dynamic> event = events.firstWhere(
       (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null,
     );

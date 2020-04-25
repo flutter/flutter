@@ -684,7 +684,7 @@ void main() {
     expect(tip, paints..path(
       color: const Color(0x80800000),
     ));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -726,7 +726,7 @@ void main() {
     expect(tip, paints..path(
       color: const Color(0x80800000),
     ));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -773,7 +773,7 @@ void main() {
     expect(tip.size.height, equals(customTooltipHeight));
     expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingVal));
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -818,7 +818,7 @@ void main() {
     expect(tip.size.height, equals(customTooltipHeight));
     expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingValue));
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingValue));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);

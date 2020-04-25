@@ -144,6 +144,8 @@ void main() {
           any,
           mode: anyNamed('mode')
         )).thenReturn(artifactPath);
+        when(mockArtifacts.isLocalEngine)
+          .thenReturn(false);
 
         when(mockBuildSystem.build(
           any,

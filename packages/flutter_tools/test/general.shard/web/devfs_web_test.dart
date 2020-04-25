@@ -157,6 +157,15 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('serves default index.html', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect((await response.read().toList()).first,
+      containsAllInOrder(utf8.encode('<html>')));
+  }));
+
   test('handles web server paths without .lib extension', () => testbed.run(() async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
@@ -360,7 +369,7 @@ void main() {
       any,
       any,
       outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -376,6 +385,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
+      chromiumLauncher: null,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -402,11 +412,12 @@ void main() {
     webDevFS.webAssetServer.dartSdkSourcemap.createSync(recursive: true);
 
     await webDevFS.update(
-      mainPath: globals.fs.path.join('lib', 'main.dart'),
+      mainUri: globals.fs.file(globals.fs.path.join('lib', 'main.dart')).uri,
       generator: residentCompiler,
       trackWidgetCreation: true,
       bundleFirstUpload: true,
       invalidatedFiles: <Uri>[],
+      packageConfig: PackageConfig.empty,
     );
 
     expect(webDevFS.webAssetServer.getFile('require.js'), isNotNull);
@@ -452,7 +463,7 @@ void main() {
       any,
       any,
       outputPath: anyNamed('outputPath'),
-      packagesFilePath: anyNamed('packagesFilePath'),
+      packageConfig: anyNamed('packageConfig'),
     )).thenAnswer((Invocation invocation) async {
       return const CompilerOutput('a', 0, <Uri>[]);
     });
@@ -468,6 +479,7 @@ void main() {
       entrypoint: Uri.base,
       testMode: true,
       expressionCompiler: null,
+      chromiumLauncher: null,
     );
     webDevFS.requireJS.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -481,6 +493,7 @@ void main() {
   test('Launches DWDS with the correct arguments', () => testbed.run(() async {
     globals.fs.file('.packages').writeAsStringSync('\n');
     final WebAssetServer server = await WebAssetServer.start(
+      null,
       'any',
       8123,
       (String url) => null,
