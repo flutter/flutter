@@ -21,7 +21,7 @@ import 'dart.dart';
 const String kIconTreeShakerFlag = 'TreeShakeIcons';
 
 /// Whether icon font subsetting is enabled by default.
-const bool kIconTreeShakerEnabledDefault = true;
+const bool kIconTreeShakerEnabledDefault = false;
 
 List<Map<String, dynamic>> _getList(dynamic object, String errorMessage) {
   try {
