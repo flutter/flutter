@@ -157,6 +157,15 @@ void main() {
     expect(response.statusCode, HttpStatus.notFound);
   }));
 
+  test('serves default index.html', () => testbed.run(() async {
+    final Response response = await webAssetServer
+      .handleRequest(Request('GET', Uri.parse('http://foobar/')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect((await response.read().toList()).first,
+      containsAllInOrder(utf8.encode('<html>')));
+  }));
+
   test('handles web server paths without .lib extension', () => testbed.run(() async {
     final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');

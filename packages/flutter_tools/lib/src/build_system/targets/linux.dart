@@ -5,7 +5,6 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -22,17 +21,16 @@ const List<String> _kLinuxArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_glfw.h',
   'icudtl.dat',
-  'cpp_client_wrapper_glfw/',
 ];
 
 const String _kLinuxDepfile = 'linux_engine_sources.d';
 
 /// Copies the Linux desktop embedding files to the copy directory.
-class UnpackLinuxDebug extends Target {
-  const UnpackLinuxDebug();
+class UnpackLinux extends Target {
+  const UnpackLinux();
 
   @override
-  String get name => 'unpack_linux_debug';
+  String get name => 'unpack_linux';
 
   @override
   List<Source> get inputs => const <Source>[
@@ -50,7 +48,19 @@ class UnpackLinuxDebug extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String artifactPath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String engineSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.linuxDesktopPath,
+        mode: buildMode,
+        platform: TargetPlatform.linux_x64,
+      );
+    final String clientSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.linuxCppClientWrapper,
+        mode: buildMode,
+        platform: TargetPlatform.linux_x64,
+      );
     final Directory outputDirectory = environment.fileSystem.directory(
       environment.fileSystem.path.join(
       environment.projectDir.path,
@@ -60,13 +70,14 @@ class UnpackLinuxDebug extends Target {
     ));
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
-      artifactPath: artifactPath,
+      engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       artifacts: _kLinuxArtifacts,
+      clientSourcePath: clientSourcePath,
     );
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       depfile,
@@ -85,7 +96,7 @@ class DebugBundleLinuxAssets extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
-    UnpackLinuxDebug(),
+    UnpackLinux(),
   ];
 
   @override
@@ -125,8 +136,8 @@ class DebugBundleLinuxAssets extends Target {
     }
     final Depfile depfile = await copyAssets(environment, outputDirectory);
     final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     depfileService.writeToFile(
       depfile,

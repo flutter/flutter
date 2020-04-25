@@ -2281,7 +2281,7 @@ void main() {
       ),
     ));
 
-    const String expectedValue = '••••••••••••••••••••••••';
+    final String expectedValue = '•' * originalText.length;
 
     expect(
       semantics,
@@ -2366,6 +2366,27 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('password fields can have their obscuring character customized', (WidgetTester tester) async {
+    const String originalText = 'super-secret-password!!1';
+    controller.text = originalText;
+
+    const String obscuringCharacter = '#';
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        obscuringCharacter: obscuringCharacter,
+        obscureText: true,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    final String expectedValue = obscuringCharacter * originalText.length;
+    expect(findRenderEditable(tester).text.text, expectedValue);
   });
 
   group('a11y copy/cut/paste', () {
