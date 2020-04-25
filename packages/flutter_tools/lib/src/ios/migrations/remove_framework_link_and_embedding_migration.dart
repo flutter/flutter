@@ -31,7 +31,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends IOSMigrator {
   @override
   bool migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
-      logger.printTrace('Xcode project not found, skipping migration');
+      logger.printTrace('Xcode project not found, skipping framework link and embedding migration');
       return true;
     }
 

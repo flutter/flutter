@@ -743,6 +743,13 @@ void main() {
         numberOfVariationsRun += 1;
       }
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
+      final TargetPlatformVariant all = TargetPlatformVariant.all();
+      final TargetPlatformVariant desktop = TargetPlatformVariant.all();
+      final TargetPlatformVariant mobile = TargetPlatformVariant.all();
+      expect(desktop.values.union(mobile.values), equals(all.values));
+    });
   });
 }
 

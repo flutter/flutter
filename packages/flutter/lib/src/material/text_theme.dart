@@ -32,7 +32,7 @@ import 'typography.dart';
 ///
 /// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
-/// (https://material.io/design/typography).
+/// ([https://material.io/design/typography](https://material.io/design/typography)).
 ///
 /// The 2018 spec has thirteen text styles:
 /// ```

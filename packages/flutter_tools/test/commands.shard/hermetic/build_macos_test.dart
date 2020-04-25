@@ -211,6 +211,34 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('macOS build supports build-name and build-number', () async {
+    final BuildCommand command = BuildCommand();
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>[
+        'build',
+        'macos',
+        '--debug',
+        '--build-name=1.2.3',
+        '--build-number=42',
+      ],
+    );
+    final String contents = fileSystem
+      .file('./macos/Flutter/ephemeral/Flutter-Generated.xcconfig')
+      .readAsStringSync();
+
+    expect(contents, contains('FLUTTER_BUILD_NAME=1.2.3'));
+    expect(contents, contains('FLUTTER_BUILD_NUMBER=42'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpMockXcodeBuildHandler('Debug')
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
@@ -221,14 +249,14 @@ void main() {
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand().hidden, true);
+    expect(BuildMacosCommand(verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
     Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand().hidden, false);
+    expect(BuildMacosCommand(verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,

@@ -280,6 +280,35 @@ void main() {
       ]))
     ]));
   });
+
+  testWithoutContext('runInView forwards arguments correctly', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', id: '1', args: <String, Object>{
+          'streamId': 'Isolate'
+        }),
+        const FakeVmServiceRequest(method: kRunInViewMethod, id: '2', args: <String, Object>{
+          'viewId': '1234',
+          'mainScript': 'main.dart',
+          'assetDirectory': 'flutter_assets/',
+        }),
+        FakeVmServiceStreamResponse(
+          streamId: 'Isolate',
+          event: vm_service.Event(
+            kind: vm_service.EventKind.kIsolateRunnable,
+            timestamp: 1,
+          )
+        ),
+      ]
+    );
+
+    await fakeVmServiceHost.vmService.runInView(
+      viewId: '1234',
+      main: Uri.file('main.dart'),
+      assetsDirectory: Uri.file('flutter_assets/'),
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
 }
 
 class MockDevice extends Mock implements Device {}

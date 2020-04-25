@@ -564,7 +564,7 @@ class TextPainter {
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
-      if (newWidth != width) {
+      if (newWidth != _applyFloatingPointHack(_paragraph.width)) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
     }

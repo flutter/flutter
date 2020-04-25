@@ -11,54 +11,44 @@ import '../../src/common.dart';
 const String _kFlutterRoot = '/data/flutter';
 
 void main() {
-  FileSystem fs;
-  Directory tempDir;
-
-  setUp(() {
-    fs = MemoryFileSystem();
-    fs.directory(_kFlutterRoot).createSync(recursive: true);
+  testWithoutContext('analyze inRepo', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.directory(_kFlutterRoot).createSync(recursive: true);
+    final Directory tempDir = fileSystem.systemTempDirectory
+      .createTempSync('flutter_analysis_test.');
     Cache.flutterRoot = _kFlutterRoot;
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
+
+    // Absolute paths
+    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
+    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
+    expect(inRepo(<String>[Cache.flutterRoot], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot, 'foo')], fileSystem), isTrue);
+
+    // Relative paths
+    fileSystem.currentDirectory = Cache.flutterRoot;
+    expect(inRepo(<String>['.'], fileSystem), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = tempDir.path;
+    expect(inRepo(<String>['.'], fileSystem), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+
+    // Ensure no exceptions
+    inRepo(null, fileSystem);
+    inRepo(<String>[], fileSystem);
   });
+}
 
-  tearDown(() {
-    tryToDelete(tempDir);
-  });
-
-  group('analyze', () {
-    testWithoutContext('inRepo', () {
-      bool inRepo(List<String> fileList) {
-        if (fileList == null || fileList.isEmpty) {
-          fileList = <String>[fs.path.current];
-        }
-        final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
-        final String prefix = root + fs.path.separator;
-        for (String file in fileList) {
-          file = fs.path.normalize(fs.path.absolute(file));
-          if (file == root || file.startsWith(prefix)) {
-            return true;
-          }
-        }
-        return false;
-      }
-
-      // Absolute paths
-      expect(inRepo(<String>[tempDir.path]), isFalse);
-      expect(inRepo(<String>[fs.path.join(tempDir.path, 'foo')]), isFalse);
-      expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
-      expect(inRepo(<String>[fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
-
-      // Relative paths
-      fs.currentDirectory = Cache.flutterRoot;
-      expect(inRepo(<String>['.']), isTrue);
-      expect(inRepo(<String>['foo']), isTrue);
-      fs.currentDirectory = tempDir.path;
-      expect(inRepo(<String>['.']), isFalse);
-      expect(inRepo(<String>['foo']), isFalse);
-
-      // Ensure no exceptions
-      inRepo(null);
-      inRepo(<String>[]);
-    });
-  });
+bool inRepo(List<String> fileList, FileSystem fileSystem) {
+  if (fileList == null || fileList.isEmpty) {
+    fileList = <String>[fileSystem.path.current];
+  }
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot));
+  final String prefix = root + fileSystem.path.separator;
+  for (String file in fileList) {
+    file = fileSystem.path.normalize(fileSystem.path.absolute(file));
+    if (file == root || file.startsWith(prefix)) {
+      return true;
+    }
+  }
+  return false;
 }

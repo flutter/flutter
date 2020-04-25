@@ -509,6 +509,23 @@ void main() {
     expect(find.text(searchHint), findsOneWidget);
   });
 
+  testWidgets('Custom searchFieldStyle value', (WidgetTester tester) async {
+    const TextStyle searchStyle = TextStyle(color: Colors.red, fontSize: 3);
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchFieldStyle: searchStyle);
+
+    await tester.pumpWidget(
+      TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final TextStyle hintStyle = textField.decoration.hintStyle;
+    expect(hintStyle, delegate.searchFieldStyle);
+  });
+
   testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -697,9 +714,10 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    TextStyle searchFieldStyle,
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction, searchFieldStyle: searchFieldStyle);
 
   final String suggestions;
   final String result;

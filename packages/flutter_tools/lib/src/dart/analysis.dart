@@ -24,12 +24,14 @@ class AnalysisServer {
     @required ProcessManager processManager,
     @required Logger logger,
     @required Platform platform,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
+    @required List<String> experiments,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _platform = platform,
-       _terminal = terminal;
+       _terminal = terminal,
+       _experiments = experiments;
 
   final String sdkPath;
   final List<String> directories;
@@ -37,7 +39,8 @@ class AnalysisServer {
   final ProcessManager _processManager;
   final Logger _logger;
   final Platform _platform;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
+  final List<String> _experiments;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -49,11 +52,20 @@ class AnalysisServer {
   int _id = 0;
 
   Future<void> start() async {
-    final String snapshot =
-        _fileSystem.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
+    final String snapshot = _fileSystem.path.join(
+      sdkPath,
+      'bin',
+      'snapshots',
+      'analysis_server.dart.snapshot',
+    );
     final List<String> command = <String>[
       _fileSystem.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
+      for (String experiment in _experiments)
+        ...<String>[
+          '--enable-experiment',
+          experiment,
+        ],
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
       '--sdk',
@@ -181,14 +193,14 @@ enum _AnalysisSeverity {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json, {
     @required Platform platform,
-    @required AnsiTerminal terminal,
+    @required Terminal terminal,
     @required FileSystem fileSystem,
   }) : _platform = platform,
        _terminal = terminal,
        _fileSystem = fileSystem;
 
   final Platform _platform;
-  final AnsiTerminal _terminal;
+  final Terminal _terminal;
   final FileSystem _fileSystem;
 
   static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{

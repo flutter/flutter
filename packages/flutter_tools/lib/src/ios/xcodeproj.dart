@@ -18,7 +18,6 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -236,11 +235,20 @@ List<String> _xcodeBuildSettingsLines({
   }
 
   if (buildInfo.dartDefines?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('DART_DEFINES=${jsonEncode(buildInfo.dartDefines)}');
+    xcodeBuildSettings.add('DART_DEFINES=${buildInfo.dartDefines.join(',')}');
   }
 
   if (buildInfo.extraFrontEndOptions?.isNotEmpty ?? false) {
-    xcodeBuildSettings.add('EXTRA_FRONT_END_OPTIONS=${buildInfo.extraFrontEndOptions.join(',')}');
+    xcodeBuildSettings.add(
+      'EXTRA_FRONT_END_OPTIONS='
+      '${buildInfo.extraFrontEndOptions.join(',')}',
+    );
+  }
+  if (buildInfo.extraGenSnapshotOptions?.isNotEmpty ?? false) {
+    xcodeBuildSettings.add(
+      'EXTRA_GEN_SNAPSHOT_OPTIONS='
+      '${buildInfo.extraGenSnapshotOptions.join(',')}',
+    );
   }
 
   return xcodeBuildSettings;

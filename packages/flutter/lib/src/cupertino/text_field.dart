@@ -241,6 +241,7 @@ class CupertinoTextField extends StatefulWidget {
     ToolbarOptions toolbarOptions,
     this.showCursor,
     this.autofocus = false,
+    this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
     SmartDashesType smartDashesType,
@@ -268,9 +269,11 @@ class CupertinoTextField extends StatefulWidget {
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
+    this.autofillHints,
   }) : assert(textAlign != null),
        assert(readOnly != null),
        assert(autofocus != null),
+       assert(obscuringCharacter != null && obscuringCharacter.length == 1),
        assert(obscureText != null),
        assert(autocorrect != null),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -427,6 +430,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
+  /// {@macro flutter.widgets.editableText.obscuringCharacter}
+  final String obscuringCharacter;
+
   /// {@macro flutter.widgets.editableText.obscureText}
   final bool obscureText;
 
@@ -579,6 +585,9 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.onTap}
   final GestureTapCallback onTap;
 
+  /// {@macro flutter.widgets.editableText.autofillHints}
+  final Iterable<String> autofillHints;
+
   @override
   _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
 
@@ -597,6 +606,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
@@ -917,6 +927,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           strutStyle: widget.strutStyle,
           textAlign: widget.textAlign,
           autofocus: widget.autofocus,
+          obscuringCharacter: widget.obscuringCharacter,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
           smartDashesType: widget.smartDashesType,
@@ -950,6 +961,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
           enableInteractiveSelection: widget.enableInteractiveSelection,
+          autofillHints: widget.autofillHints,
         ),
       ),
     );

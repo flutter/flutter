@@ -11,6 +11,7 @@ import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'desktop.dart';
 import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
@@ -23,6 +24,8 @@ const List<String> _kLinuxArtifacts = <String>[
   'icudtl.dat',
   'cpp_client_wrapper_glfw/',
 ];
+
+const String _kLinuxDepfile = 'linux_engine_sources.d';
 
 /// Copies the Linux desktop embedding files to the copy directory.
 class UnpackLinuxDebug extends Target {
@@ -40,72 +43,34 @@ class UnpackLinuxDebug extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => <String>[
-    'linux_engine_sources.d'
-  ];
+  List<String> get depfiles => const <String>[_kLinuxDepfile];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   Future<void> build(Environment environment) async {
-    final String basePath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
-    final List<File> inputs = <File>[];
-    final List<File> outputs = <File>[];
-    final String outputPrefix = globals.fs.path.join(
+    final String artifactPath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final Directory outputDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(
       environment.projectDir.path,
       'linux',
       'flutter',
       'ephemeral',
+    ));
+    final Depfile depfile = unpackDesktopArtifacts(
+      fileSystem: environment.fileSystem,
+      artifactPath: artifactPath,
+      outputDirectory: outputDirectory,
+      artifacts: _kLinuxArtifacts,
     );
-    // The native linux artifacts are composed of 6 files and a directory (listed above)
-    // which need to be copied to the target directory.
-    for (final String artifact in _kLinuxArtifacts) {
-      final String entityPath = globals.fs.path.join(basePath, artifact);
-      // If this artifact is a file, just copy the source over.
-      if (globals.fs.isFileSync(entityPath)) {
-        final String outputPath = globals.fs.path.join(
-          outputPrefix,
-          globals.fs.path.relative(entityPath, from: basePath),
-        );
-        final File destinationFile = globals.fs.file(outputPath);
-        if (!destinationFile.parent.existsSync()) {
-          destinationFile.parent.createSync(recursive: true);
-        }
-        final File inputFile = globals.fs.file(entityPath);
-        inputFile.copySync(destinationFile.path);
-        inputs.add(inputFile);
-        outputs.add(destinationFile);
-        continue;
-      }
-      // If the artifact is the directory cpp_client_wrapper, recursively
-      // copy every file from it.
-      for (final File input in globals.fs.directory(entityPath)
-          .listSync(recursive: true)
-          .whereType<File>()) {
-        final String outputPath = globals.fs.path.join(
-          outputPrefix,
-          globals.fs.path.relative(input.path, from: basePath),
-        );
-        final File destinationFile = globals.fs.file(outputPath);
-        if (!destinationFile.parent.existsSync()) {
-          destinationFile.parent.createSync(recursive: true);
-        }
-        final File inputFile = globals.fs.file(input);
-        inputFile.copySync(destinationFile.path);
-        inputs.add(inputFile);
-        outputs.add(destinationFile);
-      }
-    }
-    final Depfile depfile = Depfile(inputs, outputs);
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,
-      environment.buildDir.childFile('linux_engine_sources.d'),
+      environment.buildDir.childFile(_kLinuxDepfile),
     );
   }
 }
@@ -162,7 +127,6 @@ class DebugBundleLinuxAssets extends Target {
     final DepfileService depfileService = DepfileService(
       fileSystem: globals.fs,
       logger: globals.logger,
-      platform: globals.platform,
     );
     depfileService.writeToFile(
       depfile,

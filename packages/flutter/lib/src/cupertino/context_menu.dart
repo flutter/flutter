@@ -378,8 +378,8 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     // decoy will pop on top of the AppBar if the child is partially behind it,
     // such as a top item in a partially scrolled view. However, if we don't use
     // an overlay, then the decoy will appear behind its neighboring widget when
-    // it expands. This may be solveable by adding a widget to Scaffold that's
-    // undernearth the AppBar.
+    // it expands. This may be solvable by adding a widget to Scaffold that's
+    // underneath the AppBar.
     _lastOverlayEntry = OverlayEntry(
       opaque: false,
       builder: (BuildContext context) {
@@ -1036,7 +1036,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
         ),
       ),
     );
-    final Container spacer = Container(
+    const SizedBox spacer = SizedBox(
       width: _kPadding,
       height: _kPadding,
     );

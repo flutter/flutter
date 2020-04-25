@@ -72,7 +72,7 @@ if [[ -n "$DART_OBFUSCATION" ]]; then
   dart_obfuscation_flag="true"
 fi
 
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
@@ -83,7 +83,8 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTreeShakeIcons="${icon_tree_shaker_flag}"                             \
     -dDartObfuscation="${dart_obfuscation_flag}"                            \
     -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
-    -dDartDefines="${DART_DEFINES}"                                         \
+    --DartDefines="${DART_DEFINES}"                                         \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
     -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \

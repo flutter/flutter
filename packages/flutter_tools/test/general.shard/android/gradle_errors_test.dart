@@ -601,9 +601,10 @@ bool testErrorMessage(String errorMessage, GradleHandledError error) {
 }
 
 Platform fakePlatform(String name) {
-  return FakePlatform
-    .fromPlatform(const LocalPlatform())
-    ..operatingSystem = name;
+  return FakePlatform(
+    environment: <String, String>{},
+    operatingSystem: name,
+  );
 }
 
 class FakeGradleUtils extends GradleUtils {

@@ -312,14 +312,14 @@ void main() {
             children: <Widget>[
               Semantics(
                 value: 'value one',
-                child: Container(
+                child: const SizedBox(
                   height: 10.0,
                   width: 10.0,
                 ),
               ),
               Semantics(
                 value: 'value two',
-                child: Container(
+                child: const SizedBox(
                   height: 10.0,
                   width: 10.0,
                 ),

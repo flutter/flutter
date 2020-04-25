@@ -194,11 +194,9 @@ void main() {
       SystemChannels.system.codec.encodeMessage(data),
         (ByteData data) { },
     );
-     final RenderObject renderObject = tester.renderObject(find.byType(Slider));
-
-     bool sliderBoxNeedsLayout;
-     renderObject.visitChildren((RenderObject child) {sliderBoxNeedsLayout = child.debugNeedsLayout;});
-     expect(sliderBoxNeedsLayout, isTrue);
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+    expect(renderObject.debugNeedsLayout, isTrue);
   });
 
   testWidgets('TimePicker relayout upon system fonts changes', (WidgetTester tester) async {

@@ -31,6 +31,7 @@ class AnalyzeOnce extends AnalyzeBase {
     @required Platform platform,
     @required ProcessManager processManager,
     @required AnsiTerminal terminal,
+    @required List<String> experiments,
     this.workingDirectory,
   }) : super(
         argResults,
@@ -41,6 +42,7 @@ class AnalyzeOnce extends AnalyzeBase {
         platform: platform,
         processManager: processManager,
         terminal: terminal,
+        experiments: experiments,
       );
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -52,7 +54,7 @@ class AnalyzeOnce extends AnalyzeBase {
         (workingDirectory ?? fileSystem.currentDirectory).path;
 
     // find directories from argResults.rest
-    final Set<String> directories = Set<String>.from(argResults.rest
+    final Set<String> directories = Set<String>.of(argResults.rest
         .map<String>((String path) => fileSystem.path.canonicalize(path)));
     if (directories.isNotEmpty) {
       for (final String directory in directories) {
@@ -98,6 +100,7 @@ class AnalyzeOnce extends AnalyzeBase {
       logger: logger,
       processManager: processManager,
       terminal: terminal,
+      experiments: experiments,
     );
 
     StreamSubscription<bool> subscription;

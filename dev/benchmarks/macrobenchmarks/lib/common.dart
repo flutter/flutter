@@ -12,3 +12,4 @@ const String kLargeImagesRouteName = '/large_images';
 const String kTextRouteName = '/text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
 const String kColorFilterAndFadeRouteName = '/color_filter_and_fade';
+const String kFadingChildAnimationRouteName = '/fading_child_animation';

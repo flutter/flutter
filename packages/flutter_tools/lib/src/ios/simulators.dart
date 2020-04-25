@@ -471,6 +471,7 @@ class IOSSimulator extends Device {
       buildInfo: buildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
+      deviceID: id,
     );
     if (!buildResult.success) {
       throwToolExit('Could not build the application for the simulator.');
@@ -896,7 +897,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    final List<ForwardedPort> portsCopy = List<ForwardedPort>.from(_ports);
+    final List<ForwardedPort> portsCopy = List<ForwardedPort>.of(_ports);
     for (final ForwardedPort port in portsCopy) {
       await unforward(port);
     }
