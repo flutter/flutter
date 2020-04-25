@@ -310,6 +310,9 @@ class CupertinoTextField extends StatefulWidget {
            selectAll: true,
            paste: true,
          )),
+       assert(textInputAction != TextInputAction.newLine ||
+         maxLines == 1 ||
+         keyboardType != TextInputType.text, 'Use keyboardType TextInputType.multiline when using TextInputAction.newLine on a multiline TextField.'),
        super(key: key);
 
   /// Controls the text being edited.
