@@ -117,7 +117,7 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-    /// Convert to a structued string encoded structure appropriate for usage as
+  /// Convert to a structued string encoded structure appropriate for usage as
   /// environment variables or to embed in other scripts.
   ///
   /// Fields that are `null` are excluded from this configration.
