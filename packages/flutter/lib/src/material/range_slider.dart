@@ -351,6 +351,7 @@ class RangeSlider extends StatefulWidget {
   /// This is a temporary flag for migrating the slider from v1 to v2. Currently
   /// this defaults to false, because the changes may break existing tests. This
   /// value will be defaulted to true in the future.
+  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
   final bool useV2Slider;
 
   // Touch width for the tap boundary of the slider thumbs.
