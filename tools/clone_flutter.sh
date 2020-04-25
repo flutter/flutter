@@ -19,9 +19,10 @@ cd $ENGINE_PATH/src/flutter
 # Special handling of release branches.
 ENGINE_BRANCH_NAME=`git branch | grep '*' | cut -d ' ' -f2`
 versionregex="^v[[:digit:]]+\."
+releasecandidateregex="^flutter-[[:digit:]]+\.[[:digit:]]+-candidate\.[[:digit:]]+$"
 ON_RELEASE_BRANCH=false
 echo "Engine on branch $ENGINE_BRANCH_NAME"
-if [[ $ENGINE_BRANCH_NAME =~ $versionregex ]]
+if [[ $ENGINE_BRANCH_NAME =~ $versionregex || $ENGINE_BRANCH_NAME =~ $releasecandidateregex ]]
 then
   echo "release branch $ENGINE_BRANCH_NAME"
   ON_RELEASE_BRANCH=true
