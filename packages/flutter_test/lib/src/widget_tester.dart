@@ -89,7 +89,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
-/// If [tags] is passed, it declares user-defined tags that are implemented by
+/// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
 /// See also:
