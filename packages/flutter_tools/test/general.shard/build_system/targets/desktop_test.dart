@@ -67,7 +67,7 @@ void main() {
 
   testWithoutContext('unpackDesktopArtifacts throws when attempting to copy missing directory', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    fileSystem.file('a.txt').createSync();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
 
     expect(() => unpackDesktopArtifacts(
       fileSystem: fileSystem,
@@ -78,5 +78,19 @@ void main() {
       ],
       clientSourcePath: 'foo'
     ), throwsA(isA<Exception>()));
+  });
+
+  testWithoutContext('unpackDesktopArtifacts does not require a client source path', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    fileSystem.file('inputs/a.txt').createSync(recursive: true);
+
+    expect(() => unpackDesktopArtifacts(
+      fileSystem: fileSystem,
+      engineSourcePath: 'inputs',
+      outputDirectory: fileSystem.directory('outputs'),
+      artifacts: <String>[
+        'a.txt',
+      ],
+    ), returnsNormally);
   });
 }

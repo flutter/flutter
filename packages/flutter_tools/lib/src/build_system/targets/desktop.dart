@@ -8,7 +8,7 @@ import '../../base/file_system.dart';
 import '../depfile.dart';
 
 /// Unpack the engine artifact list [artifacts] from [engineSourcePath] and
-  /// [clientSourcePath] into a directory [outputDirectory].
+/// [clientSourcePath] (if provided) into a directory [outputDirectory].
 ///
 /// Returns a [Depfile] including all copied files.
 ///
@@ -19,7 +19,7 @@ Depfile unpackDesktopArtifacts({
   @required List<String> artifacts,
   @required Directory outputDirectory,
   @required String engineSourcePath,
-  @required String clientSourcePath,
+  String clientSourcePath,
 }) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];
@@ -45,6 +45,9 @@ Depfile unpackDesktopArtifacts({
     inputFile.copySync(destinationFile.path);
     inputs.add(inputFile);
     outputs.add(destinationFile);
+  }
+  if (clientSourcePath == null) {
+    return Depfile(inputs, outputs);
   }
   final Directory clientSourceDirectory = fileSystem.directory(clientSourcePath);
   if (!clientSourceDirectory.existsSync()) {

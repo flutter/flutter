@@ -128,8 +128,13 @@ void main() {
   });
 
   // AssetBundleFactory still uses context injection
+  FileSystem fileSystem;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  });
+
   testUsingContext('DebugBundleWindowsAssets creates correct bundle structure', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
       artifacts: MockArtifacts(),
@@ -148,6 +153,10 @@ void main() {
     // Depfile is created and dill is copied.
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 
