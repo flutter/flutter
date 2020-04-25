@@ -1676,7 +1676,10 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   const RoundedRectSliderTrackShape({ this.useV2Slider = true });
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -1814,7 +1817,10 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   const RectangularRangeSliderTrackShape({this.useV2Slider});
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -1944,7 +1950,10 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   const RoundedRectRangeSliderTrackShape({ this.useV2Slider });
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -2137,7 +2146,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   final double tickMarkRadius;
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -2240,7 +2252,10 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   final double tickMarkRadius;
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -2421,7 +2436,10 @@ class RoundSliderThumbShape extends SliderComponentShape {
   final double pressedElevation;
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   @override
@@ -2506,7 +2524,10 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   }) : assert(enabledThumbRadius != null);
 
   /// {@macro flutter.material.slider.useV2Slider}
-  @Deprecated('useV2Slider will be set to true by default, this was deprecated after v1.18.0')
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0'
+  )
   final bool useV2Slider;
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
