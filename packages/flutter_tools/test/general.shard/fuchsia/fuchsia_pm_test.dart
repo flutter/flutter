@@ -71,6 +71,16 @@ void main() {
       FuchsiaArtifacts: () => mockFuchsiaArtifacts,
       ProcessManager: () => mockProcessManager,
     });
+
+    testWithoutContext('ipv6 formatting logic of FuchsiaPackageServer', () {
+      const String host = 'fe80::ec4:7aff:fecc:ea8f%eno2';
+      const int port = 23;
+
+      expect(
+        FuchsiaPackageServer('a', 'b', host, port).url,
+        'http://[fe80::ec4:7aff:fecc:ea8f%25eno2]:23',
+      );
+    });
   });
 }
 

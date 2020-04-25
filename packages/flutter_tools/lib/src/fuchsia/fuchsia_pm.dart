@@ -192,7 +192,7 @@ class FuchsiaPackageServer {
   Process _process;
 
   /// The URL that can be used by the device to access this package server.
-  String get url => 'http://$_host:$_port';
+  String get url => Uri(scheme: 'http', host: _host, port: _port).toString();
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
