@@ -165,7 +165,7 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-    bool enabled = true,
+    bool enabled,
     double cursorWidth = 2.0,
     Radius cursorRadius,
     Color cursorColor,
