@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,26 +6,33 @@ library reporting;
 
 import 'dart:async';
 
+import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 import 'package:usage/usage_io.dart';
 
-import '../base/config.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/time.dart';
-import '../base/utils.dart';
+import '../build_system/exceptions.dart';
+import '../convert.dart';
+import '../devfs.dart';
 import '../doctor.dart';
 import '../features.dart';
-import '../globals.dart';
-import '../persistent_tool_state.dart';
+import '../flutter_manifest.dart';
+import '../flutter_project_metadata.dart';
+import '../globals.dart' as globals;
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
 part 'crash_reporting.dart';
 part 'disabled_usage.dart';
 part 'events.dart';
+part 'github_template.dart';
 part 'usage.dart';

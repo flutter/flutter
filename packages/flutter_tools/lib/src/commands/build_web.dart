@@ -1,35 +1,47 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
+
+import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+    show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand() {
+  BuildWebCommand({
+    @required bool verboseHelp,
+  }) {
+    addTreeShakeIconsFlag();
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(excludeDebug: true);
+    usesDartDefineOption();
+    addEnableExperimentation(hide: !verboseHelp);
     argParser.addFlag('web-initialize-platform',
         defaultsTo: true,
         negatable: true,
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
     );
+    argParser.addFlag('csp',
+      defaultsTo: false,
+      negatable: false,
+      help: 'Disable dynamic generation of code in the generated output. '
+        'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
   }
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
       const <DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
         DevelopmentArtifact.web,
       };
 
@@ -48,12 +60,19 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported.');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = argResults['target'];
+    final String target = stringArg('target');
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
     }
-    await buildWeb(flutterProject, target, buildInfo, argResults['web-initialize-platform']);
-    return null;
+    await buildWeb(
+      flutterProject,
+      target,
+      buildInfo,
+      boolArg('web-initialize-platform'),
+      boolArg('csp'),
+      stringsArg(FlutterOptions.kEnableExperiment),
+    );
+    return FlutterCommandResult.success();
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import 'framework.dart';
 /// be able to depend on inherited widget ancestors of the context
 /// it's built in.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool dartpad --template=freeform}
 /// This example demonstrates how `InheritedTheme.captureAll()` can be used
 /// to wrap the contents of a new route with the inherited themes that
 /// are present when the route is built - but are not present when route
@@ -101,7 +101,7 @@ abstract class InheritedTheme extends InheritedWidget {
   /// This implementation for [TooltipTheme] is typical:
   /// ```dart
   /// Widget wrap(BuildContext context, Widget child) {
-  ///   final TooltipTheme ancestorTheme = context.ancestorWidgetOfExactType(TooltipTheme);
+  ///   final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>());
   ///   return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
   /// }
   /// ```
@@ -117,7 +117,7 @@ abstract class InheritedTheme extends InheritedWidget {
     final Set<Type> themeTypes = <Type>{};
     context.visitAncestorElements((Element ancestor) {
       if (ancestor is InheritedElement && ancestor.widget is InheritedTheme) {
-        final InheritedTheme theme = ancestor.widget;
+        final InheritedTheme theme = ancestor.widget as InheritedTheme;
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the
@@ -147,7 +147,7 @@ class _CaptureAll extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (InheritedTheme theme in themes)
+    for (final InheritedTheme theme in themes)
       wrappedChild = theme.wrap(context, wrappedChild);
     return wrappedChild;
   }

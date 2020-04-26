@@ -1,10 +1,12 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
+typedef ElementRebuildCallback = void Function(StatefulElement element);
 
 class TestState extends State<StatefulWidget> {
   @override
@@ -59,6 +61,358 @@ void main() {
     expect(keyA, equals(keyA2));
     expect(keyA.hashCode, equals(keyA2.hashCode));
     expect(keyA, isNot(equals(keyB)));
+  });
+
+  testWidgets('GlobalKey correct case 1 - can move global key from container widget to layoutbuilder', (WidgetTester tester) async {
+    final Key key = GlobalKey(debugLabel: 'correct');
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        Container(
+          key: const ValueKey<int>(1),
+          child: SizedBox(key: key),
+        ),
+        LayoutBuilder(
+          key: const ValueKey<int>(2),
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return const Placeholder();
+          },
+        ),
+      ],
+    ));
+
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        Container(
+          key: const ValueKey<int>(1),
+          child: const Placeholder(),
+        ),
+        LayoutBuilder(
+          key: const ValueKey<int>(2),
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(key: key);
+          },
+        ),
+      ],
+    ));
+  });
+
+  testWidgets('GlobalKey correct case 2 - can move global key from layoutbuilder to container widget', (WidgetTester tester) async {
+    final Key key = GlobalKey(debugLabel: 'correct');
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        Container(
+          key: const ValueKey<int>(1),
+          child: const Placeholder(),
+        ),
+        LayoutBuilder(
+          key: const ValueKey<int>(2),
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SizedBox(key: key);
+          },
+        ),
+      ],
+    ));
+    await tester.pumpWidget(Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        Container(
+          key: const ValueKey<int>(1),
+          child: SizedBox(key: key),
+        ),
+        LayoutBuilder(
+          key: const ValueKey<int>(2),
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return const Placeholder();
+          },
+        ),
+      ],
+    ));
+  });
+
+  testWidgets('GlobalKey correct case 3 - can deal with early rebuild in layoutbuilder - move backward', (WidgetTester tester) async {
+    const Key key1 = GlobalObjectKey('Text1');
+    const Key key2 = GlobalObjectKey('Text2');
+    Key rebuiltKeyOfSecondChildBeforeLayout;
+    Key rebuiltKeyOfFirstChildAfterLayout;
+    Key rebuiltKeyOfSecondChildAfterLayout;
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildBeforeLayout =
+                    statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    // Result will be written during first build and need to clear it to remove
+    // noise.
+    rebuiltKeyOfSecondChildBeforeLayout = null;
+
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    state.rebuild();
+    // Reorders the items
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfFirstChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfFirstChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfFirstChildAfterLayout, key2);
+    expect(rebuiltKeyOfSecondChildAfterLayout, key1);
+  });
+
+  testWidgets('GlobalKey correct case 4 - can deal with early rebuild in layoutbuilder - move forward', (WidgetTester tester) async {
+    const Key key1 = GlobalObjectKey('Text1');
+    const Key key2 = GlobalObjectKey('Text2');
+    const Key key3 = GlobalObjectKey('Text3');
+    Key rebuiltKeyOfSecondChildBeforeLayout;
+    Key rebuiltKeyOfSecondChildAfterLayout;
+    Key rebuiltKeyOfThirdChildAfterLayout;
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
+                },
+              ),
+              const _Stateful(
+                child: Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                  key: key3,
+                ),
+              ),
+            ],
+          );
+        },
+      )
+    );
+    // Result will be written during first build and need to clear it to remove
+    // noise.
+    rebuiltKeyOfSecondChildBeforeLayout = null;
+
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    state.rebuild();
+    // Reorders the items
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                  key: key3,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfThirdChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfThirdChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfSecondChildAfterLayout, key3);
+    expect(rebuiltKeyOfThirdChildAfterLayout, key2);
+  });
+
+  testWidgets('GlobalKey correct case 5 - can deal with early rebuild in layoutbuilder - only one global key', (WidgetTester tester) async {
+    const Key key1 = GlobalObjectKey('Text1');
+    Key rebuiltKeyOfSecondChildBeforeLayout;
+    Key rebuiltKeyOfThirdChildAfterLayout;
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
+                },
+              ),
+              const _Stateful(
+                child: Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            ],
+          );
+        },
+      )
+    );
+    // Result will be written during first build and need to clear it to remove
+    // noise.
+    rebuiltKeyOfSecondChildBeforeLayout = null;
+
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    state.rebuild();
+    // Reorders the items
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text3',
+                  textDirection: TextDirection.ltr,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+                },
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfThirdChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfThirdChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+    expect(rebuiltKeyOfThirdChildAfterLayout, key1);
   });
 
   testWidgets('GlobalKey duplication 1 - double appearance', (WidgetTester tester) async {
@@ -501,7 +855,173 @@ void main() {
       ],
     ));
     FlutterError.onError = oldHandler;
-    expect(count, 2);
+    expect(count, 1);
+  });
+
+  testWidgets('GlobalKey duplication 18 - subtree build duplicate key with same type', (WidgetTester tester) async {
+    final Key key = GlobalKey(debugLabel: 'problematic');
+    final Stack stack = Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        const SwapKeyWidget(childKey: ValueKey<int>(0)),
+        Container(key: const ValueKey<int>(1)),
+        Container(key: key),
+      ],
+    );
+    await tester.pumpWidget(stack);
+    final SwapKeyWidgetState state = tester.state(find.byType(SwapKeyWidget));
+    state.swapKey(key);
+    await tester.pump();
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Duplicate GlobalKey detected in widget tree.\n'
+        'The following GlobalKey was specified multiple times in the widget tree. This will lead '
+        'to parts of the widget tree being truncated unexpectedly, because the second time a key is seen, the '
+        'previous instance is moved to the new location. The key was:\n'
+        '- [GlobalKey#00000 problematic]\n'
+        'This was determined by noticing that after the widget with the above global key was '
+        'moved out of its previous parent, that previous parent never updated during this frame, meaning that '
+        'it either did not update at all or updated before the widget was moved, in either case implying that '
+        'it still thinks that it should have a child with that global key.\n'
+        'The specific parent that did not update after having one or more children forcibly '
+        'removed due to GlobalKey reparenting is:\n'
+        '- Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, '
+        'overflow: clip, renderObject: RenderStack#00000)\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      ),
+    );
+  });
+
+  testWidgets('GlobalKey duplication 19 - subtree build duplicate key with different types', (WidgetTester tester) async {
+    final Key key = GlobalKey(debugLabel: 'problematic');
+    final Stack stack = Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        const SwapKeyWidget(childKey: ValueKey<int>(0)),
+        Container(key: const ValueKey<int>(1)),
+        Container(child: SizedBox(key: key)),
+      ],
+    );
+    await tester.pumpWidget(stack);
+    final SwapKeyWidgetState state = tester.state(find.byType(SwapKeyWidget));
+    state.swapKey(key);
+    await tester.pump();
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#95367 problematic] was used by 2 widgets:\n'
+        '  SizedBox-[GlobalKey#00000 problematic]\n'
+        '  Container-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      ),
+    );
+  });
+
+  testWidgets('GlobalKey duplication 20 - real duplication with early rebuild in layoutbuilder will throw', (WidgetTester tester) async {
+    const Key key1 = GlobalObjectKey('Text1');
+    const Key key2 = GlobalObjectKey('Text2');
+    Key rebuiltKeyOfSecondChildBeforeLayout;
+    Key rebuiltKeyOfFirstChildAfterLayout;
+    Key rebuiltKeyOfSecondChildAfterLayout;
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              const _Stateful(
+                child: Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key1,
+                ),
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildBeforeLayout = statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    // Result will be written during first build and need to clear it to remove
+    // noise.
+    rebuiltKeyOfSecondChildBeforeLayout = null;
+
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    state.rebuild();
+
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Column(
+            children: <Widget>[
+              _Stateful(
+                child: const Text(
+                  'Text2',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfFirstChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfFirstChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+              _Stateful(
+                child: const Text(
+                  'Text1',
+                  textDirection: TextDirection.ltr,
+                  key: key2,
+                ),
+                onElementRebuild: (StatefulElement element) {
+                  // Verifies the early rebuild happens before layout.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // We don't want noise to override the result;
+                  expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
+                  final _Stateful statefulWidget = element.widget as _Stateful;
+                  rebuiltKeyOfSecondChildAfterLayout = statefulWidget.child.key;
+                },
+              ),
+            ],
+          );
+        },
+      )
+    );
+    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfFirstChildAfterLayout, key2);
+    expect(rebuiltKeyOfSecondChildAfterLayout, key2);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalObjectKey String#00000] was used by multiple widgets. The '
+        'parents of those widgets were:\n'
+        '- _Stateful(state: _StatefulState#00000)\n'
+        '- _Stateful(state: _StatefulState#00000)\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      ),
+    );
   });
 
   testWidgets('GlobalKey - dettach and re-attach child to different parents', (WidgetTester tester) async {
@@ -530,12 +1050,12 @@ void main() {
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
   });
 
@@ -597,7 +1117,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key>[null, key1, null, key2, null],
@@ -616,7 +1136,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(
@@ -644,7 +1164,7 @@ void main() {
   });
 
   testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
-    await tester.pumpWidget(NullChildTest());
+    await tester.pumpWidget(const NullChildTest());
     final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
     test.includeChild = true;
     expect(
@@ -710,9 +1230,257 @@ void main() {
       );
     }
   });
+
+  testWidgets('didUpdateDependencies is not called on a State that never rebuilds', (WidgetTester tester) async {
+    final GlobalKey<DependentState> key = GlobalKey<DependentState>();
+
+    /// Initial build - should call didChangeDependencies, not deactivate
+    await tester.pumpWidget(Inherited(1, child: DependentStatefulWidget(key: key)));
+    final DependentState state = key.currentState;
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 1);
+    expect(state.deactivatedCount, 0);
+
+    /// Rebuild with updated value - should call didChangeDependencies
+    await tester.pumpWidget(Inherited(2, child: DependentStatefulWidget(key: key)));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 2);
+    expect(state.deactivatedCount, 0);
+
+    // reparent it - should call deactivate and didChangeDependencies
+    await tester.pumpWidget(Inherited(3, child: SizedBox(child: DependentStatefulWidget(key: key))));
+    expect(key.currentState, isNotNull);
+    expect(state.didChangeDependenciesCount, 3);
+    expect(state.deactivatedCount, 1);
+
+    // Remove it - should call deactivate, but not didChangeDependencies
+    await tester.pumpWidget(const Inherited(4, child: SizedBox()));
+    expect(key.currentState, isNull);
+    expect(state.didChangeDependenciesCount, 3);
+    expect(state.deactivatedCount, 2);
+  });
+
+  testWidgets('StatefulElement subclass can decorate State.build', (WidgetTester tester) async {
+    bool isDidChangeDependenciesDecorated;
+    bool isBuildDecorated;
+
+    final Widget child = Decorate(
+      didChangeDependencies: (bool value) {
+        isDidChangeDependenciesDecorated = value;
+      },
+      build: (bool value) {
+        isBuildDecorated = value;
+      }
+    );
+
+    await tester.pumpWidget(Inherited(0, child: child));
+
+    expect(isBuildDecorated, isTrue);
+    expect(isDidChangeDependenciesDecorated, isFalse);
+
+    await tester.pumpWidget(Inherited(1, child: child));
+
+    expect(isBuildDecorated, isTrue);
+    expect(isDidChangeDependenciesDecorated, isFalse);
+  });
+  group('BuildContext.debugDoingbuild', () {
+    testWidgets('StatelessWidget', (WidgetTester tester) async {
+      bool debugDoingBuildOnBuild;
+      await tester.pumpWidget(
+        StatelessWidgetSpy(
+          onBuild: (BuildContext context) {
+            debugDoingBuildOnBuild = context.debugDoingBuild;
+          },
+        ),
+      );
+
+      final Element context = tester.element(find.byType(StatelessWidgetSpy));
+
+      expect(context.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnBuild, isTrue);
+    });
+    testWidgets('StatefulWidget', (WidgetTester tester) async {
+      bool debugDoingBuildOnBuild;
+      bool debugDoingBuildOnInitState;
+      bool debugDoingBuildOnDidChangeDependencies;
+      bool debugDoingBuildOnDidUpdateWidget;
+      bool debugDoingBuildOnDispose;
+      bool debugDoingBuildOnDeactivate;
+
+      await tester.pumpWidget(
+        Inherited(
+          0,
+          child: StatefulWidgetSpy(
+            onInitState: (BuildContext context) {
+              debugDoingBuildOnInitState = context.debugDoingBuild;
+            },
+            onDidChangeDependencies: (BuildContext context) {
+              context.dependOnInheritedWidgetOfExactType<Inherited>();
+              debugDoingBuildOnDidChangeDependencies = context.debugDoingBuild;
+            },
+            onBuild: (BuildContext context) {
+              debugDoingBuildOnBuild = context.debugDoingBuild;
+            },
+          ),
+        ),
+      );
+
+      final Element context = tester.element(find.byType(StatefulWidgetSpy));
+
+      expect(context.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnBuild, isTrue);
+      expect(debugDoingBuildOnInitState, isFalse);
+      expect(debugDoingBuildOnDidChangeDependencies, isFalse);
+
+      await tester.pumpWidget(
+        Inherited(
+          1,
+          child: StatefulWidgetSpy(
+            onDidUpdateWidget: (BuildContext context) {
+              debugDoingBuildOnDidUpdateWidget = context.debugDoingBuild;
+            },
+            onDidChangeDependencies: (BuildContext context) {
+              debugDoingBuildOnDidChangeDependencies = context.debugDoingBuild;
+            },
+            onBuild: (BuildContext context) {
+              debugDoingBuildOnBuild = context.debugDoingBuild;
+            },
+            onDispose: (BuildContext contex) {
+              debugDoingBuildOnDispose = context.debugDoingBuild;
+            },
+            onDeactivate: (BuildContext contex) {
+              debugDoingBuildOnDeactivate = context.debugDoingBuild;
+            },
+          ),
+        ),
+      );
+
+      expect(context.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnBuild, isTrue);
+      expect(debugDoingBuildOnDidUpdateWidget, isFalse);
+      expect(debugDoingBuildOnDidChangeDependencies, isFalse);
+      expect(debugDoingBuildOnDeactivate, isNull);
+      expect(debugDoingBuildOnDispose, isNull);
+
+      await tester.pumpWidget(Container());
+
+      expect(context.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnDispose, isFalse);
+      expect(debugDoingBuildOnDeactivate, isFalse);
+    });
+    testWidgets('RenderObjectWidget', (WidgetTester tester) async {
+      bool debugDoingBuildOnCreateRenderObject;
+      bool debugDoingBuildOnUpdateRenderObject;
+      bool debugDoingBuildOnDidUnmountRenderObject;
+      final ValueNotifier<int> notifier = ValueNotifier<int>(0);
+
+      BuildContext spyContext;
+
+      Widget build() {
+        return ValueListenableBuilder<int>(
+          valueListenable: notifier,
+          builder: (BuildContext context, int value, Widget child) {
+            return Inherited(value, child: child);
+          },
+          child: RenderObjectWidgetSpy(
+            onCreateRenderObjet: (BuildContext context) {
+              spyContext = context;
+              context.dependOnInheritedWidgetOfExactType<Inherited>();
+              debugDoingBuildOnCreateRenderObject = context.debugDoingBuild;
+            },
+            onUpdateRenderObject: (BuildContext context) {
+              debugDoingBuildOnUpdateRenderObject = context.debugDoingBuild;
+            },
+            onDidUmountRenderObject: () {
+              debugDoingBuildOnDidUnmountRenderObject = spyContext.debugDoingBuild;
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build());
+
+      spyContext = tester.element(find.byType(RenderObjectWidgetSpy));
+
+      expect(spyContext.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnCreateRenderObject, isTrue);
+      expect(debugDoingBuildOnUpdateRenderObject, isNull);
+      expect(debugDoingBuildOnDidUnmountRenderObject, isNull);
+
+      await tester.pumpWidget(build());
+
+      expect(spyContext.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnUpdateRenderObject, isTrue);
+      expect(debugDoingBuildOnDidUnmountRenderObject, isNull);
+
+      notifier.value++;
+      debugDoingBuildOnUpdateRenderObject = false;
+      await tester.pump();
+
+      expect(spyContext.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnUpdateRenderObject, isTrue);
+      expect(debugDoingBuildOnDidUnmountRenderObject, isNull);
+
+      await tester.pumpWidget(Container());
+
+      expect(spyContext.debugDoingBuild, isFalse);
+      expect(debugDoingBuildOnDidUnmountRenderObject, isFalse);
+    });
+  });
+}
+
+class Decorate extends StatefulWidget {
+  const Decorate({
+    Key key,
+    @required this.didChangeDependencies,
+    @required this.build
+  }) :
+    assert(didChangeDependencies != null),
+    assert(build != null),
+    super(key: key);
+
+  final void Function(bool isInBuild) didChangeDependencies;
+  final void Function(bool isInBuild) build;
+
+  @override
+  _DecorateState createState() => _DecorateState();
+
+  @override
+  DecorateElement createElement() => DecorateElement(this);
+}
+
+class DecorateElement extends StatefulElement {
+  DecorateElement(Decorate widget): super(widget);
+
+  bool isDecorated = false;
+
+  @override
+  Widget build() {
+    try {
+      isDecorated = true;
+      return super.build();
+    } finally {
+      isDecorated = false;
+    }
+  }
+}
+
+class _DecorateState extends State<Decorate> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.didChangeDependencies.call((context as DecorateElement).isDecorated);
+  }
+  @override
+  Widget build(covariant DecorateElement context) {
+    context.dependOnInheritedWidgetOfExactType<Inherited>();
+    widget.build.call(context.isDecorated);
+    return Container();
+  }
 }
 
 class NullChildTest extends Widget {
+  const NullChildTest({ Key key }) : super(key: key);
   @override
   Element createElement() => NullChildElement(this);
 }
@@ -729,10 +1497,10 @@ class NullChildElement extends Element {
   }
 
   @override
-  void forgetChild(Element child) { }
+  void performRebuild() { }
 
   @override
-  void performRebuild() { }
+  bool get debugDoingBuild => throw UnimplementedError();
 }
 
 
@@ -743,9 +1511,6 @@ class DirtyElementWithCustomBuildOwner extends Element {
   final BuildOwner _owner;
 
   @override
-  void forgetChild(Element child) {}
-
-  @override
   void performRebuild() {}
 
   @override
@@ -753,4 +1518,222 @@ class DirtyElementWithCustomBuildOwner extends Element {
 
   @override
   bool get dirty => true;
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+}
+
+class Inherited extends InheritedWidget {
+  const Inherited(this.value, {Widget child, Key key}) : super(key: key, child: child);
+
+  final int value;
+
+  @override
+  bool updateShouldNotify(Inherited oldWidget) => oldWidget.value != value;
+}
+
+class DependentStatefulWidget extends StatefulWidget {
+  const DependentStatefulWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => DependentState();
+}
+
+class DependentState extends State<DependentStatefulWidget> {
+  int didChangeDependenciesCount = 0;
+  int deactivatedCount = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    didChangeDependenciesCount += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    context.dependOnInheritedWidgetOfExactType<Inherited>();
+    return const SizedBox();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    deactivatedCount += 1;
+  }
+}
+
+class SwapKeyWidget extends StatefulWidget {
+  const SwapKeyWidget({this.childKey}): super();
+
+  final Key childKey;
+  @override
+  SwapKeyWidgetState createState() => SwapKeyWidgetState();
+}
+
+class SwapKeyWidgetState extends State<SwapKeyWidget> {
+  Key key;
+
+  @override
+  void initState() {
+    super.initState();
+    key = widget.childKey;
+  }
+
+  void swapKey(Key newKey) {
+    setState(() {
+      key = newKey;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(key: key);
+  }
+}
+
+class _Stateful extends StatefulWidget {
+  const _Stateful({Key key, this.child, this.onElementRebuild}) : super(key: key);
+  final Text child;
+  final ElementRebuildCallback onElementRebuild;
+  @override
+  State<StatefulWidget> createState() => _StatefulState();
+
+  @override
+  StatefulElement createElement() => StatefulElementSpy(this);
+}
+
+class _StatefulState extends State<_Stateful> {
+  void rebuild() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class StatefulElementSpy extends StatefulElement {
+  StatefulElementSpy(StatefulWidget widget) : super(widget);
+
+  _Stateful get _statefulWidget => widget as _Stateful;
+
+  @override
+  void rebuild() {
+    if (_statefulWidget.onElementRebuild != null) {
+      _statefulWidget.onElementRebuild(this);
+    }
+    super.rebuild();
+  }
+}
+
+class StatelessWidgetSpy extends StatelessWidget {
+  const StatelessWidgetSpy({
+    Key key,
+    @required this.onBuild,
+  })  : assert(onBuild != null),
+        super(key: key);
+
+  final void Function(BuildContext) onBuild;
+
+  @override
+  Widget build(BuildContext context) {
+    onBuild(context);
+    return Container();
+  }
+}
+
+class StatefulWidgetSpy extends StatefulWidget {
+  const StatefulWidgetSpy({
+    Key key,
+    this.onBuild,
+    this.onInitState,
+    this.onDidChangeDependencies,
+    this.onDispose,
+    this.onDeactivate,
+    this.onDidUpdateWidget,
+  })  : super(key: key);
+
+  final void Function(BuildContext) onBuild;
+  final void Function(BuildContext) onInitState;
+  final void Function(BuildContext) onDidChangeDependencies;
+  final void Function(BuildContext) onDispose;
+  final void Function(BuildContext) onDeactivate;
+  final void Function(BuildContext) onDidUpdateWidget;
+
+  @override
+  _StatefulWidgetSpyState createState() => _StatefulWidgetSpyState();
+}
+
+class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInitState?.call(context);
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    widget.onDeactivate?.call(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.onDispose?.call(context);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.onDidChangeDependencies?.call(context);
+  }
+
+  @override
+  void didUpdateWidget(StatefulWidgetSpy oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.onDidUpdateWidget?.call(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.onBuild?.call(context);
+    return Container();
+  }
+}
+
+class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
+  const RenderObjectWidgetSpy({
+    Key key,
+    this.onCreateRenderObjet,
+    this.onUpdateRenderObject,
+    this.onDidUmountRenderObject,
+  })  : super(key: key);
+
+  final void Function(BuildContext) onCreateRenderObjet;
+  final void Function(BuildContext) onUpdateRenderObject;
+  final void Function() onDidUmountRenderObject;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    onCreateRenderObjet?.call(context);
+    return FakeLeafRenderObject();
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    onUpdateRenderObject?.call(context);
+  }
+
+  @override
+  void didUnmountRenderObject(RenderObject renderObject) {
+    super.didUnmountRenderObject(renderObject);
+    onDidUmountRenderObject?.call();
+  }
+}
+
+class FakeLeafRenderObject extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
 }

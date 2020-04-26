@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,36 +7,36 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
 void main() {
-  MemoryFileSystem fs;
+  MemoryFileSystem fileSystem;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    fileSystem = MemoryFileSystem();
   });
 
   group('FlutterTesterApp', () {
     testUsingContext('fromCurrentDirectory', () async {
       const String projectPath = '/home/my/projects/my_project';
-      await fs.directory(projectPath).create(recursive: true);
-      fs.currentDirectory = projectPath;
+      await fileSystem.directory(projectPath).create(recursive: true);
+      fileSystem.currentDirectory = projectPath;
 
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory();
       expect(app.name, 'my_project');
-      expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
+      expect(app.packagesFile.path, fileSystem.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -61,8 +61,17 @@ void main() {
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
-      expect(device, isInstanceOf<FlutterTesterDevice>());
+      expect(device, isA<FlutterTesterDevice>());
       expect(device.id, 'flutter-tester');
+    });
+
+    testUsingContext('discoverDevices', () async {
+      FlutterTesterDevices.showFlutterTesterDevice = true;
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
+
+      // Timeout ignored.
+      final List<Device> devices = await discoverer.discoverDevices(timeout: const Duration(seconds: 10));
+      expect(devices, hasLength(1));
     });
   });
 
@@ -106,7 +115,7 @@ void main() {
 
       final Map<Type, Generator> startOverrides = <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: 'linux'),
-        FileSystem: () => fs,
+        FileSystem: () => fileSystem,
         ProcessManager: () => mockProcessManager,
         Artifacts: () => mockArtifacts,
         BuildSystem: () => mockBuildSystem,
@@ -114,33 +123,35 @@ void main() {
 
       setUp(() {
         mockBuildSystem = MockBuildSystem();
-        flutterRoot = fs.path.join('home', 'me', 'flutter');
-        flutterTesterPath = fs.path.join(flutterRoot, 'bin', 'cache',
+        flutterRoot = fileSystem.path.join('home', 'me', 'flutter');
+        flutterTesterPath = fileSystem.path.join(flutterRoot, 'bin', 'cache',
             'artifacts', 'engine', 'linux-x64', 'flutter_tester');
-        final File flutterTesterFile = fs.file(flutterTesterPath);
+        final File flutterTesterFile = fileSystem.file(flutterTesterPath);
         flutterTesterFile.parent.createSync(recursive: true);
         flutterTesterFile.writeAsBytesSync(const <int>[]);
 
-        projectPath = fs.path.join('home', 'me', 'hello');
-        mainPath = fs.path.join(projectPath, 'lin', 'main.dart');
+        projectPath = fileSystem.path.join('home', 'me', 'hello');
+        mainPath = fileSystem.path.join(projectPath, 'lin', 'main.dart');
 
         mockProcessManager = MockProcessManager();
         mockProcessManager.processFactory =
             (List<String> commands) => mockProcess;
 
         mockArtifacts = MockArtifacts();
-        final String artifactPath = fs.path.join(flutterRoot, 'artifact');
-        fs.file(artifactPath).createSync(recursive: true);
+        final String artifactPath = fileSystem.path.join(flutterRoot, 'artifact');
+        fileSystem.file(artifactPath).createSync(recursive: true);
         when(mockArtifacts.getArtifactPath(
           any,
           mode: anyNamed('mode')
         )).thenReturn(artifactPath);
+        when(mockArtifacts.isLocalEngine)
+          .thenReturn(false);
 
         when(mockBuildSystem.build(
           any,
           any,
         )).thenAnswer((_) async {
-          fs.file('$mainPath.dill').createSync(recursive: true);
+          fileSystem.file('$mainPath.dill').createSync(recursive: true);
           return BuildResult(success: true);
         });
       });
@@ -148,7 +159,7 @@ void main() {
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
+            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false)));
 
         expect(result.started, isFalse);
       }, overrides: startOverrides);
@@ -166,7 +177,7 @@ Hello!
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null, treeShakeIcons: false)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
         expect(logLines.last, 'Hello!');

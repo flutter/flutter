@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:path/path.dart' as path;
 
 import '../framework/adb.dart';
@@ -14,16 +13,19 @@ import '../framework/framework.dart';
 import '../framework/utils.dart';
 
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
-final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
+final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/flutter_gallery'));
 
-TaskFunction createHotModeTest() {
+TaskFunction createHotModeTest({String deviceIdOverride, Map<String, String> environment}) {
   return () async {
-    final Device device = await devices.workingDevice;
-    await device.unlock();
+    if (deviceIdOverride == null) {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      deviceIdOverride = device.deviceId;
+    }
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident', '--output-dill', path.join('build', 'app.dill')
+      '--hot', '-d', deviceIdOverride, '--benchmark', '--verbose', '--resident', '--output-dill', path.join('build', 'app.dill')
     ];
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
@@ -33,13 +35,18 @@ TaskFunction createHotModeTest() {
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
       await inDirectory<void>(_editedFlutterGalleryDir, () async {
-        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-          await prepareProvisioningCertificates(_editedFlutterGalleryDir.path);
         {
+          final Process clearProcess = await startProcess(
+              path.join(flutterDirectory.path, 'bin', 'flutter'),
+              flutterCommandArgs('clean', <String>[]),
+              environment: environment,
+          );
+          await clearProcess.exitCode;
+
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               flutterCommandArgs('run', options),
-              environment: null,
+              environment: environment,
           );
 
           final Completer<void> stdoutDone = Completer<void>();
@@ -48,7 +55,7 @@ TaskFunction createHotModeTest() {
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('] Reloaded ')) {
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
@@ -83,7 +90,7 @@ TaskFunction createHotModeTest() {
               <Future<void>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
-          twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
+          twoReloadsData = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
         }
         benchmarkFile.deleteSync();
 
@@ -93,7 +100,7 @@ TaskFunction createHotModeTest() {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
               flutterCommandArgs('run', options),
-              environment: null,
+              environment: environment,
           );
           final Completer<void> stdoutDone = Completer<void>();
           final Completer<void> stderrDone = Completer<void>();
@@ -101,7 +108,7 @@ TaskFunction createHotModeTest() {
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
               .listen((String line) {
-            if (line.contains('\] Reloaded ')) {
+            if (line.contains('] Reloaded ')) {
               process.stdin.writeln('q');
             }
             print('stdout: $line');
@@ -122,7 +129,7 @@ TaskFunction createHotModeTest() {
           await process.exitCode;
 
           freshRestartReloadsData =
-              json.decode(benchmarkFile.readAsStringSync());
+              json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
         }
       });
     });

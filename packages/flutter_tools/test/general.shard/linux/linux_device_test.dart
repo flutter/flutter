@@ -1,27 +1,32 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
   final LinuxDevice device = LinuxDevice();
   final MockPlatform notLinux = MockPlatform();
-
   when(notLinux.isLinux).thenReturn(false);
 
-  testUsingContext('LinuxDevice defaults', () async {
+  final MockPlatform mockLinuxPlatform = MockPlatform();
+  when(mockLinuxPlatform.isLinux).thenReturn(true);
+
+  testWithoutContext('LinuxDevice defaults', () async {
     final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
     expect(await device.targetPlatform, TargetPlatform.linux_x64);
     expect(device.name, 'Linux');
@@ -33,16 +38,40 @@ void main() {
     expect(device.category, Category.desktop);
   });
 
-  testUsingContext('LinuxDevice: no devices listed if platform unsupported', () async {
-    expect(await LinuxDevices().devices, <Device>[]);
-  }, overrides: <Type, Generator>{
-    Platform: () => notLinux,
+  testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
+    expect(await LinuxDevices(
+      platform: notLinux,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+    ).devices, <Device>[]);
+  });
+
+  testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
+    expect(await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: false),
+    ).devices, <Device>[]);
+  });
+
+  testWithoutContext('LinuxDevice: devices', () async {
+    expect(await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+    ).devices, hasLength(1));
+  });
+
+  testWithoutContext('LinuxDevice: discoverDevices', () async {
+    // Timeout ignored.
+    final List<Device> devices = await LinuxDevices(
+      platform: mockLinuxPlatform,
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+    ).discoverDevices(timeout: const Duration(seconds: 10));
+    expect(devices, hasLength(1));
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('linux').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('linux').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(LinuxDevice().isSupportedForProject(flutterProject), true);
@@ -52,8 +81,8 @@ void main() {
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(LinuxDevice().isSupportedForProject(flutterProject), false);

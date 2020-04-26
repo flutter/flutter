@@ -1,20 +1,19 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../convert.dart';
-import '../globals.dart';
-import 'android_studio.dart' as android_studio;
+import '../globals.dart' as globals;
+import 'android_studio.dart';
 
 AndroidSdk get androidSdk => context.get<AndroidSdk>();
 
@@ -53,9 +52,9 @@ String getAdbPath([ AndroidSdk existingSdk ]) {
   final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {
-    return os.which('adb')?.path;
+    return globals.os.which('adb')?.path;
   } else {
-    return sdk.adbPath;
+    return sdk?.adbPath;
   }
 }
 
@@ -72,26 +71,26 @@ String getEmulatorPath([ AndroidSdk existingSdk ]) {
 String getAvdPath() {
 
   final List<String> searchPaths = <String>[
-    platform.environment['ANDROID_AVD_HOME'],
-    if (platform.environment['HOME'] != null)
-      fs.path.join(platform.environment['HOME'], '.android', 'avd'),
+    globals.platform.environment['ANDROID_AVD_HOME'],
+    if (globals.platform.environment['HOME'] != null)
+      globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
   ];
 
 
-  if (platform.isWindows) {
-    final String homeDrive = platform.environment['HOMEDRIVE'];
-    final String homePath = platform.environment['HOMEPATH'];
+  if (globals.platform.isWindows) {
+    final String homeDrive = globals.platform.environment['HOMEDRIVE'];
+    final String homePath = globals.platform.environment['HOMEPATH'];
 
     if (homeDrive != null && homePath != null) {
       // Can't use path.join for HOMEDRIVE/HOMEPATH
       // https://github.com/dart-lang/path/issues/37
       final String home = homeDrive + homePath;
-      searchPaths.add(fs.path.join(home, '.android', 'avd'));
+      searchPaths.add(globals.fs.path.join(home, '.android', 'avd'));
     }
   }
 
   return searchPaths.where((String p) => p != null).firstWhere(
-    (String p) => fs.directory(p).existsSync(),
+    (String p) => globals.fs.directory(p).existsSync(),
     orElse: () => null,
   );
 }
@@ -105,169 +104,8 @@ String getAvdManagerPath([ AndroidSdk existingSdk ]) {
     AndroidSdk.locateAndroidSdk()?.avdManagerPath;
 }
 
-class AndroidNdkSearchError {
-  AndroidNdkSearchError(this.reason);
-
-  /// The message explaining why NDK was not found.
-  final String reason;
-}
-
-class AndroidNdk {
-  AndroidNdk._(this.directory, this.compiler, this.compilerArgs);
-
-  /// The path to the NDK.
-  final String directory;
-
-  /// The path to the NDK compiler.
-  final String compiler;
-
-  /// The mandatory arguments to the NDK compiler.
-  final List<String> compilerArgs;
-
-  /// Locate NDK within the given SDK or throw [AndroidNdkSearchError].
-  static AndroidNdk locateNdk(String androidHomeDir) {
-    if (androidHomeDir == null) {
-      throw AndroidNdkSearchError('Can not locate NDK because no SDK is found');
-    }
-
-    String findBundle(String androidHomeDir) {
-      final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
-      if (!fs.isDirectorySync(ndkDirectory)) {
-        throw AndroidNdkSearchError('Can not locate ndk-bundle, tried: $ndkDirectory');
-      }
-      return ndkDirectory;
-    }
-
-    // Returns list that contains toolchain bin folder and compiler binary name.
-    List<String> findToolchainAndCompiler(String ndkDirectory) {
-      String directory;
-      if (platform.isLinux) {
-        directory = 'linux-x86_64';
-      } else if (platform.isMacOS) {
-        directory = 'darwin-x86_64';
-      } else {
-        throw AndroidNdkSearchError('Only Linux and macOS are supported');
-      }
-
-      final String toolchainBin = fs.path.join(ndkDirectory,
-          'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
-          'bin');
-      final String ndkCompiler = fs.path.join(toolchainBin,
-          'arm-linux-androideabi-gcc');
-      if (!fs.isFileSync(ndkCompiler)) {
-        throw AndroidNdkSearchError('Can not locate GCC binary, tried $ndkCompiler');
-      }
-
-      return <String>[toolchainBin, ndkCompiler];
-    }
-
-    List<String> findSysroot(String ndkDirectory) {
-      // If entity represents directory with name android-<version> that
-      // contains arch-arm subdirectory then returns version, otherwise
-      // returns null.
-      int toPlatformVersion(FileSystemEntity entry) {
-        if (entry is! Directory) {
-          return null;
-        }
-
-        if (!fs.isDirectorySync(fs.path.join(entry.path, 'arch-arm'))) {
-          return null;
-        }
-
-        final String name = fs.path.basename(entry.path);
-
-        const String platformPrefix = 'android-';
-        if (!name.startsWith(platformPrefix)) {
-          return null;
-        }
-
-        return int.tryParse(name.substring(platformPrefix.length));
-      }
-
-      final String platformsDir = fs.path.join(ndkDirectory, 'platforms');
-      final List<int> versions = fs
-          .directory(platformsDir)
-          .listSync()
-          .map(toPlatformVersion)
-          .where((int version) => version != null)
-          .toList(growable: false);
-      versions.sort();
-
-      final int suitableVersion = versions
-          .firstWhere((int version) => version >= 9, orElse: () => null);
-      if (suitableVersion == null) {
-        throw AndroidNdkSearchError('Can not locate a suitable platform ARM sysroot (need android-9 or newer), tried to look in $platformsDir');
-      }
-
-      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
-          'android-$suitableVersion', 'arch-arm');
-      return <String>['--sysroot', armPlatform];
-    }
-
-    int findNdkMajorVersion(String ndkDirectory) {
-      final String propertiesFile = fs.path.join(ndkDirectory, 'source.properties');
-      if (!fs.isFileSync(propertiesFile)) {
-        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile not found');
-      }
-
-      // Parse source.properties: each line has Key = Value format.
-      final Iterable<String> propertiesFileLines = fs.file(propertiesFile)
-          .readAsStringSync()
-          .split('\n')
-          .map<String>((String line) => line.trim())
-          .where((String line) => line.isNotEmpty);
-      final Map<String, String> properties = <String, String>{};
-      for (String line in propertiesFileLines) {
-        final List<String> parts = line.split(' = ');
-        if (parts.length == 2) {
-          properties[parts[0]] = parts[1];
-        } else {
-          printError('Malformed line in ndk source.properties: "$line".');
-        }
-      }
-
-      if (!properties.containsKey('Pkg.Revision')) {
-        throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile does not contain Pkg.Revision');
-      }
-
-      // Extract major version from Pkg.Revision property which looks like <ndk-version>.x.y.
-      return int.parse(properties['Pkg.Revision'].split('.').first);
-    }
-
-    final String ndkDir = findBundle(androidHomeDir);
-    final int ndkVersion = findNdkMajorVersion(ndkDir);
-    final List<String> ndkToolchainAndCompiler = findToolchainAndCompiler(ndkDir);
-    final String ndkToolchain = ndkToolchainAndCompiler[0];
-    final String ndkCompiler = ndkToolchainAndCompiler[1];
-    final List<String> ndkCompilerArgs = findSysroot(ndkDir);
-    if (ndkVersion >= 18) {
-      // Newer versions of NDK use clang instead of gcc, which falls back to
-      // system linker instead of using toolchain linker. Force clang to
-      // use appropriate linker by passing -fuse-ld=<path-to-ld> command line
-      // flag.
-      final String ndkLinker = fs.path.join(ndkToolchain, 'arm-linux-androideabi-ld');
-      if (!fs.isFileSync(ndkLinker)) {
-        throw AndroidNdkSearchError('Can not locate linker binary, tried $ndkLinker');
-      }
-      ndkCompilerArgs.add('-fuse-ld=$ndkLinker');
-    }
-    return AndroidNdk._(ndkDir, ndkCompiler, ndkCompilerArgs);
-  }
-
-  /// Returns a descriptive message explaining why NDK can not be found within
-  /// the given SDK.
-  static String explainMissingNdk(String androidHomeDir) {
-    try {
-      locateNdk(androidHomeDir);
-      return 'Unexpected error: found NDK on the second try';
-    } on AndroidNdkSearchError catch (e) {
-      return e.reason;
-    }
-  }
-}
-
 class AndroidSdk {
-  AndroidSdk(this.directory, [this.ndk]) {
+  AndroidSdk(this.directory) {
     reinitialize();
   }
 
@@ -277,19 +115,18 @@ class AndroidSdk {
   /// The path to the Android SDK.
   final String directory;
 
-  /// Android NDK (can be `null`).
-  final AndroidNdk ndk;
-
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
 
-  /// Whether the `platform-tools` directory exists in the Android SDK.
+  /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
   /// It is possible to have an Android SDK folder that is missing this with
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => fs.directory(fs.path.join(directory, 'platform-tools')).existsSync();
+  bool get platformToolsAvailable =>
+    globals.fs.directory(globals.fs.path.join(directory, 'cmdline-tools')).existsSync() ||
+    globals.fs.directory(globals.fs.path.join(directory, 'platform-tools')).existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
   ///
@@ -298,28 +135,43 @@ class AndroidSdk {
   /// from another workstation such as in CI scenarios. If these files are valid
   /// gradle or the sdkmanager will be able to download and use other parts of
   /// the SDK on demand.
-  bool get licensesAvailable => fs.directory(fs.path.join(directory, 'licenses')).existsSync();
+  bool get licensesAvailable => globals.fs.directory(globals.fs.path.join(directory, 'licenses')).existsSync();
 
   static AndroidSdk locateAndroidSdk() {
     String findAndroidHomeDir() {
       String androidHomeDir;
-      if (config.containsKey('android-sdk')) {
-        androidHomeDir = config.getValue('android-sdk');
-      } else if (platform.environment.containsKey(kAndroidHome)) {
-        androidHomeDir = platform.environment[kAndroidHome];
-      } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
-        androidHomeDir = platform.environment[kAndroidSdkRoot];
-      } else if (platform.isLinux) {
-        if (homeDirPath != null) {
-          androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');
+      if (globals.config.containsKey('android-sdk')) {
+        androidHomeDir = globals.config.getValue('android-sdk') as String;
+      } else if (globals.platform.environment.containsKey(kAndroidHome)) {
+        androidHomeDir = globals.platform.environment[kAndroidHome];
+      } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
+        androidHomeDir = globals.platform.environment[kAndroidSdkRoot];
+      } else if (globals.platform.isLinux) {
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Android',
+            'Sdk',
+          );
         }
-      } else if (platform.isMacOS) {
-        if (homeDirPath != null) {
-          androidHomeDir = fs.path.join(homeDirPath, 'Library', 'Android', 'sdk');
+      } else if (globals.platform.isMacOS) {
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'Library',
+            'Android',
+            'sdk',
+          );
         }
-      } else if (platform.isWindows) {
-        if (homeDirPath != null) {
-          androidHomeDir = fs.path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
+      } else if (globals.platform.isWindows) {
+        if (globals.fsUtils.homeDirPath != null) {
+          androidHomeDir = globals.fs.path.join(
+            globals.fsUtils.homeDirPath,
+            'AppData',
+            'Local',
+            'Android',
+            'sdk',
+          );
         }
       }
 
@@ -327,16 +179,16 @@ class AndroidSdk {
         if (validSdkDirectory(androidHomeDir)) {
           return androidHomeDir;
         }
-        if (validSdkDirectory(fs.path.join(androidHomeDir, 'sdk'))) {
-          return fs.path.join(androidHomeDir, 'sdk');
+        if (validSdkDirectory(globals.fs.path.join(androidHomeDir, 'sdk'))) {
+          return globals.fs.path.join(androidHomeDir, 'sdk');
         }
       }
 
       // in build-tools/$version/aapt
-      final List<File> aaptBins = os.whichAll('aapt');
+      final List<File> aaptBins = globals.os.whichAll('aapt');
       for (File aaptBin in aaptBins) {
         // Make sure we're using the aapt from the SDK.
-        aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
+        aaptBin = globals.fs.file(aaptBin.resolveSymbolicLinksSync());
         final String dir = aaptBin.parent.parent.parent.path;
         if (validSdkDirectory(dir)) {
           return dir;
@@ -344,10 +196,10 @@ class AndroidSdk {
       }
 
       // in platform-tools/adb
-      final List<File> adbBins = os.whichAll('adb');
+      final List<File> adbBins = globals.os.whichAll('adb');
       for (File adbBin in adbBins) {
         // Make sure we're using the adb from the SDK.
-        adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
+        adbBin = globals.fs.file(adbBin.resolveSymbolicLinksSync());
         final String dir = adbBin.parent.parent.path;
         if (validSdkDirectory(dir)) {
           return dir;
@@ -360,20 +212,11 @@ class AndroidSdk {
     final String androidHomeDir = findAndroidHomeDir();
     if (androidHomeDir == null) {
       // No dice.
-      printTrace('Unable to locate an Android SDK.');
+      globals.printTrace('Unable to locate an Android SDK.');
       return null;
     }
 
-    // Try to find the NDK compiler. If we can't find it, it's also ok.
-    AndroidNdk ndk;
-    try {
-      ndk = AndroidNdk.locateNdk(androidHomeDir);
-    } on AndroidNdkSearchError {
-      // Ignore AndroidNdkSearchError's but don't ignore any other
-      // exceptions.
-    }
-
-    return AndroidSdk(androidHomeDir, ndk);
+    return AndroidSdk(androidHomeDir);
   }
 
   static bool validSdkDirectory(String dir) {
@@ -381,24 +224,24 @@ class AndroidSdk {
   }
 
   static bool sdkDirectoryHasPlatformTools(String dir) {
-    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
+    return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'platform-tools'));
   }
 
   static bool sdkDirectoryHasLicenses(String dir) {
-    return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
+    return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'licenses'));
   }
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
 
   AndroidSdkVersion get latestVersion => _latestVersion;
 
-  String get adbPath => getPlatformToolsPath(platform.isWindows ? 'adb.exe' : 'adb');
+  String get adbPath => getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
 
   String get emulatorPath => getEmulatorPath();
 
   String get avdManagerPath => getAvdManagerPath();
 
-  Directory get _platformsDir => fs.directory(fs.path.join(directory, 'platforms'));
+  Directory get _platformsDir => globals.fs.directory(globals.fs.path.join(directory, 'platforms'));
 
   Iterable<Directory> get _platforms {
     Iterable<Directory> platforms = <Directory>[];
@@ -413,7 +256,7 @@ class AndroidSdk {
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
-    if (adbPath == null || !processManager.canRun(adbPath)) {
+    if (adbPath == null || !globals.processManager.canRun(adbPath)) {
       return <String>['Android SDK file not found: ${adbPath ?? 'adb'}.'];
     }
 
@@ -434,21 +277,21 @@ class AndroidSdk {
   }
 
   String getPlatformToolsPath(String binaryName) {
-    final String path = fs.path.join(directory, 'platform-tools', binaryName);
-    if (fs.file(path).existsSync()) {
+    final String path = globals.fs.path.join(directory, 'platform-tools', binaryName);
+    if (globals.fs.file(path).existsSync()) {
       return path;
     }
     return null;
   }
 
   String getEmulatorPath() {
-    final String binaryName = platform.isWindows ? 'emulator.exe' : 'emulator';
+    final String binaryName = globals.platform.isWindows ? 'emulator.exe' : 'emulator';
     // Emulator now lives inside "emulator" but used to live inside "tools" so
     // try both.
     final List<String> searchFolders = <String>['emulator', 'tools'];
     for (final String folder in searchFolders) {
-      final String path = fs.path.join(directory, folder, binaryName);
-      if (fs.file(path).existsSync()) {
+      final String path = globals.fs.path.join(directory, folder, binaryName);
+      if (globals.fs.file(path).existsSync()) {
         return path;
       }
     }
@@ -456,9 +299,9 @@ class AndroidSdk {
   }
 
   String getAvdManagerPath() {
-    final String binaryName = platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
-    final String path = fs.path.join(directory, 'tools', 'bin', binaryName);
-    if (fs.file(path).existsSync()) {
+    final String binaryName = globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager';
+    final String path = globals.fs.path.join(directory, 'tools', 'bin', binaryName);
+    if (globals.fs.file(path).existsSync()) {
       return path;
     }
     return null;
@@ -471,14 +314,14 @@ class AndroidSdk {
   void reinitialize() {
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
-    final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
+    final Directory buildToolsDir = globals.fs.directory(globals.fs.path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()
         .map((FileSystemEntity entity) {
           try {
             return Version.parse(entity.basename);
-          } catch (error) {
+          } on Exception {
             return null;
           }
         })
@@ -504,7 +347,7 @@ class AndroidSdk {
               .group(1);
           platformVersion = int.parse(versionString);
         }
-      } catch (error) {
+      } on Exception {
         return null;
       }
 
@@ -531,21 +374,39 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
-  /// Returns the filesystem path of the Android SDK manager tool or null if not found.
+  /// Returns the filesystem path of the Android SDK manager tool.
+  ///
+  /// The sdkmanager was previously in the tools directory but this component
+  /// was marked as obsolete in 3.6.
   String get sdkManagerPath {
-    return fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
+    final File cmdlineTool = globals.fs.file(
+      globals.fs.path.join(directory, 'cmdline-tools', 'latest', 'bin',
+        globals.platform.isWindows
+          ? 'sdkmanager.bat'
+          : 'sdkmanager'
+      ),
+    );
+    if (cmdlineTool.existsSync()) {
+      return cmdlineTool.path;
+    }
+    return globals.fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
   }
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String findJavaBinary() {
-    if (android_studio.javaPath != null) {
-      return fs.path.join(android_studio.javaPath, 'bin', 'java');
+  static String findJavaBinary({
+    @required AndroidStudio androidStudio,
+    @required FileSystem fileSystem,
+    @required OperatingSystemUtils operatingSystemUtils,
+    @required Platform platform,
+  }) {
+    if (androidStudio?.javaPath != null) {
+      return fileSystem.path.join(androidStudio.javaPath, 'bin', 'java');
     }
 
     final String javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
       // Trust JAVA_HOME.
-      return fs.path.join(javaHomeEnv, 'bin', 'java');
+      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
     }
 
     // MacOS specific logic to avoid popping up a dialog window.
@@ -553,22 +414,21 @@ class AndroidSdk {
     if (platform.isMacOS) {
       try {
         final String javaHomeOutput = processUtils.runSync(
-          <String>['/usr/libexec/java_home'],
+          <String>['/usr/libexec/java_home', '-v', '1.8'],
           throwOnError: true,
           hideStdout: true,
         ).stdout.trim();
         if (javaHomeOutput != null) {
-          final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
-          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
-            final String javaHome = javaHomeOutputSplit[0].trim();
-            return fs.path.join(javaHome, 'bin', 'java');
+          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
+            final String javaHome = javaHomeOutput.split('\n').last.trim();
+            return fileSystem.path.join(javaHome, 'bin', 'java');
           }
         }
-      } catch (_) { /* ignore */ }
+      } on Exception catch (_) { /* ignore */ }
     }
 
     // Fallback to PATH based lookup.
-    return os.which(_javaExecutable)?.path;
+    return operatingSystemUtils.which(_javaExecutable)?.path;
   }
 
   Map<String, String> _sdkManagerEnv;
@@ -578,10 +438,16 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      final String javaBinary = findJavaBinary();
+      final String javaBinary = findJavaBinary(
+        androidStudio: globals.androidStudio,
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      );
       if (javaBinary != null) {
-        _sdkManagerEnv['PATH'] =
-            fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
+        _sdkManagerEnv['PATH'] = globals.fs.path.dirname(javaBinary) +
+                                 globals.os.pathVarSeparator +
+                                 globals.platform.environment['PATH'];
       }
     }
     return _sdkManagerEnv;
@@ -589,7 +455,7 @@ class AndroidSdk {
 
   /// Returns the version of the Android SDK manager tool or null if not found.
   String get sdkManagerVersion {
-    if (!processManager.canRun(sdkManagerPath)) {
+    if (!globals.processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     }
     final RunResult result = processUtils.runSync(
@@ -597,7 +463,7 @@ class AndroidSdk {
       environment: sdkManagerEnv,
     );
     if (result.exitCode != 0) {
-      printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+      globals.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
       return null;
     }
     return result.stdout.trim();
@@ -641,11 +507,11 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getPlatformsPath(String itemName) {
-    return fs.path.join(sdk.directory, 'platforms', platformName, itemName);
+    return globals.fs.path.join(sdk.directory, 'platforms', platformName, itemName);
   }
 
   String getBuildToolsPath(String binaryName) {
-    return fs.path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
+    return globals.fs.path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
   }
 
   @override
@@ -655,14 +521,14 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
   String _exists(String path) {
-    if (!fs.isFileSync(path)) {
+    if (!globals.fs.isFileSync(path)) {
       return 'Android SDK file not found: $path.';
     }
     return null;
   }
 
   String _canRun(String path) {
-    if (!processManager.canRun(path)) {
+    if (!globals.processManager.canRun(path)) {
       return 'Android SDK file not found: $path.';
     }
     return null;

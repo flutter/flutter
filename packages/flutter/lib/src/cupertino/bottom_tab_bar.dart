@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,10 +16,7 @@ const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x4C000000),
   darkColor: Color(0x29000000),
 );
-const Color _kDefaultTabBarInactiveColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF999999),
-  darkColor: Color(0xFF757575),
-);
+const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -274,7 +271,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color backgroundColor,
     Color activeColor,
     Color inactiveColor,
-    Size iconSize,
+    double iconSize,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,

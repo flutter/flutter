@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,28 +35,29 @@ const String _kStackTraceFilename = 'stacktrace_file';
 ///   environment is behind a firewall and unable to send crash reports to
 ///   Google, or when you wish to use your own server for collecting crash
 ///   reports from Flutter Tools.
-/// * In tests call [initializeWith] and provide a mock implementation of
-///   [http.Client].
 class CrashReportSender {
-  CrashReportSender._(this._client);
+  CrashReportSender({
+    @required http.Client client,
+    @required Usage usage,
+    @required Platform platform,
+    @required Logger logger,
+    @required OperatingSystemUtils operatingSystemUtils,
+  }) : _client = client,
+      _usage = usage,
+      _platform = platform,
+      _logger = logger,
+      _operatingSystemUtils = operatingSystemUtils;
 
-  static CrashReportSender _instance;
-
-  static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
+  final http.Client _client;
+  final Usage _usage;
+  final Platform _platform;
+  final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   bool _crashReportSent = false;
 
-  /// Overrides the default [http.Client] with [client] for testing purposes.
-  @visibleForTesting
-  static void initializeWith(http.Client client) {
-    _instance = CrashReportSender._(client);
-  }
-
-  final http.Client _client;
-  final Usage _usage = Usage.instance;
-
   Uri get _baseUrl {
-    final String overrideUrl = platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String overrideUrl = _platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -90,7 +91,7 @@ class CrashReportSender {
         return;
       }
 
-      printStatus('Sending crash report to Google.');
+      _logger.printTrace('Sending crash report to Google.');
 
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
@@ -103,8 +104,8 @@ class CrashReportSender {
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
-      req.fields['osName'] = platform.operatingSystem;
-      req.fields['osVersion'] = os.name; // this actually includes version
+      req.fields['osName'] = _platform.operatingSystem;
+      req.fields['osVersion'] = _operatingSystemUtils.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
@@ -120,18 +121,20 @@ class CrashReportSender {
 
       if (resp.statusCode == 200) {
         final String reportId = await http.ByteStream(resp.stream)
-            .bytesToString();
-        printStatus('Crash report sent (report ID: $reportId)');
+          .bytesToString();
+        _logger.printTrace('Crash report sent (report ID: $reportId)');
         _crashReportSent = true;
       } else {
-        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        _logger.printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
-    } catch (sendError, sendStackTrace) {
+    // Catch all exceptions to print the message that makes clear that the
+    // crash logger crashed.
+    } catch (sendError, sendStackTrace) { // ignore: avoid_catches_without_on_clauses
       if (sendError is SocketException || sendError is HttpException) {
-        printError('Failed to send crash report due to a network error: $sendError');
+        _logger.printError('Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
-        printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+        _logger.printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
   }

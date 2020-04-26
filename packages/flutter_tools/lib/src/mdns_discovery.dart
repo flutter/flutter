@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,8 +10,10 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart';
+import 'build_info.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
+import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
 class MDnsObservatoryDiscovery {
@@ -50,29 +52,29 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
-    printTrace('Checking for advertised Dart observatories...');
+  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
+  Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
+    globals.printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
-          .lookup<PtrResourceRecord>(
-            ResourceRecordQuery.serverPointer(dartObservatoryName),
-          )
-          .toList();
+        .lookup<PtrResourceRecord>(
+          ResourceRecordQuery.serverPointer(dartObservatoryName),
+        )
+        .toList();
       if (pointerRecords.isEmpty) {
-        printTrace('No pointer records found.');
+        globals.printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
       // service on this.
-      final List<String> uniqueDomainNames = pointerRecords
-          .map<String>((PtrResourceRecord record) => record.domainName)
-          .toSet()
-          .toList();
+      final Set<String> uniqueDomainNames = pointerRecords
+        .map<String>((PtrResourceRecord record) => record.domainName)
+        .toSet();
 
       String domainName;
       if (applicationId != null) {
-        for (String name in uniqueDomainNames) {
+        for (final String name in uniqueDomainNames) {
           if (name.toLowerCase().startsWith(applicationId.toLowerCase())) {
             domainName = name;
             break;
@@ -93,21 +95,21 @@ class MDnsObservatoryDiscovery {
       } else {
         domainName = pointerRecords[0].domainName;
       }
-      printTrace('Checking for available port on $domainName');
+      globals.printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
-          .lookup<SrvResourceRecord>(
-            ResourceRecordQuery.service(domainName),
-          )
-          .toList();
+        .lookup<SrvResourceRecord>(
+          ResourceRecordQuery.service(domainName),
+        )
+        .toList();
       if (srv.isEmpty) {
         return null;
       }
       if (srv.length > 1) {
-        printError('Unexpectedly found more than one observatory report for $domainName '
+        globals.printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      printTrace('Checking for authentication code for $domainName');
+      globals.printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await client
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
@@ -131,21 +133,92 @@ class MDnsObservatoryDiscovery {
         authCode += '/';
       }
       return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
+    } on OSError catch (e) {
+      // OSError is neither an Error nor and Exception, so we wrap it in a
+      // SocketException and rethrow.
+      // See: https://github.com/dart-lang/sdk/issues/40934
+      throw SocketException('mdns query failed', osError: e);
     } finally {
       client.stop();
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false, int observatoryPort]) async {
-    final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
-    Uri observatoryUri;
-    if (result != null) {
-      final String host = usesIpv6
-        ? InternetAddress.loopbackIPv6.address
-        : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(device, host, result.port, observatoryPort, result.authCode);
+  Future<Uri> getObservatoryUri(String applicationId, Device device, {
+    bool usesIpv6 = false,
+    int hostVmservicePort,
+    int deviceVmservicePort,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await query(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+    );
+    if (result == null) {
+      await _checkForIPv4LinkLocal(device);
+      return null;
     }
-    return observatoryUri;
+
+    final String host = usesIpv6
+      ? InternetAddress.loopbackIPv6.address
+      : InternetAddress.loopbackIPv4.address;
+    return await buildObservatoryUri(
+      device,
+      host,
+      result.port,
+      hostVmservicePort,
+      result.authCode,
+    );
+  }
+
+  // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
+  // then request user interventions with a `printError()` if possible.
+  Future<void> _checkForIPv4LinkLocal(Device device) async {
+    globals.printTrace(
+      'mDNS query failed. Checking for an interface with a ipv4 link local address.'
+    );
+    final List<NetworkInterface> interfaces = await listNetworkInterfaces(
+      includeLinkLocal: true,
+      type: InternetAddressType.IPv4,
+    );
+    if (globals.logger.isVerbose) {
+      _logInterfaces(interfaces);
+    }
+    final bool hasIPv4LinkLocal = interfaces.any(
+      (NetworkInterface interface) => interface.addresses.any(
+        (InternetAddress address) => address.isLinkLocal,
+      ),
+    );
+    if (hasIPv4LinkLocal) {
+      globals.printTrace('An interface with an ipv4 link local address was found.');
+      return;
+    }
+    final TargetPlatform targetPlatform = await device.targetPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.ios:
+        UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: globals.flutterUsage).send();
+        globals.printError(
+          'The mDNS query for an attached iOS device failed. It may '
+          'be necessary to disable the "Personal Hotspot" on the device, and '
+          'to ensure that the "Disable unless needed" setting is unchecked '
+          'under System Preferences > Network > iPhone USB. '
+          'See https://github.com/flutter/flutter/issues/46698 for details.'
+        );
+        break;
+      default:
+        globals.printTrace('No interface with an ipv4 link local address was found.');
+        break;
+    }
+  }
+
+  void _logInterfaces(List<NetworkInterface> interfaces) {
+    for (final NetworkInterface interface in interfaces) {
+      if (globals.logger.isVerbose) {
+        globals.printTrace('Found interface "${interface.name}":');
+        for (final InternetAddress address in interface.addresses) {
+          final String linkLocal = address.isLinkLocal ? 'link local' : '';
+          globals.printTrace('\tBound address: "${address.address}" $linkLocal');
+        }
+      }
+    }
   }
 }
 
@@ -159,7 +232,7 @@ Future<Uri> buildObservatoryUri(
   Device device,
   String host,
   int devicePort, [
-  int observatoryPort,
+  int hostVmservicePort,
   String authCode,
 ]) async {
   String path = '/';
@@ -171,7 +244,7 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int localPort = observatoryPort
-      ?? await device.portForwarder.forward(devicePort);
-  return Uri(scheme: 'http', host: host, port: localPort, path: path);
+  final int actualHostPort = hostVmservicePort ?? await device
+    .portForwarder.forward(devicePort);
+  return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

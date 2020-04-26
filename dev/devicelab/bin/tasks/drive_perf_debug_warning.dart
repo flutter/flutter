@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ Future<String> _runWithMode(String mode, String deviceId) async {
 }
 
 Future<TaskResult> run() async {
-  cd('${flutterDirectory.path}/examples/flutter_gallery');
+  cd('${flutterDirectory.path}/dev/integration_tests/flutter_gallery');
   final Device device = await devices.workingDevice;
   await device.unlock();
   final String deviceId = device.deviceId;

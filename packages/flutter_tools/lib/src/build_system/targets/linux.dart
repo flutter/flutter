@@ -1,16 +1,17 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
+import 'desktop.dart';
+import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -20,82 +21,68 @@ const List<String> _kLinuxArtifacts = <String>[
   'flutter_plugin_registrar.h',
   'flutter_glfw.h',
   'icudtl.dat',
-  'cpp_client_wrapper_glfw/',
 ];
 
+const String _kLinuxDepfile = 'linux_engine_sources.d';
+
 /// Copies the Linux desktop embedding files to the copy directory.
-class UnpackLinuxDebug extends Target {
-  const UnpackLinuxDebug();
+class UnpackLinux extends Target {
+  const UnpackLinux();
 
   @override
-  String get name => 'unpack_linux_debug';
+  String get name => 'unpack_linux';
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.depfile('linux_engine_sources.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('linux_engine_sources.d'),
-  ];
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[_kLinuxDepfile];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   Future<void> build(Environment environment) async {
-    final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
-    final List<File> inputs = <File>[];
-    final List<File> outputs = <File>[];
-    final String outputPrefix = fs.path.join(
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final String engineSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.linuxDesktopPath,
+        mode: buildMode,
+        platform: TargetPlatform.linux_x64,
+      );
+    final String clientSourcePath = environment.artifacts
+      .getArtifactPath(
+        Artifact.linuxCppClientWrapper,
+        mode: buildMode,
+        platform: TargetPlatform.linux_x64,
+      );
+    final Directory outputDirectory = environment.fileSystem.directory(
+      environment.fileSystem.path.join(
       environment.projectDir.path,
       'linux',
       'flutter',
       'ephemeral',
+    ));
+    final Depfile depfile = unpackDesktopArtifacts(
+      fileSystem: environment.fileSystem,
+      engineSourcePath: engineSourcePath,
+      outputDirectory: outputDirectory,
+      artifacts: _kLinuxArtifacts,
+      clientSourcePath: clientSourcePath,
     );
-    // The native linux artifacts are composed of 6 files and a directory (listed above)
-    // which need to be copied to the target directory.
-    for (String artifact in _kLinuxArtifacts) {
-      final String entityPath = fs.path.join(basePath, artifact);
-      // If this artifact is a file, just copy the source over.
-      if (fs.isFileSync(entityPath)) {
-        final String outputPath = fs.path.join(
-          outputPrefix,
-          fs.path.relative(entityPath, from: basePath),
-        );
-        final File destinationFile = fs.file(outputPath);
-        if (!destinationFile.parent.existsSync()) {
-          destinationFile.parent.createSync(recursive: true);
-        }
-        final File inputFile = fs.file(entityPath);
-        inputFile.copySync(destinationFile.path);
-        inputs.add(inputFile);
-        outputs.add(destinationFile);
-        continue;
-      }
-      // If the artifact is the directory cpp_client_wrapper, recursively
-      // copy every file from it.
-      for (File input in fs.directory(entityPath)
-          .listSync(recursive: true)
-          .whereType<File>()) {
-        final String outputPath = fs.path.join(
-          outputPrefix,
-          fs.path.relative(input.path, from: basePath),
-        );
-        final File destinationFile = fs.file(outputPath);
-        if (!destinationFile.parent.existsSync()) {
-          destinationFile.parent.createSync(recursive: true);
-        }
-        final File inputFile = fs.file(input);
-        inputFile.copySync(destinationFile.path);
-        inputs.add(inputFile);
-        outputs.add(destinationFile);
-      }
-    }
-    final Depfile depfile = Depfile(inputs, outputs);
-    depfile.writeToFile(environment.buildDir.childFile('linux_engine_sources.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile(_kLinuxDepfile),
+    );
   }
 }
 
@@ -109,21 +96,25 @@ class DebugBundleLinuxAssets extends Target {
   @override
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
-    UnpackLinuxDebug(),
+    UnpackLinux(),
   ];
 
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.depfile('flutter_assets.d'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    ...IconTreeShaker.inputs,
   ];
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
     Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -144,6 +135,13 @@ class DebugBundleLinuxAssets extends Target {
         .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
     final Depfile depfile = await copyAssets(environment, outputDirectory);
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final DepfileService depfileService = DepfileService(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+    );
+    depfileService.writeToFile(
+      depfile,
+      environment.buildDir.childFile('flutter_assets.d'),
+    );
   }
 }

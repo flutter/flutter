@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,7 +29,10 @@ import 'table.dart';
 /// Observatory rather than getting it in the console (where it can be
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 bool debugPrintRebuildDirtyWidgets = false;
 
 /// Signature for [debugOnRebuildDirtyWidget] implementations.
@@ -62,7 +65,10 @@ RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
 /// triggered by the initial mounting of a widget tree (e.g. in a call to
 /// [runApp]) from the regular builds triggered by the pipeline.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 bool debugPrintBuildScope = false;
 
 /// Log the call stacks that mark widgets as needing to be rebuilt.
@@ -90,9 +96,11 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
 /// and https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md
 ///
-/// See also [debugProfilePaintsEnabled], which does something similar but for
-/// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
-/// but reporting the builds to the console.
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar but for
+///    painting, and [debugPrintRebuildDirtyWidgets], which does something similar
+///    but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.
@@ -100,7 +108,7 @@ bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
-  for (Widget widget in widgets) {
+  for (final Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
       continue;
@@ -128,13 +136,11 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Duplicate keys found.'),
-        ErrorDescription(
-          'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
-          '$parent has multiple children with key $nonUniqueKey.'
-        ),
-      ]);
+      throw FlutterError(
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        '$parent has multiple children with key $nonUniqueKey.'
+      );
     }
     return true;
   }());
@@ -157,9 +163,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Duplicate key found: $nonUniqueKey.'),
-      ]);
+      throw FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
   }());
   return false;
@@ -179,7 +183,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
-    if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
+    if (context.widget is! Table && context.findAncestorWidgetOfExactType<Table>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Table widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Table widget ancestor.'),
@@ -207,7 +211,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
-    if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
+    if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No MediaQuery widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
@@ -239,7 +243,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context) {
   assert(() {
-    if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
+    if (context.widget is! Directionality && context.findAncestorWidgetOfExactType<Directionality>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'),
@@ -307,7 +311,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$reason')]);
+      throw FlutterError(reason);
     }
     return true;
   }());

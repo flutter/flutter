@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,11 +45,11 @@ void main() {
     });
 
     testUsingContext('getEmulatorsById', () async {
-      final _MockEmulator emulator1 =
+      const _MockEmulator emulator1 =
           _MockEmulator('Nexus_5', 'Nexus 5', 'Google');
-      final _MockEmulator emulator2 =
+      const _MockEmulator emulator2 =
           _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
-      final _MockEmulator emulator3 =
+      const _MockEmulator emulator3 =
           _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
@@ -129,7 +129,7 @@ void main() {
       when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
       when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
       when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        final List<String> args = invocation.positionalArguments[0];
+        final List<String> args = invocation.positionalArguments[0] as List<String>;
         if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
           didAttemptToRunSimulator = true;
         }
@@ -137,7 +137,7 @@ void main() {
       });
     });
     testUsingContext('runs correct launch commands', () async {
-      final Emulator emulator = IOSEmulator('ios');
+      const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
       expect(didAttemptToRunSimulator, equals(true));
     }, overrides: <Type, Generator>{
@@ -160,7 +160,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class _MockEmulator extends Emulator {
-  _MockEmulator(String id, this.name, this.manufacturer)
+  const _MockEmulator(String id, this.name, this.manufacturer)
     : super(id, true);
 
   @override
@@ -206,9 +206,9 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) {
-    final String program = command[0];
-    final List<String> args = command.sublist(1);
-    switch (command[0]) {
+    final String program = command[0] as String;
+    final List<String> args = command.sublist(1) as List<String>;
+    switch (program) {
       case '/usr/bin/xcode-select':
         throw ProcessException(program, args);
         break;

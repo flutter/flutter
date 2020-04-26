@@ -1,8 +1,9 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -68,7 +69,7 @@ class PathBoundsMatcher extends Matcher {
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-    final Map<Matcher, dynamic> map = matchState['failedMatcher'];
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
     final Iterable<String> descriptions = map.entries
       .map<String>(
         (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
@@ -105,8 +106,8 @@ class PathPointsMatcher extends Matcher {
 
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Offset notIncluded = matchState['notIncluded'];
-    final Offset notExcluded = matchState['notExcluded'];
+    final Offset notIncluded = matchState['notIncluded'] as Offset;
+    final Offset notExcluded = matchState['notExcluded'] as Offset;
     final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
 
     if ((notExcluded ?? notIncluded) != null) {
@@ -332,7 +333,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -358,7 +359,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -425,9 +426,7 @@ void main() {
     expect(editableText.cursorOffset, const Offset(-2.0 / 3.0, 0));
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor animates', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoTextField(),
@@ -459,13 +458,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(renderEditable.cursorColor.alpha, 0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoTextField(),
@@ -476,9 +471,7 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Cupertino cursor android golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
@@ -507,9 +500,7 @@ void main() {
     );
   });
 
-  testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cupertino cursor golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
       home: Center(
         child: RepaintBoundary(
@@ -530,12 +521,13 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
     await tester.pumpAndSettle();
 
-    debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino_${describeEnum(debugDefaultTargetPlatformOverride).toLowerCase()}.1.png',
+      ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'can control text content via controller',
@@ -2596,10 +2588,11 @@ void main() {
 
       // Double tap at the end of text.
       final Offset textEndPos = textOffsetToPosition(tester, 11); // Position at the end of text.
-      TestGesture gesture = await tester.startGesture(
+      final TestGesture gesture = await tester.startGesture(
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2614,11 +2607,7 @@ void main() {
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
 
       // Double tap on 'h' to select 'ghi'.
-      gesture = await tester.startGesture(
-        hPos,
-        kind: PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
+      await gesture.down(hPos);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2735,7 +2724,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.border.bottom.color.value,
@@ -2949,8 +2938,7 @@ void main() {
     expect(editableText.cursorColor.value, 0x87654321);
   });
 
-  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('shows selection handles', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);
 
@@ -2975,14 +2963,12 @@ void main() {
     final List<Widget> transitions =
       find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
+    final FadeTransition left = transitions[0] as FadeTransition;
+    final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
@@ -3391,7 +3377,7 @@ void main() {
                 children: <Widget>[
                   Container(
                     height: 100,
-                    color: CupertinoColors.activeOrange,
+                    color: CupertinoColors.black,
                   ),
                   Expanded(
                     child: Navigator(
@@ -3637,7 +3623,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3690,7 +3676,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3744,7 +3730,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3798,7 +3784,7 @@ void main() {
                     focusNode: focusNode,
                     expands: true,
                     maxLines: null,
-                    prefix: Container(
+                    prefix: const SizedBox(
                       height: 100,
                       width: 10,
                     ),
@@ -3946,5 +3932,156 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isTextField: true,
+        isEnabled: true,
+        hasEnabledState: true,
+        hasTapAction: true,
+      ),
+    );
+  });
+
+  testWidgets('Disabled Cupertino text field semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(200, 200)),
+            child: const CupertinoTextField(
+              enabled: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(CupertinoTextField),
+          matching: find.byType(Semantics),
+        ).first,
+      ),
+      matchesSemantics(
+        isEnabled: false,
+        hasEnabledState: true,
+        hasTapAction: false,
+      ),
+    );
+  });
+
+  testWidgets('text selection style 1', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
+    );
+    await tester.pumpWidget(
+       CupertinoApp(
+        home: Center(
+          child: RepaintBoundary(
+            child: Container(
+              width: 650.0,
+              height: 600.0,
+              decoration: const BoxDecoration(
+                color: Color(0xff00ff00),
+              ),
+              child: Column(
+                children: <Widget>[
+                  CupertinoTextField(
+                    key: const Key('field0'),
+                    controller: controller,
+                    style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
+                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+                    selectionWidthStyle: ui.BoxWidthStyle.max,
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+
+    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.pump(const Duration(milliseconds: 150));
+    // Tap the Select All button.
+    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('text_field_golden.TextSelectionStyle.1.png'),
+    );
+  });
+
+  testWidgets('text selection style 2', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwassssup!',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: RepaintBoundary(
+            child: Container(
+              width: 650.0,
+              height: 600.0,
+              decoration: const BoxDecoration(
+                color: Color(0xff00ff00),
+              ),
+              child: Column(
+                children: <Widget>[
+                  CupertinoTextField(
+                    key: const Key('field0'),
+                    controller: controller,
+                    style: const TextStyle(height: 4, color: ui.Color.fromARGB(100, 0, 0, 0)),
+                    toolbarOptions: const ToolbarOptions(selectAll: true),
+                    selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+                    selectionWidthStyle: ui.BoxWidthStyle.tight,
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byKey(const Key('field0')));
+
+    await tester.longPressAt(textfieldStart + const Offset(50.0, 2.0));
+    await tester.pump(const Duration(milliseconds: 150));
+    // Tap the Select All button.
+    await tester.tapAt(textfieldStart + const Offset(20.0, 100.0));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await expectLater(
+      find.byType(CupertinoApp),
+      matchesGoldenFile('text_field_golden.TextSelectionStyle.2.png'),
+    );
   });
 }

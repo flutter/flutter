@@ -1,4 +1,5 @@
 {
+  "moreButtonTooltip": "Plus",
   "selectedRowCountTitleOne": "1 élément sélectionné",
   "remainingTextFieldCharacterCountOther": "$remainingCount caractères restants",
   "openAppDrawerTooltip": "Ouvrir le menu de navigation",

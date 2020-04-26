@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///
-/// More specifially, it includes:
+/// More specifically, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
@@ -135,7 +135,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 
 /// Returns the button of `buttons` with the smallest integer.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns the set bit closest to the least significant bit.
 ///
 /// It returns zero when `buttons` is zero.
@@ -150,12 +150,12 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
 ///
-/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// The `buttons` parameter is a bit field where each set bit represents a button.
 /// This function returns whether there is only one set bit in the given integer.
 ///
 /// It returns false when `buttons` is zero.
@@ -170,8 +170,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bitfield with
-///     the smallest integer button.
+///  * [smallestButton], which returns the button in a `buttons` bit field with
+///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
@@ -196,7 +196,7 @@ bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == 
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent extends Diagnosticable {
+abstract class PointerEvent with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -257,11 +257,10 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
-  ///
   /// See also:
   ///
-  ///  * [globalPosition], which is the position in the global coordinate
-  ///    system of the screen.
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last
@@ -367,7 +366,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// for this pointer, in logical pixels.
   final double radiusMin;
 
-  /// The minimum value that could be reported for [radiusMajor] and [radiusMinor]
+  /// The maximum value that could be reported for [radiusMajor] and [radiusMinor]
   /// for this pointer, in logical pixels.
   final double radiusMax;
 
@@ -420,7 +419,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
-  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
+  /// of [PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes
@@ -632,7 +631,7 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerAddedEvent ?? this,
     );
   }
 }
@@ -694,7 +693,7 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerRemovedEvent ?? this,
     );
   }
 }
@@ -799,7 +798,7 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerHoverEvent ?? this,
     );
   }
 }
@@ -874,7 +873,10 @@ class PointerEnterEvent extends PointerEvent {
   /// Creates an enter event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerEnterEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an enter event from a [PointerEvent].
@@ -904,7 +906,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerEnterEvent,
   );
 
   @override
@@ -942,7 +944,7 @@ class PointerEnterEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerEnterEvent ?? this,
     );
   }
 }
@@ -1017,7 +1019,10 @@ class PointerExitEvent extends PointerEvent {
   /// Creates an exit event from a [PointerHoverEvent].
   ///
   /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
-  @Deprecated('use PointerExitEvent.fromMouseEvent instead')
+  @Deprecated(
+    'Use PointerExitEvent.fromMouseEvent instead. '
+    'This feature was deprecated after v1.4.3.'
+  )
   PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
 
   /// Creates an exit event from a [PointerEvent].
@@ -1047,7 +1052,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerExitEvent,
   );
 
   @override
@@ -1085,7 +1090,7 @@ class PointerExitEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerExitEvent ?? this,
     );
   }
 }
@@ -1169,7 +1174,7 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerDownEvent ?? this,
     );
   }
 }
@@ -1278,7 +1283,7 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerMoveEvent ?? this,
     );
   }
 }
@@ -1366,7 +1371,7 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerUpEvent ?? this,
     );
   }
 }
@@ -1448,7 +1453,7 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerScrollEvent ?? this,
     );
   }
 
@@ -1538,7 +1543,7 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerCancelEvent ?? this,
     );
   }
 }

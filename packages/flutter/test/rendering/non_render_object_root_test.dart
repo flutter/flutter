@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ class RealRoot extends AbstractNode {
   @override
   void attach(Object owner) {
     super.attach(owner);
-    child?.attach(owner);
+    child?.attach(owner as PipelineOwner);
   }
 
   @override
@@ -36,7 +36,7 @@ class RealRoot extends AbstractNode {
   }
 
   @override
-  PipelineOwner get owner => super.owner;
+  PipelineOwner get owner => super.owner as PipelineOwner;
 
   void layout() {
     child?.layout(BoxConstraints.tight(const Size(500.0, 500.0)));

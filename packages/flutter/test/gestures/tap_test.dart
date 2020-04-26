@@ -1,11 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
@@ -380,6 +380,32 @@ void main() {
     tap.dispose();
   });
 
+  testGesture('onTapCancel should show reason in the proper format', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    tap.onTapCancel = () {
+      throw Exception(test);
+    };
+
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    bool gotError = false;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
+      gotError = true;
+    };
+
+    const int pointer = 1;
+    tap.addPointer(const PointerDownEvent(pointer: pointer));
+    tester.closeArena(pointer);
+    tester.async.elapse(const Duration(milliseconds: 500));
+    tester.route(const PointerCancelEvent(pointer: pointer));
+
+    expect(gotError, isTrue);
+
+    FlutterError.onError = previousErrorHandler;
+    tap.dispose();
+  });
+
   testGesture('No duplicate tap events', (GestureTester tester) {
     final TapGestureRecognizer tapA = TapGestureRecognizer();
     final TapGestureRecognizer tapB = TapGestureRecognizer();
@@ -554,6 +580,51 @@ void main() {
 
     tap.dispose();
     drag.dispose();
+  });
+
+  testGesture('non-primary pointers does not trigger timeout', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/43310
+    // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
+    // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
+    // after its `_reset`.
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+    tap.onTapDown = (_) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (_) {
+      recognized.add('up');
+    };
+    tap.onTap = () {
+      recognized.add('tap');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(down1.pointer);
+
+    tap.addPointer(down2);
+    tester.closeArena(down2.pointer);
+
+    expect(recognized, isEmpty);
+
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(down1.pointer);
+    expect(recognized, <String>['down', 'up', 'tap']);
+    recognized.clear();
+
+    // If regression happens, the following step will throw error
+    tester.async.elapse(const Duration(milliseconds: 200));
+    expect(recognized, isEmpty);
+
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(down2.pointer);
+    expect(recognized, isEmpty);
+
+    tap.dispose();
   });
 
   group('Enforce consistent-button restriction:', () {
@@ -832,5 +903,39 @@ void main() {
       GestureBinding.instance.gestureArena.sweep(down5.pointer);
       expect(recognized, <String>['secondaryCancel']);
     });
+  });
+
+  testGesture('A second tap after rejection is ignored', (GestureTester tester) {
+    bool didTap = false;
+
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTap = () {
+        didTap = true;
+      };
+    // Add drag recognizer for competition
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) {};
+
+    final TestPointer pointer1 = TestPointer(1);
+
+    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
+    drag.addPointer(down);
+    tap.addPointer(down);
+
+    tester.closeArena(1);
+
+    // One-finger moves, canceling the tap
+    tester.route(down);
+    tester.route(pointer1.move(const Offset(50.0, 0)));
+
+    // Add another finger
+    final TestPointer pointer2 = TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
+    drag.addPointer(down2);
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+
+    expect(didTap, isFalse);
   });
 }

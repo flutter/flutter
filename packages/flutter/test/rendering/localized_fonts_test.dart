@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.display3;
+              final TextStyle style = Theme.of(context).textTheme.headline2;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -52,7 +52,6 @@ void main() {
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
-    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -68,7 +67,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.display3;
+              final TextStyle style = Theme.of(context).textTheme.headline2;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -120,7 +119,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.display3;
+              final TextStyle style = Theme.of(context).textTheme.headline2;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),

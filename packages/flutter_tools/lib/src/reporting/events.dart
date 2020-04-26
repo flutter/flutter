@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,12 +12,14 @@ class UsageEvent {
   UsageEvent(this.category, this.parameter, {
     this.label,
     this.value,
+    @required this.flutterUsage,
   });
 
   final String category;
   final String parameter;
   final String label;
   final int value;
+  final Usage flutterUsage;
 
   void send() {
     flutterUsage.sendEvent(category, parameter, label: label, value: value);
@@ -46,7 +48,7 @@ class HotEvent extends UsageEvent {
     this.invalidatedSourcesCount,
     this.transferTimeInMs,
     this.overallTimeInMs,
-  }) : super('hot', parameter);
+  }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
 
   final String reason;
   final String targetPlatform;
@@ -101,6 +103,7 @@ class DoctorResultEvent extends UsageEvent {
     'doctor-result',
     '${validator.runtimeType}',
     label: result.typeStr,
+    flutterUsage: globals.flutterUsage,
   );
 
   final DoctorValidator validator;
@@ -112,7 +115,7 @@ class DoctorResultEvent extends UsageEvent {
       flutterUsage.sendEvent(category, parameter, label: label);
       return;
     }
-    final GroupedValidator group = validator;
+    final GroupedValidator group = validator as GroupedValidator;
     for (int i = 0; i < group.subValidators.length; i++) {
       final DoctorValidator v = group.subValidators[i];
       final ValidationResult r = group.subResults[i];
@@ -126,38 +129,44 @@ class PubResultEvent extends UsageEvent {
   PubResultEvent({
     @required String context,
     @required String result,
-  }) : super('pub-result', context, label: result);
+    @required Usage usage,
+  }) : super('pub-result', context, label: result, flutterUsage: usage);
 }
 
 /// An event that reports something about a build.
 class BuildEvent extends UsageEvent {
   BuildEvent(String label, {
-    this.command,
-    this.settings,
-    this.eventError,
-  }) : super(
+    String command,
+    String settings,
+    String eventError,
+    @required Usage flutterUsage,
+  }) : _command = command,
+  _settings = settings,
+  _eventError = eventError,
+      super(
     // category
     'build',
     // parameter
-    FlutterCommand.current == null ?
-      'unspecified' :
-      '${FlutterCommand.current.name}',
+    FlutterCommand.current == null
+      ? 'unspecified'
+      : FlutterCommand.current.name,
     label: label,
+    flutterUsage: flutterUsage,
   );
 
-  final String command;
-  final String settings;
-  final String eventError;
+  final String _command;
+  final String _settings;
+  final String _eventError;
 
   @override
   void send() {
     final Map<String, String> parameters = _useCdKeys(<CustomDimensions, String>{
-      if (command != null)
-        CustomDimensions.buildEventCommand: command,
-      if (settings != null)
-        CustomDimensions.buildEventSettings: settings,
-      if (eventError != null)
-        CustomDimensions.buildEventError: eventError,
+      if (_command != null)
+        CustomDimensions.buildEventCommand: _command,
+      if (_settings != null)
+        CustomDimensions.buildEventSettings: _settings,
+      if (_eventError != null)
+        CustomDimensions.buildEventError: _eventError,
     });
     flutterUsage.sendEvent(
       category,
@@ -171,7 +180,9 @@ class BuildEvent extends UsageEvent {
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(String commandPath, FlutterCommandResult result)
-      : super(commandPath, result?.toString() ?? 'unspecified');
+      : assert(commandPath != null),
+        assert(result != null),
+        super(commandPath, result.toString(), flutterUsage: globals.flutterUsage);
 
   @override
   void send() {
@@ -193,9 +204,9 @@ class CommandResultEvent extends UsageEvent {
         label: parameter,
         value: maxRss,
       );
-    } catch (error) {
+    } on Exception catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
-      printTrace('Querying maxRss failed with error: $error');
+      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
 }
@@ -209,5 +220,6 @@ class AnalyticsConfigEvent extends UsageEvent {
     'analytics',
     'enabled',
     label: enabled ? 'true' : 'false',
+    flutterUsage: globals.flutterUsage,
   );
 }

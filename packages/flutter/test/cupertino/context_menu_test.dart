@@ -1,13 +1,14 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   final TestWidgetsFlutterBinding binding =
-    TestWidgetsFlutterBinding.ensureInitialized();
+    TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   const double _kOpenScale = 1.1;
 
   Widget _getChild() {
@@ -102,6 +103,11 @@ void main() {
       expect(_findDecoyChild(child), findsOneWidget);
       Rect decoyChildRect = tester.getRect(_findDecoyChild(child));
       expect(childRect, equals(decoyChildRect));
+
+      // TODO(justinmc): When ShaderMask is supported on web, remove this
+      // conditional and just check for ShaderMask.
+      // https://github.com/flutter/flutter/issues/52967.
+      expect(find.byType(ShaderMask), kIsWeb ? findsNothing : findsOneWidget);
 
       // After a small delay, the _DecoyChild has begun to animate.
       await tester.pump(const Duration(milliseconds: 100));
@@ -208,7 +214,7 @@ void main() {
       expect(_findStatic(), findsNothing);
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
 
-    testWidgets('Backdrop is added using ModalRoute\'s filter parameter', (WidgetTester tester) async {
+    testWidgets("Backdrop is added using ModalRoute's filter parameter", (WidgetTester tester) async {
       final Widget child = _getChild();
       await tester.pumpWidget(_getContextMenu(child: child));
       expect(find.byType(BackdropFilter), findsNothing);
@@ -224,7 +230,7 @@ void main() {
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44152
   });
 
-  group('Open layout differs depending on child\'s position on screen', () {
+  group("Open layout differs depending on child's position on screen", () {
     testWidgets('Portrait', (WidgetTester tester) async {
       const Size portraitScreenSize = Size(600.0, 800.0);
       await binding.setSurfaceSize(portraitScreenSize);

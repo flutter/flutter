@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,13 +11,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/painting.dart';
 
+import 'actions.dart';
 import 'basic.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
+import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
@@ -81,6 +84,7 @@ class Scrollable extends StatefulWidget {
     this.controller,
     this.physics,
     @required this.viewportBuilder,
+    this.incrementCalculator,
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -88,6 +92,7 @@ class Scrollable extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -153,6 +158,19 @@ class Scrollable extends StatefulWidget {
   ///  * [ShrinkWrappingViewport], which is a viewport that displays a list of
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
+
+  /// An optional function that will be called to calculate the distance to
+  /// scroll when the scrollable is asked to scroll via the keyboard using a
+  /// [ScrollAction].
+  ///
+  /// If not supplied, the [Scrollable] will scroll a default amount when a
+  /// keyboard navigation key is pressed (e.g. pageUp/pageDown, control-upArrow,
+  /// etc.), or otherwise invoked by a [ScrollAction].
+  ///
+  /// If [incrementCalculator] is null, the default for
+  /// [ScrollIncrementType.page] is 80% of the size of the scroll window, and
+  /// for [ScrollIncrementType.line], 50 logical pixels.
+  final ScrollIncrementCalculator incrementCalculator;
 
   /// Whether the scroll actions introduced by this [Scrollable] are exposed
   /// in the semantics tree.
@@ -228,9 +246,33 @@ class Scrollable extends StatefulWidget {
   /// ```dart
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
+  ///
+  /// Calling this method will create a dependency on the closest [Scrollable]
+  /// in the [context], if there is one.
   static ScrollableState of(BuildContext context) {
-    final _ScrollableScope widget = context.inheritFromWidgetOfExactType(_ScrollableScope);
+    final _ScrollableScope widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
+  }
+
+  /// Provides a heuristic to determine if expensive frame-bound tasks should be
+  /// deferred for the [context] at a specific point in time.
+  ///
+  /// Calling this method does _not_ create a dependency on any other widget.
+  /// This also means that the value returned is only good for the point in time
+  /// when it is called, and callers will not get updated if the value changes.
+  ///
+  /// The heuristic used is determined by the [physics] of this [Scrollable]
+  /// via [ScrollPhysics.recommendDeferredScrolling]. That method is called with
+  /// the current [activity]'s [ScrollActivity.velocity].
+  ///
+  /// If there is no [Scrollable] in the widget tree above the [context], this
+  /// method returns false.
+  static bool recommendDeferredLoadingForContext(BuildContext context) {
+    final _ScrollableScope widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope;
+    if (widget == null) {
+      return false;
+    }
+    return widget.position.recommendDeferredLoading(context);
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
@@ -240,6 +282,7 @@ class Scrollable extends StatefulWidget {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -250,6 +293,7 @@ class Scrollable extends StatefulWidget {
         alignment: alignment,
         duration: duration,
         curve: curve,
+        alignmentPolicy: alignmentPolicy,
       ));
       context = scrollable.context;
       scrollable = Scrollable.of(context);
@@ -461,7 +505,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject() as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -556,7 +600,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_physics != null && !_physics.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }
@@ -641,6 +685,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.semanticChildCount,
     Widget child,
   }) : assert(position != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super(key: key, child: child);
 
   final ScrollPosition position;
@@ -742,7 +787,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
-    for (SemanticsNode child in children) {
+    for (final SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
@@ -761,5 +806,230 @@ class _RenderScrollSemantics extends RenderProxyBox {
   void clearSemantics() {
     super.clearSemantics();
     _innerNode = null;
+  }
+}
+
+/// A typedef for a function that can calculate the offset for a type of scroll
+/// increment given a [ScrollIncrementDetails].
+///
+/// This function is used as the type for [Scrollable.incrementCalculator],
+/// which is called from a [ScrollAction].
+typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
+
+/// Describes the type of scroll increment that will be performed by a
+/// [ScrollAction] on a [Scrollable].
+///
+/// This is used to configure a [ScrollIncrementDetails] object to pass to a
+/// [ScrollIncrementCalculator] function on a [Scrollable].
+///
+/// {@template flutter.widgets.scrollable.scroll_increment_type.intent}
+/// This indicates the *intent* of the scroll, not necessarily the size. Not all
+/// scrollable areas will have the concept of a "line" or "page", but they can
+/// respond to the different standard key bindings that cause scrolling, which
+/// are bound to keys that people use to indicate a "line" scroll (e.g.
+/// control-arrowDown keys) or a "page" scroll (e.g. pageDown key). It is
+/// recommended that at least the relative magnitudes of the scrolls match
+/// expectations.
+/// {@endtemplate}
+enum ScrollIncrementType {
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance it should move when the user requests to scroll by a "line".
+  ///
+  /// The distance a "line" scrolls refers to what should happen when the key
+  /// binding for "scroll down/up by a line" is triggered. It's up to the
+  /// [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
+  line,
+
+  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
+  /// distance it should move when the user requests to scroll by a "page".
+  ///
+  /// The distance a "page" scrolls refers to what should happen when the key
+  /// binding for "scroll down/up by a page" is triggered. It's up to the
+  /// [ScrollIncrementCalculator] function to decide what that means for a
+  /// particular scrollable.
+  page,
+}
+
+/// A details object that describes the type of scroll increment being requested
+/// of a [ScrollIncrementCalculator] function, as well as the current metrics
+/// for the scrollable.
+class ScrollIncrementDetails {
+  /// A const constructor for a [ScrollIncrementDetails].
+  ///
+  /// All of the arguments must not be null, and are required.
+  const ScrollIncrementDetails({
+    @required this.type,
+    @required this.metrics,
+  })  : assert(type != null),
+        assert(metrics != null);
+
+  /// The type of scroll this is (e.g. line, page, etc.).
+  ///
+  /// {@macro flutter.widgets.scrollable.scroll_increment_type.intent}
+  final ScrollIncrementType type;
+
+  /// The current metrics of the scrollable that is being scrolled.
+  final ScrollMetrics metrics;
+}
+
+/// An [Intent] that represents scrolling the nearest scrollable by an amount
+/// appropriate for the [type] specified.
+///
+/// The actual amount of the scroll is determined by the
+/// [Scrollable.incrementCalculator], or by its defaults if that is not
+/// specified.
+class ScrollIntent extends Intent {
+  /// Creates a const [ScrollIntent] that requests scrolling in the given
+  /// [direction], with the given [type].
+  ///
+  /// If [reversed] is specified, then the scroll will happen in the opposite
+  /// direction from the normal scroll direction.
+  const ScrollIntent({
+    @required this.direction,
+    this.type = ScrollIncrementType.line,
+  })  : assert(direction != null),
+        assert(type != null);
+
+  /// The direction in which to scroll the scrollable containing the focused
+  /// widget.
+  final AxisDirection direction;
+
+  /// The type of scrolling that is intended.
+  final ScrollIncrementType type;
+}
+
+/// An [Action] that scrolls the [Scrollable] that encloses the current
+/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
+///
+/// If [Scrollable.incrementCalculator] is null for the scrollable, the default
+/// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
+/// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
+/// pixels.
+class ScrollAction extends Action<ScrollIntent> {
+  /// The [LocalKey] that uniquely connects this action to a [ScrollIntent].
+  static const LocalKey key = ValueKey<Type>(ScrollAction);
+
+  @override
+  bool isEnabled(ScrollIntent intent) {
+    final FocusNode focus = primaryFocus;
+    return focus != null && focus.context != null && Scrollable.of(focus.context) != null;
+  }
+
+  // Returns the scroll increment for a single scroll request, for use when
+  // scrolling using a hardware keyboard.
+  //
+  // Must not be called when the position is null, or when any of the position
+  // metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
+  // null. The type and state arguments must not be null, and the widget must
+  // have already been laid out so that the position fields are valid.
+  double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+    assert(type != null);
+    assert(state.position != null);
+    assert(state.position.pixels != null);
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
+    assert(state.widget.physics == null || state.widget.physics.shouldAcceptUserOffset(state.position));
+    if (state.widget.incrementCalculator != null) {
+      return state.widget.incrementCalculator(
+        ScrollIncrementDetails(
+          type: type,
+          metrics: state.position,
+        ),
+      );
+    }
+    switch (type) {
+      case ScrollIncrementType.line:
+        return 50.0;
+      case ScrollIncrementType.page:
+        return 0.8 * state.position.viewportDimension;
+    }
+    return 0.0;
+  }
+
+  // Find out how much of an increment to move by, taking the different
+  // directions into account.
+  double _getIncrement(ScrollableState state, ScrollIntent intent) {
+    final double increment = _calculateScrollIncrement(state, type: intent.type);
+    switch (intent.direction) {
+      case AxisDirection.down:
+        switch (state.axisDirection) {
+          case AxisDirection.up:
+            return -increment;
+            break;
+          case AxisDirection.down:
+            return increment;
+            break;
+          case AxisDirection.right:
+          case AxisDirection.left:
+            return 0.0;
+        }
+        break;
+      case AxisDirection.up:
+        switch (state.axisDirection) {
+          case AxisDirection.up:
+            return increment;
+            break;
+          case AxisDirection.down:
+            return -increment;
+            break;
+          case AxisDirection.right:
+          case AxisDirection.left:
+            return 0.0;
+        }
+        break;
+      case AxisDirection.left:
+        switch (state.axisDirection) {
+          case AxisDirection.right:
+            return -increment;
+            break;
+          case AxisDirection.left:
+            return increment;
+            break;
+          case AxisDirection.up:
+          case AxisDirection.down:
+            return 0.0;
+        }
+        break;
+      case AxisDirection.right:
+        switch (state.axisDirection) {
+          case AxisDirection.right:
+            return increment;
+            break;
+          case AxisDirection.left:
+            return -increment;
+            break;
+          case AxisDirection.up:
+          case AxisDirection.down:
+            return 0.0;
+        }
+        break;
+    }
+    return 0.0;
+  }
+
+  @override
+  void invoke(ScrollIntent intent) {
+    final ScrollableState state = Scrollable.of(primaryFocus.context);
+    assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
+    assert(state.position.pixels != null, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
+    assert(state.position.viewportDimension != null);
+    assert(state.position.maxScrollExtent != null);
+    assert(state.position.minScrollExtent != null);
+
+    // Don't do anything if the user isn't allowed to scroll.
+    if (state.widget.physics != null && !state.widget.physics.shouldAcceptUserOffset(state.position)) {
+      return;
+    }
+    final double increment = _getIncrement(state, intent);
+    if (increment == 0.0) {
+      return;
+    }
+    state.position.moveTo(
+      state.position.pixels + increment,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeInOut,
+    );
   }
 }

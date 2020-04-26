@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,9 +38,10 @@ import 'observer_list.dart';
 ///
 ///  * [AnimatedBuilder], a widget that uses a builder callback to rebuild
 ///    whenever a given [Listenable] triggers its notifications. This widget is
-///    commonly used with [Animation] subclasses, wherein its name. It is a
-///    subclass of [AnimatedWidget], which can be used to create widgets that
-///    are driven from a [Listenable].
+///    commonly used with [Animation] subclasses, hence its name, but is by no
+///    means limited to animations, as it can be used with any [Listenable]. It
+///    is a subclass of [AnimatedWidget], which can be used to create widgets
+///    that are driven from a [Listenable].
 ///  * [ValueListenableBuilder], a widget that uses a builder callback to
 ///    rebuild whenever a [ValueListenable] object triggers its notifications,
 ///    providing the builder with the value of the object.
@@ -102,10 +103,10 @@ class ChangeNotifier implements Listenable {
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_listeners == null) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A $runtimeType was used after being disposed.'),
-          ErrorDescription('Once you have called dispose() on a $runtimeType, it can no longer be used.')
-        ]);
+        throw FlutterError(
+          'A $runtimeType was used after being disposed.\n'
+          'Once you have called dispose() on a $runtimeType, it can no longer be used.'
+        );
       }
       return true;
     }());
@@ -182,9 +183,9 @@ class ChangeNotifier implements Listenable {
   /// Call all the registered listeners.
   ///
   /// Call this method whenever the object changes, to notify any clients the
-  /// object may have. Listeners that are added during this iteration will not
-  /// be visited. Listeners that are removed during this iteration will not be
-  /// visited after they are removed.
+  /// object may have changed. Listeners that are added during this iteration
+  /// will not be visited. Listeners that are removed during this iteration will
+  /// not be visited after they are removed.
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].
@@ -200,7 +201,7 @@ class ChangeNotifier implements Listenable {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
       final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
-      for (VoidCallback listener in localListeners) {
+      for (final VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))
             listener();

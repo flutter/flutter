@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
 /// [MergeSemantics] is used to turn the entire [ListTile] into a single item
@@ -60,6 +60,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.trackColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(dragStartBehavior != null),
@@ -100,6 +101,11 @@ class CupertinoSwitch extends StatefulWidget {
   /// the [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
+  /// The color to use for the background when the switch is off.
+  ///
+  /// Defaults to [CupertinoColors.secondarySystemFill] when null.
+  final Color trackColor;
+
   /// {@template flutter.cupertino.switch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -134,8 +140,158 @@ class CupertinoSwitch extends StatefulWidget {
 }
 
 class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
+  TapGestureRecognizer _tap;
+  HorizontalDragGestureRecognizer _drag;
+
+  AnimationController _positionController;
+  CurvedAnimation position;
+
+  AnimationController _reactionController;
+  Animation<double> _reaction;
+
+  bool get isInteractive => widget.onChanged != null;
+
+  // A non-null boolean value that changes to true at the end of a drag if the
+  // switch must be animated to the position indicated by the widget's value.
+  bool needsPositionAnimation = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _tap = TapGestureRecognizer()
+      ..onTapDown = _handleTapDown
+      ..onTapUp = _handleTapUp
+      ..onTap = _handleTap
+      ..onTapCancel = _handleTapCancel;
+    _drag = HorizontalDragGestureRecognizer()
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..dragStartBehavior = widget.dragStartBehavior;
+
+    _positionController = AnimationController(
+      duration: _kToggleDuration,
+      value: widget.value ? 1.0 : 0.0,
+      vsync: this,
+    );
+    position = CurvedAnimation(
+      parent: _positionController,
+      curve: Curves.linear,
+    );
+    _reactionController = AnimationController(
+      duration: _kReactionDuration,
+      vsync: this,
+    );
+    _reaction = CurvedAnimation(
+      parent: _reactionController,
+      curve: Curves.ease,
+    );
+  }
+
+  @override
+  void didUpdateWidget(CupertinoSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _drag.dragStartBehavior = widget.dragStartBehavior;
+
+    if (needsPositionAnimation || oldWidget.value != widget.value)
+      _resumePositionAnimation(isLinear: needsPositionAnimation);
+  }
+
+  // `isLinear` must be true if the position animation is trying to move the
+  // thumb to the closest end after the most recent drag animation, so the curve
+  // does not change when the controller's value is not 0 or 1.
+  //
+  // It can be set to false when it's an implicit animation triggered by
+  // widget.value changes.
+  void _resumePositionAnimation({ bool isLinear = true }) {
+    needsPositionAnimation = false;
+    position
+      ..curve = isLinear ? null : Curves.ease
+      ..reverseCurve = isLinear ? null : Curves.ease.flipped;
+    if (widget.value)
+      _positionController.forward();
+    else
+      _positionController.reverse();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (isInteractive)
+      needsPositionAnimation = false;
+      _reactionController.forward();
+  }
+
+  void _handleTap() {
+    if (isInteractive) {
+      widget.onChanged(!widget.value);
+      _emitVibration();
+    }
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    if (isInteractive) {
+      needsPositionAnimation = false;
+      _reactionController.reverse();
+    }
+  }
+
+  void _handleTapCancel() {
+    if (isInteractive)
+      _reactionController.reverse();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    if (isInteractive) {
+      needsPositionAnimation = false;
+      _reactionController.forward();
+      _emitVibration();
+    }
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    if (isInteractive) {
+      position
+        ..curve = null
+        ..reverseCurve = null;
+      final double delta = details.primaryDelta / _kTrackInnerLength;
+      switch (Directionality.of(context)) {
+        case TextDirection.rtl:
+          _positionController.value -= delta;
+          break;
+        case TextDirection.ltr:
+          _positionController.value += delta;
+          break;
+      }
+    }
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    // Deferring the animation to the next build phase.
+    setState(() { needsPositionAnimation = true; });
+    // Call onChanged when the user's intent to change value is clear.
+    if (position.value >= 0.5 != widget.value)
+      widget.onChanged(!widget.value);
+    _reactionController.reverse();
+  }
+
+  void _emitVibration() {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        HapticFeedback.lightImpact();
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (needsPositionAnimation)
+      _resumePositionAnimation();
     return Opacity(
       opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
       child: _CupertinoSwitchRenderObjectWidget(
@@ -144,11 +300,22 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           widget.activeColor ?? CupertinoColors.systemGreen,
           context,
         ),
+        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
         onChanged: widget.onChanged,
-        vsync: this,
-        dragStartBehavior: widget.dragStartBehavior,
+        textDirection: Directionality.of(context),
+        state: this,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tap.dispose();
+    _drag.dispose();
+
+    _positionController.dispose();
+    _reactionController.dispose();
+    super.dispose();
   }
 }
 
@@ -157,27 +324,28 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     Key key,
     this.value,
     this.activeColor,
+    this.trackColor,
     this.onChanged,
-    this.vsync,
-    this.dragStartBehavior = DragStartBehavior.start,
+    this.textDirection,
+    this.state,
   }) : super(key: key);
 
   final bool value;
   final Color activeColor;
+  final Color trackColor;
   final ValueChanged<bool> onChanged;
-  final TickerProvider vsync;
-  final DragStartBehavior dragStartBehavior;
+  final _CupertinoSwitchState state;
+  final TextDirection textDirection;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
     return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
-      trackColor: CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context),
+      trackColor: trackColor,
       onChanged: onChanged,
-      textDirection: Directionality.of(context),
-      vsync: vsync,
-      dragStartBehavior: dragStartBehavior,
+      textDirection: textDirection,
+      state: state,
     );
   }
 
@@ -186,11 +354,9 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     renderObject
       ..value = value
       ..activeColor = activeColor
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context)
+      ..trackColor = trackColor
       ..onChanged = onChanged
-      ..textDirection = Directionality.of(context)
-      ..vsync = vsync
-      ..dragStartBehavior = dragStartBehavior;
+      ..textDirection = textDirection;
   }
 }
 
@@ -215,53 +381,22 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     @required Color trackColor,
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
-    @required TickerProvider vsync,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    @required _CupertinoSwitchState state,
   }) : assert(value != null),
        assert(activeColor != null),
-       assert(vsync != null),
+       assert(state != null),
        _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
        _onChanged = onChanged,
        _textDirection = textDirection,
-       _vsync = vsync,
+       _state = state,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    _tap = TapGestureRecognizer()
-      ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel;
-    _drag = HorizontalDragGestureRecognizer()
-      ..onStart = _handleDragStart
-      ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd
-      ..dragStartBehavior = dragStartBehavior;
-    _positionController = AnimationController(
-      duration: _kToggleDuration,
-      value: value ? 1.0 : 0.0,
-      vsync: vsync,
-    );
-    _position = CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.linear,
-    )..addListener(markNeedsPaint)
-     ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = AnimationController(
-      duration: _kReactionDuration,
-      vsync: vsync,
-    );
-    _reaction = CurvedAnimation(
-      parent: _reactionController,
-      curve: Curves.ease,
-    )..addListener(markNeedsPaint);
+         state.position.addListener(markNeedsPaint);
+         state._reaction.addListener(markNeedsPaint);
   }
 
-  AnimationController _positionController;
-  CurvedAnimation _position;
-
-  AnimationController _reactionController;
-  Animation<double> _reaction;
+  final _CupertinoSwitchState _state;
 
   bool get value => _value;
   bool _value;
@@ -271,24 +406,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       return;
     _value = value;
     markNeedsSemanticsUpdate();
-    _position
-      ..curve = Curves.ease
-      ..reverseCurve = Curves.ease.flipped;
-    if (value)
-      _positionController.forward();
-    else
-      _positionController.reverse();
-  }
-
-  TickerProvider get vsync => _vsync;
-  TickerProvider _vsync;
-  set vsync(TickerProvider value) {
-    assert(value != null);
-    if (value == _vsync)
-      return;
-    _vsync = value;
-    _positionController.resync(vsync);
-    _reactionController.resync(vsync);
   }
 
   Color get activeColor => _activeColor;
@@ -334,122 +451,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
-  set dragStartBehavior(DragStartBehavior value) {
-    assert(value != null);
-    if (_drag.dragStartBehavior == value)
-      return;
-    _drag.dragStartBehavior = value;
-  }
-
   bool get isInteractive => onChanged != null;
-
-  TapGestureRecognizer _tap;
-  HorizontalDragGestureRecognizer _drag;
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    if (value)
-      _positionController.forward();
-    else
-      _positionController.reverse();
-    if (isInteractive) {
-      switch (_reactionController.status) {
-        case AnimationStatus.forward:
-          _reactionController.forward();
-          break;
-        case AnimationStatus.reverse:
-          _reactionController.reverse();
-          break;
-        case AnimationStatus.dismissed:
-        case AnimationStatus.completed:
-          // nothing to do
-          break;
-      }
-    }
-  }
-
-  @override
-  void detach() {
-    _positionController.stop();
-    _reactionController.stop();
-    super.detach();
-  }
-
-  void _handlePositionStateChanged(AnimationStatus status) {
-    if (isInteractive) {
-      if (status == AnimationStatus.completed && !_value)
-        onChanged(true);
-      else if (status == AnimationStatus.dismissed && _value)
-        onChanged(false);
-    }
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    if (isInteractive)
-      _reactionController.forward();
-  }
-
-  void _handleTap() {
-    if (isInteractive) {
-      onChanged(!_value);
-      _emitVibration();
-    }
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    if (isInteractive)
-      _reactionController.reverse();
-  }
-
-  void _handleTapCancel() {
-    if (isInteractive)
-      _reactionController.reverse();
-  }
-
-  void _handleDragStart(DragStartDetails details) {
-    if (isInteractive) {
-      _reactionController.forward();
-      _emitVibration();
-    }
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    if (isInteractive) {
-      _position
-        ..curve = null
-        ..reverseCurve = null;
-      final double delta = details.primaryDelta / _kTrackInnerLength;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          _positionController.value -= delta;
-          break;
-        case TextDirection.ltr:
-          _positionController.value += delta;
-          break;
-      }
-    }
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    if (_position.value >= 0.5)
-      _positionController.forward();
-    else
-      _positionController.reverse();
-    _reactionController.reverse();
-  }
-
-  void _emitVibration() {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        HapticFeedback.lightImpact();
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.android:
-        break;
-    }
-  }
 
   @override
   bool hitTestSelf(Offset position) => true;
@@ -458,8 +460,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
-      _drag.addPointer(event);
-      _tap.addPointer(event);
+      _state._drag.addPointer(event);
+      _state._tap.addPointer(event);
     }
   }
 
@@ -468,7 +470,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     super.describeSemanticsConfiguration(config);
 
     if (isInteractive)
-      config.onTap = _handleTap;
+      config.onTap = _state._handleTap;
 
     config.isEnabled = isInteractive;
     config.isToggled = _value;
@@ -478,8 +480,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    final double currentValue = _position.value;
-    final double currentReactionValue = _reaction.value;
+    final double currentValue = _state.position.value;
+    final double currentReactionValue = _state._reaction.value;
 
     double visualPosition;
     switch (textDirection) {

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,12 +19,16 @@ void main() {
     expect(stderrLines, <String>[
       'known_broken_documentation.dart:30:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
-      'known_broken_documentation.dart:42:9: new Opacity(',
+      'known_broken_documentation.dart:62:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       '',
       'Found 1 sample code errors.',
       '',
     ]);
-    expect(stdoutLines, <String>['Found 7 sample code sections.', 'Starting analysis of samples.', '']);
+    expect(stdoutLines, <String>[
+      'Found 7 sample code sections.',
+       'Starting analysis of code samples.',
+      '',
+    ]);
   }, skip: Platform.isWindows);
 }

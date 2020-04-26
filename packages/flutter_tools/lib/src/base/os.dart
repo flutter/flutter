@@ -1,30 +1,65 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+import 'package:file/file.dart';
+import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
-import '../globals.dart';
-import 'context.dart';
+import '../globals.dart' as globals;
 import 'file_system.dart';
 import 'io.dart';
-import 'platform.dart';
+import 'logger.dart';
 import 'process.dart';
-import 'process_manager.dart';
-
-/// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 
 abstract class OperatingSystemUtils {
-  factory OperatingSystemUtils() {
+  factory OperatingSystemUtils({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) {
     if (platform.isWindows) {
-      return _WindowsUtils();
+      return _WindowsUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
     } else {
-      return _PosixUtils();
+      return _PosixUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
     }
   }
 
-  OperatingSystemUtils._private();
+  OperatingSystemUtils._private({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _processManager = processManager,
+       _processUtils = ProcessUtils(
+        logger: logger,
+        processManager: processManager,
+      );
+
+  @visibleForTesting
+  static final GZipCodec gzipLevel1 = GZipCodec(level: 1);
+
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final ProcessUtils _processUtils;
 
   /// Make the given file executable. This may be a no-op on some platforms.
   void makeExecutable(File file);
@@ -66,6 +101,11 @@ abstract class OperatingSystemUtils {
   /// Returns true if the gzip is not corrupt (does not check tar).
   bool verifyGzip(File gzippedFile);
 
+  /// Compresses a stream using gzip level 1 (faster but larger).
+  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) {
+    return stream.cast<List<int>>().transform<List<int>>(gzipLevel1.encoder);
+  }
+
   /// Returns a pretty name string for the current operating system.
   ///
   /// If available, the detailed version of the OS is included.
@@ -75,7 +115,7 @@ abstract class OperatingSystemUtils {
       'linux': 'Linux',
       'windows': 'Windows',
     };
-    final String osName = platform.operatingSystem;
+    final String osName = _platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
@@ -103,10 +143,10 @@ abstract class OperatingSystemUtils {
       if (!ipv6) {
         return findFreePort(ipv6: true);
       }
-      printTrace('findFreePort failed: $e');
-    } catch (e) {
+      _logger.printTrace('findFreePort failed: $e');
+    } on Exception catch (e) {
       // Failures are signaled by a return value of 0 from this function.
-      printTrace('findFreePort failed: $e');
+      _logger.printTrace('findFreePort failed: $e');
     } finally {
       if (serverSocket != null) {
         await serverSocket.close();
@@ -117,7 +157,17 @@ abstract class OperatingSystemUtils {
 }
 
 class _PosixUtils extends OperatingSystemUtils {
-  _PosixUtils() : super._private();
+  _PosixUtils({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) : super._private(
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
 
   @override
   void makeExecutable(File file) {
@@ -127,16 +177,20 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   void chmod(FileSystemEntity entity, String mode) {
     try {
-      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      final ProcessResult result = _processManager.runSync(
+        <String>['chmod', mode, entity.path],
+      );
       if (result.exitCode != 0) {
-        printTrace(
+        _logger.printTrace(
           'Error trying to run chmod on ${entity.absolute.path}'
           '\nstdout: ${result.stdout}'
           '\nstderr: ${result.stderr}',
         );
       }
     } on ProcessException catch (error) {
-      printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
+      _logger.printTrace(
+        'Error trying to run chmod on ${entity.absolute.path}: $error',
+      );
     }
   }
 
@@ -147,17 +201,19 @@ class _PosixUtils extends OperatingSystemUtils {
       if (all) '-a',
       execName,
     ];
-    final ProcessResult result = processManager.runSync(command);
+    final ProcessResult result = _processManager.runSync(command);
     if (result.exitCode != 0) {
       return const <File>[];
     }
-    final String stdout = result.stdout;
-    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
+    final String stdout = result.stdout as String;
+    return stdout.trim().split('\n').map<File>(
+      (String path) => _fileSystem.file(path.trim()),
+    ).toList();
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    processUtils.runSync(
+    _processUtils.runSync(
       <String>['zip', '-r', '-q', zipFile.path, '.'],
       workingDirectory: data.path,
       throwOnError: true,
@@ -167,7 +223,7 @@ class _PosixUtils extends OperatingSystemUtils {
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    processUtils.runSync(
+    _processUtils.runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
       throwOnError: true,
     );
@@ -175,12 +231,12 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyZip(File zipFile) =>
-      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+    _processUtils.exitsHappySync(<String>['unzip', '-t', '-qq', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    processUtils.runSync(
+    _processUtils.runSync(
       <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
       throwOnError: true,
     );
@@ -188,15 +244,15 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyGzip(File gzippedFile) =>
-      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
+    _processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    processUtils.runSync(
+    _processUtils.runSync(
       <String>['mkfifo', path],
       throwOnError: true,
     );
-    return fs.file(path);
+    return _fileSystem.file(path);
   }
 
   String _name;
@@ -204,11 +260,11 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      if (platform.isMacOS) {
+      if (_platform.isMacOS) {
         final List<RunResult> results = <RunResult>[
-          processUtils.runSync(<String>['sw_vers', '-productName']),
-          processUtils.runSync(<String>['sw_vers', '-productVersion']),
-          processUtils.runSync(<String>['sw_vers', '-buildVersion']),
+          _processUtils.runSync(<String>['sw_vers', '-productName']),
+          _processUtils.runSync(<String>['sw_vers', '-productVersion']),
+          _processUtils.runSync(<String>['sw_vers', '-buildVersion']),
         ];
         if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
@@ -225,7 +281,17 @@ class _PosixUtils extends OperatingSystemUtils {
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
-  _WindowsUtils() : super._private();
+  _WindowsUtils({
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required Platform platform,
+    @required ProcessManager processManager,
+  }) : super._private(
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
 
   @override
   void makeExecutable(File file) {}
@@ -236,25 +302,25 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = processManager.runSync(<String>['where', execName]);
+    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }
-    final List<String> lines = result.stdout.trim().split('\n');
+    final List<String> lines = (result.stdout as String).trim().split('\n');
     if (all) {
-      return lines.map<File>((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => _fileSystem.file(path.trim())).toList();
     }
-    return <File>[fs.file(lines.first.trim())];
+    return <File>[_fileSystem.file(lines.first.trim())];
   }
 
   @override
   void zip(Directory data, File zipFile) {
     final Archive archive = Archive();
-    for (FileSystemEntity entity in data.listSync(recursive: true)) {
+    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
       }
-      final File file = entity;
+      final File file = entity as File;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile(path, bytes.length, bytes));
@@ -296,22 +362,27 @@ class _WindowsUtils extends OperatingSystemUtils {
       return false;
     } on ArchiveException catch (_) {
       return false;
+    } on RangeError catch (_) {
+      return false;
     }
     return true;
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
-    for (ArchiveFile archiveFile in archive.files) {
+    for (final ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
         continue;
       }
 
-      final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
+      final File destFile = _fileSystem.file(_fileSystem.path.join(
+        targetDirectory.path,
+        archiveFile.name,
+      ));
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
-      destFile.writeAsBytesSync(archiveFile.content);
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
     }
   }
 
@@ -325,10 +396,10 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      final ProcessResult result = processManager.runSync(
+      final ProcessResult result = _processManager.runSync(
           <String>['ver'], runInShell: true);
       if (result.exitCode == 0) {
-        _name = result.stdout.trim();
+        _name = (result.stdout as String).trim();
       } else {
         _name = super.name;
       }
@@ -346,12 +417,12 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// or if the project root is the flutter repository root.
 String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
-  directory ??= fs.currentDirectory.path;
+  directory ??= globals.fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel))) {
+    if (globals.fs.isFileSync(globals.fs.path.join(directory, kProjectRootSentinel))) {
       return directory;
     }
-    final String parent = fs.path.dirname(directory);
+    final String parent = globals.fs.path.dirname(directory);
     if (directory == parent) {
       return null;
     }

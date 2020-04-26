@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,7 @@ void main() {
           '   must have unique keys.\n'
           '   Flex(direction: vertical, mainAxisAlignment: start,\n'
           '   crossAxisAlignment: center) has multiple children with key\n'
-          '   [<\'key\'>].\n',
+          "   [<'key'>].\n",
         ),
       );
     }
@@ -56,7 +56,7 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   Duplicate key found: [<\'key\'>].\n'
+          "   Duplicate key found: [<'key'>].\n"
         ),
       );
     }
@@ -74,7 +74,7 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 4);
-            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
+            expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
             expect(
               error.toStringDeep(),
               equalsIgnoringHashCodes(
@@ -106,7 +106,7 @@ void main() {
           } finally {
             expect(error, isNotNull);
             expect(error.diagnostics.length, 5);
-            expect(error.diagnostics[2], isInstanceOf<DiagnosticsProperty<Element>>());
+            expect(error.diagnostics[2], isA<DiagnosticsProperty<Element>>());
             expect(error.diagnostics.last.level, DiagnosticLevel.hint);
             expect(
               error.diagnostics.last.toStringDeep(),
@@ -147,7 +147,7 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
         error.diagnostics[1].toStringDeep(),
@@ -190,7 +190,7 @@ void main() {
     } finally {
       expect(error, isNotNull);
       expect(error.diagnostics.length, 3);
-      expect(error.diagnostics[1], isInstanceOf<DiagnosticsProperty<Widget>>());
+      expect(error.diagnostics[1], isA<DiagnosticsProperty<Widget>>());
       expect(error.diagnostics[1].style, DiagnosticsTreeStyle.errorProperty);
       expect(
         error.diagnostics[1].toStringDeep(),
@@ -206,7 +206,7 @@ void main() {
           '   A build function returned context.widget.\n'
           '   The offending widget is:\n'
           '     Container\n'
-          '   Build functions must never return their BuildContext parameter\'s\n'
+          "   Build functions must never return their BuildContext parameter's\n"
           '   widget or a child that contains "context.widget". Doing so\n'
           '   introduces a loop in the widget tree that can cause the app to\n'
           '   crash.\n'

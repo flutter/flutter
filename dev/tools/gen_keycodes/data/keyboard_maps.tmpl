@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,6 +53,12 @@ const Map<int, LogicalKeyboardKey> kMacOsNumPadMap = <int, LogicalKeyboardKey>{
 @@@MACOS_NUMPAD_MAP@@@
 };
 
+/// A map of macOS key codes which are numbered function keys, so that they
+/// can be excluded when asking "is the Fn modifier down?".
+const Map<int, LogicalKeyboardKey> kMacOsFunctionKeyMap = <int, LogicalKeyboardKey>{
+@@@MACOS_FUNCTION_KEY_MAP@@@
+};
+
 /// Maps GLFW-specific key codes to the matching [LogicalKeyboardKey].
 const Map<int, LogicalKeyboardKey> kGlfwToLogicalKey = <int, LogicalKeyboardKey>{
 @@@GLFW_KEY_CODE_MAP@@@
@@ -87,3 +93,19 @@ const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKe
 @@@WEB_NUMPAD_MAP@@@
 };
 
+/// Maps Windows KeyboardEvent codes to the matching [LogicalKeyboardKey].
+const Map<int, LogicalKeyboardKey> kWindowsToLogicalKey = <int, LogicalKeyboardKey>{
+@@@WINDOWS_LOGICAL_KEY_MAP@@@
+};
+
+/// Maps Windows KeyboardEvent codes to the matching [PhysicalKeyboardKey].
+const Map<int, PhysicalKeyboardKey> kWindowsToPhysicalKey = <int, PhysicalKeyboardKey>{
+@@@WINDOWS_PHYSICAL_KEY_MAP@@@
+};
+
+/// A map of Windows KeyboardEvent codes which have printable representations, but appear
+/// on the number pad. Used to provide different key objects for keys like
+/// KEY_EQUALS and NUMPAD_EQUALS.
+const Map<int, LogicalKeyboardKey> kWindowsNumPadMap = <int, LogicalKeyboardKey>{
+@@@WINDOWS_NUMPAD_MAP@@@
+};

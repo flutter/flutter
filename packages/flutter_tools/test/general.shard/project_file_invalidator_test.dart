@@ -1,69 +1,169 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 // assumption: tests have a timeout less than 100 days
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  group('ProjectFileInvalidator', () {
-    _testProjectFileInvalidator(asyncScanning: false);
-  });
-  group('ProjectFileInvalidator (async scanning)', () {
-    _testProjectFileInvalidator(asyncScanning: true);
-  });
-}
+  for (final bool asyncScanning in <bool>[true, false]) {
+    testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages').writeAsStringSync('\n');
 
-void _testProjectFileInvalidator({@required bool asyncScanning}) {
-  const ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator();
+      expect(
+        (await projectFileInvalidator.findInvalidated(
+          lastCompiled: null,
+          urisToMonitor: <Uri>[],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        )).uris,
+        isEmpty,
+      );
+    });
 
-  testUsingContext('No last compile', () async {
-    expect(
-      await projectFileInvalidator.findInvalidated(
+    testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages').writeAsStringSync('\n');
+
+      expect(
+        (await projectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        )).uris,
+        isEmpty,
+      );
+    });
+
+    testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MemoryFileSystem();
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: MemoryFileSystem(),
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages').writeAsStringSync('\n');
+
+      expect(
+        (await projectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        )).uris,
+        isEmpty,
+      );
+    });
+
+    testWithoutContext('Picks up changes to the .packages file and updates package_config.json'
+      ', asyncScanning: $asyncScanning', () async {
+      final DateTime past = DateTime.now().subtract(const Duration(seconds: 1));
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final PackageConfig packageConfig = PackageConfig.empty;
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages')
+        .writeAsStringSync('\n');
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[],
+        }));
+
+      final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
         lastCompiled: null,
         urisToMonitor: <Uri>[],
-        packagesPath: '',
+        packagesPath: '.packages',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  });
+        packageConfig: packageConfig,
+      );
+      expect(invalidationResult.uris, isEmpty);
+      fileSystem.file('.packages').setLastModifiedSync(DateTime.now());
 
-  testUsingContext('Empty project', () async {
-    expect(
-      await projectFileInvalidator.findInvalidated(
-        lastCompiled: inFuture,
+      final InvalidationResult secondInvalidation = await projectFileInvalidator.findInvalidated(
+        lastCompiled: past,
         urisToMonitor: <Uri>[],
-        packagesPath: '',
+        packagesPath: '.packages',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+        packageConfig: packageConfig,
+      );
+      expect(secondInvalidation.uris, unorderedEquals(<Uri>[
+        Uri.parse('.packages'),
+        Uri.parse('.dart_tool/package_config.json'),
+      ]));
+    });
 
-  testUsingContext('Non-existent files are ignored', () async {
-    expect(
-      await projectFileInvalidator.findInvalidated(
-        lastCompiled: inFuture,
-        urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
-        packagesPath: '',
+
+    testWithoutContext('Picks up changes to the .packages file and updates PackageConfig'
+      ', asyncScanning: $asyncScanning', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final PackageConfig packageConfig = PackageConfig.empty;
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        fileSystem: fileSystem,
+        platform: FakePlatform(),
+        logger: BufferLogger.test(),
+      );
+      fileSystem.file('.packages')
+        .writeAsStringSync('\n');
+
+      final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '.packages',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+        packageConfig: packageConfig,
+      );
+
+      expect(invalidationResult.packageConfig, isNot(packageConfig));
+
+      fileSystem.file('.packages')
+        .writeAsStringSync('foo:lib/\n');
+      final DateTime packagesUpdated = fileSystem.statSync('.packages')
+        .modified;
+
+      final InvalidationResult nextInvalidationResult = await projectFileInvalidator
+        .findInvalidated(
+          lastCompiled: packagesUpdated.subtract(const Duration(seconds: 1)),
+          urisToMonitor: <Uri>[],
+          packagesPath: '.packages',
+          asyncScanning: asyncScanning,
+          packageConfig: PackageConfig.empty,
+        );
+
+      expect(nextInvalidationResult.uris, contains(Uri.parse('.packages')));
+      // The PackagConfig should have been recreated too
+      expect(nextInvalidationResult.packageConfig,
+        isNot(invalidationResult.packageConfig));
+    });
+  }
 }

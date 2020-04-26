@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,6 +22,7 @@ export 'src/widgets/animated_switcher.dart';
 export 'src/widgets/annotated_region.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/async.dart';
+export 'src/widgets/autofill.dart';
 export 'src/widgets/automatic_keep_alive.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
@@ -31,6 +32,7 @@ export 'src/widgets/color_filter.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';
+export 'src/widgets/disposable_build_context.dart';
 export 'src/widgets/drag_target.dart';
 export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/editable_text.dart';
@@ -48,6 +50,7 @@ export 'src/widgets/icon_data.dart';
 export 'src/widgets/icon_theme.dart';
 export 'src/widgets/icon_theme_data.dart';
 export 'src/widgets/image.dart';
+export 'src/widgets/image_filter.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
 export 'src/widgets/inherited_model.dart';
@@ -77,6 +80,7 @@ export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/routes.dart';
 export 'src/widgets/safe_area.dart';
 export 'src/widgets/scroll_activity.dart';
+export 'src/widgets/scroll_aware_image_provider.dart';
 export 'src/widgets/scroll_configuration.dart';
 export 'src/widgets/scroll_context.dart';
 export 'src/widgets/scroll_controller.dart';
@@ -94,6 +98,7 @@ export 'src/widgets/shortcuts.dart';
 export 'src/widgets/single_child_scroll_view.dart';
 export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/sliver.dart';
+export 'src/widgets/sliver_fill.dart';
 export 'src/widgets/sliver_layout_builder.dart';
 export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/sliver_prototype_extent_list.dart';

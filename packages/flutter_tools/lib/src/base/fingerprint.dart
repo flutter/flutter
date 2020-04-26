@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,19 +7,11 @@ import 'package:meta/meta.dart';
 import 'package:quiver/core.dart' show hash2;
 
 import '../convert.dart' show json;
-import '../globals.dart';
-import '../version.dart';
+import '../globals.dart' as globals;
 import 'file_system.dart';
-import 'platform.dart';
+import 'utils.dart';
 
 typedef FingerprintPathFilter = bool Function(String path);
-
-/// Whether to completely disable build caching.
-///
-/// This is done by always returning false from fingerprinter invocations. This
-/// is safe to do generally, because fingerprinting is only a performance
-/// improvement.
-bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -36,7 +28,7 @@ class Fingerprinter {
     Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
-       _properties = Map<String, String>.from(properties),
+       _properties = Map<String, String>.of(properties),
        _depfilePaths = depfilePaths.toList(),
        _pathFilter = pathFilter,
        assert(fingerprintPath != null),
@@ -56,30 +48,27 @@ class Fingerprinter {
   }
 
   bool doesFingerprintMatch() {
-    if (_disableBuildCache) {
-      return false;
-    }
     try {
-      final File fingerprintFile = fs.file(fingerprintPath);
+      final File fingerprintFile = globals.fs.file(fingerprintPath);
       if (!fingerprintFile.existsSync()) {
         return false;
       }
 
-      if (!_depfilePaths.every(fs.isFileSync)) {
+      if (!_depfilePaths.every(globals.fs.isFileSync)) {
         return false;
       }
 
       final List<String> paths = _getPaths();
-      if (!paths.every(fs.isFileSync)) {
+      if (!paths.every(globals.fs.isFileSync)) {
         return false;
       }
 
       final Fingerprint oldFingerprint = Fingerprint.fromJson(fingerprintFile.readAsStringSync());
       final Fingerprint newFingerprint = buildFingerprint();
       return oldFingerprint == newFingerprint;
-    } catch (e) {
+    } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
-      printTrace('Fingerprint check error: $e');
+      globals.printTrace('Fingerprint check error: $e');
     }
     return false;
   }
@@ -87,17 +76,17 @@ class Fingerprinter {
   void writeFingerprint() {
     try {
       final Fingerprint fingerprint = buildFingerprint();
-      fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
-    } catch (e) {
+      globals.fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+    } on Exception catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
-      printTrace('Fingerprint write error: $e');
+      globals.printTrace('Fingerprint write error: $e');
     }
   }
 
   List<String> _getPaths() {
     final Set<String> paths = <String>{
       ..._paths,
-      for (String depfilePath in _depfilePaths)
+      for (final String depfilePath in _depfilePaths)
         ...readDepfile(depfilePath),
     };
     final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
@@ -109,57 +98,67 @@ class Fingerprinter {
 /// properties.
 ///
 /// See [Fingerprinter].
+@immutable
 class Fingerprint {
-  Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
-    final Iterable<File> files = inputPaths.map<File>(fs.file);
+  const Fingerprint._({
+    Map<String, String> checksums,
+    Map<String, String> properties,
+  })  : _checksums = checksums,
+        _properties = properties;
+
+  factory Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
+    final Iterable<File> files = inputPaths.map<File>(globals.fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty) {
-      throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
+      throw Exception('Missing input files:\n' + missingInputs.join('\n'));
     }
-
-    _checksums = <String, String>{};
-    for (File file in files) {
-      final List<int> bytes = file.readAsBytesSync();
-      _checksums[file.path] = md5.convert(bytes).toString();
-    }
-    _properties = <String, String>{...properties};
+    return Fingerprint._(
+      // ignore: prefer_const_literals_to_create_immutables, https://github.com/dart-lang/linter/issues/2025
+      checksums: <String, String>{
+        for (final File file in files)
+          file.path: md5.convert(file.readAsBytesSync()).toString(),
+      },
+      properties: <String, String>{...properties},
+    );
   }
 
   /// Creates a Fingerprint from serialized JSON.
   ///
-  /// Throws [ArgumentError], if there is a version mismatch between the
+  /// Throws [Exception], if there is a version mismatch between the
   /// serializing framework and this framework.
-  Fingerprint.fromJson(String jsonData) {
-    final Map<String, dynamic> content = json.decode(jsonData);
+  factory Fingerprint.fromJson(String jsonData) {
+    final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
 
-    final String version = content['version'];
-    if (version != FlutterVersion.instance.frameworkRevision) {
-      throw ArgumentError('Incompatible fingerprint version: $version');
+    final String version = content['version'] as String;
+    if (version != globals.flutterVersion.frameworkRevision) {
+      throw Exception('Incompatible fingerprint version: $version');
     }
-    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
-    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
+    return Fingerprint._(
+      checksums: castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{},
+      properties: castStringKeyedMap(content['properties'])?.cast<String,String>() ?? <String, String>{},
+    );
   }
 
-  Map<String, String> _checksums;
-  Map<String, String> _properties;
+  final Map<String, String> _checksums;
+  final Map<String, String> _properties;
 
   String toJson() => json.encode(<String, dynamic>{
-    'version': FlutterVersion.instance.frameworkRevision,
+    'version': globals.flutterVersion.frameworkRevision,
     'properties': _properties,
     'files': _checksums,
   });
 
   @override
-  bool operator==(dynamic other) {
+  bool operator==(Object other) {
     if (identical(other, this)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums)
-        && _equalMaps(typedOther._properties, _properties);
+    return other is Fingerprint
+        && _equalMaps(other._checksums, _checksums)
+        && _equalMaps(other._properties, _properties);
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {
@@ -191,15 +190,16 @@ final RegExp _escapeExpr = RegExp(r'\\(.)');
 Set<String> readDepfile(String depfilePath) {
   // Depfile format:
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
-  final String contents = fs.file(depfilePath).readAsStringSync();
+  final String contents = globals.fs.file(depfilePath).readAsStringSync();
 
-  final String dependencies = contents.split(': ')[1];
-  return dependencies
+  final List<String> dependencies = contents.split(': ');
+  if (dependencies.length < 2) {
+    throw Exception('malformed depfile');
+  }
+  return dependencies[1]
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
       .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }
-
-

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,7 +22,7 @@ void main() {
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
-    tap.addPointer(event);
+    tap.addPointer(event as PointerDownEvent);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Adding: TapGestureRecognizer#00000(state: ready, button: 1)'));
@@ -68,7 +68,7 @@ void main() {
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
-    tap.addPointer(event);
+    tap.addPointer(event as PointerDownEvent);
     expect(log, isEmpty);
 
     GestureBinding.instance.gestureArena.close(1);
@@ -111,7 +111,7 @@ void main() {
     expect(log, isEmpty);
 
     event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
-    tap.addPointer(event);
+    tap.addPointer(event as PointerDownEvent);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
     expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Adding: TapGestureRecognizer#00000(state: ready, button: 1)'));
@@ -150,7 +150,7 @@ void main() {
     final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTap = () {}; // Add a callback so that event can be added
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
-    const PointerEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    const PointerDownEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     tap.didExceedDeadline();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: possible, button: 1, sent tap down)'));

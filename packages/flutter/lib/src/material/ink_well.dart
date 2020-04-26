@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,6 +63,80 @@ abstract class InteractiveInkFeature extends InkFeature {
       return;
     _color = value;
     controller.markNeedsPaint();
+  }
+
+  /// Draws an ink splash or ink ripple on the passed in [Canvas].
+  ///
+  /// The [transform] argument is the [Matrix4] transform that typically
+  /// shifts the coordinate space of the canvas to the space in which
+  /// the ink circle is to be painted.
+  ///
+  /// [center] is the [Offset] from origin of the canvas where the center
+  /// of the circle is drawn.
+  ///
+  /// [paint] takes a [Paint] object that describes the styles used to draw the ink circle.
+  /// For example, [paint] can specify properties like color, strokewidth, colorFilter.
+  ///
+  /// [radius] is the radius of ink circle to be drawn on canvas.
+  ///
+  /// [clipCallback] is the callback used to obtain the [Rect] used for clipping the ink effect.
+  /// If [clipCallback] is null, no clipping is performed on the ink circle.
+  ///
+  /// Clipping can happen in 3 different ways -
+  ///  1. If [customBorder] is provided, it is used to determine the path
+  ///     for clipping.
+  ///  2. If [customBorder] is null, and [borderRadius] is provided, the canvas
+  ///     is clipped by an [RRect] created from [clipCallback] and [borderRadius].
+  ///  3. If [borderRadius] is the default [BorderRadius.zero], then the [Rect] provided
+  ///      by [clipCallback] is used for clipping.
+  ///
+  /// [textDirection] is used by [customBorder] if it is non-null. This allows the [customBorder]'s path
+  /// to be properly defined if it was the path was expressed in terms of "start" and "end" instead of
+  /// "left" and "right".
+  ///
+  /// For examples on how the function is used, see [InkSplash] and [InkRipple].
+  @protected
+  void paintInkCircle({
+    @required Canvas canvas,
+    @required Matrix4 transform,
+    @required Paint paint,
+    @required Offset center,
+    @required double radius,
+    TextDirection textDirection,
+    ShapeBorder customBorder,
+    BorderRadius borderRadius = BorderRadius.zero,
+    RectCallback clipCallback,
+    }) {
+    assert(canvas != null);
+    assert(transform != null);
+    assert(paint != null);
+    assert(center != null);
+    assert(radius != null);
+    assert(borderRadius != null);
+
+    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    canvas.save();
+    if (originOffset == null) {
+      canvas.transform(transform.storage);
+    } else {
+      canvas.translate(originOffset.dx, originOffset.dy);
+    }
+    if (clipCallback != null) {
+      final Rect rect = clipCallback();
+      if (customBorder != null) {
+        canvas.clipPath(customBorder.getOuterPath(rect, textDirection: textDirection));
+      } else if (borderRadius != BorderRadius.zero) {
+        canvas.clipRRect(RRect.fromRectAndCorners(
+          rect,
+          topLeft: borderRadius.topLeft, topRight: borderRadius.topRight,
+          bottomLeft: borderRadius.bottomLeft, bottomRight: borderRadius.bottomRight,
+        ));
+      } else {
+        canvas.clipRect(rect);
+      }
+    }
+    canvas.drawCircle(center, radius, paint);
+    canvas.restore();
   }
 }
 
@@ -485,34 +559,26 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   InteractiveInkFeature _currentSplash;
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
-  Map<LocalKey, ActionFactory> _actionMap;
+  Map<Type, Action<Intent>> _actionMap;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
 
-  void _handleAction(FocusNode node, Intent intent) {
-    _startSplash(context: node.context);
-    _handleTap(node.context);
-  }
-
-  Action _createAction() {
-    return CallbackAction(
-      ActivateAction.key,
-      onInvoke:  _handleAction,
-    );
+  void _handleAction(ActivateIntent intent) {
+    _startSplash(context: context);
+    _handleTap(context);
   }
 
   @override
   void initState() {
     super.initState();
-    _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+    _actionMap = <Type, Action<Intent>>{
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleAction),
     };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   @override
-  void didUpdateWidget(InkResponse oldWidget) {
+  void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       _handleHoverChange(_hovering);
@@ -566,7 +632,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       return;
     if (value) {
       if (highlight == null) {
-        final RenderBox referenceBox = context.findRenderObject();
+        final RenderBox referenceBox = context.findRenderObject() as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
@@ -604,7 +670,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   InteractiveInkFeature _createInkFeature(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
-    final RenderBox referenceBox = context.findRenderObject();
+    final RenderBox referenceBox = context.findRenderObject() as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
@@ -682,7 +748,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
     Offset globalPosition;
     if (context != null) {
-      final RenderBox referenceBox = context.findRenderObject();
+      final RenderBox referenceBox = context.findRenderObject() as RenderBox;
       assert(referenceBox.hasSize, 'InkResponse must be done with layout before starting a splash.');
       globalPosition = referenceBox.localToGlobal(referenceBox.paintBounds.center);
     } else {
@@ -738,12 +804,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes;
       _splashes = null;
-      for (InteractiveInkFeature splash in splashes)
+      for (final InteractiveInkFeature splash in splashes)
         splash.dispose();
       _currentSplash = null;
     }
     assert(_currentSplash == null);
-    for (_HighlightType highlight in _highlights.keys) {
+    for (final _HighlightType highlight in _highlights.keys) {
       _highlights[highlight]?.dispose();
       _highlights[highlight] = null;
     }
@@ -769,7 +835,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
-    for (_HighlightType type in _highlights.keys) {
+    for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
@@ -848,7 +914,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///
 /// An example of this situation is as follows:
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool dartpad --template=stateful_widget_scaffold_center}
 ///
 /// Tap the container to cause it to grow. Then, tap it again and hold before
 /// the widget reaches its maximum size to observe the clipped ink splash.

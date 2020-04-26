@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -122,8 +122,7 @@ void main() {
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
-            instance
-              ..onTap = () { logs.add('tap'); };
+            instance.onTap = () { logs.add('tap'); };
           },
         ),
       });
@@ -146,8 +145,7 @@ void main() {
                 HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
                   () => HorizontalDragGestureRecognizer(),
                   (HorizontalDragGestureRecognizer instance) {
-                    instance
-                      ..onStart = (_) { logs.add('horizontal'); };
+                    instance.onStart = (_) { logs.add('horizontal'); };
                   },
                 ),
               },
@@ -174,7 +172,7 @@ void main() {
     semantics.dispose();
   });
 
-  group('RawGestureDetector\'s custom semantics delegate', () {
+  group("RawGestureDetector's custom semantics delegate", () {
     testWidgets('should update semantics notations when switching from the default delegate', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
@@ -322,7 +320,7 @@ void main() {
     });
   });
 
-  group('RawGestureDetector\'s default semantics delegate', () {
+  group("RawGestureDetector's default semantics delegate", () {
     group('should map onTap to', () {
       testWidgets('null when there is no TapGR', (WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);

@@ -1,13 +1,14 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/net.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
 
@@ -99,18 +100,21 @@ class FuchsiaPM {
     ]);
   }
 
-  /// Spawns an http server in a new process for serving Fuchisa packages.
+  /// Spawns an http server in a new process for serving Fuchsia packages.
   ///
-  /// The arguemnt [repoPath] should have previously been an arguemnt to
+  /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
   /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
   /// http server to bind.
   Future<Process> serve(String repoPath, String host, int port) async {
-    if (fuchsiaArtifacts.pm == null) {
+    if (globals.fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
+    if (isIPv6Address(host.split('%').first)) {
+      host = '[${host.replaceAll('%', '%25')}]';
+    }
     final List<String> command = <String>[
-      fuchsiaArtifacts.pm.path,
+      globals.fuchsiaArtifacts.pm.path,
       'serve',
       '-repo',
       repoPath,
@@ -121,11 +125,11 @@ class FuchsiaPM {
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printTrace);
+        .listen(globals.printTrace);
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printError);
+        .listen(globals.printError);
     return process;
   }
 
@@ -147,10 +151,10 @@ class FuchsiaPM {
   }
 
   Future<bool> _runPMCommand(List<String> args) async {
-    if (fuchsiaArtifacts.pm == null) {
+    if (globals.fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
+    final List<String> command = <String>[globals.fuchsiaArtifacts.pm.path, ...args];
     final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }
@@ -176,7 +180,17 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
+  factory FuchsiaPackageServer(String repo, String name, String host, int port) {
+    // TODO(jonahwilliams): ensure we only receive valid ipv4 or ipv6 InternetAddresses.
+    // Temporary work around to receiving ipv6 addresses with trailing information:
+    // fe80::ec4:7aff:fecc:ea8f%eno2
+    if (host.contains('%')) {
+      host = host.split('%').first;
+    }
+    return FuchsiaPackageServer._(repo, name, host, port);
+  }
+
+  FuchsiaPackageServer._(this._repo, this.name, this._host, this._port);
 
   static const String deviceHost = 'fuchsia.com';
   static const String toolHost = 'flutter_tool';
@@ -187,25 +201,25 @@ class FuchsiaPackageServer {
 
   Process _process;
 
-  /// The url that can be used by the device to access this package server.
-  String get url => 'http://$_host:$_port';
+  /// The URL that can be used by the device to access this package server.
+  String get url => Uri(scheme: 'http', host: _host, port: _port).toString();
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
 
-  /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not
   /// be spawned, and true otherwise.
   Future<bool> start() async {
     if (_process != null) {
-      printError('$this already started!');
+      globals.printError('$this already started!');
       return false;
     }
     // initialize a new repo.
     if (!await fuchsiaSdk.fuchsiaPM.newrepo(_repo)) {
-      printError('Failed to create a new package server repo');
+      globals.printError('Failed to create a new package server repo');
       return false;
     }
     _process = await fuchsiaSdk.fuchsiaPM.serve(_repo, _host, _port);
@@ -213,7 +227,7 @@ class FuchsiaPackageServer {
     unawaited(_process.exitCode.whenComplete(() {
       // If _process is null, then the server was stopped deliberately.
       if (_process != null) {
-        printError('Error running Fuchsia pm tool "serve" command');
+        globals.printError('Error running Fuchsia pm tool "serve" command');
       }
     }));
     return true;

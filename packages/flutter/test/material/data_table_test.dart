@@ -1,7 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,7 +35,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             onSelectChanged: (bool selected) {
               log.add('row-selected: ${dessert.name}');
             },
@@ -96,6 +97,72 @@ void main() {
     await tester.tap(find.byType(Checkbox).last);
 
     expect(log, <String>['row-selected: KitKat']);
+    log.clear();
+  });
+
+  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    Widget buildTable({ bool checkboxes = false }) {
+      return DataTable(
+        showCheckboxColumn: checkboxes,
+        onSelectAll: (bool value) {
+          log.add('select-all: $value');
+        },
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            onSelectChanged: (bool selected) {
+              log.add('row-selected: ${dessert.name}');
+            },
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {
+                  log.add('cell-tap: ${dessert.calories}');
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    expect(find.byType(Checkbox), findsNothing);
+    await tester.tap(find.text('Cupcake'));
+
+    expect(log, <String>['row-selected: Cupcake']);
+    log.clear();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(checkboxes: true)),
+    ));
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    final Finder checkboxes = find.byType(Checkbox);
+    expect(checkboxes, findsNWidgets(11));
+    await tester.tap(checkboxes.first);
+
+    expect(log, <String>['select-all: true']);
     log.clear();
   });
 
@@ -294,7 +361,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -330,7 +397,7 @@ void main() {
           ],
           rows: kDesserts.map<DataRow>((Dessert dessert) {
             return DataRow(
-              key: Key(dessert.name),
+              key: ValueKey<String>(dessert.name),
               onSelectChanged: (bool selected) {},
               cells: <DataCell>[
                 DataCell(
@@ -421,7 +488,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -528,7 +595,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -642,7 +709,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -735,7 +802,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: Key(dessert.name),
+            key: ValueKey<String>(dessert.name),
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -799,5 +866,172 @@ void main() {
       tester.getRect(padding).right - tester.getRect(cellContent).right,
       _customHorizontalMargin,
     );
+  });
+
+  testWidgets('DataTable set border width test', (WidgetTester tester) async {
+    const List<DataColumn> columns = <DataColumn>[
+      DataColumn(label: Text('column1')),
+      DataColumn(label: Text('column2')),
+    ];
+
+    const List<DataCell> cells = <DataCell>[
+      DataCell(Text('cell1')),
+      DataCell(Text('cell2')),
+    ];
+
+    const List<DataRow> rows = <DataRow>[
+      DataRow(cells: cells),
+      DataRow(cells: cells),
+    ];
+
+    // no thickness provided - border should be default: i.e "1.0" as it
+    // set in DataTable constructor
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+
+    Table table = tester.widget(find.byType(Table));
+    TableRow tableRow = table.children.first;
+    BoxDecoration boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, 1.0);
+
+    const double thickness =  4.2;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            dividerThickness: thickness,
+            columns: columns,
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+    table = tester.widget(find.byType(Table));
+    tableRow = table.children.first;
+    boxDecoration = tableRow.decoration as BoxDecoration;
+    expect(boxDecoration.border.bottom.width, thickness);
+  });
+
+  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
+    Widget buildTable({ int sortColumnIndex, bool sortEnabled = true }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        columns: <DataColumn>[
+          DataColumn(
+            label: const Expanded(child: Center(child: Text('Name'))),
+            tooltip: 'Name',
+            onSort: sortEnabled ? (_, __) {} : null,
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('A long desert name')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    // Start with without sorting
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+
+    // Turn on sorting
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: true,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsOneWidget);
+    }
+
+    // Turn off sorting again
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(
+        sortEnabled: false,
+      )),
+    ));
+
+    {
+      final Finder nameText = find.text('Name');
+      expect(nameText, findsOneWidget);
+      final Finder nameCell = find.ancestor(of: find.text('Name'), matching: find.byType(Container)).first;
+      expect(tester.getCenter(nameText), equals(tester.getCenter(nameCell)));
+      expect(find.descendant(of: nameCell, matching: find.byType(Icon)), findsNothing);
+    }
+  });
+
+  testWidgets('DataTable correctly renders with a mouse', (WidgetTester tester) async {
+    // Regression test for a bug described in
+    // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
+    // Filed at https://github.com/flutter/flutter/issues/51152
+    Widget buildTable({ int sortColumnIndex }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Expanded(child: Center(child: Text('column1'))),
+            tooltip: 'Column1',
+          ),
+          DataColumn(
+            label: const Expanded(child: Center(child: Text('column2'))),
+            tooltip: 'Column2',
+            onSort: (_, __) {},
+          ),
+        ],
+        rows: const <DataRow>[
+          DataRow(
+            cells: <DataCell>[
+              DataCell(Text('Content1')),
+              DataCell(Text('Content2')),
+            ],
+          ),
+        ]
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    expect(tester.renderObject(find.text('column1')).attached, true);
+    expect(tester.renderObject(find.text('column2')).attached, true);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpAndSettle();
+    expect(tester.renderObject(find.text('column1')).attached, true);
+    expect(tester.renderObject(find.text('column2')).attached, true);
+
+    // Wait for the tooltip timer to expire to prevent it scheduling a new frame
+    // after the view is destroyed, which causes exceptions.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 }

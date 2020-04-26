@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 set -e
 
@@ -21,4 +24,3 @@ set -o pipefail && xcodebuild \
   -scheme ios_add2app \
   -sdk "iphonesimulator$os_version" \
   -destination "OS=$os_version,name=iPhone X" test | $PRETTY
-

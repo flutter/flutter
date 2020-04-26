@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -502,7 +502,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
       return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
@@ -537,7 +537,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           inflexibleSpace += mainSize;
           maxCrossSize = math.max(maxCrossSize, crossSize);
         }
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
 
@@ -552,7 +552,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         final int flex = _getFlex(child);
         if (flex > 0)
           maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
 
@@ -604,12 +604,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   int _getFlex(RenderBox child) {
-    final FlexParentData childParentData = child.parentData;
+    final FlexParentData childParentData = child.parentData as FlexParentData;
     return childParentData.flex ?? 0;
   }
 
   FlexFit _getFit(RenderBox child) {
-    final FlexParentData childParentData = child.parentData;
+    final FlexParentData childParentData = child.parentData as FlexParentData;
     return childParentData.fit ?? FlexFit.tight;
   }
 
@@ -636,6 +636,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   void performLayout() {
     assert(_debugHasNecessaryDirections);
+    final BoxConstraints constraints = this.constraints;
+
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
     int totalChildren = 0;
@@ -648,7 +650,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     RenderBox child = firstChild;
     RenderBox lastFlexChild;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
       totalChildren++;
       final int flex = _getFlex(child);
       if (flex > 0) {
@@ -670,13 +672,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             switch (_direction) {
               case Axis.horizontal:
                 while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
-                  node = node.parent;
+                  node = node.parent as RenderBox;
                 if (!node.constraints.hasBoundedWidth)
                   node = null;
                 break;
               case Axis.vertical:
                 while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
-                  node = node.parent;
+                  node = node.parent as RenderBox;
                 if (!node.constraints.hasBoundedHeight)
                   node = null;
                 break;
@@ -711,7 +713,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),
             ...addendum,
             ErrorDescription(
-              'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+              "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
               '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
             ),
           ]);
@@ -830,7 +832,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
           }
         }
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
         child = childParentData.nextSibling;
       }
     }
@@ -892,7 +894,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
-      final FlexParentData childParentData = child.parentData;
+      final FlexParentData childParentData = child.parentData as FlexParentData;
       double childCrossPosition;
       switch (_crossAxisAlignment) {
         case CrossAxisAlignment.start:

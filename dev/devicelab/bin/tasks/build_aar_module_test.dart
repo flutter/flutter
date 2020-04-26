@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,7 +57,7 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['aar', '--verbose'],
+          options: <String>['aar', '--release', '--verbose'],
         );
       });
 
@@ -152,7 +152,7 @@ Future<void> main() async {
 
       section('Check assets in release AAR');
 
-      checkItContains<String>(
+      checkCollectionContains<String>(
         <String>[
           ...flutterAssets,
           // AOT snapshots
@@ -278,7 +278,7 @@ Future<void> main() async {
         'flutter_debug-1.0.aar',
       ));
 
-      checkItContains<String>(<String>[
+      checkCollectionContains<String>(<String>[
         ...flutterAssets,
         ...debugAssets,
       ], debugAar);

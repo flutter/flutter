@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,6 +30,7 @@ typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 /// implicitly.
 ///
 /// See also:
+///
 ///  * [TransitionBuilder], which is similar but only takes a [BuildContext]
 ///    and a child widget.
 typedef HeroPlaceholderBuilder = Widget Function(
@@ -73,7 +74,7 @@ enum HeroFlightDirection {
 // The bounding box for context in ancestorContext coordinate system, or in the global
 // coordinate system when null.
 Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
-  final RenderBox box = context.findRenderObject();
+  final RenderBox box = context.findRenderObject() as RenderBox;
   assert(box != null && box.hasSize);
   return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
@@ -274,8 +275,8 @@ class Hero extends StatefulWidget {
         }
         return true;
       }());
-      final Hero heroWidget = hero.widget;
-      final _HeroState heroState = hero.state;
+      final Hero heroWidget = hero.widget as Hero;
+      final _HeroState heroState = hero.state as _HeroState;
       if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
         result[tag] = heroState;
       } else {
@@ -286,10 +287,10 @@ class Hero extends StatefulWidget {
     }
 
     void visitor(Element element) {
-      if (element.widget is Hero) {
-        final StatefulElement hero = element;
-        final Hero heroWidget = element.widget;
-        final Object tag = heroWidget.tag;
+      final Widget widget = element.widget;
+      if (widget is Hero) {
+        final StatefulElement hero = element as StatefulElement;
+        final Object tag = widget.tag;
         assert(tag != null);
         if (Navigator.of(hero) == navigator) {
           inviteHero(hero, tag);
@@ -344,7 +345,7 @@ class _HeroState extends State<Hero> {
   void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     assert(box != null && box.hasSize);
     setState(() {
       _placeholderSize = box.size;
@@ -371,7 +372,7 @@ class _HeroState extends State<Hero> {
   @override
   Widget build(BuildContext context) {
     assert(
-      context.ancestorWidgetOfExactType(Hero) == null,
+      context.findAncestorWidgetOfExactType<Hero>() == null,
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
@@ -489,7 +490,7 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget child) {
-        final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject();
+        final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject() as RenderBox;
         if (_aborted || toHeroBox == null || !toHeroBox.attached) {
           // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
@@ -501,7 +502,7 @@ class _HeroFlight {
         } else if (toHeroBox.hasSize) {
           // The toHero has been laid out. If it's no longer where the hero animation is
           // supposed to end up then recreate the heroRect tween.
-          final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject();
+          final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
           if (toHeroOrigin != heroRectTween.end.topLeft) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end.size;
@@ -754,7 +755,7 @@ class HeroController extends NavigatorObserver {
 
     // Treat these invalidated flights as dismissed. Calling _handleAnimationUpdate
     // will also remove the flight from _flights.
-    for (_HeroFlight flight in invalidFlights) {
+    for (final _HeroFlight flight in invalidFlights) {
       flight._handleAnimationUpdate(AnimationStatus.dismissed);
     }
   }
@@ -833,7 +834,7 @@ class HeroController extends NavigatorObserver {
     // animation value back to what it was before it was "moved" offstage.
     to.offstage = false;
 
-    for (Object tag in fromHeroes.keys) {
+    for (final Object tag in fromHeroes.keys) {
       if (toHeroes[tag] != null) {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
@@ -865,7 +866,7 @@ class HeroController extends NavigatorObserver {
 
     // If the from hero is gone, the flight won't start and the to hero needs to
     // be put on stage again.
-    for (Object tag in toHeroes.keys) {
+    for (final Object tag in toHeroes.keys) {
       if (fromHeroes[tag] == null)
         toHeroes[tag].ensurePlaceholderIsHidden();
     }
@@ -882,7 +883,7 @@ class HeroController extends NavigatorObserver {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    final Hero toHero = toHeroContext.widget;
+    final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
   };
 }

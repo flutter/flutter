@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,6 +37,7 @@ class Scrollbar extends StatefulWidget {
     Key key,
     @required this.child,
     this.controller,
+    this.isAlwaysShown = false,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -49,6 +50,9 @@ class Scrollbar extends StatefulWidget {
 
   /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
   final ScrollController controller;
+
+  /// {@macro flutter.cupertino.cupertinoScrollbar.isAlwaysShown}
+  final bool isAlwaysShown;
 
   @override
   _ScrollbarState createState() => _ScrollbarState();
@@ -86,6 +90,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         // On iOS, stop all local animations. CupertinoScrollbar has its own
         // animations.
         _fadeoutTimer?.cancel();
@@ -95,13 +100,37 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         _themeColor = theme.highlightColor.withOpacity(1.0);
         _textDirection = Directionality.of(context);
         _materialPainter = _buildMaterialScrollbarPainter();
         _useCupertinoScrollbar = false;
+        WidgetsBinding.instance.addPostFrameCallback((Duration duration) {
+          if (widget.isAlwaysShown) {
+            assert(widget.controller != null);
+            // Wait one frame and cause an empty scroll event.  This allows the
+            // thumb to show immediately when isAlwaysShown is true.  A scroll
+            // event is required in order to paint the thumb.
+            widget.controller.position.didUpdateScrollPositionBy(0);
+          }
+        });
         break;
     }
     assert(_useCupertinoScrollbar != null);
+  }
+
+  @override
+  void didUpdateWidget(Scrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isAlwaysShown != oldWidget.isAlwaysShown) {
+      assert(widget.controller != null);
+      if (widget.isAlwaysShown == false) {
+        _fadeoutAnimationController.reverse();
+      } else {
+        _fadeoutAnimationController.animateTo(1.0);
+      }
+    }
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
@@ -123,17 +152,23 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
     if (!_useCupertinoScrollbar &&
-        (notification is ScrollUpdateNotification || notification is OverscrollNotification)) {
+        (notification is ScrollUpdateNotification ||
+            notification is OverscrollNotification)) {
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }
 
-      _materialPainter.update(notification.metrics, notification.metrics.axisDirection);
-      _fadeoutTimer?.cancel();
-      _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
-        _fadeoutAnimationController.reverse();
-        _fadeoutTimer = null;
-      });
+      _materialPainter.update(
+        notification.metrics,
+        notification.metrics.axisDirection,
+      );
+      if (!widget.isAlwaysShown) {
+        _fadeoutTimer?.cancel();
+        _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
+          _fadeoutAnimationController.reverse();
+          _fadeoutTimer = null;
+        });
+      }
     }
     return false;
   }
@@ -151,6 +186,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
+        isAlwaysShown: widget.isAlwaysShown,
         controller: widget.controller,
       );
     }

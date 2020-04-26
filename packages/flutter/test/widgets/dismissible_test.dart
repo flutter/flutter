@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -208,7 +208,7 @@ Future<void> rollbackElement(WidgetTester tester, Finder finder, { @required Axi
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  const Test1215DismissibleWidget(this.text);
+  const Test1215DismissibleWidget(this.text, { Key key }) : super(key: key);
 
   final String text;
 
@@ -777,7 +777,7 @@ void main() {
     final dynamic exception =  tester.takeException();
     expect(exception, isNotNull);
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(
       error.diagnostics.last.toStringDeep(),

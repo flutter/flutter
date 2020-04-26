@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,6 +39,18 @@ class TestTextInput {
   /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
 
+  /// Resets any internal state of this object and calls [register].
+  ///
+  /// This method is invoked by the testing framework between tests. It should
+  /// not ordinarily be called by tests directly.
+  void resetAndRegister() {
+    log.clear();
+    editingState = null;
+    setClientArgs = null;
+    _client = 0;
+    _isVisible = false;
+    register();
+  }
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
@@ -64,6 +76,7 @@ class TestTextInput {
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// Use [register] and [unregister] methods to control this value.
+  // TODO(dnfield): This is unreliable. https://github.com/flutter/flutter/issues/47180
   bool get isRegistered => _isRegistered;
   bool _isRegistered = false;
 
@@ -87,8 +100,8 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0];
-        setClientArgs = methodCall.arguments[1];
+        _client = methodCall.arguments[0] as int;
+        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.clearClient':
         _client = 0;
@@ -97,7 +110,7 @@ class TestTextInput {
           onCleared();
         break;
       case 'TextInput.setEditingState':
-        editingState = methodCall.arguments;
+        editingState = methodCall.arguments as Map<String, dynamic>;
         break;
       case 'TextInput.show':
         _isVisible = true;

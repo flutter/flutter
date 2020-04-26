@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,6 +30,28 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.textAlign, alignment);
+  });
+
+  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+    const ScrollPhysics scrollPhysics = ScrollPhysics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              scrollPhysics: scrollPhysics,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
   testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
@@ -281,7 +303,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  });
+  }, skip: isBrowser); // We do not use Flutter-rendered context menu on the Web
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
@@ -308,5 +330,51 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.pump(const Duration(milliseconds: 300));
     expect(tapCount, 3);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/54472.
+  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextFormField(
+                initialValue: 'initialValue',
+              ),
+            ),
+          ),
+        )
+    );
+
+    await tester.enterText(find.byType(TextFormField), 'changedValue');
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.reset();
+
+    expect(find.text('changedValue'), findsNothing);
+    expect(find.text('initialValue'), findsOneWidget);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/54472.
+  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: 'initialValue',
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('initialValue'), findsOneWidget);
+
+    final FormFieldState<String> state = tester.state<FormFieldState<String>>(find.byType(TextFormField));
+    state.didChange('changedValue');
+
+    expect(find.text('initialValue'), findsNothing);
+    expect(find.text('changedValue'), findsOneWidget);
   });
 }

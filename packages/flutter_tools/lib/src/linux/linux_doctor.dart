@@ -1,15 +1,22 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 
 /// A validator that checks for Clang and Make build dependencies
 class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop');
+  LinuxDoctorValidator({
+    @required ProcessManager processManager,
+  }) : _processManager = processManager,
+       super('Linux toolchain - develop for Linux desktop');
+
+  final ProcessManager _processManager;
 
   /// The minimum version of clang supported.
   final Version minimumClangVersion = Version(3, 4, 0);
@@ -21,7 +28,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     /// Check for a minimum version of Clang.
     ProcessResult clangResult;
     try {
-      clangResult = await processManager.run(const <String>[
+      clangResult = await _processManager.run(const <String>[
         'clang++',
         '--version',
       ]);
@@ -30,9 +37,9 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (clangResult == null || clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('clang++ is not installed'));
+      messages.add(const ValidationMessage.error('clang++ is not installed'));
     } else {
-      final String firstLine = clangResult.stdout.split('\n').first.trim();
+      final String firstLine = (clangResult.stdout as String).split('\n').first.trim();
       final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
       final Version version = Version.parse(versionString);
       if (version >= minimumClangVersion) {
@@ -48,7 +55,7 @@ class LinuxDoctorValidator extends DoctorValidator {
     // a better idea about what is supported.
     ProcessResult makeResult;
     try {
-      makeResult = await processManager.run(const <String>[
+      makeResult = await _processManager.run(const <String>[
         'make',
         '--version',
       ]);
@@ -57,9 +64,9 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (makeResult == null || makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('make is not installed'));
+      messages.add(const ValidationMessage.error('make is not installed'));
     } else {
-      final String firstLine = makeResult.stdout.split('\n').first.trim();
+      final String firstLine = (makeResult.stdout as String).split('\n').first.trim();
       messages.add(ValidationMessage(firstLine));
     }
 

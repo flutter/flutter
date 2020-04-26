@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
 
-CustomPainter _buildPainter({
+ScrollbarPainter _buildPainter({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
   Color color = _kScrollbarColor,
@@ -42,7 +42,7 @@ class _DrawRectOnceCanvas extends Mock implements Canvas { }
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
-  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single;
+  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single as Rect;
 
   tearDown(() => painter = null);
 
@@ -123,7 +123,7 @@ void main() {
       ];
 
       double lastCoefficient;
-      for (ScrollMetrics metrics in metricsList) {
+      for (final ScrollMetrics metrics in metricsList) {
         painter.update(metrics, metrics.axisDirection);
         painter.paint(testCanvas, size);
 
@@ -154,7 +154,7 @@ void main() {
       const double minLen = 0;
 
       const List<double> margins = <double> [-10, 1, viewportDimension/2 - 0.01];
-      for(double margin in margins) {
+      for (final double margin in margins) {
         painter = _buildPainter(
           mainAxisMargin: margin,
           minLength: minLen,
@@ -194,14 +194,14 @@ void main() {
       const Size size = Size(600, viewportDimension);
       const double margin = 4;
 
-      for(TextDirection textDirection in TextDirection.values) {
+      for (final TextDirection textDirection in TextDirection.values) {
         painter = _buildPainter(
           crossAxisMargin: margin,
           scrollMetrics: startingMetrics,
           textDirection: textDirection,
         );
 
-        for(AxisDirection direction in AxisDirection.values) {
+        for (final AxisDirection direction in AxisDirection.values) {
           painter.update(
             startingMetrics.copyWith(axisDirection: direction),
             direction,
@@ -454,7 +454,7 @@ void main() {
         viewportDimension: size.height,
       );
 
-      for(double minLength in <double> [_kMinThumbExtent, double.infinity]) {
+      for (final double minLength in <double>[_kMinThumbExtent, double.infinity]) {
         // Disregard `minLength` and `minOverscrollLength` to keep
         // scroll direction correct, if needed
         painter = _buildPainter(
@@ -471,7 +471,7 @@ void main() {
 
         Rect previousRect;
 
-        for(ScrollMetrics metrics in metricsList) {
+        for (final ScrollMetrics metrics in metricsList) {
           painter.update(metrics, metrics.axisDirection);
           painter.paint(testCanvas, size);
           final Rect rect = captureRect();

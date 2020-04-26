@@ -1,6 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'package:flutter/foundation.dart';
 
 import '../widgets/framework.dart';
 
@@ -9,7 +11,7 @@ import '../widgets/framework.dart';
 ///
 /// See also:
 ///
-/// * `UIUserInterfaceLevel`, the UIKit equivalent: https://developer.apple.com/documentation/uikit/uiuserinterfacelevel.
+///  * `UIUserInterfaceLevel`, the UIKit equivalent: https://developer.apple.com/documentation/uikit/uiuserinterfacelevel.
 enum CupertinoUserInterfaceLevelData {
   /// The level for your window's main content.
   base,
@@ -31,8 +33,8 @@ enum CupertinoUserInterfaceLevelData {
 ///
 /// See also:
 ///
-/// * [CupertinoUserInterfaceLevelData], specifies the visual level for the content
-/// in the subtree [CupertinoUserInterfaceLevel] established.
+///  * [CupertinoUserInterfaceLevelData], specifies the visual level for the content
+///    in the subtree [CupertinoUserInterfaceLevel] established.
 class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
@@ -58,7 +60,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   static CupertinoUserInterfaceLevelData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final CupertinoUserInterfaceLevel query = context.inheritFromWidgetOfExactType(CupertinoUserInterfaceLevel);
+    final CupertinoUserInterfaceLevel query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null)
       return query._data;
     if (nullOk)
@@ -72,5 +74,11 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(EnumProperty<CupertinoUserInterfaceLevelData>('user interface level', _data));
   }
 }

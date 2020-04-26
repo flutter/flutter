@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,25 +12,27 @@ import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_devices.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
       final DeviceManager deviceManager = DeviceManager();
-      final List<Device> devices = await deviceManager.getDevices().toList();
+      final List<Device> devices = await deviceManager.getDevices();
       expect(devices, isList);
     });
 
     testUsingContext('getDeviceById', () async {
-      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
-      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
-      final _MockDevice device3 = _MockDevice('iPod touch', '82564b38861a9a5');
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      final FakeDevice device3 = FakeDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
       final DeviceManager deviceManager = TestDeviceManager(devices);
 
       Future<void> expectDevice(String id, List<Device> expected) async {
-        expect(await deviceManager.getDevicesById(id).toList(), expected);
+        expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('01abfc49119c410e', <Device>[device2]);
       await expectDevice('Nexus 5X', <Device>[device2]);
@@ -39,24 +41,44 @@ void main() {
       await expectDevice('0553790', <Device>[device1]);
       await expectDevice('Nexus', <Device>[device1, device2]);
     });
+
+    testUsingContext('getAllConnectedDevices caches', () async {
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
+      expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      deviceManager.resetDevices(<Device>[device2]);
+      expect(await deviceManager.getAllConnectedDevices(), <Device>[device1]);
+    });
+
+    testUsingContext('refreshAllConnectedDevices does not cache', () async {
+      final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
+      final TestDeviceManager deviceManager = TestDeviceManager(<Device>[device1]);
+      expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device1]);
+
+      final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
+      deviceManager.resetDevices(<Device>[device2]);
+      expect(await deviceManager.refreshAllConnectedDevices(), <Device>[device2]);
+    });
   });
 
   group('Filter devices', () {
-    _MockDevice ephemeral;
-    _MockDevice nonEphemeralOne;
-    _MockDevice nonEphemeralTwo;
-    _MockDevice unsupported;
-    _MockDevice webDevice;
-    _MockDevice fuchsiaDevice;
+    FakeDevice ephemeral;
+    FakeDevice nonEphemeralOne;
+    FakeDevice nonEphemeralTwo;
+    FakeDevice unsupported;
+    FakeDevice webDevice;
+    FakeDevice fuchsiaDevice;
 
     setUp(() {
-      ephemeral = _MockDevice('ephemeral', 'ephemeral', true);
-      nonEphemeralOne = _MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
-      nonEphemeralTwo = _MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
-      unsupported = _MockDevice('unsupported', 'unsupported', true, false);
-      webDevice = _MockDevice('webby', 'webby')
+      ephemeral = FakeDevice('ephemeral', 'ephemeral', true);
+      nonEphemeralOne = FakeDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonEphemeralTwo = FakeDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      unsupported = FakeDevice('unsupported', 'unsupported', true, false);
+      webDevice = FakeDevice('webby', 'webby')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
-      fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
+      fuchsiaDevice = FakeDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
     });
 
@@ -161,18 +183,33 @@ void main() {
       });
     });
   });
+
+  group('JSON encode devices', () {
+    testUsingContext('Consistency of JSON representation', () async {
+      expect(
+        // This tests that fakeDevices is a list of tuples where "second" is the
+        // correct JSON representation of the "first". Actual values are irrelevant
+        await Future.wait(fakeDevices.map((FakeDeviceJsonData d) => d.dev.toJson())),
+        fakeDevices.map((FakeDeviceJsonData d) => d.json)
+      );
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager(this.allDevices);
-
-  final List<Device> allDevices;
-  bool isAlwaysSupportedOverride;
-
-  @override
-  Stream<Device> getAllConnectedDevices() {
-    return Stream<Device>.fromIterable(allDevices);
+  TestDeviceManager(List<Device> allDevices) {
+    _deviceDiscoverer = MockPollingDeviceDiscovery();
+    resetDevices(allDevices);
   }
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[_deviceDiscoverer];
+  MockPollingDeviceDiscovery _deviceDiscoverer;
+
+  void resetDevices(List<Device> allDevices) {
+    _deviceDiscoverer.setDevices(allDevices);
+  }
+
+  bool isAlwaysSupportedOverride;
 
   @override
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
@@ -181,29 +218,6 @@ class TestDeviceManager extends DeviceManager {
     }
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
-}
-
-class _MockDevice extends Device {
-  _MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
-      id,
-      platformType: PlatformType.web,
-      category: Category.mobile,
-      ephemeral: ephemeral,
-  );
-
-  final bool _isSupported;
-
-  @override
-  final String name;
-
-  @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
-
-  @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 }
 
 class MockProcess extends Mock implements Process {}

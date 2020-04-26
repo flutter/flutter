@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 bool willPopValue = false;
 
 class SamplePage extends StatefulWidget {
+  const SamplePage({ Key key }) : super(key: key);
   @override
   SamplePageState createState() => SamplePageState();
 }
@@ -86,7 +87,7 @@ void main() {
                   onPressed: () {
                     showDialog<void>(
                       context: context,
-                      builder: (BuildContext context) => SamplePage(),
+                      builder: (BuildContext context) => const SamplePage(),
                     );
                   },
                 ),
@@ -125,6 +126,51 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Sample Page'), findsNothing);
+  });
+
+  testWidgets('willPop will only pop if the callback returns true', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Home')),
+          body: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: FlatButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return SampleForm(
+                          callback: () => Future<bool>.value(willPopValue),
+                        );
+                      },
+                    ));
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sample Form'), findsOneWidget);
+
+    // Should not pop if callback returns null
+    willPopValue = null;
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sample Form'), findsOneWidget);
+
+    // Should pop if callback returns true
+    willPopValue = true;
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sample Form'), findsNothing);
   });
 
   testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {

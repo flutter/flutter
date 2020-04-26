@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -322,7 +322,7 @@ void main() {
       ),
     );
     final dynamic exception = tester.takeException();
-    expect(exception is String, isTrue);
+    expect(exception, isA<String>());
     expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsNothing);
@@ -474,7 +474,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
     await tester.pumpWidget(const MaterialApp(
       color: Color(0xFF112233),
       home: Placeholder(),
@@ -485,7 +485,7 @@ void main() {
       color: const Color(0xFF112233),
       home: const Placeholder(),
     ));
-    expect(key.currentState, isInstanceOf<NavigatorState>());
+    expect(key.currentState, isA<NavigatorState>());
   });
 
   testWidgets('Has default material and cupertino localizations', (WidgetTester tester) async {
@@ -787,6 +787,51 @@ void main() {
 
     expect(themeBeforeBrightnessChange.brightness, Brightness.light);
     expect(themeAfterBrightnessChange.brightness, Brightness.dark);
+  });
+
+  testWidgets('MaterialApp can customize initial routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        onGenerateInitialRoutes: (String initialRoute) {
+          expect(initialRoute, '/abc');
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page one');
+              }
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page two');
+              }
+            ),
+          ];
+        },
+        initialRoute: '/abc',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => const Text('regular page one'),
+          '/abc': (BuildContext context) => const Text('regular page two'),
+        },
+      )
+    );
+    expect(find.text('non-regular page two'), findsOneWidget);
+    expect(find.text('non-regular page one'), findsNothing);
+    expect(find.text('regular page one'), findsNothing);
+    expect(find.text('regular page two'), findsNothing);
+    navigatorKey.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('non-regular page two'), findsNothing);
+    expect(find.text('non-regular page one'), findsOneWidget);
+    expect(find.text('regular page one'), findsNothing);
+    expect(find.text('regular page two'), findsNothing);
   });
 }
 

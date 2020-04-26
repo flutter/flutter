@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,17 +25,17 @@ void main(List<String> args) {
 
   final ArgResults results = argParser.parse(args);
 
-  if (results['help']) {
+  if (results['help'] as bool) {
     print('Generate n copies of flutter_gallery.\n');
     print('usage: dart mega_gallery.dart <options>');
     print(argParser.usage);
     exit(0);
   }
 
-  final Directory source = Directory(_normalize('examples/flutter_gallery'));
-  final Directory out = Directory(_normalize(results['out']));
+  final Directory source = Directory(_normalize('dev/integration_tests/flutter_gallery'));
+  final Directory out = Directory(_normalize(results['out'] as String));
 
-  if (results['delete']) {
+  if (results['delete'] as bool) {
     if (out.existsSync()) {
       print('Deleting ${out.path}');
       out.deleteSync(recursive: true);
@@ -55,14 +55,14 @@ void main(List<String> args) {
     final SourceStats stats = getStatsFor(_dir(source, 'lib'));
     copies = (kTargetLineCount / stats.lines).round();
   } else {
-    copies = int.parse(results['copies']);
+    copies = int.parse(results['copies'] as String);
   }
 
   print('Making $copies copies of flutter_gallery.');
   print('');
   print('Stats:');
   print('  packages/flutter            : ${getStatsFor(Directory("packages/flutter"))}');
-  print('  examples/flutter_gallery    : ${getStatsFor(Directory("examples/flutter_gallery"))}');
+  print('  dev/integration_tests/flutter_gallery    : ${getStatsFor(Directory("dev/integration_tests/flutter_gallery"))}');
 
   final Directory lib = _dir(out, 'lib');
   if (lib.existsSync())
@@ -89,7 +89,7 @@ void main(List<String> args) {
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
-  print('  ${path.relative(results["out"])} : ${getStatsFor(out)}');
+  print('  ${path.relative(results["out"] as String)} : ${getStatsFor(out)}');
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
@@ -102,7 +102,7 @@ void _createEntry(File mainFile, int copies) {
   }
 
   final String contents = '''
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -134,7 +134,7 @@ void _copy(Directory source, Directory target) {
   if (!target.existsSync())
     target.createSync(recursive: true);
 
-  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
+  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
     if (entity is Directory) {
@@ -165,7 +165,7 @@ class SourceStats {
 SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
   stats ??= SourceStats();
 
-  for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+  for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;

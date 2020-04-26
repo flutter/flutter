@@ -1,10 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../base/net.dart';
 import '../device.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -17,11 +18,12 @@ abstract class WebRunnerFactory {
 
   /// Create a [ResidentRunner] for the web.
   ResidentRunner createWebRunner(
-    Device device, {
+    FlutterDevice device, {
     String target,
     @required bool stayResident,
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    @required UrlTunneller urlTunneller,
   });
 }

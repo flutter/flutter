@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -40,6 +42,12 @@ void main() {
       when(mockProcessInfo.maxRss).thenReturn(10);
     });
 
+    testUsingContext('help text contains global options', () {
+      final FakeCommand fake = FakeCommand();
+      createTestCommandRunner(fake);
+      expect(fake.usage, contains('Global options:\n'));
+    });
+
     testUsingContext('honors shouldUpdateCache false', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
@@ -52,13 +60,30 @@ void main() {
     testUsingContext('honors shouldUpdateCache true', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
-      verify(cache.updateAll(any)).called(1);
+      // First call for universal, second for the rest
+      expect(
+        verify(cache.updateAll(captureAny)).captured,
+        <Set<DevelopmentArtifact>>[
+          <DevelopmentArtifact>{DevelopmentArtifact.universal},
+          <DevelopmentArtifact>{},
+        ],
+      );
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
     });
 
-    void testUsingCommandContext(String testName, Function testBody) {
+    testUsingContext('uses the error handling file system', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          expect(globals.fs, isA<ErrorHandlingFileSystem>());
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
+      await flutterCommand.run();
+    });
+
+    void testUsingCommandContext(String testName, dynamic Function() testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         SystemClock: () => clock,
@@ -198,6 +223,14 @@ void main() {
       }
     });
 
+    test('FlutterCommandResult.success()', () async {
+      expect(FlutterCommandResult.success().exitStatus, ExitStatus.success);
+    });
+
+    test('FlutterCommandResult.warning()', () async {
+      expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
@@ -260,6 +293,43 @@ void main() {
         SystemClock: () => clock,
         Usage: () => usage,
       });
+
+      testUsingContext('command release lock on kill signal', () async {
+        mockTimes = <int>[1000, 2000];
+        final Completer<void> completer = Completer<void>();
+        setExitFunctionForTests((int exitCode) {
+          expect(exitCode, 0);
+          restoreExitFunction();
+          completer.complete();
+        });
+        final Completer<void> checkLockCompleter = Completer<void>();
+        final DummyFlutterCommand flutterCommand =
+            DummyFlutterCommand(commandFunction: () async {
+          await Cache.lock();
+          checkLockCompleter.complete();
+          final Completer<void> c = Completer<void>();
+          await c.future;
+          return null; // unreachable
+        });
+
+        unawaited(flutterCommand.run());
+        await checkLockCompleter.future;
+
+        Cache.checkLockAcquired();
+
+        signalController.add(mockSignal);
+        await completer.future;
+
+        await Cache.lock();
+        Cache.releaseLockEarly();
+      }, overrides: <Type, Generator>{
+        ProcessInfo: () => mockProcessInfo,
+        Signals: () => FakeSignals(
+              subForSigTerm: signalUnderTest,
+              exitSignals: <ProcessSignal>[signalUnderTest],
+            ),
+        Usage: () => usage
+      });
     });
 
     testUsingCommandContext('report execution timing by default', () async {
@@ -278,7 +348,7 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null,
+          'fail',
         ],
       );
     });
@@ -359,17 +429,16 @@ void main() {
   });
 }
 
-
 class FakeCommand extends FlutterCommand {
   @override
-  String get description => null;
+  String get description => 'A fake command';
 
   @override
   String get name => 'fake';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

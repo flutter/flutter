@@ -1,15 +1,15 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
@@ -60,13 +60,13 @@ class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices() : super('windows devices');
 
   @override
-  bool get supportsPlatform => platform.isWindows;
+  bool get supportsPlatform => globals.platform.isWindows;
 
   @override
   bool get canListAnything => windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices() async {
+  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }
@@ -93,7 +93,7 @@ List<String> runningProcess(String processName) {
   if (result.exitCode != 0) {
     return null;
   }
-  for (String rawProcess in result.stdout.split('\n')) {
+  for (final String rawProcess in result.stdout.split('\n')) {
     final String process = rawProcess.trim();
     if (!process.contains(processName)) {
       continue;

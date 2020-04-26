@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,7 +31,7 @@ class RenderDots extends RenderConstrainedBox {
     canvas.drawRect(offset & size, Paint()..color = const Color(0xFF0000FF));
 
     final Paint paint = Paint()..color = const Color(0xFF00FF00);
-    for (Offset point in _dots.values)
+    for (final Offset point in _dots.values)
       canvas.drawCircle(point, 50.0, paint);
 
     super.paint(context, offset);

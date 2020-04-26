@@ -1,16 +1,18 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_emulator.dart';
 import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/process.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/ios_emulators.dart';
 
 EmulatorManager get emulatorManager => context.get<EmulatorManager>();
@@ -214,8 +216,9 @@ abstract class EmulatorDiscovery {
   Future<List<Emulator>> get emulators;
 }
 
+@immutable
 abstract class Emulator {
-  Emulator(this.id, this.hasConfig);
+  const Emulator(this.id, this.hasConfig);
 
   final String id;
   final bool hasConfig;
@@ -228,14 +231,12 @@ abstract class Emulator {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! Emulator) {
-      return false;
-    }
-    return id == other.id;
+    return other is Emulator
+        && other.id == id;
   }
 
   Future<void> launch();
@@ -250,7 +251,7 @@ abstract class Emulator {
 
     // Extract emulators information
     final List<List<String>> table = <List<String>>[
-      for (Emulator emulator in emulators)
+      for (final Emulator emulator in emulators)
         <String>[
           emulator.id ?? '',
           emulator.name ?? '',
@@ -262,7 +263,7 @@ abstract class Emulator {
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
@@ -280,7 +281,7 @@ abstract class Emulator {
   }
 
   static void printEmulators(List<Emulator> emulators) {
-    descriptions(emulators).forEach(printStatus);
+    descriptions(emulators).forEach(globals.printStatus);
   }
 }
 

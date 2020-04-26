@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -501,7 +501,7 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
-      final RenderBox box = candidate.renderObject;
+      final RenderBox box = candidate.renderObject as RenderBox;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
@@ -544,14 +544,13 @@ class _TextFinder extends MatchFinder {
 
   @override
   bool matches(Element candidate) {
-    if (candidate.widget is Text) {
-      final Text textWidget = candidate.widget;
-      if (textWidget.data != null)
-        return textWidget.data == text;
-      return textWidget.textSpan.toPlainText() == text;
-    } else if (candidate.widget is EditableText) {
-      final EditableText editable = candidate.widget;
-      return editable.controller.text == text;
+    final Widget widget = candidate.widget;
+    if (widget is Text) {
+      if (widget.data != null)
+        return widget.data == text;
+      return widget.textSpan.toPlainText() == text;
+    } else if (widget is EditableText) {
+      return widget.controller.text == text;
     }
     return false;
   }
@@ -720,7 +719,7 @@ class _AncestorFinder extends Finder {
   @override
   Iterable<Element> get allCandidates {
     final List<Element> candidates = <Element>[];
-    for (Element root in descendant.evaluate()) {
+    for (final Element root in descendant.evaluate()) {
       final List<Element> ancestors = <Element>[];
       if (matchRoot)
         ancestors.add(root);

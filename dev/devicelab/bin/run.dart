@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,18 +9,34 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
+import 'package:flutter_devicelab/framework/ab.dart';
 import 'package:flutter_devicelab/framework/manifest.dart';
 import 'package:flutter_devicelab/framework/runner.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+ArgResults args;
+
 List<String> _taskNames = <String>[];
+
+/// Suppresses standard output, prints only standard error output.
+bool silent;
+
+/// The build of the local engine to use.
+///
+/// Required for A/B test mode.
+String localEngine;
+
+/// The path to the engine "src/" directory.
+String localEngineSrcPath;
+
+/// Whether to exit on first test failure.
+bool exitOnFirstTestFailure;
 
 /// Runs tasks.
 ///
 /// The tasks are chosen depending on the command-line options
 /// (see [_argParser]).
 Future<void> main(List<String> rawArgs) async {
-  ArgResults args;
   try {
     args = _argParser.parse(rawArgs);
   } on FormatException catch (error) {
@@ -55,11 +71,20 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  final bool silent = args['silent'];
-  final String localEngine = args['local-engine'];
-  final String localEngineSrcPath = args['local-engine-src-path'];
+  silent = args['silent'] as bool;
+  localEngine = args['local-engine'] as String;
+  localEngineSrcPath = args['local-engine-src-path'] as String;
+  exitOnFirstTestFailure = args['exit'] as bool;
 
-  for (String taskName in _taskNames) {
+  if (args.wasParsed('ab')) {
+    await _runABTest();
+  } else {
+    await _runTasks();
+  }
+}
+
+Future<void> _runTasks() async {
+  for (final String taskName in _taskNames) {
     section('Running task "$taskName"');
     final Map<String, dynamic> result = await runTask(
       taskName,
@@ -72,13 +97,85 @@ Future<void> main(List<String> rawArgs) async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (!result['success']) {
+    if (!(result['success'] as bool)) {
       exitCode = 1;
-      if (args['exit']) {
+      if (exitOnFirstTestFailure) {
         return;
       }
     }
   }
+}
+
+Future<void> _runABTest() async {
+  final int runsPerTest = int.parse(args['ab'] as String);
+
+  if (_taskNames.length > 1) {
+    stderr.writeln('When running in A/B test mode exactly one task must be passed but got ${_taskNames.join(', ')}.\n');
+    stderr.writeln(_argParser.usage);
+    exit(1);
+  }
+
+  if (!args.wasParsed('local-engine')) {
+    stderr.writeln('When running in A/B test mode --local-engine is required.\n');
+    stderr.writeln(_argParser.usage);
+    exit(1);
+  }
+
+  final String taskName = _taskNames.single;
+
+  print('$taskName A/B test. Will run $runsPerTest times.');
+
+  final ABTest abTest = ABTest();
+  for (int i = 1; i <= runsPerTest; i++) {
+    section('Run #$i');
+
+    print('Running with the default engine (A)');
+    final Map<String, dynamic> defaultEngineResult = await runTask(
+      taskName,
+      silent: silent,
+    );
+
+    print('Default engine result:');
+    print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
+
+    if (!(defaultEngineResult['success'] as bool)) {
+      stderr.writeln('Task failed on the default engine.');
+      exit(1);
+    }
+
+    abTest.addAResult(defaultEngineResult);
+
+    print('Running with the local engine (B)');
+    final Map<String, dynamic> localEngineResult = await runTask(
+      taskName,
+      silent: silent,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
+    );
+
+    print('Task localEngineResult:');
+    print(const JsonEncoder.withIndent('  ').convert(localEngineResult));
+
+    if (!(localEngineResult['success'] as bool)) {
+      stderr.writeln('Task failed on the local engine.');
+      exit(1);
+    }
+
+    abTest.addBResult(localEngineResult);
+
+    if (!silent && i < runsPerTest) {
+      section('A/B results so far');
+      print(abTest.printSummary());
+    }
+  }
+
+  if (!silent) {
+    section('Raw results');
+    print(abTest.rawResults());
+  }
+
+  section('Final A/B results');
+  print(abTest.printSummary());
 }
 
 void addTasks({
@@ -94,10 +191,10 @@ void addTasks({
     tasks.removeRange(0, index);
   }
   // Only start skipping if user specified a task to continue from
-  final String stage = args['stage'];
-  for (ManifestTask task in tasks) {
+  final String stage = args['stage'] as String;
+  for (final ManifestTask task in tasks) {
     final bool isQualifyingStage = stage == null || task.stage == stage;
-    final bool isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
+    final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
     if (isQualifyingHost && isQualifyingStage) {
       taskNames.add(task.name);
     }
@@ -116,7 +213,7 @@ final ArgParser _argParser = ArgParser()
         '\n'
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
-      for (String nameOrPath in value) {
+      for (final String nameOrPath in value) {
         final List<String> fragments = path.split(nameOrPath);
         final bool isDartFile = fragments.last.endsWith('.dart');
 
@@ -129,6 +226,22 @@ final ArgParser _argParser = ArgParser()
         } else {
           _taskNames.add(path.withoutExtension(fragments.last));
         }
+      }
+    },
+  )
+  ..addOption(
+    'ab',
+    help: 'Runs an A/B test comparing the default engine with the local\n'
+          'engine build for one task. This option does not support running\n'
+          'multiple tasks. The value is the number of times to run the task.\n'
+          'The task is expected to be a benchmark that reports score keys.\n'
+          'The A/B test collects the metrics collected by the test and\n'
+          'produces a report containing averages, noise, and the speed-up\n'
+          'between the two engines. --local-engine is required when running\n'
+          'an A/B test.',
+    callback: (String value) {
+      if (value != null && int.tryParse(value) == null) {
+        throw ArgParserException('Option --ab must be a number, but was "$value".');
       }
     },
   )
@@ -152,12 +265,13 @@ final ArgParser _argParser = ArgParser()
     help: 'Name of a build output within the engine out directory, if you\n'
           'are building Flutter locally. Use this to select a specific\n'
           'version of the engine if you have built multiple engine targets.\n'
-          'This path is relative to --local-engine-src-path/out.',
+          'This path is relative to --local-engine-src-path/out. This option\n'
+          'is required when running an A/B test (see the --ab option).',
   )
   ..addFlag(
     'list',
     abbr: 'l',
-    help: 'Don\'t actually run the tasks, but list out the tasks that would\n'
+    help: "Don't actually run the tasks, but list out the tasks that would\n"
           'have been run, in the order they would have run.',
   )
   ..addOption(
@@ -171,7 +285,7 @@ final ArgParser _argParser = ArgParser()
     defaultsTo: true,
     help: 'Only run tests that match the host platform (e.g. do not run a\n'
           'test with a `required_agent_capabilities` value of "mac/android"\n'
-          'on a windows host). Each test publishes its'
+          'on a windows host). Each test publishes its '
           '`required_agent_capabilities`\nin the `manifest.yaml` file.',
   )
   ..addOption(

@@ -1,10 +1,29 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class TestAction extends Action<Intent> {
+  TestAction();
+
+  static const LocalKey key = ValueKey<Type>(TestAction);
+
+  int calls = 0;
+
+  @override
+  void invoke(Intent intent) {
+    calls += 1;
+  }
+}
 
 void main() {
   testWidgets('WidgetsApp with builder only', (WidgetTester tester) async {
@@ -19,6 +38,109 @@ void main() {
       ),
     );
     expect(find.byKey(key), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
+    bool checked = false;
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      WidgetsApp(
+        key: key,
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump(); // Wait for focus to take effect.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    // Default key mapping worked.
+    expect(checked, isTrue);
+    checked = false;
+
+    final TestAction action = TestAction();
+    await tester.pumpWidget(
+      WidgetsApp(
+        key: key,
+        actions: <Type, Action<Intent>>{
+          TestIntent: action,
+        },
+        shortcuts: <LogicalKeySet, Intent> {
+          LogicalKeySet(LogicalKeyboardKey.space): const TestIntent(),
+        },
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    // Default key mapping was not invoked.
+    expect(checked, isFalse);
+    // Overridden mapping was invoked.
+    expect(action.calls, equals(1));
+  });
+
+  testWidgets('WidgetsApp default activation key mappings work', (WidgetTester tester) async {
+    bool checked = false;
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        builder: (BuildContext context, Widget child) {
+          return Material(
+            child: Checkbox(
+              value: checked,
+              autofocus: true,
+              onChanged: (bool value) {
+                checked = value;
+              },
+            ),
+          );
+        },
+        color: const Color(0xFF123456),
+      ),
+    );
+    await tester.pump();
+
+    // Test three default buttons for the activation action.
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    // Only space is used as an activation key on web.
+    if (kIsWeb) {
+      return;
+    }
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
+
+    checked = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.gameButtonA);
+    await tester.pumpAndSettle();
+    expect(checked, isTrue);
   });
 
   group('error control test', () {
@@ -87,5 +209,55 @@ void main() {
           '   null.\n' ,
       );
     });
+  });
+
+  testWidgets('WidgetsApp can customize initial routes', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        onGenerateInitialRoutes: (String initialRoute) {
+          expect(initialRoute, '/abc');
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page one');
+              }
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation) {
+                return const Text('non-regular page two');
+              }
+            ),
+          ];
+        },
+        initialRoute: '/abc',
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<void>(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation) {
+              return const Text('regular page');
+            }
+          );
+        },
+        color: const Color(0xFF123456),
+      )
+    );
+    expect(find.text('non-regular page two'), findsOneWidget);
+    expect(find.text('non-regular page one'), findsNothing);
+    expect(find.text('regular page'), findsNothing);
+    navigatorKey.currentState.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('non-regular page two'), findsNothing);
+    expect(find.text('non-regular page one'), findsOneWidget);
+    expect(find.text('regular page'), findsNothing);
   });
 }

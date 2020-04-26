@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,15 +6,15 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
+import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -59,8 +59,6 @@ void main() {
   });
 
   testUsingContext('compile expression can compile single expression', () async {
-    final BufferLogger bufferLogger = logger;
-
     final Completer<List<int>> compileResponseCompleter =
         Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter =
@@ -78,14 +76,15 @@ void main() {
     )));
 
     await generator.recompile(
-      '/path/to/main.dart',
+      globals.fs.file('/path/to/main.dart').uri,
       null, /* invalidatedFiles */
       outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
     ).then((CompilerOutput output) {
       expect(mockFrontendServerStdIn.getAndClear(),
-          'compile /path/to/main.dart\n');
+          'compile file:///path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(bufferLogger.errorText,
+      expect(testLogger.errorText,
           equals('\nCompiler message:\nline1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
@@ -106,12 +105,10 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
-    Logger: () => BufferLogger(),
     Platform: kNoColorTerminalPlatform,
   });
 
   testUsingContext('compile expressions without awaiting', () async {
-    final BufferLogger bufferLogger = logger;
     final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
@@ -128,11 +125,12 @@ void main() {
     // The test manages timing via completers.
     unawaited(
       generator.recompile(
-        '/path/to/main.dart',
+        Uri.parse('/path/to/main.dart'),
         null, /* invalidatedFiles */
         outputPath: '/build/',
+        packageConfig: PackageConfig.empty,
       ).then((CompilerOutput outputCompile) {
-        expect(bufferLogger.errorText,
+        expect(testLogger.errorText,
             equals('\nCompiler message:\nline1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 

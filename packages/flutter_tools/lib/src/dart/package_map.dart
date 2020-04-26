@@ -1,75 +1,54 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:package_config/packages_file.dart' as packages_file;
+import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+
+import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
+import '../base/logger.dart';
 
 const String kPackagesFileName = '.packages';
 
-Map<String, Uri> _parse(String packagesPath) {
-  final List<int> source = fs.file(packagesPath).readAsBytesSync();
-  return packages_file.parse(source,
-      Uri.file(packagesPath, windows: platform.isWindows));
+String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+
+set globalPackagesPath(String value) {
+  _globalPackagesPath = value;
 }
 
-class PackageMap {
-  PackageMap(this.packagesPath);
+bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
 
-  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
+String _globalPackagesPath;
 
-  static String get globalGeneratedPackagesPath => fs.path.setExtension(globalPackagesPath, '.generated');
-
-  static set globalPackagesPath(String value) {
-    _globalPackagesPath = value;
-  }
-
-  static bool get isUsingCustomPackagesPath => _globalPackagesPath != null;
-
-  static String _globalPackagesPath;
-
-  final String packagesPath;
-
-  /// Load and parses the .packages file.
-  void load() {
-    _map ??= _parse(packagesPath);
-  }
-
-  Map<String, Uri> get map {
-    load();
-    return _map;
-  }
-  Map<String, Uri> _map;
-
-  /// Returns the path to [packageUri].
-  String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
-
-  /// Returns the path to [packageUri] as Uri.
-  Uri uriForPackage(Uri packageUri) {
-    assert(packageUri.scheme == 'package');
-    final List<String> pathSegments = packageUri.pathSegments.toList();
-    final String packageName = pathSegments.removeAt(0);
-    final Uri packageBase = map[packageName];
-    if (packageBase == null) {
-      return null;
+/// Load the package configuration from [file] or throws a [ToolExit]
+/// if the operation would fail.
+Future<PackageConfig> loadPackageConfigOrFail(File file, {
+  @required Logger logger,
+}) {
+  final FileSystem fileSystem = file.fileSystem;
+  return loadPackageConfigUri(
+    file.absolute.uri,
+    loader: (Uri uri) {
+      final File configFile = fileSystem.file(uri);
+      if (!configFile.existsSync()) {
+        return null;
+      }
+      return Future<Uint8List>.value(configFile.readAsBytesSync());
+    },
+    onError: (dynamic error) {
+      logger.printTrace(error.toString());
+      String message = '${file.path} does not exist.';
+      final String pubspecPath = fileSystem.path.absolute(fileSystem.path.dirname(file.path), 'pubspec.yaml');
+      if (fileSystem.isFileSync(pubspecPath)) {
+        message += '\nDid you run "flutter pub get" in this directory?';
+      } else {
+        message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+      }
+      logger.printError(message);
+      throwToolExit(null);
     }
-    final String packageRelativePath = fs.path.joinAll(pathSegments);
-    return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
-  }
-
-  String checkValid() {
-    if (fs.isFileSync(packagesPath)) {
-      return null;
-    }
-    String message = '$packagesPath does not exist.';
-    final String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
-    if (fs.isFileSync(pubspecPath)) {
-      message += '\nDid you run "flutter pub get" in this directory?';
-    } else {
-      message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
-    }
-    return message;
-  }
+  );
 }

@@ -1,30 +1,38 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:mustache/mustache.dart' as mustache;
+import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
+import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
-import 'globals.dart';
+import 'dart/package_map.dart';
+import 'dart/pub.dart';
+import 'globals.dart' as globals hide fs;
 
 /// Expands templates in a directory to a destination. All files that must
-/// undergo template expansion should end with the '.tmpl' extension. All other
+/// undergo template expansion should end with the '.tmpl' extension. All files
+/// that should be replaced with the corresponding image from
+/// flutter_template_images should end with the '.img.tmpl' extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
 /// as is, the directory itself can end with '.tmpl' extension. Files within
-/// such a directory may also contain the '.tmpl' extension and will be
-/// considered for expansion. In case certain files need to be copied but
-/// without template expansion (images, data files, etc.), the '.copy.tmpl'
+/// such a directory may also contain the '.tmpl' or '.img.tmpl' extensions and
+/// will be considered for expansion. In case certain files need to be copied
+/// but without template expansion (data files, etc.), the '.copy.tmpl'
 /// extension may be used.
 ///
 /// Folders with platform/language-specific content must be named
 /// '<platform>-<language>.tmpl'.
 ///
-/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl'
-/// or '-<language>.tmpl' extensions.
+/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
+/// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  Template(Directory templateSource, Directory baseDir) {
+  Template(Directory templateSource, Directory baseDir, this.imageSourceDir, {
+    @required FileSystem fileSystem,
+  }) : _fileSystem = fileSystem {
     _templateFilePaths = <String, String>{};
 
     if (!templateSource.existsSync()) {
@@ -33,33 +41,37 @@ class Template {
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
-    for (FileSystemEntity entity in templateFiles) {
+    for (final FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
         // We are only interesting in template *file* URIs.
         continue;
       }
 
-      final String relativePath = fs.path.relative(entity.path,
+      final String relativePath = fileSystem.path.relative(entity.path,
           from: baseDir.absolute.path);
 
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = fs.path.absolute(entity.path);
+        _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
     }
   }
 
-  factory Template.fromName(String name) {
+  static Future<Template> fromName(String name, { @required FileSystem fileSystem }) async {
     // All named templates are placed in the 'templates' directory
-    final Directory templateDir = templateDirectoryInPackage(name);
-    return Template(templateDir, templateDir);
+    final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
+    final Directory imageDir = await _templateImageDirectory(name, fileSystem);
+    return Template(templateDir, templateDir, imageDir, fileSystem: fileSystem);
   }
 
+  final FileSystem _fileSystem;
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
+  static const String imageTemplateExtension = '.img.tmpl';
   final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
+  final Directory imageSourceDir;
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
@@ -75,7 +87,7 @@ class Template {
     try {
       destination.createSync(recursive: true);
     } on FileSystemException catch (err) {
-      printError(err.toString());
+      globals.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
       return 0;
     }
@@ -90,30 +102,41 @@ class Template {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1);
-        final String language = context['${platform}Language'];
+        final String language = context['${platform}Language'] as String;
         if (language != match.group(2)) {
           return null;
         }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
       // Only build a web project if explicitly asked.
-      final bool web = context['web'];
+      final bool web = context['web'] as bool;
       if (relativeDestinationPath.contains('web') && !web) {
         return null;
       }
+      // Only build a Linux project if explicitly asked.
+      final bool linux = context['linux'] as bool;
+      if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
+        return null;
+      }
       // Only build a macOS project if explicitly asked.
-      final bool macOS = context['macos'];
+      final bool macOS = context['macos'] as bool;
       if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
         return null;
       }
-      final String projectName = context['projectName'];
-      final String androidIdentifier = context['androidIdentifier'];
-      final String pluginClass = context['pluginClass'];
+      // Only build a Windows project if explicitly asked.
+      final bool windows = context['windows'] as bool;
+      if (relativeDestinationPath.startsWith('windows.tmpl') && !windows) {
+        return null;
+      }
+      final String projectName = context['projectName'] as String;
+      final String androidIdentifier = context['androidIdentifier'] as String;
+      final String pluginClass = context['pluginClass'] as String;
       final String destinationDirPath = destination.absolute.path;
-      final String pathSeparator = fs.path.separator;
-      String finalDestinationPath = fs.path
+      final String pathSeparator = _fileSystem.path.separator;
+      String finalDestinationPath = _fileSystem.path
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(copyTemplateExtension, '')
+        .replaceAll(imageTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
       if (androidIdentifier != null) {
@@ -130,7 +153,7 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
-      final bool withRootModule = context['withRootModule'] ?? false;
+      final bool withRootModule = context['withRootModule'] as bool ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
       }
@@ -139,8 +162,8 @@ class Template {
       if (finalDestinationPath == null) {
         return;
       }
-      final File finalDestinationFile = fs.file(finalDestinationPath);
-      final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
+      final File finalDestinationFile = _fileSystem.file(finalDestinationPath);
+      final String relativePathForLogging = _fileSystem.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
@@ -148,25 +171,25 @@ class Template {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
           if (printStatusWhenWriting) {
-            printStatus('  $relativePathForLogging (overwritten)');
+            globals.printStatus('  $relativePathForLogging (overwritten)');
           }
         } else {
           // The file exists but we cannot overwrite it, move on.
           if (printStatusWhenWriting) {
-            printTrace('  $relativePathForLogging (existing - skipped)');
+            globals.printTrace('  $relativePathForLogging (existing - skipped)');
           }
           return;
         }
       } else {
         if (printStatusWhenWriting) {
-          printStatus('  $relativePathForLogging (created)');
+          globals.printStatus('  $relativePathForLogging (created)');
         }
       }
 
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
-      final File sourceFile = fs.file(absoluteSourcePath);
+      final File sourceFile = _fileSystem.file(absoluteSourcePath);
 
       // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
@@ -177,19 +200,30 @@ class Template {
         return;
       }
 
-      // Step 3: If the absolute path ends with a '.tmpl', this file needs
+      // Step 3: If the absolute paths ends with a '.img.tmpl', this file needs
+      //         to be copied from the template image package.
+
+      if (sourceFile.path.endsWith(imageTemplateExtension)) {
+        final File imageSourceFile = _fileSystem.file(_fileSystem.path.join(
+            imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, '')));
+        imageSourceFile.copySync(finalDestinationFile.path);
+
+        return;
+      }
+
+      // Step 4: If the absolute path ends with a '.tmpl', this file needs
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = mustache.Template(templateContents).renderString(context);
+        final String renderedContents = globals.templateRenderer.renderString(templateContents, context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
         return;
       }
 
-      // Step 4: This file does not end in .tmpl but is in a directory that
+      // Step 5: This file does not end in .tmpl but is in a directory that
       //         does. Directly copy the file to the destination.
 
       sourceFile.copySync(finalDestinationFile.path);
@@ -199,8 +233,42 @@ class Template {
   }
 }
 
-Directory templateDirectoryInPackage(String name) {
-  final String templatesDir = fs.path.join(Cache.flutterRoot,
+Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
+  final String templatesDir = fileSystem.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
-  return fs.directory(fs.path.join(templatesDir, name));
+  return fileSystem.directory(fileSystem.path.join(templatesDir, name));
+}
+
+// Returns the directory containing the 'name' template directory in
+// flutter_template_images, to resolve image placeholder against.
+Future<Directory> _templateImageDirectory(String name, FileSystem fileSystem) async {
+  final String toolPackagePath = fileSystem.path.join(
+      Cache.flutterRoot, 'packages', 'flutter_tools');
+  final String packageFilePath = fileSystem.path.join(toolPackagePath, kPackagesFileName);
+  // Ensure that .packgaes is present.
+  if (!fileSystem.file(packageFilePath).existsSync()) {
+    await _ensurePackageDependencies(toolPackagePath);
+  }
+  final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    fileSystem.file(packageFilePath),
+    logger: globals.logger,
+  );
+  final Uri imagePackageLibDir = packageConfig['flutter_template_images']?.packageUriRoot;
+  // Ensure that the template image package is present.
+  if (imagePackageLibDir == null || !fileSystem.directory(imagePackageLibDir).existsSync()) {
+    await _ensurePackageDependencies(toolPackagePath);
+  }
+  return fileSystem.directory(imagePackageLibDir)
+      .parent
+      .childDirectory('templates')
+      .childDirectory(name);
+}
+
+// Runs 'pub get' for the given path to ensure that .packages is created and
+// all dependencies are present.
+Future<void> _ensurePackageDependencies(String packagePath) async {
+  await pub.get(
+    context: PubContext.pubGet,
+    directory: packagePath,
+  );
 }

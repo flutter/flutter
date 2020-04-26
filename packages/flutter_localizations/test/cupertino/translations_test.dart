@@ -1,13 +1,15 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (String language in kCupertinoSupportedLanguages) {
+  for (final String language in kCupertinoSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language);
 
@@ -93,7 +95,7 @@ void main() {
     const Locale locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations is CupertinoLocalizationFr, true);
+    expect(localizations, isA<CupertinoLocalizationFr>());
     expect(localizations.alertDialogLabel, 'Alerte');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 heure');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 heures');
@@ -108,7 +110,7 @@ void main() {
     const Locale locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
-    expect(localizations is CupertinoLocalizationZh, true);
+    expect(localizations, isA<CupertinoLocalizationZh>());
     expect(localizations.alertDialogLabel, '提醒');
     expect(localizations.datePickerHourSemanticsLabel(1), '1 点');
     expect(localizations.datePickerHourSemanticsLabel(12), '12 点');
@@ -117,5 +119,30 @@ void main() {
     expect(localizations.timerPickerSecondLabel(20), '秒');
     expect(localizations.selectAllButtonLabel, '全选');
     expect(localizations.timerPickerMinute(10), '10');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/53036.
+  testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
+    final File nbCupertinoArbFile = File('lib/src/l10n/cupertino_nb.arb');
+    final File noCupertinoArbFile = File('lib/src/l10n/cupertino_no.arb');
+
+    if (noCupertinoArbFile.existsSync() && !nbCupertinoArbFile.existsSync()) {
+      Locale locale = const Locale.fromSubtags(languageCode: 'no', scriptCode: null, countryCode: null);
+      expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+      CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+      expect(localizations, isA<CupertinoLocalizationNo>());
+
+      final String pasteButtonLabelNo = localizations.pasteButtonLabel;
+      final String copyButtonLabelNo = localizations.copyButtonLabel;
+      final String cutButtonLabelNo = localizations.cutButtonLabel;
+
+      locale = const Locale.fromSubtags(languageCode: 'nb', scriptCode: null, countryCode: null);
+      expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+      localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+      expect(localizations, isA<CupertinoLocalizationNb>());
+      expect(localizations.pasteButtonLabel, pasteButtonLabelNo);
+      expect(localizations.copyButtonLabel, copyButtonLabelNo);
+      expect(localizations.cutButtonLabel, cutButtonLabelNo);
+    }
   });
 }

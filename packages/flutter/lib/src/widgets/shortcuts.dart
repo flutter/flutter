@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,9 +25,9 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
-class KeySet<T extends KeyboardKey> extends Diagnosticable {
+class KeySet<T extends KeyboardKey> {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [KeySet.fromSet].
@@ -79,29 +79,71 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
 
   /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
   Set<T> get keys => UnmodifiableSetView<T>(_keys);
-  // This needs to be a hash set to be sure that the hashCode accessor returns
-  // consistent results. LinkedHashSet (the default Set implementation) depends
-  // upon insertion order, and HashSet does not.
   final HashSet<T> _keys;
 
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final KeySet<T> typedOther = other;
-    return setEquals<T>(_keys, typedOther._keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
+  // Arrays used to temporarily store hash codes for sorting.
+  static final List<int> _tempHashStore3 = <int>[0, 0, 0]; // used to sort exactly 3 keys
+  static final List<int> _tempHashStore4 = <int>[0, 0, 0, 0]; // used to sort exactly 4 keys
+
+  // Cached hash code value. Improves [hashCode] performance by 27%-900%,
+  // depending on key set size and read/write ratio.
+  int _hashCode;
+
   @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes, to remove in NNBD with a late final hashcode
   int get hashCode {
-    return hashList(_keys);
-  }
+    // Return cached hash code if available.
+    if (_hashCode != null) {
+      return _hashCode;
+    }
 
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<T>>('keys', _keys));
+    // Compute order-independent hash and cache it.
+    final int length = _keys.length;
+    final Iterator<T> iterator = _keys.iterator;
+
+    // There's always at least one key. Just extract it.
+    iterator.moveNext();
+    final int h1 = iterator.current.hashCode;
+
+    if (length == 1) {
+      // Don't do anything fancy if there's exactly one key.
+      return _hashCode = h1;
+    }
+
+    iterator.moveNext();
+    final int h2 = iterator.current.hashCode;
+    if (length == 2) {
+      // No need to sort if there's two keys, just compare them.
+      return _hashCode = h1 < h2
+        ? hashValues(h1, h2)
+        : hashValues(h2, h1);
+    }
+
+    // Sort key hash codes and feed to hashList to ensure the aggregate
+    // hash code does not depend on the key order.
+    final List<int> sortedHashes = length == 3
+      ? _tempHashStore3
+      : _tempHashStore4;
+    sortedHashes[0] = h1;
+    sortedHashes[1] = h2;
+    iterator.moveNext();
+    sortedHashes[2] = iterator.current.hashCode;
+    if (length == 4) {
+      iterator.moveNext();
+      sortedHashes[3] = iterator.current.hashCode;
+    }
+    sortedHashes.sort();
+    return _hashCode = hashList(sortedHashes);
   }
 }
 
@@ -116,7 +158,7 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
 /// sets with the same keys in them will compare as equal.
-class LogicalKeySet extends KeySet<LogicalKeyboardKey> {
+class LogicalKeySet extends KeySet<LogicalKeyboardKey> with Diagnosticable {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
@@ -136,13 +178,78 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> {
   ///
   /// The `keys` must not be null.
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
+
+  static final Set<LogicalKeyboardKey> _modifiers = <LogicalKeyboardKey>{
+    LogicalKeyboardKey.alt,
+    LogicalKeyboardKey.control,
+    LogicalKeyboardKey.meta,
+    LogicalKeyboardKey.shift,
+  };
+
+  /// Returns a description of the key set that is short and readable.
+  ///
+  /// Intended to be used in debug mode for logging purposes.
+  String debugDescribeKeys() {
+    final List<LogicalKeyboardKey> sortedKeys = keys.toList()..sort(
+            (LogicalKeyboardKey a, LogicalKeyboardKey b) {
+          // Put the modifiers first. If it has a synonym, then it's something
+          // like shiftLeft, altRight, etc.
+          final bool aIsModifier = a.synonyms.isNotEmpty || _modifiers.contains(a);
+          final bool bIsModifier = b.synonyms.isNotEmpty || _modifiers.contains(b);
+          if (aIsModifier && !bIsModifier) {
+            return -1;
+          } else if (bIsModifier && !aIsModifier) {
+            return 1;
+          }
+          return a.debugName.compareTo(b.debugName);
+        }
+    );
+    return sortedKeys.map<String>((LogicalKeyboardKey key) => key.debugName.toString()).join(' + ');
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys, description: debugDescribeKeys()));
+  }
+}
+
+/// Diagnostics property which handles formatting a `Map<LogicalKeySet, Intent>`
+/// (the same type as the [Shortcuts.shortcuts] property) so that it is human-readable.
+class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>> {
+  /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
+  /// which are the same type as the [Shortcuts.shortcuts] property.
+  ///
+  /// The [showName] and [level] arguments must not be null.
+  ShortcutMapProperty(
+    String name,
+    Map<LogicalKeySet, Intent> value, {
+    bool showName = true,
+    Object defaultValue = kNoDefaultValue,
+    DiagnosticLevel level = DiagnosticLevel.info,
+    String description,
+  }) : assert(showName != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+         description: description,
+       );
+
+  @override
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    return '{${value.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
+  }
 }
 
 /// A manager of keyboard shortcut bindings.
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
 /// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
+class ShortcutManager extends ChangeNotifier with Diagnosticable {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.
@@ -179,6 +286,14 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   /// The optional `keysPressed` argument provides an override to keys that the
   /// [RawKeyboard] reports. If not specified, uses [RawKeyboard.keysPressed]
   /// instead.
+  ///
+  /// If a key mapping is found, then the associated action will be invoked
+  /// using the [Intent] that the [LogicalKeySet] maps to, and the currently
+  /// focused widget's context (from [FocusManager.primaryFocus]).
+  ///
+  /// The object returned is the result of [Action.invoke] being called on the
+  /// [Action] bound to the [Intent] that the key press maps to, or null, if the
+  /// key press didn't match any intent.
   @protected
   bool handleKeypress(
     BuildContext context,
@@ -196,7 +311,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (LogicalKeyboardKey setKey in keySet.keys) {
+      for (final LogicalKeyboardKey setKey in keySet.keys) {
         final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
         if (synonyms.isNotEmpty) {
           // There currently aren't any synonyms that match more than one key.
@@ -209,10 +324,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
     }
     if (matchedIntent != null) {
       final BuildContext primaryContext = primaryFocus?.context;
-      if (primaryContext == null) {
-        return false;
-      }
-      return Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      assert (primaryContext != null);
+      Actions.invoke(primaryContext, matchedIntent, nullOk: true);
+      return true;
     }
     return false;
   }
@@ -231,9 +345,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
 ///
 /// See also:
 ///
-///   * [Intent], a class for containing a description of a user
-///     action to be invoked.
-///   * [Action], a class for defining an invocation of a user action.
+///  * [Intent], a class for containing a description of a user action to be
+///    invoked.
+///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
@@ -243,6 +357,7 @@ class Shortcuts extends StatefulWidget {
     this.manager,
     this.shortcuts,
     this.child,
+    this.debugLabel,
   }) : super(key: key);
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -254,11 +369,13 @@ class Shortcuts extends StatefulWidget {
   /// [shortcuts] change materially.
   final ShortcutManager manager;
 
-  /// The map of shortcuts that the [manager] will be given to manage.
+  /// {@template flutter.widgets.shortcuts.shortcuts}
+  /// The map of shortcuts that the [ShortcutManager] will be given to manage.
   ///
   /// For performance reasons, it is recommended that a pre-built map is passed
   /// in here (e.g. a final variable from your widget class) instead of defining
   /// it inline in the build function.
+  /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
@@ -266,13 +383,22 @@ class Shortcuts extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The debug label that is printed for this node when logged.
+  ///
+  /// If this label is set, then it will be displayed instead of the shortcut
+  /// map when logged.
+  ///
+  /// This allows simplifying the diagnostic output to avoid cluttering it
+  /// unnecessarily with the default shortcut map.
+  final String debugLabel;
+
   /// Returns the [ActionDispatcher] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
   static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType(_ShortcutsMarker);
+    final _ShortcutsMarker inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;
@@ -297,8 +423,8 @@ class Shortcuts extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager));
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts));
+    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager, defaultValue: null));
+    properties.add(ShortcutMapProperty('shortcuts', shortcuts, description: debugLabel?.isNotEmpty ?? false ? debugLabel : null));
   }
 }
 

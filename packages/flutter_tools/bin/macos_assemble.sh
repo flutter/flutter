@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2018 The Chromium Authors. All rights reserved.
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -62,7 +62,17 @@ ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
 build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+icon_tree_shaker_flag="false"
+if [[ -n "$TREE_SHAKE_ICONS" ]]; then
+  icon_tree_shaker_flag="true"
+fi
+
+dart_obfuscation_flag="false"
+if [[ -n "$DART_OBFUSCATION" ]]; then
+  dart_obfuscation_flag="true"
+fi
+
+RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
@@ -70,6 +80,12 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
     -dBuildMode="${build_mode}"                                             \
+    -dTreeShakeIcons="${icon_tree_shaker_flag}"                             \
+    -dDartObfuscation="${dart_obfuscation_flag}"                            \
+    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
+    --DartDefines="${DART_DEFINES}"                                         \
+    --ExtraGenSnapshotOptions="${EXTRA_GEN_SNAPSHOT_OPTIONS}"               \
+    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     --output="${ephemeral_dir}"                                             \

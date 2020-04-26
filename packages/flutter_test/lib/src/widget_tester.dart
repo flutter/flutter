@@ -1,10 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,6 +13,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
 import 'all_elements.dart';
@@ -27,6 +30,7 @@ import 'test_text_input.dart';
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
+// ignore: deprecated_member_use
 /// Hide these imports so that they do not conflict with our own implementations in
 /// test_compat.dart. This handles setting up a declarer when one is not defined, which
 /// can happen when a test is executed via flutter_run.
@@ -81,6 +85,10 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
+/// When the [variant] argument is set, [testWidgets] will run the test once for
+/// each value of the [TestVariant.values]. If [variant] is not set, the test
+/// will be run once using the base test environment.
+///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -103,32 +111,157 @@ void testWidgets(
   test_package.Timeout timeout,
   Duration initialTimeout,
   bool semanticsEnabled = true,
+  TestVariant<Object> variant = const DefaultTestVariant(),
 }) {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  test(
-    description,
-    () {
-      SemanticsHandle semanticsHandle;
-      if (semanticsEnabled == true) {
-        semanticsHandle = tester.ensureSemantics();
-      }
-      tester._recordNumberOfSemanticsHandles();
-      test_package.addTearDown(binding.postTest);
-      return binding.runTest(
-        () async {
-          debugResetSemanticsIdCounter();
-          await callback(tester);
-          semanticsHandle?.dispose();
-        },
-        tester._endOfTestVerifications,
-        description: description ?? '',
-        timeout: initialTimeout,
-      );
-    },
-    skip: skip,
-    timeout: timeout ?? binding.defaultTestTimeout,
-  );
+  for (final dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () {
+        tester._testDescription = combinedDescription;
+        SemanticsHandle semanticsHandle;
+        if (semanticsEnabled == true) {
+          semanticsHandle = tester.ensureSemantics();
+        }
+        tester._recordNumberOfSemanticsHandles();
+        test_package.addTearDown(binding.postTest);
+        return binding.runTest(
+          () async {
+            debugResetSemanticsIdCounter();
+            tester.resetTestTextInput();
+            Object memento;
+            try {
+              memento = await variant.setUp(value);
+              await callback(tester);
+            } finally {
+              await variant.tearDown(value, memento);
+            }
+            semanticsHandle?.dispose();
+          },
+          tester._endOfTestVerifications,
+          description: combinedDescription ?? '',
+          timeout: initialTimeout,
+        );
+      },
+      skip: skip,
+      timeout: timeout ?? binding.defaultTestTimeout,
+    );
+  }
+}
+
+/// An abstract base class for describing test environment variants.
+///
+/// These serve as elements of the `variants` argument to [testWidgets].
+///
+/// Use care when adding more testing variants: it multiplies the number of
+/// tests which run. This can drastically increase the time it takes to run all
+/// the tests.
+abstract class TestVariant<T> {
+  /// A const constructor so that subclasses can be const.
+  const TestVariant();
+
+  /// Returns an iterable of the variations that this test dimension represents.
+  ///
+  /// The variations returned should be unique so that the same variation isn't
+  /// needlessly run twice.
+  Iterable<T> get values;
+
+  /// Returns the string that will be used to both add to the test description, and
+  /// be printed when a test fails for this variation.
+  String describeValue(T value);
+
+  /// A function that will be called before each value is tested, with the
+  /// value that will be tested.
+  ///
+  /// This function should preserve any state needed to restore the testing
+  /// environment back to its base state when [tearDown] is called in the
+  /// `Object` that is returned. The returned object will then be passed to
+  /// [tearDown] as a `memento` when the test is complete.
+  Future<Object> setUp(T value);
+
+  /// A function that is guaranteed to be called after a value is tested, even
+  /// if it throws an exception.
+  ///
+  /// Calling this function must return the testing environment back to the base
+  /// state it was in before [setUp] was called. The [memento] is the object
+  /// returned from [setUp] when it was called.
+  Future<void> tearDown(T value, covariant Object memento);
+}
+
+/// The [TestVariant] that represents the "default" test that is run if no
+/// `variants` iterable is specified for [testWidgets].
+///
+/// This variant can be added into a list of other test variants to provide
+/// a "control" test where nothing is changed from the base test environment.
+class DefaultTestVariant extends TestVariant<void> {
+  /// A const constructor for a [DefaultTestVariant].
+  const DefaultTestVariant();
+
+  @override
+  Iterable<void> get values => const <void>[null];
+
+  @override
+  String describeValue(void value) => '';
+
+  @override
+  Future<void> setUp(void value) async {}
+
+  @override
+  Future<void> tearDown(void value, void memento) async {}
+}
+
+/// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
+/// set to different values of [TargetPlatform].
+class TargetPlatformVariant extends TestVariant<TargetPlatform> {
+  /// Creates a [TargetPlatformVariant] that tests the given [values].
+  const TargetPlatformVariant(this.values);
+
+  /// Creates a [TargetPlatformVariant] that tests all values from
+  /// the [TargetPlatform] enum.
+  TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
+
+  /// Creates a [TargetPlatformVariant] that includes platforms that are
+  /// considered desktop platforms.
+  TargetPlatformVariant.desktop() : values = <TargetPlatform>{
+    TargetPlatform.linux,
+    TargetPlatform.macOS,
+    TargetPlatform.windows,
+  };
+
+  /// Creates a [TargetPlatformVariant] that includes platforms that are
+  /// considered mobile platforms.
+  TargetPlatformVariant.mobile() : values = <TargetPlatform>{
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+    TargetPlatform.fuchsia,
+  };
+
+  /// Creates a [TargetPlatformVariant] that tests only the given value of
+  /// [TargetPlatform].
+  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
+
+  @override
+  final Set<TargetPlatform> values;
+
+  @override
+  String describeValue(TargetPlatform value) => value.toString();
+
+  @override
+  Future<TargetPlatform> setUp(TargetPlatform value) async {
+    final TargetPlatform previousTargetPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = value;
+    return previousTargetPlatform;
+  }
+
+  @override
+  Future<void> tearDown(TargetPlatform value, TargetPlatform memento) async {
+    debugDefaultTargetPlatformOverride = memento;
+  }
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
@@ -195,7 +328,7 @@ Future<void> benchmarkWidgets(
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle semanticsHandle;
@@ -279,9 +412,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       binding.deviceEventDispatcher = this;
   }
 
+  /// The description string of the test currently being run.
+  String get testDescription => _testDescription;
+  String _testDescription = '';
+
   /// The binding instance used by the testing framework.
   @override
-  TestWidgetsFlutterBinding get binding => super.binding;
+  TestWidgetsFlutterBinding get binding => super.binding as TestWidgetsFlutterBinding;
 
   /// Renders the UI from the given [widget].
   ///
@@ -298,7 +435,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// [expectLater] call to test that a widget throws an exception. Instead, use
   /// [TestWidgetsFlutterBinding.takeException].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
   ///   await tester.pumpWidget(MyWidget(-1));
@@ -324,7 +461,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Triggers a frame after `duration` amount of time.
   ///
   /// This makes the framework act as if the application had janked (missed
-  /// frames) for `duration` amount of time, and then received a v-sync signal
+  /// frames) for `duration` amount of time, and then received a "Vsync" signal
   /// to paint the application.
   ///
   /// This is a convenience function that just calls
@@ -482,9 +619,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
-      final RenderObject innerTarget = result.path.firstWhere(
-        (HitTestEntry candidate) => candidate.target is RenderObject,
-      ).target;
+      final RenderObject innerTarget = result.path
+        .map((HitTestEntry candidate) => candidate.target)
+        .whereType<RenderObject>()
+        .first;
       final Element innerTargetElement = collectAllElementsFrom(
         binding.renderViewElement,
         skipOffstage: true,
@@ -507,40 +645,39 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int numberOfTypes = 0;
       int totalNumber = 0;
       debugPrint('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
-      for (Element element in candidates) {
+      for (final Element element in candidates) {
         if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
-        if (element.widget is Tooltip) {
-          final Tooltip widget = element.widget;
+        final Widget widget = element.widget;
+        if (widget is Tooltip) {
           final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
           if (matches.length == 1) {
-            debugPrint('  find.byTooltip(\'${widget.message}\')');
+            debugPrint("  find.byTooltip('${widget.message}')");
             continue;
           }
         }
 
-        if (element.widget is Text) {
+        if (widget is Text) {
           assert(descendantText == null);
-          final Text widget = element.widget;
           final Iterable<Element> matches = find.text(widget.data).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
-            debugPrint('  find.text(\'${widget.data}\')');
+            debugPrint("  find.text('${widget.data}')");
             continue;
           }
         }
 
-        if (element.widget.key is ValueKey<dynamic>) {
-          final ValueKey<dynamic> key = element.widget.key;
+        final Key key = widget.key;
+        if (key is ValueKey<dynamic>) {
           String keyLabel;
           if (key is ValueKey<int> ||
               key is ValueKey<double> ||
               key is ValueKey<bool>) {
-            keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
+            keyLabel = 'const ${key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
-            keyLabel = 'const Key(\'${key.value}\')';
+            keyLabel = "const Key('${key.value}')";
           }
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
@@ -551,20 +688,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (!_isPrivate(element.widget.runtimeType)) {
+        if (!_isPrivate(widget.runtimeType)) {
           if (numberOfTypes < 5) {
-            final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
+            final Iterable<Element> matches = find.byType(widget.runtimeType).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.byType(${element.widget.runtimeType})');
+              debugPrint('  find.byType(${widget.runtimeType})');
               numberOfTypes += 1;
               continue;
             }
           }
 
           if (descendantText != null && numberOfWithTexts < 5) {
-            final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
+            final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              debugPrint("  find.widgetWithText(${widget.runtimeType}, '$descendantText')");
               numberOfWithTexts += 1;
               continue;
             }
@@ -634,7 +771,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
     assert(when != null);
     if (_tickers != null) {
-      for (Ticker ticker in _tickers) {
+      for (final Ticker ticker in _tickers) {
         if (ticker.isActive) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A Ticker was active $when.'),
@@ -659,8 +796,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      // TODO(jacobr): The hint for this one causes a change in line breaks but
-      // I think it is for the best.
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A SemanticsHandle was active at the end of the test.'),
         ErrorDescription(
@@ -688,6 +823,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Typical app tests will not need to use this value. To add text to widgets
   /// like [TextField] or [TextFormField], call [enterText].
   TestTextInput get testTextInput => binding.testTextInput;
+
+  /// Ensures that [testTextInput] is registered and [TestTextInput.log] is
+  /// reset.
+  ///
+  /// This is called by the testing framework before test runs, so that if a
+  /// previous test has set its own handler on [SystemChannels.textInput], the
+  /// [testTextInput] regains control and the log is fresh for the new test.
+  /// It should not typically need to be called by tests.
+  void resetTestTextInput() {
+    testTextInput.resetAndRegister();
+  }
 
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
@@ -839,7 +985,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
     while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
+      renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }
     if (result == null)

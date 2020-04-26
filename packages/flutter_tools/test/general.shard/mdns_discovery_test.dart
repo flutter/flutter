@@ -1,19 +1,35 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('mDNS Discovery', () {
     final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+
+    setUp(() {
+      setNetworkInterfaceLister(
+        ({
+          bool includeLoopback,
+          bool includeLinkLocal,
+          InternetAddressType type,
+        }) async => <NetworkInterface>[],
+      );
+    });
+
+    tearDown(() {
+      resetNetworkInterfaceLister();
+    });
 
     MDnsClient getMockClient(
       List<PtrResourceRecord> ptrRecords,
@@ -46,6 +62,18 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
+    });
+
+    testUsingContext('Prints helpful message when there is no ipv4 link local address.', () async {
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+
+      final Uri uri = await portDiscovery.getObservatoryUri(
+        '',
+        MockIOSDevice(),
+      );
+      expect(uri, isNull);
+      expect(testLogger.errorText, contains('Personal Hotspot'));
     });
 
     testUsingContext('One port available, no appId', () async {
@@ -163,6 +191,21 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
+    });
+
+    testUsingContext('Throws SocketException when client throws OSError on start', () async {
+      final MDnsClient client = MockMDnsClient();
+      when(client.start()).thenAnswer((_) {
+        throw const OSError('Operation not suppoted on socket', 102);
+      });
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+      );
+      expect(
+        () async => await portDiscovery.query(),
+        throwsA(isA<SocketException>()),
+      );
     });
   });
 }

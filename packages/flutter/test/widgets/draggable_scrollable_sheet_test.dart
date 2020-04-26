@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,6 +15,7 @@ void main() {
     double minChildSize = .25,
     double itemExtent,
     Key containerKey,
+    NotificationListenerCallback<ScrollNotification> onScrollNotification,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -29,14 +30,17 @@ void main() {
             minChildSize: minChildSize,
             initialChildSize: initialChildSize,
             builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                key: containerKey,
-                color: const Color(0xFFABCDEF),
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemExtent: itemExtent,
-                  itemCount: itemCount,
-                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              return NotificationListener<ScrollNotification>(
+                onNotification: onScrollNotification,
+                child: Container(
+                  key: containerKey,
+                  color: const Color(0xFFABCDEF),
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemExtent: itemExtent,
+                    itemCount: itemCount,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
                 ),
               );
             },
@@ -78,7 +82,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  for (TargetPlatform platform in TargetPlatform.values) {
+  for (final TargetPlatform platform in TargetPlatform.values) {
     group('$platform Scroll Physics', () {
       debugDefaultTargetPlatformOverride = platform;
 
@@ -101,7 +105,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 31'), findsOneWidget);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -114,7 +118,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null, itemCount: 30, initialChildSize: .25));
@@ -131,7 +135,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Item 1').hitTestable(), findsOneWidget);
         expect(find.text('Item 29').hitTestable(), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
         int taps = 0;
@@ -160,7 +164,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 18'), findsOneWidget);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up gently', (WidgetTester tester) async {
         int taps = 0;
@@ -183,7 +187,7 @@ void main() {
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 36'), findsOneWidget);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up', (WidgetTester tester) async {
         int taps = 0;
@@ -204,7 +208,7 @@ void main() {
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsOneWidget);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
         await tester.pumpWidget(_boilerplate(null));
@@ -217,7 +221,7 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
         int taps = 0;
@@ -256,9 +260,53 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 70'), findsNothing);
-      }, skip: isBrowser);
+      }, skip: isBrowser, variant: TargetPlatformVariant.all());
 
       debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
+      final List<Type> notificationTypes = <Type>[];
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          notificationTypes.add(notification.runtimeType);
+          return false;
+        },
+      ));
+
+      await tester.fling(find.text('Item 1'), const Offset(0, -200), 200);
+      await tester.pumpAndSettle();
+
+      // TODO(itome): Make sure UserScrollNotification and ScrollUpdateNotification are called correctly.
+      final List<Type> types = <Type>[
+        ScrollStartNotification,
+        ScrollEndNotification,
+      ];
+      expect(notificationTypes, equals(types));
+    });
+
+    testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (WidgetTester tester) async {
+      final List<Type> notificationTypes = <Type>[];
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          notificationTypes.add(notification.runtimeType);
+          return false;
+        },
+      ));
+
+      await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+      await tester.pumpAndSettle();
+
+      final List<Type> types = <Type>[
+        ScrollStartNotification,
+        UserScrollNotification,
+        ...List<Type>.filled(5, ScrollUpdateNotification),
+        ScrollEndNotification,
+        UserScrollNotification,
+      ];
+      expect(notificationTypes, types);
     });
   }
 }
