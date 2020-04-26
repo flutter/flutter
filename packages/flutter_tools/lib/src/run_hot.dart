@@ -826,7 +826,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
-    // bool shouldReportReloadTime = true;
+    bool shouldReportReloadTime = true;
     _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS.success) {
       return OperationResult(1, 'DevFS synchronization failed');
@@ -970,7 +970,6 @@ class HotRunner extends ResidentRunner {
 
     globals.printTrace('Reassembling application');
 
-    bool shouldReportReloadTime = true;
     final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures);
     await reassembleFuture.timeout(
       const Duration(seconds: 2),
