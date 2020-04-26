@@ -752,7 +752,7 @@ class _BuildInstance {
         target: node.target.name,
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
-        passed: passed,
+        succeeded: passed,
         analyicsName: node.target.analyticsName,
       );
     }
@@ -781,14 +781,14 @@ class PerformanceMeasurement {
     @required this.target,
     @required this.elapsedMilliseconds,
     @required this.skipped,
-    @required this.passed,
+    @required this.succeeded,
     @required this.analyicsName,
   });
 
   final int elapsedMilliseconds;
   final String target;
   final bool skipped;
-  final bool passed;
+  final bool succeeded;
   final String analyicsName;
 }
 
