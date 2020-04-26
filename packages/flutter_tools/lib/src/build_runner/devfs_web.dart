@@ -752,7 +752,8 @@ class WebDevFS implements DevFS {
         path: '/' + mainUri.pathSegments.last,
       ),
       invalidatedFiles,
-      outputPath: dillOutputPath ?? kDefaultBundleName,
+      outputPath: dillOutputPath ??
+        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {

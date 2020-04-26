@@ -357,6 +357,9 @@ class HotRunner extends ResidentRunner {
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
+    final String outputPath = dillOutputPath ??
+      getDefaultApplicationKernelPath(
+        trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation);
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -367,7 +370,7 @@ class HotRunner extends ResidentRunner {
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
-            outputPath: dillOutputPath ?? kDefaultBundleName,
+            outputPath: outputPath,
             packageConfig: packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
@@ -389,7 +392,7 @@ class HotRunner extends ResidentRunner {
 
     // Initialize the first build time to the updated timestamp of the
     // output dill.
-    firstBuildTime = artifactDirectory.childFile(kDefaultBundleName)
+    firstBuildTime = globals.fs.file(outputPath)
       .lastModifiedSync();
 
     return attach(

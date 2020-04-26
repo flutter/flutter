@@ -22,12 +22,27 @@ import 'devfs.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 
-const String kDefaultBundleName =  'app.dill';
-
 String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+
+String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
+  return getKernelPathForTransformerOptions(
+    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
+    trackWidgetCreation: trackWidgetCreation,
+  );
+}
+
+String getKernelPathForTransformerOptions(
+  String path, {
+  @required bool trackWidgetCreation,
+}) {
+  if (trackWidgetCreation) {
+    path += '.track.dill';
+  }
+  return path;
+}
 
 const String defaultPrivateKeyPath = 'privatekey.der';
 
