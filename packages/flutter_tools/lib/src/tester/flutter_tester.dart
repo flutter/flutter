@@ -129,6 +129,7 @@ class FlutterTesterDevice extends Device {
       '--non-interactive',
       '--enable-dart-profiling',
       '--packages=$globalPackagesPath',
+      '--verbose-system-logs',
     ];
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) {
@@ -144,10 +145,8 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      globals.fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-    );
+    final String applicationKernelFilePath = globals.fs.path.join(
+      getBuildDirectory(), 'flutter-tester-app.dill');
     await BundleBuilder().build(
       buildInfo: buildInfo,
       mainPath: mainPath,

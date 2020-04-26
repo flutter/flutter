@@ -475,7 +475,6 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
-    final DateTime candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
 
     // Update modified files
@@ -514,14 +513,15 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainUri,
       invalidatedFiles,
-      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath ?? kDefaultBundleName,
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
-    lastCompiled = candidateCompileTime;
+    lastCompiled = globals.fs.file(compilerOutput.outputFilename)
+      .lastModifiedSync();
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //

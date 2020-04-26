@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/hot_reload_project.dart';
@@ -41,9 +40,9 @@ void main() {
     await flutter.hotRestart();
   });
 
-
   test('newly added code executes during hot reload', () async {
     await flutter.run();
+
     project.uncommentHotReloadPrint();
     unawaited(flutter.hotReload());
 
@@ -53,6 +52,7 @@ void main() {
 
   test('reloadMethod triggers hot reload behavior', () async {
     await flutter.run();
+
     project.uncommentHotReloadPrint();
     final String libraryId = project.buildBreakpointUri.toString();
     unawaited(flutter.reloadMethod(libraryId: libraryId, classId: 'MyApp'));
@@ -62,24 +62,16 @@ void main() {
   });
 
   test('breakpoints are hit after hot reload', () async {
-    // First wait for initial synchronization.
-    flutter.stdout.listen(print);
-
-    unawaited(flutter.run(withDebugger: true));
+    final Future<void> didStart = flutter.run(withDebugger: true);
     await expectLater(flutter.stdout,
       emitsThrough(contains('((((TICK 1))))')));
 
-    await flutter.getFlutterIsolate();
-
     // Add first breakpoint and verify it is set.
-    unawaited(flutter.addBreakpoint(
+    await didStart;
+    await flutter.addBreakpoint(
       project.scheduledBreakpointUri,
       project.scheduledBreakpointLine,
-    ));
-    await expectLater(flutter.vmService.onDebugEvent, emitsInOrder(<Matcher>[
-      predicate((Event event) => event.kind == EventKind.kBreakpointAdded),
-      predicate((Event event) => event.kind == EventKind.kBreakpointResolved),
-    ]));
+    );
 
     // reload triggers code which eventually hits the breakpoint
     await flutter.hotReload();
@@ -87,14 +79,10 @@ void main() {
 
     // Resume and add a breakpoint to the build method.
     await flutter.resume();
-    unawaited(flutter.addBreakpoint(
+    await flutter.addBreakpoint(
       project.buildBreakpointUri,
       project.buildBreakpointLine,
-    ));
-    await expectLater(flutter.vmService.onDebugEvent, emitsInOrder(<Matcher>[
-      predicate((Event event) => event.kind == EventKind.kBreakpointAdded),
-      predicate((Event event) => event.kind == EventKind.kBreakpointResolved),
-    ]));
+    );
 
     // Start a hot reload and verify that we pause.
     final Future<void> pendingHotReload = flutter.hotReload();
@@ -110,18 +98,16 @@ void main() {
   });
 
   test('hot reload does not reassemble if paused', () async {
-    unawaited(flutter.run(withDebugger: true));
+    final Future<void> didStart = flutter.run(withDebugger: true);
+
     await expectLater(flutter.stdout,
       emitsThrough(contains('((((TICK 1))))')));
 
-    unawaited(flutter.addBreakpoint(
+    await didStart;
+    await flutter.addBreakpoint(
       project.buildBreakpointUri,
       project.buildBreakpointLine,
-    ));
-    await expectLater(flutter.vmService.onDebugEvent, emitsInOrder(<Matcher>[
-      predicate((Event event) => event.kind == EventKind.kBreakpointAdded),
-      predicate((Event event) => event.kind == EventKind.kBreakpointResolved),
-    ]));
+    );
 
     final Future<void> pendingHotReload = flutter.hotReload();
     await expectLater(flutter.stdout, emitsThrough(contains(

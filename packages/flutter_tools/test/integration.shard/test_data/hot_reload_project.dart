@@ -55,7 +55,7 @@ class HotReloadProject extends Project {
       if (count == 2) {
         SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
           SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
-            breakpointFunction();
+            print('breakpoint line'); // SCHEDULED BREAKPOINT
           });
         });
       }
@@ -66,10 +66,6 @@ class HotReloadProject extends Project {
         home: Container(),
       );
     }
-  }
-
-  void breakpointFunction() {
-    print('breakpoint line'); // SCHEDULED BREAKPOINT
   }
 
   void printHotReloadWorked() {
@@ -90,6 +86,6 @@ class HotReloadProject extends Project {
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents, true);
   }
 }

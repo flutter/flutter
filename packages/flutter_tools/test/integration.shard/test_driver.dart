@@ -219,7 +219,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<void> addBreakpoint(Object uri, int line) async {
-    return _vmService.addBreakpoint(
+    return _vmService.addBreakpointWithScriptUri(
       await _getFlutterIsolateId(),
       uri.toString(),
       line,
@@ -241,7 +241,6 @@ abstract class FlutterTestDriver {
     // for the event.
     final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
     if (isolate.pauseEvent.kind.startsWith('Pause')) {
-      print(isolate.pauseEvent.kind);
       return getFlutterIsolate();
     }
 

@@ -11,7 +11,6 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../codegen.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
@@ -42,10 +41,8 @@ class TestCompiler {
     this.buildMode,
     this.trackWidgetCreation,
     this.flutterProject,
-  ) : testFilePath = getKernelPathForTransformerOptions(
-        globals.fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
-        trackWidgetCreation: trackWidgetCreation,
-      ) {
+  ) : testFilePath = globals.fs.path
+    .join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill') {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
