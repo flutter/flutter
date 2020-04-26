@@ -1462,13 +1462,15 @@ extension FlutterVmService on vm_service.VmService {
   ///
   /// This method is only supported by certain embedders. This is
   /// described by [Device.supportsFlutterExit].
-  Future<Map<String, dynamic>> flutterExit({
+  Future<void> flutterExit({
     @required String isolateId,
   }) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.exit',
       isolateId: isolateId,
-    );
+    ).catchError((dynamic error, StackTrace stackTrace) {
+      // Do nothing on sentinel, the isolate already exited.
+    }, test: (dynamic error) => error is vm_service.SentinelException);
   }
 
   /// Return the current platform override for the flutter view running with

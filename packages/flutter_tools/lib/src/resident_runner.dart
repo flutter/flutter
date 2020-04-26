@@ -278,18 +278,15 @@ class FlutterDevice {
         return;
       }
     }
-    final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterView view in views) {
       if (view != null && view.uiIsolate != null) {
-        futures.add(vmService.flutterExit(
+        // If successful, there will be no response from flutterExit.
+        unawaited(vmService.flutterExit(
           isolateId: view.uiIsolate.id,
         ));
       }
     }
-    // The flutterExit message only returns if it fails, so just wait a few
-    // seconds then assume it worked.
-    // TODO(ianh): We should make this return once the VM service disconnects.
-    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
+    return vmService.onDone;
   }
 
   Future<Uri> setupDevFS(
