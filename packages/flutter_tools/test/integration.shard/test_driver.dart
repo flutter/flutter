@@ -60,6 +60,8 @@ abstract class FlutterTestDriver {
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
 
+  VmService get vmService => _vmService;
+
   String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
     const int maxLength = 2500;
@@ -191,12 +193,13 @@ abstract class FlutterTestDriver {
     // ceases to be the case, this code will need changing.
     if (_flutterIsolateId == null) {
       final VM vm = await _vmService.getVM();
-      _flutterIsolateId = vm.isolates.first.id;
+      _flutterIsolateId = vm.isolates.single.id;
     }
     return _flutterIsolateId;
   }
 
-  Future<Isolate> _getFlutterIsolate() async {
+  /// Retrieve the main isolate attached to the flutter view.
+  Future<Isolate> getFlutterIsolate() async {
     final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
   }
@@ -215,9 +218,8 @@ abstract class FlutterTestDriver {
     await waitForPause();
   }
 
-  Future<void> addBreakpoint(Uri uri, int line) async {
-    _debugPrint('Sending breakpoint for: $uri:$line');
-    await _vmService.addBreakpointWithScriptUri(
+  Future<void> addBreakpoint(Object uri, int line) async {
+    return _vmService.addBreakpoint(
       await _getFlutterIsolateId(),
       uri.toString(),
       line,
@@ -227,41 +229,24 @@ abstract class FlutterTestDriver {
   // This method isn't racy. If the isolate is already paused,
   // it will immediately return.
   Future<Isolate> waitForPause() async {
-    return _timeoutWithMessages<Isolate>(
-      () async {
-        final String flutterIsolate = await _getFlutterIsolateId();
-        final Completer<Event> pauseEvent = Completer<Event>();
+    final String flutterIsolate = await _getFlutterIsolateId();
 
-        // Start listening for pause events.
-        final StreamSubscription<Event> pauseSubscription = _vmService.onDebugEvent
-          .where((Event event) {
-            return event.isolate.id == flutterIsolate
-                && event.kind.startsWith('Pause');
-          })
-          .listen((Event event) {
-            if (!pauseEvent.isCompleted) {
-              pauseEvent.complete(event);
-            }
-          });
+    final Future<void> pauseReceived = _vmService.onDebugEvent
+      .firstWhere((Event event) {
+        return event.isolate.id == flutterIsolate && event.kind.startsWith('Pause');
+      });
 
-        // But also check if the isolate was already paused (only after we've set
-        // up the subscription) to avoid races. If it was paused, we don't need to wait
-        // for the event.
-        final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
-        if (isolate.pauseEvent.kind.startsWith('Pause')) {
-          _debugPrint('Isolate was already paused (${isolate.pauseEvent.kind}).');
-        } else {
-          _debugPrint('Isolate is not already paused, waiting for event to arrive...');
-          await pauseEvent.future;
-        }
+    // Check if the isolate was already paused (only after we've set
+    // up the subscription) to avoid races. If it was paused, we don't need to wait
+    // for the event.
+    final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
+    if (isolate.pauseEvent.kind.startsWith('Pause')) {
+      print(isolate.pauseEvent.kind);
+      return getFlutterIsolate();
+    }
 
-        // Cancel the subscription on either of the above.
-        await pauseSubscription.cancel();
-
-        return _getFlutterIsolate();
-      },
-      task: 'Waiting for isolate to pause',
-    );
+    await pauseReceived;
+    return getFlutterIsolate();
   }
 
   Future<Isolate> resume({ bool waitForNextPause = false }) => _resume(null, waitForNextPause);
@@ -271,7 +256,7 @@ abstract class FlutterTestDriver {
   Future<Isolate> stepOut({ bool waitForNextPause = true }) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
-    final Isolate isolate = await _getFlutterIsolate();
+    final Isolate isolate = await getFlutterIsolate();
     return isolate.pauseEvent.atAsyncSuspension == true;
   }
 

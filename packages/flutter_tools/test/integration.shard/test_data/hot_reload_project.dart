@@ -55,7 +55,7 @@ class HotReloadProject extends Project {
       if (count == 2) {
         SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
           SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
-            print('breakpoint line'); // SCHEDULED BREAKPOINT
+            breakpointFunction();
           });
         });
       }
@@ -66,6 +66,10 @@ class HotReloadProject extends Project {
         home: Container(),
       );
     }
+  }
+
+  void breakpointFunction() {
+    print('breakpoint line'); // SCHEDULED BREAKPOINT
   }
 
   void printHotReloadWorked() {

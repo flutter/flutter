@@ -317,6 +317,9 @@ class FlutterDevice {
   }
 
   Future<void> resetAssetDirectory() async {
+    if (devFS.baseUri == null) {
+      return;
+    }
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         globals.fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
