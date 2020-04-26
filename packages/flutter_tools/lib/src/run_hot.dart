@@ -388,7 +388,7 @@ class HotRunner extends ResidentRunner {
     }
 
     // Initialize the first build time to the updated timestamp of the
-    // output dill. This ensures we
+    // output dill.
     firstBuildTime = artifactDirectory.childFile(kDefaultBundleName)
       .lastModifiedSync();
 
@@ -1239,7 +1239,6 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
-    DateTime checkTime;
     if (asyncScanning) {
       final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
@@ -1261,7 +1260,6 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = _fileSystem.statSync(
             uri.toFilePath(windows: _platform.isWindows)).modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
-          checkTime = updatedAt;
           invalidatedFiles.add(uri);
         }
       }
@@ -1285,11 +1283,6 @@ class ProjectFileInvalidator {
         }
       }
     }
-    _logger.sendEvent('invalidated', <String, Object>{
-      'uris': invalidatedFiles.join(','),
-      'compileTime': lastCompiled.toString(),
-      'fileTime': checkTime.toString(),
-    });
     _logger.printTrace(
       'Scanned through ${urisToScan.length} files in '
       '${stopwatch.elapsedMilliseconds}ms'
