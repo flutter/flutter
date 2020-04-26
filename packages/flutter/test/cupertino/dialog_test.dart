@@ -432,6 +432,7 @@ void main() {
               title: const Text('The title'),
               content: const Text('The content.'),
               scrollController: scrollController,
+              actions: const <Widget>[],
             ),
           );
         },
@@ -1061,7 +1062,10 @@ void main() {
       const MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(viewInsets: EdgeInsets.zero),
-          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+          child: CupertinoAlertDialog(
+            content: Placeholder(fallbackHeight: 200.0),
+            actions: <Widget>[],
+            ),
         ),
       ),
     );
@@ -1072,7 +1076,10 @@ void main() {
       const MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(viewInsets: EdgeInsets.fromLTRB(40.0, 30.0, 20.0, 10.0)),
-          child: CupertinoAlertDialog(content: Placeholder(fallbackHeight: 200.0)),
+          child: CupertinoAlertDialog(
+            content: Placeholder(fallbackHeight: 200.0),
+            actions: <Widget>[],
+            ),
         ),
       ),
     );
