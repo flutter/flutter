@@ -666,7 +666,7 @@ class _BuildInstance {
   Future<bool> _invokeInternal(Node node) async {
     final PoolResource resource = await resourcePool.request();
     final Stopwatch stopwatch = Stopwatch()..start();
-    bool passed = true;
+    bool succeeded = true;
     bool skipped = false;
 
     // The build system produces a list of aggregate input and output
@@ -702,7 +702,7 @@ class _BuildInstance {
         skipped = true;
         logger.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
-        return passed;
+        return succeeded;
       }
       logger.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
@@ -741,7 +741,7 @@ class _BuildInstance {
       // TODO(jonahwilliams): throw specific exception for expected errors to mark
       // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
-      passed = false;
+      succeeded = false;
       skipped = false;
       exceptionMeasurements[node.target.name] = ExceptionMeasurement(
           node.target.name, exception, stackTrace);
@@ -752,11 +752,11 @@ class _BuildInstance {
         target: node.target.name,
         elapsedMilliseconds: stopwatch.elapsedMilliseconds,
         skipped: skipped,
-        succeeded: passed,
+        succeeded: succeeded,
         analyicsName: node.target.analyticsName,
       );
     }
-    return passed;
+    return succeeded;
   }
 }
 
