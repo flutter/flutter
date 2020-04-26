@@ -137,7 +137,6 @@ void main() {
 
         when(device.name).thenReturn('MockAndroidDevice');
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
-
           .thenReturn(mockLogReader);
 
           final Process dartProcess = MockProcess();
@@ -291,6 +290,7 @@ void main() {
         final AttachCommand command = AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory,
         );
+        globals.fs.file(outputDill).createSync();
         await createTestCommandRunner(command).run(<String>[
           'attach',
           '--filesystem-scheme',
