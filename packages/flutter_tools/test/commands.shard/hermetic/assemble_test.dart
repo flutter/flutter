@@ -126,7 +126,7 @@ void main() {
     expect(
       json.decode(globals.fs.file('out.json').readAsStringSync()),
       containsPair('targets', contains(
-        containsPair('name', 'hello'),
+        containsPair('name', 'bar'),
       )),
     );
   });
@@ -209,7 +209,7 @@ void main() {
     final List<PerformanceMeasurement> performanceMeasurement = <PerformanceMeasurement>[
       PerformanceMeasurement(
         analyicsName: 'foo',
-        target: 'foo',
+        target: 'hidden',
         skipped: false,
         succeeded: true,
         elapsedMilliseconds: 123,

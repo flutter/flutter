@@ -278,7 +278,7 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
     'targets': <Object>[
       for (final PerformanceMeasurement measurement in measurements)
         <String, Object>{
-          'name': measurement.target,
+          'name': measurement.analyicsName,
           'skipped': measurement.skipped,
           'succeeded': measurement.succeeded,
           'elapsedMilliseconds': measurement.elapsedMilliseconds,
