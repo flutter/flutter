@@ -97,7 +97,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///
 /// An alert dialog informs the user about situations that require
 /// acknowledgement. An alert dialog has an optional title, optional content,
-/// and an optional list of actions. The title is displayed above the content
+/// and an optional list of actions (required in [CupertinoDialogAction]). The title is displayed above the content
 /// and the actions are displayed below the content.
 ///
 /// This dialog styles its title and content (typically a message) to match the
