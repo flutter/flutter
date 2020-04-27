@@ -802,7 +802,11 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     ];
     final ProcessResult result = await globals.processManager.run(command);
     if (result.exitCode != 0) {
-      throwToolExit('Unforward command failed: $result');
+      throwToolExit(
+        'Unforward command failed:\n'
+        'stdout: ${result.stdout}\n'
+        'stderr: ${result.stderr}'
+      );
     }
   }
 

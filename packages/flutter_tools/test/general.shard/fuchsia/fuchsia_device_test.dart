@@ -563,6 +563,49 @@ void main() {
     }, testOn: 'posix');
   });
 
+  group('portForwarder', () {
+    MockProcessManager mockProcessManager;
+    MockFile sshConfig;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+
+      sshConfig = MockFile();
+      when(sshConfig.path).thenReturn('irrelevant');
+      when(sshConfig.existsSync()).thenReturn(true);
+      when(sshConfig.absolute).thenReturn(sshConfig);
+    });
+
+    testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
+      final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
+
+      final MockProcessResult mockFailureProcessResult = MockProcessResult();
+      when(mockFailureProcessResult.exitCode).thenReturn(1);
+      when<String>(mockFailureProcessResult.stdout as String).thenReturn('<stdout>');
+      when<String>(mockFailureProcessResult.stderr as String).thenReturn('<stderr>');
+      when(mockProcessManager.run(<String>[
+        'ssh',
+        '-F',
+        'irrelevant',
+        '-O',
+        'cancel',
+        '-vvv',
+        '-L',
+        '0:127.0.0.1:1',
+        'id',
+      ])).thenAnswer((Invocation invocation) {
+        return Future<ProcessResult>.value(mockFailureProcessResult);
+      });
+      await expectLater(
+        () => device.portForwarder.unforward(ForwardedPort(/*hostPort=*/ 0, /*devicePort=*/ 1)),
+        throwsToolExit(message: 'Unforward command failed:\nstdout: <stdout>\nstderr: <stderr>'),
+      );
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+    });
+  });
+
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
     MockPortForwarder portForwarder;
