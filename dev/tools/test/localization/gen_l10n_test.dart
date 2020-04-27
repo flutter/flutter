@@ -17,7 +17,7 @@ import '../common.dart';
 
 final String defaultL10nPathString = path.join('lib', 'l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
-const String defaultOutputFileString = 'output-localization-file';
+const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''
 {
@@ -364,6 +364,35 @@ void main() {
     }
     expect(unimplementedOutputString, contains('es'));
     expect(unimplementedOutputString, contains('subtitle'));
+  });
+
+  test('correctly generates output files in non-default output directory', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          outputPathString: 'lib/l10n/output',
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFile();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
+    expect(outputDirectory.existsSync(), isTrue);
+
+    print(outputDirectory.listSync());
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
   });
 
   test('setting both a headerString and a headerFile should fail', () {
@@ -897,9 +926,9 @@ void main() {
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
-import '${defaultOutputFileString}_en.dart';
-import '${defaultOutputFileString}_es.dart';
-import '${defaultOutputFileString}_zh.dart';
+import 'output-localization-file_en.dart';
+import 'output-localization-file_es.dart';
+import 'output-localization-file_zh.dart';
 '''));
     });
 
@@ -928,7 +957,7 @@ import '${defaultOutputFileString}_zh.dart';
       ).readAsStringSync();
       expect(localizationsFile, contains(
 '''
-import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileString}_en;
+import 'output-localization-file_en.dart' deferred as output-localization-file_en;
 '''));
     });
 
