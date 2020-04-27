@@ -641,8 +641,6 @@ FILE: ../../../flutter/shell/platform/android/android_environment_gl.h
 FILE: ../../../flutter/shell/platform/android/android_exports.lst
 FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.h
-FILE: ../../../flutter/shell/platform/android/android_external_view_embedder.cc
-FILE: ../../../flutter/shell/platform/android/android_external_view_embedder.h
 FILE: ../../../flutter/shell/platform/android/android_native_window.cc
 FILE: ../../../flutter/shell/platform/android/android_native_window.h
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
@@ -657,6 +655,9 @@ FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.h
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
+FILE: ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder.cc
+FILE: ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder.h
+FILE: ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder_unittests.cc
 FILE: ../../../flutter/shell/platform/android/flutter_main.cc
 FILE: ../../../flutter/shell/platform/android/flutter_main.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/Log.java
