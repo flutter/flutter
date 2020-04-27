@@ -121,8 +121,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('targetPlatform does not throw when sshConfig is missing',
-        () async {
+    testUsingContext('targetPlatform does not throw when sshConfig is missing', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.targetPlatform, TargetPlatform.fuchsia_arm64);
     }, overrides: <Type, Generator>{
@@ -172,7 +171,7 @@ void main() {
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) =>
-          Future<ProcessResult>.value(mockProcessResult));
+      Future<ProcessResult>.value(mockProcessResult));
       when(mockProcessResult.exitCode).thenReturn(1);
       when<String>(mockProcessResult.stdout as String).thenReturn('');
       when<String>(mockProcessResult.stderr as String).thenReturn('');
@@ -186,7 +185,7 @@ void main() {
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) =>
-          Future<ProcessResult>.value(emptyStdoutProcessResult));
+      Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
@@ -207,9 +206,9 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-            sshConfig: mockFile,
-            devFinder: mockFile,
-          ),
+        sshConfig: mockFile,
+        devFinder: mockFile,
+      ),
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
@@ -239,8 +238,7 @@ void main() {
         exitCode = Completer<int>();
         when(mockProcessManager.start(any))
             .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation _) => exitCode.future);
+        when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
         when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
         devFinder = MockFile();
@@ -257,8 +255,8 @@ void main() {
 
       testUsingContext('can be parsed for an app', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader =
-            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader = device.getLogReader(
+            app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -286,8 +284,8 @@ void main() {
 
       testUsingContext('cuts off prior logs', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader =
-            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader = device.getLogReader(
+            app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -358,14 +356,14 @@ void main() {
       expect(device.supportsScreenshot, false);
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
-            operatingSystem: 'windows',
-          ),
+        operatingSystem: 'windows',
+      ),
     });
 
     test("takeScreenshot throws if file isn't .ppm", () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
-        () => device.takeScreenshot(globals.fs.file('file.invalid')),
+            () => device.takeScreenshot(globals.fs.file('file.invalid')),
         throwsA(equals('file.invalid must be a .ppm file')),
       );
     }, testOn: 'posix');
@@ -386,18 +384,17 @@ void main() {
       )).thenAnswer((_) async => ProcessResult(0, 1, '', '<error-message>'));
 
       await expectLater(
-        () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(equals(
-            'Could not take a screenshot on device tester:\n<error-message>')),
+            () => device.takeScreenshot(globals.fs.file('file.ppm')),
+        throwsA(equals('Could not take a screenshot on device tester:\n<error-message>')),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Platform: () => FakePlatform(
-            environment: <String, String>{
-              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-            },
-            operatingSystem: 'linux',
-          ),
+        environment: <String, String>{
+          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+        },
+        operatingSystem: 'linux',
+      ),
     }, testOn: 'posix');
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
@@ -440,23 +437,20 @@ void main() {
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       await expectLater(
-        () => device.takeScreenshot(globals.fs.file('file.ppm')),
-        throwsA(
-            equals('Failed to copy screenshot from device:\n<error-message>')),
+            () => device.takeScreenshot(globals.fs.file('file.ppm')),
+        throwsA(equals('Failed to copy screenshot from device:\n<error-message>')),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Platform: () => FakePlatform(
-            environment: <String, String>{
-              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-            },
-            operatingSystem: 'linux',
-          ),
+        environment: <String, String>{
+          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+        },
+        operatingSystem: 'linux',
+      ),
     }, testOn: 'posix');
 
-    testUsingContext(
-        "takeScreenshot prints error if can't delete file from device",
-        () async {
+    testUsingContext("takeScreenshot prints error if can't delete file from device", () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
 
       when(mockProcessManager.run(
@@ -502,17 +496,16 @@ void main() {
       }
       expect(
         testLogger.errorText,
-        contains(
-            'Failed to delete screenshot.ppm from the device:\n<error-message>'),
+        contains('Failed to delete screenshot.ppm from the device:\n<error-message>'),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Platform: () => FakePlatform(
-            environment: <String, String>{
-              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-            },
-            operatingSystem: 'linux',
-          ),
+        environment: <String, String>{
+          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+        },
+        operatingSystem: 'linux',
+      ),
     }, testOn: 'posix');
 
     testUsingContext('takeScreenshot returns', () async {
@@ -562,13 +555,14 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Platform: () => FakePlatform(
-            environment: <String, String>{
-              'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
-            },
-            operatingSystem: 'linux',
-          ),
+        environment: <String, String>{
+          'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
+        },
+        operatingSystem: 'linux',
+      ),
     }, testOn: 'posix');
   });
+
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
     MockPortForwarder portForwarder;
@@ -584,19 +578,18 @@ void main() {
       when(vmService.vm).thenReturn(vm);
     });
 
-    Future<Uri> findUri(
-        List<MockFlutterView> views, String expectedIsolateName) async {
+    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) async {
       when(vm.views).thenReturn(views);
       for (final MockFlutterView view in views) {
         when(view.owner).thenReturn(vm);
       }
       final MockFuchsiaDevice fuchsiaDevice =
-          MockFuchsiaDevice('123', portForwarder, false);
+      MockFuchsiaDevice('123', portForwarder, false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
-          FuchsiaIsolateDiscoveryProtocol(
+      FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
-        (Uri uri) async => vmService,
+            (Uri uri) async => vmService,
         true, // only poll once.
       );
       when(fuchsiaDevice.servicePorts())
@@ -611,8 +604,7 @@ void main() {
       return await discoveryProtocol.uri;
     }
 
-    testUsingContext('can find flutter view with matching isolate name',
-        () async {
+    testUsingContext('can find flutter view with matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
@@ -623,8 +615,7 @@ void main() {
           uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     });
 
-    testUsingContext('can handle flutter view without matching isolate name',
-        () async {
+    testUsingContext('can handle flutter view without matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
@@ -643,36 +634,32 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    expect(
-      globals.artifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.debug,
-      ),
+    expect(globals.artifacts.getArtifactPath(
+      Artifact.fuchsiaFlutterRunner,
+      platform: TargetPlatform.fuchsia_x64,
+      mode: BuildMode.debug,
+    ),
       contains('flutter_jit_runner'),
     );
-    expect(
-      globals.artifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.profile,
-      ),
+    expect(globals.artifacts.getArtifactPath(
+      Artifact.fuchsiaFlutterRunner,
+      platform: TargetPlatform.fuchsia_x64,
+      mode: BuildMode.profile,
+    ),
       contains('flutter_aot_runner'),
     );
-    expect(
-      globals.artifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.release,
-      ),
+    expect(globals.artifacts.getArtifactPath(
+      Artifact.fuchsiaFlutterRunner,
+      platform: TargetPlatform.fuchsia_x64,
+      mode: BuildMode.release,
+    ),
       contains('flutter_aot_product_runner'),
     );
-    expect(
-      globals.artifacts.getArtifactPath(
-        Artifact.fuchsiaFlutterRunner,
-        platform: TargetPlatform.fuchsia_x64,
-        mode: BuildMode.jitRelease,
-      ),
+    expect(globals.artifacts.getArtifactPath(
+      Artifact.fuchsiaFlutterRunner,
+      platform: TargetPlatform.fuchsia_x64,
+      mode: BuildMode.jitRelease,
+    ),
       contains('flutter_jit_product_runner'),
     );
   });
@@ -697,12 +684,9 @@ void main() {
       fuchsiaSdk = MockFuchsiaSdk();
       fuchsiaArtifacts = MockFuchsiaArtifacts();
 
-      compilerSnapshot = memoryFileSystem.file('kernel_compiler.snapshot')
-        ..createSync();
-      platformDill = memoryFileSystem.file('platform_strong.dill')
-        ..createSync();
-      patchedSdk = memoryFileSystem.file('flutter_runner_patched_sdk')
-        ..createSync();
+      compilerSnapshot = memoryFileSystem.file('kernel_compiler.snapshot')..createSync();
+      platformDill = memoryFileSystem.file('platform_strong.dill')..createSync();
+      patchedSdk = memoryFileSystem.file('flutter_runner_patched_sdk')..createSync();
       runner = memoryFileSystem.file('flutter_jit_runner')..createSync();
 
       mockArtifacts = MockArtifacts();
@@ -747,14 +731,11 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
         globals.fs.file('.packages').createSync();
-        globals.fs
-            .file(globals.fs.path.join('lib', 'main.dart'))
-            .createSync(recursive: true);
+        globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
       }
 
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          BuildInfo(mode, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(BuildInfo(mode, null, treeShakeIcons: false));
       return await device.startApp(
         app,
         prebuiltApplication: prebuilt,
@@ -764,7 +745,7 @@ void main() {
 
     testUsingContext('start prebuilt in release mode', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -786,10 +767,11 @@ void main() {
       final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
-      final DebuggingOptions debuggingOptions = DebuggingOptions.disabled(
-          const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+      final DebuggingOptions debuggingOptions =
+      DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
-          prebuiltApplication: true, debuggingOptions: debuggingOptions);
+          prebuiltApplication: true,
+          debuggingOptions: debuggingOptions);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
       expect(await device.stopApp(app), isTrue);
@@ -805,7 +787,7 @@ void main() {
 
     testUsingContext('start prebuilt in debug mode', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
@@ -820,7 +802,7 @@ void main() {
 
     testUsingContext('start buildable in release mode', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: false, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: false, mode: BuildMode.release);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -835,7 +817,7 @@ void main() {
 
     testUsingContext('start buildable in debug mode', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: false, mode: BuildMode.debug);
+      await setupAndStartApp(prebuilt: false, mode: BuildMode.debug);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
@@ -848,10 +830,9 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
-    testUsingContext('fail with correct LaunchResult when device-finder fails',
-        () async {
+    testUsingContext('fail with correct LaunchResult when device-finder fails', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -866,7 +847,7 @@ void main() {
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -879,39 +860,36 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
-    testUsingContext('fail with correct LaunchResult when amber fails',
-        () async {
+    testUsingContext('fail with correct LaunchResult when amber fails', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaDeviceTools: () =>
-          FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
+      FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(amber: FailingAmberCtl()),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
     });
 
-    testUsingContext('fail with correct LaunchResult when tiles fails',
-        () async {
+    testUsingContext('fail with correct LaunchResult when tiles fails', () async {
       final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      FuchsiaDeviceTools: () =>
-          FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
+      FuchsiaDeviceTools: () => FakeFuchsiaDeviceTools(tiles: FailingTilesCtl()),
       FuchsiaArtifacts: () => fuchsiaArtifacts,
       FuchsiaSdk: () => fuchsiaSdk,
       OperatingSystemUtils: () => osUtils,
     });
+
   });
 
   group('sdkNameAndVersion: ', () {
@@ -931,27 +909,23 @@ void main() {
       mockSuccessProcessManager = MockProcessManager();
       mockSuccessProcessResult = MockProcessResult();
       when(mockSuccessProcessManager.run(any)).thenAnswer(
-          (Invocation invocation) =>
-              Future<ProcessResult>.value(mockSuccessProcessResult));
+              (Invocation invocation) => Future<ProcessResult>.value(mockSuccessProcessResult));
       when(mockSuccessProcessResult.exitCode).thenReturn(0);
-      when<String>(mockSuccessProcessResult.stdout as String)
-          .thenReturn('version');
+      when<String>(mockSuccessProcessResult.stdout as String).thenReturn('version');
       when<String>(mockSuccessProcessResult.stderr as String).thenReturn('');
 
       mockFailureProcessManager = MockProcessManager();
       mockFailureProcessResult = MockProcessResult();
       when(mockFailureProcessManager.run(any)).thenAnswer(
-          (Invocation invocation) =>
-              Future<ProcessResult>.value(mockFailureProcessResult));
+              (Invocation invocation) => Future<ProcessResult>.value(mockFailureProcessResult));
       when(mockFailureProcessResult.exitCode).thenReturn(1);
       when<String>(mockFailureProcessResult.stdout as String).thenReturn('');
       when<String>(mockFailureProcessResult.stderr as String).thenReturn('');
 
       emptyStdoutProcessManager = MockProcessManager();
       emptyStdoutProcessResult = MockProcessResult();
-      when(emptyStdoutProcessManager.run(any)).thenAnswer(
-          (Invocation invocation) =>
-              Future<ProcessResult>.value(emptyStdoutProcessResult));
+      when(emptyStdoutProcessManager.run(any)).thenAnswer((Invocation invocation) =>
+      Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
@@ -966,8 +940,7 @@ void main() {
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
-    testUsingContext('returns what we get from the device on success',
-        () async {
+    testUsingContext('returns what we get from the device on success', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.sdkNameAndVersion, equals('Fuchsia version'));
     }, overrides: <Type, Generator>{
@@ -985,8 +958,7 @@ void main() {
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
-    testUsingContext('returns "Fuchsia" when device gives an empty result',
-        () async {
+    testUsingContext('returns "Fuchsia" when device gives an empty result', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
       expect(await device.sdkNameAndVersion, equals('Fuchsia'));
     }, overrides: <Type, Generator>{
@@ -1022,12 +994,10 @@ Process _createMockProcess({
   String stderr = '',
   bool persistent = false,
 }) {
-  final Stream<List<int>> stdoutStream =
-      Stream<List<int>>.fromIterable(<List<int>>[
+  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stdout),
   ]);
-  final Stream<List<int>> stderrStream =
-      Stream<List<int>>.fromIterable(<List<int>>[
+  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
   final Process process = MockProcess();
@@ -1063,8 +1033,7 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
   final DevicePortForwarder portForwarder;
 
   @override
-  Future<TargetPlatform> get targetPlatform async =>
-      TargetPlatform.fuchsia_arm64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
 }
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
@@ -1088,22 +1057,18 @@ class MockIsolate extends Mock implements Isolate {
 }
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
-  FuchsiaDeviceWithFakeDiscovery(String id, {String name})
-      : super(id, name: name);
+  FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
 
   @override
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
-      String isolateName) {
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) {
     return FakeFuchsiaIsolateDiscoveryProtocol();
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async =>
-      TargetPlatform.fuchsia_arm64;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia_arm64;
 }
 
-class FakeFuchsiaIsolateDiscoveryProtocol
-    implements FuchsiaIsolateDiscoveryProtocol {
+class FakeFuchsiaIsolateDiscoveryProtocol implements FuchsiaIsolateDiscoveryProtocol {
   @override
   FutureOr<Uri> get uri => Uri.parse('http://[::1]:37');
 
@@ -1128,20 +1093,17 @@ class FakeFuchsiaAmberCtl implements FuchsiaAmberCtl {
   }
 
   @override
-  Future<bool> addRepoCfg(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return true;
   }
 
   @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-      String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     return true;
   }
 
   @override
-  Future<bool> pkgCtlRepoRemove(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return true;
   }
 }
@@ -1163,20 +1125,17 @@ class FailingAmberCtl implements FuchsiaAmberCtl {
   }
 
   @override
-  Future<bool> addRepoCfg(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return false;
   }
 
   @override
-  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
-      String packageName) async {
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
     return false;
   }
 
   @override
-  Future<bool> pkgCtlRepoRemove(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return false;
   }
 }
@@ -1260,7 +1219,7 @@ class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
     FuchsiaAmberCtl amber,
     FuchsiaTilesCtl tiles,
-  })  : amberCtl = amber ?? FakeFuchsiaAmberCtl(),
+  }) : amberCtl = amber ?? FakeFuchsiaAmberCtl(),
         tilesCtl = tiles ?? FakeFuchsiaTilesCtl();
 
   @override
@@ -1287,9 +1246,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
   @override
   Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!globals.fs
-        .file(globals.fs.path.join(buildPath, 'meta', 'package'))
-        .existsSync()) {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync()) {
       return false;
     }
     globals.fs.file(outKeyPath).createSync(recursive: true);
@@ -1297,27 +1254,19 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
-    if (!globals.fs
-            .file(globals.fs.path.join(buildPath, 'meta', 'package'))
-            .existsSync() ||
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
-    globals.fs
-        .file(globals.fs.path.join(buildPath, 'meta.far'))
-        .createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join(buildPath, 'meta.far')).createSync(recursive: true);
     return true;
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
-    if (!globals.fs
-            .file(globals.fs.path.join(buildPath, 'meta', 'package'))
-            .existsSync() ||
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !globals.fs.file(keyPath).existsSync() ||
         !globals.fs.file(manifestPath).existsSync()) {
       return false;
@@ -1368,14 +1317,12 @@ class FailingPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     return false;
   }
 
@@ -1404,8 +1351,7 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
-    final String manifestPath =
-        globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     globals.fs.file(manifestPath).createSync(recursive: true);
   }
 }
@@ -1423,7 +1369,7 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({ Duration timeout }) async {
     return <String>['192.168.42.172 scare-cable-skip-joy'];
   }
 
@@ -1435,7 +1381,7 @@ class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
 
 class FailingDevFinder implements FuchsiaDevFinder {
   @override
-  Future<List<String>> list({Duration timeout}) async {
+  Future<List<String>> list({ Duration timeout }) async {
     return null;
   }
 
@@ -1450,7 +1396,7 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
     FuchsiaPM pm,
     FuchsiaKernelCompiler compiler,
     FuchsiaDevFinder devFinder,
-  })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
+  }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
         fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder();
 
