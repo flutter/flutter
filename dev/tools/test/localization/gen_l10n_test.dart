@@ -336,7 +336,7 @@ void main() {
       generator
         ..initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -450,7 +450,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -480,7 +480,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -511,7 +511,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -546,7 +546,7 @@ void main() {
           generator = LocalizationsGenerator(fs);
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -588,7 +588,7 @@ void main() {
           generator = LocalizationsGenerator(fs);
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -626,7 +626,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -678,7 +678,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'first_file.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -723,7 +723,7 @@ void main() {
         generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app_es.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -750,7 +750,7 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -785,7 +785,7 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app_en.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -812,7 +812,7 @@ void main() {
         final LocalizationsGenerator generator = LocalizationsGenerator(fs);
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: 'app_en_US.arb',
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -844,7 +844,7 @@ void main() {
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -876,7 +876,7 @@ void main() {
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -907,7 +907,7 @@ import '${defaultOutputFileString}_zh.dart';
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -953,7 +953,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -992,7 +992,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1030,7 +1030,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1067,7 +1067,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1100,7 +1100,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1129,7 +1129,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1161,7 +1161,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1194,7 +1194,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -1226,7 +1226,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
       try {
         generator.initialize(
           inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
           templateArbFileName: defaultTemplateArbFileName,
           outputFileString: defaultOutputFileString,
           classNameString: defaultClassNameString,
@@ -1262,7 +1262,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1294,7 +1294,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
@@ -1326,7 +1326,7 @@ import '${defaultOutputFileString}_en.dart' deferred as ${defaultOutputFileStrin
         try {
           generator.initialize(
             inputPathString: defaultL10nPathString,
-        outputPathString: defaultL10nPathString,
+            outputPathString: defaultL10nPathString,
             templateArbFileName: defaultTemplateArbFileName,
             outputFileString: defaultOutputFileString,
             classNameString: defaultClassNameString,
