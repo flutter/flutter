@@ -31,53 +31,16 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/testbed.dart';
 
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-);
-
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kPauseException,
-    timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  exceptionPauseMode: null,
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
-);
-
 void main() {
   final Uri testUri = Uri.parse('foo://bar');
   Testbed testbed;
   MockFlutterDevice mockFlutterDevice;
   MockVMService mockVMService;
   MockDevFS mockDevFS;
+  MockFlutterView mockFlutterView;
   ResidentRunner residentRunner;
   MockDevice mockDevice;
+  MockIsolate mockIsolate;
   FakeVmServiceHost fakeVmServiceHost;
 
   setUp(() {
@@ -98,7 +61,8 @@ void main() {
     mockDevice = MockDevice();
     mockVMService = MockVMService();
     mockDevFS = MockDevFS();
-
+    mockFlutterView = MockFlutterView();
+    mockIsolate = MockIsolate();
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
     when(mockDevFS.sources).thenReturn(<Uri>[]);
@@ -128,10 +92,10 @@ void main() {
     });
     when(mockFlutterDevice.devFS).thenReturn(mockDevFS);
     when(mockFlutterDevice.views).thenReturn(<FlutterView>[
-      // NB: still using mock FlutterDevice.
-      fakeFlutterView,
+      mockFlutterView,
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
+    when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenAnswer((_) => Stream<Uri>.value(testUri));
     when(mockFlutterDevice.connect(
@@ -170,6 +134,9 @@ void main() {
       final Completer<void> result = Completer<void>.sync();
       return result.future;
     });
+    when(mockIsolate.reload()).thenAnswer((Invocation invocation) {
+      return Future<ServiceObject>.value(null);
+    });
   });
 
   test('ResidentRunner can attach to device successfully', () => testbed.run(() async {
@@ -193,32 +160,18 @@ void main() {
 
   test('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        id: '1',
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        id: '2',
-        method: 'getVM',
-        args: null,
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
-      ),
       const FakeVmServiceRequest(
-        id: '3',
+        id: '1',
         method: 'streamListen',
         args: <String, Object>{
           'streamId': 'Isolate',
         }
       ),
-      FakeVmServiceRequest(
-        id: '4',
+      const FakeVmServiceRequest(
+        id: '2',
         method: kRunInViewMethod,
         args: <String, Object>{
-          'viewId': fakeFlutterView.id,
+          'viewId': null,
           'mainScript': 'lib/main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         }
@@ -319,19 +272,11 @@ void main() {
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       // Not all requests are present due to existing mocks
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        id: '2',
         method: 'ext.flutter.reassemble',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
         },
       ),
     ]);
@@ -366,32 +311,18 @@ void main() {
   test('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
      // Not all requests are present due to existing mocks
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        id: '1',
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        id: '2',
-        method: 'getVM',
-        args: null,
-        jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson(),
-      ),
       const FakeVmServiceRequest(
-        id: '3',
+        id: '1',
         method: 'streamListen',
         args: <String, Object>{
           'streamId': 'Isolate',
         },
       ),
-      FakeVmServiceRequest(
-        id: '4',
+      const FakeVmServiceRequest(
+        id: '2',
         method: kRunInViewMethod,
         args: <String, Object>{
-          'viewId': fakeFlutterView.id,
+          'viewId': null,
           'mainScript': 'lib/main.dart.dill',
           'assetDirectory': 'build/flutter_assets',
         },
@@ -568,11 +499,11 @@ void main() {
 
   test('ResidentRunner handles writeSkSL returning no data', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-       FakeVmServiceRequest(
+       const FakeVmServiceRequest(
         id: '1',
         method: kGetSkSLsMethod,
         args: <String, Object>{
-          'viewId': fakeFlutterView.id,
+          'viewId': null,
         },
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{}
@@ -586,11 +517,11 @@ void main() {
 
   test('ResidentRunner can write SkSL data to a unique file with engine revision, platform, and device name', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
         method: kGetSkSLsMethod,
         args: <String, Object>{
-          'viewId': fakeFlutterView.id,
+          'viewId': null,
         },
         jsonResponse: <String, Object>{
           'SkSLs': <String, Object>{
@@ -618,19 +549,19 @@ void main() {
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'false',
         },
       ),
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '2',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'true',
         },
       )
@@ -660,11 +591,11 @@ void main() {
 
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws RpcError', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'false',
         },
         // Failed response,
@@ -680,19 +611,19 @@ void main() {
 
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner during second request', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'false',
         },
       ),
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '2',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'true',
         },
         // Failed response,
@@ -707,19 +638,19 @@ void main() {
 
   test('ResidentRunner bails taking screenshot on debug device if takeScreenshot throws', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'false',
         },
       ),
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '2',
         method: 'ext.flutter.debugAllowBanner',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
           'enabled': 'true',
         },
       ),
@@ -763,31 +694,15 @@ void main() {
   }));
 
   test('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
-        id: '1',
-        method: '_flutter.listViews',
-        args: null,
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        id: '2',
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
-        },
-        jsonResponse: fakePausedIsolate.toJson(),
-      ),
-    ]);
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
-      <FlutterView>[ fakeFlutterView ],
+      <FlutterView>[ mockFlutterView ],
     );
     flutterDevice.vmService = fakeVmServiceHost.vmService;
+    final MockServiceEvent mockServiceEvent = MockServiceEvent();
+    when(mockServiceEvent.isPauseEvent).thenReturn(true);
+    when(mockIsolate.pauseEvent).thenReturn(mockServiceEvent);
     when(mockDevice.supportsFlutterExit).thenReturn(true);
 
     await flutterDevice.exitApps();
@@ -798,44 +713,26 @@ void main() {
 
   test('FlutterDevice will exit an un-paused isolate', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      FakeVmServiceRequest(
+      const FakeVmServiceRequest(
         id: '1',
-        method: kListViewsMethod,
-        args: null,
-        jsonResponse: <String, Object>{
-          'views': <Object>[
-            fakeFlutterView.toJson(),
-          ],
-        },
-      ),
-      FakeVmServiceRequest(
-        id: '2',
-        method: 'getIsolate',
-        args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id
-        },
-        jsonResponse: fakeUnpausedIsolate.toJson(),
-      ),
-      FakeVmServiceRequest(
-        id: '3',
         method: 'ext.flutter.exit',
         args: <String, Object>{
-          'isolateId': fakeUnpausedIsolate.id,
+          'isolateId': null,
         },
-        close: true,
       )
     ]);
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
       mockDevice,
-      <FlutterView> [fakeFlutterView ],
+      <FlutterView> [mockFlutterView],
     );
     flutterDevice.vmService = fakeVmServiceHost.vmService;
 
+    final MockServiceEvent mockServiceEvent = MockServiceEvent();
+    when(mockServiceEvent.isPauseEvent).thenReturn(false);
+    when(mockIsolate.pauseEvent).thenReturn(mockServiceEvent);
     when(mockDevice.supportsFlutterExit).thenReturn(true);
 
-    final Future<void> exitFuture = flutterDevice.exitApps();
-
-    await expectLater(exitFuture, completes);
+    await flutterDevice.exitApps();
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
@@ -1084,14 +981,17 @@ void main() {
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
+class MockFlutterView extends Mock implements FlutterView {}
 class MockVMService extends Mock implements VMService {}
 class MockDevFS extends Mock implements DevFS {}
+class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
 class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
-
+class MockServiceEvent extends Mock implements ServiceEvent {}
+class MockVM extends Mock implements VM {}
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice(Device device, this.views, { Stream<Uri> observatoryUris })
     : super(device, buildInfo: BuildInfo.debug) {

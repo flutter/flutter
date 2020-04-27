@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -171,52 +170,6 @@ void main() {
     });
 
     testUsingContext('Does hot restarts when all devices support it', () async {
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-         const FakeVmServiceRequest(
-          id: '2',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-        FakeVmServiceRequest(
-          id: '3',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        FakeVmServiceRequest(
-          id: '4',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '5',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-        const FakeVmServiceRequest(
-          id: '6',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-      ]);
       // Setup mocks
       final MockDevice mockDevice = MockDevice();
       final MockDevice mockHotDevice = MockDevice();
@@ -226,12 +179,8 @@ void main() {
       when(mockHotDevice.supportsHotRestart).thenReturn(true);
       // Trigger a restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)
-          ..vmService = fakeVmServiceHost.vmService
-          ..devFS = mockDevFs,
-        FlutterDevice(mockHotDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)
-          ..vmService = fakeVmServiceHost.vmService
-          ..devFS = mockDevFs,
+        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
+        FlutterDevice(mockHotDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
       final HotRunner hotRunner = HotRunner(devices);
       final OperationResult result = await hotRunner.restart(fullRestart: true);
@@ -262,39 +211,13 @@ void main() {
 
     testUsingContext('hot restart supported', () async {
       // Setup mocks
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-        const FakeVmServiceRequest(
-          id: '1',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-        FakeVmServiceRequest(
-          id: '2',
-          method: 'getVM',
-          args: null,
-          jsonResponse: vm_service.VM.parse(<String, Object>{}).toJson()
-        ),
-        const FakeVmServiceRequest(
-          id: '3',
-          method: kListViewsMethod,
-          args: null,
-          jsonResponse: <String, Object>{
-            'views': <Object>[],
-          }
-        ),
-      ]);
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
       when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)
-          ..vmService = fakeVmServiceHost.vmService
-          ..devFS = mockDevFs,
+        FlutterDevice(mockDevice, generator: residentCompiler, buildInfo: BuildInfo.debug)..devFS = mockDevFs,
       ];
       final HotRunner hotRunner = HotRunner(devices);
       final OperationResult result = await hotRunner.restart(fullRestart: true);
