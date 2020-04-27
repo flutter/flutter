@@ -1053,6 +1053,7 @@ void main() {
                   activeColor: activeColor,
                   inactiveColor: inactiveColor,
                   onChanged: onChanged,
+                  // ignore: deprecated_member_use_from_same_package
                   useV2Slider: useV2Slider,
                 ),
               ),
@@ -1545,6 +1546,7 @@ void main() {
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onChanged: onChanged,
+                    // ignore: deprecated_member_use_from_same_package
                     useV2Slider: true,
                   ),
                 ),
@@ -1601,6 +1603,7 @@ void main() {
                 child: Theme(
                   data: theme,
                   child: RangeSlider(
+                    // ignore: deprecated_member_use_from_same_package
                     useV2Slider: false,
                     values: values,
                     labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
@@ -1687,6 +1690,7 @@ void main() {
                             values = newValues;
                           });
                         },
+                        // ignore: deprecated_member_use_from_same_package
                         useV2Slider: true,
                       ),
                     ),
@@ -1830,6 +1834,7 @@ void main() {
                             values = newValues;
                           });
                         },
+                        // ignore: deprecated_member_use_from_same_package
                         useV2Slider: true,
                       ),
                     ),
@@ -1983,6 +1988,7 @@ void main() {
                             values = newValues;
                           });
                         },
+                        // ignore: deprecated_member_use_from_same_package
                         useV2Slider: true,
                       ),
                     ),
@@ -2106,6 +2112,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
+      // ignore: deprecated_member_use_from_same_package
       useV2Slider: false,
       activeColor: Colors.blue,
       divisions: 4,

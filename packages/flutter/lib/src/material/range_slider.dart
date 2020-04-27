@@ -132,6 +132,11 @@ class RangeSlider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    @Deprecated(
+        'This flag has changed to true by default and no longer needed. '
+            'This feature was deprecated after v1.18.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
     this.useV2Slider = true,
   }) : assert(values != null),
        assert(min != null),
@@ -141,6 +146,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
        assert(divisions == null || divisions > 0),
+       // ignore: deprecated_member_use_from_same_package
        assert(useV2Slider != null),
        super(key: key);
 
