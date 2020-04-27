@@ -134,7 +134,7 @@ void main() {
       );
     });
 
-    test('setTemplateArbFile fails if l10nDirectory is null', () {
+    test('setTemplateArbFile fails if inputDirectory is null', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
         generator.setTemplateArbFile(defaultTemplateArbFileName);
@@ -145,7 +145,7 @@ void main() {
 
       fail(
         'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
+        'the inputDirectory is not specified.'
       );
     });
 
@@ -161,7 +161,7 @@ void main() {
 
       fail(
         'Attempting to set LocalizationsGenerator.setTemplateArbFile should fail if the '
-        'the l10nDirectory is null.'
+        'the templateArbFileName passed in is null.'
       );
     });
 
