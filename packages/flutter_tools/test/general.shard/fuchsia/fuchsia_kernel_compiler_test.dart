@@ -11,7 +11,7 @@ void main() {
   group('Fuchsia Kernel Compiler', () {
     test('provide correct flags for release mode', () {
       expect(
-          FuchsiaKernelCompiler.getBuildInfoFlags(
+        FuchsiaKernelCompiler.getBuildInfoFlags(
             buildInfo: BuildInfo.release,
             manifestPath: '',
           ),
