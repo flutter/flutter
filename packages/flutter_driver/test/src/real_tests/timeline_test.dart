@@ -62,11 +62,11 @@ void main() {
         'traceEvents': <Map<String, dynamic>>[
           <String, dynamic>{
             'name': 'test event 1',
-            'ts': 456,
+            'ts': 457,
           },
           <String, dynamic>{
             'name': 'test event 2',
-            'ts': 457,
+            'ts': 456,
           },
         ],
       });
@@ -74,6 +74,8 @@ void main() {
       expect(timeline.events, hasLength(2));
       expect(timeline.events[0].timestampMicros, equals(456));
       expect(timeline.events[1].timestampMicros, equals(457));
+      expect(timeline.events[0].name, equals('test event 2'));
+      expect(timeline.events[1].name, equals('test event 1'));
     });
 
     test('sorts JSON nulls first', () {
@@ -85,11 +87,11 @@ void main() {
           },
           <String, dynamic>{
             'name': 'test event 1',
-            'ts': 456,
+            'ts': 457,
           },
           <String, dynamic>{
             'name': 'test event 2',
-            'ts': 457,
+            'ts': 456,
           },
           <String, dynamic>{
             'name': 'test event 3',
@@ -103,6 +105,10 @@ void main() {
       expect(timeline.events[1].timestampMicros, isNull);
       expect(timeline.events[2].timestampMicros, equals(456));
       expect(timeline.events[3].timestampMicros, equals(457));
+      expect(timeline.events[0].name, equals('test event 0'));
+      expect(timeline.events[1].name, equals('test event 3'));
+      expect(timeline.events[2].name, equals('test event 2'));
+      expect(timeline.events[3].name, equals('test event 1'));
     });
   });
 }
