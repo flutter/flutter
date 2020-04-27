@@ -32,7 +32,7 @@ void main() {
     painter.layout();
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
-  }, skip: isBrowser);
+  });
 
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
@@ -57,7 +57,7 @@ void main() {
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-  }, skip: isBrowser);
+  });
 
   test('TextPainter caret emoji test', () {
     final TextPainter painter = TextPainter()
@@ -121,7 +121,7 @@ void main() {
     expect(caretOffset.dx, 112); // 🇸
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
     expect(caretOffset.dx, 112); // 🇸
-  }, skip: isBrowser);
+  });
 
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
@@ -143,7 +143,7 @@ void main() {
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, 49);
-  }, skip: isBrowser);
+  });
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -171,7 +171,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(123.0, 123.0));
-  }, skip: isBrowser);
+  });
 
   test('TextPainter textScaleFactor test', () {
     final TextPainter painter = TextPainter(
@@ -188,7 +188,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(20.0, 20.0));
-  }, skip: isBrowser);
+  });
 
   test('TextPainter default text height is 14 pixels', () {
     final TextPainter painter = TextPainter(
@@ -198,7 +198,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 14.0);
     expect(painter.size, const Size(14.0, 14.0));
-  }, skip: isBrowser);
+  });
 
   test('TextPainter sets paragraph size from root', () {
     final TextPainter painter = TextPainter(
@@ -208,7 +208,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 100.0);
     expect(painter.size, const Size(100.0, 100.0));
-  }, skip: isBrowser);
+  });
 
   test('TextPainter intrinsic dimensions', () {
     const TextStyle style = TextStyle(
@@ -635,7 +635,7 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-  }, skip: isBrowser);
+  });
 
   test('TextPainter widget span', () {
     final TextPainter painter = TextPainter()
@@ -729,7 +729,7 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes[12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
-  }, skip: isBrowser);
+  });
 
   // Null values are valid. See https://github.com/flutter/flutter/pull/48346#issuecomment-584839221
   test('TextPainter set TextHeightBehavior null test', () {
@@ -832,5 +832,5 @@ void main() {
       ui.Rect.zero,
     );
     expect(caretHeight, 50.0);
-  }, skip: kIsWeb);
+  });
 }

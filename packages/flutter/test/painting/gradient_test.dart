@@ -817,7 +817,7 @@ void main() {
       for (final Gradient gradient in gradients45) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
-        }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
+        });
       }
     });
 
@@ -825,7 +825,7 @@ void main() {
       for (final Gradient gradient in gradients90) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
-        }, skip: isBrowser); // TODO(yjbanov): web does not support golden tests yet: https://github.com/flutter/flutter/issues/40297
+        });
       }
     });
   });
