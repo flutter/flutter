@@ -9,10 +9,9 @@ import '../../src/common.dart';
 
 void main() {
   group('Fuchsia Kernel Compiler', () {
-    final FuchsiaKernelCompiler fuchsiaKernelCompiler = FuchsiaKernelCompiler();
     test('provide correct flags for release mode', () {
       expect(
-          fuchsiaKernelCompiler.getBuildInfoFlags(
+          FuchsiaKernelCompiler.getBuildInfoFlags(
             buildInfo: BuildInfo.release,
             manifestPath: '',
           ),
@@ -24,19 +23,20 @@ void main() {
 
     test('provide correct flags for profile mode', () {
       expect(
-          fuchsiaKernelCompiler.getBuildInfoFlags(
-            buildInfo: BuildInfo.profile,
-            manifestPath: '',
-          ),
-          allOf(<Matcher>[
-            contains('-Ddart.vm.profile=true'),
-            contains('-Ddart.vm.product=false'),
-          ]));
+        FuchsiaKernelCompiler.getBuildInfoFlags(
+          buildInfo: BuildInfo.profile,
+          manifestPath: '',
+        ),
+        allOf(<Matcher>[
+          contains('-Ddart.vm.profile=true'),
+          contains('-Ddart.vm.product=false'),
+        ]),
+      );
     });
 
     test('provide correct flags for custom dart define', () {
       expect(
-          fuchsiaKernelCompiler.getBuildInfoFlags(
+          FuchsiaKernelCompiler.getBuildInfoFlags(
               buildInfo: const BuildInfo(
                 BuildMode.debug,
                 null,

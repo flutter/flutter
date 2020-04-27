@@ -93,7 +93,8 @@ class FuchsiaKernelCompiler {
   }
 
   /// Provide flags that are affected by [BuildInfo]
-  List<String> getBuildInfoFlags({
+  @visibleForTesting
+  static List<String> getBuildInfoFlags({
     @required BuildInfo buildInfo,
     @required String manifestPath,
   }) {
@@ -132,7 +133,8 @@ class FuchsiaKernelCompiler {
         '--drop-ast',
       ],
 
-      for (final Object dartDefine in buildInfo.dartDefines) '-D$dartDefine',
+      for (final String dartDefine in buildInfo.dartDefines) 
+        '-D$dartDefine',
     ];
   }
 }

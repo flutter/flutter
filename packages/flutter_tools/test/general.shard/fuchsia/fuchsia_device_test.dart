@@ -56,8 +56,7 @@ void main() {
     });
 
     testUsingContext('parse device-finder output', () async {
-      const String example =
-          '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
+      const String example = '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
       final List<FuchsiaDevice> names = await parseListDevices(example);
 
       expect(names.length, 1);
@@ -1409,13 +1408,6 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
         globals.fs.path.join(outDir, '$appName.dilpmanifest');
     globals.fs.file(manifestPath).createSync(recursive: true);
   }
-
-  @override
-  List<String> getBuildInfoFlags({
-    @required BuildInfo buildInfo,
-    @required String manifestPath,
-  }) =>
-      <String>[];
 }
 
 class FailingKernelCompiler implements FuchsiaKernelCompiler {
@@ -1427,13 +1419,6 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
   }) async {
     throwToolExit('Build process failed');
   }
-
-  @override
-  List<String> getBuildInfoFlags({
-    @required BuildInfo buildInfo,
-    @required String manifestPath,
-  }) =>
-      <String>[];
 }
 
 class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
