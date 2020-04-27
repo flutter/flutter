@@ -133,8 +133,8 @@ class RangeSlider extends StatefulWidget {
     this.inactiveColor,
     this.semanticFormatterCallback,
     @Deprecated(
-        'This flag has changed to true by default and no longer needed. '
-            'This feature was deprecated after v1.18.0.'
+      'This flag has changed to true by default and no longer needed. '
+      'This feature was deprecated after v1.18.0.'
     )
     // ignore: deprecated_member_use_from_same_package
     this.useV2Slider = true,
