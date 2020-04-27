@@ -73,10 +73,13 @@ class HashLocationStrategy extends LocationStrategy {
     // and if it is empty then it will stay empty
     String path = _platformLocation.hash ?? '';
     assert(path.isEmpty || path.startsWith('#'));
-    // Dart will complain if a call to substring is
-    // executed with a position value that exceeds the
-    // length of string.
-    return path.isEmpty ? path : path.substring(1);
+
+    // We don't want to return an empty string as a path. Instead we default to "/".
+    if (path.isEmpty || path == '#') {
+      return '/';
+    }
+    // At this point, we know [path] starts with "#" and isn't empty.
+    return path.substring(1);
   }
 
   @override
