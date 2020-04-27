@@ -307,8 +307,8 @@ void main() {
   });
 
   testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
-    BuildContext savedContext;
-    
+    BuildContext savedContext;  
+  
     await tester.pumpWidget(MaterialApp(
       home: Builder(
         builder: (BuildContext context) {
@@ -319,7 +319,7 @@ void main() {
     ));
 
     int numBuilderCalls = 0;
-    bottom_sheet.showModalBottomSheet<void>(
+    showModalBottomSheet<void>(
       context: savedContext,
       isDismissible: false,
       enableDrag: true,
