@@ -133,7 +133,7 @@ class FuchsiaKernelCompiler {
         '--drop-ast',
       ],
 
-      for (final String dartDefine in buildInfo.dartDefines) 
+      for (final String dartDefine in buildInfo.dartDefines)
         '-D$dartDefine',
     ];
   }
