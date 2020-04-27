@@ -429,7 +429,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   showValueIndicator: ShowValueIndicator.never,
                 ),
                 child: RangeSlider(
-                  // ignore: deprecated_member_use
+                  // ignore
                   useV2Slider: true,
                   values: _discreteCustomValues,
                   min: 0.0,
