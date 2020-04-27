@@ -88,3 +88,10 @@ cd $flutter_dir/dev/benchmarks/test_apps/stocks/
 $flutter_bin pub get
 $flutter_bin drive -v -d $device_name --target=test_driver/stock_view.dart
 echo "$(date) END:DRIVER_TEST ---------------------------------------"
+echo "$(date) START:HOT_RELOAD_TEST ---------------------------------"
+# remove all out dated .packages references
+find $flutter_dir -name ".packages" | xargs rm
+cd $flutter_dir/dev/integration_tests/flutter_gallery
+$flutter_bin pub get
+$flutter_bin run --hot -d $device_name --benchmark --verbose --resident --output-dill build/app.dill
+echo "$(date) END:HOT_RELOAD_TEST -----------------------------------"
