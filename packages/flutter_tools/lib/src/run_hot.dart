@@ -360,6 +360,7 @@ class HotRunner extends ResidentRunner {
     final String outputPath = dillOutputPath ??
       getDefaultApplicationKernelPath(
         trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation);
+    firstBuildTime = DateTime.now();
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -389,11 +390,6 @@ class HotRunner extends ResidentRunner {
       globals.printError(err.toString());
       return 1;
     }
-
-    // Initialize the first build time to the updated timestamp of the
-    // output dill.
-    firstBuildTime = globals.fs.file(outputPath)
-      .lastModifiedSync();
 
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,

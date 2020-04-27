@@ -475,6 +475,7 @@ class DevFS {
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
+    final DateTime candidateCompileTime = DateTime.now();
     lastPackageConfig = packageConfig;
 
     // Update modified files
@@ -521,8 +522,7 @@ class DevFS {
       return UpdateFSReport(success: false);
     }
     // Only update the last compiled time if we successfully compiled.
-    lastCompiled = globals.fs.file(compilerOutput.outputFilename)
-      .lastModifiedSync();
+    lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
     sources = compilerOutput.sources;
     //
