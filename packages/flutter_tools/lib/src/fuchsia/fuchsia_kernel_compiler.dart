@@ -34,7 +34,7 @@ class FuchsiaKernelCompiler {
     final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String kernelCompiler = globals.artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(kernelCompiler)) {
@@ -42,27 +42,20 @@ class FuchsiaKernelCompiler {
     }
     final String platformDill = globals.artifacts.getArtifactPath(
       Artifact.platformKernelDill,
-      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(platformDill)) {
       throwToolExit('Fuchisa platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
-      '--target',
-      'flutter_runner',
-      '--platform',
-      platformDill,
-      '--filesystem-scheme',
-      'main-root',
-      '--filesystem-root',
-      fsRoot,
-      '--packages',
-      '$multiRootScheme:///$relativePackagesFile',
-      '--output',
-      globals.fs.path.join(outDir, '$appName.dil'),
-      '--component-name',
-      appName,
+      '--target', 'flutter_runner',
+      '--platform', platformDill,
+      '--filesystem-scheme', 'main-root',
+      '--filesystem-root', fsRoot,
+      '--packages', '$multiRootScheme:///$relativePackagesFile',
+      '--output', globals.fs.path.join(outDir, '$appName.dil'),
+      '--component-name', appName,
       ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
     ];
 
