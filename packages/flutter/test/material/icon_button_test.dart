@@ -337,6 +337,41 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets('IconButton with explicit min splash radius',
+      (WidgetTester tester) async {
+    const double minSplashRadius = 10.0;
+
+    Widget buttonWidget = wrap(
+      child: IconButton(
+        icon: const Icon(Icons.android),
+        minSplashRadius: minSplashRadius,
+        onPressed: () {/* enable the button */},
+      ),
+    );
+
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(),
+        child: buttonWidget,
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(
+        milliseconds: 200)); // wait for splash to be well under way
+
+    expect(
+      Material.of(tester.element(find.byType(IconButton))),
+      paints
+        ..circle(radius: minSplashRadius)
+    );
+
+    await gesture.up();
+  });
+
+
   testWidgets('IconButton Semantics (enabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
