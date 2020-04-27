@@ -500,6 +500,7 @@ task:
     CPU: 2
     MEMORY: 8G
   setup_script:
+    - sudo sntp -sS time.apple.com
     - date
     - which flutter
     - bundle --version
