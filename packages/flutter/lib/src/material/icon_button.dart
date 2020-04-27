@@ -131,7 +131,7 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], [autofocus], [minSplashRadius] and [alignment] arguments must not  
+  /// The [iconSize], [padding], [autofocus], [minSplashRadius] and [alignment] arguments must not
   /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
@@ -142,7 +142,7 @@ class IconButton extends StatelessWidget {
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
-    this.minSplashRadius = Material.defaultSplashRadius,    
+    this.minSplashRadius = Material.defaultSplashRadius,
     @required this.icon,
     this.color,
     this.focusColor,
@@ -159,7 +159,7 @@ class IconButton extends StatelessWidget {
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
-       assert(minSplashRadius != null),   
+       assert(minSplashRadius != null),
        assert(autofocus != null),
        assert(icon != null),
        super(key: key);
