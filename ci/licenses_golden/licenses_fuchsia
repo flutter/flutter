@@ -1,4 +1,4 @@
-Signature: 44cb628eb9224e271be453caa27775a4
+Signature: 139e407bc8cefb727e997e33654f8fa7
 
 UNUSED LICENSES:
 
@@ -537,6 +537,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ultrasound/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/meta.json
@@ -548,6 +549,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
@@ -987,7 +989,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/timer.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/vcpu.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/vmar.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/vmo.fidl
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/zx.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_core_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
@@ -1243,7 +1244,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/timer.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/vcpu.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/vmar.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/vmo.fidl
-FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/zx.fidl
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/composition_delegate.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/composition_delegate/composition_delegate.dart
 FILE: ../../../fuchsia/sdk/linux/dart/composition_delegate/lib/src/internal/layout_logic/_layout_logic.dart
@@ -1547,6 +1547,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/focuser.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_token.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ultrasound/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/channel.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/channelcontrol.fidl
@@ -1570,6 +1571,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/executor.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/irq.h
@@ -2293,6 +2295,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ultrasound/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channel/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update.channelcontrol/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/meta.json
@@ -2304,6 +2307,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
@@ -3260,9 +3264,13 @@ TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/stream.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/zx_common.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/vdso/zx_syscall.fidl
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/string_view.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/testonly-syscalls.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/stream.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/zx_common.fidl
+FILE: ../../../fuchsia/sdk/linux/arch/x64/vdso/zx_syscall.fidl
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/internal/_view_provider_impl.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/noop_view_provider.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular/lib/src/module/view_provider.dart
@@ -3271,6 +3279,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_modular_testing/lib/src/module_wit
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/launch.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/power.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/tiles.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/update.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.gesture/gesture_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.a2dp/audio_mode.fidl
@@ -3288,6 +3297,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_register.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keys.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/event.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/metrics_recorder.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/properties.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.drm/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.target/target_discovery.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/activity_reporter.fidl
@@ -3302,10 +3312,12 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/pointer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_ref_installed.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ultrasound/factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.update/update.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.url/url.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.weave/auth.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/wlan_deprecated_configuration.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/zx/zx_common.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/validate_string.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/stream.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/stream.cc
