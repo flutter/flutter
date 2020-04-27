@@ -223,6 +223,8 @@ class KernelSnapshot extends Target {
     bool forceLinkPlatform;
     switch (targetPlatform) {
       case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;
       default:
