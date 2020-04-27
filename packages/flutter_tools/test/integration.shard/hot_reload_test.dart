@@ -97,7 +97,6 @@ void main() {
       _project.scheduledBreakpointUri,
       _project.scheduledBreakpointLine,
     );
-    await Future<void>.delayed(const Duration(seconds: 2));
     await _flutter.hotReload(); // reload triggers code which eventually hits the breakpoint
     isolate = await _flutter.waitForPause();
     expect(isolate.pauseEvent.kind, equals(EventKind.kPauseBreakpoint));
