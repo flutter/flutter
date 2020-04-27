@@ -36,7 +36,7 @@ void main() {
 
     test('provide correct flags for custom dart define', () {
       expect(
-          FuchsiaKernelCompiler.getBuildInfoFlags(
+        FuchsiaKernelCompiler.getBuildInfoFlags(
               buildInfo: const BuildInfo(
                 BuildMode.debug,
                 null,
