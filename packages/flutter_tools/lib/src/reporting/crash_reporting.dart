@@ -43,34 +43,37 @@ class CrashDetails {
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
-    @required this.fileSystem,
-    @required this.logger,
-    @required this.flutterProjectFactory,
-    @required this.client,
-  });
+    @required FileSystem fileSystem,
+    @required Logger logger,
+    @required FlutterProjectFactory flutterProjectFactory,
+    @required HttpClient client,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _flutterProjectFactory = flutterProjectFactory,
+       _client = client;
 
-  final FileSystem fileSystem;
-  final Logger logger;
-  final FlutterProjectFactory flutterProjectFactory;
-  final HttpClient client;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final FlutterProjectFactory _flutterProjectFactory;
+  final HttpClient _client;
 
   /// Prints instructions for filing a bug about the crash.
   Future<void> informUser(CrashDetails details, File crashFile) async {
-    logger.printError('A crash report has been written to ${crashFile.path}.');
-    logger.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+    _logger.printError('A crash report has been written to ${crashFile.path}.');
+    _logger.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
-    final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL('${details.error}');
-    logger.printStatus('$similarIssuesURL\n', wrap: false);
-    logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
-    logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+    final String similarIssuesURL = GitHubTemplateCreator.toolCrashSimilarIssuesURL(details.error.toString());
+    _logger.printStatus('$similarIssuesURL\n', wrap: false);
+    _logger.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+    _logger.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
 
-    logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+    _logger.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
     final GitHubTemplateCreator gitHubTemplateCreator = GitHubTemplateCreator(
-      fileSystem: fileSystem,
-      logger: logger,
-      flutterProjectFactory: flutterProjectFactory,
-      client: client,
+      fileSystem: _fileSystem,
+      logger: _logger,
+      flutterProjectFactory: _flutterProjectFactory,
+      client: _client,
     );
 
     final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
@@ -79,7 +82,7 @@ class CrashReporter {
       details.stackTrace,
       details.doctorText,
     );
-    logger.printStatus('$gitHubTemplateURL\n', wrap: false);
+    _logger.printStatus('$gitHubTemplateURL\n', wrap: false);
   }
 }
 
