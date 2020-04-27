@@ -137,7 +137,7 @@ class UpgradeCommandRunner {
     }
     recordState(flutterVersion);
     await upgradeChannel(flutterVersion);
-    await attemptReset(flutterVersion, upstreamRevision);
+    await attemptReset(upstreamRevision);
     if (!testFlow) {
       await flutterUpgradeContinue();
     }
@@ -243,14 +243,15 @@ class UpgradeCommandRunner {
   /// This is a reset instead of fast forward because if we are on a release
   /// branch with cherry picks, there may not be a direct fast-forward route
   /// to the next release.
-  Future<void> attemptReset(FlutterVersion oldFlutterVersion, String newRevision) async {
-    final RunResult result = await processUtils.run(
-      <String>['git', 'reset', '--hard', newRevision],
-      throwOnError: true,
-      workingDirectory: workingDirectory,
-    );
-    if (result.exitCode != 0) {
-      throwToolExit(null, exitCode: result.exitCode);
+  Future<void> attemptReset(String newRevision) async {
+    try {
+      await processUtils.run(
+        <String>['git', 'reset', '--hard', newRevision],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+    } on ProcessException catch (e) {
+      throwToolExit(e.message, exitCode: e.errorCode);
     }
   }
 
