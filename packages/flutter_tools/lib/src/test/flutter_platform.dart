@@ -176,11 +176,15 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+  // This type is sensitive to the non-nullable experiment.
+  final String beforeLoadTypedef = nullSafety
+    ? 'Future<dynamic> Function()?'
+    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
 StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, Future<dynamic> Function()${nullSafety ? '?' : ''} beforeLoad}) {
+    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
   return RemoteListener.start(getMain,
       hidePrints: hidePrints, beforeLoad: beforeLoad);
 }
