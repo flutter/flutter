@@ -1469,8 +1469,8 @@ extension FlutterVmService on vm_service.VmService {
       'ext.flutter.exit',
       isolateId: isolateId,
     ).catchError((dynamic error, StackTrace stackTrace) {
-      // Do nothing on sentinel, the isolate already exited.
-    }, test: (dynamic error) => error is vm_service.SentinelException);
+      // Do nothing on sentinel or exception, the isolate already exited.
+    }, test: (dynamic error) => error is vm_service.SentinelException || error is vm_service.RPCError);
   }
 
   /// Return the current platform override for the flutter view running with

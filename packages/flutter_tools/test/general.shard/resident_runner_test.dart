@@ -822,6 +822,7 @@ void main() {
         args: <String, Object>{
           'isolateId': fakeUnpausedIsolate.id,
         },
+        close: true,
       )
     ]);
     final TestFlutterDevice flutterDevice = TestFlutterDevice(
@@ -832,7 +833,9 @@ void main() {
 
     when(mockDevice.supportsFlutterExit).thenReturn(true);
 
-    await flutterDevice.exitApps();
+    final Future<void> exitFuture = flutterDevice.exitApps();
+
+    await expectLater(exitFuture, completes);
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   }));
 
