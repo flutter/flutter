@@ -137,6 +137,7 @@ void main() {
 
         when(device.name).thenReturn('MockAndroidDevice');
         when(device.getLogReader(includePastLogs: anyNamed('includePastLogs')))
+
           .thenReturn(mockLogReader);
 
           final Process dartProcess = MockProcess();
@@ -188,8 +189,6 @@ void main() {
 
             time.elapse(const Duration(milliseconds: 200));
 
-            globals.fs.file('/path/to/main.dart.dill')
-              .createSync(recursive: true);
             compilerStdoutController
               .add(utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'));
             time.flushMicrotasks();
@@ -211,7 +210,7 @@ void main() {
             await task;
           }));
         });
-        print(observatoryLogs);
+
         expect(observatoryLogs.length, 9);
         expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
         expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
@@ -292,7 +291,6 @@ void main() {
         final AttachCommand command = AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory,
         );
-        globals.fs.file(outputDill).createSync();
         await createTestCommandRunner(command).run(<String>[
           'attach',
           '--filesystem-scheme',

@@ -352,15 +352,13 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
+    firstBuildTime = DateTime.now();
+
     final List<Future<bool>> startupTasks = <Future<bool>>[];
     final PackageConfig packageConfig = await loadPackageConfigOrFail(
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
-    final String outputPath = dillOutputPath ??
-      getDefaultApplicationKernelPath(
-        trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation);
-    firstBuildTime = DateTime.now();
     for (final FlutterDevice device in flutterDevices) {
       // Here we initialize the frontend_server concurrently with the platform
       // build, reducing overall initialization time. This is safe because the first
@@ -371,7 +369,8 @@ class HotRunner extends ResidentRunner {
           device.generator.recompile(
             globals.fs.file(mainPath).uri,
             <Uri>[],
-            outputPath: outputPath,
+            outputPath: dillOutputPath ??
+              getDefaultApplicationKernelPath(trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation),
             packageConfig: packageConfig,
           ).then((CompilerOutput output) => output?.errorCount == 0)
         );
@@ -1238,6 +1237,7 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
+
     if (asyncScanning) {
       final Pool pool = Pool(_kMaxPendingStats);
       final List<Future<void>> waitList = <Future<void>>[];
@@ -1282,6 +1282,7 @@ class ProjectFileInvalidator {
         }
       }
     }
+
     _logger.printTrace(
       'Scanned through ${urisToScan.length} files in '
       '${stopwatch.elapsedMilliseconds}ms'

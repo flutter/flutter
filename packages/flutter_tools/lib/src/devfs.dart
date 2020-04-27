@@ -514,8 +514,7 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainUri,
       invalidatedFiles,
-      outputPath: dillOutputPath ??
-        getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packageConfig: packageConfig,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
