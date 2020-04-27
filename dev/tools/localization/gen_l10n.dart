@@ -555,7 +555,6 @@ class LocalizationsGenerator {
       outputDirectory.createSync(recursive: true);
     }
 
-
     final FileStat fileStat = outputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
       throw FileSystemException(
