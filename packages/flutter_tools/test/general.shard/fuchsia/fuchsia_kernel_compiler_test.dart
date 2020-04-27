@@ -12,13 +12,13 @@ void main() {
     test('provide correct flags for release mode', () {
       expect(
         FuchsiaKernelCompiler.getBuildInfoFlags(
-            buildInfo: BuildInfo.release,
-            manifestPath: '',
-          ),
-          allOf(<Matcher>[
-            contains('-Ddart.vm.profile=false'),
-            contains('-Ddart.vm.product=true'),
-          ]));
+          buildInfo: BuildInfo.release,
+          manifestPath: '',
+        ),
+        allOf(<Matcher>[
+          contains('-Ddart.vm.profile=false'),
+          contains('-Ddart.vm.product=true'),
+        ]));
     });
 
     test('provide correct flags for profile mode', () {
