@@ -564,6 +564,11 @@ class VMService implements vm_service.VmService {
     return _delegateService.resume(isolateId, step: step, frameIndex: frameIndex);
   }
 
+  @override
+  Future<vm_service.Success> kill(String isolateId) {
+    return _delegateService.kill(isolateId);
+  }
+
   // To enable a gradual migration to package:vm_service
   @override
   dynamic noSuchMethod(Invocation invocation) {
