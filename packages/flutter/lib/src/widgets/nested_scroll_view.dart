@@ -909,7 +909,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (_innerPositions.isEmpty) {
       _outerPosition.applyFullDragUpdate(delta);
     } else if (delta < 0.0) {
-      // dragging "up"
+      // Dragging "up"
       // Prioritize getting rid of any inner overscroll, and then the outer
       // view, so that the app bar will scroll out of the way asap.
       double outerDelta = delta;
@@ -932,7 +932,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         }
       }
     } else {
-      // dragging "down" - delta is positive
+      // Dragging "down" - delta is positive
       // Prioritize the inner views, so that the inner content will move before
       // the app bar grows
       double outerDelta = 0.0; // it will go positive if it changes
