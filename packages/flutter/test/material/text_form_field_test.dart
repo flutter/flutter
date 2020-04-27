@@ -240,6 +240,42 @@ void main() {
     expect(_validateCalled, 2);
   });
 
+
+  testWidgets('Disabled field hides helper and counter', (WidgetTester tester) async {
+    const String helperText = 'helper text';
+    const String counterText = 'counter text';
+    Widget buildFrame(bool enabled) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: 'label text',
+                helperText: helperText,
+                counterText: counterText,
+                enabled: enabled,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When enabled is true, the helper and counter are visible.
+    await tester.pumpWidget(buildFrame(true));
+    Text helperWidget = tester.widget(find.text(helperText));
+    Text counterWidget = tester.widget(find.text(counterText));
+    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(counterWidget.style.color, isNot(equals(Colors.transparent)));
+
+    // When enabled is false, the helper and counter are not visible.
+    await tester.pumpWidget(buildFrame(false));
+    helperWidget = tester.widget(find.text(helperText));
+    counterWidget = tester.widget(find.text(counterText));
+    expect(helperWidget.style.color, equals(Colors.transparent));
+    expect(counterWidget.style.color, equals(Colors.transparent));
+  });
+
   testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
