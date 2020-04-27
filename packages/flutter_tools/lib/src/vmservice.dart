@@ -1537,9 +1537,9 @@ extension FlutterVmService on vm_service.VmService {
   /// been collected.
   Future<vm_service.Isolate> getIsolateOrNull(String isolateId) {
     return getIsolate(isolateId)
-    .catchError((dynamic error, StackTrace stackTrace) {
+      .catchError((dynamic error, StackTrace stackTrace) {
         return null;
-    }, test: (dynamic error) => error is vm_service.SentinelException);
+      }, test: (dynamic error) => error is vm_service.SentinelException);
   }
 }
 
