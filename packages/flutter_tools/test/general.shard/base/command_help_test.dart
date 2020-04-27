@@ -89,7 +89,7 @@ void main() {
         expect(commandHelp.U.toString(), startsWith('\x1B[1mU\x1B[22m'));
         expect(commandHelp.a.toString(), startsWith('\x1B[1ma\x1B[22m'));
         expect(commandHelp.d.toString(), startsWith('\x1B[1md\x1B[22m'));
-        expect(commandHelp.g.toString(), startsWith('\x1B[1md\x1B[22m'));
+        expect(commandHelp.g.toString(), startsWith('\x1B[1mg\x1B[22m'));
         expect(commandHelp.h.toString(), startsWith('\x1B[1mh\x1B[22m'));
         expect(commandHelp.i.toString(), startsWith('\x1B[1mi\x1B[22m'));
         expect(commandHelp.o.toString(), startsWith('\x1B[1mo\x1B[22m'));
