@@ -10,7 +10,7 @@ import '../build_system/build_system.dart';
 import '../build_system/depfile.dart';
 import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
-import '../build_system/targets/dart.dart';
+import '../build_system/targets/common.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -38,6 +38,8 @@ const List<Target> _kDefaultTargets = <Target>[
   ReleaseMacOSBundleFlutterAssets(),
   // Linux targets
   DebugBundleLinuxAssets(),
+  ProfileBundleLinuxAssets(),
+  ReleaseBundleLinuxAssets(),
   // Web targets
   WebServiceWorker(),
   ReleaseAndroidApplication(),
@@ -59,8 +61,9 @@ const List<Target> _kDefaultTargets = <Target>[
   ProfileIosApplicationBundle(),
   ReleaseIosApplicationBundle(),
   // Windows targets
-  UnpackWindows(),
   DebugBundleWindowsAssets(),
+  ProfileBundleWindowsAssets(),
+  ReleaseBundleWindowsAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

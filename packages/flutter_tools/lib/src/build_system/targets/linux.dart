@@ -7,11 +7,8 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import '../exceptions.dart';
-import 'assets.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'desktop.dart';
-import 'icon_tree_shaker.dart';
 
 /// The only files/subdirectories we care out.
 const List<String> _kLinuxArtifacts = <String>[
@@ -86,62 +83,86 @@ class UnpackLinux extends Target {
   }
 }
 
-/// Creates a debug bundle for the Linux desktop target.
-class DebugBundleLinuxAssets extends Target {
+class DebugBundleLinuxAssets extends ApplicationAssetBundle {
   const DebugBundleLinuxAssets();
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+    const Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
+    const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+  ];
 
   @override
   String get name => 'debug_bundle_linux_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-    UnpackLinux(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const UnpackLinux(),
+  ];
+}
+
+class ProfileBundleLinuxAssets extends ApplicationAssetBundle
+  with ReleaseAssetBundle {
+
+  const ProfileBundleLinuxAssets();
+
+  @override
+  String get name => 'profile_bundle_linux_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.so'),
   ];
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
-    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    ...IconTreeShaker.inputs,
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/app.so')
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfProfile(),
+    const UnpackLinux(),
+  ];
+}
+
+class ReleaseBundleLinuxAssets extends ApplicationAssetBundle
+  with ReleaseAssetBundle {
+
+  const ReleaseBundleLinuxAssets();
+
+  @override
+  String get name => 'release_bundle_linux_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.pattern('{BUILD_DIR}/app.so'),
   ];
 
   @override
-  List<String> get depfiles => const <String>[
-    'flutter_assets.d',
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/app.so')
   ];
 
   @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'debug_bundle_linux_assets');
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final Directory outputDirectory = environment.outputDir
-      .childDirectory('flutter_assets');
-    if (!outputDirectory.existsSync()) {
-      outputDirectory.createSync();
-    }
-
-    // Only copy the kernel blob in debug mode.
-    if (buildMode == BuildMode.debug) {
-      environment.buildDir.childFile('app.dill')
-        .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-    }
-    final Depfile depfile = await copyAssets(environment, outputDirectory);
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
-      depfile,
-      environment.buildDir.childFile('flutter_assets.d'),
-    );
-  }
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfRelease(),
+    const UnpackLinux(),
+  ];
 }

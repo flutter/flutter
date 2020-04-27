@@ -7,8 +7,9 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
 import 'package:mockito/mockito.dart';
 
@@ -57,17 +58,23 @@ void main() {
 
   // Only required for the test below that still depends on the context.
   FileSystem fileSystem;
+
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
 
   testUsingContext('DebugBundleLinuxAssets copies artifacts to out directory', () async {
+    final MockArtifacts mockArtifacts =  MockArtifacts();
+    when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+      .thenReturn('vm_snapshot_data');
+    when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+      .thenReturn('isolate_snapshot_data');
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: 'debug',
       },
-      artifacts: MockArtifacts(),
+      artifacts: mockArtifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -77,6 +84,8 @@ void main() {
 
     // Create input files.
     testEnvironment.buildDir.childFile('app.dill').createSync();
+    fileSystem.file('vm_snapshot_data').createSync();
+    fileSystem.file('isolate_snapshot_data').createSync();
 
     await const DebugBundleLinuxAssets().build(testEnvironment);
     final Directory output = testEnvironment.outputDir
@@ -84,6 +93,8 @@ void main() {
 
     expect(output.childFile('kernel_blob.bin'), exists);
     expect(output.childFile('AssetManifest.json'), exists);
+    expect(output.childFile('isolate_snapshot_data'), exists);
+    expect(output.childFile('vm_snapshot_data'), exists);
     // No bundled fonts
     expect(output.childFile('FontManifest.json'), isNot(exists));
   }, overrides: <Type, Generator>{
