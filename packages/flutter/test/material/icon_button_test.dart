@@ -360,7 +360,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
     await tester.pump(const Duration(
-        milliseconds: 1000)); // wait for splash to be well under way
+        milliseconds: 1000)); // Wait for splash to be well under way.
 
     expect(
       Material.of(tester.element(find.byType(IconButton))),
