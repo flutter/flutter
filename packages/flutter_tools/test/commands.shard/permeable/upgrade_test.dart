@@ -196,6 +196,7 @@ void main() {
         <String>['reset', '--hard', revision],
         errorMessage,
       ));
+
       expect(
         () async => await realCommandRunner.attemptReset(revision),
         throwsToolExit(message: errorMessage),
