@@ -371,7 +371,6 @@ void main() {
     await gesture.up();
   });
 
-
   testWidgets('IconButton Semantics (enabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
