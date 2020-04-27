@@ -1743,6 +1743,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
     final Radius activeTrackRadius = Radius.circular(trackRect.height / 2 + 1);
 
+    // ignore: deprecated_member_use_from_same_package
     if (useV2Slider) {
       context.canvas.drawRRect(
         RRect.fromLTRBAndCorners(
@@ -2055,6 +2056,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       isDiscrete: isDiscrete,
     );
 
+    // ignore: deprecated_member_use_from_same_package
     if (useV2Slider) {
       final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
@@ -2140,8 +2142,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
   /// The preferred radius of the round tick mark.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
   /// [SliderThemeData.trackHeight] is used. If it is not provided, and
+  // ignore: deprecated_member_use_from_same_package
   /// [useV2Slider] is false, then half of the track height is used.
   final double tickMarkRadius;
 
@@ -2164,6 +2168,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     // radius is defaulted to be a fraction of the
     // [SliderThemeData.trackHeight]. The fraction is 1/4 when [useV2Slider] is
     // true, and 1/2 when it is false.
+    // ignore: deprecated_member_use_from_same_package
     return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
   }
 
@@ -2246,8 +2251,10 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
 
   /// The preferred radius of the round tick mark.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
   /// [SliderThemeData.trackHeight] is used. If it is not provided, and
+  // ignore: deprecated_member_use_from_same_package
   /// [useV2Slider] is false, then half of the track height is used.
   final double tickMarkRadius;
 
@@ -2266,6 +2273,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(sliderTheme != null);
     assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
+    // ignore: deprecated_member_use_from_same_package
     return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
   }
 
@@ -2384,6 +2392,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s thumb.
 ///
+// ignore: deprecated_member_use_from_same_package
 /// If [useV2Slider] is true, then there is a shadow for the resting and
 /// pressed state.
 ///
@@ -2416,6 +2425,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The resting elevation adds shadow to the unpressed thumb.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// This value is only used when [useV2Slider] is true.
   ///
   /// The default is 1.
@@ -2427,6 +2437,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The pressed elevation adds shadow to the pressed thumb.
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// This value is only used when [useV2Slider] is true.
   ///
   /// The default is 6.
@@ -2483,6 +2494,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     final Color color = colorTween.evaluate(enableAnimation);
     final double radius = radiusTween.evaluate(enableAnimation);
 
+    // ignore: deprecated_member_use_from_same_package
     if (useV2Slider) {
       final Tween<double> elevationTween = Tween<double>(
         begin: elevation,
@@ -2505,6 +2517,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
 /// The default shape of a [RangeSlider]'s thumbs.
 ///
+// ignore: deprecated_member_use_from_same_package
 /// If [useV2Slider] is true, then there is a shadow for the resting and
 /// pressed state.
 ///
@@ -2623,6 +2636,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     final Color color = colorTween.evaluate(enableAnimation);
 
+    // ignore: deprecated_member_use_from_same_package
     if (useV2Slider) {
       final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
       final Path shadowPath = Path()

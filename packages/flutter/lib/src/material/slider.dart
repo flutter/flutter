@@ -133,6 +133,11 @@ class Slider extends StatefulWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
+    @Deprecated(
+      'This flag has changed to true by default and no longer needed. '
+      'This feature was deprecated after v1.18.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
     this.useV2Slider = true,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
@@ -141,6 +146,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       // ignore: deprecated_member_use_from_same_package
        assert(useV2Slider != null),
        super(key: key);
 
@@ -407,10 +413,6 @@ class Slider extends StatefulWidget {
   /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
   /// unexpected breaking changes, this value should be set to true. Setting
   /// this to false is considered deprecated.
-  @Deprecated(
-    'This flag has changed to true by default and no longer needed. '
-    'This feature was deprecated after v1.18.0.'
-  )
   final bool useV2Slider;
 
   final _SliderType _sliderType ;

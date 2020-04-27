@@ -378,6 +378,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    // ignore: deprecated_member_use_from_same_package
     properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
@@ -566,6 +567,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
+    // ignore: deprecated_member_use_from_same_package
     final bool useV2Slider = widget.useV2Slider;
     final double _defaultTrackHeight = useV2Slider ? 4 : 2;
     final RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
@@ -635,6 +637,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
         state: this,
         semanticFormatterCallback: widget.semanticFormatterCallback,
+        // ignore: deprecated_member_use_from_same_package
         useV2Slider: widget.useV2Slider,
       ),
     );

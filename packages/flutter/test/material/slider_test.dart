@@ -641,6 +641,7 @@ void main() {
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     onChanged: onChanged,
+                    // ignore: deprecated_member_use_from_same_package
                     useV2Slider: true,
                   ),
                 ),
@@ -857,6 +858,7 @@ void main() {
                 child: Theme(
                   data: theme,
                   child: Slider(
+                    // ignore: deprecated_member_use_from_same_package
                     useV2Slider: false,
                     value: value,
                     label: '$value',
@@ -1233,6 +1235,7 @@ void main() {
                               value = newValue;
                             });
                           },
+                          // ignore: deprecated_member_use_from_same_package
                           useV2Slider: true,
                         ),
                       ),
@@ -1369,6 +1372,7 @@ void main() {
                         maxWidth: double.infinity,
                         maxHeight: double.infinity,
                         child: Slider(
+                          // ignore: deprecated_member_use_from_same_package
                           useV2Slider: false,
                           key: sliderKey,
                           min: 0.0,
@@ -1509,6 +1513,7 @@ void main() {
               value = newValue;
             });
           },
+          // ignore: deprecated_member_use_from_same_package
           useV2Slider: true,
         );
 
@@ -1634,6 +1639,7 @@ void main() {
     Widget buildSlider(int parents) {
       Widget createParents(int parents, StateSetter setState) {
         Widget slider = Slider(
+          // ignore: deprecated_member_use_from_same_package
           useV2Slider: false,
           key: sliderKey,
           value: value,
@@ -2499,6 +2505,7 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(
+      // ignore: deprecated_member_use_from_same_package
       useV2Slider: false,
       activeColor: Colors.blue,
       divisions: 10,
