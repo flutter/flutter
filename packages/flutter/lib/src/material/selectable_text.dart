@@ -31,7 +31,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({TextStyle style ,bool withComposing}) {
-    assert(!withComposing);
+    // This does not care about composing.
     return TextSpan(
       style: style,
       children: <TextSpan>[_textSpan],
