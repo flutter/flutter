@@ -280,12 +280,12 @@ class Focus extends StatefulWidget {
     this.onKey,
     this.debugLabel,
     this.canRequestFocus,
-    this.overrideChildren = false,
+    this.overrideFocusability = false,
     this.skipTraversal,
     this.includeSemantics = true,
   })  : assert(child != null),
         assert(autofocus != null),
-        assert(overrideChildren != null),
+        assert(overrideFocusability != null),
         assert(includeSemantics != null),
         super(key: key);
 
@@ -401,23 +401,27 @@ class Focus extends StatefulWidget {
   /// {@endtemplate}
   final bool canRequestFocus;
 
-  /// {@template flutter.widgets.Focus.overrideChildren}
-  /// If true, the focusability of the focus node that this widget manages will
-  /// affect its children as well.
+  /// {@template flutter.widgets.Focus.overrideFocusability}
+  /// If true, setting [canRequestFocus] on this widget to false will disable
+  /// focus for its descendants.
   ///
-  /// Defaults to false.
+  /// Defaults to false.  Set to true if you want this widget's descendants to
+  /// be unfocusable when this widget's [canRequestFocus] is false.
   ///
-  /// Set to true if you want the children of the [FocusNode] this widget
-  /// manages to be affected by the value of [canRequestFocus] for this widget's
-  /// focus node.
+  /// If any descendatns are focused when this is set while [canRequestFocus] is
+  /// false, they will be unfocused. When `overrideFocusability` is set to false
+  /// again, they will not be refocused, although they will be able to accept
+  /// focus again.
   ///
   /// See also:
   ///
+  ///  * [ExcludeFocus], a widget that uses this property to conditionally
+  ///    exclude focus for a subtree.
   ///  * [FocusTraversalGroup], a widget used to group together and configure
   ///    the focus traversal policy for a widget subtree that has an
   ///    `excludeFocus` parameter to conditionally block focus for a subtree.
   /// {@endtemplate}
-  final bool overrideChildren;
+  final bool overrideFocusability;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the
   /// given [BuildContext].
@@ -488,7 +492,7 @@ class Focus extends StatefulWidget {
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: false));
-    properties.add(FlagProperty('overrideChildren', value: overrideChildren, ifTrue: 'OVERRIDE CHILDREN', defaultValue: false));
+    properties.add(FlagProperty('overrideFocusability', value: overrideFocusability, ifTrue: 'OVERRIDE CHILDREN', defaultValue: false));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 
@@ -501,7 +505,7 @@ class _FocusState extends State<Focus> {
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasPrimaryFocus;
   bool _canRequestFocus;
-  bool _overrideChildren;
+  bool _overrideFocusability;
   bool _didAutofocus = false;
   FocusAttachment _focusAttachment;
 
@@ -517,8 +521,8 @@ class _FocusState extends State<Focus> {
       // This calls a function instead of just allocating in place because
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
-      if (widget.overrideChildren != null) {
-        focusNode.overrideChildren = widget.overrideChildren;
+      if (widget.overrideFocusability != null) {
+        focusNode.overrideFocusability = widget.overrideFocusability;
       }
     }
     if (widget.skipTraversal != null) {
@@ -528,7 +532,7 @@ class _FocusState extends State<Focus> {
       focusNode.canRequestFocus = widget.canRequestFocus;
     }
     _canRequestFocus = focusNode.canRequestFocus;
-    _overrideChildren = focusNode.overrideChildren;
+    _overrideFocusability = focusNode.overrideFocusability;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
 
@@ -542,7 +546,7 @@ class _FocusState extends State<Focus> {
     return FocusNode(
       debugLabel: widget.debugLabel,
       canRequestFocus: widget.canRequestFocus ?? true,
-      overrideChildren: widget.overrideChildren ?? false,
+      overrideFocusability: widget.overrideFocusability ?? false,
       skipTraversal: widget.skipTraversal ?? false,
     );
   }
@@ -606,8 +610,8 @@ class _FocusState extends State<Focus> {
       if (widget.canRequestFocus != null) {
         focusNode.canRequestFocus = widget.canRequestFocus;
       }
-      if (widget.overrideChildren != null) {
-        focusNode.overrideChildren = widget.overrideChildren;
+      if (widget.overrideFocusability != null) {
+        focusNode.overrideFocusability = widget.overrideFocusability;
       }
     } else {
       _focusAttachment.detach();
@@ -623,7 +627,7 @@ class _FocusState extends State<Focus> {
   void _handleFocusChanged() {
     final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
     final bool canRequestFocus = focusNode.canRequestFocus;
-    final bool overrideChildren = focusNode.overrideChildren;
+    final bool overrideFocusability = focusNode.overrideFocusability;
     if (widget.onFocusChange != null) {
       widget.onFocusChange(focusNode.hasFocus);
     }
@@ -637,9 +641,9 @@ class _FocusState extends State<Focus> {
         _canRequestFocus = canRequestFocus;
       });
     }
-    if (_overrideChildren != overrideChildren) {
+    if (_overrideFocusability != overrideFocusability) {
       setState(() {
-        _overrideChildren = overrideChildren;
+        _overrideFocusability = overrideFocusability;
       });
     }
   }
@@ -881,7 +885,7 @@ class FocusScope extends Focus {
           autofocus: autofocus,
           onFocusChange: onFocusChange,
           canRequestFocus: canRequestFocus,
-          overrideChildren: true,
+          overrideFocusability: true,
           skipTraversal: skipTraversal,
           onKey: onKey,
           debugLabel: debugLabel,
@@ -975,7 +979,7 @@ class ExcludeFocus extends StatelessWidget {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
-      overrideChildren: excluding,
+      overrideFocusability: excluding,
       child: child,
     );
   }

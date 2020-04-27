@@ -64,6 +64,7 @@ void main() {
       expect(child2.parent, isNull);
       expect(parent.children, isEmpty);
     });
+    testWidgets('canRequestFocus affects descendants when overriding.', (WidgetTester tester) async {
     testWidgets('Geometry is transformed properly.', (WidgetTester tester) async {
       final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
@@ -101,9 +102,9 @@ void main() {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', canRequestFocus: true);
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', overrideChildren: true);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', overrideFocusability: true);
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', overrideChildren: true);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', overrideFocusability: true);
       final FocusAttachment parent2Attachment = parent2.attach(context);
       final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
       final FocusAttachment child1Attachment = child1.attach(context);
@@ -148,7 +149,7 @@ void main() {
       final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
         'context: null',
-        'overrideChildren: false',
+        'overrideFocusability: false',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',

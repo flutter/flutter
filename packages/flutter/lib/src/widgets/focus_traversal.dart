@@ -1697,7 +1697,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
         canRequestFocus: false,
         skipTraversal: true,
         includeSemantics: false,
-        overrideChildren: widget.excludeFocus,
+        overrideFocusability: widget.excludeFocus,
         child: widget.child,
       ),
     );
