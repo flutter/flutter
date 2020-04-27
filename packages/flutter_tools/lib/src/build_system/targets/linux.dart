@@ -106,7 +106,6 @@ class DebugBundleLinuxAssets extends ApplicationAssetBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
     UnpackLinux(),
   ];
 }
@@ -139,7 +138,7 @@ class ProfileBundleLinuxAssets extends ApplicationAssetBundle
 }
 
 class ReleaseBundleLinuxAssets extends ApplicationAssetBundle
-  with ReleaseAssetBundle{
+  with ReleaseAssetBundle {
 
   const ReleaseBundleLinuxAssets();
 
@@ -163,14 +162,4 @@ class ReleaseBundleLinuxAssets extends ApplicationAssetBundle
     AotElfRelease(),
     UnpackLinux(),
   ];
-
-  @override
-  Future<void> build(Environment environment) async {
-    await super.build(environment);
-    environment.buildDir.childFile('app.so')
-      .copySync(environment.outputDir
-        .childDirectory('flutter_assets')
-        .childFile('app.so').path
-    );
-  }
 }

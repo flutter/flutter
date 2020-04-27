@@ -109,6 +109,11 @@ class DebugBundleWindowsAssets extends ApplicationAssetBundle {
 
   @override
   String get name => 'debug_bundle_windows_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    UnpackWindows(),
+  ];
 }
 
 class ProfileBundleWindowsAssets extends ApplicationAssetBundle
