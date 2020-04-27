@@ -8,82 +8,15 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
-import '../depfile.dart';
 import '../exceptions.dart';
-import 'assets.dart';
-import 'dart.dart';
-import 'icon_tree_shaker.dart';
-
-/// Prepares the asset bundle in the format expected by flutter.gradle.
-///
-/// The vm_snapshot_data, isolate_snapshot_data, and kernel_blob.bin are
-/// expected to be in the root output directory.
-///
-/// All assets and manifests are included from flutter_assets/**.
-abstract class AndroidAssetBundle extends Target {
-  const AndroidAssetBundle();
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill'),
-    ...IconTreeShaker.inputs,
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
-  List<String> get depfiles => <String>[
-    if (_copyAssets)
-      'flutter_assets.d',
-  ];
-
-  bool get _copyAssets => true;
-
-  @override
-  Future<void> build(Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, name);
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final Directory outputDirectory = environment.outputDir
-      .childDirectory('flutter_assets')
-      ..createSync(recursive: true);
-
-    // Only copy the prebuilt runtimes and kernel blob in debug mode.
-    if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
-      environment.buildDir.childFile('app.dill')
-          .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-      globals.fs.file(vmSnapshotData)
-          .copySync(outputDirectory.childFile('vm_snapshot_data').path);
-      globals.fs.file(isolateSnapshotData)
-          .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
-    }
-    if (_copyAssets) {
-      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-      final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-      depfileService.writeToFile(
-        assetDepfile,
-        environment.buildDir.childFile('flutter_assets.d'),
-      );
-    }
-  }
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-}
+import 'common.dart';
 
 /// An implementation of [AndroidAssetBundle] that includes dependencies on vm
 /// and isolate data.
-class DebugAndroidApplication extends AndroidAssetBundle {
-  const DebugAndroidApplication();
+class DebugAndroidApplication extends ApplicationAssetBundle {
+  const DebugAndroidApplication({
+    bool shouldCopyAssets = true
+  }) : super(shouldCopyAssets: shouldCopyAssets);
 
   @override
   String get name => 'debug_android_application';
@@ -106,17 +39,14 @@ class DebugAndroidApplication extends AndroidAssetBundle {
 
 /// A minimal android application that does not include assets.
 class FastStartAndroidApplication extends DebugAndroidApplication {
-  const FastStartAndroidApplication();
+  const FastStartAndroidApplication() : super(shouldCopyAssets: false);
 
   @override
   String get name => 'faststart_android_application';
-
-  @override
-  bool get _copyAssets => false;
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
-class AotAndroidAssetBundle extends AndroidAssetBundle {
+class AotAndroidAssetBundle extends ApplicationAssetBundle {
   const AotAndroidAssetBundle();
 
   @override

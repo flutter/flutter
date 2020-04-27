@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/android.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
@@ -29,6 +29,11 @@ void main() {
   });
 
   testbed.test('debug bundle contains expected resources', () async {
+    final MockArtifacts mockArtifacts =  MockArtifacts();
+    when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+      .thenReturn('vm_snapshot_data');
+    when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+      .thenReturn('isolate_snapshot_data');
     final Environment environment = Environment.test(
       globals.fs.currentDirectory,
       outputDir: globals.fs.directory('out')..createSync(),
@@ -36,7 +41,7 @@ void main() {
         kBuildMode: 'debug',
       },
       processManager: fakeProcessManager,
-      artifacts: MockArtifacts(),
+      artifacts: mockArtifacts,
       fileSystem: globals.fs,
       logger: globals.logger,
     );
@@ -45,17 +50,14 @@ void main() {
     // create pre-requisites.
     environment.buildDir.childFile('app.dill')
       .writeAsStringSync('abcd');
-    final Directory hostDirectory = globals.fs.currentDirectory
-      .childDirectory(getNameForHostPlatform(getCurrentHostPlatform()))
-      ..createSync(recursive: true);
-    hostDirectory.childFile('vm_isolate_snapshot.bin').createSync();
-    hostDirectory.childFile('isolate_snapshot.bin').createSync();
+    globals.fs.file('vm_snapshot_data').createSync();
+    globals.fs.file('isolate_snapshot_data').createSync();
 
     await const DebugAndroidApplication().build(environment);
 
-    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'isolate_snapshot_data')).existsSync(), true);
-    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'vm_snapshot_data')).existsSync(), true);
-    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'kernel_blob.bin')).existsSync(), true);
+    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'isolate_snapshot_data')), exists);
+    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'vm_snapshot_data')), exists);
+    expect(globals.fs.file(globals.fs.path.join('out', 'flutter_assets', 'kernel_blob.bin')), exists);
   });
 
   testbed.test('profile bundle contains expected resources', () async {

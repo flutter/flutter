@@ -10,7 +10,7 @@ import '../../devfs.dart';
 import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
-import 'dart.dart';
+import 'common.dart';
 import 'icon_tree_shaker.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output

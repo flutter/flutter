@@ -19,7 +19,7 @@ import 'assets.dart';
 import 'icon_tree_shaker.dart';
 
 /// The define to pass a [BuildMode].
-const String kBuildMode= 'BuildMode';
+const String kBuildMode = 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
 const String kTargetPlatform = 'TargetPlatform';
@@ -223,8 +223,6 @@ class KernelSnapshot extends Target {
     bool forceLinkPlatform;
     switch (targetPlatform) {
       case TargetPlatform.darwin_x64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
         break;
       default:
@@ -394,6 +392,90 @@ abstract class CopyFlutterAotBundle extends Target {
       outputFile.parent.createSync(recursive: true);
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+/// Prepares the asset bundle in the format expected by consumer tooling.
+///
+/// The vm_snapshot_data, isolate_snapshot_data, and kernel_blob.bin are
+/// expected to be in the root output directory.
+///
+/// All assets and manifests are included from flutter_assets/**.
+abstract class ApplicationAssetBundle extends Target {
+  const ApplicationAssetBundle({
+    this.shouldCopyAssets = true,
+  });
+
+  final bool shouldCopyAssets;
+
+  @override
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    if (shouldCopyAssets)
+      ...IconTreeShaker.inputs,
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    if (shouldCopyAssets)
+      'flutter_assets.d',
+  ];
+
+  @override
+  Future<void> build(Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, name);
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final Directory outputDirectory = environment.outputDir
+      .childDirectory('flutter_assets')
+      ..createSync(recursive: true);
+
+    // Only copy the prebuilt runtimes and kernel blob in debug mode.
+    if (buildMode == BuildMode.debug) {
+      final String vmSnapshotData = environment.artifacts
+        .getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = environment.artifacts
+        .getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      environment.buildDir.childFile('app.dill')
+        .copySync(outputDirectory.childFile('kernel_blob.bin').path);
+      environment.fileSystem.file(vmSnapshotData)
+        .copySync(outputDirectory.childFile('vm_snapshot_data').path);
+      environment.fileSystem.file(isolateSnapshotData)
+        .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+    }
+    if (shouldCopyAssets) {
+      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      final DepfileService depfileService = DepfileService(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+      );
+      depfileService.writeToFile(
+        assetDepfile,
+        environment.buildDir.childFile('flutter_assets.d'),
+      );
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+}
+
+/// For single-arch release builds, copy app.so to flutter_assets
+mixin ReleaseAssetBundle on ApplicationAssetBundle {
+  @override
+  Future<void> build(Environment environment) async {
+    await super.build(environment);
+    environment.buildDir.childFile('app.so')
+      .copySync(environment.outputDir
+        .childDirectory('flutter_assets')
+        .childFile('app.so').path
+    );
   }
 }
 

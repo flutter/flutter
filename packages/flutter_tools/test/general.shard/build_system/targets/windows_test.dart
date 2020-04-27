@@ -4,7 +4,8 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -135,9 +136,15 @@ void main() {
   });
 
   testUsingContext('DebugBundleWindowsAssets creates correct bundle structure', () async {
+    final MockArtifacts mockArtifacts = MockArtifacts();
+    when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+      .thenReturn('vm_snapshot_data');
+    when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+      .thenReturn('isolate_snapshot_data');
+
     final Environment environment = Environment.test(
       fileSystem.currentDirectory,
-      artifacts: MockArtifacts(),
+      artifacts: mockArtifacts,
       processManager: FakeProcessManager.any(),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -147,6 +154,8 @@ void main() {
     );
 
     environment.buildDir.childFile('app.dill').createSync(recursive: true);
+    fileSystem.file('vm_snapshot_data').createSync();
+    fileSystem.file('isolate_snapshot_data').createSync();
 
     await const DebugBundleWindowsAssets().build(environment);
 
@@ -154,6 +163,8 @@ void main() {
     expect(environment.buildDir.childFile('flutter_assets.d'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin'), exists);
     expect(fileSystem.file(r'C:\flutter_assets\AssetManifest.json'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\isolate_snapshot_data'), exists);
+    expect(fileSystem.file(r'C:\flutter_assets\vm_snapshot_data'), exists);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
