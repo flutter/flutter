@@ -111,8 +111,9 @@ class DebugBundleWindowsAssets extends ApplicationAssetBundle {
   String get name => 'debug_bundle_windows_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    UnpackWindows(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const UnpackWindows(),
   ];
 }
 
@@ -137,9 +138,10 @@ class ProfileBundleWindowsAssets extends ApplicationAssetBundle
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotElfProfile(),
-    UnpackWindows(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfProfile(),
+    const UnpackWindows(),
   ];
 }
 
@@ -165,8 +167,9 @@ class ReleaseBundleWindowsAssets extends ApplicationAssetBundle
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotElfRelease(),
-    UnpackWindows(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfRelease(),
+    const UnpackWindows(),
   ];
 }
