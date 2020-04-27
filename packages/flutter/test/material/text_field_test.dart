@@ -3600,7 +3600,8 @@ void main() {
   testWidgets('Disabled text field hides helper and counter', (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
-    Widget buildFrame(bool enabled) {
+    const String errorText = 'error text';
+    Widget buildFrame(bool enabled, bool hasError) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -3609,6 +3610,7 @@ void main() {
                 labelText: 'label text',
                 helperText: helperText,
                 counterText: counterText,
+                errorText: hasError ? errorText : null,
                 enabled: enabled,
               ),
             ),
@@ -3617,19 +3619,28 @@ void main() {
       );
     }
 
-    // When enabled is true, the helper and counter are visible.
-    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpWidget(buildFrame(true, false));
     Text helperWidget = tester.widget(find.text(helperText));
     Text counterWidget = tester.widget(find.text(counterText));
     expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
     expect(counterWidget.style.color, isNot(equals(Colors.transparent)));
+    await tester.pumpWidget(buildFrame(true, true));
+    counterWidget = tester.widget(find.text(counterText));
+    Text errorWidget = tester.widget(find.text(errorText));
+    expect(helperWidget.style.color, isNot(equals(Colors.transparent)));
+    expect(errorWidget.style.color, isNot(equals(Colors.transparent)));
 
-    // When enabled is false, the helper and counter are not visible.
-    await tester.pumpWidget(buildFrame(false));
+    // When enabled is false, the helper/error and counter are not visible.
+    await tester.pumpWidget(buildFrame(false, false));
     helperWidget = tester.widget(find.text(helperText));
     counterWidget = tester.widget(find.text(counterText));
     expect(helperWidget.style.color, equals(Colors.transparent));
     expect(counterWidget.style.color, equals(Colors.transparent));
+    await tester.pumpWidget(buildFrame(false, true));
+    errorWidget = tester.widget(find.text(errorText));
+    counterWidget = tester.widget(find.text(counterText));
+    expect(counterWidget.style.color, equals(Colors.transparent));
+    expect(errorWidget.style.color, equals(Colors.transparent));
   });
 
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
