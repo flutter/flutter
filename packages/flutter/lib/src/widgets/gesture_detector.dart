@@ -1254,14 +1254,6 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
         longPress.onLongPressEnd(const LongPressEndDetails());
       if (longPress.onLongPressUp != null)
         longPress.onLongPressUp();
-      if (longPress.onSecondaryLongPressStart != null)
-        longPress.onSecondaryLongPressStart(const LongPressStartDetails());
-      if (longPress.onSecondaryLongPress != null)
-        longPress.onSecondaryLongPress();
-      if (longPress.onSecondaryLongPressEnd != null)
-        longPress.onSecondaryLongPressEnd(const LongPressEndDetails());
-      if (longPress.onSecondaryLongPressUp != null)
-        longPress.onSecondaryLongPressUp();
     };
   }
 

@@ -222,8 +222,8 @@ class DefaultTestVariant extends TestVariant<void> {
 
 typedef ListVariantValueToString<T> = String Function(T value);
 
-/// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
-/// set to different values of [TargetPlatform].
+/// A [TestVariant] that runs tests with various different values from a list,
+/// and resets to the initial value when done.
 class ListVariant<T> extends TestVariant<T> {
   /// Creates a [TargetPlatformVariant] that tests the given [values].
   const ListVariant({
