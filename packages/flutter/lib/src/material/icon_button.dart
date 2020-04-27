@@ -131,7 +131,7 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
+  /// The [iconSize], [padding], [autofocus], [minSplashRadius] and [alignment] arguments must not  
   /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
@@ -142,6 +142,7 @@ class IconButton extends StatelessWidget {
     this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
+    this.minSplashRadius = Material.defaultSplashRadius,    
     @required this.icon,
     this.color,
     this.focusColor,
@@ -158,6 +159,7 @@ class IconButton extends StatelessWidget {
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
+       assert(minSplashRadius != null),   
        assert(autofocus != null),
        assert(icon != null),
        super(key: key);
@@ -201,6 +203,10 @@ class IconButton extends StatelessWidget {
   ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
   ///    relative to text direction.
   final AlignmentGeometry alignment;
+
+  /// Defines the minimum splash radius on interaction.
+  /// This property must not be null. It defaults to [Material.defaultSplashRadius].
+  final double minSplashRadius;
 
   /// The icon to display inside the button.
   ///
@@ -370,7 +376,7 @@ class IconButton extends StatelessWidget {
         highlightColor: highlightColor ?? Theme.of(context).highlightColor,
         splashColor: splashColor ?? Theme.of(context).splashColor,
         radius: math.max(
-          Material.defaultSplashRadius,
+          minSplashRadius,
           (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
           // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
