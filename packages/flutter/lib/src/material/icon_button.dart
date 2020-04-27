@@ -205,6 +205,7 @@ class IconButton extends StatelessWidget {
   final AlignmentGeometry alignment;
 
   /// Defines the minimum splash radius on interaction.
+  ///
   /// This property must not be null. It defaults to [Material.defaultSplashRadius].
   final double minSplashRadius;
 
