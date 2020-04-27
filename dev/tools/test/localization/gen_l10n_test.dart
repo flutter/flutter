@@ -388,8 +388,6 @@ void main() {
 
     final Directory outputDirectory = fs.directory('lib').childDirectory('l10n').childDirectory('output');
     expect(outputDirectory.existsSync(), isTrue);
-
-    print(outputDirectory.listSync());
     expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
     expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
