@@ -64,7 +64,6 @@ void main() {
       expect(child2.parent, isNull);
       expect(parent.children, isEmpty);
     });
-    testWidgets('canRequestFocus affects descendants when overriding.', (WidgetTester tester) async {
     testWidgets('Geometry is transformed properly.', (WidgetTester tester) async {
       final FocusNode focusNode1 = FocusNode(debugLabel: 'Test Node 1');
       final FocusNode focusNode2 = FocusNode(debugLabel: 'Test Node 2');
@@ -98,7 +97,7 @@ void main() {
       expect(focusNode1.offset, equals(const Offset(300.0, 8.0)));
       expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
-    testWidgets('canRequestFocus affects children when overriding.', (WidgetTester tester) async {
+    testWidgets('canRequestFocus affects descendants when overriding.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', canRequestFocus: true);
       final FocusAttachment scopeAttachment = scope.attach(context);

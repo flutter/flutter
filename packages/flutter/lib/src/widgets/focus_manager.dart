@@ -487,10 +487,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   set canRequestFocus(bool value) {
     if (value != _canRequestFocus) {
+      // Have to set this first before unfocusing, since it checks this to cull
+      // unfocusable, previously-focused children.
+      _canRequestFocus = value;
       if (hasFocus && !value) {
         unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
-      _canRequestFocus = value;
       _manager?._markPropertiesChanged(this);
     }
   }
@@ -839,11 +841,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // If the scope is null, then this is either the root node, or a node that
       // is not yet in the tree, neither of which do anything when unfocused.
       return;
-    }
-    if (overrideFocusability) {
-      for (final FocusNode child in children) {
-        child.unfocus(disposition: disposition);
-      }
     }
     switch (disposition) {
       case UnfocusDisposition.scope:

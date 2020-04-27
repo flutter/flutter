@@ -1583,13 +1583,14 @@ class FocusTraversalOrder extends InheritedWidget {
 class FocusTraversalGroup extends StatefulWidget {
   /// Creates a [FocusTraversalGroup] object.
   ///
-  /// The [child] argument must not be null.
+  /// The [child] and [excludeFocus] arguments must not be null.
   FocusTraversalGroup({
     Key key,
     FocusTraversalPolicy policy,
-    this.excludeFocus,
+    this.excludeFocus = false,
     @required this.child,
-  })  : policy = policy ?? ReadingOrderTraversalPolicy(),
+  })  : assert(excludeFocus != null),
+        policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
 
   /// The policy used to move the focus from one focus node to another when
@@ -1611,7 +1612,10 @@ class FocusTraversalGroup extends StatefulWidget {
 
   /// If true, then the children of this group will be marked as not focusable.
   ///
-  /// If any children of this group are currently focused, they will lose focus.
+  /// If any children of this group are currently focused when this is set to
+  /// true, they will lose focus.
+  ///
+  /// Defaults to false. Must not be null.
   final bool excludeFocus;
 
   /// The child widget of this [FocusTraversalGroup].
