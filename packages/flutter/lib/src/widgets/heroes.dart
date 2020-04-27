@@ -921,6 +921,12 @@ class HeroController extends NavigatorObserver {
 }
 
 /// Enables or disables [Hero]es in the widget subtree.
+///
+/// When [enabled] is false, all Hero widgets in this subtree will not be
+/// considered for Hero animations.
+///
+/// When [enabled] is true (the default), Hero widgets may be involved in a
+/// Hero animation, like normal.
 class HeroMode extends StatelessWidget {
   /// Creates a widget that enables or disables [Hero]es.
   ///
