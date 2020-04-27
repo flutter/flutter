@@ -359,8 +359,7 @@ void main() {
     final Offset center = tester.getCenter(find.byType(IconButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // Start gesture.
-    await tester.pump(const Duration(
-        milliseconds: 1000)); // Wait for splash to be well under way.
+    await tester.pump(const Duration(milliseconds: 1000)); // Wait for splash to be well under way.
 
     expect(
       Material.of(tester.element(find.byType(IconButton))),
