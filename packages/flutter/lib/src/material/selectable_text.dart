@@ -31,7 +31,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({TextStyle style ,bool withComposing}) {
-    // TODO(chunhtai): Implement composing.
+    // TODO(chunhtai): Implement composing, link to issue
     return TextSpan(
       style: style,
       children: <TextSpan>[_textSpan],
@@ -40,7 +40,7 @@ class _TextSpanEditingController extends TextEditingController {
 
   @override
   set text(String newText) {
-    // TODO(chunhtai): Implement value editing.
+    // TODO(chunhtai): Implement value editing, link to issue
   }
 }
 
