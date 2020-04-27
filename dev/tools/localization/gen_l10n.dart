@@ -551,11 +551,10 @@ class LocalizationsGenerator {
     if (outputPathString == null)
       throw L10nException('outputPathString argument cannot be null');
     outputDirectory = _fs.directory(outputPathString);
-    if (!outputDirectory.existsSync())
-      throw FileSystemException(
-        "The 'arb-dir' directory, $outputDirectory, does not exist.\n"
-        'Make sure that the correct path was provided.'
-      );
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true);
+    }
+
 
     final FileStat fileStat = outputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat))

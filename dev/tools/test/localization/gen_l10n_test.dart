@@ -98,23 +98,27 @@ void main() {
       );
     });
 
-    // TODO: update this to recursively create directory if does not exist
-    test('setOutputDirectory fails if the directory does not exist', () {
+    test('setOutputDirectory creates directory if it does not exist', () {
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+
+      // The output directory should not exist at first.
+      expect(fs.directory('lib').existsSync(), isFalse);
+      expect(fs.directory('lib').childDirectory('output').existsSync(), isFalse);
+
       try {
-        generator.setOutputDirectory('lib');
+        generator.setOutputDirectory('lib/output');
+      } on L10nException catch (e) {
+        throw TestFailure('Unexpected failure during test setup: ${e.message}');
       } on FileSystemException catch (e) {
-        expect(e.message, contains('Make sure that the correct path was provided'));
-        return;
+        throw TestFailure('Unexpected failure during test setup: ${e.message}');
       }
 
-      fail(
-        'Attempting to set LocalizationsGenerator.setOutputDirectory should fail if the '
-        'directory does not exist.'
-      );
+      // The output directory should now exist.
+      expect(fs.directory('lib').existsSync(), isTrue);
+      expect(fs.directory('lib').childDirectory('output').existsSync(), isTrue);
     });
 
-    test('setOutputDirectory fails if input string is null', () {
+    test('setOutputDirectory fails if output string is null', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
