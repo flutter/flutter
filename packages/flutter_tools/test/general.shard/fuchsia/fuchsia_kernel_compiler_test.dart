@@ -12,13 +12,13 @@ void main() {
     test('provide correct flags for release mode', () {
       expect(
         FuchsiaKernelCompiler.getBuildInfoFlags(
-            buildInfo: BuildInfo.release,
-            manifestPath: '',
-          ),
-          allOf(<Matcher>[
-            contains('-Ddart.vm.profile=false'),
-            contains('-Ddart.vm.product=true'),
-          ]));
+          buildInfo: BuildInfo.release,
+          manifestPath: '',
+        ),
+        allOf(<Matcher>[
+          contains('-Ddart.vm.profile=false'),
+          contains('-Ddart.vm.product=true'),
+        ]));
     });
 
     test('provide correct flags for profile mode', () {
@@ -37,13 +37,13 @@ void main() {
     test('provide correct flags for custom dart define', () {
       expect(
         FuchsiaKernelCompiler.getBuildInfoFlags(
-              buildInfo: const BuildInfo(
-                BuildMode.debug,
-                null,
-                treeShakeIcons: true,
-                dartDefines: <String>['abc=efg'],
-              ),
-              manifestPath: ''),
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: true,
+            dartDefines: <String>['abc=efg'],
+          ),
+          manifestPath: ''),
           allOf(<Matcher>[
             contains('-Dabc=efg'),
           ]));
