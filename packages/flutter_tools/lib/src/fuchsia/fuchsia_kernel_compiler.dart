@@ -30,11 +30,13 @@ class FuchsiaKernelCompiler {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile = globals.fs.path.relative(packagesFile, from: fsRoot);
-    final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    final String relativePackagesFile =
+        globals.fs.path.relative(packagesFile, from: fsRoot);
+    final String manifestPath =
+        globals.fs.path.join(outDir, '$appName.dilpmanifest');
     final String kernelCompiler = globals.artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(kernelCompiler)) {
@@ -42,42 +44,28 @@ class FuchsiaKernelCompiler {
     }
     final String platformDill = globals.artifacts.getArtifactPath(
       Artifact.platformKernelDill,
-      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64, // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!globals.fs.isFileSync(platformDill)) {
       throwToolExit('Fuchisa platform file not found at "$platformDill"');
     }
     List<String> flags = <String>[
-      '--target', 'flutter_runner',
-      '--platform', platformDill,
-      '--filesystem-scheme', 'main-root',
-      '--filesystem-root', fsRoot,
-      '--packages', '$multiRootScheme:///$relativePackagesFile',
-      '--output', globals.fs.path.join(outDir, '$appName.dil'),
-      '--component-name', appName,
-
-      // AOT/JIT:
-      if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
-      else ...<String>[
-        '--no-link-platform',
-        '--split-output-by-packages',
-        '--manifest', manifestPath
-      ],
-
-      // debug, profile, jit release, release:
-      if (buildInfo.isDebug) '--embed-sources'
-      else '--no-embed-sources',
-
-      if (buildInfo.isProfile) '-Ddart.vm.profile=true',
-      if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
-      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
-
-      // Use bytecode and drop the ast in JIT release mode.
-      if (buildInfo.isJitRelease) ...<String>[
-        '--gen-bytecode',
-        '--drop-ast',
-      ],
+      '--target',
+      'flutter_runner',
+      '--platform',
+      platformDill,
+      '--filesystem-scheme',
+      'main-root',
+      '--filesystem-root',
+      fsRoot,
+      '--packages',
+      '$multiRootScheme:///$relativePackagesFile',
+      '--output',
+      globals.fs.path.join(outDir, '$appName.dil'),
+      '--component-name',
+      appName,
+      ...getBuildInfoFlags(buildInfo: buildInfo, manifestPath: manifestPath)
     ];
 
     flags += <String>[
@@ -102,5 +90,49 @@ class FuchsiaKernelCompiler {
     if (result != 0) {
       throwToolExit('Build process failed');
     }
+  }
+
+  /// Provide flags that are affected by [BuildInfo]
+  List<String> getBuildInfoFlags({
+    @required BuildInfo buildInfo,
+    @required String manifestPath,
+  }) {
+    return <String>[
+      // AOT/JIT:
+      if (buildInfo.usesAot) ...<String>[
+        '--aot',
+        '--tfa'
+      ] else ...<String>[
+        '--no-link-platform',
+        '--split-output-by-packages',
+        '--manifest',
+        manifestPath
+      ],
+
+      // debug, profile, jit release, release:
+      if (buildInfo.isDebug)
+        '--embed-sources'
+      else
+        '--no-embed-sources',
+
+      if (buildInfo.isProfile) ...<String>[
+        '-Ddart.vm.profile=true',
+        '-Ddart.vm.product=false',
+      ],
+
+      if (buildInfo.mode.isRelease) ...<String>[
+        '-Ddart.vm.profile=false',
+        '-Ddart.vm.product=true',
+      ],
+      '-Ddart.developer.causal_async_stacks=${buildInfo.isDebug}',
+
+      // Use bytecode and drop the ast in JIT release mode.
+      if (buildInfo.isJitRelease) ...<String>[
+        '--gen-bytecode',
+        '--drop-ast',
+      ],
+
+      for (final Object dartDefine in buildInfo.dartDefines) '-D$dartDefine',
+    ];
   }
 }
