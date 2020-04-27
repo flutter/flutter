@@ -96,7 +96,7 @@ class FakeTestCompiler extends TestCompiler {
     bool trackWidgetCreation,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(buildMode, trackWidgetCreation, flutterProject);
+  ) : super(buildMode, trackWidgetCreation, flutterProject, <String>[]);
 
   final MockResidentCompiler residentCompiler;
 
