@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/android_external_view_embedder.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
-#include "fml/trace_event.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
