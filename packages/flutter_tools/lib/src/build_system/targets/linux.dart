@@ -105,8 +105,9 @@ class DebugBundleLinuxAssets extends ApplicationAssetBundle {
   String get name => 'debug_bundle_linux_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[
-    UnpackLinux(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const UnpackLinux(),
   ];
 }
 
@@ -131,9 +132,10 @@ class ProfileBundleLinuxAssets extends ApplicationAssetBundle
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotElfProfile(),
-    UnpackLinux(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfProfile(),
+    const UnpackLinux(),
   ];
 }
 
@@ -158,8 +160,9 @@ class ReleaseBundleLinuxAssets extends ApplicationAssetBundle
   ];
 
   @override
-  List<Target> get dependencies => const <Target>[
-    AotElfRelease(),
-    UnpackLinux(),
+  List<Target> get dependencies => <Target>[
+    ...super.dependencies,
+    const AotElfRelease(),
+    const UnpackLinux(),
   ];
 }
