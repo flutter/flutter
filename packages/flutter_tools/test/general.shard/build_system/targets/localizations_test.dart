@@ -12,6 +12,8 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 
 void main() {
+  // Verifies that values are correctly passed through the localizations
+  // target, but does not validate them beyond the serialized data type.
   testWithoutContext('generateLocalizations forwards arguments correctly', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Logger logger = BufferLogger.test();
@@ -58,6 +60,8 @@ void main() {
       flutterRoot: '',
     );
 
+    // Verify that the input/output files are tracked correctly, based on
+    // the inputs given in the LocalizationOptions.
     expect(depfile.inputs.map((File file) => file.uri), unorderedEquals(<Uri>[
       Uri.parse('arb/foo.arb'),
       Uri.parse('arb/bar.arb'),
@@ -67,9 +71,10 @@ void main() {
       Uri.parse('file:///untranslated'),
       Uri.parse('bar'),
     ]));
+    expect(processManager.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('parseLocalizationsOptions handles valid yaml', () async {
+  testWithoutContext('parseLocalizationsOptions handles valid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''
@@ -100,7 +105,7 @@ preferred-supported-locales: en_US
     expect(options.preferredSupportedLocales, 'en_US');
   });
 
-  testWithoutContext('parseLocalizationsOptions throws exception on invalid yaml', () async {
+  testWithoutContext('parseLocalizationsOptions throws exception on invalid yaml configuration', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')
       ..writeAsStringSync('''

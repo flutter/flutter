@@ -800,7 +800,7 @@ abstract class ResidentRunner {
     fileSystem:  globals.fs,
     logger:  globals.logger,
     platform:  globals.platform,
-    processManager:  globals.processManager
+    processManager:  globals.processManager,
   );
   Future<void> runSourceGenerators() async {
     return _sourceCodeGenerator.generate();
@@ -1569,8 +1569,8 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
   }
 }
 
-/// The source code generator runs additonal tasks that produce dart source
-/// files
+/// The source code generator runs additional  tasks that produce Dart source
+/// files.
 class SourceCodeGenerator {
   SourceCodeGenerator({
     @required FileSystem fileSystem,
@@ -1638,7 +1638,7 @@ class SourceCodeGenerator {
         file: configFile,
         logger: _logger,
       );
-      _logger.printTrace('Pausing scanning to update localizations');
+      _logger.printTrace('Running update localizations');
       try {
         _depfile = await generateLocalizations(
           fileSystem: _fileSystem,

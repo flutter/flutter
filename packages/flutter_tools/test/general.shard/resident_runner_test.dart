@@ -465,6 +465,30 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
   }));
 
+  test('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
+    final FakeProcessManager processManager = globals.processManager as FakeProcessManager;
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+        globals.fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'localization', 'bin', 'gen_l10n.dart'),
+      ],
+      exitCode: 1,
+      stderr: 'stderr'
+    ));
+    globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+      .createSync(recursive: true);
+    globals.fs.file('l10n.yaml').createSync();
+
+    await residentRunner.runSourceGenerators();
+
+    expect(testLogger.errorText, allOf(
+      contains('stderr'), // Message from gen_l10n.dart
+      contains('Error generating localizations.') // Message from resident_runner.dart
+    ));
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[]),
+  }));
+
   test('ResidentRunner printHelpDetails', () => testbed.run(() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     when(mockDevice.supportsHotRestart).thenReturn(true);
