@@ -620,12 +620,13 @@ class FuchsiaDevice extends Device {
         // loopback (::1).
         final Uri uri = Uri.parse('http://[$_ipv6Loopback]:$port');
         final VMService vmService = await VMService.connect(uri);
-        final List<FlutterView> flutterViews = await vmService.getFlutterViews();
-        for (final FlutterView flutterView in flutterViews) {
+        await vmService.getVMOld();
+        await vmService.refreshViews();
+        for (final FlutterView flutterView in vmService.vm.views) {
           if (flutterView.uiIsolate == null) {
             continue;
           }
-          final Uri address = vmService.httpAddress;
+          final Uri address = flutterView.owner.vmService.httpAddress;
           if (flutterView.uiIsolate.name.contains(isolateName)) {
             return address.port;
           }
@@ -716,12 +717,13 @@ class FuchsiaIsolateDiscoveryProtocol {
           continue;
         }
       }
-      final List<FlutterView> flutterViews = await service.getFlutterViews();
-      for (final FlutterView flutterView in flutterViews) {
+      await service.getVMOld();
+      await service.refreshViews();
+      for (final FlutterView flutterView in service.vm.views) {
         if (flutterView.uiIsolate == null) {
           continue;
         }
-        final Uri address = service.httpAddress;
+        final Uri address = flutterView.owner.vmService.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
           _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
