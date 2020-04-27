@@ -910,7 +910,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       _outerPosition.applyFullDragUpdate(delta);
     } else if (delta < 0.0) {
       // dragging "up"
-      // Prioritize getting rid of any inner overscroll, then and then the outer
+      // Prioritize getting rid of any inner overscroll, and then the outer
       // view, so that the app bar will scroll out of the way asap.
       double outerDelta = delta;
       for (final _NestedScrollPosition position in _innerPositions) {
