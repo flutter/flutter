@@ -48,7 +48,7 @@ class FuchsiaSdk {
   /// Example output:
   ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
-  Future<String> listDevices({ Duration timeout }) async {
+  Future<List<String>> listDevices({ Duration timeout }) async {
     if (globals.fuchsiaArtifacts.devFinder == null ||
         !globals.fuchsiaArtifacts.devFinder.existsSync()) {
       return null;
@@ -57,7 +57,7 @@ class FuchsiaSdk {
     if (devices == null) {
       return null;
     }
-    return devices.isNotEmpty ? devices[0] : null;
+    return devices.isNotEmpty ? devices : null;
   }
 
   /// Returns the fuchsia system logs for an attached device where

@@ -57,20 +57,19 @@ void main() {
 
     testUsingContext('parse device-finder output', () async {
       const String example = '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
-      final List<FuchsiaDevice> names = await parseListDevices(example);
+      final FuchsiaDevice device = await parseDevice(example);
 
-      expect(names.length, 1);
-      expect(names.first.name, 'paper-pulp-bush-angel');
-      expect(names.first.id, '192.168.42.10');
+      expect(device.name, 'paper-pulp-bush-angel');
+      expect(device.id, '192.168.42.10');
     }, overrides: <Type, Generator>{
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     testUsingContext('parse junk device-finder output', () async {
       const String example = 'junk';
-      final List<FuchsiaDevice> names = await parseListDevices(example);
+      final FuchsiaDevice device = await parseDevice(example);
 
-      expect(names.length, 0);
+      expect(device, null);
     }, overrides: <Type, Generator>{
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });

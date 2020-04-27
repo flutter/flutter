@@ -149,11 +149,18 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices(timeout: timeout);
+    final List<String> text = await fuchsiaSdk.listDevices(timeout: timeout);
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = await parseListDevices(text);
+    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
+    for (final String line in text) {
+      final FuchsiaDevice device = await parseDevice(line);
+      if (device == null) {
+        continue;
+      }
+      devices.add(device);
+    }
     return devices;
   }
 
@@ -162,27 +169,23 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 }
 
 @visibleForTesting
-Future<List<FuchsiaDevice>> parseListDevices(String text) async {
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-  for (final String rawLine in text.trim().split('\n')) {
-    final String line = rawLine.trim();
-    // ['ip', 'device name']
-    final List<String> words = line.split(' ');
-    if (words.length < 2) {
-      continue;
-    }
-    final String name = words[1];
-    final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: false,
-    );
-    if (resolvedHost == null) {
-      globals.printError('Failed to resolve host for Fuchsia device `$name`');
-      continue;
-    }
-    devices.add(FuchsiaDevice(resolvedHost, name: name));
+Future<FuchsiaDevice> parseDevice(String text) async {
+  final String line = text.trim();
+  // ['ip', 'device name']
+  final List<String> words = line.split(' ');
+  if (words.length < 2) {
+    return null;
   }
-  return devices;
+  final String name = words[1];
+  final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
+    name,
+    local: false,
+  );
+  if (resolvedHost == null) {
+    globals.printError('Failed to resolve host for Fuchsia device `$name`');
+    return null;
+  }
+  return FuchsiaDevice(resolvedHost, name: name);
 }
 
 class FuchsiaDevice extends Device {
