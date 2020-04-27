@@ -74,8 +74,8 @@ template("_fuchsia_fidl_library") {
 
   _deps = [ "../pkg:fidl_cpp" ]
 
-  library_name = string_replace(meta_json.name, "fuchsia.", "")
-  library_name_json = "$library_name.json"
+  library_name = meta_json.name
+  library_name_json = "${meta_json.name}.json"
 
   foreach(dep, meta_json.deps) {
     _deps += [ ":$dep" ]
@@ -97,10 +97,10 @@ template("_fuchsia_fidl_library") {
     ]
 
     outputs = [
-      "$target_gen_dir/fuchsia/$library_name_slashes/c/fidl.h",
-      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl.h",
-      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl.cc",
-      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/tables.c",
+      "$target_gen_dir/$library_name_slashes/c/fidl.h",
+      "$target_gen_dir/$library_name_slashes/cpp/fidl.h",
+      "$target_gen_dir/$library_name_slashes/cpp/fidl.cc",
+      "$target_gen_dir/$library_name_slashes/cpp/tables.c",
     ]
 
     args = [
@@ -117,12 +117,11 @@ template("_fuchsia_fidl_library") {
       "--include-base",
       rebase_path("$target_gen_dir"),
       "--output-base-cc",
-      rebase_path("$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl"),
+      rebase_path("$target_gen_dir/$library_name_slashes/cpp/fidl"),
       "--output-c-header",
-      rebase_path("$target_gen_dir/fuchsia/$library_name_slashes/c/fidl.h"),
+      rebase_path("$target_gen_dir/$library_name_slashes/c/fidl.h"),
       "--output-c-tables",
-      rebase_path(
-          "$target_gen_dir/fuchsia/$library_name_slashes/cpp/tables.c"),
+      rebase_path("$target_gen_dir/$library_name_slashes/cpp/tables.c"),
     ]
   }
 
