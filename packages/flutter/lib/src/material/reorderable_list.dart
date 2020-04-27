@@ -386,6 +386,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         // Animates leftover space in the drop area closed.
         // TODO(djshuckerow): bring the animation in line with the Material
         // specifications.
+        // What needs correcting?
         _ghostController.reverse(from: 0.1);
         _entranceController.reverse(from: 0.1);
         _dragging = null;

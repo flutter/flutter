@@ -307,7 +307,7 @@ class ThemeData with Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
-    // TODO(sandrasandeep): change to color provided by Material Design team
+    // May be able to resolve
     cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];

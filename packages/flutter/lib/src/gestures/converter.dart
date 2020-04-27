@@ -8,9 +8,7 @@ import 'events.dart';
 
 // Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
 //
-// TODO(tongmu): This patch is supposed to be done by embedders. Patching it
-// in framework is a workaround before [PointerEventConverter] is moved to embedders.
-// https://github.com/flutter/flutter/issues/30454
+// Needs Update
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:

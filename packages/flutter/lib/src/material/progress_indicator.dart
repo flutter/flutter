@@ -15,6 +15,7 @@ const double _kMinCircularProgressIndicatorSize = 36.0;
 const int _kIndeterminateLinearDuration = 1800;
 
 // TODO(hansmuller): implement the support for buffer indicator
+// This is from 2016, still actionable?
 
 /// A base class for material design progress indicators.
 ///
