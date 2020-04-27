@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -34,6 +35,22 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/mocks.dart';
 
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
 
 void main() {
   group('attach', () {
@@ -491,7 +508,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-    });
+    }, skip: const LocalPlatform().isWindows); // mDNS does not work on Windows.
 
     group('forwarding to given port', () {
       const int devicePort = 499;
@@ -805,11 +822,21 @@ VMServiceConnector getFakeVmServiceFactory({
         version: '',
       );
     });
-
-    when(vm.refreshViews(waitForViews: anyNamed('waitForViews')))
-      .thenAnswer((_) => Future<void>.value(null));
-    when(vm.views)
-      .thenReturn(<FlutterView>[FlutterViewMock()]);
+    when(vmService.getIsolate(any))
+      .thenAnswer((Invocation invocation) async {
+        return fakeUnpausedIsolate;
+      });
+    when(vmService.callMethod(kListViewsMethod))
+      .thenAnswer((_) async {
+        return vm_service.Response.parse(<String, Object>{
+          'views': <Object>[
+            <String, Object>{
+              'id': '1',
+              'isolate': fakeUnpausedIsolate.toJson()
+            }
+          ]
+        });
+      });
     when(vm.createDevFS(any))
       .thenAnswer((_) => Future<Map<String, dynamic>>.value(<String, dynamic>{'uri': '/',}));
 
@@ -859,7 +886,6 @@ class TestHotRunnerFactory extends HotRunnerFactory {
 
 class VMMock extends Mock implements VM {}
 class VMServiceMock extends Mock implements VMService {}
-class FlutterViewMock extends Mock implements FlutterView {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
