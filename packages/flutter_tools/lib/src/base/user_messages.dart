@@ -12,7 +12,7 @@ UserMessages get userMessages => context.get<UserMessages>();
 class UserMessages {
   // Messages used in FlutterValidator
   String flutterStatusInfo(String channel, String version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, v${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
   String flutterRevision(String revision, String age, String date) =>
