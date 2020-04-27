@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
-import 'package:test/test.dart';
 
 import '../../src/common.dart';
 
