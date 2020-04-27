@@ -171,7 +171,7 @@ void main() {
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) =>
-      Future<ProcessResult>.value(mockProcessResult));
+          Future<ProcessResult>.value(mockProcessResult));
       when(mockProcessResult.exitCode).thenReturn(1);
       when<String>(mockProcessResult.stdout as String).thenReturn('');
       when<String>(mockProcessResult.stderr as String).thenReturn('');
@@ -185,7 +185,7 @@ void main() {
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((Invocation invocation) =>
-      Future<ProcessResult>.value(emptyStdoutProcessResult));
+          Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
@@ -206,9 +206,9 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-        sshConfig: mockFile,
-        devFinder: mockFile,
-      ),
+            sshConfig: mockFile,
+            devFinder: mockFile,
+          ),
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
@@ -363,7 +363,7 @@ void main() {
     test("takeScreenshot throws if file isn't .ppm", () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       await expectLater(
-            () => device.takeScreenshot(globals.fs.file('file.invalid')),
+        () => device.takeScreenshot(globals.fs.file('file.invalid')),
         throwsA(equals('file.invalid must be a .ppm file')),
       );
     }, testOn: 'posix');
@@ -384,7 +384,7 @@ void main() {
       )).thenAnswer((_) async => ProcessResult(0, 1, '', '<error-message>'));
 
       await expectLater(
-            () => device.takeScreenshot(globals.fs.file('file.ppm')),
+        () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(equals('Could not take a screenshot on device tester:\n<error-message>')),
       );
     }, overrides: <Type, Generator>{
@@ -424,7 +424,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(0, 1, '', '<error-message>'));
 
-      when(mockProcessManager.run(
+       when(mockProcessManager.run(
         const <String>[
           'ssh',
           '-F',
@@ -437,7 +437,7 @@ void main() {
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       await expectLater(
-            () => device.takeScreenshot(globals.fs.file('file.ppm')),
+        () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(equals('Failed to copy screenshot from device:\n<error-message>')),
       );
     }, overrides: <Type, Generator>{
@@ -477,7 +477,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
-      when(mockProcessManager.run(
+       when(mockProcessManager.run(
         const <String>[
           'ssh',
           '-F',
@@ -535,7 +535,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
-      when(mockProcessManager.run(
+       when(mockProcessManager.run(
         const <String>[
           'ssh',
           '-F',
@@ -584,12 +584,12 @@ void main() {
         when(view.owner).thenReturn(vm);
       }
       final MockFuchsiaDevice fuchsiaDevice =
-      MockFuchsiaDevice('123', portForwarder, false);
+          MockFuchsiaDevice('123', portForwarder, false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
-      FuchsiaIsolateDiscoveryProtocol(
+          FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
-            (Uri uri) async => vmService,
+        (Uri uri) async => vmService,
         true, // only poll once.
       );
       when(fuchsiaDevice.servicePorts())
@@ -635,31 +635,31 @@ void main() {
 
   testUsingContext('Correct flutter runner', () async {
     expect(globals.artifacts.getArtifactPath(
-      Artifact.fuchsiaFlutterRunner,
-      platform: TargetPlatform.fuchsia_x64,
-      mode: BuildMode.debug,
-    ),
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.debug,
+      ),
       contains('flutter_jit_runner'),
     );
     expect(globals.artifacts.getArtifactPath(
-      Artifact.fuchsiaFlutterRunner,
-      platform: TargetPlatform.fuchsia_x64,
-      mode: BuildMode.profile,
-    ),
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.profile,
+      ),
       contains('flutter_aot_runner'),
     );
     expect(globals.artifacts.getArtifactPath(
-      Artifact.fuchsiaFlutterRunner,
-      platform: TargetPlatform.fuchsia_x64,
-      mode: BuildMode.release,
-    ),
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.release,
+      ),
       contains('flutter_aot_product_runner'),
     );
     expect(globals.artifacts.getArtifactPath(
-      Artifact.fuchsiaFlutterRunner,
-      platform: TargetPlatform.fuchsia_x64,
-      mode: BuildMode.jitRelease,
-    ),
+        Artifact.fuchsiaFlutterRunner,
+        platform: TargetPlatform.fuchsia_x64,
+        mode: BuildMode.jitRelease,
+      ),
       contains('flutter_jit_product_runner'),
     );
   });
@@ -745,7 +745,7 @@ void main() {
 
     testUsingContext('start prebuilt in release mode', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -768,7 +768,7 @@ void main() {
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions =
-      DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
+          DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null, treeShakeIcons: false));
       final LaunchResult launchResult = await device.startApp(app,
           prebuiltApplication: true,
           debuggingOptions: debuggingOptions);
@@ -787,7 +787,7 @@ void main() {
 
     testUsingContext('start prebuilt in debug mode', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.debug);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
@@ -802,7 +802,7 @@ void main() {
 
     testUsingContext('start buildable in release mode', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: false, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: false, mode: BuildMode.release);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -817,7 +817,7 @@ void main() {
 
     testUsingContext('start buildable in debug mode', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: false, mode: BuildMode.debug);
+          await setupAndStartApp(prebuilt: false, mode: BuildMode.debug);
       expect(launchResult.started, isTrue);
       expect(launchResult.hasObservatory, isTrue);
     }, overrides: <Type, Generator>{
@@ -832,7 +832,7 @@ void main() {
 
     testUsingContext('fail with correct LaunchResult when device-finder fails', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -847,7 +847,7 @@ void main() {
 
     testUsingContext('fail with correct LaunchResult when pm fails', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -862,7 +862,7 @@ void main() {
 
     testUsingContext('fail with correct LaunchResult when amber fails', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -877,7 +877,7 @@ void main() {
 
     testUsingContext('fail with correct LaunchResult when tiles fails', () async {
       final LaunchResult launchResult =
-      await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
+          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);
       expect(launchResult.hasObservatory, isFalse);
     }, overrides: <Type, Generator>{
@@ -909,7 +909,7 @@ void main() {
       mockSuccessProcessManager = MockProcessManager();
       mockSuccessProcessResult = MockProcessResult();
       when(mockSuccessProcessManager.run(any)).thenAnswer(
-              (Invocation invocation) => Future<ProcessResult>.value(mockSuccessProcessResult));
+          (Invocation invocation) => Future<ProcessResult>.value(mockSuccessProcessResult));
       when(mockSuccessProcessResult.exitCode).thenReturn(0);
       when<String>(mockSuccessProcessResult.stdout as String).thenReturn('version');
       when<String>(mockSuccessProcessResult.stderr as String).thenReturn('');
@@ -917,7 +917,7 @@ void main() {
       mockFailureProcessManager = MockProcessManager();
       mockFailureProcessResult = MockProcessResult();
       when(mockFailureProcessManager.run(any)).thenAnswer(
-              (Invocation invocation) => Future<ProcessResult>.value(mockFailureProcessResult));
+          (Invocation invocation) => Future<ProcessResult>.value(mockFailureProcessResult));
       when(mockFailureProcessResult.exitCode).thenReturn(1);
       when<String>(mockFailureProcessResult.stdout as String).thenReturn('');
       when<String>(mockFailureProcessResult.stderr as String).thenReturn('');
@@ -925,7 +925,7 @@ void main() {
       emptyStdoutProcessManager = MockProcessManager();
       emptyStdoutProcessResult = MockProcessResult();
       when(emptyStdoutProcessManager.run(any)).thenAnswer((Invocation invocation) =>
-      Future<ProcessResult>.value(emptyStdoutProcessResult));
+          Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
@@ -1220,7 +1220,7 @@ class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
     FuchsiaAmberCtl amber,
     FuchsiaTilesCtl tiles,
   }) : amberCtl = amber ?? FakeFuchsiaAmberCtl(),
-        tilesCtl = tiles ?? FakeFuchsiaTilesCtl();
+       tilesCtl = tiles ?? FakeFuchsiaTilesCtl();
 
   @override
   final FuchsiaAmberCtl amberCtl;
@@ -1397,8 +1397,8 @@ class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
     FuchsiaKernelCompiler compiler,
     FuchsiaDevFinder devFinder,
   }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
-        fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
-        fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder();
+       fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
+       fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder();
 
   @override
   final FuchsiaPM fuchsiaPM;
