@@ -576,7 +576,7 @@ void main() {
       when(sshConfig.absolute).thenReturn(sshConfig);
     });
 
-    testUsingContext('unforward prints stdout and stderror if ssh command failed', () async {
+    testUsingContext('`unforward` prints stdout and stderr if ssh command failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
 
       final MockProcessResult mockFailureProcessResult = MockProcessResult();
