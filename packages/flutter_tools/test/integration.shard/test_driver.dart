@@ -60,8 +60,6 @@ abstract class FlutterTestDriver {
   int get vmServicePort => _vmServiceWsUri.port;
   bool get hasExited => _hasExited;
 
-  VmService get vmService => _vmService;
-
   String lastTime = '';
   void _debugPrint(String message, { String topic = '' }) {
     const int maxLength = 2500;
@@ -193,13 +191,12 @@ abstract class FlutterTestDriver {
     // ceases to be the case, this code will need changing.
     if (_flutterIsolateId == null) {
       final VM vm = await _vmService.getVM();
-      _flutterIsolateId = vm.isolates.single.id;
+      _flutterIsolateId = vm.isolates.first.id;
     }
     return _flutterIsolateId;
   }
 
-  /// Retrieve the main isolate attached to the flutter view.
-  Future<Isolate> getFlutterIsolate() async {
+  Future<Isolate> _getFlutterIsolate() async {
     final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
     return isolate;
   }
@@ -241,11 +238,11 @@ abstract class FlutterTestDriver {
     // for the event.
     final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
     if (isolate.pauseEvent.kind.startsWith('Pause')) {
-      return getFlutterIsolate();
+      return _getFlutterIsolate();
     }
 
     await pauseReceived;
-    return getFlutterIsolate();
+    return _getFlutterIsolate();
   }
 
   Future<Isolate> resume({ bool waitForNextPause = false }) => _resume(null, waitForNextPause);
@@ -255,7 +252,7 @@ abstract class FlutterTestDriver {
   Future<Isolate> stepOut({ bool waitForNextPause = true }) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
-    final Isolate isolate = await getFlutterIsolate();
+    final Isolate isolate = await _getFlutterIsolate();
     return isolate.pauseEvent.atAsyncSuspension == true;
   }
 
