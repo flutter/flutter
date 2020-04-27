@@ -233,25 +233,18 @@ class FlutterDevice {
     if (vmService == null) {
       return;
     }
-    final List<FlutterView> updatedViews = await vmService.getFlutterViews();
-    _views
-      ..clear()
-      ..addAll(updatedViews);
+    await flutterDeprecatedVmService.vm.refreshViews(waitForViews: true);
   }
-  final List<FlutterView> _views = <FlutterView>[];
 
   List<FlutterView> get views {
-    if (vmService == null) {
+    if (vmService == null || flutterDeprecatedVmService.isClosed) {
       return <FlutterView>[];
     }
-    if (viewFilter != null) {
-      return <FlutterView>[
-        for (final FlutterView flutterView in views)
-          if (flutterView.uiIsolate.name.contains(viewFilter))
-            flutterView
-      ];
-    }
-    return _views;
+
+
+    return (viewFilter != null
+        ? flutterDeprecatedVmService.vm.allViewsWithName(viewFilter)
+        : flutterDeprecatedVmService.vm.views).toList();
   }
 
   Future<void> getVMs() => flutterDeprecatedVmService.getVMOld();
@@ -261,32 +254,35 @@ class FlutterDevice {
       await device.stopApp(package);
       return;
     }
-    await refreshViews();
-    if (views == null || views.isEmpty) {
+    final List<FlutterView> flutterViews = views;
+    if (flutterViews == null || flutterViews.isEmpty) {
       return;
     }
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
-    for (final FlutterView flutterView in views) {
-      final vm_service.Isolate isolate = await vmService
-        .getIsolateOrNull(flutterView.uiIsolate.id);
-      if (isolate == null) {
-        continue;
+    if (flutterViews.any((FlutterView view) {
+      return view != null &&
+             view.uiIsolate != null &&
+             view.uiIsolate.pauseEvent != null &&
+             view.uiIsolate.pauseEvent.isPauseEvent;
       }
-      if (isPauseEvent(isolate.pauseEvent.kind)) {
-        await device.stopApp(package);
-        return;
-      }
+    )) {
+      await device.stopApp(package);
+      return;
     }
-    for (final FlutterView view in views) {
+    final List<Future<void>> futures = <Future<void>>[];
+    for (final FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
-        // If successful, there will be no response from flutterExit.
-        unawaited(vmService.flutterExit(
+        assert(!view.uiIsolate.pauseEvent.isPauseEvent);
+        futures.add(vmService.flutterExit(
           isolateId: view.uiIsolate.id,
         ));
       }
     }
-    return vmService.onDone;
+    // The flutterExit message only returns if it fails, so just wait a few
+    // seconds then assume it worked.
+    // TODO(ianh): We should make this return once the VM service disconnects.
+    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
   }
 
   Future<Uri> setupDevFS(
