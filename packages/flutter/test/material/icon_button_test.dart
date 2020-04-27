@@ -345,7 +345,7 @@ void main() {
       child: IconButton(
         icon: const Icon(Icons.android),
         minSplashRadius: minSplashRadius,
-        onPressed: () {/* enable the button */},
+        onPressed: () {/* Enable the button. */},
       ),
     );
 
