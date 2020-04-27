@@ -274,8 +274,6 @@ class _SlidersState extends State<_Sliders> {
                 ),
               ),
               Slider.adaptive(
-                // ignore: deprecated_member_use
-                useV2Slider: true,
                 label: _continuousValue.toStringAsFixed(6).toString(),
                 value: _continuousValue,
                 min: 0.0,
@@ -292,8 +290,7 @@ class _SlidersState extends State<_Sliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: const <Widget>[
-              // ignore: deprecated_member_use
-              Slider.adaptive(useV2Slider: true, value: 0.25, onChanged: null),
+              Slider.adaptive(value: 0.25, onChanged: null),
               Text('Disabled'),
             ],
           ),
@@ -301,8 +298,6 @@ class _SlidersState extends State<_Sliders> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Slider.adaptive(
-                // ignore: deprecated_member_use
-                useV2Slider: true,
                 value: _discreteValue,
                 min: 0.0,
                 max: 200.0,
@@ -334,8 +329,6 @@ class _SlidersState extends State<_Sliders> {
                   valueIndicatorTextStyle: theme.accentTextTheme.bodyText1.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
-                  // ignore: deprecated_member_use
-                  useV2Slider: true,
                   value: _discreteCustomValue,
                   min: 0.0,
                   max: 200.0,
@@ -379,8 +372,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               RangeSlider(
-                // ignore: deprecated_member_use
-                useV2Slider: true,
                 values: _continuousValues,
                 min: 0.0,
                 max: 100.0,
@@ -396,8 +387,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              // ignore: deprecated_member_use
-              RangeSlider(useV2Slider: true, values: const RangeValues(0.25, 0.75), onChanged: null),
+              RangeSlider(values: const RangeValues(0.25, 0.75), onChanged: null),
               const Text('Disabled'),
             ],
           ),
@@ -405,8 +395,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               RangeSlider(
-                // ignore: deprecated_member_use
-                useV2Slider: true,
                 values: _discreteValues,
                 min: 0.0,
                 max: 200.0,
@@ -436,8 +424,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   showValueIndicator: ShowValueIndicator.never,
                 ),
                 child: RangeSlider(
-                  // ignore: deprecated_member_use
-                  useV2Slider: true,
                   values: _discreteCustomValues,
                   min: 0.0,
                   max: 200.0,
