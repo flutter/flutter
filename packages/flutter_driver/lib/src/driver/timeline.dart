@@ -34,12 +34,8 @@ class TimelineEvent {
       json['ph'] as String,
       json['pid'] as int,
       json['tid'] as int,
-      json['dur'] != null
-        ? Duration(microseconds: json['dur'] as int)
-        : null,
-      json['tdur'] != null
-        ? Duration(microseconds: json['tdur'] as int)
-        : null,
+      json['dur'] != null ? Duration(microseconds: json['dur'] as int) : null,
+      json['tdur'] != null ? Duration(microseconds: json['tdur'] as int) : null,
       json['ts'] as int,
       json['tts'] as int,
       json['args'] as Map<String, dynamic>,
@@ -124,11 +120,20 @@ class TimelineEvent {
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
   final List<dynamic> jsonEvents = json['traceEvents'] as List<dynamic>;
 
-  if (jsonEvents == null)
+  if (jsonEvents == null) {
     return null;
+  }
 
   // TODO(vegorov): use instance method version of castFrom when it is available.
-  return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-    .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
-    .toList();
+  final List<TimelineEvent> timelineEvents =
+      Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
+          .map<TimelineEvent>(
+              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+          .toList();
+
+  timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
+    return e1.timestampMicros.compareTo(e2.timestampMicros);
+  });
+
+  return timelineEvents;
 }
