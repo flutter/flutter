@@ -91,6 +91,46 @@ final Map<String, Object> listViews = <String, dynamic>{
 typedef ServiceCallback = Future<Map<String, dynamic>> Function(Map<String, Object>);
 
 void main() {
+  testUsingContext('VMService can refreshViews', () async {
+    final MockVMService mockVmService = MockVMService();
+    final VMService vmService = VMService(
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      mockVmService,
+      Completer<void>(),
+      const Stream<dynamic>.empty(),
+    );
+
+    verify(mockVmService.registerService('flutterVersion', 'Flutter Tools')).called(1);
+
+    when(mockVmService.callServiceExtension('getVM',
+      args: anyNamed('args'), // Empty
+      isolateId: null
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(vm);
+    });
+    await vmService.getVMOld();
+
+
+    when(mockVmService.callServiceExtension('_flutter.listViews',
+      args: anyNamed('args'),
+      isolateId: anyNamed('isolateId')
+    )).thenAnswer((Invocation invocation) async {
+      return vm_service.Response.parse(listViews);
+    });
+    await vmService.refreshViews(waitForViews: true);
+
+    expect(vmService.vm.name, 'vm');
+    expect(vmService.vm.views.single.id, '_flutterView/0x4a4c1f8');
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger.test()
+  });
+
   testUsingContext('VmService registers reloadSources', () {
     Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
     final MockVMService mockVMService = MockVMService();
