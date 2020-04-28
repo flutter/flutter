@@ -300,6 +300,7 @@ void main() {
         testLogger.statusText,
         containsIgnoringWhitespace("Successfully switched to flutter channel 'beta'."),
       );
+      
       expect(
         testLogger.statusText,
         containsIgnoringWhitespace(
