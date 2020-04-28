@@ -23,14 +23,14 @@ void main(List<String> arguments) {
   parser.addOption(
     'arb-dir',
     defaultsTo: path.join('lib', 'l10n'),
-    help: 'The directory where the template and translated arb files should '
-      'be located.',
+    help: 'The directory where the template and translated arb files are located.',
   );
   parser.addOption(
     'output-dir',
     defaultsTo: path.join('lib', 'l10n'),
-    help: 'The directory where the generated output messages Dart files for '
-      'each locale and the generated localizations classes will be created.',
+    help: 'The directory where the generated localization classes will be written. '
+      'The app must import the file specified in the \'output-localization-file\' '
+      'option from this directory.'
   );
   parser.addOption(
     'template-arb-file',
@@ -81,7 +81,8 @@ void main(List<String> arguments) {
     'header-file',
     help: 'The header to prepend to the generated Dart localizations '
       'files. The value of this option is the name of the file that '
-      'contains the header text. \n\n'
+      'contains the header text which will be inserted at the top '
+      'of each generated Dart file. \n\n'
       'Alternatively, see the `header` option to pass in a string '
       'for a simpler header. \n\n'
       'This file should be placed in the directory specified in \'arb-dir\'.'

@@ -394,7 +394,8 @@ class LocalizationsGenerator {
   AppResourceBundleCollection _allBundles;
   LocaleInfo _templateArbLocale;
 
-  /// The reference to the project's input arb file's directory.
+  /// The directory that contains the project's arb files, as well as the
+  /// header file, if specified.
   ///
   /// It is assumed that all input files (e.g. [templateArbFile], arb files
   /// for translated messages, header file templates) will reside here.
@@ -402,7 +403,7 @@ class LocalizationsGenerator {
   /// This directory is specified with the [initialize] method.
   Directory inputDirectory;
 
-  /// The reference to the project's generated output file's directory.
+  /// The directory to generate the project's localizations files in.
   ///
   /// It is assumed that all output files (e.g. The localizations
   /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
@@ -482,6 +483,14 @@ class LocalizationsGenerator {
   bool get useDeferredLoading => _useDeferredLoading;
   bool _useDeferredLoading;
 
+  /// Contains a map of each output language file to its corresponding content in
+  /// string format.
+  final Map<File, String> _languageFileMap = <File, String>{};
+
+  /// Contains the generated application's localizations and localizations delegate
+  /// classes.
+  String _generatedLocalizationsFile;
+
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
   /// [outputFile] and [className].
   ///
@@ -533,14 +542,14 @@ class LocalizationsGenerator {
     inputDirectory = _fs.directory(inputPathString);
     if (!inputDirectory.existsSync())
       throw FileSystemException(
-        "The 'input-dir' directory, $inputDirectory, does not exist.\n"
+        "The 'input-dir' directory, '$inputDirectory', does not exist.\n"
         'Make sure that the correct path was provided.'
       );
 
     final FileStat fileStat = inputDirectory.statSync();
     if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
       throw FileSystemException(
-        "The 'input-dir' directory, $inputDirectory, doesn't allow reading and writing.\n"
+        "The 'input-dir' directory, '$inputDirectory', doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
       );
   }
@@ -551,16 +560,6 @@ class LocalizationsGenerator {
     if (outputPathString == null)
       throw L10nException('outputPathString argument cannot be null');
     outputDirectory = _fs.directory(outputPathString);
-    if (!outputDirectory.existsSync()) {
-      outputDirectory.createSync(recursive: true);
-    }
-
-    final FileStat fileStat = outputDirectory.statSync();
-    if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
-      throw FileSystemException(
-        "The 'output-dir' directory, $outputDirectory, doesn't allow reading and writing.\n"
-        'Please ensure that the user has read and write permissions.'
-      );
   }
 
   /// Sets the reference [File] for [templateArbFile].
@@ -783,7 +782,7 @@ class LocalizationsGenerator {
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,
   // and all AppLocalizations subclasses for every locale.
-  String generateCode() {
+  void generateCode() {
     bool isBaseClassLocale(LocaleInfo locale, String language) {
       return locale.languageCode == language
           && locale.countryCode == null
@@ -827,7 +826,7 @@ class LocalizationsGenerator {
     final String fileName = outputFileName.split('.')[0];
     for (final LocaleInfo locale in allLocales) {
       if (isBaseClassLocale(locale, locale.languageCode)) {
-        final File localeMessageFile = _fs.file(
+        final File languageMessageFile = _fs.file(
           path.join(outputDirectory.path, '${fileName}_$locale.dart'),
         );
 
@@ -855,9 +854,9 @@ class LocalizationsGenerator {
           );
         });
 
-        localeMessageFile.writeAsStringSync(
-          languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join()),
-        );
+        _languageFileMap.putIfAbsent(languageMessageFile, () {
+          return languageBaseClassFile.replaceAll('@(subclasses)', subclasses.join());
+        });
       }
     }
 
@@ -882,7 +881,7 @@ class LocalizationsGenerator {
       fileName: fileName,
     );
 
-    return fileTemplate
+    _generatedLocalizationsFile = fileTemplate
       .replaceAll('@(header)', header)
       .replaceAll('@(class)', className)
       .replaceAll('@(methods)', _allMessages.map(generateBaseClassMethod).join('\n'))
@@ -894,7 +893,28 @@ class LocalizationsGenerator {
   }
 
   void writeOutputFile() {
-    outputFile.writeAsStringSync(generateCode());
+    // First, generate the string contents of all necessary files.
+    generateCode();
+
+    // Since all validity checks have passed up to this point,
+    // write the contents into the directory.
+    if (!outputDirectory.existsSync()) {
+      outputDirectory.createSync(recursive: true);
+    }
+
+    // Ensure that the created directory has read/write permissions.
+    final FileStat fileStat = outputDirectory.statSync();
+    if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
+      throw FileSystemException(
+        "The 'output-dir' directory, $outputDirectory, doesn't allow reading and writing.\n"
+        'Please ensure that the user has read and write permissions.'
+      );
+
+    // Generate the required files for localizations.
+    _languageFileMap.forEach((File file, String contents) {
+      file.writeAsStringSync(contents);
+    });
+    outputFile.writeAsStringSync(_generatedLocalizationsFile);
   }
 
   void outputUnimplementedMessages(String untranslatedMessagesFile) {
