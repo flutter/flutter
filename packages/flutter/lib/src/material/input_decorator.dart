@@ -2309,17 +2309,31 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context);
+      const verticalPaddingMinInteractive = 14.5; // Fits kMinInteractiveDimension.
+      const verticalPaddingDense = 8.0;
       if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 14.5, 12.0, 14.5));
+          ? const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: verticalPaddingDense,
+            )
+          : const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: verticalPaddingMinInteractive,
+            ));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : const EdgeInsets.fromLTRB(0.0, 14.5, 0.0, 14.5));
+          ? const EdgeInsets.symmetric(
+              horizontal: 0.0,
+              vertical: verticalPaddingDense,
+            )
+          : const EdgeInsets.symmetric(
+              horizontal: 0.0,
+              vertical: verticalPaddingMinInteractive,
+            ));
       }
     } else {
       floatingLabelHeight = 0.0;
