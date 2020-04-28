@@ -206,7 +206,7 @@ class IconButton extends StatelessWidget {
 
   /// The splash radius.
   ///
-  /// If nil, default splash radius of [Material.defaultSplashRadius] is used.
+  /// If null, default splash radius of [Material.defaultSplashRadius] is used.
   final double splashRadius;
 
   /// The icon to display inside the button.
