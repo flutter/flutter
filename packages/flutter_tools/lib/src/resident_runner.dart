@@ -246,7 +246,7 @@ class FlutterDevice {
     }
     if (viewFilter != null) {
       return <FlutterView>[
-        for (final FlutterView flutterView in views)
+        for (final FlutterView flutterView in _views)
           if (flutterView.uiIsolate.name.contains(viewFilter))
             flutterView
       ];
