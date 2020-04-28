@@ -46,6 +46,7 @@ class AndroidPlatformView extends StatelessWidget {
 }
 
 // TODO(egarciad): The Android view controller should be defined in the framework.
+// https://github.com/flutter/flutter/issues/55904
 class _AndroidViewController extends PlatformViewController {
   _AndroidViewController(
     this.viewId,
