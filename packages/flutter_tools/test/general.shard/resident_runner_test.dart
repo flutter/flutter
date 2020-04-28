@@ -162,12 +162,6 @@ void main() {
         })),
       ];
     });
-    // VMService mocks.
-    when(mockVMService.wsAddress).thenReturn(testUri);
-    when(mockVMService.onDone).thenAnswer((Invocation invocation) {
-      final Completer<void> result = Completer<void>.sync();
-      return result.future;
-    });
   });
 
   test('FlutterDevice can list views with a filter', () => testbed.run(() async {
@@ -953,6 +947,7 @@ void main() {
 
   test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -1027,6 +1022,7 @@ void main() {
   test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    setWsAddress(testUri, fakeVmServiceHost.vmService);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,

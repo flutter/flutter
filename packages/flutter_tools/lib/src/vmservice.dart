@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart' show required, visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'base/context.dart';
@@ -133,6 +133,16 @@ typedef VMServiceConnector = Future<vm_service.VmService> Function(Uri httpUri, 
 final Expando<Uri> _httpAddressExpando = Expando<Uri>();
 
 final Expando<Uri> _wsAddressExpando = Expando<Uri>();
+
+@visibleForTesting
+void setHttpAddress(Uri uri, vm_service.VmService vmService) {
+  _httpAddressExpando[vmService] = uri;
+}
+
+@visibleForTesting
+void setWsAddress(Uri uri, vm_service.VmService vmService) {
+  _wsAddressExpando[vmService] = uri;
+}
 
 /// A connection to the Dart VM Service.
 vm_service.VmService setUpVmService(
