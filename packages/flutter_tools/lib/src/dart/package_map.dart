@@ -30,7 +30,7 @@ String _globalPackagesPath;
 /// config is returned.
 Future<PackageConfig> loadPackageConfigWithLogging(File file, {
   @required Logger logger,
-  bool nonFatal = false,
+  bool throwOnError = true,
 }) {
   final FileSystem fileSystem = file.fileSystem;
   return loadPackageConfigUri(
@@ -43,7 +43,7 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
       return Future<Uint8List>.value(configFile.readAsBytesSync());
     },
     onError: (dynamic error) {
-      if (nonFatal) {
+      if (!throwOnError) {
         return;
       }
       logger.printTrace(error.toString());
