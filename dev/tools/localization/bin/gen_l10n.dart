@@ -132,7 +132,7 @@ void main(List<String> arguments) {
     localizationsGenerator
       ..initialize(
         inputPathString: inputPathString,
-        outputPathString: outputPathString ?? inputPathString,
+        outputPathString: outputPathString,
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
