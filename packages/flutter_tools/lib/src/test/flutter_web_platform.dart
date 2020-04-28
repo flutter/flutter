@@ -75,7 +75,7 @@ class FlutterWebPlatform extends PlatformPlugin {
 
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
-      () => TestCompiler(BuildMode.debug, false, flutterProject),
+      () => TestCompiler(BuildMode.debug, false, flutterProject, <String>[]),
     );
   }
 
@@ -97,12 +97,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     );
   }
 
-  final Future<PackageConfig> _packagesFuture = loadPackageConfigOrFail(
+  final Future<PackageConfig> _packagesFuture = loadPackageConfigWithLogging(
     globals.fs.file(globalPackagesPath),
     logger: globals.logger,
   );
 
-  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigOrFail(
+  final Future<PackageConfig> _flutterToolsPackageMap = loadPackageConfigWithLogging(
     globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',

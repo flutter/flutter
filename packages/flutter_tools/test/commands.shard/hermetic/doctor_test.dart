@@ -577,7 +577,7 @@ void main() {
 
       expect(logger.statusText, equals(
         'Doctor summary (to see all details, run flutter doctor -v):\n'
-          '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
+          '[!] Flutter (Channel unknown, 0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
           '    ✗ version error\n\n'
           '! Doctor found issues in 1 category.\n'
       ));
