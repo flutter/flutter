@@ -219,7 +219,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 ///data: April 28, 2020
 ///defect：When the maximum length is reached, the cursor will move after the last character. Temporarily unable to resolve
 class EmojiLengthLimitingTextInputFormatter extends TextInputFormatter {
-  EmojiTextLengthLimitingTextInputFormatter(this.maxLength) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
+  EmojiLengthLimitingTextInputFormatter(this.maxLength) : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   final int maxLength;
 
