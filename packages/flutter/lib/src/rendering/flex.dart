@@ -263,7 +263,8 @@ typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 ///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
-                                        DebugOverflowIndicatorMixin {
+                                        DebugOverflowIndicatorMixin,
+                                        ClipBehaviorMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
@@ -289,9 +290,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _crossAxisAlignment = crossAxisAlignment,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
-       _textBaseline = textBaseline,
-       _clipBehavior = clipBehavior {
+       _textBaseline = textBaseline {
     addAll(children);
+    this.clipBehavior = clipBehavior;
   }
 
   /// The direction to use as the main axis.
@@ -429,19 +430,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (_textBaseline != value) {
       _textBaseline = value;
       markNeedsLayout();
-    }
-  }
-
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Defaults to [Clip.none], and must not be null.
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior;
-  set clipBehavior(Clip value) {
-    assert(value != null);
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
     }
   }
 

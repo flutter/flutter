@@ -305,3 +305,14 @@ class TestClipPaintingContext extends PaintingContext {
 
   Clip clipBehavior = Clip.none;
 }
+
+void expectOverflowedErrors() {
+  final FlutterErrorDetails errorDetails = renderer.takeFlutterErrorDetails();
+  final bool overflowed = errorDetails.toString().contains('overflowed');
+  if (!overflowed) {
+    FlutterError.reportError(errorDetails);
+  }
+}
+
+RenderConstrainedBox get box200x200 =>
+    RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 200.0, width: 200.0));

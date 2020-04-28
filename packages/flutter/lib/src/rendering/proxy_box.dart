@@ -2283,7 +2283,7 @@ class RenderTransform extends RenderProxyBox {
 }
 
 /// Scales and positions its child within itself according to [fit].
-class RenderFittedBox extends RenderProxyBox {
+class RenderFittedBox extends RenderProxyBox with ClipBehaviorMixin {
   /// Scales and positions its child within itself.
   ///
   /// The [fit] and [alignment] arguments must not be null.
@@ -2292,12 +2292,16 @@ class RenderFittedBox extends RenderProxyBox {
     AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
     RenderBox child,
+    Clip clipBehavior = Clip.none,
   }) : assert(fit != null),
        assert(alignment != null),
+       assert(clipBehavior != null),
        _fit = fit,
        _alignment = alignment,
        _textDirection = textDirection,
-       super(child);
+       super(child) {
+    this.clipBehavior = clipBehavior;
+  }
 
   Alignment _resolvedAlignment;
 
@@ -2418,9 +2422,9 @@ class RenderFittedBox extends RenderProxyBox {
       return;
     _updatePaintData();
     if (child != null) {
-      if (_hasVisualOverflow)
+      if (_hasVisualOverflow && clipBehavior != Clip.none)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null);
+            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null, clipBehavior: clipBehavior);
       else
         layer = _paintChildWithTransform(context, offset);
     }
