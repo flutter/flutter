@@ -337,7 +337,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton with explicit min splash radius',
+  testWidgets('IconButton with explicit splash radius',
       (WidgetTester tester) async {
     const double splashRadius = 30.0;
 
