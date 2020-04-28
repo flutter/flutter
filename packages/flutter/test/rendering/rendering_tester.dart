@@ -294,3 +294,14 @@ class FakeTicker implements Ticker {
     return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
   }
 }
+
+class TestClipPaintingContext extends PaintingContext {
+  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+
+  @override
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, painter, {Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer}) {
+    this.clipBehavior = clipBehavior;
+  }
+
+  Clip clipBehavior = Clip.none;
+}
