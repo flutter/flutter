@@ -45,7 +45,7 @@ FLUTTER_ASSERT_ARC
   [self.application launch];
 }
 
-- (void)testAccessibilityFocusOnTextSemanticsProducesCorrectIosViews {
+- (void)skip_testAccessibilityFocusOnTextSemanticsProducesCorrectIosViews {
   NSTimeInterval timeout = 10.0;
   // Find the initial TextInputSemanticsObject which was sent from the mock framework on first
   // frame.
