@@ -322,7 +322,7 @@ void main() {
         TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = TextPainter()

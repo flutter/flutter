@@ -317,7 +317,7 @@ void main() {
         debugNetworkImageHttpClientProvider = () => client2;
         await loadNetworkImage();
         expect(capturedErrors, <dynamic>['client1', 'client2']);
-      });
+      }, skip: isBrowser); // Browser implementation does not use HTTP client but an <img> tag.
 
       test('Propagates http client errors during resolve()', () async {
         when(httpClient.getUrl(any)).thenThrow(Error());
@@ -395,7 +395,7 @@ void main() {
           expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
-      });
+      }, skip: isBrowser); // Reference needed
 
       test('NetworkImage is evicted from cache on SocketException', () async {
         final MockHttpClient mockHttpClient = MockHttpClient();
@@ -443,7 +443,7 @@ void main() {
     const ImageConfiguration resizeConfig = ImageConfiguration(size: resizeDims);
     final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: resizeConfig);
     expect(resizedImageSize, resizeDims);
-  });
+  }, skip: isBrowser); // Reference needed
 
   test('ResizeImage does not resize when no size is passed', () async {
     final Uint8List bytes = Uint8List.fromList(kTransparentImage);

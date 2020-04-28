@@ -828,7 +828,7 @@ void main() {
         });
       }
     });
-  });
+  }, skip: isBrowser); // Reference needed
 }
 
 class GradientPainter extends CustomPainter {
