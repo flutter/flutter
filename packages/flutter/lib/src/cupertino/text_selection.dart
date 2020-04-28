@@ -6,6 +6,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
@@ -344,18 +345,13 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
       : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
-    void addToolbarButtonIfNeeded(
-      String text,
-      bool Function(TextSelectionDelegate) predicate,
+    void addToolbarButton(
+      Widget label, 
       void Function(TextSelectionDelegate) onPressed,
     ) {
-      if (!predicate(delegate)) {
-        return;
-      }
-
       items.add(CupertinoButton(
-        child: Text(
-          text,
+        child: DefaultTextStyle(
+          child: label,
           overflow: TextOverflow.ellipsis,
           style: _kToolbarButtonFontStyle,
         ),
@@ -368,10 +364,26 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ));
     }
 
+    void addToolbarButtonIfNeeded(
+      String text,
+      bool Function(TextSelectionDelegate) predicate,
+      void Function(TextSelectionDelegate) onPressed,
+    ) {
+      if (!predicate(delegate)) {
+        return;
+      }
+
+      addToolbarButton(Text(text), onPressed);
+    }
+
     addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
     addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
+
+    for (final TextSelectionAction action in delegate.actions) {
+      addToolbarButton(action.label(context), action.onPressed);
+    }
 
     return CupertinoTextSelectionToolbar._(
       barTopY: localBarTopY + globalEditableRegion.top,

@@ -1280,11 +1280,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    Text text = tester.widget<Text>(find.text('Paste'));
-    expect(text.style.color, CupertinoColors.white);
-    expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.15);
-    expect(text.style.fontWeight, FontWeight.w400);
+    RichText text = tester.widget<RichText>(find.descendant(of: find.text('Paste'), matching: find.byType(RichText)));
+    expect(text.text.style.color, CupertinoColors.white);
+    expect(text.text.style.fontSize, 14);
+    expect(text.text.style.letterSpacing, -0.15);
+    expect(text.text.style.fontWeight, FontWeight.w400);
 
     // Change the theme.
     await tester.pumpWidget(
@@ -1311,12 +1311,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    text = tester.widget<Text>(find.text('Paste'));
+    text = tester.widget<RichText>(find.descendant(of: find.text('Paste'), matching: find.byType(RichText)));
     // The toolbar buttons' text are still the same style.
-    expect(text.style.color, CupertinoColors.white);
-    expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.15);
-    expect(text.style.fontWeight, FontWeight.w400);
+    expect(text.text.style.color, CupertinoColors.white);
+    expect(text.text.style.fontSize, 14);
+    expect(text.text.style.letterSpacing, -0.15);
+    expect(text.text.style.fontWeight, FontWeight.w400);
   });
 
 

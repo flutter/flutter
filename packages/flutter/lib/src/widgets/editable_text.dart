@@ -245,10 +245,12 @@ class ToolbarOptions {
     this.cut = false,
     this.paste = false,
     this.selectAll = false,
+    this.actions = const <TextSelectionAction>[],
   }) : assert(copy != null),
        assert(cut != null),
        assert(paste != null),
-       assert(selectAll != null);
+       assert(selectAll != null),
+       assert(actions != null);
 
   /// Whether to show copy option in toolbar.
   ///
@@ -273,6 +275,11 @@ class ToolbarOptions {
   ///
   /// Defaults to false. Must not be null.
   final bool selectAll;
+
+  /// The actions that appear in the toolbar.
+  /// 
+  /// Defaults to empty. Must not be null.
+  final List<TextSelectionAction> actions;
 }
 
 /// A basic text input field.
@@ -1154,6 +1161,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   bool get selectAllEnabled => widget.toolbarOptions.selectAll;
+
+  @override
+  List<TextSelectionAction> get actions => widget.toolbarOptions.actions;
 
   // State lifecycle:
 

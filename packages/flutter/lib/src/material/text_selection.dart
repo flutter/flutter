@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -34,6 +35,8 @@ class _TextSelectionToolbar extends StatefulWidget {
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
+    this.delegate,
+    this.actions,
     this.isAbove,
   }) : super(key: key);
 
@@ -41,6 +44,9 @@ class _TextSelectionToolbar extends StatefulWidget {
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+
+  final TextSelectionDelegate delegate;
+  final List<TextSelectionAction> actions;
 
   // When true, the toolbar fits above its anchor and will be positioned there.
   final bool isAbove;
@@ -58,10 +64,10 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
   // The key for _TextSelectionToolbarContainer.
   UniqueKey _containerKey = UniqueKey();
 
-  FlatButton _getItem(VoidCallback onPressed, String label) {
+  FlatButton _getItem(VoidCallback onPressed, Widget label) {
     assert(onPressed != null);
     return FlatButton(
-      child: Text(label),
+      child: label,
       onPressed: onPressed,
     );
   }
@@ -89,13 +95,15 @@ class _TextSelectionToolbarState extends State<_TextSelectionToolbar> with Ticke
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> items = <Widget>[
       if (widget.handleCut != null)
-        _getItem(widget.handleCut, localizations.cutButtonLabel),
+        _getItem(widget.handleCut, Text(localizations.cutButtonLabel)),
       if (widget.handleCopy != null)
-        _getItem(widget.handleCopy, localizations.copyButtonLabel),
+        _getItem(widget.handleCopy, Text(localizations.copyButtonLabel)),
       if (widget.handlePaste != null)
-        _getItem(widget.handlePaste, localizations.pasteButtonLabel),
+        _getItem(widget.handlePaste, Text(localizations.pasteButtonLabel)),
       if (widget.handleSelectAll != null)
-        _getItem(widget.handleSelectAll, localizations.selectAllButtonLabel),
+        _getItem(widget.handleSelectAll, Text(localizations.selectAllButtonLabel)),
+      for (final TextSelectionAction action in widget.actions)
+        _getItem(() { action.onPressed(widget.delegate); }, action.label(context)),
     ];
 
     // If there is no option available, build an empty widget.
@@ -669,6 +677,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
             handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
             handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
             handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+            delegate: delegate,
+            actions: delegate.actions,
             isAbove: fitsAbove,
           ),
         ),

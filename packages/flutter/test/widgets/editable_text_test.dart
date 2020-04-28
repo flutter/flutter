@@ -1166,6 +1166,51 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
+  testWidgets('custom toolbar actions', (WidgetTester tester) async {
+    bool clicked = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          readOnly: true,
+          toolbarOptions: ToolbarOptions(
+            actions: [
+              TextSelectionAction(
+                (BuildContext context) => const Text('CUSTOM'),
+                (TextSelectionDelegate delegate) { clicked = true; },
+              )
+            ]
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('CUSTOM'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsNothing);
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+
+    await tester.tap(find.text('CUSTOM'));
+    expect(clicked, equals(true));
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     String changedValue;
     final Widget widget = MaterialApp(
