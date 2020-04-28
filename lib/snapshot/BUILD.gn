@@ -52,6 +52,7 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   args = [
+    "--enable-experiment=non-nullable",
     "--snapshot_kind=core",
     "--enable_mirrors=false",
     "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
@@ -233,23 +234,6 @@ source_set("snapshot") {
             get_target_outputs(":platform_strong_dill_linkable")
 }
 
-compile_platform("non_strong_platform") {
-  single_root_scheme = "org-dartlang-sdk"
-  single_root_base = rebase_path("../../../")
-  libraries_specification_uri =
-      "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
-
-  outputs = [
-    "$root_out_dir/flutter_patched_sdk/platform.dill",
-    "$root_out_dir/flutter_patched_sdk/vm_outline.dill",
-  ]
-
-  args = [
-    "--target=flutter",
-    "dart:core",
-  ]
-}
-
 compile_platform("strong_platform") {
   single_root_scheme = "org-dartlang-sdk"
   single_root_base = rebase_path("../../../")
@@ -265,6 +249,8 @@ compile_platform("strong_platform") {
       flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release"
   allow_causal_async_stacks = !is_runtime_mode_release
   args = [
+    "--enable-experiment=non-nullable",
+    "--nnbd-agnostic",
     "--target=flutter",
     "-Ddart.vm.product=$is_runtime_mode_release",
     "-Ddart.developer.causal_async_stacks=$allow_causal_async_stacks",
