@@ -286,7 +286,10 @@ class FlutterDevice {
         ));
       }
     }
-    return vmService.onDone;
+    // TODO(jonahwilliams): this only seems to fail on CI.
+    return vmService.onDone.timeout(const Duration(seconds: 2), onTimeout: () {
+      globals.logger.printTrace('error: vm service shutdown failed');
+    });
   }
 
   Future<Uri> setupDevFS(
