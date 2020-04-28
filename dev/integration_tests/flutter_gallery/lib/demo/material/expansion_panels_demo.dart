@@ -305,8 +305,6 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         // Allow room for the value indicator.
                         padding: const EdgeInsets.only(top: 44.0),
                         child: Slider(
-                          // ignore: deprecated_member_use
-                          useV2Slider: true,
                           min: 0.0,
                           max: 100.0,
                           divisions: 5,
