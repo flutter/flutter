@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io'; // ignore: dart_io_import
 
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -125,7 +126,21 @@ void main() {
         // simulate package
         await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-        final MockVMService vmService = MockVMService();
+        final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            FakeVmServiceRequest(
+              id: '1',
+              method: '_createDevFS',
+              args: <String, Object>{
+                'fsName': 'test',
+              },
+              jsonResponse: <String, Object>{
+                'uri': Uri.parse('test').toString(),
+              }
+            )
+          ],
+        );
+        setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
 
         reset(httpClient);
 
@@ -145,7 +160,7 @@ void main() {
         });
 
         final DevFS devFS = DevFS(
-          vmService,
+          fakeVmServiceHost.vmService,
           'test',
           tempDir,
           osUtils: osUtils,
@@ -176,21 +191,36 @@ void main() {
   });
 
   group('devfs remote', () {
-    MockVMService vmService;
     DevFS devFS;
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
       basePath = tempDir.path;
-      vmService = MockVMService();
     });
 
     setUp(() {
+      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          FakeVmServiceRequest(
+            id: '1',
+            method: '_createDevFS',
+            args: <String, Object>{
+              'fsName': 'test',
+            },
+            jsonResponse: <String, Object>{
+              'uri': Uri.parse('test').toString(),
+            }
+          )
+        ],
+      );
+      setHttpAddress(Uri.parse('http://localhost'), fakeVmServiceHost.vmService);
       devFS = DevFS(
-        vmService,
+        fakeVmServiceHost.vmService,
         'test',
         tempDir,
         osUtils: FakeOperatingSystemUtils(),
+        // TODO(jonahwilliams): remove and prevent usage of http writer.
+        disableUpload: true,
       );
     });
 

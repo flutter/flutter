@@ -378,18 +378,21 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     @required OperatingSystemUtils osUtils,
+    @visibleForTesting bool disableUpload = false,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(
         fsName,
         serviceProtocol,
         osUtils: osUtils,
-      );
+      ),
+      _disableUpload = disableUpload;
 
   DevFS.operations(
     this._operations,
     this.fsName,
     this.rootDirectory,
-  ) : _httpWriter = null;
+  ) : _httpWriter = null,
+      _disableUpload = false;
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -399,6 +402,7 @@ class DevFS {
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
   PackageConfig lastPackageConfig;
+  final bool _disableUpload;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -524,7 +528,9 @@ class DevFS {
     globals.printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
       try {
-        await _httpWriter.write(dirtyEntries);
+        if (!_disableUpload) {
+          await _httpWriter.write(dirtyEntries);
+        }
       } on SocketException catch (socketException, stackTrace) {
         globals.printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);
