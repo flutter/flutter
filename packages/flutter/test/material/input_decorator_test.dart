@@ -2630,6 +2630,32 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
   });
 
+  testWidgets('contentPadding smaller than kMinInteractiveDimension', (WidgetTester tester) async {
+    const double verticalPadding = 1.0;
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default),
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          hintText: 'hint',
+          contentPadding: EdgeInsets.symmetric(vertical: verticalPadding),
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 16dps:
+    //   16 - input text (ahem font size 16dps)
+
+    // A custom contentPadding is respected, even when not using isDense or
+    // InputDecoration.collapsed.
+    const double height = 16.0 + verticalPadding * 2.0;
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, height));
+    expect(tester.getSize(find.text('text')).height, 16.0);
+    expect(tester.getTopLeft(find.text('text')).dy, verticalPadding);
+    expect(getOpacity(tester, 'hint'), 0.0);
+    expect(getBorderWeight(tester), 1.0);
+  });
+
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
