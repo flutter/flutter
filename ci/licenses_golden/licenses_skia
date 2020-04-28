@@ -1,4 +1,4 @@
-Signature: b411a58079da392b6f656d3053a32b61
+Signature: 8efd292fa4af5f44bfbd55f33d3a3745
 
 UNUSED LICENSES:
 
@@ -6297,6 +6297,7 @@ FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/job_builder.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/nano_flags.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/schema.go
 FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/task_builder.go
+FILE: ../../../third_party/skia/infra/bots/task_drivers/perf_skottie_wasm/perf_skottie_wasm.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2020 The Chromium Authors. All rights reserved.
 
