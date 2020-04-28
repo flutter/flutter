@@ -375,7 +375,7 @@ class TextField extends StatefulWidget {
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
        // Assert the following instead of setting it directly to avoid surprising the user by silently changing the value they set.
-       assert(textInputAction?.index != TextInputAction.newline.index ||
+       assert(textInputAction != TextInputAction.newline ||
          maxLines == 1 ||
          keyboardType != TextInputType.text,
          'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
