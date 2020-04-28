@@ -104,7 +104,6 @@ class BuildRunner extends CodeGenerator {
         context: PubContext.pubGet,
         directory: generatedDirectory.path,
         upgrade: false,
-        checkLastModified: false,
       );
       if (!scriptIdFile.existsSync()) {
         scriptIdFile.createSync(recursive: true);

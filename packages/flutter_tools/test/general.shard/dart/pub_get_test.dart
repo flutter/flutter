@@ -52,7 +52,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(logger.statusText, '');
-      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -117,7 +117,7 @@ void main() {
       processManager: MockProcessManager(66, stderr: 'err1\nerr2\nerr3\n', stdout: 'out1\nout2\nout3\n'),
     );
     try {
-      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests);
       throw AssertionError('pubGet did not fail');
     } on ToolExit catch (error) {
       expect(error.message, 'pub get failed (66; err3)');
@@ -152,7 +152,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -185,7 +185,7 @@ void main() {
       expect(processMock.lastPubCache, isNull);
 
       String error;
-      pub.get(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pub.get(context: PubContext.flutterTests).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -213,7 +213,7 @@ void main() {
       ),
     );
 
-    await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+    await pub.get(context: PubContext.flutterTests);
 
     verify(usage.sendEvent('pub-result', 'flutter-tests', label: 'success')).called(1);
   });
@@ -234,7 +234,7 @@ void main() {
       ),
     );
     try {
-      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests);
     } on ToolExit {
       // Ignore.
     }
@@ -262,7 +262,7 @@ void main() {
     );
 
     try {
-      await pub.get(context: PubContext.flutterTests, checkLastModified: false);
+      await pub.get(context: PubContext.flutterTests);
     } on ToolExit {
       // Ignore.
     }
@@ -334,7 +334,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..setLastModifiedSync(DateTime(2001));
-    await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub sets date of .packages to 2002
+    await pub.get(context: PubContext.flutterTests); // pub sets date of .packages to 2002
 
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
@@ -348,7 +348,7 @@ void main() {
       .setLastModifiedSync(DateTime(2000));
     fileSystem.file('pubspec.yaml')
       .setLastModifiedSync(DateTime(2001));
-    await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
+    await pub.get(context: PubContext.flutterTests); // pub does nothing
 
     expect(logger.statusText, 'Running "flutter pub get" in /...\n');
     expect(logger.errorText, isEmpty);
@@ -363,7 +363,7 @@ void main() {
     fileSystem.file('pubspec.yaml')
       .setLastModifiedSync(DateTime(2001));
     try {
-      await pub.get(context: PubContext.flutterTests, checkLastModified: true);
+      await pub.get(context: PubContext.flutterTests);
       expect(true, isFalse, reason: 'pub.get did not throw');
     } on ToolExit catch (error) {
       expect(error.message, '/: unexpected concurrent modification of pubspec.yaml while running pub.');
@@ -380,7 +380,7 @@ void main() {
       .setLastModifiedSync(DateTime(9999));
     assert(DateTime(9999).isAfter(DateTime.now()));
 
-    await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
+    await pub.get(context: PubContext.flutterTests); // pub does nothing
 
     expect(logger.statusText, contains('Running "flutter pub get" in /...\n'));
     expect(logger.errorText, startsWith(

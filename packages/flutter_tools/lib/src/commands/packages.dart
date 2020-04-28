@@ -96,7 +96,6 @@ class PackagesGetCommand extends FlutterCommand {
         directory: directory,
         upgrade: upgrade ,
         offline: boolArg('offline'),
-        checkLastModified: false,
       );
       pubGetTimer.stop();
       globals.flutterUsage.sendTiming('pub', 'get', pubGetTimer.elapsed, label: 'success');

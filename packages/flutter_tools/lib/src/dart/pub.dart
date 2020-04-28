@@ -92,7 +92,6 @@ abstract class Pub {
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
     String flutterRootOverride,
   });
@@ -163,7 +162,6 @@ class _DefaultPub implements Pub {
     bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
-    bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
     String flutterRootOverride,
   }) async {
@@ -183,10 +181,7 @@ class _DefaultPub implements Pub {
 
     final DateTime originalPubspecYamlModificationTime = pubSpecYaml.lastModifiedSync();
 
-    if (!checkLastModified || _shouldRunPubGet(
-      pubSpecYaml: pubSpecYaml,
-      packageConfigFile: packageConfigFile,
-    )) {
+    {
       final String command = upgrade ? 'upgrade' : 'get';
       final Status status = _logger.startProgress(
         'Running "flutter pub $command" in ${_fileSystem.path.basename(directory)}...',
@@ -392,17 +387,6 @@ class _DefaultPub implements Pub {
         'pub'
     ]);
     return <String>[sdkPath, ...arguments];
-  }
-
-  bool _shouldRunPubGet({ @required File pubSpecYaml, @required File packageConfigFile }) {
-    if (!packageConfigFile.existsSync()) {
-      return true;
-    }
-    final DateTime dotPackagesLastModified = packageConfigFile.lastModifiedSync();
-    if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
-      return true;
-    }
-    return false;
   }
 
   // Returns the environment value that should be used when running pub.
