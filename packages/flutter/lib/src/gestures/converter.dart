@@ -6,26 +6,6 @@ import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
 import 'events.dart';
 
-// Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
-//
-// TODO(tongmu): This patch is supposed to be done by embedders. Patching it
-// in framework is a workaround before [PointerEventConverter] is moved to embedders.
-// https://github.com/flutter/flutter/issues/30454
-int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
-  switch (kind) {
-    case PointerDeviceKind.mouse:
-      return buttons;
-    case PointerDeviceKind.touch:
-    case PointerDeviceKind.stylus:
-    case PointerDeviceKind.invertedStylus:
-      return buttons | kPrimaryButton;
-    default:
-      // We have no information about the device but we know we never want
-      // buttons to be 0 when the pointer is down.
-      return buttons == 0 ? kPrimaryButton : buttons;
-  }
-}
-
 /// Converts from engine pointer data to framework pointer events.
 ///
 /// This takes [PointerDataPacket] objects, as received from the engine via
@@ -98,13 +78,14 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.down:
+            assert(datum.buttons != 0);
             yield PointerDownEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
               kind: kind,
               device: datum.device,
               position: position,
-              buttons: _synthesiseDownButtons(datum.buttons, kind),
+              buttons: datum.buttons,
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
@@ -120,6 +101,7 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.move:
+            assert(datum.buttons != 0);
             yield PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: datum.pointerIdentifier,
@@ -127,7 +109,7 @@ class PointerEventConverter {
               device: datum.device,
               position: position,
               delta: delta,
-              buttons: _synthesiseDownButtons(datum.buttons, kind),
+              buttons: datum.buttons,
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,

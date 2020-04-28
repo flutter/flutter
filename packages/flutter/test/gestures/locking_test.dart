@@ -24,7 +24,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 
   static const ui.PointerDataPacket packet = ui.PointerDataPacket(
     data: <ui.PointerData>[
-      ui.PointerData(change: ui.PointerChange.down),
+      ui.PointerData(change: ui.PointerChange.down, buttons: 0x1),
       ui.PointerData(change: ui.PointerChange.up),
     ],
   );

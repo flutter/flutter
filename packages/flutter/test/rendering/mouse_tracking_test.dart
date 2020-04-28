@@ -254,7 +254,7 @@ void main() {
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
-      _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
+      _pointerData(PointerChange.down, const Offset(0.0, 101.0), buttons: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       // This Enter event is triggered by the [PointerAddedEvent] The
@@ -264,7 +264,7 @@ void main() {
     events.clear();
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.move, const Offset(0.0, 201.0)),
+      _pointerData(PointerChange.move, const Offset(0.0, 201.0), buttons: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
@@ -614,6 +614,7 @@ ui.PointerData _pointerData(
   Offset logicalPosition, {
   int device = 0,
   PointerDeviceKind kind = PointerDeviceKind.mouse,
+  int buttons = 0,
 }) {
   return ui.PointerData(
     change: change,
@@ -621,6 +622,7 @@ ui.PointerData _pointerData(
     physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
     kind: kind,
     device: device,
+    buttons: buttons,
   );
 }
 
