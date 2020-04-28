@@ -373,6 +373,8 @@ tasks:
   #   required_agent_capabilities: ["linux/android"]
   #   flaky: true
 
+  # TODO(jonahwilliams): marked as flaky to due unreproducible errors
+  # 55875 and 55811
   flutter_attach_test_android:
     description: >
       Tests the `flutter attach` command.

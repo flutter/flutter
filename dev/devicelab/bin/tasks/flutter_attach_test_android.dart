@@ -115,7 +115,7 @@ void main() {
         section('Launching `flutter attach`');
         Process attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
+          <String>['-v', '--suppress-analytics', 'attach', '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
 
@@ -142,7 +142,7 @@ void main() {
         section('Launching attach with given port');
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '--debug-uri',
+          <String>['-v', '--suppress-analytics', 'attach', '--debug-uri',
           observatoryUri, '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
@@ -163,7 +163,7 @@ void main() {
         // Attach again now that the VM is already running.
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
+          <String>['-v', '--suppress-analytics', 'attach', '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
         // Verify that it can discover the observatory port from past logs.
