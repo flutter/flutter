@@ -132,7 +132,12 @@ class RangeSlider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
-    this.useV2Slider = false,
+    @Deprecated(
+      'This flag has changed to true by default and no longer needed. '
+      'This feature was deprecated after v1.18.0.'
+    )
+    // ignore: deprecated_member_use_from_same_package
+    this.useV2Slider = true,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -141,6 +146,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
        assert(divisions == null || divisions > 0),
+       // ignore: deprecated_member_use_from_same_package
        assert(useV2Slider != null),
        super(key: key);
 
@@ -351,6 +357,10 @@ class RangeSlider extends StatefulWidget {
   /// This is a temporary flag for migrating the slider from v1 to v2. Currently
   /// this defaults to false, because the changes may break existing tests. This
   /// value will be defaulted to true in the future.
+  @Deprecated(
+    'This flag has changed to true by default and no longer needed. '
+    'This feature was deprecated after v1.18.0.'
+  )
   final bool useV2Slider;
 
   // Touch width for the tap boundary of the slider thumbs.
@@ -374,6 +384,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    // ignore: deprecated_member_use_from_same_package
     properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
@@ -562,6 +573,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
+    // ignore: deprecated_member_use_from_same_package
     final bool useV2Slider = widget.useV2Slider;
     final double _defaultTrackHeight = useV2Slider ? 4 : 2;
     final RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
@@ -631,6 +643,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
         state: this,
         semanticFormatterCallback: widget.semanticFormatterCallback,
+        // ignore: deprecated_member_use_from_same_package
         useV2Slider: widget.useV2Slider,
       ),
     );

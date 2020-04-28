@@ -53,7 +53,12 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
   process.exitCode.then<void>((int processExitCode) { exitCode = processExitCode; });
 
   Future<dynamic> eventOrExit(Future<void> event) {
-    return Future.any<dynamic>(<Future<dynamic>>[ event, process.exitCode ]);
+    return Future.any<dynamic>(<Future<dynamic>>[
+      event,
+      process.exitCode,
+      // Keep the test from running for 15 minutes if it gets stuck.
+      Future<void>.delayed(const Duration(seconds: 10)),
+    ]);
   }
 
   await eventOrExit(listening.future);
@@ -63,13 +68,16 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     throw TaskResult.failure('Failed to attach to test app; command unexpected exited, with exit code $exitCode.');
 
   process.stdin.write('r');
-  process.stdin.flush();
+  print('run:stdin: r');
+  await process.stdin.flush();
   await eventOrExit(reloaded.future);
   process.stdin.write('R');
-  process.stdin.flush();
+  print('run:stdin: R');
+  await process.stdin.flush();
   await eventOrExit(restarted.future);
   process.stdin.write('q');
-  process.stdin.flush();
+  print('run:stdin: q');
+  await process.stdin.flush();
   await eventOrExit(finished.future);
 
   await process.exitCode;
