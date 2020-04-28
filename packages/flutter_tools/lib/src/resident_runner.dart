@@ -243,7 +243,7 @@ class FlutterDevice {
     }
     if (viewFilter != null) {
       return <FlutterView>[
-        for (final FlutterView flutterView in views)
+        for (final FlutterView flutterView in _views)
           if (flutterView.uiIsolate.name.contains(viewFilter))
             flutterView
       ];
@@ -281,7 +281,19 @@ class FlutterDevice {
         ));
       }
     }
-    return vmService.onDone;
+    return vmService.onDone
+      .catchError((dynamic error, StackTrace stackTrace) {
+        globals.logger.printError(
+          'unhanlded error waiting for vm service exit:\n $error',
+          stackTrace: stackTrace,
+         );
+      })
+      .timeout(const Duration(seconds: 2), onTimeout: () {
+        // TODO(jonahwilliams): this only seems to fail on CI in the
+        // flutter_attach_android_test. This log should help verify this
+        // is where the tool is getting stuck.
+        globals.logger.printTrace('error: vm service shutdown failed');
+      });
   }
 
   Future<Uri> setupDevFS(

@@ -170,6 +170,33 @@ void main() {
     });
   });
 
+  test('FlutterDevice can list views with a filter', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      FakeVmServiceRequest(
+        id: '1',
+        method: kListViewsMethod,
+        args: null,
+        jsonResponse: <String, Object>{
+          'views': <Object>[
+            fakeFlutterView.toJson(),
+          ],
+        },
+      ),
+    ]);
+    final MockDevice mockDevice = MockDevice();
+    final FlutterDevice flutterDevice = FlutterDevice(
+      mockDevice,
+      buildInfo: BuildInfo.debug,
+      viewFilter: 'b', // Does not match name of `fakeFlutterView`.
+    );
+
+    flutterDevice.vmService = fakeVmServiceHost.vmService;
+
+    await flutterDevice.refreshViews();
+
+    expect(flutterDevice.views, isEmpty);
+  }));
+
   test('ResidentRunner can attach to device successfully', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();

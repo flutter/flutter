@@ -165,7 +165,7 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-    bool enabled = true,
+    bool enabled,
     double cursorWidth = 2.0,
     Radius cursorRadius,
     Color cursorColor,
@@ -205,7 +205,7 @@ class TextFormField extends FormField<String> {
     onSaved: onSaved,
     validator: validator,
     autovalidate: autovalidate,
-    enabled: enabled,
+    enabled: enabled ?? decoration?.enabled ?? true,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
@@ -248,7 +248,7 @@ class TextFormField extends FormField<String> {
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
-        enabled: enabled,
+        enabled: enabled ?? decoration?.enabled ?? true,
         cursorWidth: cursorWidth,
         cursorRadius: cursorRadius,
         cursorColor: cursorColor,
