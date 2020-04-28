@@ -103,7 +103,10 @@ void main() {
       await completer.future;
 
       final String errorText = testLogger.errorText;
-      expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
+      expect(
+        errorText,
+        containsIgnoringWhitespace('Oops; flutter has exited unexpectedly: "an exception % --".\n'),
+      );
 
       final File log = globals.fs.file('/flutter_01.log');
       final String logContents = log.readAsStringSync();
