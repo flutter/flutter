@@ -831,4 +831,3 @@ tasks:
       and the size of the compiled code.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
