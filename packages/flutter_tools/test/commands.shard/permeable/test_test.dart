@@ -276,6 +276,7 @@ Future<ProcessResult> _runFlutterTest(
     ...dartVmFlags,
     globals.fs.path.absolute(globals.fs.path.join('bin', 'flutter_tools.dart')),
     'test',
+    '--no-pub',
     '--no-color',
     '--no-version-check',
     ...extraArguments,
