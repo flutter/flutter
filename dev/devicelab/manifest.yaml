@@ -824,7 +824,6 @@ tasks:
       Checks that the New Flutter Gallery runs successfully on Chrome.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_v2_web_compile_test:
     description: >
