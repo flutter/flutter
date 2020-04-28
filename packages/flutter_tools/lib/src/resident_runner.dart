@@ -226,7 +226,7 @@ class FlutterDevice {
     return completer.future;
   }
 
-  // f: remove once all callsites are updated.
+  // TODO(jonahwilliams): remove once all callsites are updated.
   VMService get flutterDeprecatedVmService => vmService as VMService;
 
   Future<void> refreshViews() async {
