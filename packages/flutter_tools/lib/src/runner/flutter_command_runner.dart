@@ -357,6 +357,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           globals.fs.file(globalPackagesPath),
           logger: globals.logger,
+          throwOnError: false,
         );
         Uri engineUri = packageConfig[kFlutterEnginePackageName]?.packageUriRoot;
         // Skip if sky_engine is the self-contained one.
