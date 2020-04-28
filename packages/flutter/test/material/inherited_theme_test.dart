@@ -461,8 +461,6 @@ void main() {
     final Widget slider = Scaffold(
       body: Center(
         child: Slider(
-          // ignore: deprecated_member_use_from_same_package
-          useV2Slider: false,
           value: 0.5,
           onChanged: (double value) { },
         ),
@@ -525,7 +523,7 @@ void main() {
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
     RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor));
+    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
@@ -534,7 +532,7 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, isNot(paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
