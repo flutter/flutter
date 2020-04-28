@@ -482,6 +482,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'),
       options: <String>['--enable-experiment=non-nullable'],
+      skip: true, // TODO(jonahwilliams): re-enable after https://github.com/flutter/flutter/issues/55872
     );
     await _runFlutterTest(
       path.join(flutterRoot, 'dev', 'tracing_tests'),

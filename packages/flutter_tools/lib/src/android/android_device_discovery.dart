@@ -160,7 +160,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
         diagnostics?.add(
           'Unexpected failure parsing device information from adb output:\n'
           '$line\n'
-          'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
+          '${globals.userMessages.flutterToolBugInstructions}');
       }
     }
   }
