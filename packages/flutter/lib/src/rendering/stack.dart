@@ -316,7 +316,8 @@ enum Overflow {
 ///  * [RenderFlow]
 class RenderStack extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData> {
+         RenderBoxContainerDefaultsMixin<RenderBox, StackParentData>,
+         ClipBehaviorMixin {
   /// Creates a stack render object.
   ///
   /// By default, the non-positioned children of the stack are aligned by their
@@ -326,15 +327,18 @@ class RenderStack extends RenderBox
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit = StackFit.loose,
-    Overflow overflow = Overflow.clip,
+    Overflow overflow = Overflow.visible,
+    Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
        assert(fit != null),
        assert(overflow != null),
+       assert(clipBehavior != null),
        _alignment = alignment,
        _textDirection = textDirection,
        _fit = fit,
        _overflow = overflow {
     addAll(children);
+    this.clipBehavior = clipBehavior;
   }
 
   bool _hasVisualOverflow = false;
@@ -604,8 +608,11 @@ class RenderStack extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Make sure that _overflow and clipBehavior are compatible.
+    assert((_overflow == Overflow.visible) == (clipBehavior == Clip.none));
+
     if (_overflow == Overflow.clip && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack, clipBehavior: clipBehavior);
     } else {
       paintStack(context, offset);
     }

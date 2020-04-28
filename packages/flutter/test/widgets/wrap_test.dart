@@ -895,4 +895,13 @@ void main() {
       const Offset(0.0, 20.0),
     ]);
   });
+
+  testWidgets('Wrap can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr));
+    final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(Wrap(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+  });
 }

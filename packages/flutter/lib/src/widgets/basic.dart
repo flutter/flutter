@@ -3231,9 +3231,10 @@ class Stack extends MultiChildRenderObjectWidget {
     this.alignment = AlignmentDirectional.topStart,
     this.textDirection,
     this.fit = StackFit.loose,
-    this.overflow = Overflow.clip,
+    this.overflow = Overflow.visible,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
-  }) : super(key: key, children: children);
+  }) : assert(clipBehavior != null), super(key: key, children: children);
 
   /// How to align the non-positioned and partially-positioned children in the
   /// stack.
@@ -3276,6 +3277,11 @@ class Stack extends MultiChildRenderObjectWidget {
   /// [Overflow.clip], children cannot paint outside of the stack's box.
   final Overflow overflow;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   @override
   RenderStack createRenderObject(BuildContext context) {
     return RenderStack(
@@ -3283,6 +3289,7 @@ class Stack extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
       overflow: overflow,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3292,7 +3299,8 @@ class Stack extends MultiChildRenderObjectWidget {
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
-      ..overflow = overflow;
+      ..overflow = overflow
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -4653,8 +4661,9 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.crossAxisAlignment = WrapCrossAlignment.start,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
-  }) : super(key: key, children: children);
+  }) : assert(clipBehavior != null), super(key: key, children: children);
 
   /// The direction to use as the main axis.
   ///
@@ -4788,6 +4797,11 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// [verticalDirection] must not be null.
   final VerticalDirection verticalDirection;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return RenderWrap(
@@ -4799,6 +4813,7 @@ class Wrap extends MultiChildRenderObjectWidget {
       crossAxisAlignment: crossAxisAlignment,
       textDirection: textDirection ?? Directionality.of(context),
       verticalDirection: verticalDirection,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -4812,7 +4827,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..runSpacing = runSpacing
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = textDirection ?? Directionality.of(context)
-      ..verticalDirection = verticalDirection;
+      ..verticalDirection = verticalDirection
+      ..clipBehavior = clipBehavior;
   }
 
   @override

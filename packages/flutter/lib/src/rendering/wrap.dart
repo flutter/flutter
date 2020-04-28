@@ -102,7 +102,8 @@ class WrapParentData extends ContainerBoxParentData<RenderBox> {
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
 class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, WrapParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData> {
+                                        RenderBoxContainerDefaultsMixin<RenderBox, WrapParentData>,
+                                        ClipBehaviorMixin {
   /// Creates a wrap render object.
   ///
   /// By default, the wrap layout is horizontal and both the children and the
@@ -117,12 +118,14 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
+    Clip clipBehavior = Clip.none,
   }) : assert(direction != null),
        assert(alignment != null),
        assert(spacing != null),
        assert(runAlignment != null),
        assert(runSpacing != null),
        assert(crossAxisAlignment != null),
+       assert(clipBehavior != null),
        _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
@@ -132,6 +135,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
        _textDirection = textDirection,
        _verticalDirection = verticalDirection {
     addAll(children);
+    this.clipBehavior = clipBehavior;
   }
 
   /// The direction to use as the main axis.
@@ -749,8 +753,8 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   void paint(PaintingContext context, Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
-    if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
+    if (_hasVisualOverflow && clipBehavior != Clip.none)
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint, clipBehavior: clipBehavior);
     else
       defaultPaint(context, offset);
   }
