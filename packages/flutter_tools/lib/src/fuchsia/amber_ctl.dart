@@ -68,7 +68,7 @@ class FuchsiaAmberCtl {
   /// Fuchsia package server that it was accessing via [serverUrl].
   Future<bool> rmSrc(FuchsiaDevice device, FuchsiaPackageServer server) async {
     final RunResult result =
-        await device.shell('amber_ctl rm_src -n ${server.url}');
+        await device.shell('amber_ctl rm_src -n ${server.interfaceStrippedUrl}');
     return result.exitCode == 0;
   }
 
