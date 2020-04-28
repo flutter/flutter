@@ -501,6 +501,7 @@ class _Decoration {
     this.border,
     this.borderGap,
     this.alignLabelWithHint,
+    this.filled,
     this.isDense,
     this.visualDensity,
     this.icon,
@@ -515,8 +516,7 @@ class _Decoration {
     this.counter,
     this.container,
     this.fixTextFieldOutlineLabel = false,
-  }) : assert(contentPadding != null),
-       assert(isCollapsed != null),
+  }) : assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
        assert(floatingLabelProgress != null),
        assert(fixTextFieldOutlineLabel != null);
@@ -530,6 +530,7 @@ class _Decoration {
   final bool alignLabelWithHint;
   final bool isDense;
   final VisualDensity visualDensity;
+  final bool filled;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -558,6 +559,7 @@ class _Decoration {
         && other.borderGap == borderGap
         && other.alignLabelWithHint == alignLabelWithHint
         && other.isDense == isDense
+        && other.filled == filled
         && other.visualDensity == visualDensity
         && other.icon == icon
         && other.input == input
@@ -926,7 +928,34 @@ class _RenderDecoration extends RenderBox {
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
 
-  EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
+  EdgeInsets get contentPadding {
+    if (decoration.contentPadding != null) {
+      return decoration.contentPadding as EdgeInsets;
+    }
+
+    final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
+    if (decoration.isCollapsed) {
+      return EdgeInsets.zero;
+    } else if (!decoration.border.isOutline) {
+      // 4.0: the vertical gap between the inline elements and the floating label.
+      if (decoration.filled == true) { // filled == null same as filled == false
+        return decorationIsDense
+          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+      } else {
+        // Not left or right padding for underline borders that aren't filled
+        // is a small concession to backwards compatibility. This eliminates
+        // the most noticeable layout change introduced by #13734.
+        return decorationIsDense
+          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0);
+      }
+    } else {
+      return decorationIsDense
+        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
+    }
+  }
 
   // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
@@ -1075,10 +1104,19 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom
       + densityOffset.dy,
     );
+    final double minContainerHeight = decoration.isDense
+        || expands
+        || decoration.contentPadding != null
+            ? 0.0
+            : kMinInteractiveDimension + densityOffset.dy;
+    final double interactiveAdjustment = minContainerHeight > contentHeight
+       && decoration.contentPadding == null
+            ? (minContainerHeight - contentHeight) / 2.0
+            : 0.0;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight + densityOffset.dy;
     final double containerHeight = expands
       ? maxContainerHeight
-      : math.min(contentHeight, maxContainerHeight);
+      : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
 
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
@@ -1096,6 +1134,7 @@ class _RenderDecoration extends RenderBox {
     final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
+      + interactiveAdjustment
       + baselineAdjustment;
     final double maxContentHeight = containerHeight
       - contentPadding.top
@@ -2301,51 +2340,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsets decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
 
-    EdgeInsets contentPadding;
     double floatingLabelHeight;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
-      contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = (4.0 + 0.75 * inlineLabelStyle.fontSize) * MediaQuery.textScaleFactorOf(context);
-      const verticalPaddingMinInteractive = 14.5; // Fits kMinInteractiveDimension.
-      const verticalPaddingDense = 8.0;
-      if (decoration.filled == true) { // filled == null same as filled == false
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: verticalPaddingDense,
-            )
-          : const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: verticalPaddingMinInteractive,
-            ));
-      } else {
-        // Not left or right padding for underline borders that aren't filled
-        // is a small concession to backwards compatibility. This eliminates
-        // the most noticeable layout change introduced by #13734.
-        contentPadding = decorationContentPadding ?? (decorationIsDense
-          ? const EdgeInsets.symmetric(
-              horizontal: 0.0,
-              vertical: verticalPaddingDense,
-            )
-          : const EdgeInsets.symmetric(
-              horizontal: 0.0,
-              vertical: verticalPaddingMinInteractive,
-            ));
-      }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decorationContentPadding ?? (decorationIsDense
-        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
     return _Decorator(
       decoration: _Decoration(
-        contentPadding: contentPadding,
+        contentPadding: decorationContentPadding,
         isCollapsed: decoration.isCollapsed,
+        filled: decoration.filled,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _floatingLabelController.value,
         border: border,
