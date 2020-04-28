@@ -27,10 +27,10 @@ void main(List<String> arguments) {
   );
   parser.addOption(
     'output-dir',
-    defaultsTo: path.join('lib', 'l10n'),
     help: 'The directory where the generated localization classes will be written. '
       'The app must import the file specified in the \'output-localization-file\' '
-      'option from this directory.'
+      'option from this directory. If unspecified, this defaults to the same '
+      'directory as the input directory specified in \'arb-dir\'.'
   );
   parser.addOption(
     'template-arb-file',
