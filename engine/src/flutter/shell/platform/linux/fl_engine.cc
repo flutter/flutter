@@ -8,8 +8,16 @@
 
 #include <gmodule.h>
 
+static constexpr int kMicrosecondsPerNanosecond = 1000;
+
+// Unique number associated with platform tasks
+static constexpr size_t kPlatformTaskRunnerIdentifier = 1;
+
 struct _FlEngine {
   GObject parent_instance;
+
+  // Thread the GLib main loop is running on
+  GThread* thread;
 
   FlDartProject* project;
   FlRenderer* renderer;
@@ -20,7 +28,39 @@ G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 
 G_DEFINE_TYPE(FlEngine, fl_engine, G_TYPE_OBJECT)
 
-// Callback from Flutter engine that are passed to the renderer
+// Subclass of GSource that integrates Flutter tasks into the GLib main loop
+typedef struct {
+  GSource parent;
+  FlEngine* self;
+  FlutterTask task;
+} FlutterSource;
+
+// Callback to run a Flutter task in the GLib main loop
+static gboolean flutter_source_dispatch(GSource* source,
+                                        GSourceFunc callback,
+                                        gpointer user_data) {
+  FlutterSource* fl_source = reinterpret_cast<FlutterSource*>(source);
+  FlEngine* self = fl_source->self;
+
+  FlutterEngineResult result =
+      FlutterEngineRunTask(self->engine, &fl_source->task);
+  if (result != kSuccess)
+    g_warning("Failed to run Flutter task\n");
+
+  return G_SOURCE_REMOVE;
+}
+
+// Table of functions for Flutter GLib main loop integration
+static GSourceFuncs flutter_source_funcs = {
+    nullptr,                  // prepare
+    nullptr,                  // check
+    flutter_source_dispatch,  // dispatch
+    nullptr,                  // finalize
+    nullptr,
+    nullptr  // Internal usage
+};
+
+// Flutter engine callbacks
 
 static void* fl_engine_gl_proc_resolver(void* user_data, const char* name) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
@@ -59,6 +99,26 @@ static bool fl_engine_gl_present(void* user_data) {
   return result;
 }
 
+static bool fl_engine_runs_task_on_current_thread(void* user_data) {
+  FlEngine* self = static_cast<FlEngine*>(user_data);
+  return self->thread == g_thread_self();
+}
+
+static void fl_engine_post_task_callback(FlutterTask task,
+                                         uint64_t target_time_nanos,
+                                         void* user_data) {
+  FlEngine* self = static_cast<FlEngine*>(user_data);
+
+  g_autoptr(GSource) source =
+      g_source_new(&flutter_source_funcs, sizeof(FlutterSource));
+  FlutterSource* fl_source = reinterpret_cast<FlutterSource*>(source);
+  fl_source->self = self;
+  fl_source->task = task;
+  g_source_set_ready_time(source,
+                          target_time_nanos / kMicrosecondsPerNanosecond);
+  g_source_attach(source, nullptr);
+}
+
 static void fl_engine_dispose(GObject* object) {
   FlEngine* self = FL_ENGINE(object);
 
@@ -74,7 +134,9 @@ static void fl_engine_class_init(FlEngineClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_engine_dispose;
 }
 
-static void fl_engine_init(FlEngine* self) {}
+static void fl_engine_init(FlEngine* self) {
+  self->thread = g_thread_self();
+}
 
 FlEngine* fl_engine_new(FlDartProject* project, FlRenderer* renderer) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
@@ -102,10 +164,23 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   config.open_gl.fbo_callback = fl_engine_gl_fbo_callback;
   config.open_gl.present = fl_engine_gl_present;
 
+  FlutterTaskRunnerDescription platform_task_runner = {};
+  platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
+  platform_task_runner.user_data = self;
+  platform_task_runner.runs_task_on_current_thread_callback =
+      fl_engine_runs_task_on_current_thread;
+  platform_task_runner.post_task_callback = fl_engine_post_task_callback;
+  platform_task_runner.identifier = kPlatformTaskRunnerIdentifier;
+
+  FlutterCustomTaskRunners custom_task_runners = {};
+  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  custom_task_runners.platform_task_runner = &platform_task_runner;
+
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
   args.assets_path = fl_dart_project_get_assets_path(self->project);
   args.icu_data_path = fl_dart_project_get_icu_data_path(self->project);
+  args.custom_task_runners = &custom_task_runners;
 
   FlutterEngineResult result = FlutterEngineInitialize(
       FLUTTER_ENGINE_VERSION, &config, &args, self, &self->engine);
