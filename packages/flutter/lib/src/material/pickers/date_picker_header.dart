@@ -25,6 +25,7 @@ const double _headerPaddingLandscape = 16.0;
 ///
 /// * Single Date picker with calendar mode.
 /// * Single Date picker with manual input mode.
+/// * Date Range picker with manual input mode.
 ///
 /// [helpText], [orientation], [icon], [onIconPressed] are required and must be
 /// non-null.
