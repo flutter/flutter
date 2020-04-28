@@ -55,6 +55,22 @@ void main() {
     expect(actualUnselectedIconTheme.fontSize, equals(unselectedIconTheme.size));
   });
 
+  testWidgets('Default unselected and selected icons have the correct opacities', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: _destinations(),
+        labelType: NavigationRailLabelType.selected,
+      ),
+    );
+
+    final TextStyle actualSelectedIconTheme = _iconStyle(tester, Icons.favorite);
+    final TextStyle actualUnselectedIconTheme = _iconStyle(tester, Icons.bookmark_border);
+    expect(actualSelectedIconTheme.color.opacity, equals(1.0));
+    expect(actualUnselectedIconTheme.color.opacity, closeTo(0.64, 0.01));
+  });
+
   testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
