@@ -186,7 +186,7 @@ class HotRunner extends ResidentRunner {
         from: projectRootPath,
       );
       for (final FlutterDevice device in flutterDevices) {
-        final List<Future<vm_service.ReloadReport>> reportFutures = device.reloadSources(
+        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
           entryPath, pause: false,
         );
         final List<vm_service.ReloadReport> reports = await Future.wait(reportFutures);
@@ -257,8 +257,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.flutterDeprecatedVmService.httpAddress,
-            wsUri: flutterDevices.first.flutterDeprecatedVmService.wsAddress,
+            httpUri: flutterDevices.first.vmService.httpAddress,
+            wsUri: flutterDevices.first.vmService.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -820,7 +820,6 @@ class HotRunner extends ResidentRunner {
     final Stopwatch reloadTimer = Stopwatch()..start();
 
     globals.printTrace('Refreshing active FlutterViews before reloading.');
-    await refreshVM();
     await refreshViews();
 
     final Stopwatch devFSTimer = Stopwatch()..start();
@@ -847,7 +846,7 @@ class HotRunner extends ResidentRunner {
           await device.resetAssetDirectory();
           _shouldResetAssetDirectory = false;
         }
-        final List<Future<vm_service.ReloadReport>> reportFutures = device.reloadSources(
+        final List<Future<vm_service.ReloadReport>> reportFutures = await device.reloadSources(
           entryPath, pause: pause,
         );
         allReportsFutures.add(Future.wait(reportFutures).then(
@@ -1117,7 +1116,7 @@ class HotRunner extends ResidentRunner {
       // Caution: This log line is parsed by device lab tests.
       globals.printStatus(
         'An Observatory debugger and profiler on $dname is available at: '
-        '${device.flutterDeprecatedVmService.httpAddress}',
+        '${device.vmService.httpAddress}',
       );
     }
   }

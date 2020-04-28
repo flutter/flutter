@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
-import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -30,17 +29,7 @@ void main() {
   });
 }
 
-class MockVMService extends Mock implements VMService {
-  @override
-  final MockVM vm = MockVM();
-}
-
-class MockVM extends Mock implements VM {
-  @override
-  final List<MockIsolate> isolates = <MockIsolate>[ MockIsolate() ];
-}
-
-class MockIsolate extends Mock implements Isolate {}
+class MockVMService extends Mock implements vm_service.VmService {}
 
 class MockProcess extends Mock implements Process {
   final Completer<int>completer = Completer<int>();

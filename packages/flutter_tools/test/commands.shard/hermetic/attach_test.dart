@@ -797,12 +797,9 @@ VMServiceConnector getFakeVmServiceFactory({
     CompressionOptions compression,
     Device device,
   }) async {
-    final VMService vmService = VMServiceMock();
-    final VM vm = VMMock();
+    final vm_service.VmService vmService = VMServiceMock();
 
-    when(vmService.vm).thenReturn(vm);
-    when(vmService.isClosed).thenReturn(false);
-    when(vmService.done).thenAnswer((_) {
+    when(vmService.onDone).thenAnswer((_) {
       return Future<void>.value(null);
     });
     when(vmService.onDone).thenAnswer((_) {
@@ -837,8 +834,6 @@ VMServiceConnector getFakeVmServiceFactory({
           ]
         });
       });
-    when(vm.createDevFS(any))
-      .thenAnswer((_) => Future<Map<String, dynamic>>.value(<String, dynamic>{'uri': '/',}));
 
     return vmService;
   };
@@ -884,8 +879,7 @@ class TestHotRunnerFactory extends HotRunnerFactory {
   }
 }
 
-class VMMock extends Mock implements VM {}
-class VMServiceMock extends Mock implements VMService {}
+class VMServiceMock extends Mock implements vm_service.VmService {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}

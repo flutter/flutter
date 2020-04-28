@@ -650,8 +650,6 @@ void main() {
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
-      when(vmService.getVMOld())
-          .thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.httpAddress).thenReturn(Uri.parse('example'));
       when(vmService.callMethod(kListViewsMethod)).thenAnswer((Invocation invocation) async {
         return vm_service.Response.parse(<String, Object>{
@@ -1121,7 +1119,7 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
-class MockVMService extends Mock implements VMService {}
+class MockVMService extends Mock implements vm_service.VmService {}
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
