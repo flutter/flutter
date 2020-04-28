@@ -116,6 +116,29 @@ class BuildInfo {
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
+
+  /// Convert to a structued string encoded structure appropriate for usage as
+  /// environment variables or to embed in other scripts.
+  ///
+  /// Fields that are `null` are excluded from this configration.
+  Map<String, String> toEnvironmentConfig() {
+    return <String, String>{
+      if (dartDefines?.isNotEmpty ?? false)
+        'DART_DEFINES': dartDefines.join(','),
+      if (dartObfuscation != null)
+        'DART_OBFUSCATION': dartObfuscation.toString(),
+      if (extraFrontEndOptions?.isNotEmpty ?? false)
+        'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
+      if (extraGenSnapshotOptions?.isNotEmpty ?? false)
+        'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      if (splitDebugInfoPath != null)
+        'SPLIT_DEBUG_INFO': splitDebugInfoPath,
+      if (trackWidgetCreation != null)
+        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      if (treeShakeIcons != null)
+        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+    };
+  }
 }
 
 /// Information about an Android build to be performed or used.

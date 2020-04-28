@@ -118,9 +118,9 @@ class Cache {
       _artifacts.add(IOSEngineArtifacts(this));
       _artifacts.add(FlutterWebSdk(this));
       _artifacts.add(FlutterSdk(this));
-      _artifacts.add(WindowsEngineArtifacts(this));
+      _artifacts.add(WindowsEngineArtifacts(this, platform: _platform));
       _artifacts.add(MacOSEngineArtifacts(this));
-      _artifacts.add(LinuxEngineArtifacts(this));
+      _artifacts.add(LinuxEngineArtifacts(this, platform: _platform));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
@@ -879,19 +879,25 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() => const <String>[];
 }
 
+/// Artifacts required for desktop Windows builds.
 class WindowsEngineArtifacts extends EngineCachedArtifact {
-  WindowsEngineArtifacts(Cache cache) : super(
-    'windows-sdk',
-    cache,
-    DevelopmentArtifact.windows,
-  );
+  WindowsEngineArtifacts(Cache cache, {
+    @required Platform platform,
+  }) : _platform = platform,
+       super(
+        'windows-sdk',
+         cache,
+         DevelopmentArtifact.windows,
+       );
+
+  final Platform _platform;
 
   @override
   List<String> getPackageDirs() => const <String>[];
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isWindows || ignorePlatformFiltering) {
+    if (_platform.isWindows || ignorePlatformFiltering) {
       return _windowsDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -901,19 +907,25 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
   List<String> getLicenseDirs() => const <String>[];
 }
 
+/// Artifacts required for desktop Linux builds.
 class LinuxEngineArtifacts extends EngineCachedArtifact {
-  LinuxEngineArtifacts(Cache cache) : super(
-    'linux-sdk',
-    cache,
-    DevelopmentArtifact.linux,
-  );
+  LinuxEngineArtifacts(Cache cache, {
+    @required Platform platform
+  }) : _platform = platform,
+       super(
+        'linux-sdk',
+        cache,
+        DevelopmentArtifact.linux,
+      );
+
+  final Platform _platform;
 
   @override
   List<String> getPackageDirs() => const <String>[];
 
   @override
   List<List<String>> getBinaryDirs() {
-    if (globals.platform.isLinux || ignorePlatformFiltering) {
+    if (_platform.isLinux || ignorePlatformFiltering) {
       return _linuxDesktopBinaryDirs;
     }
     return const <List<String>>[];
@@ -1364,9 +1376,14 @@ void _ensureExists(Directory directory) {
   }
 }
 
+// TODO(jonahwilliams): upload debug desktop artifacts to host-debug and
+// remove from existing host folder.
+// https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
   <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
+  <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
+  <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],
 ];
 
 const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
@@ -1374,9 +1391,6 @@ const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
   <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper-glfw.zip'],
 ];
 
-// TODO(jonahwilliams): upload debug desktop artifacts to host-debug and
-// remove from existing host folder.
-// https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
   <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
   <String>['darwin-x64-profile', 'darwin-x64-profile/FlutterMacOS.framework.zip'],

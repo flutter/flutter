@@ -461,6 +461,8 @@ void main() {
     final Widget slider = Scaffold(
       body: Center(
         child: Slider(
+          // ignore: deprecated_member_use_from_same_package
+          useV2Slider: false,
           value: 0.5,
           onChanged: (double value) { },
         ),
