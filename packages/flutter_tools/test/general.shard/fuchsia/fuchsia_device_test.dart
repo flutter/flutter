@@ -6,6 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -27,13 +33,26 @@ import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:meta/meta.dart';
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+
+final vm_service.Isolate fakeIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  exceptionPauseMode: null,
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'wrong name',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+);
 
 void main() {
   group('fuchsia device', () {
@@ -607,71 +626,92 @@ void main() {
   });
 
 
-  group(FuchsiaIsolateDiscoveryProtocol, () {
+  group('FuchsiaIsolateDiscoveryProtocol', () {
     MockPortForwarder portForwarder;
     MockVMService vmService;
-    MockVM vm;
 
     setUp(() {
       portForwarder = MockPortForwarder();
       vmService = MockVMService();
-      vm = MockVM();
-
-      when(vm.vmService).thenReturn(vmService);
-      when(vmService.vm).thenReturn(vm);
     });
 
-    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) async {
-      when(vm.views).thenReturn(views);
-      for (final MockFlutterView view in views) {
-        when(view.owner).thenReturn(vm);
-      }
+    Future<Uri> findUri(List<FlutterView> views, String expectedIsolateName) async {
       final MockFuchsiaDevice fuchsiaDevice =
-          MockFuchsiaDevice('123', portForwarder, false);
+        MockFuchsiaDevice('123', portForwarder, false);
       final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
-          FuchsiaIsolateDiscoveryProtocol(
+        FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => vmService,
         true, // only poll once.
       );
+
       when(fuchsiaDevice.servicePorts())
           .thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1))
           .thenAnswer((Invocation invocation) async => 2);
       when(vmService.getVMOld())
           .thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(vmService.refreshViews())
-          .thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.httpAddress).thenReturn(Uri.parse('example'));
+      when(vmService.callMethod(kListViewsMethod)).thenAnswer((Invocation invocation) async {
+        return vm_service.Response.parse(<String, Object>{
+          'views': <Object>[
+            for (FlutterView view in views)
+              view.toJson()
+          ],
+        });
+      });
       return await discoveryProtocol.uri;
     }
 
     testUsingContext('can find flutter view with matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
-      final Uri uri = await findUri(<MockFlutterView>[
-        MockFlutterView(null), // no ui isolate.
-        MockFlutterView(MockIsolate('wrong name')), // wrong name.
-        MockFlutterView(MockIsolate(expectedIsolateName)), // matching name.
+      final Uri uri = await findUri(<FlutterView>[
+        // no ui isolate.
+        FlutterView(id: '1', uiIsolate: null),
+        // wrong name.
+        FlutterView(
+          id: '2',
+          uiIsolate: vm_service.Isolate.parse(<String, dynamic>{
+            ...fakeIsolate.toJson(),
+            'name': 'Wrong name',
+          }),
+        ),
+        // matching name.
+        FlutterView(
+          id: '3',
+          uiIsolate: vm_service.Isolate.parse(<String, dynamic>{
+             ...fakeIsolate.toJson(),
+            'name': expectedIsolateName,
+          }),
+        ),
       ], expectedIsolateName);
+
       expect(
           uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     });
 
     testUsingContext('can handle flutter view without matching isolate name', () async {
       const String expectedIsolateName = 'foobar';
-      final Future<Uri> uri = findUri(<MockFlutterView>[
-        MockFlutterView(null), // no ui isolate.
-        MockFlutterView(MockIsolate('wrong name')), // wrong name.
+      final Future<Uri> uri = findUri(<FlutterView>[
+        // no ui isolate.
+        FlutterView(id: '1', uiIsolate: null),
+        // wrong name.
+        FlutterView(id: '2', uiIsolate: vm_service.Isolate.parse(<String, Object>{
+           ...fakeIsolate.toJson(),
+          'name': 'wrong name',
+        })),
       ], expectedIsolateName);
+
       expect(uri, throwsException);
     });
 
     testUsingContext('can handle non flutter view', () async {
       const String expectedIsolateName = 'foobar';
-      final Future<Uri> uri = findUri(<MockFlutterView>[
-        MockFlutterView(null), // no ui isolate.
+      final Future<Uri> uri = findUri(<FlutterView>[
+        FlutterView(id: '1', uiIsolate: null), // no ui isolate.
       ], expectedIsolateName);
+
       expect(uri, throwsException);
     });
   });
@@ -1082,22 +1122,6 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class MockVMService extends Mock implements VMService {}
-
-class MockVM extends Mock implements VM {}
-
-class MockFlutterView extends Mock implements FlutterView {
-  MockFlutterView(this.uiIsolate);
-
-  @override
-  final Isolate uiIsolate;
-}
-
-class MockIsolate extends Mock implements Isolate {
-  MockIsolate(this.name);
-
-  @override
-  final String name;
-}
 
 class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
   FuchsiaDeviceWithFakeDiscovery(String id, {String name}) : super(id, name: name);
