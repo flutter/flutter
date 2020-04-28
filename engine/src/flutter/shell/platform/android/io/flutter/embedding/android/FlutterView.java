@@ -400,10 +400,11 @@ public class FlutterView extends FrameLayout {
   @SuppressLint({"InlinedApi", "NewApi"})
   @NonNull
   public final WindowInsets onApplyWindowInsets(@NonNull WindowInsets insets) {
+    boolean statusBarHidden = (SYSTEM_UI_FLAG_FULLSCREEN & getWindowSystemUiVisibility()) != 0;
     WindowInsets newInsets = super.onApplyWindowInsets(insets);
 
     // Status bar (top) and left/right system insets should partially obscure the content (padding).
-    viewportMetrics.paddingTop = insets.getSystemWindowInsetTop();
+    viewportMetrics.paddingTop = statusBarHidden ? 0 : insets.getSystemWindowInsetTop();
     viewportMetrics.paddingRight = insets.getSystemWindowInsetRight();
     viewportMetrics.paddingBottom = 0;
     viewportMetrics.paddingLeft = insets.getSystemWindowInsetLeft();
