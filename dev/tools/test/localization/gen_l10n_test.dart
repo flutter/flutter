@@ -346,6 +346,30 @@ void main() {
     expect(unimplementedOutputString, contains('subtitle'));
   });
 
+  test('uses inputPathString as outputPathString when the outputPathString is null', () {
+    _standardFlutterDirectoryL10nSetup(fs);
+    LocalizationsGenerator generator;
+    try {
+      generator = LocalizationsGenerator(fs);
+      generator
+        ..initialize(
+          inputPathString: defaultL10nPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        )
+        ..loadResources()
+        ..writeOutputFile();
+    } on L10nException catch (e) {
+      fail('Generating output should not fail: \n${e.message}');
+    }
+
+    final Directory outputDirectory = fs.directory('lib').childDirectory('l10n');
+    expect(outputDirectory.childFile('output-localization-file.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_en.dart').existsSync(), isTrue);
+    expect(outputDirectory.childFile('output-localization-file_es.dart').existsSync(), isTrue);
+  });
+
   test('correctly generates output files in non-default output directory if it already exists', () {
   final Directory l10nDirectory = fs.currentDirectory
     .childDirectory('lib')
