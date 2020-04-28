@@ -118,11 +118,17 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   backend_context.fGraphicsQueueIndex =
       logical_device_->GetGraphicsQueueIndex();
   backend_context.fMinAPIVersion = application_->GetAPIVersion();
+  backend_context.fMaxAPIVersion = application_->GetAPIVersion();
   backend_context.fFeatures = skia_features;
   backend_context.fGetProc = std::move(getProc);
   backend_context.fOwnsInstanceAndDevice = false;
 
   context_ = GrContext::MakeVulkan(backend_context);
+
+  if (context_ == nullptr) {
+    FML_LOG(ERROR) << "Failed to create GrContext.";
+    return false;
+  }
 
   // Use local limits specified in this file above instead of flutter defaults.
   context_->setResourceCacheLimits(kGrCacheMaxCount, kGrCacheMaxByteSize);
