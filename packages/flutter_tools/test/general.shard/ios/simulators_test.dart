@@ -517,13 +517,13 @@ void main() {
   });
 
   group('log reader', () {
-    MockProcessManager mockProcessManager;
+    FakeProcessManager fakeProcessManager;
     MockIosProject mockIosProject;
     MockSimControl mockSimControl;
     MockXcode mockXcode;
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      fakeProcessManager = FakeProcessManager.list(<FakeCommand>[]);
       mockIosProject = MockIosProject();
       mockSimControl = MockSimControl();
       mockXcode = MockXcode();
@@ -536,22 +536,14 @@ void main() {
       });
 
       testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            return Stream<List<int>>.fromIterable(<List<int>>['''
-Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/'''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: 'Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -567,31 +559,25 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
         expect(lines, <String>[
           'flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
       });
 
       testUsingContext('simulator can output `)`', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            return Stream<List<int>>.fromIterable(<List<int>>['''
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -609,20 +595,18 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
           '))))))))))',
           '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
       });
 
-      testUsingContext('log reader handles multiline messages', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            // Messages from 2017 should pass through, 2020 message should not
-            return Stream<List<int>>.fromIterable(<List<int>>['''
+      testUsingContext('multiline messages', () async {
+        fakeProcessManager
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', 'system.log'],
+            stdout: '''
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Multi line message
   continues...
@@ -637,15 +621,10 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
   and goes...
 2017-09-13 15:36:57.228948-0700  localhost Runner[37195]: (Flutter) Single line message, not the part of the above
 '''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+          ))
+          ..addCommand(const FakeCommand(
+            command:  <String>['tail', '-n', '0', '-F', '/private/var/log/system.log']
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -668,8 +647,9 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
           '  and goes...',
           'Single line message, not the part of the above'
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
         Platform: () => osx,
       });
@@ -677,12 +657,25 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
 
     group('unified logging', () {
       testUsingContext('log reader handles escaped multiline messages', () async {
-        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-          final Process mockProcess = MockProcess();
-          when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) {
-            return Stream<List<int>>.fromIterable(<List<int>>['''
+        const String logPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "Runner" '
+          'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+          'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+          'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+          'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(const FakeCommand(
+            command:  <String>[
+              '/usr/bin/xcrun',
+              'simctl',
+              'spawn',
+              '123456',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+            stdout: '''
 },{
   "traceID" : 37579774151491588,
   "eventMessage" : "Single line message",
@@ -696,15 +689,7 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
   "eventType" : "logEvent"
 },{
 '''
-              .codeUnits]);
-          });
-          when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-          when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-          return Future<Process>.value(mockProcess);
-        });
+          ));
 
         final IOSSimulator device = IOSSimulator(
           '123456',
@@ -721,8 +706,9 @@ Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on htt
           'Single line message', 'Multi line message\n  continues...\n  continues...',
           'Single line message, not the part of the above'
         ]);
+        expect(fakeProcessManager.hasRemainingExpectations, isFalse);
       }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
+        ProcessManager: () => fakeProcessManager,
         FileSystem: () => fileSystem,
       });
     });
