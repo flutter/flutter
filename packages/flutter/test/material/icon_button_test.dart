@@ -339,12 +339,12 @@ void main() {
 
   testWidgets('IconButton with explicit min splash radius',
       (WidgetTester tester) async {
-    const double minSplashRadius = 10.0;
+    const double splashRadius = 30.0;
 
     final Widget buttonWidget = wrap(
       child: IconButton(
         icon: const Icon(Icons.android),
-        minSplashRadius: minSplashRadius,
+        splashRadius: splashRadius,
         onPressed: () {/* Enable the button. */},
       ),
     );
@@ -364,7 +364,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(IconButton))),
       paints
-        ..circle(radius: minSplashRadius)
+        ..circle(radius: splashRadius)
     );
 
     await gesture.up();
