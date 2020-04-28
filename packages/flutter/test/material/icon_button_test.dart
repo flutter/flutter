@@ -341,7 +341,7 @@ void main() {
       (WidgetTester tester) async {
     const double minSplashRadius = 10.0;
 
-    Widget buttonWidget = wrap(
+    final buttonWidget = wrap(
       child: IconButton(
         icon: const Icon(Icons.android),
         minSplashRadius: minSplashRadius,
