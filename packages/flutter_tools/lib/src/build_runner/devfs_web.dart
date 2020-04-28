@@ -154,7 +154,7 @@ class WebAssetServer implements AssetReader {
         address = (await InternetAddress.lookup(hostname)).first;
       }
       final HttpServer httpServer = await HttpServer.bind(address, port);
-      final PackageConfig packageConfig = await loadPackageConfigOrFail(
+      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         globals.fs.file(globalPackagesPath),
         logger: globals.logger,
       );

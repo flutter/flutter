@@ -157,7 +157,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch stopwatch = Stopwatch()..start();
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
-    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
@@ -355,7 +355,7 @@ class HotRunner extends ResidentRunner {
     firstBuildTime = DateTime.now();
 
     final List<Future<bool>> startupTasks = <Future<bool>>[];
-    final PackageConfig packageConfig = await loadPackageConfigOrFail(
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       globals.fs.file(globalPackagesPath),
       logger: globals.logger,
     );
@@ -1300,7 +1300,7 @@ class ProjectFileInvalidator {
   }
 
   Future<PackageConfig> _createPackageConfig(String packagesPath) {
-    return loadPackageConfigOrFail(
+    return loadPackageConfigWithLogging(
       _fileSystem.file(globalPackagesPath),
       logger: _logger,
     );
