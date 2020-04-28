@@ -56,6 +56,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     return Future.any<dynamic>(<Future<dynamic>>[
       event,
       process.exitCode,
+      // Keep the test from running for 15 minutes if it gets stuck.
       Future<void>.delayed(const Duration(seconds: 10)),
     ]);
   }
