@@ -379,6 +379,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     timeout_in_minutes: 20
+    flaky: true
 
   named_isolates_test:
     description: >
