@@ -1411,9 +1411,11 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.fit = BoxFit.contain,
     this.alignment = Alignment.center,
+    this.clipBehavior = Clip.none,
     Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// How to inscribe the child into the space allocated during layout.
@@ -1435,12 +1437,18 @@ class FittedBox extends SingleChildRenderObjectWidget {
   ///    relative to text direction.
   final AlignmentGeometry alignment;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   @override
   RenderFittedBox createRenderObject(BuildContext context) {
     return RenderFittedBox(
       fit: fit,
       alignment: alignment,
       textDirection: Directionality.of(context),
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -1449,7 +1457,8 @@ class FittedBox extends SingleChildRenderObjectWidget {
     renderObject
       ..fit = fit
       ..alignment = alignment
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -3809,6 +3818,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline,
+    this.clipBehavior = Clip.none,
     List<Widget> children = const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -3816,6 +3826,7 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
        assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       assert(clipBehavior != null),
        super(key: key, children: children);
 
   /// The direction to use as the main axis.
@@ -3900,6 +3911,11 @@ class Flex extends MultiChildRenderObjectWidget {
   /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   bool get _needTextDirection {
     assert(direction != null);
     switch (direction) {
@@ -3943,6 +3959,7 @@ class Flex extends MultiChildRenderObjectWidget {
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
+      clipBehavior: clipBehavior,
     );
   }
 
@@ -3955,7 +3972,8 @@ class Flex extends MultiChildRenderObjectWidget {
       ..crossAxisAlignment = crossAxisAlignment
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
-      ..textBaseline = textBaseline;
+      ..textBaseline = textBaseline
+      ..clipBehavior = clipBehavior;
   }
 
   @override

@@ -472,6 +472,15 @@ void main() {
     await tester.tap(find.byKey(key1));
     expect(_pointerDown, isTrue);
   });
+
+  testWidgets('Can set and update clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container()));
+    final RenderFittedBox renderObject = tester.allRenderObjects.whereType<RenderFittedBox>().first;
+    expect(renderObject.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(FittedBox(fit: BoxFit.none, child: Container(), clipBehavior: Clip.hardEdge));
+    expect(renderObject.clipBehavior, equals(Clip.hardEdge));
+  });
 }
 
 List<Type> getLayers() {
