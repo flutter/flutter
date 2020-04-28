@@ -616,7 +616,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///  * [RenderSizedOverflowBox], a render object that is a specific size but
 ///    passes its original constraints through to its child, which it allows to
 ///    overflow.
-class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin, ClipBehaviorMixin {
   /// Create a render object that sizes itself to the child but does not
   /// pass the [constraints] down to that child.
   ///
@@ -626,9 +626,13 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     @required TextDirection textDirection,
     Axis constrainedAxis,
     RenderBox child,
+    Clip clipBehavior = Clip.none,
   }) : assert(alignment != null),
+       assert(clipBehavior != null),
        _constrainedAxis = constrainedAxis,
-       super.mixin(alignment, textDirection, child);
+       super.mixin(alignment, textDirection, child) {
+    this.clipBehavior = clipBehavior;
+  }
 
   /// The axis to retain constraints on, if any.
   ///
@@ -694,8 +698,12 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
       return;
     }
 
-    // We have overflow. Clip it.
-    context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint);
+    if (clipBehavior == Clip.none) {
+      super.paint(context, offset);
+    } else {
+      // We have overflow and the clipBehavior isn't none. Clip it.
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint, clipBehavior: clipBehavior);
+    }
 
     // Display the overflow indicator.
     assert(() {

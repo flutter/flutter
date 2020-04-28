@@ -2240,7 +2240,9 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     this.textDirection,
     this.alignment = Alignment.center,
     this.constrainedAxis,
+    this.clipBehavior = Clip.none,
   }) : assert(alignment != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The text direction to use when interpreting the [alignment] if it is an
@@ -2266,12 +2268,18 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// will be retained.
   final Axis constrainedAxis;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
       ..textDirection = textDirection ?? Directionality.of(context)
       ..alignment = alignment
-      ..constrainedAxis = constrainedAxis;
+      ..constrainedAxis = constrainedAxis
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -2279,6 +2287,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     textDirection: textDirection ?? Directionality.of(context),
     alignment: alignment,
     constrainedAxis: constrainedAxis,
+    clipBehavior: clipBehavior,
   );
 
   @override
