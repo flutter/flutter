@@ -12,7 +12,7 @@
 // @dart = 2.6
 library dart.ui;
 
-import 'dart:_internal' hide Symbol; // ignore: import_internal_library, unused_import
+import 'dart:_internal' hide Symbol; // ignore: unused_import
 import 'dart:async';
 import 'dart:collection' as collection;
 import 'dart:convert';
