@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/physical_shape_layer.h"
@@ -130,12 +131,12 @@ static void CheckTextSkData(sk_sp<SkData> data, const std::string& expected) {
   ASSERT_EQ(data_string, expected);
 }
 
-void ResetAssetPath() {
-  PersistentCache::UpdateAssetPath("some_path_that_does_not_exist");
+static void ResetAssetManager() {
+  PersistentCache::SetAssetManager(nullptr);
   ASSERT_EQ(PersistentCache::GetCacheForProcess()->LoadSkSLs().size(), 0u);
 }
 
-void CheckTwoSkSLsAreLoaded() {
+static void CheckTwoSkSLsAreLoaded() {
   auto shaders = PersistentCache::GetCacheForProcess()->LoadSkSLs();
   ASSERT_EQ(shaders.size(), 2u);
 }
@@ -144,11 +145,6 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
   // Avoid polluting unit tests output by hiding INFO level logging.
   fml::LogSettings warning_only = {fml::LOG_WARNING};
   fml::ScopedSetLogSettings scoped_set_log_settings(warning_only);
-
-  // Create an empty shell to test its service protocol handlers.
-  auto empty_settings = CreateSettingsForFixture();
-  auto empty_config = RunConfiguration::InferFromSettings(empty_settings);
-  std::unique_ptr<Shell> empty_shell = CreateShell(empty_settings);
 
   // The SkSL key is Base32 encoded. "IE" is the encoding of "A" and "II" is the
   // encoding of "B".
@@ -165,41 +161,29 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
 
   // Temp dir for the asset.
   fml::ScopedTemporaryDirectory asset_dir;
-  fml::UniqueFD sksl_asset_dir =
-      fml::OpenDirectory(asset_dir.fd(), PersistentCache::kSkSLSubdirName, true,
-                         fml::FilePermission::kReadWrite);
 
   auto data = std::make_unique<fml::DataMapping>(
       std::vector<uint8_t>{kTestJson.begin(), kTestJson.end()});
-  fml::WriteAtomically(sksl_asset_dir, PersistentCache::kAssetFileName, *data);
+  fml::WriteAtomically(asset_dir.fd(), PersistentCache::kAssetFileName, *data);
 
-  // 1st, test that RunConfiguration::InferFromSettings sets the path.
-  ResetAssetPath();
+  // 1st, test that RunConfiguration::InferFromSettings sets the asset manager.
+  ResetAssetManager();
   auto settings = CreateSettingsForFixture();
   settings.assets_path = asset_dir.path();
   RunConfiguration::InferFromSettings(settings);
   CheckTwoSkSLsAreLoaded();
 
-  // 2nd, test that Shell::OnServiceProtocolSetAssetBundlePath sets the path.
-  ResetAssetPath();
-  ServiceProtocol::Handler::ServiceProtocolMap params;
-  rapidjson::Document document;
-  params["assetDirectory"] = asset_dir.path();
-  OnServiceProtocol(
-      empty_shell.get(), ShellTest::ServiceProtocolEnum::kSetAssetBundlePath,
-      empty_shell->GetTaskRunners().GetUITaskRunner(), params, document);
+  // 2nd, test that the RunConfiguration constructor sets the asset manager.
+  // (Android is directly calling that constructor without InferFromSettings.)
+  ResetAssetManager();
+  auto asset_manager = std::make_shared<AssetManager>();
+  RunConfiguration config(nullptr, asset_manager);
+  asset_manager->PushBack(
+      std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
+          asset_dir.path().c_str(), false, fml::FilePermission::kRead)));
   CheckTwoSkSLsAreLoaded();
 
-  // 3rd, test that Shell::OnServiceProtocolRunInView sets the path.
-  ResetAssetPath();
-  params["assetDirectory"] = asset_dir.path();
-  params["mainScript"] = "no_such_script.dart";
-  OnServiceProtocol(
-      empty_shell.get(), ShellTest::ServiceProtocolEnum::kSetAssetBundlePath,
-      empty_shell->GetTaskRunners().GetUITaskRunner(), params, document);
-  CheckTwoSkSLsAreLoaded();
-
-  // 4th, test the content of the SkSLs in the asset.
+  // 3rd, test the content of the SkSLs in the asset.
   {
     auto shaders = PersistentCache::GetCacheForProcess()->LoadSkSLs();
     ASSERT_EQ(shaders.size(), 2u);
@@ -217,9 +201,7 @@ TEST_F(ShellTest, CanLoadSkSLsFromAsset) {
   }
 
   // Cleanup.
-  DestroyShell(std::move(empty_shell));
-  fml::UnlinkFile(sksl_asset_dir, PersistentCache::kAssetFileName);
-  fml::UnlinkDirectory(asset_dir.fd(), PersistentCache::kSkSLSubdirName);
+  fml::UnlinkFile(asset_dir.fd(), PersistentCache::kAssetFileName);
 }
 
 }  // namespace testing

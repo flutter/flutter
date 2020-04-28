@@ -9,6 +9,7 @@
 #include <mutex>
 #include <set>
 
+#include "flutter/assets/asset_manager.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/unique_fd.h"
@@ -65,8 +66,9 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   /// Load all the SkSL shader caches in the right directory.
   std::vector<SkSLCache> LoadSkSLs();
 
-  /// Update the asset path from which PersistentCache can load SkLSs.
-  static void UpdateAssetPath(const std::string& path);
+  /// Set the asset manager from which PersistentCache can load SkLSs. A nullptr
+  /// can be provided to clear the asset manager.
+  static void SetAssetManager(std::shared_ptr<AssetManager> value);
 
   static bool cache_sksl() { return cache_sksl_; }
   static void SetCacheSkSL(bool value);
@@ -77,7 +79,8 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 
  private:
   static std::string cache_base_path_;
-  static std::string asset_path_;
+
+  static std::shared_ptr<AssetManager> asset_manager_;
 
   static std::mutex instance_mutex_;
   static std::unique_ptr<PersistentCache> gPersistentCache;
