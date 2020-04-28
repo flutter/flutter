@@ -131,7 +131,7 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [iconSize], [padding], [autofocus] and [alignment] arguments must not
+  /// The [iconSize], [padding], [autofocus], and [alignment] arguments must not
   /// be null (though they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
@@ -206,7 +206,7 @@ class IconButton extends StatelessWidget {
 
   /// The splash radius.
   ///
-  /// If nil, default splash value of [Material.defaultSplashRadius] is used.
+  /// If nil, default splash radius of [Material.defaultSplashRadius] is used.
   final double splashRadius;
 
   /// The icon to display inside the button.
