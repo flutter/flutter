@@ -817,7 +817,7 @@ void main() {
       for (final Gradient gradient in gradients45) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 45);
-        });
+        }, skip: isBrowser); // Reference needed
       }
     });
 
@@ -825,10 +825,10 @@ void main() {
       for (final Gradient gradient in gradients90) {
         testWidgets('$gradient', (WidgetTester tester) async {
           await runTest(tester, gradient, 90);
-        });
+        }, skip: isBrowser); // Reference needed
       }
     });
-  }, skip: isBrowser); // Reference needed
+  });
 }
 
 class GradientPainter extends CustomPainter {

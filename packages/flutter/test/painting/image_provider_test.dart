@@ -65,7 +65,7 @@ void main() {
 
         expect(imageCache.statusForKey(provider).untracked, true);
         expect(imageCache.pendingImageCount, 0);
-      });
+      }, skip: isBrowser); // Reference needed
 
       test('AssetImageProvider - evicts on null load', () async {
         final Completer<StateError> error = Completer<StateError>();
