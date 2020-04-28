@@ -97,13 +97,13 @@ void main() {
       expect(focusNode1.offset, equals(const Offset(300.0, 8.0)));
       expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
-    testWidgets('canRequestFocus affects descendants when overriding.', (WidgetTester tester) async {
+    testWidgets('descendantsAreFocusable disables focus for descendants.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope', canRequestFocus: true);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
       final FocusAttachment scopeAttachment = scope.attach(context);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', overrideFocusability: true);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', overrideFocusability: true);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
       final FocusAttachment parent2Attachment = parent2.attach(context);
       final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
       final FocusAttachment child1Attachment = child1.attach(context);
@@ -122,21 +122,25 @@ void main() {
       expect(scope.traversalDescendants.contains(child1), isTrue);
       expect(scope.traversalDescendants.contains(child2), isTrue);
 
-      parent2.canRequestFocus = false;
+      parent2.descendantsAreFocusable = false;
+      // Node should still be focusable, even if descendants are not.
+      parent2.requestFocus();
       await tester.pump();
+      expect(parent2.hasPrimaryFocus, isTrue);
+
       child2.requestFocus();
       await tester.pump();
       expect(tester.binding.focusManager.primaryFocus, isNot(equals(child2)));
-      expect(tester.binding.focusManager.primaryFocus, equals(child1));
-      expect(scope.focusedChild, equals(child1));
+      expect(tester.binding.focusManager.primaryFocus, equals(parent2));
+      expect(scope.focusedChild, equals(parent2));
       expect(scope.traversalDescendants.contains(child1), isTrue);
       expect(scope.traversalDescendants.contains(child2), isFalse);
 
-      parent1.canRequestFocus = false;
+      parent1.descendantsAreFocusable = false;
       await tester.pump();
       expect(tester.binding.focusManager.primaryFocus, isNot(equals(child2)));
       expect(tester.binding.focusManager.primaryFocus, isNot(equals(child1)));
-      expect(scope.focusedChild, isNull);
+      expect(scope.focusedChild, equals(parent2));
       expect(scope.traversalDescendants.contains(child1), isFalse);
       expect(scope.traversalDescendants.contains(child2), isFalse);
     });
@@ -148,7 +152,7 @@ void main() {
       final List<String> description = builder.properties.map((DiagnosticsNode n) => n.toString()).toList();
       expect(description, <String>[
         'context: null',
-        'overrideFocusability: false',
+        'descendantsAreFocusable: true',
         'canRequestFocus: true',
         'hasFocus: false',
         'hasPrimaryFocus: false',

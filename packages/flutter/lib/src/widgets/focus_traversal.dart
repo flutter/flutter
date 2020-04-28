@@ -1421,6 +1421,9 @@ class FocusTraversalOrder extends InheritedWidget {
 ///
 /// By default, traverses in reading order using [ReadingOrderTraversalPolicy].
 ///
+/// To prevent the members of the group from being focused, set the
+/// [descendantsAreFocusable] attribute to true.
+///
 /// {@tool dartpad --template=stateless_widget_material}
 /// This sample shows three rows of buttons, each grouped by a
 /// [FocusTraversalGroup], each with different traversal order policies. Use tab
@@ -1583,13 +1586,13 @@ class FocusTraversalOrder extends InheritedWidget {
 class FocusTraversalGroup extends StatefulWidget {
   /// Creates a [FocusTraversalGroup] object.
   ///
-  /// The [child] and [excludeFocus] arguments must not be null.
+  /// The [child] and [descendantsAreFocusable] arguments must not be null.
   FocusTraversalGroup({
     Key key,
     FocusTraversalPolicy policy,
-    this.excludeFocus = false,
+    this.descendantsAreFocusable = true,
     @required this.child,
-  })  : assert(excludeFocus != null),
+  })  : assert(descendantsAreFocusable != null),
         policy = policy ?? ReadingOrderTraversalPolicy(),
         super(key: key);
 
@@ -1610,13 +1613,8 @@ class FocusTraversalGroup extends StatefulWidget {
   ///    bottom.
   final FocusTraversalPolicy policy;
 
-  /// If true, then the children of this group will be marked as not focusable.
-  ///
-  /// If any children of this group are currently focused when this is set to
-  /// true, they will lose focus.
-  ///
-  /// Defaults to false. Must not be null.
-  final bool excludeFocus;
+  /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
+  final bool descendantsAreFocusable;
 
   /// The child widget of this [FocusTraversalGroup].
   ///
@@ -1701,7 +1699,7 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
         canRequestFocus: false,
         skipTraversal: true,
         includeSemantics: false,
-        overrideFocusability: widget.excludeFocus,
+        descendantsAreFocusable: widget.descendantsAreFocusable,
         child: widget.child,
       ),
     );

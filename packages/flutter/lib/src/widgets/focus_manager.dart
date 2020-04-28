@@ -407,19 +407,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal] and [canRequestFocus] arguments must not be null.
+  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
+  /// arguments must not be null.
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
-    bool overrideFocusability = false,
+    bool descendantsAreFocusable = true,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
-        assert(overrideFocusability != null),
+        assert(descendantsAreFocusable != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
-        _overrideFocusability = overrideFocusability,
+        _descendantsAreFocusable = descendantsAreFocusable,
         _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
@@ -475,8 +476,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (!_canRequestFocus) {
       return false;
     }
+    final FocusScopeNode scope = enclosingScope;
+    if (scope != null && !scope.canRequestFocus) {
+      return false;
+    }
     for (final FocusNode ancestor in ancestors) {
-      if (ancestor.overrideFocusability && !ancestor._canRequestFocus) {
+      if (!ancestor.descendantsAreFocusable) {
         return false;
       }
     }
@@ -497,16 +502,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// If true, setting [canRequestFocus] on this focus node to false will
-  /// disable focus for its descendants.
+  /// If false, will disable focus for all of this node's descendants.
   ///
-  /// Defaults to false.  Set to true if you want this node's descendants to
-  /// be unfocusable when this node's [canRequestFocus] is false.
+  /// Defaults to true. Does not affect focusability of this node: for that,
+  /// use [canRequestFocus].
   ///
-  /// If any descendants are focused when this is set and [canRequestFocus] is
-  /// false, they will be unfocused. When `overrideFocusability` is set to false
-  /// again, they will not be refocused, although they will be able to accept
-  /// focus again.
+  /// If any descendants are focused when this is set to false, they will be
+  /// unfocused. When `descendantsAreFocusable` is set to true again, they will
+  /// not be refocused, although they will be able to accept focus again.
+  ///
+  /// Does not affect the value of [canRequestFocus] on the descendants.
   ///
   /// See also:
   ///
@@ -515,20 +520,21 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///  * [Focus], a widget that exposes this setting as a parameter.
   ///  * [FocusTraversalGroup], a widget used to group together and configure
   ///    the focus traversal policy for a widget subtree that also has an
-  ///    `excludeFocus` parameter that prevents its children from being focused.
-  bool get overrideFocusability => _overrideFocusability;
-  bool _overrideFocusability;
+  ///    `descendantsAreFocusable` parameter that prevents its children from
+  ///    being focused.
+  bool get descendantsAreFocusable => _descendantsAreFocusable;
+  bool _descendantsAreFocusable;
   @mustCallSuper
-  set overrideFocusability(bool value) {
-    if (value == _overrideFocusability) {
+  set descendantsAreFocusable(bool value) {
+    if (value == _descendantsAreFocusable) {
       return;
     }
-    if (!canRequestFocus && hasFocus) {
+    if (!value && hasFocus) {
       for (final FocusNode child in children) {
         child.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
     }
-    _overrideFocusability = value;
+    _descendantsAreFocusable = value;
     _manager?._markPropertiesChanged(this);
   }
 
@@ -1130,7 +1136,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
     if (this is! FocusScopeNode) {
-      properties.add(FlagProperty('overrideFocusability', value: overrideFocusability, ifTrue: 'OVERRIDE', defaultValue: false));
+      properties.add(FlagProperty('descendantsAreFocusable', value: descendantsAreFocusable, ifFalse: 'DESCENDANTS UNFOCUSABLE', defaultValue: true));
     }
     properties.add(FlagProperty('canRequestFocus', value: canRequestFocus, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus && !hasPrimaryFocus, ifTrue: 'IN FOCUS PATH', defaultValue: false));
@@ -1197,7 +1203,7 @@ class FocusScopeNode extends FocusNode {
           debugLabel: debugLabel,
           onKey: onKey,
           canRequestFocus: canRequestFocus,
-          overrideFocusability: true,
+          descendantsAreFocusable: true,
           skipTraversal: skipTraversal,
         );
 
