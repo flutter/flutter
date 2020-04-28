@@ -535,6 +535,44 @@ void main() {
         osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = syslog.path;
       });
 
+      testUsingContext('simulator can parse Xcode 8/iOS 10-style logs', () async {
+        when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+          .thenAnswer((Invocation invocation) {
+          final Process mockProcess = MockProcess();
+          when(mockProcess.stdout)
+            .thenAnswer((Invocation invocation) {
+            return Stream<List<int>>.fromIterable(<List<int>>['''
+Dec 20 17:04:32 md32-11-vm1 Runner[88374]: flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/'''
+              .codeUnits]);
+          });
+          when(mockProcess.stderr)
+            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+          when(mockProcess.exitCode)
+            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+          return Future<Process>.value(mockProcess);
+        });
+
+        final IOSSimulator device = IOSSimulator(
+          '123456',
+          simulatorCategory: 'iOS 10.0',
+          simControl: mockSimControl,
+          xcode: mockXcode,
+        );
+        final DeviceLogReader logReader = device.getLogReader(
+          app: await BuildableIOSApp.fromProject(mockIosProject),
+        );
+
+        final List<String> lines = await logReader.logLines.toList();
+        expect(lines, <String>[
+          'flutter: Observatory listening on http://127.0.0.1:64213/1Uoeu523990=/',
+        ]);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+        FileSystem: () => fileSystem,
+        Platform: () => osx,
+      });
+
       testUsingContext('simulator can output `)`', () async {
         when(mockProcessManager.start(any, environment: null, workingDirectory: null))
           .thenAnswer((Invocation invocation) {
