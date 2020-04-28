@@ -1351,7 +1351,7 @@ class TerminalHandler {
       case 'D':
         await residentRunner.detach();
         return true;
-      case 'G':
+      case 'g':
         await residentRunner.runSourceGenerators();
         return true;
       case 'h':
