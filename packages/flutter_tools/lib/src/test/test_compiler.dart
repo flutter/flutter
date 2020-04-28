@@ -42,6 +42,7 @@ class TestCompiler {
     this.buildMode,
     this.trackWidgetCreation,
     this.flutterProject,
+    this.dartExperiments,
   ) : testFilePath = getKernelPathForTransformerOptions(
         globals.fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
         trackWidgetCreation: trackWidgetCreation,
@@ -65,6 +66,7 @@ class TestCompiler {
   final BuildMode buildMode;
   final bool trackWidgetCreation;
   final String testFilePath;
+  final List<String> dartExperiments;
 
 
   ResidentCompiler compiler;
@@ -104,6 +106,7 @@ class TestCompiler {
       unsafePackageSerialization: false,
       dartDefines: const <String>[],
       packagesPath: globalPackagesPath,
+      experimentalFlags: dartExperiments,
     );
     if (flutterProject.hasBuilders) {
       return CodeGeneratingResidentCompiler.create(

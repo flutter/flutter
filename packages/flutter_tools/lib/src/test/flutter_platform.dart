@@ -87,6 +87,7 @@ FlutterPlatform installHook({
   FlutterProject flutterProject,
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
+  @required List<String> dartExperiments,
 }) {
   assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
@@ -119,6 +120,7 @@ FlutterPlatform installHook({
     projectRootDirectory: projectRootDirectory,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
+    dartExperiments: dartExperiments,
   );
   platformPluginRegistration(platform);
   return platform;
@@ -144,6 +146,7 @@ String generateTestBootstrap({
   @required InternetAddress host,
   File testConfigFile,
   bool updateGoldens = false,
+  @required bool nullSafety,
 }) {
   assert(testUrl != null);
   assert(host != null);
@@ -173,11 +176,15 @@ import '$testUrl' as test;
 import '${Uri.file(testConfigFile.path)}' as test_config;
 ''');
   }
+  // This type is sensitive to the non-nullable experiment.
+  final String beforeLoadTypedef = nullSafety
+    ? 'Future<dynamic> Function()?'
+    : 'Future<dynamic> Function()';
   buffer.write('''
 
 /// Returns a serialized test suite.
 StreamChannel<dynamic> serializeSuite(Function getMain(),
-    {bool hidePrints = true, Future<dynamic> beforeLoad()}) {
+    {bool hidePrints = true, $beforeLoadTypedef beforeLoad}) {
   return RemoteListener.start(getMain,
       hidePrints: hidePrints, beforeLoad: beforeLoad);
 }
@@ -259,6 +266,7 @@ class FlutterPlatform extends PlatformPlugin {
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
+    @required this.dartExperiments,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -279,6 +287,7 @@ class FlutterPlatform extends PlatformPlugin {
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
+  final List<String> dartExperiments;
 
   Directory fontsDirectory;
 
@@ -447,7 +456,7 @@ class FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject);
+        compiler ??= TestCompiler(buildMode, trackWidgetCreation, flutterProject, dartExperiments);
         mainDart = await compiler.compile(globals.fs.file(mainDart).uri);
 
         if (mainDart == null) {
@@ -739,6 +748,7 @@ class FlutterPlatform extends PlatformPlugin {
       testConfigFile: findTestConfigFile(globals.fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
+      nullSafety: dartExperiments.contains('non-nullable'),
     );
   }
 

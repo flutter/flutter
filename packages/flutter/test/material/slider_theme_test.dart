@@ -454,6 +454,7 @@ void main() {
                         label: value,
                         divisions: 3,
                         onChanged: (double d) { },
+                        // ignore: deprecated_member_use_from_same_package
                         useV2Slider: true,
                       ),
                     ),
@@ -1281,6 +1282,7 @@ Widget _buildApp(
             label: '$value',
             onChanged: onChanged,
             divisions: divisions,
+            // ignore: deprecated_member_use_from_same_package
             useV2Slider: useV2Slider
           ),
         ),
