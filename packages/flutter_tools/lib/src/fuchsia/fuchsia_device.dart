@@ -627,7 +627,7 @@ class FuchsiaDevice extends Device {
             continue;
           }
           if (flutterView.uiIsolate.name.contains(isolateName)) {
-            vmService.httpAddress.port;
+            return vmService.httpAddress.port;
           }
         }
       } on SocketException catch (err) {
