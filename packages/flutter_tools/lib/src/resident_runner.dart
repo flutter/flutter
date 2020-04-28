@@ -802,6 +802,7 @@ abstract class ResidentRunner {
     platform:  globals.platform,
     processManager:  globals.processManager,
   );
+
   Future<void> runSourceGenerators() async {
     return _sourceCodeGenerator.generate();
   }

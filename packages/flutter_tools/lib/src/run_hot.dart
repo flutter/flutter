@@ -364,6 +364,7 @@ class HotRunner extends ResidentRunner {
       // build, reducing overall initialization time. This is safe because the first
       // invocation of the frontend server produces a full dill file that the
       // subsequent invocation in devfs will not overwrite.
+      await runSourceGenerators();
       if (device.generator != null) {
         startupTasks.add(
           device.generator.recompile(
@@ -673,6 +674,10 @@ class HotRunner extends ResidentRunner {
       emulator = false;
     }
     final Stopwatch timer = Stopwatch()..start();
+
+    // Run source generation if needed.
+    await runSourceGenerators();
+
     if (fullRestart) {
       final OperationResult result = await _fullRestartHelper(
         targetPlatform: targetPlatform,
