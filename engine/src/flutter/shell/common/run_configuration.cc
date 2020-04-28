@@ -27,7 +27,6 @@ RunConfiguration RunConfiguration::InferFromSettings(
   asset_manager->PushBack(
       std::make_unique<DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
-  PersistentCache::UpdateAssetPath(settings.assets_path);
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
                                                   io_worker),
@@ -37,13 +36,17 @@ RunConfiguration RunConfiguration::InferFromSettings(
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration)
     : RunConfiguration(std::move(configuration),
-                       std::make_shared<AssetManager>()) {}
+                       std::make_shared<AssetManager>()) {
+  PersistentCache::SetAssetManager(asset_manager_);
+}
 
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration,
     std::shared_ptr<AssetManager> asset_manager)
     : isolate_configuration_(std::move(configuration)),
-      asset_manager_(std::move(asset_manager)) {}
+      asset_manager_(std::move(asset_manager)) {
+  PersistentCache::SetAssetManager(asset_manager_);
+}
 
 RunConfiguration::RunConfiguration(RunConfiguration&&) = default;
 
