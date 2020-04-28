@@ -729,22 +729,6 @@ VMServiceConnector getFakeVmServiceFactory({
         ),
       ],
     );
-    // when(vmService.getIsolate(any))
-    //   .thenAnswer((Invocation invocation) async {
-    //     return fakeUnpausedIsolate;
-    //   });
-    // when(vmService.callMethod(kListViewsMethod))
-    //   .thenAnswer((_) async {
-    //     return vm_service.Response.parse(<String, Object>{
-        //   'views': <Object>[
-        //     <String, Object>{
-        //       'id': '1',
-        //       'isolate': fakeUnpausedIsolate.toJson()
-        //     }
-        //   ]
-        // });
-    //   });
-
     return fakeVmServiceHost.vmService;
   };
 }
